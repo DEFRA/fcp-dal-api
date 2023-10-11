@@ -1,0 +1,5 @@
+services:
+  ffc-template-node:
+    command: npm run test:debug
+    ports:
+      - "9229:9229"

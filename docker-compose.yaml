@@ -1,0 +1,10 @@
+services:
+  ffc-template-node:
+    build:
+      context: .
+      target: production
+    image: ffc-template-node
+    container_name: ffc-template-node
+    environment:
+      APPINSIGHTS_CLOUDROLE: ffc-template-node-local
+      APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
