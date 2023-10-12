@@ -1,0 +1,8 @@
+type Person {
+    firstName: String!
+    surname: String!
+}
+
+extend type Query {
+    Person(personId: Int!): Person!
+}

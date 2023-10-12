@@ -10,6 +10,7 @@
     "test:watch": "jest --coverage=false --onlyChanged --watch --runInBand",
     "test:lint": "standard",
     "test:debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --coverage=false --onlyChanged --watch --runInBand --no-cache",
+    "start:dev": "nodemon --ext js app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js"
   },
@@ -17,8 +18,12 @@
   "contributors": [],
   "license": "OGL-UK-3.0",
   "dependencies": {
+    "@apollo/server": "4.9.4",
+    "@as-integrations/hapi": "2.0.1",
+    "@graphql-tools/load-files": "7.0.0",
     "@hapi/hapi": "21.3.2",
-    "applicationinsights": "2.8.0"
+    "applicationinsights": "2.8.0",
+    "graphql": "16.8.1"
   },
   "devDependencies": {
     "jest": "29.7.0",

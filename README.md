@@ -4,9 +4,14 @@ Customer Registry GraphQL API created from template to support rapid delivery of
 It contains the configuration needed to deploy a simple Hapi Node server to the Azure Kubernetes Platform.
 
 
-## Usage
+## Development Usage
+To up and running with dev container please run:
 
-tbc
+```bash
+  docker-compose -f docker-compose.dev.yaml up
+```
+
+You could access GraphQL API from: `http://localhost/graphql`
 
 
 ## Prerequisites
