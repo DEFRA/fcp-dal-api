@@ -1,5 +1,5 @@
 services:
-  ffc-template-node:
+  ffc-customer-registry-api:
     command: >
       sh -c "npm run test:watch"
     volumes:

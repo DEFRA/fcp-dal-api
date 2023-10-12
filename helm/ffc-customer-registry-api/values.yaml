@@ -1,9 +1,9 @@
 environment: production
 environmentCode:
-name: ffc-template-node
-namespace: ffc-demo
-workstream: ffc-demo
-image: ffc-template-node
+name: ffc-customer-registry-api
+namespace: ffc-customer
+workstream: ffc-customer
+image: ffc-customer-registry-api
 
 labels:
   component: service
@@ -12,10 +12,10 @@ appInsights:
   connectionString:
 
 containerConfigMap:
-  name: ffc-template-node-config-map
+  name: ffc-customer-registry-api-config-map
 
 containerSecret:
-  name: ffc-template-node-container-secret
+  name: ffc-customer-registry-api-container-secret
   type: Opaque
 
 deployment: {}

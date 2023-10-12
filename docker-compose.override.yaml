@@ -2,11 +2,11 @@
 # to provide dependencies and expose ports for local testing
 
 services:
-  ffc-template-node:
+  ffc-customer-registry-api:
     build:
       target: development
-    image: ffc-template-node-development
-    container_name: ffc-template-node-development
+    image: ffc-customer-registry-api-development
+    container_name: ffc-customer-registry-api-development
     ports:
       - "3000:3000"
       - "9229:9229"

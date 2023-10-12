@@ -1,0 +1,8 @@
+{{- include "ffc-helm-library.deployment" (list . "ffc-customer-registry-api.deployment") -}}
+{{- define "ffc-customer-registry-api.deployment" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{ include "ffc-helm-library.container" (list . "ffc-customer-registry-api.container") }}
+{{- end -}}

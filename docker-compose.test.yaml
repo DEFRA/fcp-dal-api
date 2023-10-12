@@ -2,11 +2,11 @@
 # that test output is saved to the host
 
 services:
-  ffc-template-node:
+  ffc-customer-registry-api:
     build:
       target: development
-    image: ffc-template-node-development
-    container_name: ffc-template-node-test
+    image: ffc-customer-registry-api-development
+    container_name: ffc-customer-registry-api-test
     command: npm run test
     volumes:
       - ./app:/home/node/app

@@ -1,10 +1,10 @@
 services:
-  ffc-template-node:
+  ffc-customer-registry-api:
     build:
       context: .
       target: production
-    image: ffc-template-node
-    container_name: ffc-template-node
+    image: ffc-customer-registry-api
+    container_name: ffc-customer-registry-api
     environment:
-      APPINSIGHTS_CLOUDROLE: ffc-template-node-local
+      APPINSIGHTS_CLOUDROLE: ffc-customer-registry-api-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}

@@ -1,0 +1,7 @@
+{{- include "ffc-helm-library.container-config-map" (list . "ffc-customer-registry-api.config-map") -}}
+{{- define "ffc-customer-registry-api.config-map" -}}
+data:
+  NODE_ENV: {{ quote .Values.environment }}
+  PORT: {{ quote .Values.container.port }}
+  APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
+{{- end -}}
