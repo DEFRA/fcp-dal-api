@@ -6,6 +6,9 @@ const init = async () => {
   await server.register({
     plugin: hapiApollo,
     options: {
+      context: async ({ request }) => ({
+        headers: request.headers
+      }),
       apolloServer,
       path: '/graphql',
     }
