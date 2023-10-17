@@ -1,4 +1,4 @@
-module.exports = {
+export const healthzRoute = {
   method: 'GET',
   path: '/healthz',
   handler: (request, h) => {
