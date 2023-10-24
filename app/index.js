@@ -1,6 +1,7 @@
 import hapiApollo from '@as-integrations/hapi'
 
-import { apolloServer, server } from './server.js'
+import { server } from './server.js'
+import { apolloServer } from './graphql/server.js'
 
 const init = async () => {
   await apolloServer.start()

@@ -11,7 +11,7 @@
     "test:watch": "jest --coverage=false --onlyChanged --watch --runInBand",
     "test:lint": "standard",
     "test:debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --coverage=false --onlyChanged --watch --runInBand --no-cache",
-    "start:dev": "nodemon --ext js app/index.js",
+    "start:dev": "nodemon --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js"
   },
@@ -22,6 +22,7 @@
     "@apollo/server": "4.9.4",
     "@as-integrations/hapi": "2.0.1",
     "@graphql-tools/load-files": "7.0.0",
+    "@graphql-tools/schema": "^10.0.0",
     "@hapi/hapi": "21.3.2",
     "applicationinsights": "2.8.0",
     "graphql": "16.8.1"

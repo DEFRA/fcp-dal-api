@@ -4,5 +4,5 @@ type Person {
 }
 
 extend type Query {
-    Person(personId: Int!): Person!
+    Person(personId: ID!): Person!
 }
