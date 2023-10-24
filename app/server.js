@@ -20,7 +20,6 @@ const typeDefs = loadFilesSync(join(__dirname, 'graphql', 'types'), {
 
 const resolvers = loadFilesSync(join(__dirname, 'graphql', 'resolvers'), {
   recursive: true,
-  requireMethod: async path => import(pathToFileURL(path))
 })
 
 export const apolloServer = new ApolloServer({
