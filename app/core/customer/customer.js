@@ -6,6 +6,8 @@ const customer = {
   }
 }
 
-export function customerHandler () {
+export function findCustomerByReferenceHandler (reference) {
+  console.log('reference number is', reference)
+
   return customer
 }
