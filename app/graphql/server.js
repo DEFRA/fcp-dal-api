@@ -1,5 +1,5 @@
 import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { pathToFileURL, fileURLToPath } from 'url'
 
 import { loadFiles } from '@graphql-tools/load-files'
 import { makeExecutableSchema } from '@graphql-tools/schema'
@@ -10,14 +10,14 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 const graphqlPath = dirname(fileURLToPath(import.meta.url))
 
 export const schema = makeExecutableSchema({
-  typeDefs: await loadFiles(join(graphqlPath, 'types')),
-  resolvers: await loadFiles(join(graphqlPath, 'resolvers')),
-  resolverValidationOptions: {
-    requireResolversForArgs: 'error',
-    requireResolversForAllField: 'error',
-    requireResolversForResolveType: 'error',
-    requireResolversToMatchSchema: 'error',
-  }
+  typeDefs: await loadFiles(join(graphqlPath, 'types'), {
+    recursive: true,
+    requireMethod: async path => import(pathToFileURL(path))
+  }),
+  resolvers: await loadFiles(join(graphqlPath, 'resolvers'), {
+    recursive: true,
+    requireMethod: async path => import(pathToFileURL(path))
+  })
 })
 
 export const apolloServer = new ApolloServer({
