@@ -1,0 +1,24 @@
+type CustomerName {
+    title: String
+    otherTitle: String
+    first: String
+    middle: String
+    last: String
+}
+
+type CustomerStatus {
+    locked: Boolean
+    confirmed: Boolean
+    deactivated: Boolean
+}
+
+type Customer {
+    referenceNumber: String
+    name: CustomerName
+    dateOfBirth: Date
+    phone: Phone
+    email: Email
+    status: CustomerStatus
+    address: Address
+}
+
