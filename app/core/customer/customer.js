@@ -3,6 +3,11 @@ const customer = {
     referenceNumber: "323231",
     firstName: 'John',
     surname: 'Doe'
+  },
+  authenticationQuestions: {
+    memorableDate: "",
+    memorableEvent: "",
+    memorablePlace: ""
   }
 }
 
