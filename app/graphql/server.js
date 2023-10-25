@@ -25,7 +25,6 @@ export const apolloServer = new ApolloServer({
   plugins: [
     (() => {
       if (process.env?.NODE_ENV === 'production') {
-        // todo: ensure validation for schema and resolvers args are enforced for production
         return ApolloServerPluginLandingPageDisabled()
       }
 
