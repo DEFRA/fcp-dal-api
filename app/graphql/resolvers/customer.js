@@ -2,10 +2,10 @@ import { findCustomerByReferenceHandler } from '../../core/customer/customer.js'
 
 export default {
   Query: {
-    customer: function (parent, args, context) {
+    customer: function (parent, args, context, info) {
       const { referenceNumber } = args
 
-      findCustomerByReferenceHandler(referenceNumber)
+      return findCustomerByReferenceHandler(referenceNumber)
     }
   }
 }

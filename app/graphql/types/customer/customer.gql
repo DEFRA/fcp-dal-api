@@ -21,7 +21,7 @@ type AuthenticationQuestions {
 type Customer {
     referenceNumber: String
     name: CustomerName
-    dateOfBirth: Date
+    dateOfBirth: String
     phone: Phone
     email: Email
     status: CustomerStatus
