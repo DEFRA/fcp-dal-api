@@ -1,6 +1,6 @@
-export function findCustomerByReferenceHandler (reference) {
+export function findCustomerByReferenceHandler (referenceNumber) {
   return {
-    referenceNumber: reference,
+    referenceNumber: referenceNumber,
     dateOfBirth: "283996800000",
     name: {
       title: 'Mr',

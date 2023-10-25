@@ -1,4 +1,4 @@
-import { findCustomerByReferenceHandler } from '../../core/customer/customer.js'
+import { findCustomerByReferenceHandler } from '../../../core/customer/query.js'
 
 export default {
   Query: {
