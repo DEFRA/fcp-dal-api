@@ -4,3 +4,4 @@ helm/**/*.lock
 *.tgz
 .vscode
 .env
+.idea
