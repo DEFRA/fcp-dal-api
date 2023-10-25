@@ -1,0 +1,10 @@
+input AuthenticationQuestionsInput {
+    customerReferenceNumber: ID!
+    memorableDate: String
+    memorableEvent: String
+    memorablePlace: String
+}
+
+extend type Mutation {
+    updateCustomerAuthenticationQuestions(input: AuthenticationQuestionsInput!): Customer!
+}

@@ -12,6 +12,12 @@ type CustomerStatus {
     deactivated: Boolean
 }
 
+type AuthenticationQuestions {
+    memorableDate: String!
+    memorableEvent: String!
+    memorablePlace: String!
+}
+
 type Customer {
     referenceNumber: String
     name: CustomerName
@@ -20,5 +26,5 @@ type Customer {
     email: Email
     status: CustomerStatus
     address: Address
+    authenticationQuestions: AuthenticationQuestions
 }
-
