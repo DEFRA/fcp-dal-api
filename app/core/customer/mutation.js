@@ -1,6 +1,7 @@
 import { mockCustomer } from './mock.js'
 
-export function updateCustomerAuthenticateHandler(customerAuthenticateUpdate) {
-    // Update logic to be added here
-    return { ...mockCustomer.authenticationQuestions, ...customerAuthenticateUpdate }
+export function updateCustomerAuthenticateHandler (customerAuthenticateUpdate) {
+  const updatedAuthenticationQuestions = { ...mockCustomer.authenticationQuestions, ...customerAuthenticateUpdate }
+  mockCustomer.authenticationQuestions = updatedAuthenticationQuestions
+  return updatedAuthenticationQuestions
 }

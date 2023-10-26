@@ -22,7 +22,7 @@ export const schema = makeExecutableSchema({
     requireResolversForArgs: 'error',
     requireResolversForAllField: 'error',
     requireResolversForResolveType: 'error',
-    requireResolversToMatchSchema: 'error',
+    requireResolversToMatchSchema: 'error'
   }
 })
 
