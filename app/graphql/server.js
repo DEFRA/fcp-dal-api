@@ -17,7 +17,13 @@ export const schema = makeExecutableSchema({
   resolvers: await loadFiles(join(graphqlPath, 'resolvers'), {
     recursive: true,
     requireMethod: async path => import(pathToFileURL(path))
-  })
+  }),
+  resolverValidationOptions: {
+    requireResolversForArgs: 'error',
+    requireResolversForAllField: 'error',
+    requireResolversForResolveType: 'error',
+    requireResolversToMatchSchema: 'error',
+  }
 })
 
 export const apolloServer = new ApolloServer({
