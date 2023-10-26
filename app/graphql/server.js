@@ -11,7 +11,13 @@ const graphqlPath = dirname(fileURLToPath(import.meta.url))
 
 export const schema = makeExecutableSchema({
   typeDefs: await loadFiles(join(graphqlPath, 'types')),
-  resolvers: await loadFiles(join(graphqlPath, 'resolvers'))
+  resolvers: await loadFiles(join(graphqlPath, 'resolvers')),
+  resolverValidationOptions: {
+    requireResolversForArgs: 'error',
+    requireResolversForAllField: 'error',
+    requireResolversForResolveType: 'error',
+    requireResolversToMatchSchema: 'error',
+  }
 })
 
 export const apolloServer = new ApolloServer({
