@@ -6,5 +6,5 @@ input AuthenticationInput {
 }
 
 extend type Mutation {
-    customerAuthenticateUpdate(customerAuthenticateUpdate: AuthenticationInput!): AuthenticationQuestions
+    customerAuthenticateUpdate(customerAuthenticateUpdate: AuthenticationInput!): CustomerAuthenticationQuestions
 }

@@ -21,7 +21,7 @@ type CustomerStatus {
     deactivated: Boolean
 }
 
-type AuthenticationQuestions {
+type CustomerAuthenticationQuestions {
     memorableDate: String
     memorableEvent: String
     memorablePlace: String
@@ -30,5 +30,5 @@ type AuthenticationQuestions {
 type Customer {
     referenceNumber: Int!
     customerInfo: CustomerInfo
-    authenticationQuestions: AuthenticationQuestions
+    customerAuthenticationQuestions: CustomerAuthenticationQuestions
 }
