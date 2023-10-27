@@ -8,7 +8,7 @@ export const Query = {
 }
 
 export const Mutation = {
-  customerAuthenticateUpdate: function (_, { customerAuthenticateUpdate }) {
+  customerAuthenticateUpdate (_, { customerAuthenticateUpdate }) {
     return updateCustomerAuthenticateHandler(customerAuthenticateUpdate)
   }
 }
