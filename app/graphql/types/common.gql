@@ -1,32 +1,32 @@
 type Phone {
-    mobile: String
-    landline: String
-    fax: String
+  mobile: String
+  landline: String
+  fax: String
 }
 
 type Email {
-    address: String
-    validated: Boolean
-    doNotContact: Boolean
+  address: String
+  validated: Boolean
+  doNotContact: Boolean
 }
 
 type Address {
-    line1: String
-    line2: String
-    line3: String
-    line4: String
-    line5: String
-    pafOrganisationName: String
-    buildingNumberRange: String
-    buildingName: String
-    flatName: String
-    street: String
-    city: String
-    county: String
-    postalCode: String
-    country: String
-    uprn: String
-    dependentLocality: String
-    doubleDependentLocality: String
-    addressTypeId: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  pafOrganisationName: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String
+  county: String
+  postalCode: String
+  country: String
+  uprn: String
+  dependentLocality: String
+  doubleDependentLocality: String
+  typeId: String
 }

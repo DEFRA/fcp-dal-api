@@ -5,6 +5,7 @@ import { apolloServer } from './graphql/server.js'
 
 const init = async () => {
   await apolloServer.start()
+
   await server.register({
     plugin: hapiApollo.default,
     options: {

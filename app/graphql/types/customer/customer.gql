@@ -1,34 +1,34 @@
 type CustomerInfo {
-    name: CustomerName
-    dateOfBirth: String
-    phone: Phone
-    email: Email
-    status: CustomerStatus
-    address: Address
+  name: CustomerName
+  dateOfBirth: String
+  phone: Phone
+  email: Email
+  status: CustomerStatus
+  address: Address
 }
 
 type CustomerName {
-    title: String
-    otherTitle: String
-    first: String
-    middle: String
-    last: String
+  title: String
+  otherTitle: String
+  first: String
+  middle: String
+  last: String
 }
 
 type CustomerStatus {
-    locked: Boolean
-    confirmed: Boolean
-    deactivated: Boolean
+  locked: Boolean
+  confirmed: Boolean
+  deactivated: Boolean
 }
 
 type CustomerAuthenticationQuestions {
-    memorableDate: String
-    memorableEvent: String
-    memorablePlace: String
+  memorableDate: String
+  memorableEvent: String
+  memorablePlace: String
 }
 
 type Customer {
-    referenceNumber: Int!
-    customerInfo: CustomerInfo
-    customerAuthenticationQuestions: CustomerAuthenticationQuestions
+  referenceNumber: ID!
+  info: CustomerInfo
+  authenticationQuestions: CustomerAuthenticationQuestions
 }

@@ -4,18 +4,42 @@ Customer Registry GraphQL API created from template to support rapid delivery of
 It contains the configuration needed to deploy a simple Hapi Node server to the Azure Kubernetes Platform.
 
 
-## Development Usage
-To up and running with dev container please run:
+## Local development
+Create a `.env` file:
 
-```bash
-  docker-compose -f docker-compose.dev.yaml up
+```env
+NODE_ENV=development
+PORT=4000
 ```
 
-You could access GraphQL API from: `http://localhost/graphql`
+Run:
 
+```bash
+make dev
+```
+
+Access GraphQL landing page at: [http://localhost:4000/graphql](http://localhost:4000/graphql)
+
+### Mocks
+
+Mocks can be enabled by setting the env variable `MOCK_LEVEL`.
+
+
+#### Partial
+_Resolvers enabled; data returned from mocks if no resolver is set_
+
+```env
+MOCK_LEVEL=partial
+```
+
+#### Full 
+_Resolvers disabled; data returned from mocks **even if** a resolver is set_
+
+```env
+MOCK_LEVEL=full
+```
 
 ## Prerequisites
-
 - Docker
 - Docker Compose
 

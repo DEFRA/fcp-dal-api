@@ -1,33 +1,34 @@
 import { dirname, join } from 'path'
-import { pathToFileURL, fileURLToPath } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 
-import { loadFiles } from '@graphql-tools/load-files'
-import { makeExecutableSchema } from '@graphql-tools/schema'
+import { addMocksToSchema } from '@graphql-tools/mock'
 import { ApolloServer } from '@apollo/server'
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
+import { loadFiles } from '@graphql-tools/load-files'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { mergeResolvers } from '@graphql-tools/merge'
 
-const graphqlPath = dirname(fileURLToPath(import.meta.url))
+async function getFiles (path) {
+  return loadFiles(join(dirname(fileURLToPath(import.meta.url)), path), {
+    recursive: true,
+    requireMethod: async path => import(pathToFileURL(path))
+  })
+}
 
 export const schema = makeExecutableSchema({
-  typeDefs: await loadFiles(join(graphqlPath, 'types'), {
-    recursive: true,
-    requireMethod: async path => import(pathToFileURL(path))
-  }),
-  resolvers: await loadFiles(join(graphqlPath, 'resolvers'), {
-    recursive: true,
-    requireMethod: async path => import(pathToFileURL(path))
-  }),
-  resolverValidationOptions: {
-    requireResolversForArgs: 'error',
-    requireResolversForAllField: 'error',
-    requireResolversForResolveType: 'error',
-    requireResolversToMatchSchema: 'error'
-  }
+  typeDefs: await getFiles('types'),
+  resolvers: mergeResolvers(await getFiles('resolvers'))
+})
+
+export const schemaWithMocks = addMocksToSchema({
+  schema,
+  mocks: mergeResolvers(await getFiles('mocks')),
+  preserveResolvers: process.env.MOCK_LEVEL === 'partial'
 })
 
 export const apolloServer = new ApolloServer({
-  schema,
+  schema: process.env.MOCK_LEVEL ? schemaWithMocks : schema,
   plugins: [
     (() => {
       if (process.env?.NODE_ENV === 'production') {

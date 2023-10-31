@@ -3,11 +3,10 @@ services:
     image: node:18
     container_name: ffc-customer-registry-api-dev
     ports:
-      - "80:80"
-    environment:
-      NODE_ENV: development
-      PORT: 80
+      - ${PORT}:${PORT}
     command: npm run start:dev
     volumes:
       - ./:/usr/local/dev/ffc-customer-registry-api
     working_dir: /usr/local/dev/ffc-customer-registry-api
+    env_file:
+      - .env
