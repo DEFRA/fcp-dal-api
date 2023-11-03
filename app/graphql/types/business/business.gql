@@ -1,0 +1,4 @@
+type Business {
+  id: ID!
+  landManagement: LandManagement
+}
