@@ -1,8 +1,8 @@
 environment: production
 environmentCode:
 name: ffc-customer-registry-api
-namespace: ffc-customer
-workstream: ffc-customer
+namespace: ffc-cr
+workstream: ffc-cr
 image: ffc-customer-registry-api
 
 labels:
