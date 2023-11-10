@@ -1,6 +1,8 @@
+import { server } from '../../../../app/server.js'
+import { notEqual } from 'assert'
+
 describe('Server test', () => {
-  test('createServer returns server', () => {
-    const server = require('../../../../app/server')
-    expect(server).toBeDefined()
+  it('createServer returns server', () => {
+    notEqual(server, undefined)
   })
 })
