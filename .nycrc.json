@@ -1,0 +1,7 @@
+{
+  "all": true,
+  "include": ["app/**/*.js"],
+  "report-dir": "test-output",
+  "reporter": ["lcov"],
+  "temp-directory": "./test-output/.nyc_output"
+}

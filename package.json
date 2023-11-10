@@ -7,16 +7,15 @@
   "type": "module",
   "scripts": {
     "pretest": "npm run test:lint",
-    "test": "jest --runInBand --forceExit",
+    "test": "nyc mocha './test/**/*.test.js'",
+    "posttest": "mocha --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'",
     "test:watch": "jest --coverage=false --onlyChanged --watch --runInBand",
-    "test:lint": "standard",
+    "test:lint": "standard && eslint app/graphql/types && prettier 'app/graphql/types/**/*.gql' --check",
     "test:debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --coverage=false --onlyChanged --watch --runInBand --no-cache",
     "start:dev": "nodemon --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
-    "gql:lint": "eslint app/graphql/types && npx prettier 'app/graphql/types/**/*.gql' --check",
-    "gql:format": "npx prettier 'app/graphql/types/**/*.gql' --write",
-    "gql:test": "npx mocha -- 'test/graphql/**/*.test.js'"
+    "gql:format": "prettier 'app/graphql/types/**/*.gql' --write"
   },
   "author": "Defra",
   "contributors": [],
@@ -39,7 +38,11 @@
     "eslint": "8.52.0",
     "jest": "29.7.0",
     "jest-junit": "16.0.0",
+    "mocha": "10.2.0",
+    "mocha-junit-reporter": "2.2.1",
     "nodemon": "3.0.1",
+    "nyc": "15.1.0",
+    "prettier": "3.0.3",
     "standard": "17.1.0"
   },
   "standard": {
@@ -51,7 +54,8 @@
       "afterEach",
       "jest",
       "beforeAll",
-      "afterAll"
+      "afterAll",
+      "it"
     ]
   },
   "nodemonConfig": {

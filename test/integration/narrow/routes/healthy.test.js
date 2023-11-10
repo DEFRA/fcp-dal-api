@@ -1,18 +1,19 @@
-describe('Healthy test', () => {
-  const server = require('../../../../app/server')
+import { server } from '../../../../app/server.js'
+import { equal } from 'assert'
 
+describe('Healthy test', () => {
   beforeEach(async () => {
     await server.start()
   })
 
-  test('GET /healthy route returns 200', async () => {
+  it('GET /healthy route returns 200', async () => {
     const options = {
       method: 'GET',
       url: '/healthy'
     }
 
     const response = await server.inject(options)
-    expect(response.statusCode).toBe(200)
+    equal(response.statusCode, 200)
   })
 
   afterEach(async () => {
