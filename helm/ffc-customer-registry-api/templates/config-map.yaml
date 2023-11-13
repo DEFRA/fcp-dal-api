@@ -4,5 +4,4 @@ data:
   NODE_ENV: {{ quote .Values.environment }}
   PORT: {{ quote .Values.container.port }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
-  MOCK_LEVEL: "partial"
 {{- end -}}

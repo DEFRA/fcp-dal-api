@@ -27,7 +27,8 @@
     "@graphql-tools/schema": "10.0.0",
     "@hapi/hapi": "21.3.2",
     "applicationinsights": "2.8.0",
-    "graphql": "16.8.1"
+    "graphql": "16.8.1",
+    "graphql-tools": "^9.0.0"
   },
   "devDependencies": {
     "@faker-js/faker": "8.2.0",
