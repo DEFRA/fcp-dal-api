@@ -1,10 +1,11 @@
-import { Query as LandQuery } from '../land/query.js'
+import { Land } from '../land/query.js'
 
 export const Query = {
-  business: function (_, { id }) {
-    return {
+  business: (_, { id }) => ({
       id,
-      land: LandQuery.land
-    }
-  }
+  })
+}
+
+export const Business = {
+  land: () => Land
 }

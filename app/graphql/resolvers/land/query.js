@@ -1,7 +1,7 @@
 export const Query = {
-  land () {
-    return {
-      summary: {}
-    }
-  }
+  land: () => ({})
+}
+
+export const Land = {
+  summary: () => ({})
 }
