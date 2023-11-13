@@ -1,5 +1,5 @@
 # TODO change to type and add other fields
-scalar LandManagementParcels
+scalar LandParcels
 
 type LandSummary {
   date: Date
@@ -9,12 +9,12 @@ type LandSummary {
   permanentGrassland: Numeric
 }
 
-type LandManagement {
-  parcels: LandManagementParcels
+type Land {
+  parcels: LandParcels
 
   summary: LandSummary
 }
 
 extend type Query {
-  landManagement(businessId: ID!): LandManagement
+  land(businessId: ID!): Land
 }

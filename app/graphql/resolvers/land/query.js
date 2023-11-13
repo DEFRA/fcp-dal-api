@@ -1,5 +1,5 @@
 export const Query = {
-  landManagement: function () {
+  land () {
     return {
       summary: {}
     }

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
 
-export const LandManagement = {
+export const Land = {
   summary: {
     date: faker.date.anytime().toUTCString(),
     numberOfParcels: faker.number.int(),

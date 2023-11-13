@@ -4,7 +4,7 @@ export const Query = {
   business: function (_, { id }) {
     return {
       id,
-      landManagement: LandQuery.landManagement
+      land: LandQuery.land
     }
   }
 }
