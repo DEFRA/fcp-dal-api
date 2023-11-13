@@ -2,7 +2,7 @@ import { Land } from '../land/query.js'
 
 export const Query = {
   business: (_, { id }) => ({
-      id,
+    id
   })
 }
 
