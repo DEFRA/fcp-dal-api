@@ -4,7 +4,7 @@ export const Business = {
   id: faker.string.alphanumeric({ length: 10, casing: 'upper' }),
   landManagement: {
     summary: {
-      date: 'ssss',
+      date: faker.date.anytime().toUTCString(),
       numberOfParcels: faker.number.int(),
       totalArea: faker.number.float(),
       mapImageData: faker.lorem.text(),
