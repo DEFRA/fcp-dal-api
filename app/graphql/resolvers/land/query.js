@@ -3,10 +3,10 @@ export const Query = {
     return {
       summary: {
         totalArea: 2323.1,
-        date: "2022-08-08",
+        date: '2022-08-08',
         numberOfParcels: 28,
-        mapImageData: "REVGUkFJbWFnZVNjYWxhckdyYXBoUUxUeXBl",
-        permanentGrassland: 8112.5,
+        mapImageData: 'REVGUkFJbWFnZVNjYWxhckdyYXBoUUxUeXBl',
+        permanentGrassland: 8112.5
       }
     }
   }
