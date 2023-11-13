@@ -1,6 +1,7 @@
 ARG PARENT_VERSION=2.1.2-node18.11.0
 ARG PORT=3000
 ARG PORT_DEBUG=9229
+ARG MOCK_LEVEL=partial
 
 # Development
 FROM defradigital/node-development:${PARENT_VERSION} AS development
@@ -10,9 +11,11 @@ LABEL uk.gov.defra.ffc.parent-image=defradigital/node-development:${PARENT_VERSI
 ARG PORT
 ARG PORT_DEBUG
 ENV PORT ${PORT}
+ENV MOCK_LEVEL ${MOCK_LEVEL}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
 COPY --chown=node:node package*.json ./
+ARG CACHEBUST=1
 RUN npm install
 COPY --chown=node:node . .
 CMD [ "npm", "run", "start:watch" ]
