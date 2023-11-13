@@ -1,7 +1,0 @@
-# TODO change to type and add other fields
-scalar LandManagementParcels
-
-type LandManagement {
-  parcels: LandManagementParcels
-  # TODO Add other fields
-}
