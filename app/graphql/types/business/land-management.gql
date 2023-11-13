@@ -1,7 +1,20 @@
 # TODO change to type and add other fields
 scalar LandManagementParcels
 
+type LandSummary {
+  date: Date
+  numberOfParcels: Numeric
+  totalArea: Numeric
+  mapImageData: Image
+  permanentGrassland: Numeric
+}
+
 type LandManagement {
   parcels: LandManagementParcels
-  # TODO Add other fields
+
+  summary: LandSummary
+}
+
+extend type Query {
+  landManagement(businessId: ID!): LandManagement
 }
