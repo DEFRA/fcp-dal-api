@@ -1,0 +1,12 @@
+[
+  {
+    "id": "base",
+    "routes": [
+      "rpp-api-get-login:default",
+      "rpp-api-post-login:default",
+      "rpp-api-person-context:default",
+      "rpp-api-person:default",
+      "rpp-api-organisation:default"
+    ]
+  }
+]
