@@ -42,3 +42,8 @@ readinessProbe:
   periodSeconds: 10
   failureThreshold: 3
   timeoutSeconds: 5
+
+ingress:
+  class: nginx
+  endpoint: ffc-customer-registry-api
+  server: example.com

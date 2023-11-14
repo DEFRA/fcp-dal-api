@@ -1,0 +1,3 @@
+{{- include "ffc-helm-library.azure-ingress" (list . "ffc-customer-registry-api.ingress") -}}
+{{- define "ffc-customer-registry-api.ingress" -}}
+{{- end -}}
