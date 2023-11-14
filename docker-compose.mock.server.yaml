@@ -1,0 +1,10 @@
+services:
+  ffc-server-mocks:
+    image: mocksserver/main
+    container_name: ffc-server-mocks-dev
+    ports:
+      - ${MOCK_PORT}:${MOCK_PORT}
+    volumes:
+      - ./mocks:/input/mocks
+      - ./node_modules:/input/node_modules
+      - ./.mocksrc.js:/input/.mocksrc.js
