@@ -1,6 +1,6 @@
 {
   "name": "ffc-customer-registry-api",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/ffc-customer-registry-api",
   "main": "app/index.js",

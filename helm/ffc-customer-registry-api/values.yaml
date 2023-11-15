@@ -1,4 +1,4 @@
-environment: production
+environment: development
 environmentCode:
 name: ffc-customer-registry-api
 namespace: ffc-cr
