@@ -1,4 +1,5 @@
 environment: development
+mock_level: full
 environmentCode:
 name: ffc-customer-registry-api
 namespace: ffc-cr
