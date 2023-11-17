@@ -1,7 +1,7 @@
 services:
   ffc-server-mocks:
     image: mocksserver/main
-    container_name: ffc-server-mocks-dev
+    container_name: ffc-server-mocks
     ports:
       - ${MOCK_PORT}:${MOCK_PORT}
     volumes:

@@ -2,11 +2,19 @@
   {
     "id": "base",
     "routes": [
-      "rpp-api-get-login:default",
-      "rpp-api-post-login:default",
-      "rpp-api-person-context:default",
-      "rpp-api-person:default",
-      "rpp-api-organisation:default"
+      "rpp-authenticate-get-login:default",
+      "rpp-authenticate-post-login:default",
+      "rpp-authenticate-get-authenticate:default",
+      "rpp-authenticate-get-person-context:default",
+
+      "rpp-business-get-by-id:default",
+      "rpp-business-get-by-sbi:default",
+
+      "rpp-customer-get-by-id:default",
+      "rpp-customer-get-by-crn:default",
+
+      "rpp-lms-get-land-covers:default",
+      "rpp-lms-get-parcels:default"
     ]
   }
 ]
