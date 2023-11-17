@@ -7,11 +7,11 @@
       "rpp-authenticate-get-authenticate:default",
       "rpp-authenticate-get-person-context:default",
 
-      "rpp-business-get-by-id:default",
-      "rpp-business-get-by-sbi:default",
+      "rpp-organisation-get-by-id:default",
+      "rpp-organisation-get-by-sbi:default",
 
-      "rpp-customer-get-by-id:default",
-      "rpp-customer-get-by-crn:default",
+      "rpp-person-get-by-id:default",
+      "rpp-person-get-by-crn:default",
 
       "rpp-lms-get-land-covers:default",
       "rpp-lms-get-parcels:default"
