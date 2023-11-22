@@ -1,4 +1,3 @@
-const { faker } = require('@faker-js/faker/locale/en_GB')
 const { pagination } = require('../../fixtures/pagination')
 const { organisation, organisations } = require('../../fixtures/organisation')
 
