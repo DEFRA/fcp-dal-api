@@ -10,6 +10,7 @@ Create a `.env` file:
 ```env
 NODE_ENV=development
 PORT=4000
+MOCK_PORT=3100
 ```
 
 Run:
@@ -23,6 +24,11 @@ Access GraphQL landing page at: [http://localhost:4000/graphql](http://localhost
 ### Mocks
 
 Mocks can be enabled by setting the env variable `MOCK_LEVEL`.
+
+#### Mock Server
+The mock server is ran when the development docker environment. The mock server service is provided by [Mock Server](https://www.mocks-server.org/).
+
+Mocks endpoints are defined within the ./mocks directory.
 
 
 #### Partial

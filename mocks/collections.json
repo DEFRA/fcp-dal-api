@@ -1,0 +1,20 @@
+[
+  {
+    "id": "base",
+    "routes": [
+      "rpp-authenticate-get-login:default",
+      "rpp-authenticate-post-login:default",
+      "rpp-authenticate-get-authenticate:default",
+      "rpp-authenticate-get-person-context:default",
+
+      "rpp-organisation-get-by-id:default",
+      "rpp-organisation-get-by-sbi:default",
+
+      "rpp-person-get-by-id:default",
+      "rpp-person-get-by-crn:default",
+
+      "rpp-lms-get-land-covers:default",
+      "rpp-lms-get-parcels:default"
+    ]
+  }
+]
