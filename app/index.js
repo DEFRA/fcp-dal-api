@@ -2,6 +2,7 @@ import hapiApollo from '@as-integrations/hapi'
 
 import { server } from './server.js'
 import { apolloServer } from './graphql/server.js'
+import { context } from './graphql/context.js'
 
 const init = async () => {
   await apolloServer.start()
@@ -9,9 +10,7 @@ const init = async () => {
   await server.register({
     plugin: hapiApollo.default,
     options: {
-      context: async ({ request }) => ({
-        headers: request.headers
-      }),
+      context,
       apolloServer,
       path: '/graphql'
     }

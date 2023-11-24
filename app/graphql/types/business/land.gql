@@ -1,18 +1,36 @@
-# TODO change to type and add other fields
-scalar LandParcels
+enum LandCoverDescription {
+  PERMANENT_GRASSLAND
+  PERMANENT_CROPS
+  ARABLE_LAND
+}
+
+type LandCover {
+  id: ID!
+  landParcelId: String!
+  classCode: Int
+  description: LandCoverDescription
+  area: Float
+}
+
+type LandParcel {
+  id: ID!
+  sbi: String!
+  area: Float
+  covers: [LandCover]
+}
 
 type LandSummary {
+  arableLandArea: Float
   date: Date
-  numberOfParcels: Numeric
-  totalArea: Numeric
-  mapImageData: Image
-  permanentGrassland: Numeric
+  numberOfParcels: Float
+  permanentGrasslandArea: Float
+  totalArea: Float
 }
 
 type Land {
-  parcels: LandParcels
-
+  sbi: String!
   summary: LandSummary
+  parcels: [LandParcel]
 }
 
 extend type Query {

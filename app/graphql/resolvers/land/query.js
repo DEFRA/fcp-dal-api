@@ -1,7 +1,5 @@
 export const Query = {
-  land: () => ({})
-}
-
-export const Land = {
-  summary: () => ({})
+  land (_, { businessId }) {
+    return { sbi: businessId }
+  }
 }

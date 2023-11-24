@@ -1,6 +1,6 @@
 {
   "name": "ffc-customer-registry-api",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/ffc-customer-registry-api",
   "main": "app/index.js",
@@ -21,16 +21,17 @@
   "contributors": [],
   "license": "OGL-UK-3.0",
   "dependencies": {
+    "@apollo/datasource-rest": "^6.2.2",
     "@apollo/server": "4.9.4",
     "@as-integrations/hapi": "2.0.1",
+    "@faker-js/faker": "8.2.0",
     "@graphql-tools/load-files": "7.0.0",
     "@graphql-tools/merge": "9.0.0",
     "@graphql-tools/mock": "9.0.0",
     "@graphql-tools/schema": "10.0.0",
     "@hapi/hapi": "21.3.2",
     "applicationinsights": "2.8.0",
-    "graphql": "16.8.1",
-    "@faker-js/faker": "8.2.0"
+    "graphql": "16.8.1"
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "3.20.1",
