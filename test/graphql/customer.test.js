@@ -13,9 +13,9 @@ describe('Query.customer', () => {
   it('should return customer mock', async () => {
     const result = await graphql({
       source: `#graphql
-        query TestCustomer($referenceNumber: ID!) {
-          customer(referenceNumber: $referenceNumber) {
-            referenceNumber
+        query TestCustomer($id: ID!) {
+          customer(id: $id) {
+            id
             info {
               status {
                 locked
@@ -70,7 +70,7 @@ describe('Query.customer', () => {
         }
       `,
       variableValues: {
-        referenceNumber: 'crn'
+        id: 'crn'
       },
       schema: schemaWithMocks
     })
@@ -78,7 +78,7 @@ describe('Query.customer', () => {
     deepEqual(result, {
       data: {
         customer: {
-          referenceNumber: 'N5CTZ0CKL9',
+          id: 'N5CTZ0CKL9',
           info: {
             status: { locked: true, deactivated: false, confirmed: false },
             phone: {
@@ -150,7 +150,7 @@ describe('Mutation.updateCustomerAuthenticationQuestions', () => {
       `,
       variableValues: {
         input: {
-          referenceNumber: 'crn',
+          id: 'crn',
           memorableDate: '',
           memorableEvent: '',
           memorablePlace: ''

@@ -1,5 +1,5 @@
 input UpdateCustomerAuthenticationQuestionsInput {
-  referenceNumber: ID!
+  id: ID!
   memorableDate: String
   memorableEvent: String
   memorablePlace: String
