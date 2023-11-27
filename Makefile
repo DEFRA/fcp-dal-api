@@ -4,4 +4,4 @@ dev:
 
 .PHONY: test
 test:
-	docker compose -f docker-compose.test.yaml run ffc-customer-registry-api
+	docker compose -f docker-compose.test.local.yaml run --rm ffc-customer-registry-api

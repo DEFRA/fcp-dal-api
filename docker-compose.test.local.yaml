@@ -1,0 +1,13 @@
+services:
+  ffc-customer-registry-api:
+    build:
+      target: development
+    image: ffc-customer-registry-api-development
+    container_name: ffc-customer-registry-api-test
+    command: npm run test:local
+    volumes:
+      - ./app:/home/node/app
+      - ./test:/home/node/test
+      - ./package.json:/home/node/package.json
+    env_file:
+      - .env
