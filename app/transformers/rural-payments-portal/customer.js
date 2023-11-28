@@ -1,4 +1,4 @@
-export const ruralPaymentsPortalCustomerTransformer = (data) => {
+export const ruralPaymentsPortalCustomerTransformer = data => {
   return {
     info: {
       name: {

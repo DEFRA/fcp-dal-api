@@ -1,4 +1,4 @@
-export const transformOrganisationToBusiness = (data) => {
+export const transformOrganisationToBusiness = data => {
   return {
     info: {
       name: data.name,
@@ -25,7 +25,9 @@ export const transformOrganisationToBusiness = (data) => {
         fax: data.fax
       },
       email: {
-        address: data.email
+        address: data.email,
+        validated: data.emailValidated,
+        doNotContact: data.doNotContact
       },
       legalStatus: {
         code: data.legalStatus.id,
@@ -38,7 +40,8 @@ export const transformOrganisationToBusiness = (data) => {
       registrationNumbers: {
         companiesHouse: data.companiesHouseRegistrationNumber,
         charityCommission: data.charityCommissionRegistrationNumber
-      }
+      },
+      sbi: data.sbi
     },
     id: data.id
   }

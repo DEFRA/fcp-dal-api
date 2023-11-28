@@ -29,6 +29,7 @@ export const organisation = {
   },
   email: 'lynehouseliveryq@yrevilesuohenyli.com.test',
   emailValidated: false,
+  doNotContact: false,
   landline: '01234394643',
   mobile: null,
   fax: null,

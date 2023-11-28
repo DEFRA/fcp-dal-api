@@ -6,6 +6,7 @@ export default [
       'rpp-authenticate-post-login:default',
       'rpp-authenticate-get-authenticate:default',
       'rpp-authenticate-get-person-context:default',
+      'rpp-authenticate-get-expire-user-session:default',
 
       'rpp-organisation-get-by-id:default',
       'rpp-organisation-get-by-sbi:default',
