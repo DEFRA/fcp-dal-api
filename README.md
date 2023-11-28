@@ -136,6 +136,5 @@ The Open Government Licence (OGL) was developed by the Controller of Her Majesty
 
 It is designed to encourage use and re-use of information freely and flexibly, with only a few conditions.
 
-# Running Defra laptop
-
+# Running defra machine
 Ensure add the proxy url your .env: `RURAL_PAYMENTS_PROXY_URL=http://10.255.1.3:443`
