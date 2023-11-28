@@ -1,4 +1,4 @@
-module.exports.pagination = {
+export const pagination = {
   number: 0,
   size: 20,
   totalPages: 1,

@@ -3,130 +3,80 @@ import { deepEqual } from 'assert'
 import { graphql } from 'graphql'
 import { faker } from '@faker-js/faker/locale/en_GB'
 
-import { schemaWithMocks } from '../../app/graphql/server.js'
+import { schemaWithMocks, schema } from '../../app/graphql/server.js'
+import { context } from '../../app/graphql/context.js'
+
+import mockServer from '../../mocks/server.js'
+
+import { ruralPaymentsPortalCustomerTransformer } from '../../app/transformers/rural-payments-portal/customer.js'
+import { person as personFixture } from '../../mocks/fixtures/person.js'
 
 describe('Query.customer', () => {
-  beforeEach(() => {
-    faker.seed(7209369705577748)
-  })
+  before(mockServer.start)
+  after(mockServer.stop)
 
-  it('should return customer mock', async () => {
+  it('should return customer data', async () => {
+    await mockServer.selectBase('base')
+    const transformedPerson = ruralPaymentsPortalCustomerTransformer(personFixture)
+
     const result = await graphql({
       source: `#graphql
-        query TestCustomer($referenceNumber: ID!) {
-          customer(referenceNumber: $referenceNumber) {
-            referenceNumber
+        query Customer {
+          customer(id: "5090008") {
+            id
             info {
-              status {
-                locked
-                deactivated
-                confirmed
+              name {
+                title
+                otherTitle
+                first
+                middle
+                last
               }
+              dateOfBirth
               phone {
                 mobile
                 landline
                 fax
               }
-              name {
-                first
-                last
-                middle
-                otherTitle
-                title
-              }
               email {
                 address
-                doNotContact
                 validated
+                doNotContact
               }
-              dateOfBirth
+              status {
+                locked
+                confirmed
+                deactivated
+              }
               address {
-                buildingName
+                pafOrganisationName
                 buildingNumberRange
+                buildingName
+                flatName
+                street
                 city
-                country
                 county
+                postalCode
+                country
+                uprn
                 dependentLocality
                 doubleDependentLocality
-                flatName
-                line1
-                line3
-                line2
-                line4
-                line5
-                pafOrganisationName
-                postalCode
-                street
                 typeId
-                uprn
               }
-            }
-            authenticationQuestions {
-              memorableDate
-              memorableEvent
-              memorablePlace
             }
           }
         }
       `,
       variableValues: {
-        referenceNumber: 'crn'
+        customerId: '5090008'
       },
-      schema: schemaWithMocks
+      schema,
+      contextValue: await context()
     })
 
     deepEqual(result, {
       data: {
-        customer: {
-          referenceNumber: 'N5CTZ0CKL9',
-          info: {
-            status: { locked: true, deactivated: false, confirmed: false },
-            phone: {
-              mobile: '019631 79025',
-              landline: '0114 562 7834',
-              fax: '0932 226 4907'
-            },
-            name: {
-              first: 'Yvette',
-              last: 'Gutkowski-Upton',
-              middle: 'Quinn',
-              otherTitle: 'Mr.',
-              title: 'Miss'
-            },
-            email: {
-              address: 'Ben_Feeney25@yahoo.com',
-              doNotContact: false,
-              validated: true
-            },
-            dateOfBirth: '1',
-            address: {
-              buildingName: 'Apt. 778',
-              buildingNumberRange: 'Suite 815',
-              city: 'Legros-upon-Kihn',
-              country: 'Iceland',
-              county: 'Wales',
-              dependentLocality: null,
-              doubleDependentLocality: null,
-              flatName: 'Suite 411',
-              line1: '66 Nelson Street',
-              line3: null,
-              line2: null,
-              line4: null,
-              line5: null,
-              pafOrganisationName: null,
-              postalCode: 'XW18 6OC',
-              street: 'Church View',
-              typeId: null,
-              uprn: null
-            }
-          },
-          authenticationQuestions: {
-            memorableDate: 'Atrox basium carmen cras soleo architecto.',
-            memorableEvent:
-              'Timidus aegrotatio odio stabilis amita apud autem.',
-            memorablePlace: 'Decimus creber perferendis quia verbera tollo.'
-          }
-        }
+        customer: JSON.parse(JSON.stringify(transformedPerson))
       }
     })
   })
@@ -150,7 +100,7 @@ describe('Mutation.updateCustomerAuthenticationQuestions', () => {
       `,
       variableValues: {
         input: {
-          referenceNumber: 'crn',
+          id: 'crn',
           memorableDate: '',
           memorableEvent: '',
           memorablePlace: ''

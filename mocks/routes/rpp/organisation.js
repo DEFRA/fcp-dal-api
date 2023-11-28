@@ -1,7 +1,7 @@
-const { pagination } = require('../../fixtures/pagination')
-const { organisation, organisations } = require('../../fixtures/organisation')
+import { pagination } from '../../fixtures/pagination.js'
+import { organisation, organisations } from '../../fixtures/organisation.js'
 
-module.exports = [
+export default [
   {
     id: 'rpp-organisation-get-by-id',
     url: '/rpp/api/organisation/:orgId',

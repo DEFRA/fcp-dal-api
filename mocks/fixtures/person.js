@@ -1,6 +1,6 @@
-const { faker } = require('@faker-js/faker/locale/en_GB')
+import { faker } from '@faker-js/faker/locale/en_GB'
 
-module.exports.persons = [
+export const persons = [
   {
     fullName: `${faker.person.firstName()} ${faker.person.lastName()}`,
     primaryAddress: {
@@ -27,7 +27,7 @@ module.exports.persons = [
   }
 ]
 
-module.exports.person = {
+export const person = {
   title: faker.person.prefix(),
   otherTitle: null,
   firstName: faker.person.firstName(),
@@ -35,6 +35,7 @@ module.exports.person = {
   lastName: faker.person.lastName(),
   dateOfBirth: faker.date.birthdate(),
   landline: null,
+  fax: null,
   mobile: faker.string.numeric(10),
   email: faker.internet.email(),
   doNotContact: false,

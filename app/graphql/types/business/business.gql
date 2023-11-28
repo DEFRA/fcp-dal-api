@@ -1,4 +1,29 @@
+type BusinessInfo {
+  sbi: Int
+  name: String
+  reference: String
+  vat: String
+  address: Address
+  phone: Phone
+  email: Email
+  legalStatus: BusinessType
+  type: BusinessType
+  registrationNumbers: BusinessRegistrationNumbers
+}
+
+type BusinessRegistrationNumbers {
+  companiesHouse: String
+  charityCommission: String
+}
+
+# eslint-disable-next-line @graphql-eslint/naming-convention
+type BusinessType {
+  code: Int
+  type: String
+}
+
 type Business {
   id: ID!
+  info: BusinessInfo
   land: Land
 }
