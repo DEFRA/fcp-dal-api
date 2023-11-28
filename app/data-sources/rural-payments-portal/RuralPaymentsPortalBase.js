@@ -6,7 +6,7 @@ const ruralPaymentsSession = new RuralPaymentsSession()
 export class RuralPaymentsPortalBase extends RESTDataSource {
   baseURL = process.env.RURAL_PAYMENTS_API_URL
 
-  async willSendRequest(path, request) {
+  async willSendRequest (path, request) {
     await ruralPaymentsSession.getAuthentication()
     return ruralPaymentsSession.willSendRequest(path, request)
   }

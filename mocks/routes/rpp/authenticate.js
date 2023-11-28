@@ -30,7 +30,7 @@ export default [
         options: {
           middleware: (req, res) => {
             const headers = req.headers
-            if (!headers['cookie'] || !headers['cookie'].includes('CLEARED-PREVIOUS-SESSION')) {
+            if (!headers.cookie || !headers.cookie.includes('CLEARED-PREVIOUS-SESSION')) {
               res.status(201)
               return res.send('Session exists')
             }
@@ -71,7 +71,7 @@ export default [
         options: {
           middleware: (req, res) => {
             const headers = req.headers
-            if (!headers['cookie']) {
+            if (!headers.cookie) {
               res.status(401)
               return res.send()
             }
@@ -103,7 +103,7 @@ export default [
         options: {
           status: 200,
           headers: {
-            'set-cookie': `CLEARED-PREVIOUS-SESSION=true`
+            'set-cookie': 'CLEARED-PREVIOUS-SESSION=true'
           }
         }
       }

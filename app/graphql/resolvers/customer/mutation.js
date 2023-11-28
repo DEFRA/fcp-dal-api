@@ -1,5 +1,5 @@
 export const Mutation = {
-  updateCustomerAuthenticationQuestions(_, { input }) {
+  updateCustomerAuthenticationQuestions (_, { input }) {
     return null
   }
 }
