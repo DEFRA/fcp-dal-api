@@ -13,11 +13,6 @@ export const Email = () => ({
 })
 
 export const Address = () => ({
-  line1: faker.location.streetAddress(false),
-  line2: null,
-  line3: null,
-  line4: null,
-  line5: null,
   pafOrganisationName: null,
   buildingNumberRange: faker.location.secondaryAddress(),
   buildingName: faker.location.secondaryAddress(),

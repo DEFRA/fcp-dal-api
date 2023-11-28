@@ -4,8 +4,8 @@
  */
 
 import { RESTDataSource } from '@apollo/datasource-rest'
-import { CookieJar, parse as parseCookie } from 'tough-cookie'
-import { HttpsProxyAgent } from 'https-proxy-agent';
+import { CookieJar } from 'tough-cookie'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import { URL } from 'url'
 import qs from 'qs'
 
@@ -26,7 +26,7 @@ const apiCredentials = {
 
 export class RuralPaymentsSession extends RESTDataSource {
   baseURL = process.env.RURAL_PAYMENTS_API_URL
-  
+
   constructor () {
     super(...arguments)
 
@@ -35,22 +35,22 @@ export class RuralPaymentsSession extends RESTDataSource {
 
   willSendRequest (path, request) {
     if (process.env.RURAL_PAYMENTS_PROXY_URL) {
-      request.agent = new HttpsProxyAgent(process.env.RURAL_PAYMENTS_PROXY_URL);
+      request.agent = new HttpsProxyAgent(process.env.RURAL_PAYMENTS_PROXY_URL)
     }
-    
+
     request.headers = {
       ...request.headers,
       ...defaultHeaders
     }
-    
+
     const xsrfToken = this.getCookie('XSRF-TOKEN')
     if (xsrfToken) {
       request.headers['X-XSRF-TOKEN'] = xsrfToken
     }
-    
+
     const cookie = this.jar.getCookieStringSync(`${request.headers.Origin}/${path}`)
     if (cookie.length) {
-      request.headers['Cookie'] = cookie
+      request.headers.Cookie = cookie
     }
 
     // manually handle redirects so we can apply the headers to each redirect request
@@ -59,8 +59,8 @@ export class RuralPaymentsSession extends RESTDataSource {
     return request
   }
 
-  setCookies(path, response) {
-    let cookies = response.headers.raw()['set-cookie'];
+  setCookies (path, response) {
+    let cookies = response.headers.raw()['set-cookie']
     if (cookies) {
       if (!Array.isArray(cookies)) {
         cookies = [cookies]
@@ -71,29 +71,26 @@ export class RuralPaymentsSession extends RESTDataSource {
     }
   }
 
-  async handleRedirects(response) {
+  async handleRedirects (response) {
     if ([301, 302, 303].includes(response?.status)) {
       const redirectUrl = new URL(response.headers.get('location'))
       return this.get(redirectUrl.pathname.replace('/', ''))
     }
   }
 
-  async throwIfResponseIsError(options) {
-    const { response, url } = options
-    if(response?.status < 400) {
-      return;
+  async throwIfResponseIsError (options) {
+    const { response } = options
+    if (response?.status < 400) {
+      return
     }
-    throw await this.errorFromResponse(options);
+    throw await this.errorFromResponse(options)
   }
 
-  async fetch(
-    path,
-    incomingRequest
-  ) {
-    const result = await super.fetch(path, incomingRequest);
+  async fetch (path, incomingRequest) {
+    const result = await super.fetch(path, incomingRequest)
     this.setCookies(path, result.response)
     await this.handleRedirects(result.response)
-    return result;
+    return result
   }
 
   async getCSRFToken () {
@@ -102,14 +99,10 @@ export class RuralPaymentsSession extends RESTDataSource {
   }
 
   getCookie (name) {
-    try {
-      const cookies = this.jar.toJSON()
-      const foundCookie = cookies.cookies.find(cookie => cookie.key === name)
-      
-      return foundCookie?.value
-    } catch (error) {
-      throw error
-    }
+    const cookies = this.jar.toJSON()
+    const foundCookie = cookies.cookies.find(cookie => cookie.key === name)
+
+    return foundCookie?.value
   }
 
   async initiateAuthenticatedSession () {
@@ -147,7 +140,7 @@ export class RuralPaymentsSession extends RESTDataSource {
 
   async hasValidSession () {
     try {
-      const response = await this.get('api/person/context')
+      await this.get('api/person/context')
       return true
     } catch (error) {
       return false
@@ -159,7 +152,7 @@ export class RuralPaymentsSession extends RESTDataSource {
       return this.onAuthPromise
     }
 
-    this.onAuthPromise = new Promise(async (resolve, reject) => {
+    const initiateSession = async (resolve, reject) => {
       try {
         await this.initiateAuthenticatedSession()
         resolve()
@@ -168,12 +161,14 @@ export class RuralPaymentsSession extends RESTDataSource {
       } finally {
         this.onAuthPromise = null
       }
-    })
+    }
+
+    this.onAuthPromise = new Promise(initiateSession)
 
     return this.onAuthPromise
   }
 
-  requestDeduplicationPolicyFor() {
+  requestDeduplicationPolicyFor () {
     return { policy: 'do-not-deduplicate' }
   }
 }

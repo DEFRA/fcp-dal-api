@@ -11,17 +11,15 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       dateOfBirth: data.dateOfBirth,
       phone: {
         mobile: data.mobile,
-        landline: data.landline
+        landline: data.landline,
+        fax: data.fax
       },
       email: {
-        address: data.email
+        address: data.email,
+        validated: data.emailValidated,
+        doNotContact: data.doNotContact
       },
       address: {
-        line1: data.address.address1,
-        line2: data.address.address2,
-        line3: data.address.address3,
-        line4: data.address.address4,
-        line5: data.address.address5,
         pafOrganisationName: data.address.pafOrganisationName,
         buildingNumberRange: data.address.buildingNumberRange,
         buildingName: data.address.buildingName,

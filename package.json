@@ -14,6 +14,7 @@
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:dev": "nodemon --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
+    "start:mocks": "node mocks/index.js",
     "test:local": "c8 -x app/insights.js  -r text mocha './test/**/*.test.js'",
     "test": "c8 -x app/insights.js -r lcov -o test-output mocha --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'"
   },
@@ -40,6 +41,7 @@
     "@graphql-eslint/eslint-plugin": "3.20.1",
     "c8": "8.0.1",
     "eslint": "8.52.0",
+    "@mocks-server/core": "^4.0.2",
     "jest": "29.7.0",
     "jest-junit": "16.0.0",
     "mocha": "10.2.0",
@@ -56,8 +58,8 @@
       "test",
       "afterEach",
       "jest",
-      "beforeAll",
-      "afterAll",
+      "before",
+      "after",
       "it"
     ]
   },

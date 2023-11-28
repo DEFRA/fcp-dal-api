@@ -1,6 +1,6 @@
-const { faker } = require('@faker-js/faker/locale/en_GB')
+import { faker } from '@faker-js/faker/locale/en_GB'
 
-module.exports = [
+export default [
   {
     id: 'rpp-lms-get-land-covers',
     url: '/rpp/viewland/lms/lms/organisation/:orgId/land-covers/historic/171123',

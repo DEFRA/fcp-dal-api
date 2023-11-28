@@ -1,6 +1,6 @@
-const { faker } = require('@faker-js/faker/locale/en_GB')
+import { faker } from '@faker-js/faker/locale/en_GB'
 
-module.exports = [
+export default [
   {
     id: 'rpp-authenticate-get-login',
     url: '/rpp/login',

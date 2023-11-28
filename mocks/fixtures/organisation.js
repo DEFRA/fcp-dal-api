@@ -1,6 +1,6 @@
-const { faker } = require('@faker-js/faker/locale/en_GB')
+import { faker } from '@faker-js/faker/locale/en_GB'
 
-const organisation = {
+export const organisation = {
   id: faker.string.numeric(7),
   name: faker.company.name(),
   sbi: parseInt(faker.string.numeric(9)),
@@ -45,5 +45,4 @@ const organisation = {
   charityCommissionRegistrationNumber: null
 }
 
-module.exports.organisations = [organisation]
-module.exports.organisation = organisation
+export const organisations = [organisation]

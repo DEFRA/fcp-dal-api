@@ -5,11 +5,6 @@ export const transformOrganisationToBusiness = (data) => {
       reference: data.businessReference,
       vat: null,
       address: {
-        line1: data.address.address1,
-        line2: data.address.address2,
-        line3: data.address.address3,
-        line4: data.address.address4,
-        line5: data.address.address5,
         pafOrganisationName: data.address.pafOrganisationName,
         buildingNumberRange: data.address.buildingNumberRange,
         buildingName: data.address.buildingName,

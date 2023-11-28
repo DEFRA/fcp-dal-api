@@ -1,7 +1,7 @@
-const { person, persons } = require('../../fixtures/person')
-const { pagination } = require('../../fixtures/pagination')
+import { person, persons } from '../../fixtures/person.js'
+import { pagination } from '../../fixtures/pagination.js'
 
-module.exports = [
+export default [
   {
     id: 'rpp-person-get-by-id',
     url: '/rpp/api/person/:personId',
