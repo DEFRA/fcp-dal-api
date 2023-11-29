@@ -10,7 +10,7 @@ Create a `.env` file:
 ```env
 NODE_ENV=development
 PORT=4000
-MOCK_PORT=3100
+PORT_MOCK=3100
 
 # Rural Payments Agency Land API
 RURAL_PAYMENTS_AGENCY_LAND_API_URL=
