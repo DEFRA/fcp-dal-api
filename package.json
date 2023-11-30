@@ -12,9 +12,9 @@
     "lint:js": "standard",
     "pretest": "npm run lint:js && npm run lint:gql",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
-    "start:dev": "nodemon --ext js,gql app/index.js",
+    "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
-    "start:mocks": "node mocks/index.js",
+    "start:mocks": "node -r dotenv/config mocks/index.js",
     "test:local": "c8 -x app/insights.js -r text mocha -r dotenv/config './test/**/*.test.js'",
     "test": "c8 -x app/insights.js -r lcov -o test-output mocha --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'"
   },
@@ -38,7 +38,6 @@
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "3.20.1",
-    "@mocks-server/core": "^4.0.2",
     "c8": "8.0.1",
     "dotenv": "^16.3.1",
     "eslint": "8.52.0",
