@@ -1,19 +1,29 @@
 import { deepEqual } from 'assert'
 
 import { graphql } from 'graphql'
-import { faker } from '@faker-js/faker/locale/en_GB'
 
-import { schemaWithMocks, schema } from '../../app/graphql/server.js'
-import { context } from '../../app/graphql/context.js'
+import { schema } from '../../../app/graphql/server.js'
+import { context } from '../../../app/graphql/context.js'
 
-import mockServer from '../../mocks/server.js'
+import mockServer from '../../../mocks/server.js'
 
-import { ruralPaymentsPortalCustomerTransformer } from '../../app/transformers/rural-payments-portal/customer.js'
-import { person as personFixture } from '../../mocks/fixtures/person.js'
+import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments-portal/customer.js'
+import { person as personFixture } from '../../../mocks/fixtures/person.js'
+
+const ruralPaymentsPortalApiUrl = process.env.RURAL_PAYMENTS_PORTAL_API_URL
+const ruralPaymentsPortalEmail = process.env.RURAL_PAYMENTS_PORTAL_EMAIL
 
 describe('Query.customer', () => {
-  before(mockServer.start)
-  after(mockServer.stop)
+  before(async () => {
+    const mockUrl = await mockServer.start()
+    process.env.RURAL_PAYMENTS_PORTAL_API_URL = `${mockUrl}/rpp/`
+    process.env.RURAL_PAYMENTS_PORTAL_EMAIL = 'test-email'
+  })
+  after(async () => {
+    process.env.RURAL_PAYMENTS_PORTAL_API_URL = ruralPaymentsPortalApiUrl
+    process.env.RURAL_PAYMENTS_PORTAL_EMAIL = ruralPaymentsPortalEmail
+    await mockServer.stop()
+  })
 
   it('should return customer data', async () => {
     await mockServer.selectBase('base')
@@ -77,46 +87,6 @@ describe('Query.customer', () => {
     deepEqual(result, {
       data: {
         customer: JSON.parse(JSON.stringify(transformedPerson))
-      }
-    })
-  })
-})
-
-describe('Mutation.updateCustomerAuthenticationQuestions', () => {
-  beforeEach(() => {
-    faker.seed(7209369705577748)
-  })
-
-  it('should return CustomerAuthenticationQuestions mock', async () => {
-    const result = await graphql({
-      source: `#graphql
-        mutation TestUpdateCustomerAuthenticationQuestions($input: UpdateCustomerAuthenticationQuestionsInput!) {
-          updateCustomerAuthenticationQuestions(input: $input) {
-            memorableDate
-            memorableEvent
-            memorablePlace
-          }
-        }
-      `,
-      variableValues: {
-        input: {
-          id: 'crn',
-          memorableDate: '',
-          memorableEvent: '',
-          memorablePlace: ''
-        }
-      },
-      schema: schemaWithMocks
-    })
-
-    deepEqual(result, {
-      data: {
-        updateCustomerAuthenticationQuestions: {
-          memorableDate:
-            'Ascit conculco tracto voluptates absum consequuntur nemo pecto.',
-          memorableEvent: 'Ustulo beatae provident totidem cito.',
-          memorablePlace: 'Desparatus abduco aduro est.'
-        }
       }
     })
   })
