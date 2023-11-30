@@ -15,6 +15,11 @@ const server = new Core({
   },
   files: {
     enabled: false
+  },
+  mock: {
+    collections: {
+      selected: 'base'
+    }
   }
 })
 
@@ -25,6 +30,8 @@ export default {
     const { loadRoutes, loadCollections } = server.mock.createLoaders()
     loadRoutes(routes)
     loadCollections(collections)
+
+    return server.server.url
   },
   stop: async () => server.stop(),
   selectBase: base => server.mock.collections.select(base)
