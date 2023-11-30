@@ -18,7 +18,7 @@ RURAL_PAYMENTS_AGENCY_LAND_API_URL=
 # Rural Payments Portal API settings
 RURAL_PAYMENTS_PORTAL_EMAIL=
 RURAL_PAYMENTS_PORTAL_PASSWORD=
-RURAL_PAYMENTS_API_URL=
+RURAL_PAYMENTS_PORTAL_API_URL=
 ```
 
 Run:
@@ -29,29 +29,10 @@ make dev
 
 Access GraphQL landing page at: [http://localhost:4000/graphql](http://localhost:4000/graphql)
 
-### Mocks
-
-Mocks can be enabled by setting the env variable `MOCK_LEVEL`.
-
 #### Mock Server
 The mock server is ran when the development docker environment. The mock server service is provided by [Mock Server](https://www.mocks-server.org/).
 
 Mocks endpoints are defined within the ./mocks directory.
-
-
-#### Partial
-_Resolvers enabled; data returned from mocks if no resolver is set_
-
-```env
-MOCK_LEVEL=partial
-```
-
-#### Full 
-_Resolvers disabled; data returned from mocks **even if** a resolver is set_
-
-```env
-MOCK_LEVEL=full
-```
 
 ## Prerequisites
 - Docker
@@ -137,4 +118,4 @@ The Open Government Licence (OGL) was developed by the Controller of Her Majesty
 It is designed to encourage use and re-use of information freely and flexibly, with only a few conditions.
 
 # Running defra machine
-Ensure add the proxy url your .env: `RURAL_PAYMENTS_PROXY_URL=http://10.255.1.3:443`
+Ensure add the proxy url your .env: `RURAL_PAYMENTS_PORTAL_PROXY_URL=http://10.255.1.3:443`
