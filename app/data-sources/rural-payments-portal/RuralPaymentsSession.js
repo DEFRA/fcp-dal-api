@@ -11,9 +11,9 @@ import qs from 'qs'
 
 const defaultHeaders = {
   'Accept-Encoding': 'gzip, deflate, br',
-  Host: new URL(process.env.RURAL_PAYMENTS_API_URL).hostname,
-  Origin: process.env.RURAL_PAYMENTS_API_URL.slice(0, -1),
-  Referer: `${process.env.RURAL_PAYMENTS_API_URL}login`,
+  Host: new URL(process.env.RURAL_PAYMENTS_PORTAL_API_URL).hostname,
+  Origin: process.env.RURAL_PAYMENTS_PORTAL_API_URL.slice(0, -1),
+  Referer: `${process.env.RURAL_PAYMENTS_PORTAL_API_URL}login`,
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
   Accept: '*/*',
   Connection: 'keep-alive'
@@ -25,7 +25,7 @@ const apiCredentials = {
 }
 
 export class RuralPaymentsSession extends RESTDataSource {
-  baseURL = process.env.RURAL_PAYMENTS_API_URL
+  baseURL = process.env.RURAL_PAYMENTS_PORTAL_API_URL
 
   constructor () {
     super(...arguments)
@@ -34,8 +34,8 @@ export class RuralPaymentsSession extends RESTDataSource {
   }
 
   willSendRequest (path, request) {
-    if (process.env.RURAL_PAYMENTS_PROXY_URL) {
-      request.agent = new HttpsProxyAgent(process.env.RURAL_PAYMENTS_PROXY_URL)
+    if (process.env.RURAL_PAYMENTS_PORTAL_PROXY_URL) {
+      request.agent = new HttpsProxyAgent(process.env.RURAL_PAYMENTS_PORTAL_PROXY_URL)
     }
 
     request.headers = {
@@ -66,7 +66,7 @@ export class RuralPaymentsSession extends RESTDataSource {
         cookies = [cookies]
       }
       cookies.forEach(cookie => {
-        this.jar.setCookieSync(cookie, `${process.env.RURAL_PAYMENTS_API_URL}`)
+        this.jar.setCookieSync(cookie, `${process.env.RURAL_PAYMENTS_PORTAL_API_URL}`)
       })
     }
   }
