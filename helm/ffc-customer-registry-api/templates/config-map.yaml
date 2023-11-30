@@ -4,5 +4,7 @@ data:
   NODE_ENV: {{ quote .Values.environment }}
   PORT: {{ quote .Values.container.port }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
-  MOCK_LEVEL: {{ quote .Values.mock_level }}
+  ENABLE_MOCK_SERVER: {{ quote .Values.mockServerEnabled }}
+  RURAL_PAYMENTS_PORTAL_API_URL: {{ quote .Values.dataSources.ruralPaymentsPortalApiUrl }}
+  RURAL_PAYMENTS_AGENCY_LAND_API_URL: {{ quote .Values.dataSources.ruralPaymentsAgencyLandApiUrl }}
 {{- end -}}

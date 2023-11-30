@@ -1,10 +1,10 @@
 environment: development
-mock_level: full
 environmentCode:
 name: ffc-customer-registry-api
 namespace: ffc-cr
 workstream: ffc-cr
 image: ffc-customer-registry-api
+mockServerEnabled: true
 
 labels:
   component: service
@@ -48,3 +48,9 @@ ingress:
   class: nginx
   endpoint: ffc-customer-registry-api
   server: example.com
+
+dataSources:
+  ruralPaymentsAgencyLandApiUrl: not-real
+  ruralPaymentsPortalApiUrl: not-real
+  ruralPaymentsPortalEmail: not-real
+  ruralPaymentsPortalPassword: not-real
