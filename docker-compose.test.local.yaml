@@ -9,5 +9,5 @@ services:
       - ./app:/home/node/app
       - ./test:/home/node/test
       - ./package.json:/home/node/package.json
-    env_file:
-      - .env
+    environment:
+      RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk

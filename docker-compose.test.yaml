@@ -17,4 +17,3 @@ services:
       - ./package.json:/home/node/package.json
     environment:
       RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
-      RURAL_PAYMENTS_API_URL: http://localhost:3100/rpp/
