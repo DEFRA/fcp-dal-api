@@ -1,4 +1,5 @@
 import hapi from '@hapi/hapi'
+import mockServer from '../mocks/server.js'
 
 import { healthyRoute } from './routes/healthy.js'
 import { healthzRoute } from './routes/healthz.js'
@@ -13,3 +14,7 @@ export const server = hapi.server({
 const routes = [].concat(healthyRoute, healthzRoute)
 
 server.route(routes)
+
+if (process.env.ENABLE_MOCK_SERVER) {
+  mockServer.start()
+}
