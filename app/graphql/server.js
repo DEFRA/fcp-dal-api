@@ -1,7 +1,6 @@
 import { dirname, join } from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
 
-import { addMocksToSchema } from '@graphql-tools/mock'
 import { ApolloServer } from '@apollo/server'
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
@@ -21,14 +20,8 @@ export const schema = makeExecutableSchema({
   resolvers: mergeResolvers(await getFiles('resolvers'))
 })
 
-export const schemaWithMocks = addMocksToSchema({
-  schema,
-  mocks: mergeResolvers(await getFiles('mocks')),
-  preserveResolvers: process.env.MOCK_LEVEL === 'partial'
-})
-
 export const apolloServer = new ApolloServer({
-  schema: process.env.MOCK_LEVEL ? schemaWithMocks : schema,
+  schema,
   plugins: [
     (() => {
       if (process.env?.NODE_ENV === 'production') {

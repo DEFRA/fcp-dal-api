@@ -1,5 +1,3 @@
-import 'dotenv/config'
-
 import hapiApollo from '@as-integrations/hapi'
 
 import { server } from './server.js'
