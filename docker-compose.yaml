@@ -6,5 +6,6 @@ services:
     image: ffc-customer-registry-api
     container_name: ffc-customer-registry-api
     environment:
+      NODE_ENV: development
       APPINSIGHTS_CLOUDROLE: ffc-customer-registry-api-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
