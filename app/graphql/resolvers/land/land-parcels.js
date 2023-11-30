@@ -4,7 +4,7 @@ export const LandParcel = {
   async covers ({ sbi, id }, __, { dataSources }) {
     return transformRuralPaymentsAgencyLandAPILandCovers(
       id,
-      await dataSources.ruralPaymentsAgencyLandAPI.getLandCoversBySbi(sbi)
+      await dataSources.ruralPaymentAgencyLandAPI.getLandCoversBySbi(sbi)
     )
   }
 }

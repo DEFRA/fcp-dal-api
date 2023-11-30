@@ -50,7 +50,7 @@ ingress:
   server: example.com
 
 dataSources:
-  ruralPaymentsAgencyLandApiUrl: not-real
-  ruralPaymentsPortalApiUrl: not-real
-  ruralPaymentsPortalEmail: not-real
-  ruralPaymentsPortalPassword: not-real
+  ruralPaymentAgencyLandApiUrl: not-real
+  ruralPaymentPortalApiUrl: not-real
+  ruralPaymentPortalEmail: not-real
+  ruralPaymentPortalPassword: not-real

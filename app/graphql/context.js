@@ -4,7 +4,7 @@ import { RuralPaymentsPortalApi } from '../data-sources/rural-payments-portal/Ru
 export function context () {
   return {
     dataSources: {
-      ruralPaymentsAgencyLandAPI: new RuralPaymentsAgencyLandAPI(),
+      ruralPaymentAgencyLandAPI: new RuralPaymentsAgencyLandAPI(),
       ruralPaymentsPortalApi: new RuralPaymentsPortalApi()
     }
   }

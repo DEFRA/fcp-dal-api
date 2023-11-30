@@ -5,6 +5,6 @@ data:
   PORT: {{ quote .Values.container.port }}
   APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
   ENABLE_MOCK_SERVER: {{ quote .Values.mockServerEnabled }}
-  RURAL_PAYMENTS_PORTAL_API_URL: {{ quote .Values.dataSources.ruralPaymentsPortalApiUrl }}
-  RURAL_PAYMENTS_AGENCY_LAND_API_URL: {{ quote .Values.dataSources.ruralPaymentsAgencyLandApiUrl }}
+  RURAL_PAYMENTS_PORTAL_API_URL: {{ quote .Values.dataSources.ruralPaymentPortalApiUrl }}
+  RURAL_PAYMENTS_AGENCY_LAND_API_URL: {{ quote .Values.dataSources.ruralPaymentAgencyLandApiUrl }}
 {{- end -}}
