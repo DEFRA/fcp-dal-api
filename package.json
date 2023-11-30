@@ -15,8 +15,8 @@
     "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:mocks": "node -r dotenv/config mocks/index.js",
-    "test:local": "c8 -x app/insights.js -r text mocha -r dotenv/config './test/**/*.test.js'",
-    "test": "c8 -x app/insights.js -r lcov -o test-output mocha --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'"
+    "test:local": "c8 -x app/insights.js -r text mocha -r dotenv/config test/helper.js './test/**/*.test.js'",
+    "test": "c8 -x app/insights.js -r lcov -o test-output mocha test/helper.js --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'"
   },
   "author": "Defra",
   "contributors": [],
@@ -48,6 +48,7 @@
     "mocha-junit-reporter": "2.2.1",
     "nodemon": "3.0.1",
     "prettier": "3.0.3",
+    "sinon": "^17.0.1",
     "standard": "17.1.0"
   },
   "standard": {

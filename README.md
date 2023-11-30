@@ -3,14 +3,16 @@
 Customer Registry GraphQL API created from template to support rapid delivery of microservices for FFC Platform. 
 It contains the configuration needed to deploy a simple Hapi Node server to the Azure Kubernetes Platform.
 
-
 ## Local development
 Create a `.env` file:
 
 ```env
 NODE_ENV=development
 PORT=4000
+
+# Mock server
 PORT_MOCK=3100
+ENABLE_MOCK_SERVER=true
 
 # Rural Payments Agency Land API
 RURAL_PAYMENTS_AGENCY_LAND_API_URL=
