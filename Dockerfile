@@ -13,6 +13,7 @@ ENV PORT ${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
 COPY --chown=node:node package*.json ./
+ARG CACHEBUST=1
 RUN npm install
 COPY --chown=node:node . .
 CMD [ "npm", "run", "start:watch" ]
