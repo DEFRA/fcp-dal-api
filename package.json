@@ -16,7 +16,7 @@
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:mocks": "node -r dotenv/config mocks/index.js",
     "test:local": "c8 -x app/insights.js -r text mocha -r dotenv/config test/helper.js './test/**/*.test.js'",
-    "test": "c8 -x app/insights.js -r lcov -o test-output mocha test/helper.js --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'"
+    "test": "./node_modules/c8/bin/c8.js -x app/insights.js -r lcov -o test-output mocha test/helper.js --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'"
   },
   "author": "Defra",
   "contributors": [],
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "3.20.1",
-    "c8": "8.0.1",
+    "c8": "^8.0.1",
     "dotenv": "^16.3.1",
     "eslint": "8.52.0",
     "jest": "29.7.0",
