@@ -31,7 +31,7 @@
     "@graphql-tools/mock": "9.0.0",
     "@graphql-tools/schema": "10.0.0",
     "@hapi/hapi": "21.3.2",
-    "@mocks-server/core": "^3.2.0",
+    "@mocks-server/core": "^4.0.2",
     "applicationinsights": "2.8.0",
     "graphql": "16.8.1",
     "https-proxy-agent": "^7.0.2",
