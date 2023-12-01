@@ -16,6 +16,7 @@ services:
       - ./jest.config.js:/home/node/jest.config.js
       - ./package.json:/home/node/package.json
     environment:
+      NODE_ENV: development
       ENABLE_MOCK_SERVER: true
       PORT_MOCK: 3100
       RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
