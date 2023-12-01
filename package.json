@@ -16,7 +16,7 @@
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:mocks": "node -r dotenv/config mocks/index.js",
     "test:local": "c8 -x app/insights.js -r text mocha -r dotenv/config test/helper.js './test/**/*.test.js'",
-    "test": "c8 -x app/insights.js -r lcov -o test-output mocha test/helper.js --reporter mocha-junit-reporter --reporter-options mochaFile=./test-output/junit.xml './test/**/*.test.js'"
+    "test": "c8 -x app/insights.js -r lcov -o test-output mocha test/helper.js './test/**/*.test.js'"
   },
   "author": "Defra",
   "contributors": [],
