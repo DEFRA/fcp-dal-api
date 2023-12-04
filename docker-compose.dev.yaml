@@ -8,18 +8,9 @@ services:
     volumes:
       - ./:/usr/local/dev/ffc-customer-registry-api
     working_dir: /usr/local/dev/ffc-customer-registry-api
-    env_file:
-      - .env
     environment:
-      - RURAL_PAYMENTS_API_URL=http://ffc-customer-registry-mocks:${PORT_MOCK}/rpp/
-  ffc-customer-registry-mocks:
-    image: node:18
-    container_name: ffc-customer-registry-mocks-dev
-    ports:
-      - ${PORT_MOCK}:${PORT_MOCK}
-    command: npm run start:mocks
-    volumes:
-      - ./:/usr/local/dev/ffc-customer-registry-api
-    working_dir: /usr/local/dev/ffc-customer-registry-api
+      RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
+      RURAL_PAYMENTS_PORTAL_API_URL: http://localhost:3100/rpp/
+      RURAL_PAYMENTS_PORTAL_EMAIL: some-email
     env_file:
       - .env

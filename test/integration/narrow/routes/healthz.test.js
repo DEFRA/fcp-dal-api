@@ -1,5 +1,4 @@
 import { server } from '../../../../app/server.js'
-import { equal } from 'assert'
 
 describe('Healthz test', () => {
   beforeEach(async () => {
@@ -13,7 +12,7 @@ describe('Healthz test', () => {
     }
 
     const response = await server.inject(options)
-    equal(response.statusCode, 200)
+    expect(response.statusCode).toEqual(200)
   })
 
   afterEach(async () => {

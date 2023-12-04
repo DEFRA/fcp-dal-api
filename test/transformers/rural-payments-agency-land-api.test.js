@@ -1,5 +1,3 @@
-import { deepEqual } from 'assert'
-
 import {
   transformRuralPaymentsAgencyLandAPILandCovers,
   transformRuralPaymentsAgencyLandAPILandParcels,
@@ -123,12 +121,9 @@ const mockLandParcelsResponse = {
 
 describe('transformRuralPaymentsAgencyLandAPILandCovers', () => {
   it('should transform data', () => {
-    const result = transformRuralPaymentsAgencyLandAPILandCovers(
-      '6953379',
-      mockLandCoversResponse
-    )
+    const result = transformRuralPaymentsAgencyLandAPILandCovers('6953379', mockLandCoversResponse)
 
-    deepEqual(result, [
+    expect(result).toEqual([
       {
         id: '10409591',
         classCode: '131',
@@ -141,12 +136,9 @@ describe('transformRuralPaymentsAgencyLandAPILandCovers', () => {
 
 describe('transformRuralPaymentsAgencyLandAPILandParcels', () => {
   it('should transform data', () => {
-    const result = transformRuralPaymentsAgencyLandAPILandParcels(
-      'sbi',
-      mockLandParcelsResponse
-    )
+    const result = transformRuralPaymentsAgencyLandAPILandParcels('sbi', mockLandParcelsResponse)
 
-    deepEqual(result, [
+    expect(result).toEqual([
       { sbi: 'sbi', id: '7154931', area: '3.1161916585340657' },
       { sbi: 'sbi', id: '6953379', area: '0.5409713521247209' }
     ])
@@ -155,10 +147,8 @@ describe('transformRuralPaymentsAgencyLandAPILandParcels', () => {
 
 describe('transformRuralPaymentsAgencyLandAPILandParcelsToSummary', () => {
   it('should transform data', () => {
-    const result = transformRuralPaymentsAgencyLandAPILandParcelsToSummary(
-      mockLandParcelsResponse
-    )
+    const result = transformRuralPaymentsAgencyLandAPILandParcelsToSummary(mockLandParcelsResponse)
 
-    deepEqual(result, { numberOfParcels: 2, totalArea: 3.6571630106587865 })
+    expect(result).toEqual({ numberOfParcels: 2, totalArea: 3.6571630106587865 })
   })
 })
