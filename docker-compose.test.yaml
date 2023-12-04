@@ -14,6 +14,7 @@ services:
       - ./test:/home/node/test
       - ./test-output:/home/node/test-output
       - ./jest.config.js:/home/node/jest.config.js
+      - ./jest.init.js:/home/node/jest.init.js
       - ./package.json:/home/node/package.json
     environment:
       NODE_ENV: development
