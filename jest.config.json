@@ -2,7 +2,7 @@
   "testMatch": ["<rootDir>/test/**/*.test.js"],
   "transform": {},
   "collectCoverage": true,
-  "collectCoverageFrom": ["<rootDir>/app/**/*.js"],
+  "collectCoverageFrom": ["<rootDir>/app/**/*.js", "!<rootDir>/app/*.js"],
   "coverageDirectory": "test-output",
   "coverageReporters": ["text-summary", "lcov"],
   "setupFilesAfterEnv": ["<rootDir>/jest.init.js"],
