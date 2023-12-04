@@ -2,9 +2,15 @@
   "testMatch": ["<rootDir>/test/**/*.test.js"],
   "transform": {},
   "collectCoverage": true,
-  "collectCoverageFrom": ["<rootDir>/app/**/*.js", "!<rootDir>/app/*.js"],
+  "collectCoverageFrom": ["<rootDir>/app/**/*.js"],
   "coverageDirectory": "test-output",
   "coverageReporters": ["text-summary", "lcov"],
+  "coveragePathIgnorePatterns": [
+    "<rootDir>/app/index.js",
+    "<rootDir>/app/insights.js",
+    "<rootDir>/app/data-sources/rural-payments-portal/RuralPaymentsSession.js",
+    "<rootDir>/app/graphql/server.js"
+  ],
   "setupFilesAfterEnv": ["<rootDir>/jest.init.js"],
   "reporters": [
     "default",
@@ -17,5 +23,6 @@
       }
     ]
   ],
-  "verbose": true
+  "verbose": true,
+  "resetMocks": true
 }
