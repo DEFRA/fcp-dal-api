@@ -1,5 +1,3 @@
-import { deepEqual } from 'assert'
-
 import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
@@ -36,7 +34,7 @@ describe('Query.land', () => {
       contextValue: await context()
     })
 
-    deepEqual(result, {
+    expect(result).toEqual({
       data: {
         land: {
           sbi: '807294898',
@@ -70,5 +68,5 @@ describe('Query.land', () => {
         }
       }
     })
-  }).timeout(10000)
+  }, 10000)
 })

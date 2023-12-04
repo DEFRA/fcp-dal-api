@@ -1,5 +1,3 @@
-import { deepEqual } from 'assert'
-
 import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
@@ -67,7 +65,7 @@ describe('Query.customer', () => {
       contextValue: await context()
     })
 
-    deepEqual(result, {
+    expect(result).toEqual({
       data: {
         customer: JSON.parse(JSON.stringify(transformedPerson))
       }
