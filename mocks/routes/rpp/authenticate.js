@@ -71,7 +71,7 @@ export default [
         options: {
           middleware: (req, res) => {
             const headers = req.headers
-            if (!headers.cookie) {
+            if (!headers.cookie || !headers.cookie.includes('AUTH_SESSION')) {
               res.status(401)
               return res.send()
             }
