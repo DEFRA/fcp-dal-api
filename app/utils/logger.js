@@ -1,6 +1,6 @@
 import winston from 'winston'
 
-function jsonStringifyRecursive(obj) {
+function jsonStringifyRecursive (obj) {
   delete obj.level
   delete obj.message
 
