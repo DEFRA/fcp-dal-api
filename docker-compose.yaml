@@ -5,7 +5,18 @@ services:
       target: production
     image: ffc-customer-registry-api
     container_name: ffc-customer-registry-api
+    ports:
+      - ${PORT}:${PORT}
     environment:
       NODE_ENV: development
       APPINSIGHTS_CLOUDROLE: ffc-customer-registry-api-local
       APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
+      PORT: 4000
+      ENABLE_MOCK_SERVER: true
+      RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
+      RURAL_PAYMENTS_PORTAL_EMAIL: some-email
+      RURAL_PAYMENTS_PORTAL_PASSWORD: 
+      RURAL_PAYMENTS_PORTAL_API_URL: http://localhost:3100/rpp/
+      RURAL_PAYMENTS_PROXY_URL: 
+      API_TENANT_ID: 
+      ADMIN_AD_GROUP_ID:

@@ -1,10 +1,16 @@
 {{- include "ffc-helm-library.container-config-map" (list . "ffc-customer-registry-api.config-map") -}}
 {{- define "ffc-customer-registry-api.config-map" -}}
 data:
-  NODE_ENV: {{ quote .Values.environment }}
-  PORT: {{ quote .Values.container.port }}
-  APPINSIGHTS_CLOUDROLE: {{ quote .Values.name }}
-  ENABLE_MOCK_SERVER: {{ quote .Values.mockServerEnabled }}
-  RURAL_PAYMENTS_PORTAL_API_URL: {{ quote .Values.dataSources.ruralPaymentPortalApiUrl }}
-  RURAL_PAYMENTS_AGENCY_LAND_API_URL: {{ quote .Values.dataSources.ruralPaymentAgencyLandApiUrl }}
+  NODE_ENV: development
+  APPINSIGHTS_CLOUDROLE: ffc-customer-registry-api-local
+  APPINSIGHTS_CONNECTIONSTRING: ${APPINSIGHTS_CONNECTIONSTRING}
+  PORT: 4000
+  ENABLE_MOCK_SERVER: true
+  RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
+  RURAL_PAYMENTS_PORTAL_EMAIL: some-email
+  RURAL_PAYMENTS_PORTAL_PASSWORD: 
+  RURAL_PAYMENTS_PORTAL_API_URL: http://localhost:3100/rpp/
+  RURAL_PAYMENTS_PROXY_URL: 
+  API_TENANT_ID: 
+  ADMIN_AD_GROUP_ID:
 {{- end -}}

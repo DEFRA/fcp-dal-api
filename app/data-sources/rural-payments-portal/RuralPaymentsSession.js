@@ -8,6 +8,7 @@ import { CookieJar } from 'tough-cookie'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import { URL } from 'url'
 import qs from 'qs'
+import logger from '../../utils/logger.js'
 
 const defaultHeaders = {
   'Accept-Encoding': 'gzip, deflate, br',
@@ -24,16 +25,18 @@ const apiCredentials = {
   password: process.env.RURAL_PAYMENTS_PORTAL_PASSWORD
 }
 
+logger.debug('#RuralPaymentsSession - Set api credentials', { apiCredentials })
+
 export class RuralPaymentsSession extends RESTDataSource {
   baseURL = process.env.RURAL_PAYMENTS_PORTAL_API_URL
 
-  constructor () {
+  constructor() {
     super(...arguments)
 
     this.jar = new CookieJar()
   }
 
-  willSendRequest (path, request) {
+  willSendRequest(path, request) {
     if (process.env.RURAL_PAYMENTS_PORTAL_PROXY_URL) {
       request.agent = new HttpsProxyAgent(process.env.RURAL_PAYMENTS_PORTAL_PROXY_URL)
     }
@@ -59,7 +62,7 @@ export class RuralPaymentsSession extends RESTDataSource {
     return request
   }
 
-  setCookies (path, response) {
+  setCookies(path, response) {
     let cookies = response.headers.raw()['set-cookie']
     if (cookies) {
       if (!Array.isArray(cookies)) {
@@ -71,41 +74,44 @@ export class RuralPaymentsSession extends RESTDataSource {
     }
   }
 
-  async handleRedirects (response) {
+  async handleRedirects(response) {
     if ([301, 302, 303].includes(response?.status)) {
       const redirectUrl = new URL(response.headers.get('location'))
+      logger.debug('#RuralPaymentsSession - handle redirect', { status: response?.status, redirect: redirectUrl.pathname })
       return this.get(redirectUrl.pathname.replace('/', ''))
     }
   }
 
-  async throwIfResponseIsError (options) {
+  async throwIfResponseIsError(options) {
     const { response } = options
+    logger.debug('#RuralPaymentsSession - error', { response })
     if (response?.status < 400) {
       return
     }
     throw await this.errorFromResponse(options)
   }
 
-  async fetch (path, incomingRequest) {
+  async fetch(path, incomingRequest) {
+    logger.debug('#RuralPaymentsSession - new request ', { path, incomingRequest })
     const result = await super.fetch(path, incomingRequest)
     this.setCookies(path, result.response)
     await this.handleRedirects(result.response)
     return result
   }
 
-  async getCSRFToken () {
+  async getCSRFToken() {
     const csrfResponse = await this.get('login')
     return csrfResponse.match(/(?<=name="csrfToken" value=")(.*)(?="\/>)/g).pop()
   }
 
-  getCookie (name) {
+  getCookie(name) {
     const cookies = this.jar.toJSON()
     const foundCookie = cookies.cookies.find(cookie => cookie.key === name)
 
     return foundCookie?.value
   }
 
-  async initiateAuthenticatedSession () {
+  async initiateAuthenticatedSession() {
     let validSession = await this.hasValidSession()
 
     if (!validSession) {
@@ -138,16 +144,17 @@ export class RuralPaymentsSession extends RESTDataSource {
     }
   }
 
-  async hasValidSession () {
+  async hasValidSession() {
     try {
       await this.get('api/person/context')
       return true
     } catch (error) {
+      logger.error('#RuralPaymentsSession - Error checking session', { error })
       return false
     }
   }
 
-  async getAuthentication () {
+  async getAuthentication() {
     if (this.onAuthPromise) {
       return this.onAuthPromise
     }
@@ -157,6 +164,7 @@ export class RuralPaymentsSession extends RESTDataSource {
         await this.initiateAuthenticatedSession()
         resolve()
       } catch (error) {
+        logger.error('#RuralPaymentsSession - Error initiating session', { error })
         reject(error)
       } finally {
         this.onAuthPromise = null
@@ -168,7 +176,7 @@ export class RuralPaymentsSession extends RESTDataSource {
     return this.onAuthPromise
   }
 
-  requestDeduplicationPolicyFor () {
+  requestDeduplicationPolicyFor() {
     return { policy: 'do-not-deduplicate' }
   }
 }
