@@ -21,7 +21,7 @@ const init = async () => {
   console.log('Server running on %s', server.info.uri)
 
   if (process.env.ENABLE_MOCK_SERVER) {
-    const url = await mockServer.start(server)
+    const url = await mockServer.start()
     console.log('Mock server running %s', url)
   }
 }
