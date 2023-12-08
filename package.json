@@ -1,14 +1,14 @@
 {
   "name": "ffc-customer-registry-api",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/ffc-customer-registry-api",
   "main": "app/index.js",
   "type": "module",
   "scripts": {
-    "format:gql": "prettier 'app/graphql/types/**/*.gql' --write",
+    "format:gql": "prettier \"app/graphql/types/**/*.gql\" --write",
     "format:js": "standard --fix",
-    "lint:gql": "eslint 'app/graphql/types' && prettier 'app/graphql/types/**/*.gql' --check",
+    "lint:gql": "eslint \"app/graphql/types\" && prettier \"app/graphql/types/**/*.gql\" --check",
     "lint:js": "standard",
     "pretest": "npm run lint:js && npm run lint:gql",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
