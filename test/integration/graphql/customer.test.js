@@ -1,15 +1,13 @@
 import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
-import { context } from '../../../app/graphql/context.js'
-
+import { fakeContext } from '../../test-setup.js'
 import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments-portal/customer.js'
 import { person as personFixture } from '../../../mocks/fixtures/person.js'
 
 describe('Query.customer', () => {
   it('should return customer data', async () => {
     const transformedPerson = ruralPaymentsPortalCustomerTransformer(personFixture)
-
     const result = await graphql({
       source: `#graphql
         query Customer {
@@ -62,7 +60,7 @@ describe('Query.customer', () => {
         customerId: '5090008'
       },
       schema,
-      contextValue: await context()
+      contextValue: fakeContext
     })
 
     expect(result).toEqual({

@@ -7,4 +7,5 @@ data:
   ENABLE_MOCK_SERVER: {{ quote .Values.mockServerEnabled }}
   RURAL_PAYMENTS_PORTAL_API_URL: {{ quote .Values.dataSources.ruralPaymentPortalApiUrl }}
   RURAL_PAYMENTS_AGENCY_LAND_API_URL: {{ quote .Values.dataSources.ruralPaymentAgencyLandApiUrl }}
+  API_TENANT_ID: {{ quote .Values.azureTenantId }}
 {{- end -}}

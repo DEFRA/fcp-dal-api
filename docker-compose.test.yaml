@@ -23,3 +23,4 @@ services:
       RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
       RURAL_PAYMENTS_PORTAL_API_URL: http://localhost:3100/rpp/
       RURAL_PAYMENTS_PORTAL_EMAIL: some-email
+      ADMIN_AD_GROUP_ID: ADGROUPID

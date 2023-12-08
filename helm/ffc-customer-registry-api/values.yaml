@@ -1,5 +1,7 @@
 environment: development
+azureTenantId:
 environmentCode:
+tenantId:
 name: ffc-customer-registry-api
 namespace: ffc-cr
 workstream: ffc-cr
@@ -48,6 +50,9 @@ ingress:
   class: nginx
   endpoint: ffc-customer-registry-api
   server: example.com
+
+adGroups:
+  admin:
 
 dataSources:
   ruralPaymentAgencyLandApiUrl: not-real

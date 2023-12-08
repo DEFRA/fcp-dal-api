@@ -1,7 +1,7 @@
 import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
-import { context } from '../../../app/graphql/context.js'
+import { fakeContext } from '../../test-setup.js'
 
 describe('Query.land', () => {
   it('should return land data', async () => {
@@ -31,7 +31,7 @@ describe('Query.land', () => {
         businessId: '807294898'
       },
       schema,
-      contextValue: await context()
+      contextValue: fakeContext
     })
 
     expect(result).toEqual({
