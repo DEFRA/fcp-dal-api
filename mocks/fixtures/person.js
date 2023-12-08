@@ -56,7 +56,7 @@ export const person = {
     addressTypeId: null
   },
   locked: false,
-  id: faker.string.numeric(6),
+  id: faker.string.numeric(7),
   confirmed: null,
   customerReferenceNumber: faker.string.numeric(10),
   personalIdentifiers: null,

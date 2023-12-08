@@ -1,5 +1,6 @@
 import { pagination } from '../../fixtures/pagination.js'
 import { organisation, organisations } from '../../fixtures/organisation.js'
+import { organisationPersonSummary } from '../../fixtures/organisation-person-summary.js'
 
 export default [
   {
@@ -43,6 +44,23 @@ export default [
               res.status(400)
               res.send()
             }
+          }
+        }
+      }
+    ]
+  },
+  {
+    id: 'rpp-organisation-get-person-summary-by-person-id',
+    url: '/rpp/api/organisation/person/:personId/summary',
+    method: ['GET'],
+    variants: [
+      {
+        id: 'default',
+        type: 'json',
+        options: {
+          status: 200,
+          body: {
+            _data: [organisationPersonSummary]
           }
         }
       }

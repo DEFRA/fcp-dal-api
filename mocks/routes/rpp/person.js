@@ -12,7 +12,9 @@ export default [
         type: 'json',
         options: {
           status: 200,
-          body: { _data: person }
+          body: {
+            _data: person
+          }
         }
       }
     ]

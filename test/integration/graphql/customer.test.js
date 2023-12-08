@@ -70,3 +70,51 @@ describe('Query.customer', () => {
     })
   })
 })
+
+describe('Query.customer.businesses', () => {
+  it('should return customer businesses', async () => {
+    const result = await graphql({
+      source: `#graphql
+        query TestCustomerBusinesses($id: ID!) {
+          customer(id: $id) {
+            businesses {
+              roles
+              privileges
+            }
+          }
+        }
+      `,
+      variableValues: {
+        id: '5841879'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          businesses: [
+            {
+              roles: ['Business Partner'],
+              privileges: [
+                'Full permission - business',
+                'SUBMIT - CS APP - SA',
+                'SUBMIT - CS AGREE - SA',
+                'Amend - land',
+                'Amend - entitlement',
+                'Submit - bps',
+                'SUBMIT - BPS - SA',
+                'AMEND - ENTITLEMENT - SA',
+                'AMEND - LAND - SA',
+                'Submit - cs app',
+                'Submit - cs agree',
+                'ELM_APPLICATION_SUBMIT'
+              ]
+            }
+          ]
+        }
+      }
+    })
+  })
+})
