@@ -11,6 +11,7 @@ export default [
       'rpp-organisation-get-by-id:default',
       'rpp-organisation-get-by-sbi:default',
       'rpp-organisation-get-person-summary-by-person-id:default',
+      'rpp-organisation-applications-get-by-id:default',
 
       'rpp-person-get-by-id:default',
       'rpp-person-get-by-crn:default',

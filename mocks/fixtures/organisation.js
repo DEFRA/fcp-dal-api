@@ -46,4 +46,69 @@ export const organisation = {
   charityCommissionRegistrationNumber: null
 }
 
+export const organisationCSApplications = {
+  applications: [
+    {
+      application_id: faker.number.int({ min: 1649461, max: 9649461 }),
+      year: 2023,
+      sector_description: faker.string.alphanumeric(),
+      module_id: faker.number.int(),
+      modcod: null,
+      application_type_ds: faker.string.alphanumeric(),
+      application_type_de: faker.string.alphanumeric(),
+      status_code: 'STADOM',
+      status_sub_code: 'WTHDRW',
+      status_description: 'WITHDRAWN',
+      active_application_flag: false,
+      application_movement_date: faker.date.anytime().toUTCString(),
+      application_code: null,
+      workflow_context_sub_code: null,
+      needs_intervention: false,
+      show_accept: false,
+      submit_date: null,
+      status: 'Withdrawn',
+      common_lands_flag: false,
+      prints_count: faker.number.int({ min: 0, max: 20 }),
+      queued: false,
+      has_sssi_intersection_c: faker.number.int({ min: 0, max: 1 }),
+      has_sssi_intersection_y: faker.number.int({ min: 0, max: 1 }),
+      has_hefer_intersection_y: faker.number.int({ min: 0, max: 1 }),
+      has_been_AGRLIV: faker.number.int({ min: 0, max: 1 }),
+      ter_closing_date: faker.date.anytime().toUTCString(),
+      eligibIntersections: null,
+      required_sssi_approval: false
+    },
+    {
+      application_id: faker.number.int({ min: 1649461, max: 9649461 }),
+      year: 2023,
+      sector_description: faker.string.alphanumeric(),
+      module_id: faker.number.int(),
+      modcod: null,
+      application_type_ds: faker.string.alphanumeric(),
+      application_type_de: faker.string.alphanumeric(),
+      status_code: 'STADOM',
+      status_sub_code: 'AGROFF',
+      status_description: 'AGREEMENT OFFER',
+      active_application_flag: true,
+      application_movement_date: faker.date.anytime().toUTCString(),
+      application_code: null,
+      workflow_context_sub_code: 'STANDA',
+      needs_intervention: false,
+      show_accept: false,
+      submit_date: faker.date.anytime().toUTCString(),
+      status: 'Checking Application',
+      common_lands_flag: false,
+      prints_count: faker.number.int({ min: 0, max: 20 }),
+      queued: false,
+      has_sssi_intersection_c: faker.number.int({ min: 0, max: 1 }),
+      has_sssi_intersection_y: faker.number.int({ min: 0, max: 1 }),
+      has_hefer_intersection_y: faker.number.int({ min: 0, max: 1 }),
+      has_been_AGRLIV: faker.number.int({ min: 0, max: 1 }),
+      ter_closing_date: faker.date.anytime().toUTCString(),
+      eligibIntersections: null,
+      required_sssi_approval: false
+    }
+  ]
+}
+
 export const organisations = [organisation]

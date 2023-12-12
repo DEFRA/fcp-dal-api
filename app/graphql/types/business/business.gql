@@ -26,4 +26,5 @@ type Business {
   id: ID!
   info: BusinessInfo
   land: Land
+  applications: [BusinessApplication]
 }

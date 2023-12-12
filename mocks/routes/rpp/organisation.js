@@ -1,6 +1,6 @@
 import { pagination } from '../../fixtures/pagination.js'
-import { organisation, organisations } from '../../fixtures/organisation.js'
 import { organisationPersonSummary } from '../../fixtures/organisation-person-summary.js'
+import { organisation, organisations, organisationCSApplications } from '../../fixtures/organisation.js'
 
 export default [
   {
@@ -62,6 +62,21 @@ export default [
           body: {
             _data: [organisationPersonSummary]
           }
+        }
+      }
+    ]
+  },
+  {
+    id: 'rpp-organisation-applications-get-by-id',
+    url: '/rpp/injected-screens-mt/api/organisation/:orgId/applications/appslist',
+    method: ['GET'],
+    variants: [
+      {
+        id: 'default',
+        type: 'json',
+        options: {
+          status: 200,
+          body: { _data: organisationCSApplications }
         }
       }
     ]

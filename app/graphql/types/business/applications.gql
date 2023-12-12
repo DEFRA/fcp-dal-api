@@ -1,0 +1,22 @@
+type BusinessApplicationStatus {
+  id: ID
+  open: String
+  status: String
+  type: String
+  sector: String
+  year: Int
+  frn: String
+  office: String
+}
+
+type BusinessApplicationClaim {
+  schemaYear: Int
+  type: String
+  status: String
+  lastMovement: String
+}
+
+type BusinessApplication {
+  applicationStatus: BusinessApplicationStatus
+  csClaim: BusinessApplicationClaim
+}
