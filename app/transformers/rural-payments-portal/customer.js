@@ -49,14 +49,14 @@ export function transformPersonRolesToCustomerAuthorisedBusinessesRoles (custome
 }
 
 export function transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges (customerId, personPrivileges) {
-  return personPrivileges.filter(({ personId }) => personId.toString() === customerId).map(
-    ({ privilegeNames }) => privilegeNames[0]
-  )
+  return personPrivileges.filter(({ personId }) => personId.toString() === customerId).map(({ privilegeNames }) => privilegeNames[0])
 }
 
 export function transformPersonSummaryToCustomerAuthorisedBusinesses (customerId, summary) {
-  return summary.map(({ id }) => ({
+  return summary.map(({ id, name, sbi }) => ({
     customerId,
-    id
+    id,
+    name,
+    sbi
   }))
 }

@@ -33,25 +33,12 @@ describe('Query.land', () => {
       schema,
       contextValue: fakeContext
     })
-
     expect(result).toEqual({
       data: {
         land: {
           sbi: '807294898',
           summary: { numberOfParcels: 2, totalArea: 3.6571630106587865 },
           parcels: [
-            {
-              id: '7154931',
-              area: 3.1161916585340657,
-              covers: [
-                {
-                  id: '11033654',
-                  classCode: 130,
-                  description: 'PERMANENT_GRASSLAND',
-                  area: 3.1161916585340657
-                }
-              ]
-            },
             {
               id: '6953379',
               area: 0.5409713521247209,
@@ -61,6 +48,18 @@ describe('Query.land', () => {
                   classCode: 131,
                   description: 'PERMANENT_GRASSLAND',
                   area: 0.5409713521247209
+                }
+              ]
+            },
+            {
+              id: '7154931',
+              area: 3.1161916585340657,
+              covers: [
+                {
+                  id: '11033654',
+                  classCode: 130,
+                  description: 'PERMANENT_GRASSLAND',
+                  area: 3.1161916585340657
                 }
               ]
             }
