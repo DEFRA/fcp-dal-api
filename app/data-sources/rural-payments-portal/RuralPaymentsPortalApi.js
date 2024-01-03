@@ -25,4 +25,20 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
     const response = await this.get(`injected-screens-mt/api/organisation/${sbi}/applications/appslist`)
     return response._data
   }
+
+  getParcelsByOrganisationId (organisationId) {
+    return this.get(`/rpp/viewland/lms/lms/organisation/${organisationId}/parcels`)
+  }
+
+  getCoversByOrganisationId (organisationId) {
+    return this.get(`/rpp/viewland/lms/lms/organisation/${organisationId}/land-covers`)
+  }
+
+  getParcelsSummaryByOrganisationId (organisationId) {
+    return this.get(`viewland/lms/lms/organisation/${organisationId}/parcels/bo-summary`)
+  }
+
+  getCoversSummaryByOrganisationId (organisationId) {
+    return this.get(`viewland/lms/lms/organisation/${organisationId}/covers-summary`)
+  }
 }

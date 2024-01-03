@@ -1,9 +1,15 @@
-import { faker } from '@faker-js/faker/locale/en_GB'
+import {
+  coversSummary,
+  landCovers,
+  landParcels,
+  totalArea,
+  totalParcels
+} from '../../fixtures/lms.js'
 
 export default [
   {
     id: 'rpp-lms-get-land-covers',
-    url: '/rpp/viewland/lms/lms/organisation/:orgId/land-covers/historic/171123',
+    url: '/rpp/viewland/lms/lms/organisation/:orgId/land-covers',
     method: ['GET'],
     variants: [
       {
@@ -11,28 +17,7 @@ export default [
         type: 'json',
         options: {
           status: 200,
-          body: [...Array(faker.number.int(20))].map((_, i) => {
-            return {
-              id: faker.string.numeric(10),
-              info: [
-                {
-                  code: '110',
-                  name: 'Arable Land',
-                  area: faker.number.float({ min: 0, max: 1000, precision: 0.01 })
-                },
-                {
-                  code: '130',
-                  name: 'Permanent Grassland',
-                  area: faker.number.float({ min: 0, max: 1000, precision: 0.01 })
-                },
-                {
-                  code: '140',
-                  name: 'Permanent Crops',
-                  area: faker.number.float({ min: 0, max: 1000, precision: 0.01 })
-                }
-              ]
-            }
-          })
+          body: landCovers
         }
       }
     ]
@@ -47,15 +32,40 @@ export default [
         type: 'json',
         options: {
           status: 200,
-          body: [...Array(faker.number.int(20))].map((_, i) => {
-            return {
-              id: parseInt(faker.string.numeric(7)),
-              sheetId: `S${faker.string.numeric(5)}`,
-              parcelId: faker.string.numeric(4),
-              area: faker.number.float({ min: 0, max: 1000, precision: 0.01 }),
-              pendingDigitisation: faker.datatype.boolean()
-            }
-          })
+          body: landParcels
+        }
+      }
+    ]
+  },
+  {
+    id: 'rpp-lms-get-parcels-summary',
+    url: '/rpp/viewland/lms/lms/organisation/:orgId/parcels/bo-summary',
+    method: 'GET',
+    variants: [
+      {
+        id: 'default',
+        type: 'json',
+        options: {
+          status: 200,
+          body: {
+            totalParcels,
+            totalArea
+          }
+        }
+      }
+    ]
+  },
+  {
+    id: 'rpp-lms-get-covers-summary',
+    url: '/rpp/viewland/lms/lms/organisation/:orgId/covers-summary',
+    method: 'GET',
+    variants: [
+      {
+        id: 'default',
+        type: 'json',
+        options: {
+          status: 200,
+          body: coversSummary
         }
       }
     ]

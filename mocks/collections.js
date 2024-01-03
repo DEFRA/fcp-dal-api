@@ -18,6 +18,8 @@ export default [
 
       'rpp-lms-get-land-covers:default',
       'rpp-lms-get-parcels:default',
+      'rpp-lms-get-parcels-summary:default',
+      'rpp-lms-get-covers-summary:default',
 
       'rpp-siti-agri-api-get-authorisation-by-organisation-id:default'
     ]

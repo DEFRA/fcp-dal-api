@@ -1,38 +1,31 @@
-enum LandCoverDescription {
+enum BusinessLandCoverName {
   PERMANENT_GRASSLAND
   PERMANENT_CROPS
   ARABLE_LAND
 }
 
-type LandCover {
+type BusinessLandParcel {
   id: ID!
-  landParcelId: String!
-  classCode: Int
-  description: LandCoverDescription
+  sheetId: String
   area: Float
 }
 
-type LandParcel {
-  id: ID!
-  sbi: String!
-  area: Float
-  covers: [LandCover]
-}
-
-type LandSummary {
+type BusinessLandSummary {
   arableLandArea: Float
-  date: Date
-  numberOfParcels: Float
+  permanentCropsArea: Float
   permanentGrasslandArea: Float
   totalArea: Float
+  totalParcels: Float
 }
 
-type Land {
-  sbi: String!
-  summary: LandSummary
-  parcels: [LandParcel]
+type BusinessLandCover {
+  id: ID!
+  name: BusinessLandCoverName
+  area: Float
 }
 
-extend type Query {
-  land(businessId: ID!): Land
+type BusinessLand {
+  covers: [BusinessLandCover]
+  parcels: [BusinessLandParcel]
+  summary: BusinessLandSummary
 }
