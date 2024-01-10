@@ -7,6 +7,14 @@ import { transformOrganisationToBusiness } from '../../../app/transformers/rural
 import { organisation as organisationFixture } from '../../../mocks/fixtures/organisation.js'
 import { landCovers, totalArea, totalParcels, coversSummary, landParcels } from '../../../mocks/fixtures/lms.js'
 import { transformLandCovers, transformLandCoversToArea, transformLandParcels } from '../../../app/transformers/rural-payments-portal/lms.js'
+import {
+  organisationCPHInfo as organisationCPHInfoFixture,
+  organisationCPH as organisationCPHFixture
+} from '../../../mocks/fixtures/organisation-cph.js'
+import {
+  transformOrganisationCPH,
+  transformOrganisationCPHCoordinates
+} from '../../../app/transformers/rural-payments-portal/business-cph.js'
 
 describe('Query.business', () => {
   it('should return business data', async () => {
@@ -172,6 +180,55 @@ describe('Query.business.land', () => {
           land: {
             covers: transformLandCovers(landCovers)
           }
+        }
+      }
+    })
+  })
+})
+
+describe('Query.Business.cph', () => {
+  const transformedCPH = transformOrganisationCPH('ID', organisationCPHFixture)
+  delete transformedCPH[0].id
+
+  it('cph', async () => {
+    const result = await graphql({
+      source: `#graphql
+      query BusinessCPH {
+        business(id: "ID") {
+          cph {
+            number
+            parcelNumbers
+            parish
+            startDate
+            expiryDate
+            species
+            coordinate {
+              x
+              y
+            }
+          }
+        }
+      }
+      `,
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        business: {
+          cph: [
+            {
+              ...transformedCPH[0],
+              parish: organisationCPHInfoFixture.parish,
+              species: organisationCPHInfoFixture.species,
+              startDate: organisationCPHInfoFixture.startDate,
+              expiryDate: organisationCPHInfoFixture.expiryDate,
+              coordinate: transformOrganisationCPHCoordinates(
+                organisationCPHInfoFixture
+              )
+            }
+          ]
         }
       }
     })

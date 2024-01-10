@@ -41,4 +41,14 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
   getCoversSummaryByOrganisationId (organisationId) {
     return this.get(`viewland/lms/lms/organisation/${organisationId}/covers-summary`)
   }
+
+  async getOrganisationCPHCollectionBySBI (sbi) {
+    const response = await this.get(`SitiAgriApi/cph/organisation/${sbi}/cph-numbers`)
+    return response.data
+  }
+
+  async getOrganisationCPHInfoBySBIAndCPHNumber (sbi, cphNumber) {
+    const response = await this.get(`SitiAgriApi/cph/organisation/${sbi}/cph-numbers/${cphNumber}`)
+    return response.data
+  }
 }
