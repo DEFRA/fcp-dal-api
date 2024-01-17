@@ -25,3 +25,8 @@ type Address {
   doubleDependentLocality: String
   typeId: String
 }
+
+input Pagination {
+  perPage: Int!
+  page: Int!
+}

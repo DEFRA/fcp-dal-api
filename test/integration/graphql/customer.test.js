@@ -118,3 +118,109 @@ describe('Query.customer.businesses', () => {
     })
   })
 })
+
+describe('Query.customer.businesses.messages', () => {
+  it('should return customer businesses messages', async () => {
+    const result = await graphql({
+      source: `#graphql
+        query Messages($customerId: ID!, $pagination: Pagination, $deleted: Boolean) {
+          customer(id: $customerId) {
+            businesses {
+              messages(pagination: $pagination, showOnlyDeleted: $deleted) {
+                title
+                read
+                id
+                date
+              }
+
+            }
+          }
+        }
+      `,
+      variableValues: {
+        customerId: '123',
+        pagination: {
+          page: 1,
+          perPage: 3
+        },
+        deleted: false
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          businesses: [
+            {
+              messages: [
+                {
+                  title: 'Crapula capillus tenetur contigo vindico arbitro corporis tenetur voveo calcar.',
+                  read: false,
+                  id: '9614024',
+                  date: 4041907889750
+                },
+                {
+                  title: 'Tamisium delicate carcer. Soluta subito antepono dignissimos dens. Ipsa solvo adopto nesciunt vomer ocer claro.\nApto tergiversatio tollo sollicito neque totidem calculus aspernatur supellex. Aegrus aurum depulso harum triumphus deputo dolores abutor studio. Sortitus vestrum voco talio umquam tollo cetera cerno damnatio nobis.\nNam nulla dedico auctor astrum. In libero aufero cupiditate excepturi arma temperantia. Debilito aeternus aranea correptius desolo volaticus deporto undique vae.',
+                  read: false,
+                  id: '3041329',
+                  date: 7413162689028
+                }
+              ]
+            }
+          ]
+        }
+      }
+    })
+  })
+
+  it('should return deleted customer businesses messages', async () => {
+    const result = await graphql({
+      source: `#graphql
+        query Messages($customerId: ID!, $pagination: Pagination, $deleted: Boolean) {
+          customer(id: $customerId) {
+            businesses {
+              messages(pagination: $pagination, showOnlyDeleted: $deleted) {
+                title
+                read
+                id
+                date
+              }
+
+            }
+          }
+        }
+      `,
+      variableValues: {
+        customerId: '123',
+        pagination: {
+          page: 1,
+          perPage: 3
+        },
+        deleted: true
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          businesses: [
+            {
+              messages: [
+                {
+                  title: 'Videlicet fuga averto antepono depopulo saepe vomica.',
+                  read: false,
+                  id: '4653378',
+                  date: 1540594791161
+                }
+              ]
+            }
+          ]
+        }
+      }
+    })
+  })
+})

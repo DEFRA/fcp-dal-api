@@ -51,4 +51,18 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
     const response = await this.get(`SitiAgriApi/cph/organisation/${sbi}/cph-numbers/${cphNumber}`)
     return response.data
   }
+
+  async getNotificationsByOrganisationIdAndPersonId (organisationId, personId, page, size) {
+    const response = await this.get('/rpp/notifications', {
+      params: {
+        personId,
+        organisationId,
+        filter: '',
+        page,
+        size
+      }
+    })
+
+    return response.notifications
+  }
 }

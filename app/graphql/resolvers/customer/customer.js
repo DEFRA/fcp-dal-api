@@ -1,7 +1,8 @@
 import {
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
-  transformPersonSummaryToCustomerAuthorisedBusinesses
+  transformPersonSummaryToCustomerAuthorisedBusinesses,
+  transformNotificationsToMessages
 } from '../../../transformers/rural-payments-portal/customer.js'
 
 export const Customer = {
@@ -20,5 +21,16 @@ export const CustomerBusiness = {
   async privileges ({ id, customerId }, __, { dataSources }) {
     const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(id)
     return transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges(customerId, authorisation.personPrivileges)
+  },
+
+  async messages ({ id, customerId }, { pagination, showOnlyDeleted }, { dataSources }) {
+    const notifications = await dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId(
+      id,
+      customerId,
+      pagination?.page || 1,
+      pagination?.perPage || 1
+    )
+
+    return transformNotificationsToMessages(notifications, showOnlyDeleted)
   }
 }

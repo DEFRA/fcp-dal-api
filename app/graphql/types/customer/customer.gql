@@ -40,4 +40,5 @@ type CustomerBusiness {
   sbi: Int!
   roles: [String]
   privileges: [String]
+  messages(pagination: Pagination, showOnlyDeleted: Boolean): [CustomerBusinessMessage]
 }

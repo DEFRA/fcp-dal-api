@@ -60,3 +60,16 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses (customerId
     sbi
   }))
 }
+
+export function transformNotificationsToMessages (notifications = [], showOnlyDeleted = false) {
+  return notifications
+    .map((message) => ({
+      id: message.id,
+      title: message.title,
+      date: message.createdAt,
+      body: message.body,
+      read: !!message.readAt,
+      archivedAt: message.archivedAt
+    }))
+    .filter(({ archivedAt }) => showOnlyDeleted ? archivedAt !== null : archivedAt === null)
+}

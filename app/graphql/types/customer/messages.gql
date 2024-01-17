@@ -1,0 +1,7 @@
+type CustomerBusinessMessage {
+  id: ID!
+  title: String
+  date: Date
+  body: String
+  read: Boolean
+}
