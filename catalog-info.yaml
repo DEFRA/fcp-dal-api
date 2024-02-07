@@ -1,0 +1,24 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "ffc-data-access-layer-api"
+  description: |
+    Customer Registry GraphQL API created from template to support rapid delivery of microservices for FFC Platform. 
+    It contains the configuration needed to deploy a simple Hapi Node server to the Azure Kubernetes Platform.
+  annotations:
+    github.com/project-slug: DEFRA/fcp-data-access-layer-api
+    dev.azure.com/project: DEFRA-FFC
+    dev.azure.com/build-definition: fcp-data-access-layer-api
+  tags:
+    - node
+    - private
+    - back-end
+    - graphql
+  links:
+    - url: https://github.com/DEFRA/fcp-data-access-layer-api
+      title: View repository
+      icon: github
+spec:
+  type: backend
+  lifecycle: beta
+  owner: "group:default/fcp-data-access-layer"
