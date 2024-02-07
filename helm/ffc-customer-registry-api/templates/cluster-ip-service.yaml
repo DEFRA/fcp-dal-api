@@ -1,3 +1,0 @@
-{{- include "ffc-helm-library.cluster-ip-service" (list . "ffc-customer-registry-api.cluster-ip-service") -}}
-{{- define "ffc-customer-registry-api.cluster-ip-service" -}}
-{{- end -}}
