@@ -41,14 +41,14 @@ resources:
 extends:
   template: /pipelines/common-app-build.yaml@DEFRA-ADPPipelineCommon
   parameters:
-    serviceName: "ffc-data-access-layer-api"
+    serviceName: "fcp-data-access-layer-api"
     deployFromFeature: ${{ parameters.deployFromFeature }}
     deployConfigOnly: ${{ parameters.deployConfigOnly }}
     appBuildConfig:
       appFrameworkType: "nodejs"
       projectPath: "./package.json"
       manifestPath: "./package.json"
-      imageRepoName: "ffc-data-access-layer-api"
+      imageRepoName: "fcp-data-access-layer-api"
     appTestConfig:
       testFilePath: "./docker-compose.test.yaml"
       snykTestFilePath: "./docker-compose.snyk.yaml"
@@ -56,6 +56,6 @@ extends:
       filepath: "./appConfig"
       filetype: "yaml"
       variableGroups:
-        - ffc-data-access-layer-api-<environment>
+        - fcp-data-access-layer-api-<environment>
       variables:
-        - ffc-data-access-layer-api-APPINSIGHTS-CONNECTIONSTRING
+        - fcp-data-access-layer-api-APPINSIGHTS-CONNECTIONSTRING
