@@ -1,8 +1,0 @@
-apiVersion: v2
-name: fcp-data-access-layer-api-infra
-description: A ASO Helm chart to deploy the FFC Data Access Layer API Infrastructure
-version: 0.0.1
-dependencies:
-- name: adp-aso-helm-library
-  version: ^1.0.0
-  repository: https://raw.githubusercontent.com/defra/adp-helm-repository/main/adp-aso-helm-library
