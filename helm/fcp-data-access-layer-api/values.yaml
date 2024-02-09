@@ -1,0 +1,28 @@
+name: fcp-data-access-layer-api
+namespace: ffc-cr
+image: fcp-data-access-layer-api
+
+labels: {}
+
+deployment:
+  priorityClassName: low
+  minReplicas: 1
+  maxReplicas: 3
+  cpuThreshold: 80
+  memoryThreshold: 80
+  minReadySeconds: 5
+
+container:
+  memCpuTier: M
+
+livenessProbe:
+  initialDelaySeconds: 70
+  periodSeconds: 10
+  failureThreshold: 3
+  script: /home/node/scripts/healthz
+
+aadWorkloadIdentity: true
+
+serviceAccount:
+  name: ffc-cr
+  roleArn: true

@@ -1,0 +1,5 @@
+{{- if .Values.pr }}
+{{- include "adp-helm-library.role-binding" (list . "fcp-data-access-layer-api.role-binding") -}}
+{{- end }}
+{{- define "fcp-data-access-layer-api.role-binding" -}}
+{{- end -}}

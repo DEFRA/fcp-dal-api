@@ -1,0 +1,8 @@
+{{- include "adp-helm-library.deployment" (list . "fcp-data-access-layer-api.deployment") -}}
+{{- define "fcp-data-access-layer-api.deployment" -}}
+spec:
+  template:
+    spec:
+      containers:
+      - {{ include "adp-helm-library.container" (list . "fcp-data-access-layer-api.container") }}      
+{{- end -}}

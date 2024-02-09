@@ -1,6 +1,0 @@
-{{- define "ffc-customer-registry-api.container" -}}
-livenessProbe: {{ include "ffc-helm-library.http-get-probe" (list . .Values.livenessProbe) | nindent 4}}
-readinessProbe: {{ include "ffc-helm-library.http-get-probe" (list . .Values.readinessProbe) | nindent 4}}
-ports:
-- containerPort: {{ .Values.container.port }}
-{{- end -}}
