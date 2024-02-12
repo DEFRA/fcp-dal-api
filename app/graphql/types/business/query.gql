@@ -1,4 +1,14 @@
+"""
+Extends the base Query type.
+"""
 extend type Query {
+  """
+  Retrieves a business by their unique identifier.
+  """
   business(id: ID!): Business
+
+  """
+  Retrieves the applications of a business by the business's unique identifier.
+  """
   businessApplications(id: ID!): [BusinessApplication]
 }

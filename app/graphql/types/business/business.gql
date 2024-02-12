@@ -1,31 +1,114 @@
+"""
+Represents the basic information of a business.
+"""
 type BusinessInfo {
+  """
+  The Single Business Identifier (SBI) of the business.
+  """
   sbi: Int
+
+  """
+  The name of the business.
+  """
   name: String
+
+  """
+  The reference of the business.
+  """
   reference: String
+
+  """
+  The VAT number of the business.
+  """
   vat: String
+
+  """
+  The address of the business.
+  """
   address: Address
+
+  """
+  The phone details of the business.
+  """
   phone: Phone
+
+  """
+  The email details of the business.
+  """
   email: Email
+
+  """
+  The legal status of the business.
+  """
   legalStatus: BusinessType
+
+  """
+  The type of the business.
+  """
   type: BusinessType
+
+  """
+  The registration numbers of the business.
+  """
   registrationNumbers: BusinessRegistrationNumbers
 }
 
+"""
+Represents the registration numbers of a business.
+"""
 type BusinessRegistrationNumbers {
+  """
+  The Companies House number of the business.
+  """
   companiesHouse: String
+
+  """
+  The Charity Commission number of the business.
+  """
   charityCommission: String
 }
 
-# eslint-disable-next-line @graphql-eslint/naming-convention
+"""
+Represents the type of a business.
+"""
 type BusinessType {
+  """
+  The code of the business type.
+  """
   code: Int
+
+  """
+  The type of the business.
+  """
   type: String
 }
 
+"""
+Represents a business.
+"""
 type Business {
+  """
+  The unique identifier of the business.
+  """
   id: ID!
+
+  """
+  The basic information of the business.
+  """
   info: BusinessInfo
+
+  """
+  The land details of the business.
+  """
   land: BusinessLand
+
+  """
+  The applications associated with the business.
+  """
   applications: [BusinessApplication]
+
+  """
+  The CPH (County Parish Holding) numbers of the business.
+  """
   cph: [CPH]
 }

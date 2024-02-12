@@ -1,31 +1,109 @@
+"""
+Represents the name of a business land cover.
+"""
 enum BusinessLandCoverName {
+  """
+  Represents permanent grassland.
+  """
   PERMANENT_GRASSLAND
+
+  """
+  Represents permanent crops.
+  """
   PERMANENT_CROPS
+
+  """
+  Represents arable land.
+  """
   ARABLE_LAND
 }
 
+"""
+Represents a parcel of a business land.
+"""
 type BusinessLandParcel {
+  """
+  The unique identifier of the land parcel.
+  """
   id: ID!
+
+  """
+  The sheet ID of the land parcel.
+  """
   sheetId: String
+
+  """
+  The area of the land parcel.
+  """
   area: Float
 }
 
+"""
+Represents a summary of a business land.
+"""
 type BusinessLandSummary {
+  """
+  The area of arable land.
+  """
   arableLandArea: Float
+
+  """
+  The area of permanent crops.
+  """
   permanentCropsArea: Float
+
+  """
+  The area of permanent grassland.
+  """
   permanentGrasslandArea: Float
+
+  """
+  The total area of the business land.
+  """
   totalArea: Float
+
+  """
+  The total number of parcels in the business land.
+  """
   totalParcels: Float
 }
 
+"""
+Represents a cover of a business land.
+"""
 type BusinessLandCover {
+  """
+  The unique identifier of the land cover.
+  """
   id: ID!
+
+  """
+  The name of the land cover.
+  """
   name: BusinessLandCoverName
+
+  """
+  The area of the land cover.
+  """
   area: Float
 }
 
+"""
+Represents a business land.
+"""
 type BusinessLand {
+  """
+  The covers of the business land.
+  """
   covers: [BusinessLandCover]
+
+  """
+  The parcels of the business land.
+  """
   parcels: [BusinessLandParcel]
+
+  """
+  The summary of the business land.
+  """
   summary: BusinessLandSummary
 }
