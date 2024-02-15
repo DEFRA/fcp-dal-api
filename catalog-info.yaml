@@ -9,6 +9,9 @@ metadata:
     github.com/project-slug: DEFRA/fcp-data-access-layer-api
     dev.azure.com/project: DEFRA-FFC
     dev.azure.com/build-definition: fcp-data-access-layer-api
+    sonarqube.org/project-key: fcp-data-access-layer-api
+    grafana/dashboard-selector: "folderTitle == 'Managed Prometheus'"
+    backstage.io/kubernetes-id: fcp-data-access-layer-api
   tags:
     - node
     - private
@@ -18,7 +21,14 @@ metadata:
     - url: https://github.com/DEFRA/fcp-data-access-layer-api
       title: View repository
       icon: github
+    - url: https://dev.azure.com/defragovuk/DEFRA-FFC/_build?definitionId=5958
+      title: CI/CD Pipeline
+    - url: https://sonarcloud.io/project/overview?id=fcp-data-access-layer-api
+      title: SonarCloud Analysis
+    - url: https://snyk.io/test/github/DEFRA/fcp-data-access-layer-api
+      title: Snyk Analysis
 spec:
   type: backend
   lifecycle: beta
-  owner: "group:default/fcp-data-access-layer"
+  owner: "group:default/fcp-data-access-layer-system"
+  system: "system:default/fcp-find-system"
