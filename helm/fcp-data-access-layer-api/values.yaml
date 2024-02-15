@@ -1,5 +1,5 @@
 name: fcp-data-access-layer-api
-namespace: ffc-cr
+namespace: ffc-dal
 image: fcp-data-access-layer-api
 
 labels: {}
@@ -12,8 +12,32 @@ deployment:
   memoryThreshold: 80
   minReadySeconds: 5
 
+service:
+  port: 80
+  type: ClusterIP
+  
 container:
   memCpuTier: M
+  imagePullPolicy: IfNotPresent
+  requestMemory: 50Mi
+  requestCpu: 50m
+  limitMemory: 200Mi
+  limitCpu: 400m
+  restClientTimeoutMillis: 20000
+  staticCacheTimeoutMillis: 54000
+  port: 3000
+
+ingress:
+  class: nginx
+  endpoint: ffc-dal
+  server: example.com
+
+readinessProbe:
+  path: /healthy
+  port: 3000
+  initialDelaySeconds: 20
+  periodSeconds: 10
+  failureThreshold: 3
 
 livenessProbe:
   initialDelaySeconds: 70
@@ -24,5 +48,5 @@ livenessProbe:
 aadWorkloadIdentity: true
 
 serviceAccount:
-  name: ffc-cr
+  name: ffc-dal
   roleArn: true
