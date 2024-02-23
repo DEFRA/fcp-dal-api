@@ -1,5 +1,7 @@
 """
 Represents a message related to a customer's business.
+
+Data Source: Rural Payments Portal (PRR)
 """
 type CustomerBusinessMessage {
   """

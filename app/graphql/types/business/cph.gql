@@ -15,6 +15,8 @@ type CPHCoordinate {
 
 """
 Represents a County Parish Holding (CPH) number.
+
+Data Source: Rural Payments Portal (PRR)
 """
 type CPH {
   """

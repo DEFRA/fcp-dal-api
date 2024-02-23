@@ -85,6 +85,8 @@ type BusinessType {
 
 """
 Represents a business.
+
+Data Source: Rural Payments Portal (PRR)
 """
 type Business {
   """

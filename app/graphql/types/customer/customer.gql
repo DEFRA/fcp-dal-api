@@ -1,5 +1,7 @@
 """
 Represents the basic information of a customer.
+
+Data Source: Rural Payments Portal (PRR)
 """
 type CustomerInfo {
   """

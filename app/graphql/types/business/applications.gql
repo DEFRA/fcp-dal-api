@@ -70,6 +70,8 @@ type BusinessApplicationClaim {
 
 """
 Represents a business application.
+
+Data Source: Rural Payments Portal (PRR)
 """
 type BusinessApplication {
   """

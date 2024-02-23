@@ -90,6 +90,8 @@ type BusinessLandCover {
 
 """
 Represents a business land.
+
+Data Source: Rural Payments Portal (PRR)
 """
 type BusinessLand {
   """
