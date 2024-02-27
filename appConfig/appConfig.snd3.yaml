@@ -1,2 +1,20 @@
-- key: Sentinel
-  value: "1"
+- key: ENABLE_MOCK_SERVER
+  value: true
+- key: RURAL_PAYMENTS_AGENCY_LAND_API_URL
+  value: "https://environment.data.gov.uk"
+- key: RURAL_PAYMENTS_PORTAL_EMAIL
+  value: "example@email.com"
+- key: RURAL_PAYMENTS_PORTAL_API_URL
+  value: "http://127.0.0.1:5000/rpp/"
+- key: RURAL_PAYMENTS_PROXY_URL
+  value: ""
+# Secrets
+- key: RURAL_PAYMENTS_PORTAL_PASSWORD
+  value: "RURAL_PAYMENTS_PORTAL_PASSWORD"
+  type: "keyvault"
+- key: API_TENANT_ID
+  value: "API_TENANT_ID"
+  type: "keyvault"
+- key: ADMIN_AD_GROUP_ID
+  value: "ADMIN_AD_GROUP_ID"
+  type: "keyvault"
