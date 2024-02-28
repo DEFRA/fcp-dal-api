@@ -1,3 +1,5 @@
+- key: Sentinel
+  value: "2"
 - key: ENABLE_MOCK_SERVER
   value: "true"
 - key: RURAL_PAYMENTS_AGENCY_LAND_API_URL
