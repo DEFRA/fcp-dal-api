@@ -1,7 +1,31 @@
+"""
+Represents a message related to a customer's business.
+
+Data Source: Rural Payments Portal (PRR)
+"""
 type CustomerBusinessMessage {
+  """
+  The unique identifier of the message.
+  """
   id: ID!
+
+  """
+  The title of the message.
+  """
   title: String
+
+  """
+  The date of the message.
+  """
   date: Date
+
+  """
+  The body content of the message.
+  """
   body: String
+
+  """
+  Whether the message has been read.
+  """
   read: Boolean
 }
