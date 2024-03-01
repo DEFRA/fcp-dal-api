@@ -59,3 +59,6 @@ extends:
         - fcp-data-access-layer-api-<environment>
       variables:
         - fcp-data-access-layer-api-APPINSIGHTS-CONNECTIONSTRING
+        - fcp-data-access-layer-api-RURAL-PAYMENTS-PORTAL-PASSWORD
+        - fcp-data-access-layer-api-API-TENANT_ID
+        - fcp-data-access-layer-api-ADMIN-AD-GROUP-ID
