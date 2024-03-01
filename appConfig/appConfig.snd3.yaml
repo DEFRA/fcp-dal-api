@@ -12,11 +12,11 @@
   value: ""
 # Secrets
 - key: RURAL_PAYMENTS_PORTAL_PASSWORD
-  value: "RURAL_PAYMENTS_PORTAL_PASSWORD"
+  value: "{{servicename}}-RURAL-PAYMENTS-PORTAL-PASSWORD"
   type: "keyvault"
 - key: API_TENANT_ID
-  value: "API_TENANT_ID"
+  value: "{{servicename}}-API-TENANT-ID"
   type: "keyvault"
 - key: ADMIN_AD_GROUP_ID
-  value: "ADMIN_AD_GROUP_ID"
+  value: "{{servicename}}-ADMIN-AD-GROUP-ID"
   type: "keyvault"
