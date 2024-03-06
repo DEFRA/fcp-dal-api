@@ -71,6 +71,7 @@ type BusinessRegistrationNumbers {
 """
 Represents the type of a business.
 """
+# eslint-disable-next-line @graphql-eslint/naming-convention
 type BusinessType {
   """
   The code of the business type.
