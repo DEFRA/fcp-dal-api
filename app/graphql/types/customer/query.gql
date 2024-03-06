@@ -1,3 +1,9 @@
+"""
+Extends the base Query type.
+"""
 extend type Query {
+  """
+  Retrieves a customer by their unique identifier.
+  """
   customer(id: ID!): Customer
 }
