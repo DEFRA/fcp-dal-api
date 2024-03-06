@@ -17,7 +17,7 @@ service:
   type: ClusterIP
   
 container:
-  memCpuTier: L
+  memCpuTier: XL
   imagePullPolicy: IfNotPresent
   # Only used if memCpuTier set to CUSTOM
   # requestMemory: 50Mi
