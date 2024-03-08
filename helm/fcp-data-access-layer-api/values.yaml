@@ -40,10 +40,11 @@ readinessProbe:
   failureThreshold: 3
 
 livenessProbe:
+  path: /healthz
+  port: 3000
   initialDelaySeconds: 70
   periodSeconds: 10
   failureThreshold: 3
-  script: /home/node/scripts/healthz
 
 aadWorkloadIdentity: true
 
