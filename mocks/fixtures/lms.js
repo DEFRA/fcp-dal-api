@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
 
-function generateCoversSummary (onlyOneArea = false) {
+function generateCoversSummary(onlyOneArea = false) {
   const randomIndex = faker.number.int({ min: 0, max: 2 })
 
   const data = [
@@ -21,10 +21,10 @@ function generateCoversSummary (onlyOneArea = false) {
   return data.map((item, index) => {
     const area = faker.number.float({ min: 0, max: 1000, precision: 0.01 })
 
-    return ({
+    return {
       ...item,
       area: onlyOneArea ? (index === randomIndex ? area : 0) : area
-    })
+    }
   })
 }
 
@@ -34,12 +34,12 @@ export const totalParcels = faker.number.int({ min: 1, max: 50 })
 
 export const totalArea = faker.number.float({ min: 0, max: 1000, precision: 0.01 })
 
-export const landCovers = [...Array(faker.number.int(20))].map(() => ({
+export const landCovers = [...Array(faker.number.int(4000))].map(() => ({
   id: faker.string.numeric(10),
   info: generateCoversSummary(true)
 }))
 
-export const landParcels = [...Array(faker.number.int(20))].map((_, i) => {
+export const landParcels = [...Array(faker.number.int(4000))].map((_, i) => {
   return {
     id: faker.string.numeric(7),
     sheetId: `S${faker.string.numeric(5)}`,
