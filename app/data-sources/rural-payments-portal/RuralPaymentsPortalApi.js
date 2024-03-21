@@ -65,4 +65,9 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
 
     return response.notifications
   }
+
+  async getAuthorisationByOrganisationIdAndPersonId (organisationId, personId) {
+    const response = await this.get(`/rpp/SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`, { headers: { callerID: personId } })
+    return response.data.personPrivileges
+  }
 }

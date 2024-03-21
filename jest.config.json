@@ -10,6 +10,7 @@
   "coverageDirectory": "test-output",
   "coverageReporters": [
     "text-summary",
+    "cobertura",
     "lcov"
   ],
   "coveragePathIgnorePatterns": [

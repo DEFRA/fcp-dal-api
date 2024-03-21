@@ -1,0 +1,52 @@
+enum PermissionLevel {
+  NO_ACCESS
+  VIEW
+  AMEND
+  SUBMIT
+  MAKE_LEGAL_CHANGES
+  FULL_PERMISSION
+}
+
+enum PermissionGroupId {
+  BASIC_PAYMENT_SCHEME
+  BUSINESS_DETAILS
+  COUNTRYSIDE_STEWARDSHIP_AGREEMENTS
+  COUNTRYSIDE_STEWARDSHIP_APPLICATIONS
+  ENTITLEMENTS
+  ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS
+  LAND_DETAILS
+}
+
+type PermissionGroup {
+  """
+  The permission group id.
+  """
+  id: PermissionGroupId!
+
+  """
+  The permission group name.
+  """
+  name: String!
+
+  """
+  The permissions within the group.
+  """
+  permissions: [Permission]
+}
+
+type Permission {
+  """
+  The permission level.
+  """
+  level: PermissionLevel
+
+  """
+  The functions that can be performed with given permission level.
+  """
+  functions: [String]
+
+  """
+  Check if this level is active for given customer and business.
+  """
+  active(customerId: String!, businessId: String!): Boolean
+}

@@ -79,7 +79,10 @@ describe('Query.customer.businesses', () => {
           customer(id: $id) {
             businesses {
               roles
-              privileges
+              permissionGroups {
+                id
+                level
+              }
             }
           }
         }
@@ -96,20 +99,38 @@ describe('Query.customer.businesses', () => {
         customer: {
           businesses: [
             {
-              roles: ['Business Partner'],
-              privileges: [
-                'Full permission - business',
-                'SUBMIT - CS APP - SA',
-                'SUBMIT - CS AGREE - SA',
-                'Amend - land',
-                'Amend - entitlement',
-                'Submit - bps',
-                'SUBMIT - BPS - SA',
-                'AMEND - ENTITLEMENT - SA',
-                'AMEND - LAND - SA',
-                'Submit - cs app',
-                'Submit - cs agree',
-                'ELM_APPLICATION_SUBMIT'
+              roles: [
+                'Business Partner'
+              ],
+              permissionGroups: [
+                {
+                  id: 'BASIC_PAYMENT_SCHEME',
+                  level: 'SUBMIT'
+                },
+                {
+                  id: 'BUSINESS_DETAILS',
+                  level: 'FULL_PERMISSION'
+                },
+                {
+                  id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS',
+                  level: 'SUBMIT'
+                },
+                {
+                  id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS',
+                  level: 'SUBMIT'
+                },
+                {
+                  id: 'ENTITLEMENTS',
+                  level: 'AMEND'
+                },
+                {
+                  id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
+                  level: 'SUBMIT'
+                },
+                {
+                  id: 'LAND_DETAILS',
+                  level: 'AMEND'
+                }
               ]
             }
           ]

@@ -1,9 +1,9 @@
 import {
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
   transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformNotificationsToMessages
 } from '../../../transformers/rural-payments-portal/customer.js'
+import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
 
 export const Customer = {
   async businesses ({ id }, __, { dataSources }) {
@@ -18,11 +18,6 @@ export const CustomerBusiness = {
     return transformPersonRolesToCustomerAuthorisedBusinessesRoles(customerId, authorisation.personRoles)
   },
 
-  async privileges ({ id, customerId }, __, { dataSources }) {
-    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(id)
-    return transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges(customerId, authorisation.personPrivileges)
-  },
-
   async messages ({ id, customerId }, { pagination, showOnlyDeleted }, { dataSources }) {
     const notifications = await dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId(
       id,
@@ -32,5 +27,17 @@ export const CustomerBusiness = {
     )
 
     return transformNotificationsToMessages(notifications, showOnlyDeleted)
+  },
+
+  async permissionGroups ({ id, customerId }, __, { dataSources }) {
+    return dataSources.permissions.getPermissionGroups().map(permissionGroup => ({ ...permissionGroup, businessId: id, customerId }))
   }
+}
+
+export const CustomerBusinessPermissionGroup = {
+  async level ({ businessId, customerId, permissions }, __, { dataSources }) {
+    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationIdAndPersonId(businessId, customerId)
+    return transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(permissions, authorisation)
+  }
+
 }

@@ -155,12 +155,24 @@ type CustomerBusiness {
   roles: [String]
 
   """
-  The privileges associated with the business.
-  """
-  privileges: [String]
-
-  """
   The messages associated with the business.
   """
   messages(pagination: Pagination, showOnlyDeleted: Boolean): [CustomerBusinessMessage]
+
+  """
+  The permission groups associated with the business.
+  """
+  permissionGroups: [CustomerBusinessPermissionGroup]
+}
+
+type CustomerBusinessPermissionGroup {
+  """
+  The permission group id.
+  """
+  id: PermissionGroupId
+
+  """
+  The permission level customer has for the business.
+  """
+  level: PermissionLevel
 }
