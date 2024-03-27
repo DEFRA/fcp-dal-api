@@ -1,10 +1,5 @@
-import {
-  coversSummary,
-  landCovers,
-  landParcels,
-  totalArea,
-  totalParcels
-} from '../../fixtures/lms.js'
+import { coversSummary, landCovers, landParcels, parcelSummary } from '../../fixtures/lms.js'
+import { okResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -14,10 +9,14 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: landCovers
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = landCovers(orgId)
+
+            return okResponse(res, data)
+          }
         }
       }
     ]
@@ -29,10 +28,14 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: landParcels
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = landParcels(orgId)
+
+            return okResponse(res, data)
+          }
         }
       }
     ]
@@ -44,12 +47,13 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: {
-            totalParcels,
-            totalArea
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = parcelSummary(orgId)
+
+            return okResponse(res, data)
           }
         }
       }
@@ -62,10 +66,14 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: coversSummary
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = coversSummary(orgId)
+
+            return okResponse(res, data)
+          }
         }
       }
     ]

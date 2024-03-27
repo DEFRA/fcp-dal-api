@@ -1,6 +1,12 @@
+import {
+  organisationApplicationsByOrgId,
+  organisationByOrgId,
+  organisationBySbi,
+  organisationPeopleByOrgId,
+  organisationPersonSummary
+} from '../../fixtures/organisation.js'
 import { pagination } from '../../fixtures/pagination.js'
-import { organisationPersonSummary } from '../../fixtures/organisation-person-summary.js'
-import { organisation, organisations, organisationCSApplications } from '../../fixtures/organisation.js'
+import { okResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -10,10 +16,14 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: { _data: organisation }
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = organisationByOrgId(orgId)
+
+            return okResponse(res, data)
+          }
         }
       }
     ]
@@ -28,22 +38,18 @@ export default [
         type: 'middleware',
         options: {
           middleware: (req, res) => {
-            try {
-              const body = req.body
-              if (!body.searchFieldType || !body.primarySearchPhrase) {
-                throw new Error('Invalid request')
-              }
-              res.setHeader('Content-Type', 'application/json')
-              res.end(
-                JSON.stringify({
-                  _data: organisations,
-                  _page: pagination
-                })
-              )
-            } catch (error) {
-              res.status(400)
-              res.send()
+            const body = req.body
+            if (!body.searchFieldType || !body.primarySearchPhrase) {
+              throw new Error('Invalid request')
             }
+
+            const searchPhrase = body.primarySearchPhrase
+            const organisation = organisationBySbi(searchPhrase)
+
+            return okResponse(res, {
+              _data: [organisation],
+              _page: pagination
+            })
           }
         }
       }
@@ -56,11 +62,32 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: {
-            _data: [organisationPersonSummary]
+          middleware: (req, res) => {
+            const personId = req.params.personId
+            const data = organisationPersonSummary(personId)
+
+            return okResponse(res, { _data: [data] })
+          }
+        }
+      }
+    ]
+  },
+  {
+    id: 'rpp-organisation-get-people-by-org-id',
+    url: '/rpp/api/authorisation/organisation/:orgId',
+    method: ['GET'],
+    variants: [
+      {
+        id: 'default',
+        type: 'middleware',
+        options: {
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = organisationPeopleByOrgId(orgId)
+
+            return okResponse(res, data)
           }
         }
       }
@@ -73,10 +100,14 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: { _data: organisationCSApplications }
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = organisationApplicationsByOrgId(orgId)
+
+            return okResponse(res, { _data: data })
+          }
         }
       }
     ]

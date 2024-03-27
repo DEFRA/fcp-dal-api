@@ -1,4 +1,6 @@
+import { faker } from '@faker-js/faker/locale/en_GB'
 import { createMessage } from '../../fixtures/messages.js'
+import { okResponse } from '../../utils/requestResponse.js'
 
 const requiredParams = ['personId', 'filter', 'page', 'size']
 
@@ -31,14 +33,14 @@ export default [
             }
 
             const messageCount = Number(req.query.size)
+
+            const seedReference = messageParams.personId || messageParams.organisationId
+            if (seedReference) {
+              faker.seed(+seedReference)
+            }
             const messages = [...Array(messageCount)].map(() => createMessage(messageParams))
 
-            res.setHeader('Content-Type', 'application/json')
-            res.end(
-              JSON.stringify({
-                notifications: messages
-              })
-            )
+            return okResponse(res, { notifications: messages })
           }
         }
       }

@@ -1,15 +1,15 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
 
 import {
-  transformPersonRolesToCustomerAuthorisedBusinessesRoles,
+  transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
-  transformPersonSummaryToCustomerAuthorisedBusinesses,
-  transformNotificationsToMessages
+  transformPersonRolesToCustomerAuthorisedBusinessesRoles,
+  transformPersonSummaryToCustomerAuthorisedBusinesses
 } from '../../../app/transformers/rural-payments-portal/customer.js'
-import { sitiAgriApiAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
+import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { createMessage } from '../../../mocks/fixtures/messages.js'
-import { person } from '../../../mocks/fixtures/person.js'
 
+// const person = personById()
 const mockOrganisationPersonSummary = {
   id: '4309257',
   name: 'company name',
@@ -24,8 +24,11 @@ const mockOrganisationPersonSummary = {
   readNotificationCount: 0
 }
 
-faker.seed(5109389384975743)
+faker.seed(5109389384975741)
 const mockMessages = [createMessage(), createMessage()]
+const organisationId = 123
+const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation({ organisationId })
+const personId = sitiAgriAuthorisationOrganisationData.personRoles[0].personId
 
 describe('Customer transformer', () => {
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
@@ -34,14 +37,14 @@ describe('Customer transformer', () => {
   })
 
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
-    const result = transformPersonRolesToCustomerAuthorisedBusinessesRoles(person.id, sitiAgriApiAuthorisationOrganisation.personRoles)
+    const result = transformPersonRolesToCustomerAuthorisedBusinessesRoles(personId, sitiAgriAuthorisationOrganisationData.personRoles)
     expect(result).toEqual(['Business Partner'])
   })
 
   test('transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges', () => {
     const result = transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges(
-      person.id,
-      sitiAgriApiAuthorisationOrganisation.personPrivileges
+      personId,
+      sitiAgriAuthorisationOrganisationData.personPrivileges
     )
     expect(result).toEqual([
       'Full permission - business',
@@ -63,10 +66,10 @@ describe('Customer transformer', () => {
     const result = transformNotificationsToMessages(mockMessages, false)
     expect(result).toEqual([
       {
-        id: 458240,
-        title: 'Volva vobis debilito autem acidus vita utrimque. Cunctatio theologus vinitor. Et utroque aro ascisco demoror calcar ad.',
-        date: 6590869576679,
-        body: '<p>Volaticus voro tenuis vicinus avarus.</p>',
+        id: 5875045,
+        title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
+        date: 8247074489993,
+        body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
         read: false,
         archivedAt: null
       }
@@ -77,12 +80,12 @@ describe('Customer transformer', () => {
     const result = transformNotificationsToMessages(mockMessages, true)
     expect(result).toEqual([
       {
-        id: 5536220,
-        title: 'Occaecati animadverto tempora vere quas peior adsum una. Arcus adfero cruentus vociferor. Conor decumbo assentator consectetur tergum sunt.',
-        date: 5423726958601,
-        body: '<p>Amicitia aurum deleo delectus amissio.</p>',
+        id: 2514276,
+        title: 'Venia dedecor beatus vinco cultellus clarus terebro voluptate assumenda tot.',
+        date: 6333830175753,
+        body: '<p>Autem thema blandior verus comprehendo cursim aliquid deleo consequuntur.</p>',
         read: false,
-        archivedAt: 222179046402
+        archivedAt: 2881854478029
       }
     ])
   })

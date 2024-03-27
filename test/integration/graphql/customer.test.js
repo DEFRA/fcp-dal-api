@@ -1,9 +1,11 @@
 import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
-import { fakeContext } from '../../test-setup.js'
 import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments-portal/customer.js'
-import { person as personFixture } from '../../../mocks/fixtures/person.js'
+import { personById } from '../../../mocks/fixtures/person.js'
+import { fakeContext } from '../../test-setup.js'
+
+const personFixture = personById({ id: '123' })
 
 describe('Query.customer', () => {
   it('should return customer data', async () => {
@@ -11,7 +13,7 @@ describe('Query.customer', () => {
     const result = await graphql({
       source: `#graphql
         query Customer {
-          customer(id: "5090008") {
+          customer(id: "123") {
             id
             info {
               name {
@@ -57,7 +59,7 @@ describe('Query.customer', () => {
         }
       `,
       variableValues: {
-        customerId: '5090008'
+        customerId: '123'
       },
       schema,
       contextValue: fakeContext
@@ -73,6 +75,8 @@ describe('Query.customer', () => {
 
 describe('Query.customer.businesses', () => {
   it('should return customer businesses', async () => {
+    // const authOrganisation = sitiAgriAuthorisationOrganisation({ organisationId: '5841879' })
+    // const personId = authOrganisation.personRoles[0].personId
     const result = await graphql({
       source: `#graphql
         query TestCustomerBusinesses($id: ID!) {
@@ -88,7 +92,7 @@ describe('Query.customer.businesses', () => {
         }
       `,
       variableValues: {
-        id: '5841879'
+        id: '1553506'
       },
       schema,
       contextValue: fakeContext
@@ -177,16 +181,16 @@ describe('Query.customer.businesses.messages', () => {
             {
               messages: [
                 {
-                  title: 'Crapula capillus tenetur contigo vindico arbitro corporis tenetur voveo calcar.',
+                  title: 'Cur strenuus stabilis ustulo utique ceno dolore defluo sortitus censura.',
                   read: false,
-                  id: '9614024',
-                  date: 4041907889750
+                  id: '3847869',
+                  date: 7148762543033
                 },
                 {
-                  title: 'Tamisium delicate carcer. Soluta subito antepono dignissimos dens. Ipsa solvo adopto nesciunt vomer ocer claro.\nApto tergiversatio tollo sollicito neque totidem calculus aspernatur supellex. Aegrus aurum depulso harum triumphus deputo dolores abutor studio. Sortitus vestrum voco talio umquam tollo cetera cerno damnatio nobis.\nNam nulla dedico auctor astrum. In libero aufero cupiditate excepturi arma temperantia. Debilito aeternus aranea correptius desolo volaticus deporto undique vae.',
+                  title: 'Contabesco crudelis adimpleo campana cogo crastinus cubicularis inflammatio sufficio iusto.',
                   read: false,
-                  id: '3041329',
-                  date: 7413162689028
+                  id: '378211',
+                  date: 1356952339887
                 }
               ]
             }
@@ -232,10 +236,10 @@ describe('Query.customer.businesses.messages', () => {
             {
               messages: [
                 {
-                  title: 'Videlicet fuga averto antepono depopulo saepe vomica.',
+                  title: 'Canonicus claudeo voveo quos tener aliquam tergiversatio damno acsi curvo.',
                   read: false,
-                  id: '4653378',
-                  date: 1540594791161
+                  id: '6724265',
+                  date: 8477637436332
                 }
               ]
             }

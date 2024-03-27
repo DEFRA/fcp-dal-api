@@ -1,33 +1,6 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
 
-export const persons = [
-  {
-    fullName: `${faker.person.firstName()} ${faker.person.lastName()}`,
-    primaryAddress: {
-      pafOrganisationName: null,
-      flatName: null,
-      buildingNumberRange: null,
-      buildingName: faker.location.buildingNumber(),
-      street: faker.location.street(),
-      city: faker.location.city(),
-      county: faker.location.county(),
-      postalCode: faker.location.zipCode(),
-      country: 'United Kingdom',
-      uprn: null,
-      dependentLocality: null,
-      doubleDependentLocality: null,
-      addressTypeId: null
-    },
-    personalIdentifiers: [faker.string.numeric(9)],
-    nationalInsuranceNumber: null,
-    customerReference: faker.string.numeric(10),
-    email: faker.internet.email(),
-    locked: faker.datatype.boolean(),
-    deactivated: faker.datatype.boolean()
-  }
-]
-
-export const person = {
+const createPersonMock = (attributes = {}) => ({
   title: faker.person.prefix(),
   otherTitle: null,
   firstName: faker.person.firstName(),
@@ -60,5 +33,15 @@ export const person = {
   confirmed: null,
   customerReferenceNumber: faker.string.numeric(10),
   personalIdentifiers: null,
-  deactivated: false
+  deactivated: false,
+  ...attributes
+})
+
+export const personById = (attributes = {}) => {
+  const seedReference = attributes.customerReferenceNumber || attributes.id
+  if (seedReference) {
+    faker.seed(+seedReference)
+  }
+
+  return createPersonMock(attributes)
 }

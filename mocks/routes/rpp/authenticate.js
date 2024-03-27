@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
+import { okResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -76,17 +77,14 @@ export default [
               return res.send()
             }
 
-            res.setHeader('Content-Type', 'application/json')
-            res.end(
-              JSON.stringify({
-                _data: {
-                  callerId: faker.string.numeric(7),
-                  type: 'internal',
-                  userFirstName: faker.person.firstName(),
-                  userLastName: faker.person.lastName()
-                }
-              })
-            )
+            return okResponse(res, {
+              _data: {
+                callerId: faker.string.numeric(7),
+                type: 'internal',
+                userFirstName: faker.person.firstName(),
+                userLastName: faker.person.lastName()
+              }
+            })
           }
         }
       }

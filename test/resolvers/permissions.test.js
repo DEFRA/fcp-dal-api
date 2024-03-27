@@ -1,5 +1,5 @@
 import { Permission, Query } from '../../app/graphql/resolvers/permissions/query.js'
-import { sitiAgriApiAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
+import { sitiAgriAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
 
 const dataSources = {
   ruralPaymentsPortalApi: {
@@ -21,10 +21,10 @@ const dataSources = {
       ]
     },
     getAuthorisationByOrganisationId () {
-      return sitiAgriApiAuthorisationOrganisation
+      return sitiAgriAuthorisationOrganisation()
     },
     getAuthorisationByOrganisationIdAndPersonId () {
-      return sitiAgriApiAuthorisationOrganisation.personPrivileges
+      return sitiAgriAuthorisationOrganisation().personPrivileges
     }
   },
   permissions: {
@@ -66,10 +66,14 @@ test('Query.permissionGroups', async () => {
 })
 
 test('Permission.active', async () => {
-  const response = await Permission.active({
-    privilegeNames: ['Amend - land']
-  }, { customerId: 'mockCustomerId', businessId: 'mockBusinessId' }, {
-    dataSources
-  })
+  const response = await Permission.active(
+    {
+      privilegeNames: ['Amend - land']
+    },
+    { customerId: 'mockCustomerId', businessId: 'mockBusinessId' },
+    {
+      dataSources
+    }
+  )
   expect(response).toEqual(true)
 })

@@ -70,8 +70,7 @@ type BusinessRegistrationNumbers {
 
 """
 Represents the type of a business.
-"""
-# eslint-disable-next-line @graphql-eslint/naming-convention
+""" # eslint-disable-next-line @graphql-eslint/naming-convention
 type BusinessType {
   """
   The code of the business type.
@@ -82,6 +81,38 @@ type BusinessType {
   The type of the business.
   """
   type: String
+}
+
+"""
+Represents the a customer of a business.
+"""
+type BusinessCustomer {
+  id: ID!
+
+  """
+  First name of the customer.
+  """
+  firstName: String
+
+  """
+  Last name of the customer.
+  """
+  lastName: String
+
+  """
+  The customer reference of the customer.
+  """
+  customerReference: String
+
+  """
+  The role the customer against the business.
+  """
+  role: String
+
+  """
+  The privileges the customer against the business.
+  """
+  privileges: [String]
 }
 
 """
@@ -114,4 +145,9 @@ type Business {
   The CPH (County Parish Holding) numbers of the business.
   """
   cph: [CPH]
+
+  """
+  The customers associated with the business.
+  """
+  customers: [BusinessCustomer]
 }

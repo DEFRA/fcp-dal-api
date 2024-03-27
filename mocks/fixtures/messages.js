@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
 
-export const createMessage = (params = {}) => ({
+const createMessageMock = (attributes = {}) => ({
   id: +faker.string.numeric(7),
   personId: +faker.string.numeric(7),
   organisationId: +faker.string.numeric(7),
@@ -9,12 +9,13 @@ export const createMessage = (params = {}) => ({
   archivedAt: faker.datatype.boolean() ? +faker.string.numeric(13) : null,
   archive: null,
   createdAt: +faker.string.numeric(13),
-  title: faker.lorem.text(),
+  title: faker.lorem.sentence(10),
   body: `<p>${faker.lorem.sentence()}</p>`,
   category: 'OrganisationLevel',
   bespokeNotificationId: null,
-  ...params
+  ...attributes
 })
 
-export const message = createMessage()
-export const messages = [createMessage(), createMessage(), createMessage()]
+export const createMessage = (attributes = {}) => {
+  return createMessageMock(attributes)
+}

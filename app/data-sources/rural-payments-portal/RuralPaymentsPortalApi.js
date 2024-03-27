@@ -12,7 +12,19 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
   }
 
   async getPersonSummaryByPersonId (personId) {
-    const response = await this.get(`api/organisation/person/${personId}/summary?order=asc&page=1&page-size=20&search=&sort-by=name&withNotifications=true`)
+    const response = await this.get(
+      `api/organisation/person/${personId}/summary?order=asc&page=1&page-size=20&search=&sort-by=name&withNotifications=true`
+    )
+    return response._data
+  }
+
+  async getOrganisationCustomersByOrganisationId (organisationId) {
+    const response = await this.get(`api/authorisation/organisation/${organisationId}`)
+    return response._data
+  }
+
+  async getPersonByPersonId (personId) {
+    const response = await this.get(`api/person/${personId}`)
     return response._data
   }
 
@@ -48,7 +60,7 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
   }
 
   async getOrganisationCPHInfoBySBIAndCPHNumber (sbi, cphNumber) {
-    const response = await this.get(`SitiAgriApi/cph/organisation/${sbi}/cph-numbers/${cphNumber}`)
+    const response = await this.get(`SitiAgriApi/cph/organisation/${sbi}/cph-numbers/${encodeURIComponent(cphNumber)}`)
     return response.data
   }
 
@@ -67,7 +79,9 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
   }
 
   async getAuthorisationByOrganisationIdAndPersonId (organisationId, personId) {
-    const response = await this.get(`/rpp/SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`, { headers: { callerID: personId } })
+    const response = await this.get(`/rpp/SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`, {
+      headers: { callerID: personId }
+    })
     return response.data.personPrivileges
   }
 }

@@ -59,9 +59,9 @@ describe('Query businessApplications', () => {
             applicationStatus: {
               id: expect.any(String),
               open: null,
-              status: 'Checking Application',
+              status: 'Withdrawn',
               type: expect.any(String),
-              sector: 'STANDA',
+              sector: null,
               year: 2023,
               frn: expect.any(String),
               office: null
@@ -69,7 +69,7 @@ describe('Query businessApplications', () => {
             csClaim: {
               schemaYear: 2023,
               type: expect.any(String),
-              status: 'AGROFF',
+              status: 'WTHDRW',
               lastMovement: expect.any(String)
             }
           }
