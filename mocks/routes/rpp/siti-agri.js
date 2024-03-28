@@ -1,5 +1,6 @@
-import { sitiAgriApiAuthorisationOrganisation } from '../../fixtures/authorisation.js'
+import { sitiAgriAuthorisationOrganisation } from '../../fixtures/authorisation.js'
 import { organisationCPH, organisationCPHInfo } from '../../fixtures/organisation-cph.js'
+import { okResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -9,11 +10,14 @@ export default [
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: {
-            data: sitiAgriApiAuthorisationOrganisation
+          middleware: (req, res) => {
+            const organisationId = req.params.organisationId
+
+            const data = sitiAgriAuthorisationOrganisation({ organisationId })
+
+            return okResponse(res, { data })
           }
         }
       }
@@ -21,16 +25,18 @@ export default [
   },
   {
     id: 'rpp-siti-agri-api-get-cph-for-organisation-by-id',
-    url: '/rpp/SitiAgriApi/cph/organisation/:organisationId/cph-numbers',
+    url: '/rpp/SitiAgriApi/cph/organisation/:orgId/cph-numbers',
     method: ['GET'],
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: {
-            data: organisationCPH
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = organisationCPH(orgId)
+
+            return okResponse(res, data)
           }
         }
       }
@@ -38,16 +44,18 @@ export default [
   },
   {
     id: 'rpp-siti-agri-api-get-cph-info-for-organisation-by-id',
-    url: '/rpp/SitiAgriApi/cph/organisation/:organisationId/cph-numbers/:cphNumber',
+    url: '/rpp/SitiAgriApi/cph/organisation/:orgId/cph-numbers/:cphNumber',
     method: ['GET'],
     variants: [
       {
         id: 'default',
-        type: 'json',
+        type: 'middleware',
         options: {
-          status: 200,
-          body: {
-            data: organisationCPHInfo
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = organisationCPHInfo(orgId)
+
+            return okResponse(res, data)
           }
         }
       }

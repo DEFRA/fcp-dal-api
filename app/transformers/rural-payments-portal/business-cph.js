@@ -1,4 +1,4 @@
-export function transformOrganisationCPH (id, data) {
+export function transformOrganisationCPH (id, data = []) {
   if (!id) {
     return null
   }
@@ -14,7 +14,7 @@ export function transformOrganisationCPH (id, data) {
   }))
 }
 
-export function transformOrganisationCPHCoordinates (data) {
+export function transformOrganisationCPHCoordinates (data = {}) {
   if (!data) {
     return null
   }

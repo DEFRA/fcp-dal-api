@@ -1,4 +1,5 @@
 import { transformOrganisationCPH } from '../../../transformers/rural-payments-portal/business-cph.js'
+import { transformOrganisationCustomers } from '../../../transformers/rural-payments-portal/business.js'
 
 export const Business = {
   land ({ id }) {
@@ -6,9 +7,10 @@ export const Business = {
   },
 
   async cph ({ id }, _, { dataSources }) {
-    return transformOrganisationCPH(
-      id,
-      await dataSources.ruralPaymentsPortalApi.getOrganisationCPHCollectionBySBI(id)
-    )
+    return transformOrganisationCPH(id, await dataSources.ruralPaymentsPortalApi.getOrganisationCPHCollectionBySBI(id))
+  },
+
+  async customers ({ id }, _, { dataSources }) {
+    return transformOrganisationCustomers(await dataSources.ruralPaymentsPortalApi.getOrganisationCustomersByOrganisationId(id))
   }
 }

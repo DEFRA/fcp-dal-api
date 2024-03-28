@@ -1,6 +1,6 @@
 {
   "name": "ffc-customer-registry-api",
-  "version": "1.0.47",
+  "version": "1.0.48",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/ffc-customer-registry-api",
   "main": "app/index.js",
@@ -8,13 +8,14 @@
   "scripts": {
     "format:gql": "prettier \"app/graphql/types/**/*.gql\" --write",
     "format:js": "standard --fix",
+    "format": "npm run format:js && npm run format:gql",
     "lint:gql": "eslint \"app/graphql/types\" && prettier \"app/graphql/types/**/*.gql\" --check",
     "lint:js": "standard",
     "pretest": "npm run lint:js && npm run lint:gql",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
-    "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
+    "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config -- test/integration/graphql/business-applications.test.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --coverage"
   },
   "author": "Defra",
@@ -43,6 +44,7 @@
     "@graphql-eslint/eslint-plugin": "3.20.1",
     "dotenv": "^16.3.1",
     "eslint": "8.52.0",
+    "http-status-codes": "^2.3.0",
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
     "nodemon": "3.0.1",
