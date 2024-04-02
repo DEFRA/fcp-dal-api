@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
-import { GraphQLError } from 'graphql'
 
 import {
   transformNotificationsToMessages,

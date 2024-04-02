@@ -1,5 +1,3 @@
-import { GraphQLError } from 'graphql'
-
 export const ruralPaymentsPortalCustomerTransformer = data => {
   return {
     info: {
