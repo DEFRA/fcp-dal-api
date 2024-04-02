@@ -97,8 +97,8 @@ describe('Customer transformer', () => {
   })
 
   test('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
-    test('should throw an error when no sbi matching', () => {
-      expect(() => transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+    test('should return null when no sbi matching', () => {
+      expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
         '99133320',
         123456,
         [{
@@ -106,10 +106,10 @@ describe('Customer transformer', () => {
           name: 'John Doe',
           sbi: 654321
         }]
-      )).toThrow(GraphQLError)
+      )).toEqual(null)
     })
 
-    test('should return id, name, sbi, and customerId', () => {
+    test('should return id, name, sbi, and customerId when sbi is matching', () => {
       expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
         '99133320',
         123456,

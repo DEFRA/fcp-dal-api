@@ -79,14 +79,7 @@ export function transformNotificationsToMessages (notifications = [], showOnlyDe
 export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (customerId, sbi, summary) {
   const filteredBusinessForCustomer = summary.find(person => person.sbi === sbi)
   if (!filteredBusinessForCustomer) {
-    throw new GraphQLError(
-      'Customer does not have a permission to view business information',
-      {
-        extensions: {
-          code: 'FORBIDDEN'
-        }
-      }
-    )
+    return null
   }
 
   return {
