@@ -75,7 +75,7 @@ export function transformNotificationsToMessages (notifications = [], showOnlyDe
 }
 
 export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (customerId, sbi, summary) {
-  const filteredBusinessForCustomer = summary.find(person => person.sbi === sbi)
+  const filteredBusinessForCustomer = summary.find(person => `${person.sbi}` === `${sbi}`)
   if (!filteredBusinessForCustomer) {
     return null
   }
