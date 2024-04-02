@@ -128,6 +128,11 @@ type Customer {
   The businesses associated with the customer.
   """
   businesses: [CustomerBusiness]
+
+  """
+  The single business filtered by sbi associated with the customer.
+  """
+  business(sbi: ID!): CustomerBusiness
 }
 
 """

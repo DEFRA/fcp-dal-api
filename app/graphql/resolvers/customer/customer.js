@@ -4,8 +4,29 @@ import {
   transformNotificationsToMessages
 } from '../../../transformers/rural-payments-portal/customer.js'
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
+import { GraphQLError } from 'graphql/index.js'
 
 export const Customer = {
+  async business ({ id }, { sbi }, { dataSources }) {
+    const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
+
+    const filteredBusinessForCustomer = summary.filter(person => person.sbi === sbi)
+    if (filteredBusinessForCustomer.length === 0) {
+      throw new GraphQLError(
+        'Customer does not have an access to view business information',
+        {
+          extensions: {
+            code: 'FORBIDDEN'
+          }
+        }
+      )
+    }
+
+    return {
+      id: filteredBusinessForCustomer[0].id,
+      name: filteredBusinessForCustomer[0].name
+    }
+  },
   async businesses ({ id }, __, { dataSources }) {
     const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
     return transformPersonSummaryToCustomerAuthorisedBusinesses(id, summary)
