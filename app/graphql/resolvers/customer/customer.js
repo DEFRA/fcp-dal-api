@@ -1,7 +1,8 @@
 import {
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
   transformPersonSummaryToCustomerAuthorisedBusinesses,
-  transformNotificationsToMessages, transformPersonSummaryToCustomerAuthorisedFilteredBusiness
+  transformNotificationsToMessages,
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments-portal/customer.js'
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
 
