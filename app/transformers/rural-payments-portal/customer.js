@@ -76,7 +76,7 @@ export function transformNotificationsToMessages (notifications = [], showOnlyDe
     .filter(({ archivedAt }) => showOnlyDeleted ? archivedAt !== null : archivedAt === null)
 }
 
-export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (sbi, summary) {
+export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (customerId, sbi, summary) {
   const filteredBusinessForCustomer = summary.filter(person => person.sbi === sbi)
   if (filteredBusinessForCustomer.length === 0) {
     throw new GraphQLError(
@@ -91,8 +91,8 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (sbi,
 
   return {
     id: filteredBusinessForCustomer[0].id,
-    customerId: filteredBusinessForCustomer[0].id,
     name: filteredBusinessForCustomer[0].name,
+    customerId,
     sbi
   }
 }

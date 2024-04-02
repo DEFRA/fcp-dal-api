@@ -99,6 +99,7 @@ describe('Customer transformer', () => {
   test('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
     test('should throw an error when no sbi matching', () => {
       expect(() => transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+        '99133320',
         123456,
         [{
           id: '32323321',
@@ -110,6 +111,7 @@ describe('Customer transformer', () => {
 
     test('should return id, name, sbi, and customerId', () => {
       expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+        '99133320',
         123456,
         [{
           id: '32323321',
@@ -119,7 +121,7 @@ describe('Customer transformer', () => {
       )).toEqual({
         id: '32323321',
         name: 'John Doe',
-        customerId: '32323321',
+        customerId: '99133320',
         sbi: 123456
       })
     })
