@@ -1,10 +1,11 @@
+import { GraphQLError } from 'graphql'
+
 import {
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
   transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformNotificationsToMessages
 } from '../../../transformers/rural-payments-portal/customer.js'
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
-import { GraphQLError } from 'graphql/index.js'
 
 export const Customer = {
   async business ({ id }, { sbi }, { dataSources }) {
