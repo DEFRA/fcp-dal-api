@@ -2,7 +2,7 @@ import { ruralPaymentsPortalCustomerTransformer } from '../../../transformers/ru
 
 export const Query = {
   async customer (__, { id }, { authorize, dataSources }) {
-    authorize.checkAuthGroup('ADMIN')
+    // authorize.checkAuthGroup('ADMIN')
     const response = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(id)
     return ruralPaymentsPortalCustomerTransformer(response)
   }
