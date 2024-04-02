@@ -1,4 +1,4 @@
-import { GraphQLError } from 'graphql/index.js'
+import { GraphQLError } from 'graphql'
 
 export const ruralPaymentsPortalCustomerTransformer = data => {
   return {
@@ -91,6 +91,8 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (sbi,
 
   return {
     id: filteredBusinessForCustomer[0].id,
+    customerId: filteredBusinessForCustomer[0].id,
+    sbi,
     name: filteredBusinessForCustomer[0].name
   }
 }

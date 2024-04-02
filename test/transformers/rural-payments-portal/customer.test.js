@@ -1,10 +1,11 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
+import { GraphQLError } from 'graphql'
 
 import {
   transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonSummaryToCustomerAuthorisedBusinesses
+  transformPersonSummaryToCustomerAuthorisedBusinesses, transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../app/transformers/rural-payments-portal/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { createMessage } from '../../../mocks/fixtures/messages.js'
@@ -93,5 +94,34 @@ describe('Customer transformer', () => {
   test('transformNotificationsToMessages does not fail if messages empty', () => {
     const result = transformNotificationsToMessages()
     expect(result).toEqual([])
+  })
+
+  test('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
+    test('should throw an error when no sbi matching', () => {
+      expect(() => transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+        123456,
+        [{
+          id: '32323321',
+          name: 'John Doe',
+          sbi: 654321
+        }]
+      )).toThrow(GraphQLError)
+    })
+
+    test('should return id, name, sbi, and customerId', () => {
+      expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+        123456,
+        [{
+          id: '32323321',
+          name: 'John Doe',
+          sbi: 123456
+        }]
+      )).toEqual({
+        id: '32323321',
+        name: 'John Doe',
+        customerId: '32323321',
+        sbi: 123456
+      })
+    })
   })
 })
