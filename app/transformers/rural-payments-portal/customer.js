@@ -80,7 +80,7 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (sbi,
   const filteredBusinessForCustomer = summary.filter(person => person.sbi === sbi)
   if (filteredBusinessForCustomer.length === 0) {
     throw new GraphQLError(
-      'Customer does not have an access to view business information',
+      'Customer does not have a permission to view business information',
       {
         extensions: {
           code: 'FORBIDDEN'
