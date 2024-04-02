@@ -8,9 +8,10 @@ import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } f
 
 export const Customer = {
   async business ({ id }, { sbi }, { dataSources }) {
-    const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
-
-    return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(sbi, summary)
+    return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+      sbi,
+      await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
+    )
   },
   async businesses ({ id }, __, { dataSources }) {
     const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
