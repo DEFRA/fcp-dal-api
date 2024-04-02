@@ -1,3 +1,5 @@
+import { GraphQLError } from 'graphql/index.js'
+
 export const ruralPaymentsPortalCustomerTransformer = data => {
   return {
     info: {
@@ -72,4 +74,23 @@ export function transformNotificationsToMessages (notifications = [], showOnlyDe
       archivedAt: message.archivedAt
     }))
     .filter(({ archivedAt }) => showOnlyDeleted ? archivedAt !== null : archivedAt === null)
+}
+
+export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (sbi, summary) {
+  const filteredBusinessForCustomer = summary.filter(person => person.sbi === sbi)
+  if (filteredBusinessForCustomer.length === 0) {
+    throw new GraphQLError(
+      'Customer does not have an access to view business information',
+      {
+        extensions: {
+          code: 'FORBIDDEN'
+        }
+      }
+    )
+  }
+
+  return {
+    id: filteredBusinessForCustomer[0].id,
+    name: filteredBusinessForCustomer[0].name
+  }
 }
