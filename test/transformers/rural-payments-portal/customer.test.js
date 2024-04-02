@@ -4,7 +4,8 @@ import {
   transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonSummaryToCustomerAuthorisedBusinesses, transformPersonSummaryToCustomerAuthorisedFilteredBusiness
+  transformPersonSummaryToCustomerAuthorisedBusinesses,
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../app/transformers/rural-payments-portal/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { createMessage } from '../../../mocks/fixtures/messages.js'
