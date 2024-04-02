@@ -92,7 +92,7 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (sbi,
   return {
     id: filteredBusinessForCustomer[0].id,
     customerId: filteredBusinessForCustomer[0].id,
-    sbi,
-    name: filteredBusinessForCustomer[0].name
+    name: filteredBusinessForCustomer[0].name,
+    sbi
   }
 }
