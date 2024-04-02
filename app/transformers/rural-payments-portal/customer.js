@@ -73,3 +73,17 @@ export function transformNotificationsToMessages (notifications = [], showOnlyDe
     }))
     .filter(({ archivedAt }) => showOnlyDeleted ? archivedAt !== null : archivedAt === null)
 }
+
+export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (customerId, sbi, summary) {
+  const filteredBusinessForCustomer = summary.find(person => `${person.sbi}` === `${sbi}`)
+  if (!filteredBusinessForCustomer) {
+    return null
+  }
+
+  return {
+    id: filteredBusinessForCustomer.id,
+    name: filteredBusinessForCustomer.name,
+    customerId,
+    sbi
+  }
+}

@@ -4,7 +4,8 @@ import {
   transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonSummaryToCustomerAuthorisedBusinesses
+  transformPersonSummaryToCustomerAuthorisedBusinesses,
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../app/transformers/rural-payments-portal/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { createMessage } from '../../../mocks/fixtures/messages.js'
@@ -93,5 +94,36 @@ describe('Customer transformer', () => {
   test('transformNotificationsToMessages does not fail if messages empty', () => {
     const result = transformNotificationsToMessages()
     expect(result).toEqual([])
+  })
+
+  test('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
+    test('should return null when no sbi matching', () => {
+      expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+        '99133320',
+        123456,
+        [{
+          id: '32323321',
+          name: 'John Doe',
+          sbi: 654321
+        }]
+      )).toEqual(null)
+    })
+
+    test('should return id, name, sbi, and customerId when sbi is matching', () => {
+      expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+        '99133320',
+        123456,
+        [{
+          id: '32323321',
+          name: 'John Doe',
+          sbi: 123456
+        }]
+      )).toEqual({
+        id: '32323321',
+        name: 'John Doe',
+        customerId: '99133320',
+        sbi: 123456
+      })
+    })
   })
 })

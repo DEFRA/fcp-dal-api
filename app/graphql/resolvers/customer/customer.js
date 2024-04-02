@@ -1,11 +1,19 @@
 import {
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
   transformPersonSummaryToCustomerAuthorisedBusinesses,
-  transformNotificationsToMessages
+  transformNotificationsToMessages,
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments-portal/customer.js'
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
 
 export const Customer = {
+  async business ({ id }, { sbi }, { dataSources }) {
+    return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+      id,
+      sbi,
+      await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
+    )
+  },
   async businesses ({ id }, __, { dataSources }) {
     const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
     return transformPersonSummaryToCustomerAuthorisedBusinesses(id, summary)
