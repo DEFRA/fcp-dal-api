@@ -6,18 +6,17 @@ labels: {}
 
 deployment:
   priorityClassName: low
-  minReadySeconds: 5
   minReplicas: 1
   maxReplicas: 3
   cpuThreshold: 80
   memoryThreshold: 80
+  minReadySeconds: 5
 
 service:
   port: 80
   type: ClusterIP
   
 container:
-  port: 3000
   memCpuTier: CUSTOM
   imagePullPolicy: IfNotPresent
   requestMemory: 50Mi
@@ -26,6 +25,7 @@ container:
   limitCpu: 400m
   restClientTimeoutMillis: 20000
   staticCacheTimeoutMillis: 54000
+  port: 3000
 
 ingress:
   class: nginx
