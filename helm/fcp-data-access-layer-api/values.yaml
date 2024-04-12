@@ -7,6 +7,10 @@ labels: {}
 deployment:
   priorityClassName: low
   minReadySeconds: 5
+  minReplicas: 1
+  maxReplicas: 3
+  cpuThreshold: 80
+  memoryThreshold: 80
 
 service:
   port: 80
