@@ -18,7 +18,14 @@ service:
   
 container:
   port: 3000
-  memCpuTier: M
+  memCpuTier: CUSTOM
+  imagePullPolicy: IfNotPresent
+  requestMemory: 50Mi
+  requestCpu: 50m
+  limitMemory: 200Mi
+  limitCpu: 400m
+  restClientTimeoutMillis: 20000
+  staticCacheTimeoutMillis: 54000
 
 ingress:
   class: nginx
