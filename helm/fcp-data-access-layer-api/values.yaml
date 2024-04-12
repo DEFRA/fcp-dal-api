@@ -6,10 +6,6 @@ labels: {}
 
 deployment:
   priorityClassName: low
-  minReplicas: 1
-  maxReplicas: 3
-  cpuThreshold: 80
-  memoryThreshold: 80
   minReadySeconds: 5
 
 service:
@@ -17,14 +13,7 @@ service:
   type: ClusterIP
   
 container:
-  memCpuTier: CUSTOM
-  imagePullPolicy: IfNotPresent
-  requestMemory: 50Mi
-  requestCpu: 50m
-  limitMemory: 200Mi
-  limitCpu: 400m
-  restClientTimeoutMillis: 20000
-  staticCacheTimeoutMillis: 54000
+  memCpuTier: M
   port: 3000
 
 ingress:
