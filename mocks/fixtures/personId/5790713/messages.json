@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 7014782,
+      "personId": 5790713,
+      "organisationId": "5625145",
+      "messageId": 7651981,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8908811510912,
+      "title": "Permission changed for james White",
+      "body": "<p>Your permission for james White was changed on Sun Mar 19 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6645989,
+      "personId": 5790713,
+      "organisationId": "5625145",
+      "messageId": 209975,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2133371354118,
+      "title": "Permission changed for james White",
+      "body": "<p>Your permission for james White was changed on Wed Jan 11 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 310079,
+      "personId": 5790713,
+      "organisationId": "5625145",
+      "messageId": 1375701,
+      "readAt": 28000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8479546206454,
+      "title": "Permission changed for james White",
+      "body": "<p>Your permission for james White was changed on Thu Jul 07 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 1,
+  "unreadCount": 2
+}

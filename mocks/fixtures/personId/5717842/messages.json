@@ -1,0 +1,91 @@
+{
+  "notifications": [
+    {
+      "id": 2853818,
+      "personId": 5717842,
+      "organisationId": "5625145",
+      "messageId": 6364754,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7405547732842,
+      "title": "Permission changed for Julia Tudor",
+      "body": "<p>Your permission for Julia Tudor was changed on Tue Feb 21 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7564508,
+      "personId": 5717842,
+      "organisationId": "5625145",
+      "messageId": 4395927,
+      "readAt": 14000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 343185291403,
+      "title": "Permission changed for Julia Tudor",
+      "body": "<p>Your permission for Julia Tudor was changed on Wed Jun 28 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6963207,
+      "personId": 5717842,
+      "organisationId": "5625145",
+      "messageId": 9036399,
+      "readAt": 3000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 44410071043,
+      "title": "Permission changed for Julia Tudor",
+      "body": "<p>Your permission for Julia Tudor was changed on Mon Mar 06 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1630787,
+      "personId": 5717842,
+      "organisationId": "5625145",
+      "messageId": 7356514,
+      "readAt": 7000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4528256297597,
+      "title": "Permission changed for Julia Tudor",
+      "body": "<p>Your permission for Julia Tudor was changed on Wed Mar 15 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 442130,
+      "personId": 5717842,
+      "organisationId": "5625145",
+      "messageId": 1522350,
+      "readAt": 5000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3356352999892,
+      "title": "Permission changed for Julia Tudor",
+      "body": "<p>Your permission for Julia Tudor was changed on Wed Jan 11 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2256228,
+      "personId": 5717842,
+      "organisationId": "5625145",
+      "messageId": 7598854,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4326790891550,
+      "title": "Permission changed for Julia Tudor",
+      "body": "<p>Your permission for Julia Tudor was changed on Thu May 12 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 6,
+  "readCount": 4,
+  "unreadCount": 2
+}

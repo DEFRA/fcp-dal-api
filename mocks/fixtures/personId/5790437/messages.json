@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 9427822,
+      "personId": 5790437,
+      "organisationId": "5625145",
+      "messageId": 4841833,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8857112878895,
+      "title": "Permission changed for Elizabeth Hogben",
+      "body": "<p>Your permission for Elizabeth Hogben was changed on Wed Jun 08 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 650869,
+      "personId": 5790437,
+      "organisationId": "5625145",
+      "messageId": 4734613,
+      "readAt": 16000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5411790163080,
+      "title": "Permission changed for Elizabeth Hogben",
+      "body": "<p>Your permission for Elizabeth Hogben was changed on Sat Jun 03 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7256492,
+      "personId": 5790437,
+      "organisationId": "5625145",
+      "messageId": 3877555,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8090199354682,
+      "title": "Permission changed for Elizabeth Hogben",
+      "body": "<p>Your permission for Elizabeth Hogben was changed on Sat Apr 23 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 1,
+  "unreadCount": 2
+}

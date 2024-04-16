@@ -1,0 +1,77 @@
+{
+  "notifications": [
+    {
+      "id": 1486132,
+      "personId": 5818670,
+      "organisationId": "5625145",
+      "messageId": 2486585,
+      "readAt": 24000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8727892290241,
+      "title": "Permission changed for Cameron McDade",
+      "body": "<p>Your permission for Cameron McDade was changed on Tue Nov 22 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4438314,
+      "personId": 5818670,
+      "organisationId": "5625145",
+      "messageId": 3388352,
+      "readAt": 10000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 842212082844,
+      "title": "Permission changed for Cameron McDade",
+      "body": "<p>Your permission for Cameron McDade was changed on Sat Apr 23 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3853783,
+      "personId": 5818670,
+      "organisationId": "5625145",
+      "messageId": 6704990,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4801196348306,
+      "title": "Permission changed for Cameron McDade",
+      "body": "<p>Your permission for Cameron McDade was changed on Tue Oct 03 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7771754,
+      "personId": 5818670,
+      "organisationId": "5625145",
+      "messageId": 8850851,
+      "readAt": 25000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 193554518489,
+      "title": "Permission changed for Cameron McDade",
+      "body": "<p>Your permission for Cameron McDade was changed on Sun Oct 22 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2754481,
+      "personId": 5818670,
+      "organisationId": "5625145",
+      "messageId": 110613,
+      "readAt": 10000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5852850187890,
+      "title": "Permission changed for Cameron McDade",
+      "body": "<p>Your permission for Cameron McDade was changed on Fri Jul 14 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 5,
+  "readCount": 4,
+  "unreadCount": 1
+}

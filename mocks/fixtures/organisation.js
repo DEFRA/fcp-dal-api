@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
+import logger from '../../app/utils/logger.js'
 import files from '../utils/files.js'
 
 const { getJSON } = files(import.meta.url)
@@ -121,6 +122,7 @@ export const organisationByOrgId = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/organisation.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #organisationByOrgId - Generating mock data')
     faker.seed(+orgId)
     return {
       _data: createOrganisationMock({ id: orgId })
@@ -132,6 +134,7 @@ export const organisationPeopleByOrgId = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/organisation-people.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #organisationPeopleByOrgId - Generating mock data')
     faker.seed(+orgId)
     return {
       _data: [...Array(faker.number.int(5))].map(createOrganisationPeopleMock)
@@ -143,6 +146,7 @@ export const organisationBySbi = sbi => {
   try {
     return getJSON(`./sbi/${sbi}/organisation.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #organisationBySbi - Generating mock data')
     faker.seed(+sbi)
     return {
       _data: createOrganisationMock({ sbi })
@@ -154,6 +158,7 @@ export const organisationApplicationsByOrgId = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/organisation-applications.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #organisationApplicationsByOrgId - Generating mock data')
     faker.seed(+orgId)
     return {
       applications: [...Array(faker.number.int(5))].map(createOrganisationApplicationMock)
@@ -161,7 +166,15 @@ export const organisationApplicationsByOrgId = orgId => {
   }
 }
 
-export const organisationPersonSummary = personId => {
-  faker.seed(+personId)
-  return createOrganisationPersonSummaryMock({ id: personId })
+export const organisationPersonSummary = (attributes = {}) => {
+  try {
+    return getJSON(`./personId/${attributes.id}/organisationSummary.json`)
+  } catch (error) {
+    logger.debug('#Mock #Fixtures #organisationPersonSummary - Generating mock data')
+    const seedReference = `${attributes.id}${attributes.sbi || 0}`
+    faker.seed(+seedReference)
+    return {
+      _data: [createOrganisationPersonSummaryMock(attributes)]
+    }
+  }
 }

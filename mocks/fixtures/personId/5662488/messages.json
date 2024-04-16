@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 7737476,
+      "personId": 5662488,
+      "organisationId": "5625145",
+      "messageId": 2415873,
+      "readAt": 24000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8933189022287,
+      "title": "Permission changed for Julia Buckpitt",
+      "body": "<p>Your permission for Julia Buckpitt was changed on Thu Jul 27 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1254102,
+      "personId": 5662488,
+      "organisationId": "5625145",
+      "messageId": 3166115,
+      "readAt": 25000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2310940527,
+      "title": "Permission changed for Julia Buckpitt",
+      "body": "<p>Your permission for Julia Buckpitt was changed on Tue Oct 10 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8453939,
+      "personId": 5662488,
+      "organisationId": "5625145",
+      "messageId": 9275451,
+      "readAt": 7000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 208930168850,
+      "title": "Permission changed for Julia Buckpitt",
+      "body": "<p>Your permission for Julia Buckpitt was changed on Fri May 19 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2627203,
+      "personId": 5662488,
+      "organisationId": "5625145",
+      "messageId": 4323458,
+      "readAt": 24000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3294870714816,
+      "title": "Permission changed for Julia Buckpitt",
+      "body": "<p>Your permission for Julia Buckpitt was changed on Thu Mar 21 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 4,
+  "unreadCount": 0
+}

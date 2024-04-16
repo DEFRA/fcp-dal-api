@@ -9,7 +9,7 @@ const personFixture = personById({ id: '123' })
 
 describe('Query.customer', () => {
   it('should return customer data', async () => {
-    const transformedPerson = ruralPaymentsPortalCustomerTransformer(personFixture)
+    const transformedPerson = ruralPaymentsPortalCustomerTransformer(personFixture._data)
     const result = await graphql({
       source: `#graphql
         query Customer {
@@ -163,7 +163,7 @@ describe('Query.customer.businesses.messages', () => {
         }
       `,
       variableValues: {
-        customerId: '123',
+        customerId: '5007136',
         pagination: {
           page: 1,
           perPage: 3
@@ -181,16 +181,22 @@ describe('Query.customer.businesses.messages', () => {
             {
               messages: [
                 {
-                  title: 'Cur strenuus stabilis ustulo utique ceno dolore defluo sortitus censura.',
+                  title: 'Permission changed for David Paul',
                   read: false,
-                  id: '3847869',
-                  date: 7148762543033
+                  id: '11401',
+                  date: 6010706997254
                 },
                 {
-                  title: 'Contabesco crudelis adimpleo campana cogo crastinus cubicularis inflammatio sufficio iusto.',
+                  title: 'Permission changed for David Paul',
+                  read: true,
+                  id: '7551987',
+                  date: 8327630499790
+                },
+                {
+                  title: 'Permission changed for David Paul',
                   read: false,
-                  id: '378211',
-                  date: 1356952339887
+                  id: '9315941',
+                  date: 8862388585856
                 }
               ]
             }
@@ -218,7 +224,7 @@ describe('Query.customer.businesses.messages', () => {
         }
       `,
       variableValues: {
-        customerId: '123',
+        customerId: '5007136',
         pagination: {
           page: 1,
           perPage: 3
@@ -236,10 +242,10 @@ describe('Query.customer.businesses.messages', () => {
             {
               messages: [
                 {
-                  title: 'Canonicus claudeo voveo quos tener aliquam tergiversatio damno acsi curvo.',
+                  title: 'Permission changed for David Paul',
                   read: false,
-                  id: '6724265',
-                  date: 8477637436332
+                  id: '9315941',
+                  date: 8862388585856
                 }
               ]
             }

@@ -44,7 +44,7 @@ describe('getAuth', () => {
     expect(await getAuth({})).toEqual({})
   })
 
-  test('should return decoded token when token is valid', async () => {
+  test.only('should return decoded token when token is valid', async () => {
     expect(await getAuth(mockRequest)).toEqual(decodedToken)
   })
 

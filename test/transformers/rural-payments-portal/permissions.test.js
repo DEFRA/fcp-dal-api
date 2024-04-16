@@ -7,7 +7,7 @@ describe('Permissions transformer', () => {
   test('returns null if no match', () => {
     const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
       [],
-      sitiAgriApiAuthorisationOrganisation.personPrivileges
+      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
     )
     expect(result).toBeNull()
   })
@@ -20,7 +20,7 @@ describe('Permissions transformer', () => {
           privilegeNames: ['SUBMIT - BPS - SA']
         }
       ],
-      sitiAgriApiAuthorisationOrganisation.personPrivileges
+      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
     )
     expect(result).toEqual('SUBMIT')
   })

@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 3863734,
+      "personId": 5776458,
+      "organisationId": "5625145",
+      "messageId": 4225651,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4254225168239,
+      "title": "Permission changed for Timothy Eckersley",
+      "body": "<p>Your permission for Timothy Eckersley was changed on Fri May 19 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3085962,
+      "personId": 5776458,
+      "organisationId": "5625145",
+      "messageId": 1009430,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2751859467080,
+      "title": "Permission changed for Timothy Eckersley",
+      "body": "<p>Your permission for Timothy Eckersley was changed on Fri Oct 28 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6494143,
+      "personId": 5776458,
+      "organisationId": "5625145",
+      "messageId": 4706383,
+      "readAt": 6000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7920595256883,
+      "title": "Permission changed for Timothy Eckersley",
+      "body": "<p>Your permission for Timothy Eckersley was changed on Thu Dec 14 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7026464,
+      "personId": 5776458,
+      "organisationId": "5625145",
+      "messageId": 1315940,
+      "readAt": 29000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2687128544853,
+      "title": "Permission changed for Timothy Eckersley",
+      "body": "<p>Your permission for Timothy Eckersley was changed on Fri Nov 10 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 2,
+  "unreadCount": 2
+}

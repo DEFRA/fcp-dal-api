@@ -17,7 +17,7 @@ export default [
 
             const data = sitiAgriAuthorisationOrganisation({ organisationId })
 
-            return okResponse(res, { data })
+            return okResponse(res, data)
           }
         }
       }

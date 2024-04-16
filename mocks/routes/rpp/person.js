@@ -17,7 +17,7 @@ export default [
 
             const data = personById({ id })
 
-            return okResponse(res, { _data: data })
+            return okResponse(res, data)
           }
         }
       }

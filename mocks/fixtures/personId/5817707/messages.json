@@ -1,0 +1,91 @@
+{
+  "notifications": [
+    {
+      "id": 1945287,
+      "personId": 5817707,
+      "organisationId": "5625145",
+      "messageId": 189100,
+      "readAt": 10000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3998794214239,
+      "title": "Permission changed for Alan Bootle",
+      "body": "<p>Your permission for Alan Bootle was changed on Fri Apr 28 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1822593,
+      "personId": 5817707,
+      "organisationId": "5625145",
+      "messageId": 1794189,
+      "readAt": 15000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 513868733732,
+      "title": "Permission changed for Alan Bootle",
+      "body": "<p>Your permission for Alan Bootle was changed on Mon Aug 15 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4414124,
+      "personId": 5817707,
+      "organisationId": "5625145",
+      "messageId": 102801,
+      "readAt": 6000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3996639713951,
+      "title": "Permission changed for Alan Bootle",
+      "body": "<p>Your permission for Alan Bootle was changed on Fri Mar 08 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2750837,
+      "personId": 5817707,
+      "organisationId": "5625145",
+      "messageId": 3190459,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8585327999659,
+      "title": "Permission changed for Alan Bootle",
+      "body": "<p>Your permission for Alan Bootle was changed on Sat Jun 10 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2812034,
+      "personId": 5817707,
+      "organisationId": "5625145",
+      "messageId": 757847,
+      "readAt": 30000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9764689096162,
+      "title": "Permission changed for Alan Bootle",
+      "body": "<p>Your permission for Alan Bootle was changed on Fri Nov 17 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9682329,
+      "personId": 5817707,
+      "organisationId": "5625145",
+      "messageId": 9659328,
+      "readAt": 16000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9966069844825,
+      "title": "Permission changed for Alan Bootle",
+      "body": "<p>Your permission for Alan Bootle was changed on Wed May 17 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 6,
+  "readCount": 5,
+  "unreadCount": 1
+}

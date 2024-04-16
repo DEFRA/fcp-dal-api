@@ -1,4 +1,8 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
+import logger from '../../app/utils/logger.js'
+import files from '../utils/files.js'
+
+const { getJSON } = files(import.meta.url)
 
 const createSitiAgriAuthorisationOrganisation = (attributes = {}) => {
   const personId = attributes.organisationId ? `${attributes.organisationId}` : faker.string.numeric(7)
@@ -63,9 +67,13 @@ const createSitiAgriAuthorisationOrganisation = (attributes = {}) => {
 }
 
 export const sitiAgriAuthorisationOrganisation = (attributes = {}) => {
-  if (attributes.organisationId) {
-    faker.seed(+attributes.organisationId)
+  try {
+    return getJSON(`./orgId/${attributes.organisationId}/siti-agri-authorisation-organisation.json`)
+  } catch (error) {
+    logger.debug('#Mock #Fixtures #sitiAgriAuthorisationOrganisation - Generating mock data')
+    if (attributes.organisationId) {
+      faker.seed(+attributes.organisationId)
+    }
+    return { data: createSitiAgriAuthorisationOrganisation(attributes) }
   }
-
-  return createSitiAgriAuthorisationOrganisation(attributes)
 }

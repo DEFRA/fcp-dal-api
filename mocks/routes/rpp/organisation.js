@@ -66,9 +66,10 @@ export default [
         options: {
           middleware: (req, res) => {
             const personId = req.params.personId
-            const data = organisationPersonSummary(personId)
+            const sbi = req.query.organisationId
+            const data = organisationPersonSummary({ id: personId, sbi })
 
-            return okResponse(res, { _data: [data] })
+            return okResponse(res, data)
           }
         }
       }

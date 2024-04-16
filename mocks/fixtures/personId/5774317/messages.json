@@ -1,0 +1,91 @@
+{
+  "notifications": [
+    {
+      "id": 9671520,
+      "personId": 5774317,
+      "organisationId": "5625145",
+      "messageId": 9078145,
+      "readAt": 25000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4513982422407,
+      "title": "Permission changed for Georgina Maltby",
+      "body": "<p>Your permission for Georgina Maltby was changed on Wed Dec 28 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5919110,
+      "personId": 5774317,
+      "organisationId": "5625145",
+      "messageId": 8443487,
+      "readAt": 29000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2093386055785,
+      "title": "Permission changed for Georgina Maltby",
+      "body": "<p>Your permission for Georgina Maltby was changed on Mon May 09 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7011221,
+      "personId": 5774317,
+      "organisationId": "5625145",
+      "messageId": 2757090,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 703452178487,
+      "title": "Permission changed for Georgina Maltby",
+      "body": "<p>Your permission for Georgina Maltby was changed on Tue Jun 07 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1212485,
+      "personId": 5774317,
+      "organisationId": "5625145",
+      "messageId": 1605655,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9115365170288,
+      "title": "Permission changed for Georgina Maltby",
+      "body": "<p>Your permission for Georgina Maltby was changed on Thu Dec 28 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3824941,
+      "personId": 5774317,
+      "organisationId": "5625145",
+      "messageId": 9714948,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5910123914247,
+      "title": "Permission changed for Georgina Maltby",
+      "body": "<p>Your permission for Georgina Maltby was changed on Tue May 10 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2392682,
+      "personId": 5774317,
+      "organisationId": "5625145",
+      "messageId": 9255888,
+      "readAt": 11000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4528519925309,
+      "title": "Permission changed for Georgina Maltby",
+      "body": "<p>Your permission for Georgina Maltby was changed on Tue Sep 20 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 6,
+  "readCount": 3,
+  "unreadCount": 3
+}

@@ -1,0 +1,28 @@
+{
+  "data": {
+      "personRoles": [
+          {
+              "personId": 5263421,
+              "role": "Business Partner"
+          },
+          {
+              "personId": 5302028,
+              "role": "Agent"
+          },
+          {
+              "personId": 5311964,
+              "role": "Business Partner"
+          },
+          {
+              "personId": 5331098,
+              "role": "Business Partner"
+          },
+          {
+              "personId": 5778203,
+              "role": "Agent"
+          }
+      ]
+  },
+  "success": true,
+  "errorString": null
+}

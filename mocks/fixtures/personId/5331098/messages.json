@@ -1,0 +1,49 @@
+{
+  "notifications": [
+      {
+          "id": 3700021,
+          "personId": 5331098,
+          "organisationId": 5565448,
+          "messageId": 2051889,
+          "readAt": null,
+          "archivedAt": null,
+          "archive": null,
+          "createdAt": 1615212307963,
+          "title": "Permission changed for Mr Marcus Twigden",
+          "body": "<p>Your permission for Mr Marcus Twigden was changed on 08 March 2021</p>",
+          "category": "OrganisationLevel",
+          "bespokeNotificationId": null
+      },
+      {
+          "id": 3700007,
+          "personId": 5331098,
+          "organisationId": 5565448,
+          "messageId": 2051875,
+          "readAt": null,
+          "archivedAt": null,
+          "archive": null,
+          "createdAt": 1615211915701,
+          "title": "Permission changed for Mr Marcus Twigden",
+          "body": "<p>Your permission for Mr Marcus Twigden was changed on 08 March 2021</p>",
+          "category": "OrganisationLevel",
+          "bespokeNotificationId": null
+      },
+      {
+          "id": 3700006,
+          "personId": 5331098,
+          "organisationId": 5565448,
+          "messageId": 2051874,
+          "readAt": null,
+          "archivedAt": null,
+          "archive": null,
+          "createdAt": 1615211911145,
+          "title": "Permission given for Mr Marcus Twigden",
+          "body": "<p>You have been given permission for Mr Marcus Twigden on 08 March 2021 </p>",
+          "category": "OrganisationLevel",
+          "bespokeNotificationId": null
+      }
+  ],
+  "resultCount": 3,
+  "readCount": 0,
+  "unreadCount": 3
+}

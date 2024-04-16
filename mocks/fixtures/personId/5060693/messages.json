@@ -1,0 +1,91 @@
+{
+  "notifications": [
+    {
+      "id": 783851,
+      "personId": 5060693,
+      "organisationId": "5625145",
+      "messageId": 404285,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4927840804854,
+      "title": "Permission changed for Julie Drummond",
+      "body": "<p>Your permission for Julie Drummond was changed on Tue Nov 07 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1867685,
+      "personId": 5060693,
+      "organisationId": "5625145",
+      "messageId": 3501893,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7000876512100,
+      "title": "Permission changed for Julie Drummond",
+      "body": "<p>Your permission for Julie Drummond was changed on Mon Jan 16 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3880018,
+      "personId": 5060693,
+      "organisationId": "5625145",
+      "messageId": 742421,
+      "readAt": 28000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5415282253369,
+      "title": "Permission changed for Julie Drummond",
+      "body": "<p>Your permission for Julie Drummond was changed on Sun Jul 09 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3741908,
+      "personId": 5060693,
+      "organisationId": "5625145",
+      "messageId": 2391424,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1434317053620,
+      "title": "Permission changed for Julie Drummond",
+      "body": "<p>Your permission for Julie Drummond was changed on Wed May 31 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6100747,
+      "personId": 5060693,
+      "organisationId": "5625145",
+      "messageId": 9422686,
+      "readAt": 25000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8166802568294,
+      "title": "Permission changed for Julie Drummond",
+      "body": "<p>Your permission for Julie Drummond was changed on Thu Dec 01 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4068367,
+      "personId": 5060693,
+      "organisationId": "5625145",
+      "messageId": 9235619,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1228020050730,
+      "title": "Permission changed for Julie Drummond",
+      "body": "<p>Your permission for Julie Drummond was changed on Fri Jun 23 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 6,
+  "readCount": 2,
+  "unreadCount": 4
+}
