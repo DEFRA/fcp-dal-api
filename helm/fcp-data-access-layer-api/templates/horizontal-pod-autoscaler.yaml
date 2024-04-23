@@ -1,0 +1,17 @@
+{{- include "adp-helm-library.horizontal-pod-autoscaler" (list . "fcp-data-access-layer-api.horizontal-pod-autoscaler") -}}
+{{- define "fcp-data-access-layer-api.horizontal-pod-autoscaler" -}}
+spec:  
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.deployment.cpuThreshold }}
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: {{ .Values.deployment.memoryThreshold }}
+{{- end -}}
