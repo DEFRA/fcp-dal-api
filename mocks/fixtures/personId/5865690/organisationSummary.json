@@ -1,0 +1,17 @@
+{
+  "_data": [
+    {
+      "id": 5865690,
+      "name": "Kate Wrangham",
+      "sbi": 5625145,
+      "additionalSbiIds": [],
+      "confirmed": false,
+      "lastUpdatedOn": null,
+      "landConfirmed": null,
+      "deactivated": true,
+      "locked": true,
+      "unreadNotificationCount": 3,
+      "readNotificationCount": 0
+    }
+  ]
+}

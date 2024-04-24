@@ -1,13 +1,11 @@
-import { faker } from '@faker-js/faker/locale/en_GB'
 import { jest } from '@jest/globals'
 
+import pick from 'lodash.pick'
 import { Customer, CustomerBusiness, CustomerBusinessPermissionGroup } from '../../app/graphql/resolvers/customer/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
-import { createMessage } from '../../mocks/fixtures/messages.js'
-import { organisationPersonSummary } from '../../mocks/fixtures/organisation.js'
 
 const authorisationOrganisation = sitiAgriAuthorisationOrganisation({ organisationId: '4309257' })
-const personId = authorisationOrganisation.personRoles[0].personId
+const personId = authorisationOrganisation.data.personRoles[0].personId
 const dataSources = {
   ruralPaymentsPortalApi: {
     getPersonByPersonId () {
@@ -28,10 +26,10 @@ const dataSources = {
       ]
     },
     getAuthorisationByOrganisationId () {
-      return authorisationOrganisation
+      return authorisationOrganisation.data
     },
     getAuthorisationByOrganisationIdAndPersonId () {
-      return sitiAgriAuthorisationOrganisation().personPrivileges
+      return sitiAgriAuthorisationOrganisation().data.personPrivileges
     },
     getPersonSummaryByPersonId: jest.fn(),
     getNotificationsByOrganisationIdAndPersonId: jest.fn()
@@ -59,8 +57,21 @@ describe('Customer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId.mockImplementation(async () => {
-      faker.seed(5109389384975741)
-      return [organisationPersonSummary('123')]
+      return [
+        {
+          id: '123',
+          name: 'Ratke, Grant and Keebler',
+          sbi: 865774479,
+          additionalSbiIds: [],
+          confirmed: true,
+          lastUpdatedOn: null,
+          landConfirmed: null,
+          deactivated: true,
+          locked: false,
+          unreadNotificationCount: 3,
+          readNotificationCount: 0
+        }
+      ]
     })
   })
 
@@ -78,12 +89,46 @@ describe('Customer', () => {
 })
 
 describe('CustomerBusiness', () => {
+  let parsedMessages = []
   beforeEach(() => {
     jest.clearAllMocks()
-    dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId.mockImplementation(async () => {
-      faker.seed(5109389384975741)
-      return [createMessage(), createMessage()]
-    })
+
+    const mockMessages = [
+      {
+        id: 5875045,
+        personId: 5824285,
+        organisationId: 8008496,
+        messageId: 6062814,
+        readAt: null,
+        archivedAt: 8862388585856,
+        archive: null,
+        createdAt: 8247074489993,
+        title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
+        body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
+        category: 'OrganisationLevel',
+        bespokeNotificationId: null
+      },
+      {
+        id: 2514276,
+        personId: 7337791,
+        organisationId: 7542172,
+        messageId: 9588060,
+        readAt: 21000,
+        archivedAt: null,
+        archive: null,
+        createdAt: 8818544780296,
+        title: 'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
+        body: '<p>Cruentus venia dedecor beatus vinco cultellus clarus.</p>',
+        category: 'OrganisationLevel',
+        bespokeNotificationId: null
+      }
+    ]
+    parsedMessages = mockMessages.map(mockMessage => ({
+      ...pick(mockMessage, ['id', 'title', 'body', 'archivedAt']),
+      date: mockMessage.createdAt,
+      read: !!mockMessage.readAt
+    }))
+    dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId.mockImplementation(() => mockMessages)
   })
 
   test('CustomerBusiness.roles', async () => {
@@ -120,18 +165,9 @@ describe('CustomerBusiness', () => {
         '4309257',
         'mockCustomerId',
         1,
-        1
+        5
       )
-      expect(response).toEqual([
-        {
-          id: 5875045,
-          title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
-          date: 8247074489993,
-          body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
-          read: false,
-          archivedAt: null
-        }
-      ])
+      expect(response).toEqual([parsedMessages[1]])
     })
 
     test('showOnlyDeleted = false', async () => {
@@ -144,42 +180,24 @@ describe('CustomerBusiness', () => {
         '4309257',
         'mockCustomerId',
         1,
-        1
+        5
       )
-      expect(response).toEqual([
-        {
-          id: 5875045,
-          title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
-          date: 8247074489993,
-          body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
-          read: false,
-          archivedAt: null
-        }
-      ])
+      expect(response).toEqual([parsedMessages[1]])
     })
 
     test('showOnlyDeleted = true', async () => {
       const response = await CustomerBusiness.messages(
-        { id: '4309257', customerId: 'mockCustomerId' },
+        { id: '123123', customerId: '321321' },
         { showOnlyDeleted: true },
         { dataSources }
       )
       expect(dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId).toHaveBeenCalledWith(
-        '4309257',
-        'mockCustomerId',
+        '123123',
+        '321321',
         1,
-        1
+        5
       )
-      expect(response).toEqual([
-        {
-          id: 2514276,
-          title: 'Venia dedecor beatus vinco cultellus clarus terebro voluptate assumenda tot.',
-          date: 6333830175753,
-          body: '<p>Autem thema blandior verus comprehendo cursim aliquid deleo consequuntur.</p>',
-          read: false,
-          archivedAt: 2881854478029
-        }
-      ])
+      expect(response).toEqual([parsedMessages[0]])
     })
 
     test('pagination', async () => {
@@ -189,16 +207,7 @@ describe('CustomerBusiness', () => {
         { dataSources }
       )
       expect(dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId).toHaveBeenCalledWith('123', '123', 5, 5)
-      expect(response).toEqual([
-        {
-          id: 5875045,
-          title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
-          date: 8247074489993,
-          body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
-          read: false,
-          archivedAt: null
-        }
-      ])
+      expect(response).toEqual([parsedMessages[1]])
     })
   })
 })

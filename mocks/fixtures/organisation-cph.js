@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
+import logger from '../../app/utils/logger.js'
 import files from '../utils/files.js'
 
 const { getJSON } = files(import.meta.url)
@@ -23,6 +24,7 @@ export const organisationCPHInfo = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/cph-info.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #organisationCPHInfo - Generating mock data')
     faker.seed(+orgId)
     return {
       data: generateCHPInfoMock()
@@ -34,6 +36,7 @@ export const organisationCPH = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/cph.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #organisationCPH - Generating mock data')
     faker.seed(+orgId)
     return {
       data: [generateCHPMock()]

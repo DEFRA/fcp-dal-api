@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 5739772,
+      "personId": 5776759,
+      "organisationId": "5625145",
+      "messageId": 8584795,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3217880177429,
+      "title": "Permission changed for Clive Barnett",
+      "body": "<p>Your permission for Clive Barnett was changed on Mon Sep 18 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2926166,
+      "personId": 5776759,
+      "organisationId": "5625145",
+      "messageId": 6490906,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6236311043817,
+      "title": "Permission changed for Clive Barnett",
+      "body": "<p>Your permission for Clive Barnett was changed on Mon Aug 28 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2063312,
+      "personId": 5776759,
+      "organisationId": "5625145",
+      "messageId": 968959,
+      "readAt": 19000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4030905469277,
+      "title": "Permission changed for Clive Barnett",
+      "body": "<p>Your permission for Clive Barnett was changed on Sun Jul 17 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 1,
+  "unreadCount": 2
+}

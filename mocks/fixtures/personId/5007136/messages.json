@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 11401,
+      "personId": 5007136,
+      "organisationId": "5625145",
+      "messageId": 5075344,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6010706997254,
+      "title": "Permission changed for David Paul",
+      "body": "<p>Your permission for David Paul was changed on Sat Oct 01 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7551987,
+      "personId": 5007136,
+      "organisationId": "5625145",
+      "messageId": 1467494,
+      "readAt": 15000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8327630499790,
+      "title": "Permission changed for David Paul",
+      "body": "<p>Your permission for David Paul was changed on Wed Apr 26 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9315941,
+      "personId": 5007136,
+      "organisationId": "5625145",
+      "messageId": 4833731,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8862388585856,
+      "title": "Permission changed for David Paul",
+      "body": "<p>Your permission for David Paul was changed on Wed May 17 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9315941,
+      "personId": 5007136,
+      "organisationId": "5625145",
+      "messageId": 4833731,
+      "readAt": null,
+      "archivedAt": 8862388585856,
+      "archive": null,
+      "createdAt": 8862388585856,
+      "title": "Permission changed for David Paul",
+      "body": "<p>Your permission for David Paul was changed on Wed May 17 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 1,
+  "unreadCount": 3
+}

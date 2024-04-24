@@ -1,0 +1,21 @@
+{
+  "notifications": [
+    {
+      "id": 3421090,
+      "personId": 5319294,
+      "organisationId": "5625145",
+      "messageId": 6127963,
+      "readAt": 27000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9696882286856,
+      "title": "Permission changed for John Chilcott",
+      "body": "<p>Your permission for John Chilcott was changed on Mon Nov 14 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 1,
+  "readCount": 1,
+  "unreadCount": 0
+}

@@ -1,0 +1,17 @@
+{
+  "_data": [
+    {
+      "id": 5894668,
+      "name": "Donald Palmer",
+      "sbi": 5625145,
+      "additionalSbiIds": [],
+      "confirmed": false,
+      "lastUpdatedOn": null,
+      "landConfirmed": null,
+      "deactivated": false,
+      "locked": true,
+      "unreadNotificationCount": 3,
+      "readNotificationCount": 0
+    }
+  ]
+}

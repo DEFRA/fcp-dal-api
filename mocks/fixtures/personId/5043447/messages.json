@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 4509457,
+      "personId": 5043447,
+      "organisationId": "5625145",
+      "messageId": 9498541,
+      "readAt": 13000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3494617373808,
+      "title": "Permission changed for Julia Theobald",
+      "body": "<p>Your permission for Julia Theobald was changed on Sat Aug 13 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9985175,
+      "personId": 5043447,
+      "organisationId": "5625145",
+      "messageId": 5864227,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1598445336496,
+      "title": "Permission changed for Julia Theobald",
+      "body": "<p>Your permission for Julia Theobald was changed on Sat May 20 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6122135,
+      "personId": 5043447,
+      "organisationId": "5625145",
+      "messageId": 5761617,
+      "readAt": 7000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3850625582372,
+      "title": "Permission changed for Julia Theobald",
+      "body": "<p>Your permission for Julia Theobald was changed on Sat Apr 23 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8465247,
+      "personId": 5043447,
+      "organisationId": "5625145",
+      "messageId": 4286701,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8955999116500,
+      "title": "Permission changed for Julia Theobald",
+      "body": "<p>Your permission for Julia Theobald was changed on Tue Aug 16 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 2,
+  "unreadCount": 2
+}

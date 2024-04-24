@@ -1,0 +1,77 @@
+{
+  "notifications": [
+    {
+      "id": 5227436,
+      "personId": 5902957,
+      "organisationId": "5625145",
+      "messageId": 3285133,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7260967222628,
+      "title": "Permission changed for Sandra Evans",
+      "body": "<p>Your permission for Sandra Evans was changed on Fri Feb 02 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4775564,
+      "personId": 5902957,
+      "organisationId": "5625145",
+      "messageId": 4254101,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4831780407649,
+      "title": "Permission changed for Sandra Evans",
+      "body": "<p>Your permission for Sandra Evans was changed on Tue Nov 21 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8379888,
+      "personId": 5902957,
+      "organisationId": "5625145",
+      "messageId": 4905005,
+      "readAt": 2000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 891064787511,
+      "title": "Permission changed for Sandra Evans",
+      "body": "<p>Your permission for Sandra Evans was changed on Sun Apr 07 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5086228,
+      "personId": 5902957,
+      "organisationId": "5625145",
+      "messageId": 4966373,
+      "readAt": 20000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3545033192588,
+      "title": "Permission changed for Sandra Evans",
+      "body": "<p>Your permission for Sandra Evans was changed on Tue Mar 07 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1131006,
+      "personId": 5902957,
+      "organisationId": "5625145",
+      "messageId": 19156,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8468516993716,
+      "title": "Permission changed for Sandra Evans",
+      "body": "<p>Your permission for Sandra Evans was changed on Wed Mar 06 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 5,
+  "readCount": 2,
+  "unreadCount": 3
+}

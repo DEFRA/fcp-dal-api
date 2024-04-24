@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 4648639,
+      "personId": 5159484,
+      "organisationId": "5625145",
+      "messageId": 551776,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3205700033221,
+      "title": "Permission changed for David C.Kennewell",
+      "body": "<p>Your permission for David C.Kennewell was changed on Tue Nov 08 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8717673,
+      "personId": 5159484,
+      "organisationId": "5625145",
+      "messageId": 2098008,
+      "readAt": 17000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5730430934910,
+      "title": "Permission changed for David C.Kennewell",
+      "body": "<p>Your permission for David C.Kennewell was changed on Sat Feb 17 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 1,
+  "unreadCount": 1
+}

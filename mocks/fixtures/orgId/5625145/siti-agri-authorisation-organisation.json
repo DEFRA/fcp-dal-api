@@ -1,0 +1,372 @@
+{
+  "data": {
+    "personRoles": [
+      {
+        "personId": 5007136,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5043447,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5060693,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5776760,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5159484,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5318480,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5319294,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5323236,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5335492,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5338844,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5662488,
+        "role": "Agent"
+      },
+      {
+        "personId": 5677046,
+        "role": "Agent"
+      },
+      {
+        "personId": 5692562,
+        "role": "Agent"
+      },
+      {
+        "personId": 5717842,
+        "role": "Agent"
+      },
+      {
+        "personId": 5735005,
+        "role": "Agent"
+      },
+      {
+        "personId": 5739334,
+        "role": "Agent"
+      },
+      {
+        "personId": 5740353,
+        "role": "Agent"
+      },
+      {
+        "personId": 5753656,
+        "role": "Agent"
+      },
+      {
+        "personId": 5762878,
+        "role": "Agent"
+      },
+      {
+        "personId": 5767225,
+        "role": "Agent"
+      },
+      {
+        "personId": 5768194,
+        "role": "Agent"
+      },
+      {
+        "personId": 5774317,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776383,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776386,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776389,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776398,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776407,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776409,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776458,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776525,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776586,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776587,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776589,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776592,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776595,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776615,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776749,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776759,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776762,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776763,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776764,
+        "role": "Agent"
+      },
+      {
+        "personId": 5777841,
+        "role": "Agent"
+      },
+      {
+        "personId": 5790437,
+        "role": "Agent"
+      },
+      {
+        "personId": 5790713,
+        "role": "Agent"
+      },
+      {
+        "personId": 5923773,
+        "role": "Agent"
+      },
+      {
+        "personId": 5925124,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776772,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776774,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776832,
+        "role": "Agent"
+      },
+      {
+        "personId": 5776865,
+        "role": "Agent"
+      },
+      {
+        "personId": 5777721,
+        "role": "Agent"
+      },
+      {
+        "personId": 5777723,
+        "role": "Agent"
+      },
+      {
+        "personId": 5777738,
+        "role": "Agent"
+      },
+      {
+        "personId": 5777747,
+        "role": "Agent"
+      },
+      {
+        "personId": 5777819,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5777821,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5777823,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5777840,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5777843,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5777844,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5778076,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5793235,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5795826,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5806709,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5807690,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5808065,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5809718,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5811864,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5814715,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5817707,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5817796,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5818670,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5821379,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5823404,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5847953,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5848614,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5852171,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5865690,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5868794,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5872270,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5876121,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5894177,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5894527,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5894668,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5897455,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5898807,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5902957,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5903202,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5903218,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5920446,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5920460,
+        "role": "Business Partner"
+      }
+    ]
+  },
+  "success": true,
+  "errorString": null
+}

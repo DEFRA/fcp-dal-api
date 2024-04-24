@@ -11,9 +11,9 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
     return organisationResponse._data
   }
 
-  async getPersonSummaryByPersonId (personId) {
+  async getPersonSummaryByPersonId (personId, sbi) {
     const response = await this.get(
-      `api/organisation/person/${personId}/summary?order=asc&page=1&page-size=20&search=&sort-by=name&withNotifications=true`
+      `api/organisation/person/${personId}/summary?order=asc&page=1&page-size=20&search=&sort-by=name&withNotifications=true&organisationId=${sbi}`
     )
     return response._data
   }
@@ -79,9 +79,7 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
   }
 
   async getAuthorisationByOrganisationIdAndPersonId (organisationId, personId) {
-    const response = await this.get(`/rpp/SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`, {
-      headers: { callerID: personId }
-    })
+    const response = await this.get(`/rpp/SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`)
     return response.data.personPrivileges
   }
 }

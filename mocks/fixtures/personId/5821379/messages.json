@@ -1,0 +1,77 @@
+{
+  "notifications": [
+    {
+      "id": 9374800,
+      "personId": 5821379,
+      "organisationId": "5625145",
+      "messageId": 7699546,
+      "readAt": 16000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2496931256597,
+      "title": "Permission changed for Nigel Crew",
+      "body": "<p>Your permission for Nigel Crew was changed on Sun Jun 11 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7891345,
+      "personId": 5821379,
+      "organisationId": "5625145",
+      "messageId": 3440829,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7891715963413,
+      "title": "Permission changed for Nigel Crew",
+      "body": "<p>Your permission for Nigel Crew was changed on Sun Nov 13 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5270756,
+      "personId": 5821379,
+      "organisationId": "5625145",
+      "messageId": 611658,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6501528269704,
+      "title": "Permission changed for Nigel Crew",
+      "body": "<p>Your permission for Nigel Crew was changed on Thu May 19 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6921762,
+      "personId": 5821379,
+      "organisationId": "5625145",
+      "messageId": 7424850,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3395686867956,
+      "title": "Permission changed for Nigel Crew",
+      "body": "<p>Your permission for Nigel Crew was changed on Wed Nov 15 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7506703,
+      "personId": 5821379,
+      "organisationId": "5625145",
+      "messageId": 7331545,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3072273997424,
+      "title": "Permission changed for Nigel Crew",
+      "body": "<p>Your permission for Nigel Crew was changed on Sun Oct 09 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 5,
+  "readCount": 1,
+  "unreadCount": 4
+}

@@ -1,5 +1,4 @@
-import { faker } from '@faker-js/faker/locale/en_GB'
-
+import pick from 'lodash.pick'
 import {
   transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
@@ -8,7 +7,6 @@ import {
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../app/transformers/rural-payments-portal/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
-import { createMessage } from '../../../mocks/fixtures/messages.js'
 
 // const person = personById()
 const mockOrganisationPersonSummary = {
@@ -25,10 +23,43 @@ const mockOrganisationPersonSummary = {
   readNotificationCount: 0
 }
 
-faker.seed(5109389384975741)
-const mockMessages = [createMessage(), createMessage()]
+const mockMessages = [
+  {
+    id: 5875045,
+    personId: 5824285,
+    organisationId: 8008496,
+    messageId: 6062814,
+    readAt: null,
+    archivedAt: null,
+    archive: null,
+    createdAt: 8247074489993,
+    title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
+    body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
+    category: 'OrganisationLevel',
+    bespokeNotificationId: null
+  },
+  {
+    id: 2514276,
+    personId: 7337791,
+    organisationId: 7542172,
+    messageId: 9588060,
+    readAt: 21000,
+    archivedAt: 8818544780296,
+    archive: null,
+    createdAt: 8818544780296,
+    title: 'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
+    body: '<p>Cruentus venia dedecor beatus vinco cultellus clarus.</p>',
+    category: 'OrganisationLevel',
+    bespokeNotificationId: null
+  }
+]
+const parsedMessages = mockMessages.map(mockMessage => ({
+  ...pick(mockMessage, ['id', 'title', 'body', 'archivedAt']),
+  date: mockMessage.createdAt,
+  read: !!mockMessage.readAt
+}))
 const organisationId = 123
-const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation({ organisationId })
+const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation({ organisationId }).data
 const personId = sitiAgriAuthorisationOrganisationData.personRoles[0].personId
 
 describe('Customer transformer', () => {
@@ -65,30 +96,12 @@ describe('Customer transformer', () => {
 
   test('transformNotificationsToMessages', () => {
     const result = transformNotificationsToMessages(mockMessages, false)
-    expect(result).toEqual([
-      {
-        id: 5875045,
-        title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
-        date: 8247074489993,
-        body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
-        read: false,
-        archivedAt: null
-      }
-    ])
+    expect(result).toEqual([parsedMessages[0]])
   })
 
   test('transformNotificationsToMessages - showOnlyDeleted', () => {
     const result = transformNotificationsToMessages(mockMessages, true)
-    expect(result).toEqual([
-      {
-        id: 2514276,
-        title: 'Venia dedecor beatus vinco cultellus clarus terebro voluptate assumenda tot.',
-        date: 6333830175753,
-        body: '<p>Autem thema blandior verus comprehendo cursim aliquid deleo consequuntur.</p>',
-        read: false,
-        archivedAt: 2881854478029
-      }
-    ])
+    expect(result).toEqual([parsedMessages[1]])
   })
 
   test('transformNotificationsToMessages does not fail if messages empty', () => {
@@ -96,7 +109,7 @@ describe('Customer transformer', () => {
     expect(result).toEqual([])
   })
 
-  test('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
+  describe('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
     test('should return null when no sbi matching', () => {
       expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
         '99133320',

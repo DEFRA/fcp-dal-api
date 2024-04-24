@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 3216059,
+      "personId": 5793235,
+      "organisationId": "5625145",
+      "messageId": 7130139,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1411511552610,
+      "title": "Permission changed for Chris Allen",
+      "body": "<p>Your permission for Chris Allen was changed on Fri Sep 29 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1576901,
+      "personId": 5793235,
+      "organisationId": "5625145",
+      "messageId": 9120227,
+      "readAt": 10000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6925608642658,
+      "title": "Permission changed for Chris Allen",
+      "body": "<p>Your permission for Chris Allen was changed on Thu Aug 03 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 1,
+  "unreadCount": 1
+}
