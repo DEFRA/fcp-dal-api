@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 7351931,
+      "personId": 5776772,
+      "organisationId": "5625145",
+      "messageId": 6503951,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2867696800577,
+      "title": "Permission changed for Andrew Riley",
+      "body": "<p>Your permission for Andrew Riley was changed on Fri May 19 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5384017,
+      "personId": 5776772,
+      "organisationId": "5625145",
+      "messageId": 7568501,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7438415031473,
+      "title": "Permission changed for Andrew Riley",
+      "body": "<p>Your permission for Andrew Riley was changed on Mon Mar 20 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8652116,
+      "personId": 5776772,
+      "organisationId": "5625145",
+      "messageId": 1684635,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 40879997757,
+      "title": "Permission changed for Andrew Riley",
+      "body": "<p>Your permission for Andrew Riley was changed on Sat Aug 06 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2099134,
+      "personId": 5776772,
+      "organisationId": "5625145",
+      "messageId": 6656716,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9021595987101,
+      "title": "Permission changed for Andrew Riley",
+      "body": "<p>Your permission for Andrew Riley was changed on Sat Jan 07 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 0,
+  "unreadCount": 4
+}

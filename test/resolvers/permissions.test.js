@@ -21,10 +21,10 @@ const dataSources = {
       ]
     },
     getAuthorisationByOrganisationId () {
-      return sitiAgriAuthorisationOrganisation()
+      return sitiAgriAuthorisationOrganisation().data
     },
     getAuthorisationByOrganisationIdAndPersonId () {
-      return sitiAgriAuthorisationOrganisation().personPrivileges
+      return sitiAgriAuthorisationOrganisation().data.personPrivileges
     }
   },
   permissions: {

@@ -1,0 +1,21 @@
+{
+  "notifications": [
+    {
+      "id": 1261344,
+      "personId": 5776615,
+      "organisationId": "5625145",
+      "messageId": 7443171,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6851053828974,
+      "title": "Permission changed for Michael Beaney",
+      "body": "<p>Your permission for Michael Beaney was changed on Mon Feb 12 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 1,
+  "readCount": 0,
+  "unreadCount": 1
+}

@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 635621,
+      "personId": 5817796,
+      "organisationId": "5625145",
+      "messageId": 5975597,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7532719561371,
+      "title": "Permission changed for David Eatough",
+      "body": "<p>Your permission for David Eatough was changed on Thu Feb 22 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3643628,
+      "personId": 5817796,
+      "organisationId": "5625145",
+      "messageId": 2204381,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5771291633510,
+      "title": "Permission changed for David Eatough",
+      "body": "<p>Your permission for David Eatough was changed on Wed Aug 17 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2644063,
+      "personId": 5817796,
+      "organisationId": "5625145",
+      "messageId": 2697242,
+      "readAt": 24000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7895232388163,
+      "title": "Permission changed for David Eatough",
+      "body": "<p>Your permission for David Eatough was changed on Fri Jun 16 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6704815,
+      "personId": 5817796,
+      "organisationId": "5625145",
+      "messageId": 2947874,
+      "readAt": 6000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 690074609374,
+      "title": "Permission changed for David Eatough",
+      "body": "<p>Your permission for David Eatough was changed on Sat Nov 05 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 2,
+  "unreadCount": 2
+}

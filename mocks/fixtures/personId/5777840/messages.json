@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 2754486,
+      "personId": 5777840,
+      "organisationId": "5625145",
+      "messageId": 5156772,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6798257393437,
+      "title": "Permission changed for Alex Brignall",
+      "body": "<p>Your permission for Alex Brignall was changed on Fri Sep 30 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8147286,
+      "personId": 5777840,
+      "organisationId": "5625145",
+      "messageId": 630199,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1428586754042,
+      "title": "Permission changed for Alex Brignall",
+      "body": "<p>Your permission for Alex Brignall was changed on Sat Nov 18 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4093189,
+      "personId": 5777840,
+      "organisationId": "5625145",
+      "messageId": 1613400,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9478311447472,
+      "title": "Permission changed for Alex Brignall",
+      "body": "<p>Your permission for Alex Brignall was changed on Tue Apr 11 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 0,
+  "unreadCount": 3
+}

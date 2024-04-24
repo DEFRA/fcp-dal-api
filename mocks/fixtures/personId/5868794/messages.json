@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 6260082,
+      "personId": 5868794,
+      "organisationId": "5625145",
+      "messageId": 2232003,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3716830648150,
+      "title": "Permission changed for William Tunnard",
+      "body": "<p>Your permission for William Tunnard was changed on Sun Aug 06 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1168616,
+      "personId": 5868794,
+      "organisationId": "5625145",
+      "messageId": 8629318,
+      "readAt": 6000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5347832950634,
+      "title": "Permission changed for William Tunnard",
+      "body": "<p>Your permission for William Tunnard was changed on Mon Sep 04 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4071745,
+      "personId": 5868794,
+      "organisationId": "5625145",
+      "messageId": 8266564,
+      "readAt": 25000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8534504565564,
+      "title": "Permission changed for William Tunnard",
+      "body": "<p>Your permission for William Tunnard was changed on Fri Sep 22 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 2,
+  "unreadCount": 1
+}

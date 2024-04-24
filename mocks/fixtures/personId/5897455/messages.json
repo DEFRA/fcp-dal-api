@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 4181408,
+      "personId": 5897455,
+      "organisationId": "5625145",
+      "messageId": 4726420,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2367460649312,
+      "title": "Permission changed for Christopher Cook",
+      "body": "<p>Your permission for Christopher Cook was changed on Sun Jun 05 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6691008,
+      "personId": 5897455,
+      "organisationId": "5625145",
+      "messageId": 7979315,
+      "readAt": 5000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4480117688849,
+      "title": "Permission changed for Christopher Cook",
+      "body": "<p>Your permission for Christopher Cook was changed on Mon Aug 15 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7141516,
+      "personId": 5897455,
+      "organisationId": "5625145",
+      "messageId": 9445895,
+      "readAt": 7000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5069053170945,
+      "title": "Permission changed for Christopher Cook",
+      "body": "<p>Your permission for Christopher Cook was changed on Tue Jan 02 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 2,
+  "unreadCount": 1
+}

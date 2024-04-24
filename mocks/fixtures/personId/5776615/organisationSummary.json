@@ -1,0 +1,17 @@
+{
+  "_data": [
+    {
+      "id": 5776615,
+      "name": "Michael Beaney",
+      "sbi": 5625145,
+      "additionalSbiIds": [],
+      "confirmed": false,
+      "lastUpdatedOn": null,
+      "landConfirmed": null,
+      "deactivated": true,
+      "locked": true,
+      "unreadNotificationCount": 3,
+      "readNotificationCount": 0
+    }
+  ]
+}

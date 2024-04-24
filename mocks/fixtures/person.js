@@ -1,4 +1,8 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
+import logger from '../../app/utils/logger.js'
+import files from '../utils/files.js'
+
+const { getJSON } = files(import.meta.url)
 
 const createPersonMock = (attributes = {}) => ({
   title: faker.person.prefix(),
@@ -38,10 +42,16 @@ const createPersonMock = (attributes = {}) => ({
 })
 
 export const personById = (attributes = {}) => {
-  const seedReference = attributes.customerReferenceNumber || attributes.id
-  if (seedReference) {
-    faker.seed(+seedReference)
+  try {
+    return getJSON(`./personId/${attributes.id}/detail.json`)
+  } catch (error) {
+    logger.debug('#Mock #Fixtures #personById - Generating mock data')
+    const seedReference = attributes.customerReferenceNumber || attributes.id
+    if (seedReference) {
+      faker.seed(+seedReference)
+    }
+    return {
+      _data: createPersonMock(attributes)
+    }
   }
-
-  return createPersonMock(attributes)
 }

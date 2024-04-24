@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 218652,
+      "personId": 5894527,
+      "organisationId": "5625145",
+      "messageId": 9078800,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4727994223743,
+      "title": "Permission changed for Mark Cieslicka",
+      "body": "<p>Your permission for Mark Cieslicka was changed on Sat Jul 29 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5392957,
+      "personId": 5894527,
+      "organisationId": "5625145",
+      "messageId": 8534100,
+      "readAt": 4000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2006160341895,
+      "title": "Permission changed for Mark Cieslicka",
+      "body": "<p>Your permission for Mark Cieslicka was changed on Sun Dec 18 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3550091,
+      "personId": 5894527,
+      "organisationId": "5625145",
+      "messageId": 7223674,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3049171134055,
+      "title": "Permission changed for Mark Cieslicka",
+      "body": "<p>Your permission for Mark Cieslicka was changed on Thu Jul 06 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2133033,
+      "personId": 5894527,
+      "organisationId": "5625145",
+      "messageId": 5305911,
+      "readAt": 24000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6675736923050,
+      "title": "Permission changed for Mark Cieslicka",
+      "body": "<p>Your permission for Mark Cieslicka was changed on Wed Nov 08 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 2,
+  "unreadCount": 2
+}

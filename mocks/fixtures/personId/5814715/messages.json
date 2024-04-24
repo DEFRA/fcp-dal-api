@@ -1,0 +1,91 @@
+{
+  "notifications": [
+    {
+      "id": 2509418,
+      "personId": 5814715,
+      "organisationId": "5625145",
+      "messageId": 8915085,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7995970436494,
+      "title": "Permission changed for Susan Maguire",
+      "body": "<p>Your permission for Susan Maguire was changed on Fri Apr 15 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4525343,
+      "personId": 5814715,
+      "organisationId": "5625145",
+      "messageId": 4043593,
+      "readAt": 15000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7150966871139,
+      "title": "Permission changed for Susan Maguire",
+      "body": "<p>Your permission for Susan Maguire was changed on Thu Apr 28 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1882893,
+      "personId": 5814715,
+      "organisationId": "5625145",
+      "messageId": 8462904,
+      "readAt": 15000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7411942145667,
+      "title": "Permission changed for Susan Maguire",
+      "body": "<p>Your permission for Susan Maguire was changed on Sun May 28 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9907796,
+      "personId": 5814715,
+      "organisationId": "5625145",
+      "messageId": 5428836,
+      "readAt": 21000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7210940840584,
+      "title": "Permission changed for Susan Maguire",
+      "body": "<p>Your permission for Susan Maguire was changed on Mon Jul 31 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1535856,
+      "personId": 5814715,
+      "organisationId": "5625145",
+      "messageId": 5080427,
+      "readAt": 4000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2903166383542,
+      "title": "Permission changed for Susan Maguire",
+      "body": "<p>Your permission for Susan Maguire was changed on Thu Mar 02 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2219720,
+      "personId": 5814715,
+      "organisationId": "5625145",
+      "messageId": 7281308,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3260425258587,
+      "title": "Permission changed for Susan Maguire",
+      "body": "<p>Your permission for Susan Maguire was changed on Fri Dec 23 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 6,
+  "readCount": 4,
+  "unreadCount": 2
+}

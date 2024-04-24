@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker/locale/en_GB'
+import logger from '../../app/utils/logger.js'
 import files from '../utils/files.js'
 
 const { getJSON } = files(import.meta.url)
@@ -35,6 +36,7 @@ export const coversSummary = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/covers-summary.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #coversSummary - Generating mock data')
     faker.seed(+orgId)
     return generateCoversSummaryMock()
   }
@@ -44,6 +46,7 @@ export const parcelSummary = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/parcel-summary.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #parcelSummary - Generating mock data')
     faker.seed(+orgId)
     const totalParcels = faker.number.int({ min: 1, max: 50 })
     const totalArea = faker.number.float({ min: 0, max: 1000, precision: 0.01 })
@@ -58,6 +61,7 @@ export const landCovers = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/land-covers.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #landCovers - Generating mock data')
     faker.seed(+orgId)
     return [...Array(faker.number.int(20))].map(() => ({
       id: faker.string.numeric(10),
@@ -70,6 +74,7 @@ export const landParcels = orgId => {
   try {
     return getJSON(`./orgId/${orgId}/land-parcels.json`)
   } catch (error) {
+    logger.debug('#Mock #Fixtures #landParcels - Generating mock data')
     faker.seed(+orgId)
     return generateLandParcelsMock()
   }
