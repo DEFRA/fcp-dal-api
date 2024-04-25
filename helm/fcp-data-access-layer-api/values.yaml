@@ -12,6 +12,11 @@ container:
   port: 3000
   memCpuTier: M
 
+ingress:
+   class: nginx
+   endpoint: ffc-dal
+   server: example.com
+
 readinessProbe:
   path: /healthy
   port: 3000
@@ -25,3 +30,9 @@ livenessProbe:
   initialDelaySeconds: 70
   periodSeconds: 10
   failureThreshold: 3
+
+aadWorkloadIdentity: true
+
+serviceAccount:
+  name: ffc-dal
+  roleArn: true
