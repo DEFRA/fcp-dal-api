@@ -6,10 +6,6 @@ labels: {}
 
 deployment:
   priorityClassName: low
-  minReplicas: 1
-  maxReplicas: 3
-  cpuThreshold: 80
-  memoryThreshold: 80
   minReadySeconds: 5
 
 service:
@@ -17,15 +13,8 @@ service:
   type: ClusterIP
   
 container:
-  memCpuTier: CUSTOM
-  imagePullPolicy: IfNotPresent
-  requestMemory: 50Mi
-  requestCpu: 50m
-  limitMemory: 200Mi
-  limitCpu: 400m
-  restClientTimeoutMillis: 20000
-  staticCacheTimeoutMillis: 54000
   port: 3000
+  memCpuTier: M
 
 ingress:
   class: nginx
@@ -35,7 +24,7 @@ ingress:
 readinessProbe:
   path: /healthy
   port: 3000
-  initialDelaySeconds: 20
+  initialDelaySeconds: 60
   periodSeconds: 10
   failureThreshold: 3
 
