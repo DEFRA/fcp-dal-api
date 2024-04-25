@@ -8,10 +8,10 @@ deployment:
   priorityClassName: low
   minReadySeconds: 5
 
-service:	
-  port: 80	
+service:
+  port: 80
   type: ClusterIP
-
+  
 container:
   port: 3000
   memCpuTier: M
