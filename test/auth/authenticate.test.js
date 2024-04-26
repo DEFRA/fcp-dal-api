@@ -18,9 +18,7 @@ const tokenPayload = {
     aio: 'aio',
     appid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
     appidacr: '1',
-    groups: [
-      '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2'
-    ],
+    groups: ['2d731eb1-6721-4349-9cb2-8fe9b0ab53a2'],
     idp: 'https://sts.windows.net/2d731eb1-6721-4349-9cb2-8fe9b0ab53a2/',
     oid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
     rh: 'rh',
@@ -44,7 +42,7 @@ describe('getAuth', () => {
     expect(await getAuth({})).toEqual({})
   })
 
-  test.only('should return decoded token when token is valid', async () => {
+  test('should return decoded token when token is valid', async () => {
     expect(await getAuth(mockRequest)).toEqual(decodedToken)
   })
 

@@ -1,3 +1,4 @@
+import { transformAuthenticateQuestionsAnswers } from '../../../transformers/authenticate/question-answers.js'
 import {
   transformNotificationsToMessages,
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
@@ -17,6 +18,10 @@ export const Customer = {
   async businesses ({ id }, __, { dataSources }) {
     const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
     return transformPersonSummaryToCustomerAuthorisedBusinesses(id, summary)
+  },
+  async authenticationQuestions ({ id }, __, { dataSources }) {
+    const results = await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(id)
+    return transformAuthenticateQuestionsAnswers(results)
   }
 }
 

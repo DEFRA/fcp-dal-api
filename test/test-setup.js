@@ -13,8 +13,15 @@ jest.unstable_mockModule('jwks-rsa', () => ({
 global.jest = jest
 
 const { context } = await import('../app/graphql/context.js')
+const contextObject = await context({})
 
 export const fakeContext = {
-  ...await context({}),
+  ...contextObject,
+  dataSources: {
+    ...contextObject.dataSources,
+    authenticateDatabase: {
+      getAuthenticateQuestionsAnswersByCRN: jest.fn()
+    }
+  },
   authorize: { checkAuthGroup: () => [process.env.ADMIN] }
 }

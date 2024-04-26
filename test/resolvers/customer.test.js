@@ -50,6 +50,16 @@ const dataSources = {
         }
       ]
     }
+  },
+  authenticateDatabase: {
+    getAuthenticateQuestionsAnswersByCRN () {
+      return {
+        CRN: '123',
+        Date: 'some date',
+        Event: 'some event',
+        Location: 'some location'
+      }
+    }
   }
 }
 
@@ -85,6 +95,15 @@ describe('Customer', () => {
         customerId: 'mockCustomerId'
       }
     ])
+  })
+
+  test('Customer.authenticationQuestions', async () => {
+    const response = await Customer.authenticationQuestions({ id: 'mockCustomerId' }, undefined, { dataSources })
+    expect(response).toEqual({
+      memorableDate: 'some date',
+      memorableEvent: 'some event',
+      memorablePlace: 'some location'
+    })
   })
 })
 
@@ -186,17 +205,8 @@ describe('CustomerBusiness', () => {
     })
 
     test('showOnlyDeleted = true', async () => {
-      const response = await CustomerBusiness.messages(
-        { id: '123123', customerId: '321321' },
-        { showOnlyDeleted: true },
-        { dataSources }
-      )
-      expect(dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId).toHaveBeenCalledWith(
-        '123123',
-        '321321',
-        1,
-        5
-      )
+      const response = await CustomerBusiness.messages({ id: '123123', customerId: '321321' }, { showOnlyDeleted: true }, { dataSources })
+      expect(dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId).toHaveBeenCalledWith('123123', '321321', 1, 5)
       expect(response).toEqual([parsedMessages[0]])
     })
 

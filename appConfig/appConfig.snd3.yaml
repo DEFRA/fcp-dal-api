@@ -20,3 +20,15 @@
 - key: ADMIN_AD_GROUP_ID
   value: "{{servicename}}-ADMIN-AD-GROUP-ID"
   type: "keyvault"
+- key: AUTHENTICATE_DB_HOST
+  value: "{{servicename}}-AUTHENTICATE-DB-HOST"
+  type: "keyvault"
+- key: AUTHENTICATE_DB_TABLE
+  value: "{{servicename}}-AUTHENTICATE-DB-TABLE"
+  type: "keyvault"
+- key: AUTHENTICATE_DB_USERNAME
+  value: "{{servicename}}-AUTHENTICATE-DB-USERNAME"
+  type: "keyvault"
+- key: AUTHENTICATE_DB_PASSWORD
+  value: "{{servicename}}-AUTHENTICATE-DB-PASSWORD"
+  type: "keyvault"

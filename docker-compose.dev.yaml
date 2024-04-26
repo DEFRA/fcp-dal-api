@@ -4,6 +4,7 @@ services:
     container_name: ffc-customer-registry-api-dev
     ports:
       - ${PORT}:${PORT}
+      - ${PORT_MOCK}:${PORT_MOCK}
     command: npm run start:dev
     volumes:
       - ./:/usr/local/dev/ffc-customer-registry-api
