@@ -1,6 +1,7 @@
 import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
+import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
 import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments-portal/customer.js'
 import { personById } from '../../../mocks/fixtures/person.js'
 import { fakeContext } from '../../test-setup.js'
@@ -71,6 +72,43 @@ describe('Query.customer', () => {
       }
     })
   })
+
+  it('should return customer authenticate questions', async () => {
+    const authenticateQuestionsResponse = {
+      CRN: '123',
+      Date: 'some date',
+      Event: 'some event',
+      Location: 'some location'
+    }
+    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(authenticateQuestionsResponse)
+    const transformedAuthenticateQuestions = transformAuthenticateQuestionsAnswers(authenticateQuestionsResponse)
+    const result = await graphql({
+      source: `#graphql
+        query Customer {
+          customer(id: "123") {
+            authenticationQuestions {
+              memorableDate
+              memorableEvent
+              memorablePlace
+            }
+          }
+        }
+      `,
+      variableValues: {
+        customerId: '123'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          authenticationQuestions: JSON.parse(JSON.stringify(transformedAuthenticateQuestions))
+        }
+      }
+    })
+  })
 })
 
 describe('Query.customer.businesses', () => {
@@ -103,9 +141,7 @@ describe('Query.customer.businesses', () => {
         customer: {
           businesses: [
             {
-              roles: [
-                'Business Partner'
-              ],
+              roles: ['Business Partner'],
               permissionGroups: [
                 {
                   id: 'BASIC_PAYMENT_SCHEME',

@@ -1,4 +1,5 @@
 import pick from 'lodash.pick'
+import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
 import {
   transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
@@ -111,32 +112,59 @@ describe('Customer transformer', () => {
 
   describe('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
     test('should return null when no sbi matching', () => {
-      expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-        '99133320',
-        123456,
-        [{
-          id: '32323321',
-          name: 'John Doe',
-          sbi: 654321
-        }]
-      )).toEqual(null)
+      expect(
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness('99133320', 123456, [
+          {
+            id: '32323321',
+            name: 'John Doe',
+            sbi: 654321
+          }
+        ])
+      ).toEqual(null)
     })
 
     test('should return id, name, sbi, and customerId when sbi is matching', () => {
-      expect(transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-        '99133320',
-        123456,
-        [{
-          id: '32323321',
-          name: 'John Doe',
-          sbi: 123456
-        }]
-      )).toEqual({
+      expect(
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness('99133320', 123456, [
+          {
+            id: '32323321',
+            name: 'John Doe',
+            sbi: 123456
+          }
+        ])
+      ).toEqual({
         id: '32323321',
         name: 'John Doe',
         customerId: '99133320',
         sbi: 123456
       })
+    })
+  })
+
+  test('transformAuthenticateQuestionsAnswers', () => {
+    const mockAuthenticateQuestionsResponse = {
+      CRN: '123',
+      Date: 'some date',
+      Event: 'some event',
+      Location: 'some location'
+    }
+
+    const result = transformAuthenticateQuestionsAnswers(mockAuthenticateQuestionsResponse)
+
+    expect(result).toEqual({
+      memorableDate: 'some date',
+      memorableEvent: 'some event',
+      memorablePlace: 'some location'
+    })
+  })
+
+  test('transformNotificationsToMessages does not fail if response is empty', () => {
+    const result = transformAuthenticateQuestionsAnswers()
+
+    expect(result).toEqual({
+      memorableDate: undefined,
+      memorableEvent: undefined,
+      memorablePlace: undefined
     })
   })
 })
