@@ -39,7 +39,7 @@ Mocks endpoints are defined within the ./mocks directory.
 In addition there is a mock authenticate database that can be used for local development. To run the database add the environment variables to your `.env`:
 ```env
 AUTHENTICATE_DB_HOST=127.0.0.1
-AUTHENTICATE_DB_TABLE=master
+AUTHENTICATE_DB_SCHEMA=master
 AUTHENTICATE_DB_USERNAME=newuser
 AUTHENTICATE_DB_PASSWORD=Password123!
 ```

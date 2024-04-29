@@ -63,6 +63,6 @@ extends:
         - fcp-data-access-layer-api-API-TENANT-ID
         - fcp-data-access-layer-api-ADMIN-AD-GROUP-ID
         - fcp-data-access-layer-api-AUTHENTICATE-DB-HOST
-        - fcp-data-access-layer-api-AUTHENTICATE-DB-TABLE
+        - fcp-data-access-layer-api-AUTHENTICATE-DB-SCHEMA
         - fcp-data-access-layer-api-AUTHENTICATE-DB-USERNAME
         - fcp-data-access-layer-api-AUTHENTICATE-DB-PASSWORD

@@ -23,8 +23,8 @@
 - key: AUTHENTICATE_DB_HOST
   value: "{{servicename}}-AUTHENTICATE-DB-HOST"
   type: "keyvault"
-- key: AUTHENTICATE_DB_TABLE
-  value: "{{servicename}}-AUTHENTICATE-DB-TABLE"
+- key: AUTHENTICATE_DB_SCHEMA
+  value: "{{servicename}}-AUTHENTICATE-DB-SCHEMA"
   type: "keyvault"
 - key: AUTHENTICATE_DB_USERNAME
   value: "{{servicename}}-AUTHENTICATE-DB-USERNAME"

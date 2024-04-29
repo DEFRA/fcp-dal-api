@@ -5,7 +5,7 @@ export class AuthenticateDatabase {
     const serverUsername = process.env.AUTHENTICATE_DB_USERNAME
     const serverPassword = process.env.AUTHENTICATE_DB_PASSWORD
     const serverHost = process.env.AUTHENTICATE_DB_HOST
-    const databaseName = process.env.AUTHENTICATE_DB_TABLE
+    const databaseName = process.env.AUTHENTICATE_DB_SCHEMA
 
     return new Sequelize(databaseName, serverUsername, serverPassword, {
       host: serverHost,
