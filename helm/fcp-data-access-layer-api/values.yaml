@@ -11,10 +11,14 @@ deployment:
 service:
   port: 80
   type: ClusterIP
-  
+
 container:
   port: 3000
-  memCpuTier: M
+  memCpuTier: CUSTOM
+  requestMemory: 50Mi
+  requestCpu: 50m
+  limitMemory: 200Mi
+  limitCpu: 400m
 
 ingress:
   class: nginx
