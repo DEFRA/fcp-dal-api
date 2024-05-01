@@ -1,10 +1,10 @@
 parameters:
   - name: deployFromFeature
-    displayName: "Deploy from Feature Branch"
+    displayName: 'Deploy from Feature Branch'
     type: boolean
     default: false
   - name: deployConfigOnly
-    displayName: "Deploy App Config"
+    displayName: 'Deploy App Config'
     type: boolean
     default: false
 pr:
@@ -23,7 +23,7 @@ trigger:
   batch: true
   branches:
     include:
-      - "*"
+      - '*'
   paths:
     exclude:
       - test-output/*
@@ -41,28 +41,19 @@ resources:
 extends:
   template: /pipelines/common-app-build.yaml@DEFRA-ADPPipelineCommon
   parameters:
-    serviceName: "fcp-data-access-layer-api"
+    serviceName: 'fcp-data-access-layer-api'
     deployFromFeature: ${{ parameters.deployFromFeature }}
     deployConfigOnly: ${{ parameters.deployConfigOnly }}
     appBuildConfig:
-      appFrameworkType: "nodejs"
-      projectPath: "./package.json"
-      manifestPath: "./package.json"
-      imageRepoName: "fcp-data-access-layer-api"
+      appFrameworkType: 'nodejs'
+      projectPath: './package.json'
+      manifestPath: './package.json'
+      imageRepoName: 'fcp-data-access-layer-api'
     appTestConfig:
-      testFilePath: "./docker-compose.test.yaml"
-      snykTestFilePath: "./docker-compose.snyk.yaml"
+      testFilePath: './docker-compose.test.yaml'
+      snykTestFilePath: './docker-compose.snyk.yaml'
     appDeployConfig:
-      filepath: "./appConfig"
-      filetype: "yaml"
+      filepath: './appConfig'
+      filetype: 'yaml'
       variableGroups:
         - fcp-data-access-layer-api-<environment>
-      variables:
-        - fcp-data-access-layer-api-APPINSIGHTS-CONNECTIONSTRING
-        - fcp-data-access-layer-api-RURAL-PAYMENTS-PORTAL-PASSWORD
-        - fcp-data-access-layer-api-API-TENANT-ID
-        - fcp-data-access-layer-api-ADMIN-AD-GROUP-ID
-        - fcp-data-access-layer-api-AUTHENTICATE-DB-HOST
-        - fcp-data-access-layer-api-AUTHENTICATE-DB-SCHEMA
-        - fcp-data-access-layer-api-AUTHENTICATE-DB-USERNAME
-        - fcp-data-access-layer-api-AUTHENTICATE-DB-PASSWORD
