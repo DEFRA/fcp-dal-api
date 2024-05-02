@@ -110,9 +110,26 @@ type BusinessCustomer {
   role: String
 
   """
-  The privileges the customer against the business.
+  The permissions the customer against the business.
   """
-  privileges: [String]
+  permissions: [BusinessCustomerPermission]
+} 
+
+type BusinessCustomerPermission {
+  """
+  The permission group id.
+  """
+  id: PermissionGroupId!
+
+  """
+  The permission group name.
+  """
+  name: String!
+
+  """
+  The permission group level assigned to the customer
+  """
+  level: PermissionLevel
 }
 
 """

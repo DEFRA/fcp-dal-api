@@ -22,9 +22,6 @@ const dataSources = {
     },
     getAuthorisationByOrganisationId () {
       return sitiAgriAuthorisationOrganisation().data
-    },
-    getAuthorisationByOrganisationIdAndPersonId () {
-      return sitiAgriAuthorisationOrganisation().data.personPrivileges
     }
   },
   permissions: {

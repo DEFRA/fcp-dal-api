@@ -28,9 +28,6 @@ const dataSources = {
     getAuthorisationByOrganisationId () {
       return authorisationOrganisation.data
     },
-    getAuthorisationByOrganisationIdAndPersonId () {
-      return sitiAgriAuthorisationOrganisation().data.personPrivileges
-    },
     getPersonSummaryByPersonId: jest.fn(),
     getNotificationsByOrganisationIdAndPersonId: jest.fn()
   },

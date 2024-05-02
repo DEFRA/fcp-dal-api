@@ -12,8 +12,10 @@ import {
 } from '../../../app/transformers/rural-payments-portal/lms.js'
 import { coversSummary, landCovers, landParcels, parcelSummary } from '../../../mocks/fixtures/lms.js'
 import { organisationCPH, organisationCPHInfo } from '../../../mocks/fixtures/organisation-cph.js'
-import { organisationByOrgId } from '../../../mocks/fixtures/organisation.js'
+import { organisationByOrgId, organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 import { fakeContext } from '../../test-setup.js'
+import { transformPrivilegesListToBusinessCustomerPermissions } from '../../../app/transformers/rural-payments-portal/permissions.js'
+import { Permissions } from '../../../app/data-sources/static/permissions.js'
 
 const organisationFixture = organisationByOrgId('123')._data
 const { totalArea, totalParcels } = parcelSummary('123')
@@ -192,7 +194,7 @@ describe('Query.business.land', () => {
   })
 })
 
-describe('Query.Business.cph', () => {
+describe('Query.business.cph', () => {
   const transformedCPH = transformOrganisationCPH('123', organisationCPHFixture)
   delete transformedCPH[0].id
 
@@ -237,50 +239,79 @@ describe('Query.Business.cph', () => {
       }
     })
   })
+})
 
-  describe('Query.Business.customers', () => {
-    const transformedCPH = transformOrganisationCPH('123', organisationCPHFixture)
-    delete transformedCPH[0].id
+describe('Query.business.customers', () => {
+  const transformedCPH = transformOrganisationCPH('123', organisationCPHFixture)
+  delete transformedCPH[0].id
 
-    it('customer', async () => {
-      const result = await graphql({
-        source: `#graphql
-        query BusinessCustomers {
-          business(id: "123") {
+  it('customer', async () => {
+    const result = await graphql({
+      source: `#graphql
+      query BusinessCustomers {
+        business(id: "123") {
+          customers {
+            id
+            firstName
+            lastName
+            customerReference
+            role
+          }
+        }
+      }
+      `,
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        business: {
+          customers: [
+            {
+              id: '7353104',
+              firstName: 'Edgardo',
+              lastName: 'Farrell',
+              customerReference: '6577447946',
+              role: 'Business Partner'
+            },
+            expect.any(Object),
+            expect.any(Object),
+            expect.any(Object)
+          ]
+        }
+      }
+    })
+  })
+
+  it('permissions', async () => {
+    const result = await graphql({
+      source: `#graphql
+        query BusinessCustomersPermissions {
+          business(id: "BID") {
             customers {
-              id
-              firstName
-              lastName
-              customerReference
-              role
-              privileges
+              permissions {
+                id
+                name
+                level
+              }
             }
           }
         }
-        `,
-        schema,
-        contextValue: fakeContext
-      })
+      `,
+      schema,
+      contextValue: fakeContext
+    })
 
-      expect(result).toEqual({
+    expect(result).toEqual(
+      {
         data: {
           business: {
-            customers: [
-              {
-                id: '7353104',
-                firstName: 'Edgardo',
-                lastName: 'Farrell',
-                customerReference: '6577447946',
-                role: 'Business Partner',
-                privileges: ['Full permission - business', 'Amend - land', 'Amend - entitlement', 'Submit - bps', 'AMEND - LAND - SA']
-              },
-              expect.any(Object),
-              expect.any(Object),
-              expect.any(Object)
-            ]
+            customers: organisationPeopleByOrgId()._data.map(({ privileges }) => ({ permissions: transformPrivilegesListToBusinessCustomerPermissions(privileges, new Permissions().getPermissionGroups()) }))
           }
         }
-      })
-    })
+      }
+
+    )
   })
 })

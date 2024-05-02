@@ -28,11 +28,6 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
     return response._data
   }
 
-  async getAuthorisationByOrganisationId (organisationId) {
-    const response = await this.get(`SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`)
-    return response.data
-  }
-
   async getApplicationsCountrysideStewardshipBySbi (sbi) {
     const response = await this.get(`injected-screens-mt/api/organisation/${sbi}/applications/appslist`)
     return response._data
@@ -78,8 +73,8 @@ export class RuralPaymentsPortalApi extends RuralPaymentsPortalBase {
     return response.notifications
   }
 
-  async getAuthorisationByOrganisationIdAndPersonId (organisationId, personId) {
+  async getAuthorisationByOrganisationId (organisationId) {
     const response = await this.get(`/rpp/SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`)
-    return response.data.personPrivileges
+    return response.data
   }
 }

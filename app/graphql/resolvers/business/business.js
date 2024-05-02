@@ -1,5 +1,6 @@
 import { transformOrganisationCPH } from '../../../transformers/rural-payments-portal/business-cph.js'
 import { transformOrganisationCustomers } from '../../../transformers/rural-payments-portal/business.js'
+import { transformPrivilegesListToBusinessCustomerPermissions } from '../../../transformers/rural-payments-portal/permissions.js'
 
 export const Business = {
   land ({ id }) {
@@ -12,5 +13,11 @@ export const Business = {
 
   async customers ({ id }, _, { dataSources }) {
     return transformOrganisationCustomers(await dataSources.ruralPaymentsPortalApi.getOrganisationCustomersByOrganisationId(id))
+  }
+}
+
+export const BusinessCustomer = {
+  permissions ({ privileges }, __, { dataSources }) {
+    return transformPrivilegesListToBusinessCustomerPermissions(privileges, dataSources.permissions.getPermissionGroups())
   }
 }
