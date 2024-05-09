@@ -4,10 +4,10 @@
  */
 
 import { RESTDataSource } from '@apollo/datasource-rest'
-import { CookieJar } from 'tough-cookie'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import { URL } from 'url'
 import qs from 'qs'
+import { CookieJar } from 'tough-cookie'
+import { URL } from 'url'
 import logger from '../../utils/logger.js'
 
 const defaultHeaders = {
@@ -84,16 +84,29 @@ export class RuralPaymentsSession extends RESTDataSource {
 
   async throwIfResponseIsError (options) {
     const { response } = options
-    logger.debug('#RuralPaymentsSession - error', { response })
     if (response?.status < 400) {
       return
     }
+    logger.error('#RuralPaymentsSession - error', { status: response?.status, url: response?.url, error: response?.error })
     throw await this.errorFromResponse(options)
   }
 
   async fetch (path, incomingRequest) {
-    logger.debug('#RuralPaymentsSession - new request ', { path, incomingRequest })
+    logger.debug('#RuralPaymentsSession - new request ', {
+      path,
+      method: incomingRequest.method,
+      cookies: this.jar
+        .toJSON()
+        .cookies.map(cookie => cookie.key)
+        .join(', ')
+    })
     const result = await super.fetch(path, incomingRequest)
+    logger.debug('#RuralPaymentsSession - response ', {
+      path,
+      status: result.response?.status,
+      body: result.response.parsedBody,
+      redirect: result.response?.headers?.get('location')
+    })
     this.setCookies(path, result.response)
     await this.handleRedirects(result.response)
     return result
@@ -149,7 +162,6 @@ export class RuralPaymentsSession extends RESTDataSource {
       await this.get('api/person/context')
       return true
     } catch (error) {
-      logger.error('#RuralPaymentsSession - Error checking session', { error })
       return false
     }
   }

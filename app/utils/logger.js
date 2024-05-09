@@ -1,5 +1,7 @@
 import winston from 'winston'
 
+Error.stackTraceLimit = Error.stackTraceLimit < 20 ? 20 : Error.stackTraceLimit
+
 function jsonStringifyRecursive (obj) {
   delete obj.level
   delete obj.message
@@ -28,18 +30,33 @@ function jsonStringifyRecursive (obj) {
 
   // Prevent logging circular references
   const cache = new Set()
-  return JSON.stringify(obj, (_, value) => {
-    if (typeof value === 'object' && value !== null) {
-      if (cache.has(value)) return
-      cache.add(value)
-    }
-    return value
-  })
+  return JSON.stringify(
+    obj,
+    (_, value) => {
+      if (typeof value === 'object' && value !== null) {
+        if (cache.has(value)) return
+        cache.add(value)
+      }
+      return value
+    },
+    4
+  )
 }
 
 const format = winston.format.combine(
   winston.format.align(),
+  winston.format.colorize(),
   winston.format.printf(info => {
+    if (!info.stack && !info.error?.stack) {
+      try {
+        throw new Error()
+      } catch (e) {
+        info.stack = e.stack
+          .split('\n')
+          .filter(line => !line.includes('node_modules') && !line.includes('logger.js') && !line.includes('node:internal'))
+        info.stack.shift()
+      }
+    }
     return `${info.level}: ${info.message} ${jsonStringifyRecursive(info)}`
   })
 )
