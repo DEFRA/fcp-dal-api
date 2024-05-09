@@ -11,7 +11,7 @@ export async function getJwtPublicKey (kid) {
   return key.getPublicKey()
 }
 
-export async function getAuth (request) {
+export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
   try {
     const authHeader = request?.headers?.authorization
     if (!authHeader) {
@@ -20,7 +20,7 @@ export async function getAuth (request) {
     const token = authHeader.split(' ')[1]
     const decodedToken = jwt.decode(token, { complete: true })
     const header = decodedToken.header
-    const signingKey = await getJwtPublicKey(header.kid)
+    const signingKey = await getJwtPublicKeyFunc(header.kid)
     return jwt.verify(token, signingKey)
   } catch (error) {
     logger.error('#authenticate - Error verifying jwt', { error })

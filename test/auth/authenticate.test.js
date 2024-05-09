@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals'
+
 import jwt from 'jsonwebtoken'
 
 import { getAuth } from '../../app/auth/authenticate.js'
@@ -36,21 +38,26 @@ const mockRequest = { headers: { authorization: `Bearer ${token}` } }
 const mockRequestWrongSign = { headers: { authorization: `Bearer ${tokenDiffSecret}` } }
 const incorrectTokenReq = { headers: { authorization: 'Bearer WRONG' } }
 const decodedToken = jwt.decode(token, 'secret')
+const mockPublicKeyFunc = jest.fn()
 
 describe('getAuth', () => {
   test('should return an empty object when no authHeader is provided', async () => {
     expect(await getAuth({})).toEqual({})
   })
 
-  // test('should return decoded token when token is valid', async () => {
-  //   expect(await getAuth(mockRequest)).toEqual(decodedToken)
-  // })
+  test('should return decoded token when token is valid', async () => {
+    mockPublicKeyFunc.mockReturnValue('secret')
+    expect(await getAuth(mockRequest, mockPublicKeyFunc)).toEqual(decodedToken)
+    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+  })
 
   test('should return an empty object when token cannot be decoded', async () => {
-    expect(await getAuth(incorrectTokenReq)).toEqual({})
+    expect(await getAuth(incorrectTokenReq, mockPublicKeyFunc)).toEqual({})
+    expect(mockPublicKeyFunc).not.toHaveBeenCalled()
   })
 
   test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
-    expect(await getAuth(mockRequestWrongSign)).toEqual({})
+    expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
+    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 })
