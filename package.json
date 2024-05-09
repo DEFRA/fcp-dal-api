@@ -1,6 +1,6 @@
 {
   "name": "ffc-customer-registry-api",
-  "version": "1.0.63",
+  "version": "1.0.65",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/ffc-customer-registry-api",
   "main": "app/index.js",
@@ -16,7 +16,7 @@
     "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --coverage"
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --coverage --setupFiles dotenv/config"
   },
   "author": "Defra",
   "contributors": [],

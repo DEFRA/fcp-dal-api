@@ -225,7 +225,7 @@ describe('CustomerBusinessPermissionGroup', () => {
       {
         id: '123',
         businessId: '123',
-        customerId: '123',
+        customerId: '4309257',
         permissions: [
           {
             level: 'MOCK_PRIVILEGE_LEVEL',

@@ -1,5 +1,8 @@
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
-import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel, transformPrivilegesListToBusinessCustomerPermissions } from '../../../app/transformers/rural-payments-portal/permissions.js'
+import {
+  transformOrganisationAuthorisationToCustomerBusinessPermissionLevel,
+  transformPrivilegesListToBusinessCustomerPermissions
+} from '../../../app/transformers/rural-payments-portal/permissions.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
@@ -7,28 +10,31 @@ const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation()
 
 describe('Permissions transformer', () => {
   test('returns null if no match', () => {
-    const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
-      [],
-      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
-    )
+    const personPrivileges = sitiAgriApiAuthorisationOrganisation.data.personPrivileges
+    const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(personPrivileges[0].personId, [], personPrivileges)
     expect(result).toBeNull()
   })
 
   test('returns level if  match', () => {
+    const personPrivileges = sitiAgriApiAuthorisationOrganisation.data.personPrivileges
     const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
+      personPrivileges[0].personId,
       [
         {
-          level: 'SUBMIT',
-          privilegeNames: ['SUBMIT - BPS - SA']
+          level: 'MOCK_LEVEL',
+          privilegeNames: ['Full permission - business']
         }
       ],
-      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
+      personPrivileges
     )
-    expect(result).toEqual('SUBMIT')
+    expect(result).toEqual('MOCK_LEVEL')
   })
 
   test('returns active permissions', () => {
-    const result = transformPrivilegesListToBusinessCustomerPermissions(organisationPeopleByOrgId()._data[0].privileges, new Permissions().getPermissionGroups())
+    const result = transformPrivilegesListToBusinessCustomerPermissions(
+      organisationPeopleByOrgId()._data[0].privileges,
+      new Permissions().getPermissionGroups()
+    )
     expect(result).toEqual([
       {
         id: 'BASIC_PAYMENT_SCHEME',
@@ -57,7 +63,6 @@ describe('Permissions transformer', () => {
         name: 'Environmental Land Management (Applications)'
       },
       { id: 'LAND_DETAILS', level: 'AMEND', name: 'Land details' }
-    ]
-    )
+    ])
   })
 })
