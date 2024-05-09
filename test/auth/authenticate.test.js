@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals'
+
 import jwt from 'jsonwebtoken'
 
 import { getAuth } from '../../app/auth/authenticate.js'
@@ -36,6 +38,7 @@ const mockRequest = { headers: { authorization: `Bearer ${token}` } }
 const mockRequestWrongSign = { headers: { authorization: `Bearer ${tokenDiffSecret}` } }
 const incorrectTokenReq = { headers: { authorization: 'Bearer WRONG' } }
 const decodedToken = jwt.decode(token, 'secret')
+const mockPublicKeyFunc = jest.fn()
 
 describe('getAuth', () => {
   test('should return an empty object when no authHeader is provided', async () => {
@@ -43,29 +46,18 @@ describe('getAuth', () => {
   })
 
   test('should return decoded token when token is valid', async () => {
-    console.log(
-      process.env.NODE_ENV,
-      process.env.PORT,
-      process.env.PORT_MOCK,
-      process.env.ENABLE_MOCK_SERVER,
-      process.env.RURAL_PAYMENTS_AGENCY_LAND_API_URL,
-      process.env.RURAL_PAYMENTS_PORTAL_EMAIL,
-      process.env.RURAL_PAYMENTS_PORTAL_PASSWORD,
-      process.env.RURAL_PAYMENTS_PORTAL_API_URL,
-      process.env.RURAL_PAYMENTS_PROXY_URL,
-      process.env.API_TENANT_ID,
-      process.env.ADMIN_AD_GROUP_ID,
-      process.env.CLIENT_ID,
-      process.env.CLIENT_SECRET
-    )
-    expect(await getAuth(mockRequest)).toEqual(decodedToken)
+    mockPublicKeyFunc.mockReturnValue('secret')
+    expect(await getAuth(mockRequest, mockPublicKeyFunc)).toEqual(decodedToken)
+    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 
   test('should return an empty object when token cannot be decoded', async () => {
-    expect(await getAuth(incorrectTokenReq)).toEqual({})
+    expect(await getAuth(incorrectTokenReq, mockPublicKeyFunc)).toEqual({})
+    expect(mockPublicKeyFunc).not.toHaveBeenCalled()
   })
 
   test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
-    expect(await getAuth(mockRequestWrongSign)).toEqual({})
+    expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
+    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 })
