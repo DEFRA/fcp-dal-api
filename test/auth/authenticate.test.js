@@ -42,9 +42,24 @@ describe('getAuth', () => {
     expect(await getAuth({})).toEqual({})
   })
 
-  // test('should return decoded token when token is valid', async () => {
-  //   expect(await getAuth(mockRequest)).toEqual(decodedToken)
-  // })
+  test('should return decoded token when token is valid', async () => {
+    console.log(
+      process.env.NODE_ENV,
+      process.env.PORT,
+      process.env.PORT_MOCK,
+      process.env.ENABLE_MOCK_SERVER,
+      process.env.RURAL_PAYMENTS_AGENCY_LAND_API_URL,
+      process.env.RURAL_PAYMENTS_PORTAL_EMAIL,
+      process.env.RURAL_PAYMENTS_PORTAL_PASSWORD,
+      process.env.RURAL_PAYMENTS_PORTAL_API_URL,
+      process.env.RURAL_PAYMENTS_PROXY_URL,
+      process.env.API_TENANT_ID,
+      process.env.ADMIN_AD_GROUP_ID,
+      process.env.CLIENT_ID,
+      process.env.CLIENT_SECRET
+    )
+    expect(await getAuth(mockRequest)).toEqual(decodedToken)
+  })
 
   test('should return an empty object when token cannot be decoded', async () => {
     expect(await getAuth(incorrectTokenReq)).toEqual({})
