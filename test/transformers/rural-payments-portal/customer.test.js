@@ -159,7 +159,7 @@ describe('Customer transformer', () => {
   })
 
   test('transformNotificationsToMessages does not fail if response is empty', () => {
-    const result = transformAuthenticateQuestionsAnswers()
+    const result = transformAuthenticateQuestionsAnswers(null)
 
     expect(result).toEqual({
       memorableDate: undefined,
