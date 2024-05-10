@@ -365,6 +365,376 @@
         "personId": 5920460,
         "role": "Business Partner"
       }
+    ],
+    "personPrivileges": [
+      {
+        "personId": 5007136,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5043447,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5060693,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776760,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5159484,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5318480,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5319294,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5323236,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5335492,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5338844,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5662488,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5677046,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5692562,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5717842,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5735005,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5739334,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5740353,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5753656,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5762878,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5767225,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5768194,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5774317,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776383,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776386,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776389,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776398,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776407,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776409,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776458,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776525,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776586,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776587,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776589,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776592,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776595,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776615,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776749,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776759,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776762,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776763,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776764,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777841,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5790437,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5790713,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5923773,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5925124,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776772,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776774,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776832,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5776865,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777721,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777723,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777738,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777747,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777819,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777821,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777823,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777840,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777843,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5777844,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5778076,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5793235,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5795826,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5806709,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5807690,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5808065,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5809718,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5811864,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5814715,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5817707,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5817796,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5818670,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5821379,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5823404,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5847953,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5848614,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5852171,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5865690,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5868794,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5872270,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5876121,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5894177,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5894527,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5894668,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5897455,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5898807,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5902957,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5903202,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5903218,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5920446,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5920460,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5263421,
+        "privilegeNames": ["Full permission - business"]
+      }
     ]
   },
   "success": true,

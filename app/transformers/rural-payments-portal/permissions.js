@@ -2,7 +2,7 @@ export function transformOrganisationAuthorisationToCustomerBusinessPermissionLe
   permissions.reverse()
 
   const privilegeNames = authorisation.flatMap(personPrivileges =>
-    personPrivileges.personId === customerId ? personPrivileges.privilegeNames : []
+    `${personPrivileges.personId}` === `${customerId}` ? personPrivileges.privilegeNames : []
   )
 
   for (const permission of permissions) {
