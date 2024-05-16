@@ -3,16 +3,16 @@ import { transformOrganisationCustomers } from '../../../transformers/rural-paym
 import { transformPrivilegesListToBusinessCustomerPermissions } from '../../../transformers/rural-payments-portal/permissions.js'
 
 export const Business = {
-  land ({ id }) {
-    return { id }
+  land ({ businessId }) {
+    return { businessId }
   },
 
-  async cph ({ id }, _, { dataSources }) {
-    return transformOrganisationCPH(id, await dataSources.ruralPaymentsPortalApi.getOrganisationCPHCollectionBySBI(id))
+  async cph ({ businessId }, _, { dataSources }) {
+    return transformOrganisationCPH(businessId, await dataSources.ruralPaymentsPortalApi.getOrganisationCPHCollectionBySBI(businessId))
   },
 
-  async customers ({ id }, _, { dataSources }) {
-    return transformOrganisationCustomers(await dataSources.ruralPaymentsPortalApi.getOrganisationCustomersByOrganisationId(id))
+  async customers ({ businessId }, _, { dataSources }) {
+    return transformOrganisationCustomers(await dataSources.ruralPaymentsPortalApi.getOrganisationCustomersByOrganisationId(businessId))
   }
 }
 

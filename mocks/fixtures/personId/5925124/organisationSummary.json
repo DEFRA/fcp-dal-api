@@ -3,12 +3,12 @@
     {
       "id": 5925124,
       "name": "Jeni Frost",
-      "sbi": 5625145,
+      "sbi": 890000004,
       "additionalSbiIds": [],
       "confirmed": false,
       "lastUpdatedOn": null,
       "landConfirmed": null,
-      "deactivated": false,
+      "deactivated": true,
       "locked": false,
       "unreadNotificationCount": 3,
       "readNotificationCount": 0

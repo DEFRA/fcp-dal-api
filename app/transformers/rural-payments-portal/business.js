@@ -27,7 +27,7 @@ export const transformOrganisationToBusiness = data => {
       email: {
         address: data.email,
         validated: data.emailValidated,
-        doNotContact: data.doNotContact
+        doNotContact: data.doNotContact || false
       },
       legalStatus: {
         code: data.legalStatus.id,
@@ -40,16 +40,16 @@ export const transformOrganisationToBusiness = data => {
       registrationNumbers: {
         companiesHouse: data.companiesHouseRegistrationNumber,
         charityCommission: data.charityCommissionRegistrationNumber
-      },
-      sbi: data.sbi
+      }
     },
-    id: data.id
+    businessId: `${data.id}`,
+    sbi: `${data.sbi}`
   }
 }
 
 export const transformOrganisationCustomers = data => {
   return data.map(({ id, firstName, lastName, customerReference, role, privileges }) => ({
-    id,
+    customerId: id,
     firstName,
     lastName,
     customerReference,

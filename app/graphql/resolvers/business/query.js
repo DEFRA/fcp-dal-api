@@ -2,18 +2,18 @@ import { transformOrganisationCSApplicationToBusinessApplications } from '../../
 import { transformOrganisationToBusiness } from '../../../transformers/rural-payments-portal/business.js'
 
 export const Query = {
-  async business (__, { id }, { dataSources }) {
-    const response = await dataSources.ruralPaymentsPortalApi.getOrganisationBySBI(id)
+  async business (__, { sbi }, { dataSources }) {
+    const response = await dataSources.ruralPaymentsPortalApi.getOrganisationBySBI(sbi)
     const business = transformOrganisationToBusiness(response)
     return {
-      id,
-      land: { sbi: id },
+      sbi,
+      land: { sbi },
       ...business
     }
   },
 
-  async businessApplications (_, { id }, { dataSources }) {
-    const response = await dataSources.ruralPaymentsPortalApi.getApplicationsCountrysideStewardshipBySbi(id)
+  async businessApplications (_, { sbi }, { dataSources }) {
+    const response = await dataSources.ruralPaymentsPortalApi.getApplicationsCountrysideStewardshipBySbi(sbi)
 
     return transformOrganisationCSApplicationToBusinessApplications(response.applications)
   }

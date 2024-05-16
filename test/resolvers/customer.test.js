@@ -66,7 +66,7 @@ describe('Customer', () => {
     dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId.mockImplementation(async () => {
       return [
         {
-          id: '123',
+          organisationId: '123',
           name: 'Ratke, Grant and Keebler',
           sbi: 865774479,
           additionalSbiIds: [],
@@ -83,13 +83,13 @@ describe('Customer', () => {
   })
 
   test('Customer.businesses', async () => {
-    const response = await Customer.businesses({ id: 'mockCustomerId', name: 'name', sbi: 123123123 }, undefined, { dataSources })
+    const response = await Customer.businesses({ customerId: '5007136' }, undefined, { dataSources })
     expect(response).toEqual([
       {
-        id: '123',
+        businessId: '123',
         name: 'Ratke, Grant and Keebler',
         sbi: 865774479,
-        customerId: 'mockCustomerId'
+        customerId: '5007136'
       }
     ])
   })
@@ -148,12 +148,12 @@ describe('CustomerBusiness', () => {
   })
 
   test('CustomerBusiness.roles', async () => {
-    const response = await CustomerBusiness.roles({ id: '4309257', customerId: personId }, undefined, { dataSources })
+    const response = await CustomerBusiness.roles({ businessId: '4309257', customerId: personId }, undefined, { dataSources })
     expect(response).toEqual(['Business Partner'])
   })
 
   test('CustomerBusiness.permissionGroups', async () => {
-    const response = await CustomerBusiness.permissionGroups({ id: 'mockBusinessId', customerId: 'mockCustomerId' }, undefined, {
+    const response = await CustomerBusiness.permissionGroups({ businessId: 'mockBusinessId', customerId: 'mockCustomerId' }, undefined, {
       dataSources
     })
 
@@ -176,7 +176,7 @@ describe('CustomerBusiness', () => {
 
   describe('CustomerBusiness.messages', () => {
     test('no args', async () => {
-      const response = await CustomerBusiness.messages({ id: '4309257', customerId: 'mockCustomerId' }, {}, { dataSources })
+      const response = await CustomerBusiness.messages({ businessId: '4309257', customerId: 'mockCustomerId' }, {}, { dataSources })
       expect(dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId).toHaveBeenCalledWith(
         '4309257',
         'mockCustomerId',
@@ -188,7 +188,7 @@ describe('CustomerBusiness', () => {
 
     test('showOnlyDeleted = false', async () => {
       const response = await CustomerBusiness.messages(
-        { id: '4309257', customerId: 'mockCustomerId' },
+        { businessId: '4309257', customerId: 'mockCustomerId' },
         { showOnlyDeleted: false },
         { dataSources }
       )
@@ -202,14 +202,18 @@ describe('CustomerBusiness', () => {
     })
 
     test('showOnlyDeleted = true', async () => {
-      const response = await CustomerBusiness.messages({ id: '123123', customerId: '321321' }, { showOnlyDeleted: true }, { dataSources })
+      const response = await CustomerBusiness.messages(
+        { businessId: '123123', customerId: '321321' },
+        { showOnlyDeleted: true },
+        { dataSources }
+      )
       expect(dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId).toHaveBeenCalledWith('123123', '321321', 1, 5)
       expect(response).toEqual([parsedMessages[0]])
     })
 
     test('pagination', async () => {
       const response = await CustomerBusiness.messages(
-        { id: '123', customerId: '123' },
+        { businessId: '123', customerId: '123' },
         { pagination: { perPage: 5, page: 5 } },
         { dataSources }
       )

@@ -43,6 +43,10 @@ const createPersonMock = (attributes = {}) => ({
 
 export const personById = (attributes = {}) => {
   try {
+    if (attributes.customerReferenceNumber) {
+      const personIdCrnMap = getJSON('./personId/personIdCrnMap.json')
+      attributes.id = personIdCrnMap[attributes.customerReferenceNumber]
+    }
     return getJSON(`./personId/${attributes.id}/detail.json`)
   } catch (error) {
     logger.debug('#Mock #Fixtures #personById - Generating mock data')

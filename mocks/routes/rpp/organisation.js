@@ -5,7 +5,6 @@ import {
   organisationPeopleByOrgId,
   organisationPersonSummary
 } from '../../fixtures/organisation.js'
-import { pagination } from '../../fixtures/pagination.js'
 import { okResponse } from '../../utils/requestResponse.js'
 
 export default [
@@ -44,12 +43,9 @@ export default [
             }
 
             const searchPhrase = body.primarySearchPhrase
-            const organisation = organisationBySbi(searchPhrase)
+            const data = organisationBySbi(searchPhrase)
 
-            return okResponse(res, {
-              _data: [organisation],
-              _page: pagination
-            })
+            return okResponse(res, data)
           }
         }
       }

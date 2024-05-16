@@ -3,13 +3,13 @@
     {
       "id": 5776592,
       "name": "Martin Griffin",
-      "sbi": 5625145,
+      "sbi": 890000004,
       "additionalSbiIds": [],
       "confirmed": false,
       "lastUpdatedOn": null,
       "landConfirmed": null,
-      "deactivated": true,
-      "locked": false,
+      "deactivated": false,
+      "locked": true,
       "unreadNotificationCount": 3,
       "readNotificationCount": 0
     }

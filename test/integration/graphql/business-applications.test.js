@@ -7,7 +7,7 @@ describe('Query businessApplications', () => {
     const result = await graphql({
       source: `#graphql
       query BusinessApplications {
-          businessApplications(id: "5444918") {
+          businessApplications(sbi: "5444918") {
               applicationStatus {
                   id
                   open
@@ -28,7 +28,7 @@ describe('Query businessApplications', () => {
       }
       `,
       variableValues: {
-        id: '5444918'
+        sbi: '5444918'
       },
       schema,
       contextValue: fakeContext

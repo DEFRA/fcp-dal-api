@@ -1,5 +1,5 @@
-import { RuralPaymentsSession } from './RuralPaymentsSession.js'
 import { RESTDataSource } from '@apollo/datasource-rest'
+import { RuralPaymentsSession } from './RuralPaymentsSession.js'
 
 const ruralPaymentsSession = new RuralPaymentsSession()
 

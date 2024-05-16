@@ -8,35 +8,35 @@ import {
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
 
 export const Customer = {
-  async business ({ id }, { sbi }, { dataSources }) {
+  async business ({ customerId }, { sbi }, { dataSources }) {
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-      id,
+      customerId,
       sbi,
-      await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id, sbi)
+      await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(customerId, sbi)
     )
   },
-  async businesses ({ id }, __, { dataSources }) {
-    const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(id)
-    return transformPersonSummaryToCustomerAuthorisedBusinesses(id, summary)
+  async businesses ({ customerId }, __, { dataSources }) {
+    const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(customerId)
+    return transformPersonSummaryToCustomerAuthorisedBusinesses(customerId, summary)
   },
-  async authenticationQuestions ({ id }, __, { dataSources }) {
-    const results = await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(id)
+  async authenticationQuestions ({ crn }, __, { dataSources }) {
+    const results = await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(crn)
     return transformAuthenticateQuestionsAnswers(results)
   }
 }
 
 export const CustomerBusiness = {
-  async roles ({ id, customerId }, __, { dataSources }) {
-    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(id)
+  async roles ({ businessId, customerId }, __, { dataSources }) {
+    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(businessId)
     return transformPersonRolesToCustomerAuthorisedBusinessesRoles(customerId, authorisation.personRoles)
   },
 
-  async messages ({ id, customerId }, { pagination, showOnlyDeleted }, { dataSources }) {
+  async messages ({ businessId, customerId }, { pagination, showOnlyDeleted }, { dataSources }) {
     const defaultPaginationPage = 1
     const defaultPaginationPerPage = 5
 
     const notifications = await dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId(
-      id,
+      businessId,
       customerId,
       pagination?.page || defaultPaginationPage,
       pagination?.perPage || defaultPaginationPerPage
@@ -45,8 +45,8 @@ export const CustomerBusiness = {
     return transformNotificationsToMessages(notifications, showOnlyDeleted)
   },
 
-  async permissionGroups ({ id, customerId }, __, { dataSources }) {
-    return dataSources.permissions.getPermissionGroups().map(permissionGroup => ({ ...permissionGroup, businessId: id, customerId }))
+  async permissionGroups ({ businessId, customerId }, __, { dataSources }) {
+    return dataSources.permissions.getPermissionGroups().map(permissionGroup => ({ ...permissionGroup, businessId, customerId }))
   }
 }
 
