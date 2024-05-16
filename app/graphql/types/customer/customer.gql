@@ -112,8 +112,7 @@ type Customer {
   """
   The unique identifier of the customer.
   """
-  customerId: ID!
-
+  customerId: ID! #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
   The CRN (Customer Reference Number) of the customer.
   """

@@ -139,8 +139,7 @@ type Business {
   """
   The first unique identifier of the business.
   """
-  businessId: ID
-
+  businessId: ID #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
   The Single Business Identifier (SBI) of the business.
   """
