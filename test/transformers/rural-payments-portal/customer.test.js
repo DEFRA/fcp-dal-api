@@ -9,9 +9,8 @@ import {
 } from '../../../app/transformers/rural-payments-portal/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 
-// const person = personById()
 const mockOrganisationPersonSummary = {
-  id: '4309257',
+  organisationId: '4309257',
   name: 'company name',
   sbi: 123123123,
   additionalSbiIds: [],
@@ -66,7 +65,7 @@ const personId = sitiAgriAuthorisationOrganisationData.personRoles[0].personId
 describe('Customer transformer', () => {
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
     const result = transformPersonSummaryToCustomerAuthorisedBusinesses('customerId', [mockOrganisationPersonSummary])
-    expect(result).toEqual([{ customerId: 'customerId', id: '4309257', name: 'company name', sbi: 123123123 }])
+    expect(result).toEqual([{ customerId: 'customerId', businessId: '4309257', name: 'company name', sbi: 123123123 }])
   })
 
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
@@ -133,7 +132,7 @@ describe('Customer transformer', () => {
           }
         ])
       ).toEqual({
-        id: '32323321',
+        personId: '32323321',
         name: 'John Doe',
         customerId: '99133320',
         sbi: 123456

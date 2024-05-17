@@ -3,13 +3,13 @@
     {
       "id": 5823404,
       "name": "Francis Simpson",
-      "sbi": 5625145,
+      "sbi": 890000004,
       "additionalSbiIds": [],
       "confirmed": false,
       "lastUpdatedOn": null,
       "landConfirmed": null,
-      "deactivated": false,
-      "locked": true,
+      "deactivated": true,
+      "locked": false,
       "unreadNotificationCount": 3,
       "readNotificationCount": 0
     }

@@ -3,14 +3,10 @@ import { BusinessLand, BusinessLandSummary } from '../../app/graphql/resolvers/b
 const dataSources = {
   ruralPaymentsPortalApi: {
     getParcelsByOrganisationId () {
-      return [
-        { id: 'mockId', sheetId: 'mockSheetId', area: 1000 }
-      ]
+      return [{ id: 'mockId', sheetId: 'mockSheetId', area: 1000 }]
     },
     getCoversByOrganisationId () {
-      return [
-        { id: 'mockId', info: [{ area: 1000, name: 'Mock Name' }] }
-      ]
+      return [{ id: 'mockId', info: [{ area: 1000, name: 'Mock Name' }] }]
     },
     getParcelsSummaryByOrganisationId () {
       return {
@@ -28,7 +24,7 @@ const dataSources = {
   }
 }
 
-const mockBusiness = { id: 'mockId' }
+const mockBusiness = { businessId: 'mockId' }
 
 describe('BusinessLand', () => {
   it('summary', () => {

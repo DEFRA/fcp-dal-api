@@ -1,7 +1,7 @@
 import { graphql } from 'graphql'
 
-import { schema } from '../../../app/graphql/server.js'
 import { context } from '../../../app/graphql/context.js'
+import { schema } from '../../../app/graphql/server.js'
 
 describe('Query.customer without authorization header', () => {
   it('should return customer data', async () => {
@@ -9,8 +9,8 @@ describe('Query.customer without authorization header', () => {
     const result = await graphql({
       source: `#graphql
         query Customer {
-          customer(id: "5090008") {
-            id
+          customer(crn: "0866159801") {
+            crn
             info {
               name {
                 title
@@ -22,10 +22,7 @@ describe('Query.customer without authorization header', () => {
             }
           }
         }
-        `,
-      variableValues: {
-        customerId: '5090008'
-      },
+      `,
       schema,
       contextValue: unAuthedContext
     })

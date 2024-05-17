@@ -144,12 +144,12 @@ export const organisationPeopleByOrgId = orgId => {
 
 export const organisationBySbi = sbi => {
   try {
-    return getJSON(`./sbi/${sbi}/organisation.json`)
+    return getJSON(`./sbi/${sbi}/organisation-search.json`)
   } catch (error) {
     logger.debug('#Mock #Fixtures #organisationBySbi - Generating mock data')
     faker.seed(+sbi)
     return {
-      _data: createOrganisationMock({ sbi })
+      _data: [createOrganisationMock({ sbi })]
     }
   }
 }
@@ -168,6 +168,7 @@ export const organisationApplicationsByOrgId = orgId => {
 
 export const organisationPersonSummary = (attributes = {}) => {
   try {
+    // throw new Error('Not implemented')
     return getJSON(`./personId/${attributes.id}/organisationSummary.json`)
   } catch (error) {
     logger.debug('#Mock #Fixtures #organisationPersonSummary - Generating mock data')

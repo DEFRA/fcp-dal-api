@@ -41,7 +41,7 @@ export default [
               }
 
               return okResponse(res, {
-                _data: [personById({ customerReferenceNumber: body.primarySearchPhrase })],
+                _data: [personById({ customerReferenceNumber: body.primarySearchPhrase })._data],
                 _page: pagination
               })
             } catch (error) {

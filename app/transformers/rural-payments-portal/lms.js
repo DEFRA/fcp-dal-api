@@ -11,10 +11,10 @@ export function transformLandCovers (landCovers) {
 }
 
 export function transformLandCoversToArea (name, landCovers) {
-  const { area } = landCovers.find((landCover) => landCover.name === name)
+  const { area } = landCovers.find(landCover => landCover.name === name)
   return area
 }
 
 export function transformLandParcels (landParcels) {
-  return landParcels.map(({ id, sheetId, area }) => ({ id, sheetId, area }))
+  return landParcels.map(({ id, sheetId, area }) => ({ id: `${id}`, sheetId, area }))
 }

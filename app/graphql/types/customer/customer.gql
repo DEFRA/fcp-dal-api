@@ -112,7 +112,11 @@ type Customer {
   """
   The unique identifier of the customer.
   """
-  id: ID!
+  customerId: ID! #eslint-disable-line @graphql-eslint/no-typename-prefix
+  """
+  The CRN (Customer Reference Number) of the customer.
+  """
+  crn: ID!
 
   """
   The basic information of the customer.
@@ -142,17 +146,17 @@ type CustomerBusiness {
   """
   The unique identifier of the business.
   """
-  id: ID!
+  businessId: ID
+
+  """
+  The SBI (Single Business Identifier) of the business.
+  """
+  sbi: ID!
 
   """
   The name of the business.
   """
   name: String!
-
-  """
-  The SBI (Single Business Identifier) of the business.
-  """
-  sbi: Int!
 
   """
   The roles associated with the business.

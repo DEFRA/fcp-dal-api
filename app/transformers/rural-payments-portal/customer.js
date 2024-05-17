@@ -40,7 +40,8 @@ export const ruralPaymentsPortalCustomerTransformer = data => {
         deactivated: data.deactivated
       }
     },
-    id: data.id
+    crn: data.customerReferenceNumber,
+    customerId: `${data.id}`
   }
 }
 
@@ -53,17 +54,17 @@ export function transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivilege
 }
 
 export function transformPersonSummaryToCustomerAuthorisedBusinesses (customerId, summary) {
-  return summary.map(({ id, name, sbi }) => ({
+  return summary.map(({ name, sbi, organisationId }) => ({
     customerId,
-    id,
     name,
-    sbi
+    sbi,
+    businessId: organisationId
   }))
 }
 
 export function transformNotificationsToMessages (notifications = [], showOnlyDeleted = false) {
   return notifications
-    .map((message) => ({
+    .map(message => ({
       id: message.id,
       title: message.title,
       date: message.createdAt,
@@ -71,7 +72,7 @@ export function transformNotificationsToMessages (notifications = [], showOnlyDe
       read: !!message.readAt,
       archivedAt: message.archivedAt
     }))
-    .filter(({ archivedAt }) => showOnlyDeleted ? archivedAt !== null : archivedAt === null)
+    .filter(({ archivedAt }) => (showOnlyDeleted ? archivedAt !== null : archivedAt === null))
 }
 
 export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (customerId, sbi, summary) {
@@ -81,7 +82,7 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (cust
   }
 
   return {
-    id: filteredBusinessForCustomer.id,
+    personId: filteredBusinessForCustomer.id,
     name: filteredBusinessForCustomer.name,
     customerId,
     sbi

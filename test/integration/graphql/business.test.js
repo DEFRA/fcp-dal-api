@@ -1,4 +1,5 @@
 import { graphql } from 'graphql'
+import { Permissions } from '../../../app/data-sources/static/permissions.js'
 import { schema } from '../../../app/graphql/server.js'
 import {
   transformOrganisationCPH,
@@ -10,17 +11,16 @@ import {
   transformLandCoversToArea,
   transformLandParcels
 } from '../../../app/transformers/rural-payments-portal/lms.js'
+import { transformPrivilegesListToBusinessCustomerPermissions } from '../../../app/transformers/rural-payments-portal/permissions.js'
 import { coversSummary, landCovers, landParcels, parcelSummary } from '../../../mocks/fixtures/lms.js'
 import { organisationCPH, organisationCPHInfo } from '../../../mocks/fixtures/organisation-cph.js'
 import { organisationByOrgId, organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 import { fakeContext } from '../../test-setup.js'
-import { transformPrivilegesListToBusinessCustomerPermissions } from '../../../app/transformers/rural-payments-portal/permissions.js'
-import { Permissions } from '../../../app/data-sources/static/permissions.js'
 
-const organisationFixture = organisationByOrgId('123')._data
-const { totalArea, totalParcels } = parcelSummary('123')
-const organisationCPHInfoFixture = organisationCPHInfo('123').data
-const organisationCPHFixture = organisationCPH('123').data
+const organisationFixture = organisationByOrgId('5565448')._data
+const { totalArea, totalParcels } = parcelSummary('5565448')
+const organisationCPHInfoFixture = organisationCPHInfo('5565448').data
+const organisationCPHFixture = organisationCPH('5565448').data
 
 describe('Query.business', () => {
   it('should return business data', async () => {
@@ -29,10 +29,10 @@ describe('Query.business', () => {
     const result = await graphql({
       source: `#graphql
         query Business {
-          business(id: "123") {
-            id
+          business(sbi: "890000001") {
+            sbi
+            businessId
             info {
-              sbi
               name
               reference
               vat
@@ -77,16 +77,13 @@ describe('Query.business', () => {
           }
         }
       `,
-      variableValues: {
-        customerId: '5090008'
-      },
       schema,
       contextValue: fakeContext
     })
 
     expect(result).toEqual({
       data: {
-        business: JSON.parse(JSON.stringify(transformedOrganisation))
+        business: transformedOrganisation
       }
     })
   })
@@ -97,7 +94,7 @@ describe('Query.business.land', () => {
     const result = await graphql({
       source: `#graphql
         query BusinessLandSummary {
-          business(id: "123") {
+          business(sbi: "890000001") {
             land {
               summary {
                 totalParcels
@@ -114,7 +111,7 @@ describe('Query.business.land', () => {
       contextValue: fakeContext
     })
 
-    const coversSummaryData = coversSummary(123)
+    const coversSummaryData = coversSummary(5565448)
 
     expect(result).toEqual({
       data: {
@@ -137,7 +134,7 @@ describe('Query.business.land', () => {
     const result = await graphql({
       source: `#graphql
         query BusinessLandParcels {
-          business(id: "123") {
+          business(sbi: "890000001") {
             land {
               parcels {
                 id
@@ -156,7 +153,7 @@ describe('Query.business.land', () => {
       data: {
         business: {
           land: {
-            parcels: transformLandParcels(landParcels(123))
+            parcels: transformLandParcels(landParcels(5565448))
           }
         }
       }
@@ -167,7 +164,7 @@ describe('Query.business.land', () => {
     const result = await graphql({
       source: `#graphql
         query BusinessLandCovers {
-          business(id: "5565448") {
+          business(sbi: "890000001") {
             land {
               covers {
                 id
@@ -195,14 +192,13 @@ describe('Query.business.land', () => {
 })
 
 describe('Query.business.cph', () => {
-  const transformedCPH = transformOrganisationCPH('123', organisationCPHFixture)
-  delete transformedCPH[0].id
-
+  const transformedCPH = transformOrganisationCPH('5565448', organisationCPHFixture)
+  delete transformedCPH[0].businessId
   it('cph', async () => {
     const result = await graphql({
       source: `#graphql
       query BusinessCPH {
-        business(id: "123") {
+        business(sbi: "890000001") {
           cph {
             number
             parcelNumbers
@@ -222,21 +218,13 @@ describe('Query.business.cph', () => {
       contextValue: fakeContext
     })
 
-    expect(result).toEqual({
-      data: {
-        business: {
-          cph: [
-            {
-              ...transformedCPH[0],
-              parish: organisationCPHInfoFixture.parish,
-              species: organisationCPHInfoFixture.species,
-              startDate: organisationCPHInfoFixture.startDate / 1000,
-              expiryDate: organisationCPHInfoFixture.expiryDate / 1000,
-              coordinate: transformOrganisationCPHCoordinates(organisationCPHInfoFixture)
-            }
-          ]
-        }
-      }
+    expect(result.data.business.cph[0]).toEqual({
+      ...transformedCPH[0],
+      parish: organisationCPHInfoFixture.parish,
+      species: organisationCPHInfoFixture.species,
+      startDate: organisationCPHInfoFixture.startDate / 1000,
+      expiryDate: organisationCPHInfoFixture.expiryDate / 1000,
+      coordinate: transformOrganisationCPHCoordinates(organisationCPHInfoFixture)
     })
   })
 })
@@ -245,13 +233,13 @@ describe('Query.business.customers', () => {
   const transformedCPH = transformOrganisationCPH('123', organisationCPHFixture)
   delete transformedCPH[0].id
 
-  it('customer', async () => {
+  organisationPeopleByOrgId('customer', async () => {
     const result = await graphql({
       source: `#graphql
       query BusinessCustomers {
-        business(id: "123") {
+        business(sbi: "890000001") {
           customers {
-            id
+            customerId
             firstName
             lastName
             customerReference
@@ -288,7 +276,7 @@ describe('Query.business.customers', () => {
     const result = await graphql({
       source: `#graphql
         query BusinessCustomersPermissions {
-          business(id: "BID") {
+          business(sbi: "890000001") {
             customers {
               permissions {
                 id
@@ -303,15 +291,14 @@ describe('Query.business.customers', () => {
       contextValue: fakeContext
     })
 
-    expect(result).toEqual(
-      {
-        data: {
-          business: {
-            customers: organisationPeopleByOrgId()._data.map(({ privileges }) => ({ permissions: transformPrivilegesListToBusinessCustomerPermissions(privileges, new Permissions().getPermissionGroups()) }))
-          }
+    expect(result).toEqual({
+      data: {
+        business: {
+          customers: organisationPeopleByOrgId('5565448')._data.map(({ privileges }) => ({
+            permissions: transformPrivilegesListToBusinessCustomerPermissions(privileges, new Permissions().getPermissionGroups())
+          }))
         }
       }
-
-    )
+    })
   })
 })

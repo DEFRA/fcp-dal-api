@@ -3,11 +3,6 @@ Represents the basic information of a business.
 """
 type BusinessInfo {
   """
-  The Single Business Identifier (SBI) of the business.
-  """
-  sbi: Int
-
-  """
   The name of the business.
   """
   name: String
@@ -87,7 +82,10 @@ type BusinessType {
 Represents the a customer of a business.
 """
 type BusinessCustomer {
-  id: ID!
+  """
+  The unique identifier of the customer.
+  """
+  customerId: ID
 
   """
   First name of the customer.
@@ -113,7 +111,7 @@ type BusinessCustomer {
   The permissions the customer against the business.
   """
   permissions: [BusinessCustomerPermission]
-} 
+}
 
 type BusinessCustomerPermission {
   """
@@ -139,9 +137,13 @@ Data Source: Rural Payments Portal (PRR)
 """
 type Business {
   """
-  The unique identifier of the business.
+  The first unique identifier of the business.
   """
-  id: ID!
+  businessId: ID #eslint-disable-line @graphql-eslint/no-typename-prefix
+  """
+  The Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID!
 
   """
   The basic information of the business.

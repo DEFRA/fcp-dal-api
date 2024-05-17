@@ -6,7 +6,8 @@ export function transformOrganisationAuthorisationToCustomerBusinessPermissionLe
   )
 
   for (const permission of permissions) {
-    if (privilegeNames.some(privilege => permission.privilegeNames.includes(privilege))) {
+    const hasPrivilegeName = privilegeNames.some(privilege => permission.privilegeNames.includes(privilege))
+    if (hasPrivilegeName) {
       return permission.level
     }
   }

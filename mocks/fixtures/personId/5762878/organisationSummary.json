@@ -3,13 +3,13 @@
     {
       "id": 5762878,
       "name": "Emma Collins",
-      "sbi": 5625145,
+      "sbi": 890000004,
       "additionalSbiIds": [],
       "confirmed": true,
       "lastUpdatedOn": null,
       "landConfirmed": null,
-      "deactivated": false,
-      "locked": false,
+      "deactivated": true,
+      "locked": true,
       "unreadNotificationCount": 3,
       "readNotificationCount": 0
     }

@@ -6,16 +6,17 @@ import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformer
 import { personById } from '../../../mocks/fixtures/person.js'
 import { fakeContext } from '../../test-setup.js'
 
-const personFixture = personById({ id: '123' })
+const personFixture = personById({ id: '5007136' })
 
 describe('Query.customer', () => {
   it('should return customer data', async () => {
     const transformedPerson = ruralPaymentsPortalCustomerTransformer(personFixture._data)
     const result = await graphql({
       source: `#graphql
-        query Customer {
-          customer(id: "123") {
-            id
+        query Customer($crn: ID!) {
+          customer(crn: $crn) {
+            crn
+            customerId
             info {
               name {
                 title
@@ -60,7 +61,7 @@ describe('Query.customer', () => {
         }
       `,
       variableValues: {
-        customerId: '123'
+        crn: '0866159801'
       },
       schema,
       contextValue: fakeContext
@@ -85,7 +86,7 @@ describe('Query.customer', () => {
     const result = await graphql({
       source: `#graphql
         query Customer {
-          customer(id: "123") {
+          customer(crn: "123") {
             authenticationQuestions {
               memorableDate
               memorableEvent
@@ -113,12 +114,10 @@ describe('Query.customer', () => {
 
 describe('Query.customer.businesses', () => {
   it('should return customer businesses', async () => {
-    // const authOrganisation = sitiAgriAuthorisationOrganisation({ organisationId: '5841879' })
-    // const personId = authOrganisation.personRoles[0].personId
     const result = await graphql({
       source: `#graphql
-        query TestCustomerBusinesses($id: ID!) {
-          customer(id: $id) {
+        query TestCustomerBusinesses($crn: ID!) {
+          customer(crn: $crn) {
             businesses {
               roles
               permissionGroups {
@@ -130,7 +129,7 @@ describe('Query.customer.businesses', () => {
         }
       `,
       variableValues: {
-        id: '1553506'
+        crn: '0866159801' // personId: 5007136
       },
       schema,
       contextValue: fakeContext
@@ -145,7 +144,7 @@ describe('Query.customer.businesses', () => {
               permissionGroups: [
                 {
                   id: 'BASIC_PAYMENT_SCHEME',
-                  level: 'SUBMIT'
+                  level: null
                 },
                 {
                   id: 'BUSINESS_DETAILS',
@@ -153,23 +152,23 @@ describe('Query.customer.businesses', () => {
                 },
                 {
                   id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS',
-                  level: 'SUBMIT'
+                  level: null
                 },
                 {
                   id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS',
-                  level: 'SUBMIT'
+                  level: null
                 },
                 {
                   id: 'ENTITLEMENTS',
-                  level: 'AMEND'
+                  level: null
                 },
                 {
                   id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
-                  level: 'SUBMIT'
+                  level: null
                 },
                 {
                   id: 'LAND_DETAILS',
-                  level: 'AMEND'
+                  level: null
                 }
               ]
             }
@@ -184,8 +183,8 @@ describe('Query.customer.businesses.messages', () => {
   it('should return customer businesses messages', async () => {
     const result = await graphql({
       source: `#graphql
-        query Messages($customerId: ID!, $pagination: Pagination, $deleted: Boolean) {
-          customer(id: $customerId) {
+        query Messages($crn: ID!, $pagination: Pagination, $deleted: Boolean) {
+          customer(crn: $crn) {
             businesses {
               messages(pagination: $pagination, showOnlyDeleted: $deleted) {
                 title
@@ -199,7 +198,7 @@ describe('Query.customer.businesses.messages', () => {
         }
       `,
       variableValues: {
-        customerId: '5007136',
+        crn: '0866159801',
         pagination: {
           page: 1,
           perPage: 3
@@ -216,12 +215,6 @@ describe('Query.customer.businesses.messages', () => {
           businesses: [
             {
               messages: [
-                {
-                  title: 'Permission changed for David Paul',
-                  read: false,
-                  id: '11401',
-                  date: 6010706997254
-                },
                 {
                   title: 'Permission changed for David Paul',
                   read: true,
@@ -245,8 +238,8 @@ describe('Query.customer.businesses.messages', () => {
   it('should return deleted customer businesses messages', async () => {
     const result = await graphql({
       source: `#graphql
-        query Messages($customerId: ID!, $pagination: Pagination, $deleted: Boolean) {
-          customer(id: $customerId) {
+        query Messages($crn: ID!, $pagination: Pagination, $deleted: Boolean) {
+          customer(crn: $crn) {
             businesses {
               messages(pagination: $pagination, showOnlyDeleted: $deleted) {
                 title
@@ -254,13 +247,12 @@ describe('Query.customer.businesses.messages', () => {
                 id
                 date
               }
-
             }
           }
         }
       `,
       variableValues: {
-        customerId: '5007136',
+        crn: '0866159801',
         pagination: {
           page: 1,
           perPage: 3
@@ -280,8 +272,8 @@ describe('Query.customer.businesses.messages', () => {
                 {
                   title: 'Permission changed for David Paul',
                   read: false,
-                  id: '9315941',
-                  date: 8862388585856
+                  id: '11401',
+                  date: 6010706997254
                 }
               ]
             }
