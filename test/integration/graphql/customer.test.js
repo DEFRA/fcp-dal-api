@@ -10,7 +10,7 @@ const personFixture = personById({ id: '5007136' })
 
 describe('Query.customer', () => {
   it('should return customer data', async () => {
-    const transformedPerson = ruralPaymentsPortalCustomerTransformer(personFixture._data)
+    const customerInfo = ruralPaymentsPortalCustomerTransformer(personFixture._data)
     const result = await graphql({
       source: `#graphql
         query Customer($crn: ID!) {
@@ -69,9 +69,14 @@ describe('Query.customer', () => {
 
     expect(result).toEqual({
       data: {
-        customer: JSON.parse(JSON.stringify(transformedPerson))
+        customer: {
+          crn: personFixture._data.customerReferenceNumber,
+          customerId: personFixture._data.id.toString(),
+          info: customerInfo
+        }
       }
-    })
+    }
+    )
   })
 
   it('should return customer authenticate questions', async () => {

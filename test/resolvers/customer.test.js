@@ -3,27 +3,15 @@ import { jest } from '@jest/globals'
 import pick from 'lodash.pick'
 import { Customer, CustomerBusiness, CustomerBusinessPermissionGroup } from '../../app/graphql/resolvers/customer/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
+import { personById } from '../../mocks/fixtures/person.js'
 
+const personFixture = personById({ id: '5007136' })
 const authorisationOrganisation = sitiAgriAuthorisationOrganisation({ organisationId: '4309257' })
 const personId = authorisationOrganisation.data.personRoles[0].personId
 const dataSources = {
   ruralPaymentsPortalApi: {
-    getPersonByPersonId () {
-      return [
-        {
-          id: '4309257',
-          name: 'company name',
-          sbi: 123123123,
-          additionalSbiIds: [],
-          confirmed: true,
-          lastUpdatedOn: null,
-          landConfirmed: null,
-          deactivated: false,
-          locked: true,
-          unreadNotificationCount: 3,
-          readNotificationCount: 0
-        }
-      ]
+    getCustomerByCRN () {
+      return personFixture._data
     },
     getAuthorisationByOrganisationId () {
       return authorisationOrganisation.data
@@ -76,9 +64,62 @@ describe('Customer', () => {
           deactivated: true,
           locked: false,
           unreadNotificationCount: 3,
-          readNotificationCount: 0
+          readNotificationCount: 0,
+          id: '4309257'
         }
       ]
+    })
+  })
+
+  test('Customer.info', async () => {
+    const response = await Customer.info({ crn: personFixture._data.customerReferenceNumber }, undefined, { dataSources })
+
+    expect(response).toEqual({
+      name: {
+        title: 'Dr.',
+        otherTitle: null,
+        first: 'David',
+        middle: 'Paul',
+        last: 'Paul'
+      },
+      dateOfBirth: '1947-10-30T03:41:25.385Z',
+      phone: { mobile: '1849164778', landline: null, fax: null },
+      email: {
+        address: 'Selena_Kub@hotmail.com',
+        validated: false,
+        doNotContact: false
+      },
+      address: {
+        pafOrganisationName: null,
+        buildingNumberRange: null,
+        buildingName: '853',
+        flatName: null,
+        street: 'Zulauf Orchard',
+        city: 'St. Blanda Heath',
+        county: 'Cambridgeshire',
+        postalCode: 'YZ72 5MB',
+        country: 'United Kingdom',
+        uprn: null,
+        dependentLocality: null,
+        doubleDependentLocality: null,
+        typeId: null
+      },
+      status: { locked: false, confirmed: null, deactivated: false }
+    })
+  })
+
+  test('Customer.business - returns null if no business', async () => {
+    const response = await Customer.business({ crn: personFixture._data.customerReferenceNumber }, { sbi: 890000001 }, { dataSources })
+    expect(response).toEqual(null)
+  })
+
+  test('Customer.business - returns business', async () => {
+    const response = await Customer.business({ crn: personFixture._data.customerReferenceNumber }, { sbi: 865774479 }, { dataSources })
+    expect(response).toEqual({
+      personId: '4309257',
+      name: 'Ratke, Grant and Keebler',
+      customerId: 5007136,
+      sbi: 865774479
     })
   })
 
@@ -89,7 +130,7 @@ describe('Customer', () => {
         businessId: '123',
         name: 'Ratke, Grant and Keebler',
         sbi: 865774479,
-        customerId: '5007136'
+        customerId: 5007136
       }
     ])
   })
