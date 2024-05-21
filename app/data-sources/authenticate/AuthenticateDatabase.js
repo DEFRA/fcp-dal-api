@@ -34,7 +34,7 @@ export class AuthenticateDatabase {
     })
 
     const answers = await Answer.findOne({
-      attributes: ['CRN', 'Date', 'Event', 'Location'],
+      attributes: ['CRN', 'Date', 'Event', 'Location', 'Updated'],
       where: {
         CRN: crn
       }

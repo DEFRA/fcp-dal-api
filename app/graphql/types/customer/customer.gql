@@ -103,6 +103,16 @@ type CustomerAuthenticationQuestions {
   The memorable place question.
   """
   memorablePlace: String
+
+  """
+  The date the record was last updated.
+  """
+  updatedAt: String
+
+  """
+  The indicator for customer record been found in authenticate database
+  """
+  isFound: Boolean
 }
 
 """
