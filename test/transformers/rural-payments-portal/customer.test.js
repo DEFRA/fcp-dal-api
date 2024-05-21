@@ -151,9 +151,11 @@ describe('Customer transformer', () => {
     const result = transformAuthenticateQuestionsAnswers(mockAuthenticateQuestionsResponse)
 
     expect(result).toEqual({
+      isFound: true,
       memorableDate: 'some date',
       memorableEvent: 'some event',
-      memorablePlace: 'some location'
+      memorablePlace: 'some location',
+      updatedAt: undefined
     })
   })
 
@@ -161,9 +163,11 @@ describe('Customer transformer', () => {
     const result = transformAuthenticateQuestionsAnswers(null)
 
     expect(result).toEqual({
+      isFound: false,
       memorableDate: undefined,
       memorableEvent: undefined,
-      memorablePlace: undefined
+      memorablePlace: undefined,
+      updatedAt: undefined
     })
   })
 })

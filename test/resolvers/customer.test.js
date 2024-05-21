@@ -138,9 +138,11 @@ describe('Customer', () => {
   test('Customer.authenticationQuestions', async () => {
     const response = await Customer.authenticationQuestions({ id: 'mockCustomerId' }, undefined, { dataSources })
     expect(response).toEqual({
+      isFound: true,
       memorableDate: 'some date',
       memorableEvent: 'some event',
-      memorablePlace: 'some location'
+      memorablePlace: 'some location',
+      updatedAt: undefined
     })
   })
 })

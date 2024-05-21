@@ -84,7 +84,8 @@ describe('Query.customer', () => {
       CRN: '123',
       Date: 'some date',
       Event: 'some event',
-      Location: 'some location'
+      Location: 'some location',
+      Updated: 'some date'
     }
     fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(authenticateQuestionsResponse)
     const transformedAuthenticateQuestions = transformAuthenticateQuestionsAnswers(authenticateQuestionsResponse)
@@ -96,6 +97,8 @@ describe('Query.customer', () => {
               memorableDate
               memorableEvent
               memorablePlace
+              updatedAt
+              isFound
             }
           }
         }
@@ -111,6 +114,90 @@ describe('Query.customer', () => {
       data: {
         customer: {
           authenticationQuestions: JSON.parse(JSON.stringify(transformedAuthenticateQuestions))
+        }
+      }
+    })
+  })
+
+  it('should return isFound false if record not found', async () => {
+    const authenticateQuestionsResponse = null
+    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(authenticateQuestionsResponse)
+    const result = await graphql({
+      source: `#graphql
+        query Customer {
+          customer(crn: "123") {
+            authenticationQuestions {
+              memorableDate
+              memorableEvent
+              memorablePlace
+              updatedAt
+              isFound
+            }
+          }
+        }
+      `,
+      variableValues: {
+        customerId: '123'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          authenticationQuestions: {
+            memorableDate: null,
+            memorableEvent: null,
+            memorablePlace: null,
+            updatedAt: null,
+            isFound: false
+          }
+        }
+      }
+    })
+  })
+
+  it('should return null for fields that are empty', async () => {
+    const authenticateQuestionsResponse = {
+      CRN: '123',
+      Date: '',
+      Event: '',
+      Location: 'some location',
+      Updated: 'some date'
+    }
+    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(authenticateQuestionsResponse)
+    const result = await graphql({
+      source: `#graphql
+        query Customer {
+          customer(crn: "123") {
+            authenticationQuestions {
+              memorableDate
+              memorableEvent
+              memorablePlace
+              updatedAt
+              isFound
+            }
+          }
+        }
+      `,
+      variableValues: {
+        customerId: '123'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          authenticationQuestions: {
+            memorableDate: null,
+            memorableEvent: null,
+            memorablePlace: 'some location',
+            updatedAt: 'some date',
+            isFound: true
+          }
         }
       }
     })
