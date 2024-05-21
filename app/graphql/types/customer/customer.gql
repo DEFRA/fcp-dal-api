@@ -107,7 +107,7 @@ type CustomerAuthenticationQuestions {
   """
   The date the record was last updated.
   """
-  updatedAt: String
+  updatedAt: Date
 
   """
   The indicator for customer record been found in authenticate database
