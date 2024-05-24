@@ -13,12 +13,6 @@
     "cobertura",
     "lcov"
   ],
-  "coveragePathIgnorePatterns": [
-    "<rootDir>/app/index.js",
-    "<rootDir>/app/insights.js",
-    "<rootDir>/app/data-sources/rural-payments-portal/RuralPaymentsSession.js",
-    "<rootDir>/app/graphql/server.js"
-  ],
   "setupFiles": [
     "<rootDir>/test/test-setup.js"
   ],
