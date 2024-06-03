@@ -36,7 +36,7 @@ resources:
       name: DEFRA/adp-pipeline-common
       endpoint: DEFRA
       type: github
-      ref: main
+      ref: pp/services-to-snd4
 
 extends:
   template: /pipelines/common-app-build.yaml@DEFRA-ADPPipelineCommon
