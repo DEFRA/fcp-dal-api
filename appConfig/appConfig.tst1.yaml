@@ -1,7 +1,7 @@
 - key: Sentinel
   value: '1'
 - key: ENABLE_MOCK_SERVER
-  value: 'true'
+  value: 'false'
 - key: RURAL_PAYMENTS_AGENCY_LAND_API_URL
   value: 'https://environment.data.gov.uk'
 - key: RURAL_PAYMENTS_PORTAL_EMAIL
