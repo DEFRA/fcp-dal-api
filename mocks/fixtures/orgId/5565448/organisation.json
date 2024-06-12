@@ -42,7 +42,7 @@
     "correspondenceLandline": null,
     "correspondenceMobile": null,
     "correspondenceFax": null,
-    "taxRegistrationNumber": null,
+    "taxRegistrationNumber": "GB123456789",
     "businessType": { "id": 101443, "type": "Not Specified" },
     "businessReference": "9102179604",
     "legalStatus": { "id": 102111, "type": "Sole Proprietorship" },
@@ -55,7 +55,7 @@
     "hasLandInWales": null,
     "hasAdditionalBusinessActivities": null,
     "vendorNumber": "694523",
-    "traderNumber": null,
+    "traderNumber": "010203040506070880980",
     "isAccountablePeopleDeclarationCompleted": null,
     "additionalBusinessActivities": null
   }

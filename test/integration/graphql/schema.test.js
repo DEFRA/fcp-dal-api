@@ -116,6 +116,8 @@ describe('schema', () => {
         name: String
         reference: String
         vat: String
+        traderNumber: String
+        vendorNumber: String
         address: Address
         phone: Phone
         email: Email
