@@ -15,7 +15,7 @@ service:
 container:
   port: 3000
   memCpuTier: CUSTOM
-  requestMemory: 50Mi
+  requestMemory: 100Mi
   requestCpu: 50m
   limitMemory: 400Mi
   limitCpu: 400m
