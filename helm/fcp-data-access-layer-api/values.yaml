@@ -17,7 +17,7 @@ container:
   memCpuTier: CUSTOM
   requestMemory: 50Mi
   requestCpu: 50m
-  limitMemory: 200Mi
+  limitMemory: 400Mi
   limitCpu: 400m
 
 ingress:
