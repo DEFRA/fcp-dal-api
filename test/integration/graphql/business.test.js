@@ -36,6 +36,8 @@ describe('Query.business', () => {
               name
               reference
               vat
+              traderNumber
+              vendorNumber
               address {
                 pafOrganisationName
                 buildingNumberRange

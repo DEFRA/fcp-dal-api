@@ -3,7 +3,9 @@ export const transformOrganisationToBusiness = data => {
     info: {
       name: data.name,
       reference: data.businessReference,
-      vat: null,
+      vat: data.taxRegistrationNumber,
+      traderNumber: data.traderNumber,
+      vendorNumber: data.vendorNumber,
       address: {
         pafOrganisationName: data.address.pafOrganisationName,
         buildingNumberRange: data.address.buildingNumberRange,

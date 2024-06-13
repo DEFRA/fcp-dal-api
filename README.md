@@ -21,6 +21,9 @@ RURAL_PAYMENTS_AGENCY_LAND_API_URL=
 RURAL_PAYMENTS_PORTAL_EMAIL=
 RURAL_PAYMENTS_PORTAL_PASSWORD=
 RURAL_PAYMENTS_PORTAL_API_URL=
+
+# Turn on all fields for local development
+ALL_SCHEMA_ON=true
 ```
 
 Run:
@@ -45,6 +48,26 @@ AUTHENTICATE_DB_PASSWORD=Password123!
 ```
 
 And then run the mock authenticate database: `docker compose -f mocks/services/authenticate/docker-compose.yaml up`
+
+#### `@on` directive
+
+To allow for the granular release of fields as data sources become available, fields must have the custom `@on` directive set to be included when the schema is built.
+
+For example:
+
+```graphql
+type Query {
+    customers: [Customer] @on
+}
+
+type Customer {
+    id: ID! @on
+    name: String # this field is not included in the final schema
+}
+
+```
+
+For local development and lower environments, all fields can be turned on by setting the env variable `ALL_SCHEMA_ON`.
 
 ## Prerequisites
 - Docker

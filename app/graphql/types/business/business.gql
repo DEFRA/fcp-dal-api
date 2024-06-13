@@ -18,6 +18,16 @@ type BusinessInfo {
   vat: String
 
   """
+  The trader number of the business.
+  """
+  traderNumber: String
+
+  """
+  The vendor number of the business.
+  """
+  vendorNumber: String
+
+  """
   The address of the business.
   """
   address: Address

@@ -92,27 +92,27 @@ type CustomerAuthenticationQuestions {
   """
   The memorable date question.
   """
-  memorableDate: String
+  memorableDate: String @on
 
   """
   The memorable event question.
   """
-  memorableEvent: String
+  memorableEvent: String @on
 
   """
   The memorable place question.
   """
-  memorablePlace: String
+  memorablePlace: String @on
 
   """
   The date the record was last updated.
   """
-  updatedAt: Date
+  updatedAt: Date @on
 
   """
   The indicator for customer record been found in authenticate database
   """
-  isFound: Boolean
+  isFound: Boolean @on
 }
 
 """
@@ -126,7 +126,7 @@ type Customer {
   """
   The CRN (Customer Reference Number) of the customer.
   """
-  crn: ID!
+  crn: ID! @on
 
   """
   The basic information of the customer.
@@ -136,7 +136,7 @@ type Customer {
   """
   The security questions of the customer.
   """
-  authenticationQuestions: CustomerAuthenticationQuestions
+  authenticationQuestions: CustomerAuthenticationQuestions @on
 
   """
   The businesses associated with the customer.
