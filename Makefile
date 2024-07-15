@@ -6,4 +6,4 @@ token:
 	-d "client_id=${CLIENT_ID}" \
 	-d "scope=api://${CLIENT_ID}/.default" \
 	-d "client_secret=${CLIENT_SECRET}" \
-	-X POST h"ttps://login.microsoftonline.com/${API_TENANT_ID}/oauth2/v2.0/token" | jq -r '.access_token' | clip
+	-X POST h"ttps://login.microsoftonline.com/${API_TENANT_ID}/oauth2/v2.0/token" | jq -r '.access_token'
