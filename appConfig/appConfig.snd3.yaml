@@ -10,6 +10,8 @@
   value: 'http://127.0.0.1:3100/rpp/'
 - key: RURAL_PAYMENTS_PROXY_URL
   value: ''
+- key: ALL_SCHEMA_ON
+  value: 'false'
 # Secrets
 - key: RURAL_PAYMENTS_PORTAL_PASSWORD
   value: '{{servicename}}-RURAL-PAYMENTS-PORTAL-PASSWORD'
