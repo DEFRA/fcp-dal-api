@@ -2,6 +2,10 @@
   "data": {
     "personRoles": [
       {
+        "personId": 5302028,
+        "role": "Business Partner"
+      },
+      {
         "personId": 5007136,
         "role": "Business Partner"
       },
@@ -367,6 +371,10 @@
       }
     ],
     "personPrivileges": [
+      {
+        "personId": 5302028,
+        "privilegeNames": ["SUBMIT - CS APP - SA", "SUBMIT - CS AGREE - SA"]
+      },
       {
         "personId": 5007136,
         "privilegeNames": ["Full permission - business"]

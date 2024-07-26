@@ -2,12 +2,12 @@ import { faker } from '@faker-js/faker/locale/en_GB'
 import fs from 'fs'
 import files from '../utils/files.js'
 import { createMessages } from './messages.js'
-import { organisationPersonSummary } from './organisationPersonSummary.js'
+import { organisationPersonSummary } from './organisation.js'
 import { personById } from './person.js'
 
 const { getJSON } = files(import.meta.url)
 
-const orgId = '5565448'
+const orgId = '5625145'
 const org = getJSON(`./orgId/${orgId}/organisation.json`)._data
 const orgPeople = getJSON(`./orgId/${orgId}/organisation-people.json`)._data
 
@@ -41,7 +41,7 @@ for (const person of orgPeople) {
   const organisationSummary = organisationPersonSummary({
     id: person.id,
     sbi: org.sbi,
-    name: `${person.firstName} ${person.lastName}`
+    name: org.name
   })
   fs.writeFileSync(`./mocks/fixtures/personId/${person.id}/organisationSummary.json`, JSON.stringify(organisationSummary, null, 2))
 }
