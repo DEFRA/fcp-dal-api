@@ -24,4 +24,12 @@ export class VersionOneCustomer extends VersionOne {
     const response = await this.get(`person/${personId}/summary`)
     return response._data
   }
+
+  async getPersonBusinessesByPersonId (personId, sbi) {
+    const personBusinessSummaries = await this.get(
+      `organisation/person/${personId}/summary`
+    )
+
+    return personBusinessSummaries._data
+  }
 }

@@ -1,8 +1,7 @@
 import {
   organisationByOrgId,
   organisationBySbi,
-  organisationPeopleByOrgId,
-  organisationPersonSummary
+  organisationPeopleByOrgId
 } from '../../fixtures/organisation.js'
 import { okResponse } from '../../utils/requestResponse.js'
 
@@ -43,26 +42,6 @@ export default [
 
             const searchPhrase = body.primarySearchPhrase
             const data = organisationBySbi(searchPhrase)
-
-            return okResponse(res, data)
-          }
-        }
-      }
-    ]
-  },
-  {
-    id: 'v1-organisation-get-person-summary-by-person-id',
-    url: '/v1/organisation/person/:personId/summary',
-    method: ['GET'],
-    variants: [
-      {
-        id: 'default',
-        type: 'middleware',
-        options: {
-          middleware: (req, res) => {
-            const personId = req.params.personId
-            const sbi = req.query.organisationId
-            const data = organisationPersonSummary({ id: personId, sbi })
 
             return okResponse(res, data)
           }

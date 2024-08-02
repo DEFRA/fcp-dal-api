@@ -95,49 +95,44 @@ type BusinessCustomer {
   """
   The unique identifier of the customer.
   """
-  customerId: ID
+  customerId: ID @on
 
   """
   First name of the customer.
   """
-  firstName: String
+  firstName: String @on
 
   """
   Last name of the customer.
   """
-  lastName: String
+  lastName: String @on
 
   """
   The customer reference of the customer.
   """
-  customerReference: String
+  crn: String @on
 
   """
   The role the customer against the business.
   """
-  role: String
+  role: String @on
 
   """
   The permissions the customer against the business.
   """
-  permissions: [BusinessCustomerPermission]
+  permissionGroups: [BusinessCustomerPermissionGroup] @on
 }
 
-type BusinessCustomerPermission {
+type BusinessCustomerPermissionGroup {
   """
   The permission group id.
   """
-  id: PermissionGroupId!
+  id: PermissionGroupId @on
 
   """
-  The permission group name.
+  The permission level customer has for the business.
   """
-  name: String!
-
-  """
-  The permission group level assigned to the customer
-  """
-  level: PermissionLevel
+  level: PermissionLevel @on
 }
 
 """
@@ -149,11 +144,11 @@ type Business {
   """
   The first unique identifier of the business.
   """
-  businessId: ID #eslint-disable-line @graphql-eslint/no-typename-prefix
+  businessId: ID @on #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
   The Single Business Identifier (SBI) of the business.
   """
-  sbi: ID!
+  sbi: ID! @on
 
   """
   The basic information of the business.
@@ -178,5 +173,5 @@ type Business {
   """
   The customers associated with the business.
   """
-  customers: [BusinessCustomer]
+  customers: [BusinessCustomer] @on
 }

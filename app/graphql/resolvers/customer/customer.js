@@ -2,15 +2,18 @@ import { transformAuthenticateQuestionsAnswers } from '../../../transformers/aut
 import {
   ruralPaymentsPortalCustomerTransformer,
   transformNotificationsToMessages,
-  transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments-portal/customer.js'
-import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
+import {
+  transformBusinessCustomerToCustomerPermissionGroups, transformBusinessCustomerToCustomerRole,
+  transformPersonSummaryToCustomerAuthorisedBusinesses
+} from '../../../transformers/version-one/customer.js'
+import logger from '../../../utils/logger.js'
 
 export const Customer = {
   async customerId ({ crn }, __, { dataSources }) {
     const { id: customerId } = await dataSources.versionOneCustomer.getCustomerByCRN(crn)
+    logger.info('Get customer id from crn', { crn, customerId })
     return customerId
   },
 
@@ -25,14 +28,15 @@ export const Customer = {
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       customerId,
       sbi,
-      await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(customerId, sbi)
+      await dataSources.versionOneCustomer.getPersonBusinessesByPersonId(customerId, sbi)
     )
   },
 
   async businesses ({ crn }, __, { dataSources }) {
     const { id: customerId } = await dataSources.versionOneCustomer.getCustomerByCRN(crn)
-    const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(customerId)
-    return transformPersonSummaryToCustomerAuthorisedBusinesses(customerId, summary)
+    const summary = await dataSources.versionOneCustomer.getPersonBusinessesByPersonId(customerId)
+    logger.info('Get customer businesses', { crn, customerId, summary })
+    return transformPersonSummaryToCustomerAuthorisedBusinesses({ customerId, crn }, summary)
   },
 
   async authenticationQuestions ({ crn }, __, { dataSources }) {
@@ -42,9 +46,10 @@ export const Customer = {
 }
 
 export const CustomerBusiness = {
-  async roles ({ businessId, customerId }, __, { dataSources }) {
-    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(businessId)
-    return transformPersonRolesToCustomerAuthorisedBusinessesRoles(customerId, authorisation.personRoles)
+  async role ({ businessId, crn }, __, { dataSources }) {
+    logger.info('Get customer business role', { crn, businessId })
+    const businessCustomers = await dataSources.versionOneBusiness.getOrganisationCustomersByOrganisationId(businessId)
+    return transformBusinessCustomerToCustomerRole(crn, businessCustomers)
   },
 
   async messages ({ businessId, customerId }, { pagination, showOnlyDeleted }, { dataSources }) {
@@ -61,14 +66,9 @@ export const CustomerBusiness = {
     return transformNotificationsToMessages(notifications, showOnlyDeleted)
   },
 
-  async permissionGroups ({ businessId, customerId }, __, { dataSources }) {
-    return dataSources.permissions.getPermissionGroups().map(permissionGroup => ({ ...permissionGroup, businessId, customerId }))
-  }
-}
+  async permissionGroups ({ businessId, crn }, __, { dataSources }) {
+    const businessCustomers = await dataSources.versionOneBusiness.getOrganisationCustomersByOrganisationId(businessId)
 
-export const CustomerBusinessPermissionGroup = {
-  async level ({ businessId, customerId, permissions }, __, { dataSources }) {
-    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(businessId)
-    return transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(customerId, permissions, authorisation.personPrivileges)
+    return transformBusinessCustomerToCustomerPermissionGroups(crn, businessCustomers, dataSources.permissions.getPermissionGroups())
   }
 }

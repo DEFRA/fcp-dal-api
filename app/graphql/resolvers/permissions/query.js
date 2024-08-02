@@ -8,7 +8,7 @@ export const Query = {
 
 export const Permission = {
   async active (permissionGroup, { customerId, businessId }, { dataSources }) {
-    const authorisation = await dataSources.versionOneBusiness.getAuthorisationByOrganisationId(businessId)
+    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(businessId)
 
     return (
       transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(customerId, [permissionGroup], authorisation.personPrivileges) ===

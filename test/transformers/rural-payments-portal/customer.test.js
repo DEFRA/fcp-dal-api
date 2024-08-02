@@ -4,9 +4,11 @@ import {
   transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../app/transformers/rural-payments-portal/customer.js'
+import {
+  transformPersonSummaryToCustomerAuthorisedBusinesses
+} from '../../../app/transformers/version-one/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 
 const mockOrganisationPersonSummary = {

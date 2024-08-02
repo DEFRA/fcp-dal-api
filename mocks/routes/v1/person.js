@@ -1,3 +1,6 @@
+import {
+  organisationPersonSummary
+} from '../../fixtures/organisation.js'
 import { pagination } from '../../fixtures/pagination.js'
 import { personById } from '../../fixtures/person.js'
 import { okResponse } from '../../utils/requestResponse.js'
@@ -48,6 +51,26 @@ export default [
               res.status(400)
               res.send()
             }
+          }
+        }
+      }
+    ]
+  },
+  {
+    id: 'v1-get-person-organisations-summary-by-person-id',
+    url: '/v1/organisation/person/:personId/summary',
+    method: ['GET'],
+    variants: [
+      {
+        id: 'default',
+        type: 'middleware',
+        options: {
+          middleware: (req, res) => {
+            const personId = req.params.personId
+            const data = organisationPersonSummary({ id: personId })
+            console.log('data', data)
+
+            return okResponse(res, data)
           }
         }
       }

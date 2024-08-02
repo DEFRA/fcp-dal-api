@@ -49,15 +49,6 @@ export function transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivilege
   return personPrivileges.filter(({ personId }) => personId === customerId).map(({ privilegeNames }) => privilegeNames[0])
 }
 
-export function transformPersonSummaryToCustomerAuthorisedBusinesses (customerId, summary) {
-  return summary.map(({ name, sbi, organisationId }) => ({
-    customerId,
-    name,
-    sbi,
-    businessId: organisationId
-  }))
-}
-
 export function transformNotificationsToMessages (notifications = [], showOnlyDeleted = false) {
   return notifications
     .map(message => ({

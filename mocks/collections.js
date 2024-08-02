@@ -1,6 +1,6 @@
 export default [
   {
-    id: 'base',
+    id: 'rural-payments-portal',
     routes: [
       'rpp-authenticate-get-login:default',
       'rpp-authenticate-post-login:default',
@@ -26,15 +26,27 @@ export default [
       'rpp-siti-agri-api-get-cph-for-organisation-by-id:default',
       'rpp-siti-agri-api-get-cph-info-for-organisation-by-id:default',
 
-      'rpp-messages:default',
+      'rpp-messages:default'
+    ]
+  },
+  {
+    id: 'release-1',
+    routes: [
+      'rpp-authenticate-get-login:default',
+      'rpp-authenticate-post-login:default',
+      'rpp-authenticate-get-authenticate:default',
+      'rpp-authenticate-get-person-context:default',
+      'rpp-authenticate-get-expire-user-session:default',
 
       'v1-person-get-by-id:default',
       'v1-person-get-by-crn:default',
+      'v1-get-person-organisations-summary-by-person-id:default',
 
       'v1-organisation-get-by-id:default',
       'v1-organisation-get-by-sbi:default',
-      'v1-organisation-get-person-summary-by-person-id:default',
-      'v1-organisation-get-people-by-org-id:default'
+      // 'v1-organisation-get-person-summary-by-person-id:default',
+      'v1-organisation-get-people-by-org-id:default',
+      'v1-siti-agri-api-get-authorisation-by-organisation-id:default'
     ]
   }
 ]

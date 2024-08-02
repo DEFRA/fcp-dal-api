@@ -26,15 +26,14 @@ export class VersionOneBusiness extends VersionOne {
     return this.getOrganisationById(response.id)
   }
 
-  // Retrieve the customers associated with an organisation
   async getOrganisationCustomersByOrganisationId (organisationId) {
     const response = await this.get(`authorisation/organisation/${organisationId}`)
     return response._data
   }
 
   // Required for role
-  // async getAuthorisationByOrganisationId (organisationId) {
-  //   const response = await this.get(`/rpp/SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`)
-  //   return response.data
-  // }
+  async getAuthorisationByOrganisationId (organisationId) {
+    const response = await this.get(`SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`)
+    return response.data
+  }
 }

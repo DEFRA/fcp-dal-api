@@ -39,7 +39,7 @@ for (const person of orgPeople) {
   fs.writeFileSync(`./mocks/fixtures/personId/${person.id}/messages.json`, JSON.stringify(messages, null, 2))
 
   const organisationSummary = organisationPersonSummary({
-    id: person.id,
+    id: orgId,
     sbi: org.sbi,
     name: org.name
   })

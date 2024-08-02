@@ -171,6 +171,7 @@ export const organisationPersonSummary = (attributes = {}) => {
     // throw new Error('Not implemented')
     return getJSON(`./personId/${attributes.id}/organisationSummary.json`)
   } catch (error) {
+    console.error(error)
     logger.debug('#Mock #Fixtures #organisationPersonSummary - Generating mock data')
     const seedReference = `${attributes.id}${attributes.sbi || 0}`
     faker.seed(+seedReference)

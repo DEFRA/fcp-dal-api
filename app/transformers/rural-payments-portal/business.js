@@ -48,14 +48,3 @@ export const transformOrganisationToBusiness = data => {
     sbi: `${data.sbi}`
   }
 }
-
-export const transformOrganisationCustomers = data => {
-  return data.map(({ id, firstName, lastName, customerReference, role, privileges }) => ({
-    customerId: id,
-    firstName,
-    lastName,
-    customerReference,
-    role,
-    privileges
-  }))
-}
