@@ -12,7 +12,7 @@ export const Business = {
   },
 
   async customers ({ businessId }, _, { dataSources }) {
-    return transformOrganisationCustomers(await dataSources.ruralPaymentsPortalApi.getOrganisationCustomersByOrganisationId(businessId))
+    return transformOrganisationCustomers(await dataSources.versionOneBusiness.getOrganisationCustomersByOrganisationId(businessId))
   }
 }
 

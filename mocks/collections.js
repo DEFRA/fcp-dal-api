@@ -26,7 +26,15 @@ export default [
       'rpp-siti-agri-api-get-cph-for-organisation-by-id:default',
       'rpp-siti-agri-api-get-cph-info-for-organisation-by-id:default',
 
-      'rpp-messages:default'
+      'rpp-messages:default',
+
+      'v1-person-get-by-id:default',
+      'v1-person-get-by-crn:default',
+
+      'v1-organisation-get-by-id:default',
+      'v1-organisation-get-by-sbi:default',
+      'v1-organisation-get-person-summary-by-person-id:default',
+      'v1-organisation-get-people-by-org-id:default'
     ]
   }
 ]

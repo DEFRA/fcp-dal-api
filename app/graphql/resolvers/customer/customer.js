@@ -10,17 +10,17 @@ import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } f
 
 export const Customer = {
   async customerId ({ crn }, __, { dataSources }) {
-    const { id: customerId } = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
+    const { id: customerId } = await dataSources.versionOneCustomer.getCustomerByCRN(crn)
     return customerId
   },
 
   async info ({ crn }, __, { dataSources }) {
-    const response = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
+    const response = await dataSources.versionOneCustomer.getCustomerByCRN(crn)
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
   async business ({ crn }, { sbi }, { dataSources }) {
-    const { id: customerId } = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
+    const { id: customerId } = await dataSources.versionOneCustomer.getCustomerByCRN(crn)
 
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       customerId,
@@ -30,7 +30,7 @@ export const Customer = {
   },
 
   async businesses ({ crn }, __, { dataSources }) {
-    const { id: customerId } = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
+    const { id: customerId } = await dataSources.versionOneCustomer.getCustomerByCRN(crn)
     const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(customerId)
     return transformPersonSummaryToCustomerAuthorisedBusinesses(customerId, summary)
   },
