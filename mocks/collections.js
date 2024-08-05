@@ -32,6 +32,8 @@ export default [
   {
     id: 'release-1',
     routes: [
+      'apim-authentication-get-token:default',
+
       'rpp-authenticate-get-login:default',
       'rpp-authenticate-post-login:default',
       'rpp-authenticate-get-authenticate:default',

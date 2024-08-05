@@ -39,7 +39,7 @@ export class VersionOne extends RESTDataSource {
     }
 
     try {
-      const response = await fetch(`https://login.microsoftonline.com/${process.env.API_TENANT_ID}/oauth2/v2.0/token`, {
+      const response = await fetch(`${process.env.VERSION_ONE_APIM_ACCESS_TOKEN_URL}${process.env.API_TENANT_ID}/oauth2/v2.0/token`, {
         method: 'post',
         body,
         headers
