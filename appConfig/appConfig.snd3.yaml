@@ -34,3 +34,9 @@
 - key: AUTHENTICATE_DB_PASSWORD
   value: '{{servicename}}-AUTHENTICATE-DB-PASSWORD'
   type: 'keyvault'
+- key: VERSION_ONE_APIM_SUBSCRIPTION_KEY
+  value: '{{servicename}}-VERSION_ONE_APIM_SUBSCRIPTION_KEY'
+  type: 'keyvault'
+- key: VERSION_ONE_APIM_SCOPE
+  value: '{{servicename}}-AUTHENTICATE-DB-PASSWORD'
+  type: 'keyvault'
