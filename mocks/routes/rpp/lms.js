@@ -1,5 +1,5 @@
 import { coversSummary, landCovers, landParcels, parcelSummary } from '../../fixtures/lms.js'
-import { okResponse } from '../../utils/requestResponse.js'
+import { okOrNotFoundResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -15,7 +15,7 @@ export default [
             const orgId = req.params.orgId
             const data = landCovers(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -34,7 +34,7 @@ export default [
             const orgId = req.params.orgId
             const data = landParcels(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -53,7 +53,7 @@ export default [
             const orgId = req.params.orgId
             const data = parcelSummary(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -72,7 +72,7 @@ export default [
             const orgId = req.params.orgId
             const data = coversSummary(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }

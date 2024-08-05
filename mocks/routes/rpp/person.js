@@ -1,6 +1,6 @@
 import { pagination } from '../../fixtures/pagination.js'
 import { personById } from '../../fixtures/person.js'
-import { okResponse } from '../../utils/requestResponse.js'
+import { okOrNotFoundResponse, okResponse, badRequestResponse, notFoundResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -14,10 +14,9 @@ export default [
         options: {
           middleware: (req, res) => {
             const id = req.params.personId
-
             const data = personById({ id })
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -32,22 +31,22 @@ export default [
         id: 'default',
         type: 'middleware',
         options: {
-          // person search
           middleware: (req, res) => {
-            try {
-              const body = req.body
-              if (!body.searchFieldType || !body.primarySearchPhrase) {
-                throw new Error('Invalid request')
-              }
-
-              return okResponse(res, {
-                _data: [personById({ customerReferenceNumber: body.primarySearchPhrase })._data],
-                _page: pagination
-              })
-            } catch (error) {
-              res.status(400)
-              res.send()
+            const body = req.body
+            if (!body.searchFieldType || !body.primarySearchPhrase) {
+              return badRequestResponse(res)
             }
+
+            const data = personById({ customerReferenceNumber: body.primarySearchPhrase })
+
+            if (!data) {
+              return notFoundResponse(res)
+            }
+
+            return okResponse(res, {
+              ...data,
+              _page: pagination
+            })
           }
         }
       }

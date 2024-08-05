@@ -1,6 +1,6 @@
 import { sitiAgriAuthorisationOrganisation } from '../../fixtures/authorisation.js'
 import { organisationCPH, organisationCPHInfo } from '../../fixtures/organisation-cph.js'
-import { okResponse } from '../../utils/requestResponse.js'
+import { okOrNotFoundResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -14,10 +14,9 @@ export default [
         options: {
           middleware: (req, res) => {
             const organisationId = req.params.organisationId
-
             const data = sitiAgriAuthorisationOrganisation({ organisationId })
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -36,7 +35,7 @@ export default [
             const orgId = req.params.orgId
             const data = organisationCPH(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -55,7 +54,7 @@ export default [
             const orgId = req.params.orgId
             const data = organisationCPHInfo(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }

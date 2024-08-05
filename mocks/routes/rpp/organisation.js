@@ -5,7 +5,7 @@ import {
   organisationPeopleByOrgId,
   organisationPersonSummary
 } from '../../fixtures/organisation.js'
-import { okResponse } from '../../utils/requestResponse.js'
+import { okOrNotFoundResponse, badRequestResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -21,7 +21,7 @@ export default [
             const orgId = req.params.orgId
             const data = organisationByOrgId(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -39,13 +39,13 @@ export default [
           middleware: (req, res) => {
             const body = req.body
             if (!body.searchFieldType || !body.primarySearchPhrase) {
-              throw new Error('Invalid request')
+              return badRequestResponse(res)
             }
 
             const searchPhrase = body.primarySearchPhrase
             const data = organisationBySbi(searchPhrase)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -65,7 +65,7 @@ export default [
             const sbi = req.query.organisationId
             const data = organisationPersonSummary({ id: personId, sbi })
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -84,7 +84,7 @@ export default [
             const orgId = req.params.orgId
             const data = organisationPeopleByOrgId(orgId)
 
-            return okResponse(res, data)
+            return okOrNotFoundResponse(res, data)
           }
         }
       }
@@ -103,7 +103,7 @@ export default [
             const orgId = req.params.orgId
             const data = organisationApplicationsByOrgId(orgId)
 
-            return okResponse(res, { _data: data })
+            return okOrNotFoundResponse(res, { _data: data })
           }
         }
       }
