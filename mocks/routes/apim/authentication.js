@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker'
+import { randomUUID } from 'node:crypto'
 import { okResponse } from '../../utils/requestResponse.js'
 
 export default [
@@ -19,9 +19,7 @@ export default [
             }
 
             return okResponse(res, {
-              access_token: faker.string.uuid(),
-              token_type: 'Bearer',
-              expires_in: faker.number.int({ min: 1, max: 1000 })
+              access_token: randomUUID()
             })
           }
         }
