@@ -1,10 +1,16 @@
+import logger from '../../utils/logger.js'
+
 export function transformBusinessCustomerToCustomerRole (crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
+
+  logger.debug('Transforming business customer to customer role', { original: { crn, customers }, transformed: customer.role })
   return customer.role
 }
 
 export function transformBusinessCustomerToCustomerPrivileges (crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
+
+  logger.debug('Transforming business customer to customer privileges', { original: { crn, customers }, transformed: customer.privileges })
   return customer.privileges
 }
 
@@ -25,10 +31,13 @@ export function transformBusinessCustomerToCustomerPermissionGroups (crn, custom
 }
 
 export function transformPersonSummaryToCustomerAuthorisedBusinesses (properties, summary) {
-  return summary.map(({ name, sbi, id }) => ({
+  const transformed = summary.map(({ name, sbi, id }) => ({
     name,
     sbi,
     businessId: id,
     ...properties
   }))
+
+  logger.debug('Transforming person summary to customer authorised businesses', { original: { properties, summary }, transformed })
+  return transformed
 }

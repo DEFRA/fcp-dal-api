@@ -1,5 +1,7 @@
+import logger from '../../utils/logger.js'
+
 export const transformOrganisationCustomers = data => {
-  return data.map(({ id, firstName, lastName, customerReference, role, privileges }) => ({
+  const transformed = data.map(({ id, firstName, lastName, customerReference, role, privileges }) => ({
     customerId: id,
     firstName,
     lastName,
@@ -7,6 +9,10 @@ export const transformOrganisationCustomers = data => {
     role,
     privileges
   }))
+
+  logger.debug('Transforming organisation customers', { original: data, transformed })
+
+  return transformed
 }
 
 export function transformBusinessCustomerPrivilegesToPermissionGroups (privileges, permissionGroups) {
