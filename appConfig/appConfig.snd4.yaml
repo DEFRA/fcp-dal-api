@@ -1,7 +1,5 @@
 - key: Sentinel
   value: '2'
-- key: ENABLE_MOCK_SERVER
-  value: 'true'
 - key: RURAL_PAYMENTS_AGENCY_LAND_API_URL
   value: 'https://environment.data.gov.uk'
 - key: RURAL_PAYMENTS_PORTAL_EMAIL
@@ -10,6 +8,10 @@
   value: 'http://127.0.0.1:3100/rpp/'
 - key: RURAL_PAYMENTS_PROXY_URL
   value: ''
+- key: VERSION_ONE_APIM_ACCESS_TOKEN_URL
+  value: 'http://127.0.0.1:3100/apim/'
+- key: VERSION_ONE_APIM_SCOPE
+  value: 'scope'
 # Secrets
 - key: RURAL_PAYMENTS_PORTAL_PASSWORD
   value: '{{servicename}}-RURAL-PAYMENTS-PORTAL-PASSWORD'
@@ -34,7 +36,4 @@
   type: 'keyvault'
 - key: VERSION_ONE_APIM_SUBSCRIPTION_KEY
   value: '{{servicename}}-VERSION_ONE_APIM_SUBSCRIPTION_KEY'
-  type: 'keyvault'
-- key: VERSION_ONE_APIM_SCOPE
-  value: '{{servicename}}-AUTHENTICATE-DB-PASSWORD'
   type: 'keyvault'

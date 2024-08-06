@@ -13,6 +13,7 @@ PORT=4000
 # Mock server
 PORT_MOCK=3100
 ENABLE_MOCK_SERVER=true
+MOCK_SERVER_COLLECTION=all #options: all, rural-payments-portal, release-1
 
 # Rural Payments Agency Land API
 RURAL_PAYMENTS_AGENCY_LAND_API_URL=
