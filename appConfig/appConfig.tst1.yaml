@@ -12,6 +12,8 @@
   value: 'http://127.0.0.1:3100/apim/'
 - key: VERSION_ONE_APIM_SCOPE
   value: 'scope'
+- key: VERSION_ONE_API_URL
+  value: 'http://127.0.0.1:3100/v1/'
 # Secrets
 - key: RURAL_PAYMENTS_PORTAL_PASSWORD
   value: '{{servicename}}-RURAL-PAYMENTS-PORTAL-PASSWORD'
