@@ -7,13 +7,6 @@ export function transformBusinessCustomerToCustomerRole (crn, customers) {
   return customer.role
 }
 
-export function transformBusinessCustomerToCustomerPrivileges (crn, customers) {
-  const customer = customers.find(({ customerReference }) => customerReference === crn)
-
-  logger.debug('Transforming business customer to customer privileges', { original: { crn, customers }, transformed: customer.privileges })
-  return customer.privileges
-}
-
 export function transformBusinessCustomerToCustomerPermissionGroups (crn, customers, permissionGroups) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
 
