@@ -20,8 +20,8 @@ const dataSources = {
         }
       ]
     },
-    getAuthorisationByOrganisationId () {
-      return sitiAgriAuthorisationOrganisation().data
+    getAuthorisationByOrganisationId (organisationId) {
+      return sitiAgriAuthorisationOrganisation({ organisationId }).data
     }
   },
   permissions: {
@@ -44,9 +44,7 @@ const dataSources = {
 }
 
 test('Query.permissionGroups', async () => {
-  const response = await Query.permissionGroups(undefined, undefined, {
-    dataSources
-  })
+  const response = await Query.permissionGroups(undefined, undefined, { dataSources })
   expect(response).toEqual([
     {
       id: 'MOCK_PERMISSION_GROUP_ID',
@@ -67,11 +65,10 @@ test('Permission.active', async () => {
     {
       privilegeNames: ['Amend - land']
     },
-    { customerId: 'mockCustomerId', businessId: 'mockBusinessId' },
+    { customerId: '5263421', businessId: '5565448' },
     {
       dataSources
     }
   )
-  // TODO this should return true
-  expect(response).toEqual(false)
+  expect(response).toEqual(true)
 })

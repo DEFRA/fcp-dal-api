@@ -11,11 +11,22 @@ import {
   transformLandCoversToArea,
   transformLandParcels
 } from '../../../app/transformers/rural-payments-portal/lms.js'
-import { transformPrivilegesListToBusinessCustomerPermissions } from '../../../app/transformers/rural-payments-portal/permissions.js'
-import { coversSummary, landCovers, landParcels, parcelSummary } from '../../../mocks/fixtures/lms.js'
-import { organisationCPH, organisationCPHInfo } from '../../../mocks/fixtures/organisation-cph.js'
-import { organisationByOrgId, organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
+import {
+  coversSummary,
+  landCovers,
+  landParcels,
+  parcelSummary
+} from '../../../mocks/fixtures/lms.js'
+import {
+  organisationCPH,
+  organisationCPHInfo
+} from '../../../mocks/fixtures/organisation-cph.js'
+import {
+  organisationByOrgId,
+  organisationPeopleByOrgId
+} from '../../../mocks/fixtures/organisation.js'
 import { fakeContext } from '../../test-setup.js'
+import { transformBusinessCustomerPrivilegesToPermissionGroups } from '../../../app/transformers/version-one/business.js'
 
 const organisationFixture = organisationByOrgId('5565448')._data
 const { totalArea, totalParcels } = parcelSummary('5565448')
@@ -24,7 +35,8 @@ const organisationCPHFixture = organisationCPH('5565448').data
 
 describe('Query.business', () => {
   it('should return business data', async () => {
-    const transformedOrganisation = transformOrganisationToBusiness(organisationFixture)
+    const transformedOrganisation =
+      transformOrganisationToBusiness(organisationFixture)
 
     const result = await graphql({
       source: `#graphql
@@ -120,9 +132,18 @@ describe('Query.business.land', () => {
         business: {
           land: {
             summary: {
-              arableLandArea: transformLandCoversToArea('Arable Land', coversSummaryData),
-              permanentCropsArea: transformLandCoversToArea('Permanent Crops', coversSummaryData),
-              permanentGrasslandArea: transformLandCoversToArea('Permanent Grassland', coversSummaryData),
+              arableLandArea: transformLandCoversToArea(
+                'Arable Land',
+                coversSummaryData
+              ),
+              permanentCropsArea: transformLandCoversToArea(
+                'Permanent Crops',
+                coversSummaryData
+              ),
+              permanentGrasslandArea: transformLandCoversToArea(
+                'Permanent Grassland',
+                coversSummaryData
+              ),
               totalArea,
               totalParcels
             }
@@ -194,7 +215,10 @@ describe('Query.business.land', () => {
 })
 
 describe('Query.business.cph', () => {
-  const transformedCPH = transformOrganisationCPH('5565448', organisationCPHFixture)
+  const transformedCPH = transformOrganisationCPH(
+    '5565448',
+    organisationCPHFixture
+  )
   delete transformedCPH[0].businessId
   it('cph', async () => {
     const result = await graphql({
@@ -226,16 +250,21 @@ describe('Query.business.cph', () => {
       species: organisationCPHInfoFixture.species,
       startDate: organisationCPHInfoFixture.startDate / 1000,
       expiryDate: organisationCPHInfoFixture.expiryDate / 1000,
-      coordinate: transformOrganisationCPHCoordinates(organisationCPHInfoFixture)
+      coordinate: transformOrganisationCPHCoordinates(
+        organisationCPHInfoFixture
+      )
     })
   })
 })
 
 describe('Query.business.customers', () => {
-  const transformedCPH = transformOrganisationCPH('123', organisationCPHFixture)
+  const transformedCPH = transformOrganisationCPH(
+    '123',
+    organisationCPHFixture
+  )
   delete transformedCPH[0].id
 
-  organisationPeopleByOrgId('customer', async () => {
+  it('customer', async () => {
     const result = await graphql({
       source: `#graphql
       query BusinessCustomers {
@@ -244,7 +273,7 @@ describe('Query.business.customers', () => {
             customerId
             firstName
             lastName
-            customerReference
+            crn
             role
           }
         }
@@ -259,15 +288,40 @@ describe('Query.business.customers', () => {
         business: {
           customers: [
             {
-              id: '7353104',
-              firstName: 'Edgardo',
-              lastName: 'Farrell',
-              customerReference: '6577447946',
+              customerId: '5263421',
+              firstName: 'Nicholas',
+              lastName: 'SANGSTER',
+              crn: '9102634220',
               role: 'Business Partner'
             },
-            expect.any(Object),
-            expect.any(Object),
-            expect.any(Object)
+            {
+              customerId: '5302028',
+              firstName: 'Ivan',
+              lastName: 'Cook',
+              crn: '9103020285',
+              role: 'Agent'
+            },
+            {
+              customerId: '5311964',
+              firstName: 'Trevor',
+              lastName: 'Graham',
+              crn: '9103119648',
+              role: 'Agent'
+            },
+            {
+              customerId: '5331098',
+              firstName: 'Marcus',
+              lastName: 'Twigden',
+              crn: '9103310984',
+              role: 'Agent'
+            },
+            {
+              customerId: '5778203',
+              firstName: 'Oliver',
+              lastName: 'Colwill',
+              crn: '9104760827',
+              role: 'Agent'
+            }
           ]
         }
       }
@@ -280,9 +334,8 @@ describe('Query.business.customers', () => {
         query BusinessCustomersPermissions {
           business(sbi: "890000001") {
             customers {
-              permissions {
+              permissionGroups {
                 id
-                name
                 level
               }
             }
@@ -296,9 +349,15 @@ describe('Query.business.customers', () => {
     expect(result).toEqual({
       data: {
         business: {
-          customers: organisationPeopleByOrgId('5565448')._data.map(({ privileges }) => ({
-            permissions: transformPrivilegesListToBusinessCustomerPermissions(privileges, new Permissions().getPermissionGroups())
-          }))
+          customers: organisationPeopleByOrgId('5565448')._data.map(
+            ({ privileges }) => ({
+              permissionGroups:
+                transformBusinessCustomerPrivilegesToPermissionGroups(
+                  privileges,
+                  new Permissions().getPermissionGroups()
+                )
+            })
+          )
         }
       }
     })

@@ -49,6 +49,7 @@ export const CustomerBusiness = {
   async role ({ businessId, crn }, __, { dataSources }) {
     logger.info('Get customer business role', { crn, businessId })
     const businessCustomers = await dataSources.versionOneBusiness.getOrganisationCustomersByOrganisationId(businessId)
+    console.log(businessCustomers)
     return transformBusinessCustomerToCustomerRole(crn, businessCustomers)
   },
 

@@ -2,78 +2,79 @@ import { graphql } from 'graphql/index.js'
 import { schema } from '../../../app/graphql/server.js'
 import { fakeContext } from '../../test-setup.js'
 
-describe('Query businessApplications', () => {
+describe('Query business.applications', () => {
   it('should return application data', async () => {
     const result = await graphql({
       source: `#graphql
-      query BusinessApplications {
-          businessApplications(sbi: "5444918") {
+        query BusinessApplications {
+          business(sbi: "890000001") {
+            applications {
               applicationStatus {
-                  id
-                  open
-                  status
-                  type
-                  sector
-                  year
-                  frn
-                  office
+                id
+                open
+                status
+                type
+                sector
+                year
+                frn
+                office
               }
               csClaim {
-                  schemaYear
-                  type
-                  status
-                  lastMovement
+                schemaYear
+                type
+                status
+                lastMovement
               }
+            }
           }
-      }
+        }
       `,
-      variableValues: {
-        sbi: '5444918'
-      },
       schema,
       contextValue: fakeContext
     })
 
     expect(result).toEqual({
       data: {
-        businessApplications: [
-          {
-            applicationStatus: {
-              id: expect.any(String),
-              open: null,
-              status: 'Withdrawn',
-              type: expect.any(String),
-              sector: null,
-              year: 2023,
-              frn: expect.any(String),
-              office: null
+        business: {
+          applications: [
+            {
+              applicationStatus: {
+                frn: '0',
+                id: '1641241',
+                office: null,
+                open: null,
+                sector: null,
+                status: 'Withdrawn',
+                type: 'Countryside Stewardship (MT) Module 2023',
+                year: 2023
+              },
+              csClaim: {
+                lastMovement: '2023-08-08T16:16:27',
+                schemaYear: 2023,
+                status: 'WTHDRW',
+                type: 'Countryside Stewardship (MT)'
+              }
             },
-            csClaim: {
-              schemaYear: 2023,
-              type: expect.any(String),
-              status: 'WTHDRW',
-              lastMovement: expect.any(String)
+            {
+              applicationStatus: {
+                frn: '0',
+                id: '1646335',
+                office: null,
+                open: null,
+                sector: 'STANDA',
+                status: 'Agreement Live',
+                type: 'Countryside Stewardship (MT) Module 2023',
+                year: 2023
+              },
+              csClaim: {
+                lastMovement: '2023-12-08T11:48:46',
+                schemaYear: 2023,
+                status: 'AGRLIV',
+                type: 'Countryside Stewardship (MT)'
+              }
             }
-          },
-          {
-            applicationStatus: {
-              id: expect.any(String),
-              open: null,
-              status: 'Withdrawn',
-              type: expect.any(String),
-              sector: null,
-              year: 2023,
-              frn: expect.any(String),
-              office: null
-            },
-            csClaim: {
-              schemaYear: 2023,
-              type: expect.any(String),
-              status: 'WTHDRW',
-              lastMovement: expect.any(String)
-            }
-          }
-        ]
+          ]
+        }
       }
     })
   })

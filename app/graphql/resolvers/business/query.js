@@ -1,4 +1,3 @@
-import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments-portal/applications-cs.js'
 import { transformOrganisationToBusiness } from '../../../transformers/rural-payments-portal/business.js'
 
 export const Query = {
@@ -10,11 +9,5 @@ export const Query = {
       land: { sbi },
       ...business
     }
-  },
-
-  async businessApplications (_, { sbi }, { dataSources }) {
-    const response = await dataSources.ruralPaymentsPortalApi.getApplicationsCountrysideStewardshipBySbi(sbi)
-
-    return transformOrganisationCSApplicationToBusinessApplications(response.applications)
   }
 }

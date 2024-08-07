@@ -10,20 +10,10 @@ import {
   transformPersonSummaryToCustomerAuthorisedBusinesses
 } from '../../../app/transformers/version-one/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
+import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
-const mockOrganisationPersonSummary = {
-  organisationId: '4309257',
-  name: 'company name',
-  sbi: 123123123,
-  additionalSbiIds: [],
-  confirmed: true,
-  lastUpdatedOn: null,
-  landConfirmed: null,
-  deactivated: false,
-  locked: true,
-  unreadNotificationCount: 3,
-  readNotificationCount: 0
-}
+const organisationId = '5565448'
+const personSummary = organisationPeopleByOrgId(organisationId)
 
 const mockMessages = [
   {
@@ -60,14 +50,20 @@ const parsedMessages = mockMessages.map(mockMessage => ({
   date: mockMessage.createdAt,
   read: !!mockMessage.readAt
 }))
-const organisationId = 123
 const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation({ organisationId }).data
 const personId = sitiAgriAuthorisationOrganisationData.personRoles[0].personId
 
 describe('Customer transformer', () => {
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
-    const result = transformPersonSummaryToCustomerAuthorisedBusinesses('customerId', [mockOrganisationPersonSummary])
-    expect(result).toEqual([{ customerId: 'customerId', businessId: '4309257', name: 'company name', sbi: 123123123 }])
+    const result = transformPersonSummaryToCustomerAuthorisedBusinesses({}, personSummary._data)
+
+    expect(result).toEqual([
+      { businessId: 5263421 },
+      { businessId: 5302028 },
+      { businessId: 5311964 },
+      { businessId: 5331098 },
+      { businessId: 5778203 }
+    ])
   })
 
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
@@ -80,20 +76,7 @@ describe('Customer transformer', () => {
       personId,
       sitiAgriAuthorisationOrganisationData.personPrivileges
     )
-    expect(result).toEqual([
-      'Full permission - business',
-      'SUBMIT - CS APP - SA',
-      'SUBMIT - CS AGREE - SA',
-      'Amend - land',
-      'Amend - entitlement',
-      'Submit - bps',
-      'SUBMIT - BPS - SA',
-      'AMEND - ENTITLEMENT - SA',
-      'AMEND - LAND - SA',
-      'Submit - cs app',
-      'Submit - cs agree',
-      'ELM_APPLICATION_SUBMIT'
-    ])
+    expect(result).toEqual([ 'Full permission - business', 'Amend - land' ])
   })
 
   test('transformNotificationsToMessages', () => {

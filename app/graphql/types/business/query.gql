@@ -1,4 +1,3 @@
 extend type Query {
   business(sbi: ID!): Business @on
-  businessApplications(sbi: ID!): [BusinessApplication]
 }

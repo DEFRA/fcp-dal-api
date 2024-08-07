@@ -6,7 +6,7 @@ import {
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
-const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation()
+const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation({organisationId: '5565448'})
 
 describe('Permissions transformer', () => {
   test('returns null if no match', () => {
@@ -32,13 +32,13 @@ describe('Permissions transformer', () => {
 
   test('returns active permissions', () => {
     const result = transformPrivilegesListToBusinessCustomerPermissions(
-      organisationPeopleByOrgId()._data[0].privileges,
+      organisationPeopleByOrgId('5565448')._data[0].privileges,
       new Permissions().getPermissionGroups()
     )
     expect(result).toEqual([
       {
         id: 'BASIC_PAYMENT_SCHEME',
-        level: 'NO_ACCESS',
+        level: 'SUBMIT',
         name: 'Basic payment scheme (BPS)'
       },
       {
