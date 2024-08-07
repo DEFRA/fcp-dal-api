@@ -1,7 +1,7 @@
 import { organisationPersonSummary } from '../../fixtures/organisation.js'
 import { pagination } from '../../fixtures/pagination.js'
 import { personById } from '../../fixtures/person.js'
-import { okResponse, notFoundResponse, okOrNotFoundResponse, badRequestResponse } from '../../utils/requestResponse.js'
+import { badRequestResponse, notFoundResponse, okOrNotFoundResponse, okResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
@@ -38,14 +38,14 @@ export default [
               return badRequestResponse(res)
             }
 
-            const data = personById({ customerReferenceNumber: body.primarySearchPhrase })
+            const person = personById({ customerReferenceNumber: body.primarySearchPhrase })
 
-            if (!data) {
+            if (!person) {
               return notFoundResponse(res)
             }
 
             return okResponse(res, {
-              ...data,
+              _data: [person._data],
               _page: pagination
             })
           }
