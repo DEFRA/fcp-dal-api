@@ -11,7 +11,7 @@ const defaultHeaders = {
 export class VersionOne extends RESTDataSource {
   baseURL = process.env.RP_INTERNAL_APIM_URL
 
-  async willSendRequest (path, request) {
+  async willSendRequest (_path, request) {
     if (!this.apimAccessToken) {
       logger.debug('Getting APIM access token')
       await this.getApimAccessToken()
@@ -46,7 +46,7 @@ export class VersionOne extends RESTDataSource {
       })
       const data = await response.json()
 
-      if (!data || !data.access_token || !data.access_token.length) {
+      if (!data?.access_token?.length) {
         throw new Error('No access token returned')
       }
 
