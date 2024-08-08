@@ -4,12 +4,12 @@ import qs from 'qs'
 import logger from '../../utils/logger.js'
 
 const defaultHeaders = {
-  'Ocp-Apim-Subscription-Key': process.env.VERSION_ONE_APIM_SUBSCRIPTION_KEY,
+  'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY,
   email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
 }
 
 export class VersionOne extends RESTDataSource {
-  baseURL = process.env.VERSION_ONE_API_URL
+  baseURL = process.env.RP_INTERNAL_APIM_URL
 
   async willSendRequest (path, request) {
     if (!this.apimAccessToken) {
@@ -28,18 +28,18 @@ export class VersionOne extends RESTDataSource {
   async getApimAccessToken () {
     const body = qs.stringify({
       grant_type: 'client_credentials',
-      scope: process.env.VERSION_ONE_APIM_SCOPE
+      scope: process.env.RP_INTERNAL_APIM_SCOPE
     })
 
-    const basicAuthHeader = Buffer.from(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`).toString('base64')
+    const basicAuthHeader = Buffer.from(`${process.env.RP_INTERNAL_APIM_CLIENT_ID}:${process.env.RP_INTERNAL_APIM_CLIENT_SECRET}`).toString('base64')
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Ocp-Apim-Subscription-Key': process.env.VERSION_ONE_APIM_SUBSCRIPTION_KEY,
+      'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY,
       Authorization: `Basic ${basicAuthHeader}`
     }
 
     try {
-      const response = await fetch(`${process.env.VERSION_ONE_APIM_ACCESS_TOKEN_URL}${process.env.API_TENANT_ID}/oauth2/v2.0/token`, {
+      const response = await fetch(`${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`, {
         method: 'post',
         body,
         headers
