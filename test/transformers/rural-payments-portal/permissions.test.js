@@ -6,7 +6,7 @@ import {
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
-const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation({organisationId: '5565448'})
+const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation({ organisationId: '5565448' })
 
 describe('Permissions transformer', () => {
   test('returns null if no match', () => {

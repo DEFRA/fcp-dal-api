@@ -1,11 +1,11 @@
 import { jest } from '@jest/globals'
 
 import pick from 'lodash.pick'
+import { Permissions } from '../../app/data-sources/static/permissions.js'
 import { Customer, CustomerBusiness } from '../../app/graphql/resolvers/customer/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
-import { personById } from '../../mocks/fixtures/person.js'
 import { organisationPeopleByOrgId, organisationPersonSummary } from '../../mocks/fixtures/organisation.js'
-import { Permissions } from '../../app/data-sources/static/permissions.js'
+import { personById } from '../../mocks/fixtures/person.js'
 
 const orgId = '5565448'
 const personId = '5007136'
@@ -190,30 +190,21 @@ describe('CustomerBusiness', () => {
     dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId.mockImplementation(() => mockMessages)
   })
 
-  test.skip('CustomerBusiness.roles', async () => {
-    const response = await CustomerBusiness.role({ businessId: '4309257', crn: '0866159801' }, undefined, { dataSources })
-    expect(response).toEqual(['Business Partner'])
+  test('CustomerBusiness.role', async () => {
+    const response = await CustomerBusiness.role({ businessId: '4309257', crn: '9102634220' }, undefined, { dataSources })
+    expect(response).toEqual('Business Partner')
   })
 
-  test.skip('CustomerBusiness.permissionGroups', async () => {
-    const response = await CustomerBusiness.permissionGroups({ businessId: 'mockBusinessId', customerId: 'mockCustomerId' }, undefined, {
+  test('CustomerBusiness.permissionGroups', async () => {
+    const response = await CustomerBusiness.permissionGroups({ businessId: '5625145', crn: '9102634220' }, undefined, {
       dataSources
     })
 
     expect(response).toEqual([
-      {
-        id: 'MOCK_PERMISSION_GROUP_ID',
-        permissions: [
-          {
-            permissionGroupId: 'MOCK_PERMISSION_GROUP_ID',
-            level: 'MOCK_PRIVILEGE_LEVEL',
-            functions: [],
-            privilegeNames: ['Mock privilege']
-          }
-        ],
-        businessId: 'mockBusinessId',
-        customerId: 'mockCustomerId'
-      }
+      { id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' },
+      { id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' },
+      { id: 'ENTITLEMENTS', level: 'AMEND' },
+      { id: 'LAND_DETAILS', level: 'AMEND' }
     ])
   })
 
@@ -284,6 +275,6 @@ describe('CustomerBusinessPermissionGroup', () => {
       { dataSources }
     )
 
-    expect(response).toEqual([{"id": "BASIC_PAYMENT_SCHEME", "level": "SUBMIT"}, {"id": "BUSINESS_DETAILS", "level": "FULL_PERMISSION"}, {"id": "ENTITLEMENTS", "level": "AMEND"}, {"id": "LAND_DETAILS", "level": "AMEND"}])
+    expect(response).toEqual([{ id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' }, { id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }, { id: 'ENTITLEMENTS', level: 'AMEND' }, { id: 'LAND_DETAILS', level: 'AMEND' }])
   })
 })

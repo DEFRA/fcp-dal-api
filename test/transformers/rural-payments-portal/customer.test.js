@@ -76,7 +76,7 @@ describe('Customer transformer', () => {
       personId,
       sitiAgriAuthorisationOrganisationData.personPrivileges
     )
-    expect(result).toEqual([ 'Full permission - business', 'Amend - land' ])
+    expect(result).toEqual(['Full permission - business', 'Amend - land'])
   })
 
   test('transformNotificationsToMessages', () => {

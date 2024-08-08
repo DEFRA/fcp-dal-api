@@ -9,7 +9,7 @@ import { fakeContext } from '../../test-setup.js'
 const personFixture = personById({ id: '5007136' })
 
 describe('Query.customer', () => {
-  it.skip('should return customer data', async () => {
+  it('should return customer data', async () => {
     const customerInfo = ruralPaymentsPortalCustomerTransformer(personFixture._data)
     const result = await graphql({
       source: `#graphql
@@ -204,7 +204,7 @@ describe('Query.customer', () => {
   })
 })
 
-describe.skip('Query.customer.businesses', () => {
+describe('Query.customer.businesses', () => {
   it('should return customer businesses', async () => {
     const result = await graphql({
       source: `#graphql
@@ -221,7 +221,7 @@ describe.skip('Query.customer.businesses', () => {
         }
       `,
       variableValues: {
-        crn: '0866159801' // personId: 5007136
+        crn: '9103020285' // personId: 5007136
       },
       schema,
       contextValue: fakeContext
@@ -232,11 +232,11 @@ describe.skip('Query.customer.businesses', () => {
         customer: {
           businesses: [
             {
-              roles: ['Business Partner'],
+              role: 'Agent',
               permissionGroups: [
                 {
                   id: 'BASIC_PAYMENT_SCHEME',
-                  level: null
+                  level: 'SUBMIT'
                 },
                 {
                   id: 'BUSINESS_DETAILS',
@@ -244,23 +244,27 @@ describe.skip('Query.customer.businesses', () => {
                 },
                 {
                   id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS',
-                  level: null
+                  level: 'SUBMIT'
                 },
                 {
                   id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS',
-                  level: null
+                  level: 'SUBMIT'
                 },
                 {
                   id: 'ENTITLEMENTS',
-                  level: null
+                  level: 'AMEND'
                 },
                 {
                   id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
-                  level: null
+                  level: 'AMEND'
+                },
+                {
+                  id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
+                  level: 'SUBMIT'
                 },
                 {
                   id: 'LAND_DETAILS',
-                  level: null
+                  level: 'AMEND'
                 }
               ]
             }
@@ -271,7 +275,7 @@ describe.skip('Query.customer.businesses', () => {
   })
 })
 
-describe.skip('Query.customer.businesses.messages', () => {
+describe('Query.customer.businesses.messages', () => {
   it('should return customer businesses messages', async () => {
     const result = await graphql({
       source: `#graphql
@@ -309,15 +313,15 @@ describe.skip('Query.customer.businesses.messages', () => {
               messages: [
                 {
                   title: 'Permission changed for David Paul',
-                  read: true,
-                  id: '7551987',
-                  date: 8327630499790
+                  read: false,
+                  id: '11401',
+                  date: 6010706997254
                 },
                 {
                   title: 'Permission changed for David Paul',
-                  read: false,
-                  id: '9315941',
-                  date: 8862388585856
+                  read: true,
+                  id: '7551987',
+                  date: 8327630499790
                 }
               ]
             }
@@ -364,8 +368,8 @@ describe.skip('Query.customer.businesses.messages', () => {
                 {
                   title: 'Permission changed for David Paul',
                   read: false,
-                  id: '11401',
-                  date: 6010706997254
+                  id: '9315941',
+                  date: 8862388585856
                 }
               ]
             }
