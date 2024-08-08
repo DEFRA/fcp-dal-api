@@ -8,12 +8,6 @@
   value: 'http://127.0.0.1:3100/rpp/'
 - key: RURAL_PAYMENTS_PROXY_URL
   value: ''
-- key: RP_INTERNAL_APIM_SCOPE
-  value: 'scope'
-- key: RP_INTERNAL_APIM_ACCESS_TOKEN_URL
-  value: 'http://127.0.0.1:3100/apim/'
-- key: RP_INTERNAL_APIM_URL
-  value: 'http://127.0.0.1:3100/v1/'
 # Secrets
 - key: RURAL_PAYMENTS_PORTAL_PASSWORD
   value: '{{servicename}}-RURAL-PAYMENTS-PORTAL-PASSWORD'
@@ -44,4 +38,13 @@
   type: 'keyvault'
 - key: RP_INTERNAL_APIM_SUBSCRIPTION_KEY
   value: '{{servicename}}-RP-INTERNAL-APIM-SUBSCRIPTION-KEY'
+  type: 'keyvault'
+- key: RP_INTERNAL_APIM_SCOPE
+  value: '{{servicename}}-RP-INTERNAL-APIM-SCOPE'
+  type: 'keyvault'
+- key: RP_INTERNAL_APIM_ACCESS_TOKEN_URL
+  value: '{{servicename}}-RP-INTERNAL-APIM-ACCESS-TOKEN-URL'
+  type: 'keyvault'
+- key: RP_INTERNAL_APIM_URL
+  value: '{{servicename}}-RP-INTERNAL-APIM-URL'
   type: 'keyvault'
