@@ -24,6 +24,9 @@ export function transformBusinessCustomerToCustomerPermissionGroups (crn, custom
 }
 
 export function transformPersonSummaryToCustomerAuthorisedBusinesses (properties, summary) {
+  // Remove any businesses that have no SBI
+  summary = summary.filter(summary => summary.sbi !== null)
+
   const transformed = summary.map(({ name, sbi, id }) => ({
     name,
     sbi,

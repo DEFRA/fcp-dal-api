@@ -35,7 +35,7 @@ export class VersionOneCustomer extends VersionOne {
   async getPersonBusinessesByPersonId (personId, sbi) {
     logger.debug('Getting person businesses by person ID', { personId, sbi })
     const personBusinessSummaries = await this.get(
-      `organisation/person/${personId}/summary`
+      `organisation/person/${personId}/summary?search=` // Currently requires and empty search parameter or it returns 500 error
     )
 
     logger.debug('Person businesses by person ID', { personBusinessSummaries })
