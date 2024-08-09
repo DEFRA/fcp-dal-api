@@ -9,9 +9,6 @@
 - key: RURAL_PAYMENTS_PROXY_URL
   value: ''
 # Secrets
-- key: RURAL_PAYMENTS_PORTAL_PASSWORD
-  value: '{{servicename}}-RURAL-PAYMENTS-PORTAL-PASSWORD'
-  type: 'keyvault'
 - key: API_TENANT_ID
   value: '{{servicename}}-API-TENANT-ID'
   type: 'keyvault'
