@@ -59,3 +59,4 @@ extends:
       variableGroups:
         - fcp-data-access-layer-api-<environment>
     includePocEnv: true
+    includePlatformEnvs: false
