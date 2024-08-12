@@ -31,6 +31,7 @@
     "@graphql-tools/schema": "10.0.0",
     "@graphql-tools/utils": "^10.2.0",
     "@hapi/hapi": "21.3.2",
+    "@mocks-server/core": "^4.0.2",
     "applicationinsights": "2.8.0",
     "ffc-customer-registry-api": "file:",
     "graphql": "16.8.1",
