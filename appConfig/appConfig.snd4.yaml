@@ -2,8 +2,6 @@
   value: '2'
 - key: RURAL_PAYMENTS_AGENCY_LAND_API_URL
   value: 'https://environment.data.gov.uk'
-- key: RURAL_PAYMENTS_PORTAL_EMAIL
-  value: 'example@email.com'
 - key: RURAL_PAYMENTS_PORTAL_API_URL
   value: 'http://127.0.0.1:3100/rpp/'
 - key: RURAL_PAYMENTS_PROXY_URL
@@ -46,4 +44,7 @@
   type: 'keyvault'
 - key: RP_INTERNAL_APIM_URL
   value: '{{servicename}}-RP-INTERNAL-APIM-URL'
+  type: 'keyvault'
+- key: RURAL_PAYMENTS_PORTAL_EMAIL
+  value: '{{servicename}}-RURAL-PAYMENTS-PORTAL-EMAIL'
   type: 'keyvault'
