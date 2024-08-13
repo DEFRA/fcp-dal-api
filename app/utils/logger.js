@@ -53,7 +53,12 @@ const format = winston.format.combine(
       } catch (e) {
         info.stack = e.stack
           .split('\n')
-          .filter(line => !line.includes('node_modules') && !line.includes('logger.js') && !line.includes('node:internal'))
+          .filter(
+            line =>
+              !line.includes('node_modules') &&
+              !line.includes('logger.js') &&
+              !line.includes('node:internal')
+          )
         info.stack.shift()
       }
     }
@@ -66,5 +71,7 @@ const log = winston.createLogger({
   transports: [new winston.transports.Console()],
   format
 })
+
+log.info(`Logger created level: ${log.level}`)
 
 export default log
