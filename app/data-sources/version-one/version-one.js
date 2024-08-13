@@ -15,7 +15,9 @@ export class VersionOne extends RESTDataSource {
     if (!this.apimAccessToken) {
       logger.debug('Getting APIM access token')
       await this.getApimAccessToken()
-      logger.debug('APIM access token', { apimAccessToken: this.apimAccessToken })
+      logger.debug('APIM access token', {
+        apimAccessToken: this.apimAccessToken
+      })
     }
 
     request.headers = {
@@ -31,20 +33,30 @@ export class VersionOne extends RESTDataSource {
       scope: process.env.RP_INTERNAL_APIM_SCOPE
     })
 
-    const basicAuthHeader = Buffer.from(`${process.env.RP_INTERNAL_APIM_CLIENT_ID}:${process.env.RP_INTERNAL_APIM_CLIENT_SECRET}`).toString('base64')
+    const basicAuthHeader = Buffer.from(
+      `${process.env.RP_INTERNAL_APIM_CLIENT_ID}:${process.env.RP_INTERNAL_APIM_CLIENT_SECRET}`
+    ).toString('base64')
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY,
+      'Ocp-Apim-Subscription-Key':
+        process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY,
       Authorization: `Basic ${basicAuthHeader}`
     }
 
     try {
-      const response = await fetch(`${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`, {
-        method: 'post',
-        body,
-        headers
-      })
+      logger.debug(
+        `Token request url: ${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`
+      )
+      const response = await fetch(
+        `${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`,
+        {
+          method: 'post',
+          body,
+          headers
+        }
+      )
       const data = await response.json()
+      logger.debug('Token request response', { data })
 
       if (!data?.access_token?.length) {
         throw new Error('No access token returned')
