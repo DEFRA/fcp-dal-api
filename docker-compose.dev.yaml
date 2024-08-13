@@ -1,14 +1,14 @@
 services:
-  ffc-customer-registry-api:
+  fcp-data-access-layer-api:
     image: node:18
-    container_name: ffc-customer-registry-api-dev
+    container_name: fcp-data-access-layer-api-dev
     ports:
       - ${PORT}:${PORT}
       - ${PORT_MOCK}:${PORT_MOCK}
     command: npm run start:dev
     volumes:
-      - ./:/usr/local/dev/ffc-customer-registry-api
-    working_dir: /usr/local/dev/ffc-customer-registry-api
+      - ./:/usr/local/dev/fcp-data-access-layer-api
+    working_dir: /usr/local/dev/fcp-data-access-layer-api
     environment:
       RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
       RURAL_PAYMENTS_PORTAL_API_URL: http://localhost:3100/rpp/

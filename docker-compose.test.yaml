@@ -2,11 +2,11 @@
 # that test output is saved to the host
 
 services:
-  ffc-customer-registry-api:
+  fcp-data-access-layer-api:
     build:
       target: development
-    image: ffc-customer-registry-api-development
-    container_name: ffc-customer-registry-api-test
+    image: fcp-data-access-layer-api-development
+    container_name: fcp-data-access-layer-api-test
     command: npm run test
     volumes:
       - ./app:/home/node/app
