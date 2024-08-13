@@ -8,6 +8,8 @@
   value: 'http://127.0.0.1:3100/rpp/'
 - key: RURAL_PAYMENTS_PROXY_URL
   value: ''
+- key: LOG_LEVEL
+  value: 'debug'
 # Secrets
 - key: API_TENANT_ID
   value: '{{servicename}}-API-TENANT-ID'
