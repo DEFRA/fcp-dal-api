@@ -8,14 +8,15 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import qs from 'qs'
 import { CookieJar } from 'tough-cookie'
 import { URL } from 'url'
-import logger from '../../utils/logger.js'
+import { logger } from '../../utils/logger.js'
 
 const defaultHeaders = {
   'Accept-Encoding': 'gzip, deflate, br',
   Host: new URL(process.env.RURAL_PAYMENTS_PORTAL_API_URL).hostname,
   Origin: process.env.RURAL_PAYMENTS_PORTAL_API_URL.slice(0, -1),
   Referer: `${process.env.RURAL_PAYMENTS_PORTAL_API_URL}login`,
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+  'User-Agent':
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
   Accept: '*/*',
   Connection: 'keep-alive'
 }
@@ -38,7 +39,9 @@ export class RuralPaymentsSession extends RESTDataSource {
 
   willSendRequest (path, request) {
     if (process.env.RURAL_PAYMENTS_PORTAL_PROXY_URL) {
-      request.agent = new HttpsProxyAgent(process.env.RURAL_PAYMENTS_PORTAL_PROXY_URL)
+      request.agent = new HttpsProxyAgent(
+        process.env.RURAL_PAYMENTS_PORTAL_PROXY_URL
+      )
     }
 
     request.headers = {
@@ -51,7 +54,9 @@ export class RuralPaymentsSession extends RESTDataSource {
       request.headers['X-XSRF-TOKEN'] = xsrfToken
     }
 
-    const cookie = this.jar.getCookieStringSync(`${request.headers.Origin}/${path}`)
+    const cookie = this.jar.getCookieStringSync(
+      `${request.headers.Origin}/${path}`
+    )
     if (cookie.length) {
       request.headers.Cookie = cookie
     }
@@ -69,7 +74,10 @@ export class RuralPaymentsSession extends RESTDataSource {
         cookies = [cookies]
       }
       cookies.forEach(cookie => {
-        this.jar.setCookieSync(cookie, `${process.env.RURAL_PAYMENTS_PORTAL_API_URL}`)
+        this.jar.setCookieSync(
+          cookie,
+          `${process.env.RURAL_PAYMENTS_PORTAL_API_URL}`
+        )
       })
     }
   }
@@ -77,7 +85,10 @@ export class RuralPaymentsSession extends RESTDataSource {
   async handleRedirects (response) {
     if ([301, 302, 303].includes(response?.status)) {
       const redirectUrl = new URL(response.headers.get('location'))
-      logger.debug('#RuralPaymentsSession - handle redirect', { status: response?.status, redirect: redirectUrl.pathname })
+      logger.debug('#RuralPaymentsSession - handle redirect', {
+        status: response?.status,
+        redirect: redirectUrl.pathname
+      })
       return this.get(redirectUrl.pathname.replace('/', ''))
     }
   }
@@ -87,7 +98,11 @@ export class RuralPaymentsSession extends RESTDataSource {
     if (response?.status < 400) {
       return
     }
-    logger.error('#RuralPaymentsSession - error', { status: response?.status, url: response?.url, error: response?.error })
+    logger.error('#RuralPaymentsSession - error', {
+      status: response?.status,
+      url: response?.url,
+      error: response?.error
+    })
     throw await this.errorFromResponse(options)
   }
 
@@ -114,7 +129,9 @@ export class RuralPaymentsSession extends RESTDataSource {
 
   async getCSRFToken () {
     const csrfResponse = await this.get('login')
-    return csrfResponse.match(/(?<=name="csrfToken" value=")(.*)(?="\/>)/g).pop()
+    return csrfResponse
+      .match(/(?<=name="csrfToken" value=")(.*)(?="\/>)/g)
+      .pop()
   }
 
   getCookie (name) {
@@ -145,7 +162,11 @@ export class RuralPaymentsSession extends RESTDataSource {
       const expireSession = authenticateResponse.match(/Session exists/g)
       if (expireSession) {
         const currentTimestamp = Date.now()
-        await this.get(`expire_user_session/${encodeURIComponent(apiCredentials.email)}?_${currentTimestamp}`)
+        await this.get(
+          `expire_user_session/${encodeURIComponent(
+            apiCredentials.email
+          )}?_${currentTimestamp}`
+        )
         return this.initiateAuthenticatedSession()
       }
 
@@ -176,7 +197,9 @@ export class RuralPaymentsSession extends RESTDataSource {
         await this.initiateAuthenticatedSession()
         resolve()
       } catch (error) {
-        logger.error('#RuralPaymentsSession - Error initiating session', { error })
+        logger.error('#RuralPaymentsSession - Error initiating session', {
+          error
+        })
         reject(error)
       } finally {
         this.onAuthPromise = null

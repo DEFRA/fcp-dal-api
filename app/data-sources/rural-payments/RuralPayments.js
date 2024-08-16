@@ -1,14 +1,14 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import fetch from 'node-fetch'
 import qs from 'qs'
-import logger from '../../utils/logger.js'
+import { logger } from '../../utils/logger.js'
 
 const defaultHeaders = {
   'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY,
   email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
 }
 
-export class VersionOne extends RESTDataSource {
+export class RuralPayments extends RESTDataSource {
   baseURL = process.env.RP_INTERNAL_APIM_URL
 
   async willSendRequest (_path, request) {

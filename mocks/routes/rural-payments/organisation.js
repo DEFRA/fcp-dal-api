@@ -3,7 +3,10 @@ import {
   organisationBySbi,
   organisationPeopleByOrgId
 } from '../../fixtures/organisation.js'
-import { okOrNotFoundResponse, badRequestResponse } from '../../utils/requestResponse.js'
+import {
+  okOrNotFoundResponse,
+  badRequestResponse
+} from '../../utils/requestResponse.js'
 
 export default [
   {

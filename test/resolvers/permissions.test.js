@@ -1,25 +1,11 @@
-import { Permission, Query } from '../../app/graphql/resolvers/permissions/query.js'
+import {
+  Permission,
+  Query
+} from '../../app/graphql/resolvers/permissions/query.js'
 import { sitiAgriAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
 
 const dataSources = {
-  ruralPaymentsPortalApi: {
-    getPersonSummaryByPersonId () {
-      return [
-        {
-          id: '4309257',
-          name: 'company name',
-          sbi: 123123123,
-          additionalSbiIds: [],
-          confirmed: true,
-          lastUpdatedOn: null,
-          landConfirmed: null,
-          deactivated: false,
-          locked: true,
-          unreadNotificationCount: 3,
-          readNotificationCount: 0
-        }
-      ]
-    },
+  ruralPaymentsBusiness: {
     getAuthorisationByOrganisationId (organisationId) {
       return sitiAgriAuthorisationOrganisation({ organisationId }).data
     }
@@ -44,7 +30,9 @@ const dataSources = {
 }
 
 test('Query.permissionGroups', async () => {
-  const response = await Query.permissionGroups(undefined, undefined, { dataSources })
+  const response = await Query.permissionGroups(undefined, undefined, {
+    dataSources
+  })
   expect(response).toEqual([
     {
       id: 'MOCK_PERMISSION_GROUP_ID',

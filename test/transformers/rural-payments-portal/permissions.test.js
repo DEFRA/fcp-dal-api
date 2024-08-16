@@ -2,31 +2,41 @@ import { Permissions } from '../../../app/data-sources/static/permissions.js'
 import {
   transformOrganisationAuthorisationToCustomerBusinessPermissionLevel,
   transformPrivilegesListToBusinessCustomerPermissions
-} from '../../../app/transformers/rural-payments-portal/permissions.js'
+} from '../../../app/transformers/rural-payments/permissions.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
-const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation({ organisationId: '5565448' })
+const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation({
+  organisationId: '5565448'
+})
 
 describe('Permissions transformer', () => {
   test('returns null if no match', () => {
-    const personPrivileges = sitiAgriApiAuthorisationOrganisation.data.personPrivileges
-    const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(personPrivileges[0].personId, [], personPrivileges)
+    const personPrivileges =
+      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
+    const result =
+      transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
+        personPrivileges[0].personId,
+        [],
+        personPrivileges
+      )
     expect(result).toBeNull()
   })
 
   test('returns level if  match', () => {
-    const personPrivileges = sitiAgriApiAuthorisationOrganisation.data.personPrivileges
-    const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
-      personPrivileges[0].personId,
-      [
-        {
-          level: 'MOCK_LEVEL',
-          privilegeNames: ['Full permission - business']
-        }
-      ],
-      personPrivileges
-    )
+    const personPrivileges =
+      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
+    const result =
+      transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
+        personPrivileges[0].personId,
+        [
+          {
+            level: 'MOCK_LEVEL',
+            privilegeNames: ['Full permission - business']
+          }
+        ],
+        personPrivileges
+      )
     expect(result).toEqual('MOCK_LEVEL')
   })
 

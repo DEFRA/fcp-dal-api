@@ -1,7 +1,7 @@
 import {
   transformOrganisationCPH,
   transformOrganisationCPHCoordinates
-} from '../../../app/transformers/rural-payments-portal/business-cph.js'
+} from '../../../app/transformers/rural-payments/business-cph.js'
 
 describe('Test Business CPHField Transformer', () => {
   describe('transformOrganisationCPH', () => {

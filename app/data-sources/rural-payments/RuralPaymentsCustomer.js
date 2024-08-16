@@ -1,7 +1,7 @@
-import logger from '../../utils/logger.js'
-import { VersionOne } from './version-one.js'
+import { logger } from '../../utils/logger.js'
+import { RuralPayments } from './RuralPayments.js'
 
-export class VersionOneCustomer extends VersionOne {
+export class RuralPaymentsCustomer extends RuralPayments {
   async getCustomerByCRN (crn) {
     logger.debug('Getting customer by CRN', { crn })
 
@@ -40,5 +40,24 @@ export class VersionOneCustomer extends VersionOne {
 
     logger.debug('Person businesses by person ID', { personBusinessSummaries })
     return personBusinessSummaries._data
+  }
+
+  async getNotificationsByOrganisationIdAndPersonId (
+    organisationId,
+    personId,
+    page,
+    size
+  ) {
+    const response = await this.get('/rpp/notifications', {
+      params: {
+        personId,
+        organisationId,
+        filter: '',
+        page,
+        size
+      }
+    })
+
+    return response.notifications
   }
 }

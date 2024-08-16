@@ -4,11 +4,9 @@ import {
   transformNotificationsToMessages,
   transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
   transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
-} from '../../../app/transformers/rural-payments-portal/customer.js'
-import {
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness,
   transformPersonSummaryToCustomerAuthorisedBusinesses
-} from '../../../app/transformers/version-one/customer.js'
+} from '../../../app/transformers/rural-payments/customer.js'
 import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
@@ -25,7 +23,8 @@ const mockMessages = [
     archivedAt: null,
     archive: null,
     createdAt: 8247074489993,
-    title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
+    title:
+      'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
     body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
     category: 'OrganisationLevel',
     bespokeNotificationId: null
@@ -39,7 +38,8 @@ const mockMessages = [
     archivedAt: 8818544780296,
     archive: null,
     createdAt: 8818544780296,
-    title: 'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
+    title:
+      'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
     body: '<p>Cruentus venia dedecor beatus vinco cultellus clarus.</p>',
     category: 'OrganisationLevel',
     bespokeNotificationId: null
@@ -50,12 +50,17 @@ const parsedMessages = mockMessages.map(mockMessage => ({
   date: mockMessage.createdAt,
   read: !!mockMessage.readAt
 }))
-const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation({ organisationId }).data
+const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation(
+  { organisationId }
+).data
 const personId = sitiAgriAuthorisationOrganisationData.personRoles[0].personId
 
 describe('Customer transformer', () => {
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
-    const result = transformPersonSummaryToCustomerAuthorisedBusinesses({}, personSummary._data)
+    const result = transformPersonSummaryToCustomerAuthorisedBusinesses(
+      {},
+      personSummary._data
+    )
 
     expect(result).toEqual([
       { businessId: 5263421 },
@@ -67,15 +72,19 @@ describe('Customer transformer', () => {
   })
 
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
-    const result = transformPersonRolesToCustomerAuthorisedBusinessesRoles(personId, sitiAgriAuthorisationOrganisationData.personRoles)
+    const result = transformPersonRolesToCustomerAuthorisedBusinessesRoles(
+      personId,
+      sitiAgriAuthorisationOrganisationData.personRoles
+    )
     expect(result).toEqual(['Business Partner'])
   })
 
   test('transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges', () => {
-    const result = transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges(
-      personId,
-      sitiAgriAuthorisationOrganisationData.personPrivileges
-    )
+    const result =
+      transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges(
+        personId,
+        sitiAgriAuthorisationOrganisationData.personPrivileges
+      )
     expect(result).toEqual(['Full permission - business', 'Amend - land'])
   })
 
@@ -97,25 +106,33 @@ describe('Customer transformer', () => {
   describe('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
     test('should return null when no sbi matching', () => {
       expect(
-        transformPersonSummaryToCustomerAuthorisedFilteredBusiness('99133320', 123456, [
-          {
-            id: '32323321',
-            name: 'John Doe',
-            sbi: 654321
-          }
-        ])
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+          '99133320',
+          123456,
+          [
+            {
+              id: '32323321',
+              name: 'John Doe',
+              sbi: 654321
+            }
+          ]
+        )
       ).toEqual(null)
     })
 
     test('should return id, name, sbi, and customerId when sbi is matching', () => {
       expect(
-        transformPersonSummaryToCustomerAuthorisedFilteredBusiness('99133320', 123456, [
-          {
-            id: '32323321',
-            name: 'John Doe',
-            sbi: 123456
-          }
-        ])
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+          '99133320',
+          123456,
+          [
+            {
+              id: '32323321',
+              name: 'John Doe',
+              sbi: 123456
+            }
+          ]
+        )
       ).toEqual({
         personId: '32323321',
         name: 'John Doe',
@@ -133,7 +150,9 @@ describe('Customer transformer', () => {
       Location: 'some location'
     }
 
-    const result = transformAuthenticateQuestionsAnswers(mockAuthenticateQuestionsResponse)
+    const result = transformAuthenticateQuestionsAnswers(
+      mockAuthenticateQuestionsResponse
+    )
 
     expect(result).toEqual({
       isFound: true,

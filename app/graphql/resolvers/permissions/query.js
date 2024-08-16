@@ -1,4 +1,4 @@
-import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
+import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments/permissions.js'
 
 export const Query = {
   async permissionGroups (_, __, { dataSources }) {
@@ -7,12 +7,24 @@ export const Query = {
 }
 
 export const Permission = {
-  async active (permissionGroup, { customerId, businessId }, { dataSources }) {
-    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(businessId)
+  async active (permissionGroup, { crn, sbi }, { dataSources }) {
+    const { id: customerId } =
+      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+
+    const { id: businessId } =
+      await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+
+    const authorisation =
+      await dataSources.ruralPaymentsBusiness.getAuthorisationByOrganisationId(
+        businessId
+      )
 
     return (
-      transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(customerId, [permissionGroup], authorisation.personPrivileges) ===
-      permissionGroup.level
+      transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
+        customerId,
+        [permissionGroup],
+        authorisation
+      ) === permissionGroup.level
     )
   }
 }

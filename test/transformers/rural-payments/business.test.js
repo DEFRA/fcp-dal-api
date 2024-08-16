@@ -1,5 +1,8 @@
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
-import { transformBusinessCustomerPrivilegesToPermissionGroups, transformOrganisationCustomers } from '../../../app/transformers/version-one/business.js'
+import {
+  transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformOrganisationCustomers
+} from '../../../app/transformers/rural-payments/business.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
 describe('Business transformer', () => {
@@ -17,7 +20,9 @@ describe('Business transformer', () => {
       }
     })
 
-    expect(transformOrganisationCustomers(customers)).toEqual(transformedCustomers)
+    expect(transformOrganisationCustomers(customers)).toEqual(
+      transformedCustomers
+    )
   })
 
   test('#transformBusinessCustomerPrivilegesToPermissionGroups', () => {
@@ -25,7 +30,10 @@ describe('Business transformer', () => {
     const { _data: customers } = organisationPeopleByOrgId(5565448)
 
     const transformedPermissionGroups = customers.map(customer => {
-      return transformBusinessCustomerPrivilegesToPermissionGroups(customer.privileges, permissionGroups)
+      return transformBusinessCustomerPrivilegesToPermissionGroups(
+        customer.privileges,
+        permissionGroups
+      )
     })
 
     expect(transformedPermissionGroups).toEqual([

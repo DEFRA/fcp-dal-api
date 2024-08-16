@@ -1,9 +1,8 @@
-import {
-  transformOrganisationCSApplicationToBusinessApplications
-} from '../../../app/transformers/rural-payments-portal/applications-cs.js'
+import { transformOrganisationCSApplicationToBusinessApplications } from '../../../app/transformers/rural-payments/applications-cs.js'
 
 describe('transformOrganisationCSApplicationToBusinessApplications Test', () => {
-  const systemUnderTest = transformOrganisationCSApplicationToBusinessApplications
+  const systemUnderTest =
+    transformOrganisationCSApplicationToBusinessApplications
 
   describe('given payload has no applications defined', () => {
     const actual = systemUnderTest(null)

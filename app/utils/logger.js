@@ -66,12 +66,8 @@ const format = winston.format.combine(
   })
 )
 
-const log = winston.createLogger({
+export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   transports: [new winston.transports.Console()],
   format
 })
-
-log.info(`Logger created level: ${log.level}`)
-
-export default log

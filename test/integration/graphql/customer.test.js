@@ -2,7 +2,7 @@ import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
-import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments-portal/customer.js'
+import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments/customer.js'
 import { personById } from '../../../mocks/fixtures/person.js'
 import { fakeContext } from '../../test-setup.js'
 
@@ -10,7 +10,9 @@ const personFixture = personById({ id: '5007136' })
 
 describe('Query.customer', () => {
   it('should return customer data', async () => {
-    const customerInfo = ruralPaymentsPortalCustomerTransformer(personFixture._data)
+    const customerInfo = ruralPaymentsPortalCustomerTransformer(
+      personFixture._data
+    )
     const result = await graphql({
       source: `#graphql
         query Customer($crn: ID!) {
@@ -75,8 +77,7 @@ describe('Query.customer', () => {
           info: customerInfo
         }
       }
-    }
-    )
+    })
   })
 
   it('should return customer authenticate questions', async () => {
@@ -87,8 +88,11 @@ describe('Query.customer', () => {
       Location: 'some location',
       Updated: 'some date'
     }
-    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(authenticateQuestionsResponse)
-    const transformedAuthenticateQuestions = transformAuthenticateQuestionsAnswers(authenticateQuestionsResponse)
+    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(
+      authenticateQuestionsResponse
+    )
+    const transformedAuthenticateQuestions =
+      transformAuthenticateQuestionsAnswers(authenticateQuestionsResponse)
     const result = await graphql({
       source: `#graphql
         query Customer {
@@ -113,7 +117,9 @@ describe('Query.customer', () => {
     expect(result).toEqual({
       data: {
         customer: {
-          authenticationQuestions: JSON.parse(JSON.stringify(transformedAuthenticateQuestions))
+          authenticationQuestions: JSON.parse(
+            JSON.stringify(transformedAuthenticateQuestions)
+          )
         }
       }
     })
@@ -121,7 +127,9 @@ describe('Query.customer', () => {
 
   it('should return isFound false if record not found', async () => {
     const authenticateQuestionsResponse = null
-    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(authenticateQuestionsResponse)
+    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(
+      authenticateQuestionsResponse
+    )
     const result = await graphql({
       source: `#graphql
         query Customer {
@@ -166,7 +174,9 @@ describe('Query.customer', () => {
       Location: 'some location',
       Updated: 'some date'
     }
-    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(authenticateQuestionsResponse)
+    fakeContext.dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN.mockResolvedValue(
+      authenticateQuestionsResponse
+    )
     const result = await graphql({
       source: `#graphql
         query Customer {

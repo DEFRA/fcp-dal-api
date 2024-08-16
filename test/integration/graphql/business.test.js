@@ -4,13 +4,12 @@ import { schema } from '../../../app/graphql/server.js'
 import {
   transformOrganisationCPH,
   transformOrganisationCPHCoordinates
-} from '../../../app/transformers/rural-payments-portal/business-cph.js'
-import { transformOrganisationToBusiness } from '../../../app/transformers/rural-payments-portal/business.js'
+} from '../../../app/transformers/rural-payments/business-cph.js'
 import {
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels
-} from '../../../app/transformers/rural-payments-portal/lms.js'
+} from '../../../app/transformers/rural-payments/lms.js'
 import {
   coversSummary,
   landCovers,
@@ -26,7 +25,10 @@ import {
   organisationPeopleByOrgId
 } from '../../../mocks/fixtures/organisation.js'
 import { fakeContext } from '../../test-setup.js'
-import { transformBusinessCustomerPrivilegesToPermissionGroups } from '../../../app/transformers/version-one/business.js'
+import {
+  transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformOrganisationToBusiness
+} from '../../../app/transformers/rural-payments/business.js'
 
 const organisationFixture = organisationByOrgId('5565448')._data
 const { totalArea, totalParcels } = parcelSummary('5565448')
@@ -258,10 +260,7 @@ describe('Query.business.cph', () => {
 })
 
 describe('Query.business.customers', () => {
-  const transformedCPH = transformOrganisationCPH(
-    '123',
-    organisationCPHFixture
-  )
+  const transformedCPH = transformOrganisationCPH('123', organisationCPHFixture)
   delete transformedCPH[0].id
 
   it('customer', async () => {

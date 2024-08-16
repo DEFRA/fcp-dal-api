@@ -48,5 +48,5 @@ type Permission {
   """
   Check if this level is active for given customer and business.
   """
-  active(customerId: String!, businessId: String!): Boolean
+  active(crn: String!, sbi: String!): Boolean
 }

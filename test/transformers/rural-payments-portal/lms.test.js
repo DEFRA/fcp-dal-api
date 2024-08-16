@@ -1,7 +1,8 @@
 import {
   transformLandCovers,
-  transformLandCoversToArea, transformLandParcels
-} from '../../../app/transformers/rural-payments-portal/lms.js'
+  transformLandCoversToArea,
+  transformLandParcels
+} from '../../../app/transformers/rural-payments/lms.js'
 
 describe('LMS transformer', () => {
   test('transformLandCovers', () => {
@@ -17,7 +18,9 @@ describe('LMS transformer', () => {
   })
 
   test('transformLandParcels', () => {
-    const input = [{ id: 'mockId', sheetId: 'mockSheetId', area: 1000, otherField: 'mock' }]
+    const input = [
+      { id: 'mockId', sheetId: 'mockSheetId', area: 1000, otherField: 'mock' }
+    ]
     const output = [{ id: 'mockId', sheetId: 'mockSheetId', area: 1000 }]
     expect(transformLandParcels(input)).toEqual(output)
   })

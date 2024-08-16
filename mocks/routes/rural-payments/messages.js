@@ -1,10 +1,13 @@
 import { messages } from '../../fixtures/messages.js'
-import { badRequestResponse, okOrNotFoundResponse } from '../../utils/requestResponse.js'
+import {
+  badRequestResponse,
+  okOrNotFoundResponse
+} from '../../utils/requestResponse.js'
 
 export default [
   {
     id: 'rpp-messages',
-    url: '/rpp/notifications',
+    url: '/v1/notifications',
     method: ['GET'],
     variants: [
       {

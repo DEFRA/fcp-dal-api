@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
 
-import logger from '../utils/logger.js'
+import { logger } from '../utils/logger.js'
 
 export async function getJwtPublicKey (kid) {
   const client = jwksClient({

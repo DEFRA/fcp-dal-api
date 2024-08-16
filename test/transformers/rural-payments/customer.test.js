@@ -1,6 +1,13 @@
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
-import { transformBusinessCustomerToCustomerPermissionGroups, transformBusinessCustomerToCustomerRole, transformPersonSummaryToCustomerAuthorisedBusinesses } from '../../../app/transformers/version-one/customer.js'
-import { organisationPeopleByOrgId, organisationPersonSummary } from '../../../mocks/fixtures/organisation.js'
+import {
+  transformBusinessCustomerToCustomerPermissionGroups,
+  transformBusinessCustomerToCustomerRole,
+  transformPersonSummaryToCustomerAuthorisedBusinesses
+} from '../../../app/transformers/rural-payments/customer.js'
+import {
+  organisationPeopleByOrgId,
+  organisationPersonSummary
+} from '../../../mocks/fixtures/organisation.js'
 
 describe('Customer transformer', () => {
   test('#transformBusinessCustomerToCustomerRole', () => {
@@ -8,7 +15,10 @@ describe('Customer transformer', () => {
 
     const customer = customers[0]
 
-    const transformedRole = transformBusinessCustomerToCustomerRole(customer.customerReference, customers)
+    const transformedRole = transformBusinessCustomerToCustomerRole(
+      customer.customerReference,
+      customers
+    )
 
     expect(transformedRole).toEqual('Business Partner')
   })
@@ -19,7 +29,12 @@ describe('Customer transformer', () => {
 
     const customer = customers[0]
 
-    const transformedPermissionGroups = transformBusinessCustomerToCustomerPermissionGroups(customer.customerReference, customers, permissionGroups)
+    const transformedPermissionGroups =
+      transformBusinessCustomerToCustomerPermissionGroups(
+        customer.customerReference,
+        customers,
+        permissionGroups
+      )
 
     expect(transformedPermissionGroups).toEqual([
       { id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' },
@@ -35,7 +50,10 @@ describe('Customer transformer', () => {
     const customerId = '5302028'
     const crn = '0866159801'
 
-    const transformed = transformPersonSummaryToCustomerAuthorisedBusinesses({ customerId, crn }, data)
+    const transformed = transformPersonSummaryToCustomerAuthorisedBusinesses(
+      { customerId, crn },
+      data
+    )
 
     expect(transformed).toEqual([
       {
