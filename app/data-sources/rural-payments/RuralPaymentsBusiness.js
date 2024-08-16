@@ -52,8 +52,17 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`lms/organisation/${organisationId}/land-covers`)
   }
 
-  getCoversSummaryByOrganisationId (organisationId) {
-    return this.get(`lms/organisation/${organisationId}/covers-summary`)
+  getCoversSummaryByOrganisationIdAndDate (organisationId, historicDate) {
+    const formattedHistoricDate = historicDate
+      .toLocaleString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: '2-digit'
+      })
+      .replace(/ /g, '-')
+    return this.get(
+      `lms/organisation/${organisationId}/covers-summary/historic/${formattedHistoricDate}`
+    )
   }
 
   async getOrganisationCPHCollectionByOrganisationId (organisationId) {

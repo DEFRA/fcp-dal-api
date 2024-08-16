@@ -10,7 +10,7 @@ import {
 
 export default [
   {
-    id: 'v1-organisation-get-by-id',
+    id: 'rural-payments-organisation-get-by-id',
     url: '/v1/organisation/:orgId',
     method: ['GET'],
     variants: [
@@ -29,7 +29,7 @@ export default [
     ]
   },
   {
-    id: 'v1-organisation-get-by-sbi',
+    id: 'rural-payments-organisation-get-by-sbi',
     url: '/v1/organisation/search',
     method: ['POST'],
     variants: [
@@ -53,7 +53,7 @@ export default [
     ]
   },
   {
-    id: 'v1-organisation-get-people-by-org-id',
+    id: 'rural-payments-organisation-get-people-by-org-id',
     url: '/v1/authorisation/organisation/:orgId',
     method: ['GET'],
     variants: [

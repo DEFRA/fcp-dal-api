@@ -6,7 +6,7 @@ import { okOrNotFoundResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
-    id: 'rpp-siti-agri-api-get-cph-for-organisation-by-id',
+    id: 'rural-payments-siti-agri-api-get-cph-for-organisation-by-id',
     url: '/v1/SitiAgriApi/cph/organisation/:orgId/cph-numbers',
     method: ['GET'],
     variants: [
@@ -25,7 +25,7 @@ export default [
     ]
   },
   {
-    id: 'rpp-siti-agri-api-get-cph-info-for-organisation-by-id',
+    id: 'rural-payments-siti-agri-api-get-cph-info-for-organisation-by-id',
     url: '/v1/SitiAgriApi/cph/organisation/:orgId/cph-numbers/:cphNumber',
     method: ['GET'],
     variants: [

@@ -1,11 +1,16 @@
 import { organisationPersonSummary } from '../../fixtures/organisation.js'
 import { pagination } from '../../fixtures/pagination.js'
 import { personById } from '../../fixtures/person.js'
-import { badRequestResponse, notFoundResponse, okOrNotFoundResponse, okResponse } from '../../utils/requestResponse.js'
+import {
+  badRequestResponse,
+  notFoundResponse,
+  okOrNotFoundResponse,
+  okResponse
+} from '../../utils/requestResponse.js'
 
 export default [
   {
-    id: 'v1-person-get-by-id',
+    id: 'rural-payments-person-get-by-id',
     url: '/v1/person/:personId/summary',
     method: ['GET'],
     variants: [
@@ -24,7 +29,7 @@ export default [
     ]
   },
   {
-    id: 'v1-person-get-by-crn',
+    id: 'rural-payments-person-get-by-crn',
     url: '/v1/person/search',
     method: ['POST'],
     variants: [
@@ -38,7 +43,9 @@ export default [
               return badRequestResponse(res)
             }
 
-            const person = personById({ customerReferenceNumber: body.primarySearchPhrase })
+            const person = personById({
+              customerReferenceNumber: body.primarySearchPhrase
+            })
 
             if (!person) {
               return notFoundResponse(res)
@@ -54,7 +61,7 @@ export default [
     ]
   },
   {
-    id: 'v1-get-person-organisations-summary-by-person-id',
+    id: 'rural-payments-get-person-organisations-summary-by-person-id',
     url: '/v1/organisation/person/:personId/summary',
     method: ['GET'],
     variants: [

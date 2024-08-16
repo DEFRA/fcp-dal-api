@@ -43,29 +43,44 @@ export const BusinessLandSummary = {
     return totalArea
   },
 
-  async arableLandArea ({ organisationId }, __, { dataSources }) {
+  async arableLandArea (
+    { organisationId, historicDate = new Date() },
+    __,
+    { dataSources }
+  ) {
     return transformLandCoversToArea(
       'Arable Land',
-      await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationId(
-        organisationId
+      await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationIdAndDate(
+        organisationId,
+        historicDate
       )
     )
   },
 
-  async permanentGrasslandArea ({ organisationId }, __, { dataSources }) {
+  async permanentGrasslandArea (
+    { organisationId, historicDate = new Date() },
+    __,
+    { dataSources }
+  ) {
     return transformLandCoversToArea(
       'Permanent Grassland',
-      await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationId(
-        organisationId
+      await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationIdAndDate(
+        organisationId,
+        historicDate
       )
     )
   },
 
-  async permanentCropsArea ({ organisationId }, __, { dataSources }) {
+  async permanentCropsArea (
+    { organisationId, historicDate = new Date() },
+    __,
+    { dataSources }
+  ) {
     return transformLandCoversToArea(
       'Permanent Crops',
-      await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationId(
-        organisationId
+      await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationIdAndDate(
+        organisationId,
+        historicDate
       )
     )
   }

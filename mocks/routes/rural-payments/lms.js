@@ -3,7 +3,7 @@ import { okOrNotFoundResponse } from '../../utils/requestResponse.js'
 
 export default [
   {
-    id: 'rpp-lms-get-land-covers',
+    id: 'rural-payments-lms-get-land-covers',
     url: '/v1/lms/organisation/:orgId/land-covers',
     method: ['GET'],
     variants: [
@@ -22,7 +22,7 @@ export default [
     ]
   },
   {
-    id: 'rpp-lms-get-parcels',
+    id: 'rural-payments-lms-get-parcels',
     url: '/v1/lms/organisation/:orgId/parcels',
     method: ['GET'],
     variants: [
@@ -41,8 +41,8 @@ export default [
     ]
   },
   {
-    id: 'rpp-lms-get-covers-summary',
-    url: '/v1/lms/organisation/:orgId/covers-summary',
+    id: 'rural-payments-lms-get-covers-summary',
+    url: '/v1/lms/organisation/:orgId/covers-summary/historic/:historicDate',
     method: 'GET',
     variants: [
       {

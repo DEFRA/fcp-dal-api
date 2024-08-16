@@ -5,36 +5,30 @@ const ruralPaymentsPortalRoutes = [
   'rpp-authenticate-get-person-context:default',
   'rpp-authenticate-get-expire-user-session:default',
 
-  'rpp-organisation-get-by-id:default',
-  'rpp-organisation-get-by-sbi:default',
-  'rpp-organisation-get-person-summary-by-person-id:default',
-  'rpp-organisation-get-people-by-org-id:default',
-  'rpp-organisation-applications-get-by-id:default',
-
-  'rpp-person-get-by-id:default',
-  'rpp-person-get-by-crn:default',
-
-  'rpp-lms-get-land-covers:default',
-  'rpp-lms-get-parcels:default',
   'rpp-lms-get-parcels-summary:default',
-  'rpp-lms-get-covers-summary:default',
 
-  'rpp-siti-agri-api-get-authorisation-by-organisation-id:default',
   'rpp-siti-agri-api-get-cph-for-organisation-by-id:default',
-  'rpp-siti-agri-api-get-cph-info-for-organisation-by-id:default',
-
-  'rpp-messages:default'
+  'rpp-siti-agri-api-get-cph-info-for-organisation-by-id:default'
 ]
 
 const release1Routes = [
   'apim-authentication-get-token:default',
 
-  'v1-person-get-by-id:default',
-  'v1-person-get-by-crn:default',
-  'v1-get-person-organisations-summary-by-person-id:default',
-  'v1-organisation-get-by-id:default',
-  'v1-organisation-get-by-sbi:default',
-  'v1-organisation-get-people-by-org-id:default'
+  'rural-payments-person-get-by-id:default',
+  'rural-payments-person-get-by-crn:default',
+  'rural-payments-get-person-organisations-summary-by-person-id:default',
+  'rural-payments-organisation-get-by-id:default',
+  'rural-payments-organisation-get-by-sbi:default',
+  'rural-payments-organisation-get-people-by-org-id:default',
+
+  'rural-payments-organisation-get-person-summary-by-person-id:default',
+  'rural-payments-organisation-applications-get-by-id:default',
+
+  'rural-payments-lms-get-covers-summary:default',
+  'rural-payments-lms-get-land-covers:default',
+  'rural-payments-lms-get-parcels:default',
+
+  'rural-payments-messages:default'
 ]
 
 export default [

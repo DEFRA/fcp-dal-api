@@ -6,7 +6,7 @@ import {
 
 export default [
   {
-    id: 'rpp-messages',
+    id: 'rural-payments-messages',
     url: '/v1/notifications',
     method: ['GET'],
     variants: [
