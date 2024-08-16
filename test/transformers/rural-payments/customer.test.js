@@ -47,11 +47,11 @@ describe('Customer transformer', () => {
   test('#transformPersonSummaryToCustomerAuthorisedBusinesses', () => {
     const data = organisationPersonSummary({ id: 5302028 })._data
 
-    const customerId = '5302028'
+    const personId = '5302028'
     const crn = '0866159801'
 
     const transformed = transformPersonSummaryToCustomerAuthorisedBusinesses(
-      { customerId, crn },
+      { personId, crn },
       data
     )
 
@@ -59,8 +59,8 @@ describe('Customer transformer', () => {
       {
         name: data[0].name,
         sbi: data[0].sbi,
-        businessId: data[0].id,
-        customerId,
+        organisationId: data[0].id,
+        personId,
         crn
       }
     ])

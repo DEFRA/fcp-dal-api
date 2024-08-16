@@ -1,8 +1,6 @@
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
-import {
-  transformBusinessCustomerPrivilegesToPermissionGroups,
-  transformOrganisationCustomers
-} from '../../../app/transformers/rural-payments/business.js'
+import { transformBusinessCustomerPrivilegesToPermissionGroups } from '../../../app/transformers/rural-payments/business.js'
+import { transformOrganisationCustomers } from '../../../app/transformers/rural-payments/business.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
 describe('Business transformer', () => {
@@ -11,7 +9,7 @@ describe('Business transformer', () => {
 
     const transformedCustomers = customers.map(customer => {
       return {
-        customerId: customer.id,
+        personId: customer.id,
         firstName: customer.firstName,
         lastName: customer.lastName,
         crn: customer.customerReference,

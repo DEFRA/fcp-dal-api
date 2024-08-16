@@ -8,22 +8,22 @@ export const Query = {
 
 export const Permission = {
   async active (permissionGroup, { crn, sbi }, { dataSources }) {
-    const { id: customerId } =
+    const { id: personId } =
       await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
-    const { id: businessId } =
+    const { id: organisationId } =
       await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
 
-    const authorisation =
-      await dataSources.ruralPaymentsBusiness.getAuthorisationByOrganisationId(
-        businessId
+    const orgCustomers =
+      await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
+        organisationId
       )
 
     return (
       transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
-        customerId,
+        personId,
         [permissionGroup],
-        authorisation
+        orgCustomers
       ) === permissionGroup.level
     )
   }

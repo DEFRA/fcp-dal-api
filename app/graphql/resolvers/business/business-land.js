@@ -5,65 +5,67 @@ import {
 } from '../../../transformers/rural-payments/lms.js'
 
 export const BusinessLand = {
-  summary ({ businessId }) {
-    return { businessId }
+  summary ({ organisationId }) {
+    return { organisationId }
   },
 
-  async parcels ({ businessId }, __, { dataSources }) {
+  async parcels ({ organisationId }, __, { dataSources }) {
     return transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationId(
-        businessId
+        organisationId
       )
     )
   },
 
-  async covers ({ businessId }, __, { dataSources }) {
+  async covers ({ organisationId }, __, { dataSources }) {
     return transformLandCovers(
-      await dataSources.ruralPaymentsBu.getCoversByOrganisationId(businessId)
+      await dataSources.ruralPaymentsBusiness.getCoversByOrganisationId(
+        organisationId
+      )
     )
   }
 }
 
 export const BusinessLandSummary = {
-  async totalParcels ({ businessId }, __, { dataSources }) {
+  async totalParcels ({ organisationId }, __, { dataSources }) {
     const { totalParcels } =
       await dataSources.ruralPaymentsPortalApi.getParcelsSummaryByOrganisationId(
-        businessId
+        organisationId
       )
     return totalParcels
   },
 
-  async totalArea ({ businessId }, __, { dataSources }) {
+  async totalArea ({ organisationId }, __, { dataSources }) {
     const { totalArea } =
       await dataSources.ruralPaymentsPortalApi.getParcelsSummaryByOrganisationId(
-        businessId
+        organisationId
       )
     return totalArea
   },
 
-  async arableLandArea ({ businessId }, __, { dataSources }) {
+  async arableLandArea ({ organisationId }, __, { dataSources }) {
     return transformLandCoversToArea(
       'Arable Land',
       await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationId(
-        businessId
+        organisationId
       )
     )
   },
 
-  async permanentGrasslandArea ({ businessId }, __, { dataSources }) {
+  async permanentGrasslandArea ({ organisationId }, __, { dataSources }) {
     return transformLandCoversToArea(
       'Permanent Grassland',
       await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationId(
-        businessId
+        organisationId
       )
     )
   },
 
-  async permanentCropsArea ({ businessId }, __, { dataSources }) {
+  async permanentCropsArea ({ organisationId }, __, { dataSources }) {
     return transformLandCoversToArea(
       'Permanent Crops',
       await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationId(
-        businessId
+        organisationId
       )
     )
   }

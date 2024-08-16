@@ -44,17 +44,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response._data
   }
 
-  // Required for role
-  async getAuthorisationByOrganisationId (organisationId) {
-    logger.debug('Getting authorisation by organisation ID', { organisationId })
-    const response = await this.get(
-      `authorisation/organisation/${organisationId}`
-    )
-
-    logger.debug('Authorisation by organisation ID', { response })
-    return response._data
-  }
-
   getParcelsByOrganisationId (organisationId) {
     return this.get(`lms/organisation/${organisationId}/parcels`)
   }

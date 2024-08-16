@@ -32,7 +32,7 @@ describe('Test Business CPHField Transformer', () => {
         ])
       ).toEqual([
         {
-          businessId: 'id',
+          organisationId: 'id',
           number: '43/060/0025',
           parcelNumbers: ['SP2936 2318']
         }

@@ -10,11 +10,11 @@ import {
 // import { logger } from '../../../utils/logger.js'
 
 export const Customer = {
-  async customerId ({ crn }, __, { dataSources }) {
-    const { id: customerId } =
+  async personId ({ crn }, __, { dataSources }) {
+    const { id: personId } =
       await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    // logger.info('Get customer id from crn', { crn, customerId })
-    return customerId
+    // logger.info('Get customer id from crn', { crn, personId })
+    return personId
   },
 
   async info ({ crn }, __, { dataSources }) {
@@ -25,29 +25,29 @@ export const Customer = {
   },
 
   async business ({ crn }, { sbi }, { dataSources }) {
-    const { id: customerId } =
+    const { id: personId } =
       await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-      customerId,
+      personId,
       sbi,
       await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
-        customerId,
+        personId,
         sbi
       )
     )
   },
 
   async businesses ({ crn }, __, { dataSources }) {
-    const { id: customerId } =
+    const { id: personId } =
       await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
     const summary =
       await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
-        customerId
+        personId
       )
-    // logger.info('Get customer businesses', { crn, customerId, summary })
+    // logger.info('Get customer businesses', { crn, personId, summary })
     return transformPersonSummaryToCustomerAuthorisedBusinesses(
-      { customerId, crn },
+      { personId, crn },
       summary
     )
   },
@@ -62,17 +62,17 @@ export const Customer = {
 }
 
 export const CustomerBusiness = {
-  async role ({ businessId, crn }, __, { dataSources }) {
-    // logger.info('Get customer business role', { crn, businessId })
+  async role ({ organisationId, crn }, __, { dataSources }) {
+    // logger.info('Get customer business role', { crn, organisationId })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
-        businessId
+        organisationId
       )
     return transformBusinessCustomerToCustomerRole(crn, businessCustomers)
   },
 
   async messages (
-    { businessId, customerId },
+    { organisationId, personId },
     { pagination, showOnlyDeleted },
     { dataSources }
   ) {
@@ -81,8 +81,8 @@ export const CustomerBusiness = {
 
     const notifications =
       await dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
-        businessId,
-        customerId,
+        organisationId,
+        personId,
         pagination?.page || defaultPaginationPage,
         pagination?.perPage || defaultPaginationPerPage
       )
@@ -90,10 +90,10 @@ export const CustomerBusiness = {
     return transformNotificationsToMessages(notifications, showOnlyDeleted)
   },
 
-  async permissionGroups ({ businessId, crn }, __, { dataSources }) {
+  async permissionGroups ({ organisationId, crn }, __, { dataSources }) {
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
-        businessId
+        organisationId
       )
 
     return transformBusinessCustomerToCustomerPermissionGroups(

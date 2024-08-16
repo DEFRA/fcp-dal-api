@@ -51,7 +51,7 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses (
     .map(({ name, sbi, id }) => ({
       name,
       sbi,
-      businessId: id,
+      organisationId: id,
       ...properties
     }))
 
@@ -105,24 +105,6 @@ export const ruralPaymentsPortalCustomerTransformer = data => {
   }
 }
 
-export function transformPersonRolesToCustomerAuthorisedBusinessesRoles (
-  customerId,
-  personRoles
-) {
-  return personRoles
-    .filter(({ personId }) => personId === customerId)
-    .map(({ role }) => role)
-}
-
-export function transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges (
-  customerId,
-  personPrivileges
-) {
-  return personPrivileges
-    .filter(({ personId }) => personId === customerId)
-    .map(({ privilegeNames }) => privilegeNames[0])
-}
-
 export function transformNotificationsToMessages (
   notifications = [],
   showOnlyDeleted = false
@@ -142,7 +124,7 @@ export function transformNotificationsToMessages (
 }
 
 export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (
-  customerId,
+  personId,
   sbi,
   summary
 ) {
@@ -156,7 +138,7 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (
   return {
     personId: filteredBusinessForCustomer.id,
     name: filteredBusinessForCustomer.name,
-    customerId,
+    personId,
     sbi
   }
 }

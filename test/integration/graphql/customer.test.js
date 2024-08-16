@@ -18,7 +18,7 @@ describe('Query.customer', () => {
         query Customer($crn: ID!) {
           customer(crn: $crn) {
             crn
-            customerId
+            personId
             info {
               name {
                 title
@@ -73,7 +73,7 @@ describe('Query.customer', () => {
       data: {
         customer: {
           crn: personFixture._data.customerReferenceNumber,
-          customerId: personFixture._data.id.toString(),
+          personId: personFixture._data.id.toString(),
           info: customerInfo
         }
       }
@@ -108,7 +108,7 @@ describe('Query.customer', () => {
         }
       `,
       variableValues: {
-        customerId: '123'
+        personId: '123'
       },
       schema,
       contextValue: fakeContext
@@ -145,7 +145,7 @@ describe('Query.customer', () => {
         }
       `,
       variableValues: {
-        customerId: '123'
+        personId: '123'
       },
       schema,
       contextValue: fakeContext
@@ -192,7 +192,7 @@ describe('Query.customer', () => {
         }
       `,
       variableValues: {
-        customerId: '123'
+        personId: '123'
       },
       schema,
       contextValue: fakeContext

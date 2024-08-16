@@ -1,9 +1,7 @@
-import { logger } from '../../utils/logger.js'
-
 export const transformOrganisationCustomers = data => {
   const transformed = data.map(
     ({ id, firstName, lastName, customerReference, role, privileges }) => ({
-      customerId: id,
+      personId: id,
       firstName,
       lastName,
       crn: customerReference,
@@ -11,11 +9,6 @@ export const transformOrganisationCustomers = data => {
       privileges
     })
   )
-
-  logger.debug('Transforming organisation customers', {
-    original: data,
-    transformed
-  })
 
   return transformed
 }
@@ -90,7 +83,7 @@ export const transformOrganisationToBusiness = data => {
         charityCommission: data.charityCommissionRegistrationNumber
       }
     },
-    businessId: `${data.id}`,
+    organisationId: `${data.id}`,
     sbi: `${data.sbi}`
   }
 }

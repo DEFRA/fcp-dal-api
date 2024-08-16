@@ -6,7 +6,7 @@ describe('Business transformer', () => {
     const { _data: organisation } = organisationByOrgId(5565448)
 
     expect(transformOrganisationToBusiness(organisation)).toEqual({
-      businessId: '5565448',
+      organisationId: '5565448',
       info: {
         address: {
           buildingName: 'STOCKWELL HALL',
@@ -46,7 +46,7 @@ describe('Business transformer', () => {
     const { _data: organisation } = organisationByOrgId(5625145)
 
     expect(transformOrganisationToBusiness(organisation)).toEqual({
-      businessId: '5625145',
+      organisationId: '5625145',
       info: {
         address: {
           buildingName: 'LADYWOOD LODGE FARM',

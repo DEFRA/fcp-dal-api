@@ -122,7 +122,7 @@ type Customer {
   """
   The unique identifier of the customer.
   """
-  customerId: ID! @on #eslint-disable-line @graphql-eslint/no-typename-prefix
+  personId: ID! @on #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
   The CRN (Customer Reference Number) of the customer.
   """
@@ -156,7 +156,7 @@ type CustomerBusiness {
   """
   The unique identifier of the business.
   """
-  businessId: ID @on
+  organisationId: ID @on
 
   """
   The SBI (Single Business Identifier) of the business.

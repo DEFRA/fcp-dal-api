@@ -29,7 +29,7 @@ const dataSources = {
   }
 }
 
-const mockBusiness = { businessId: 'mockId' }
+const mockBusiness = { organisationId: 'mockId' }
 
 describe('BusinessLand', () => {
   it('summary', () => {

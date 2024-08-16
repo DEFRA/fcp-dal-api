@@ -11,16 +11,25 @@ describe('schema', () => {
   })
 
   it('should not include custom @on directive in final schema output', async () => {
-    const { schema } = await import(`../../../app/graphql/server.js?test=${Math.random()}`)
+    const { schema } = await import(
+      `../../../app/graphql/server.js?test=${Math.random()}`
+    )
     const result = await graphql({ schema, source: getIntrospectionQuery() })
-    expect(result.data.__schema.directives.find(({ name }) => name === 'on')).toBe(undefined)
+    expect(
+      result.data.__schema.directives.find(({ name }) => name === 'on')
+    ).toBe(undefined)
   })
 
   it('should only contain fields that have the @on directive', async () => {
     delete process.env.ALL_SCHEMA_ON
-    const { schema } = await import(`../../../app/graphql/server.js?test=${Math.random()}`)
+    const { schema } = await import(
+      `../../../app/graphql/server.js?test=${Math.random()}`
+    )
 
-    expect(findBreakingChanges(schema, buildSchema(`#graphql
+    expect(
+      findBreakingChanges(
+        schema,
+        buildSchema(`#graphql
       scalar Int
       scalar Float
       scalar Date
@@ -33,7 +42,7 @@ describe('schema', () => {
       """Represents the a customer of a business."""
       type BusinessCustomer {
         """The unique identifier of the customer."""
-        customerId: ID
+        personId: ID
 
         """First name of the customer."""
         firstName: String
@@ -66,7 +75,7 @@ describe('schema', () => {
       """
       type Business {
         """The first unique identifier of the business."""
-        businessId: ID
+        organisationId: ID
 
         """The Single Business Identifier (SBI) of the business."""
         sbi: ID!
@@ -96,7 +105,7 @@ describe('schema', () => {
       """Represents a customer."""
       type Customer {
         """The unique identifier of the customer."""
-        customerId: ID!
+        personId: ID!
 
         """The CRN (Customer Reference Number) of the customer."""
         crn: ID!
@@ -111,7 +120,7 @@ describe('schema', () => {
       """Represents a business owned by a customer."""
       type CustomerBusiness {
         """The unique identifier of the business."""
-        businessId: ID
+        organisationId: ID
 
         """The SBI (Single Business Identifier) of the business."""
         sbi: ID!
@@ -152,12 +161,19 @@ describe('schema', () => {
         ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS
         LAND_DETAILS
       }
-   `))).toHaveLength(0)
+   `)
+      )
+    ).toHaveLength(0)
   })
 
   it('should contain all fields if process.env.ALL_SCHEMA is set', async () => {
-    const { schema } = await import(`../../../app/graphql/server.js?test=${Math.random()}`)
-    expect(findBreakingChanges(schema, buildSchema(`#graphql
+    const { schema } = await import(
+      `../../../app/graphql/server.js?test=${Math.random()}`
+    )
+    expect(
+      findBreakingChanges(
+        schema,
+        buildSchema(`#graphql
       type Query {
         business(sbi: ID!): Business
         permissionGroups: [PermissionGroup]
@@ -353,7 +369,7 @@ describe('schema', () => {
       """Represents the a customer of a business."""
       type BusinessCustomer {
         """The unique identifier of the customer."""
-        customerId: ID
+        personId: ID
 
         """First name of the customer."""
         firstName: String
@@ -386,7 +402,7 @@ describe('schema', () => {
       """
       type Business {
         """The first unique identifier of the business."""
-        businessId: ID
+        organisationId: ID
 
         """The Single Business Identifier (SBI) of the business."""
         sbi: ID!
@@ -552,7 +568,7 @@ describe('schema', () => {
         functions: [String]
 
         """Check if this level is active for given customer and business."""
-        active(customerId: String!, businessId: String!): Boolean
+        active(crn: ID!, sbi: ID!): Boolean
       }
 
       """
@@ -631,7 +647,7 @@ describe('schema', () => {
       """Represents a customer."""
       type Customer {
         """The unique identifier of the customer."""
-        customerId: ID!
+        personId: ID!
 
         """The CRN (Customer Reference Number) of the customer."""
         crn: ID!
@@ -652,7 +668,7 @@ describe('schema', () => {
       """Represents a business owned by a customer."""
       type CustomerBusiness {
         """The unique identifier of the business."""
-        businessId: ID
+        organisationId: ID
 
         """The SBI (Single Business Identifier) of the business."""
         sbi: ID!
@@ -699,6 +715,8 @@ describe('schema', () => {
         """Whether the message has been read."""
         read: Boolean
       }
-    `))).toHaveLength(0)
+    `)
+      )
+    ).toHaveLength(0)
   })
 })

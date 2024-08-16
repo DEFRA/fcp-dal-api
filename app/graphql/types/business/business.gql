@@ -95,7 +95,7 @@ type BusinessCustomer {
   """
   The unique identifier of the customer.
   """
-  customerId: ID @on
+  personId: ID @on
 
   """
   First name of the customer.
@@ -144,7 +144,7 @@ type Business {
   """
   The first unique identifier of the business.
   """
-  businessId: ID @on #eslint-disable-line @graphql-eslint/no-typename-prefix
+  organisationId: ID @on #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
   The Single Business Identifier (SBI) of the business.
   """

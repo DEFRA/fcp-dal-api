@@ -1,36 +1,34 @@
 import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
-import {
-  transformBusinessCustomerPrivilegesToPermissionGroups,
-  transformOrganisationCustomers
-} from '../../../transformers/rural-payments/business.js'
+import { transformBusinessCustomerPrivilegesToPermissionGroups } from '../../../transformers/rural-payments/business.js'
+import { transformOrganisationCustomers } from '../../../transformers/rural-payments/business.js'
 import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 
 export const Business = {
-  land ({ businessId }) {
-    return { businessId }
+  land ({ organisationId }) {
+    return { organisationId }
   },
 
-  async cph ({ businessId }, _, { dataSources }) {
+  async cph ({ organisationId }, _, { dataSources }) {
     return transformOrganisationCPH(
-      businessId,
+      organisationId,
       await dataSources.ruralPaymentsBusiness.getOrganisationCPHCollectionByOrganisationId(
-        businessId
+        organisationId
       )
     )
   },
 
-  async customers ({ businessId }, _, { dataSources }) {
+  async customers ({ organisationId }, _, { dataSources }) {
     return transformOrganisationCustomers(
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
-        businessId
+        organisationId
       )
     )
   },
 
-  async applications ({ businessId }, __, { dataSources }) {
+  async applications ({ organisationId }, __, { dataSources }) {
     const response =
       await dataSources.ruralPaymentsPortalApi.getApplicationsCountrysideStewardship(
-        businessId
+        organisationId
       )
     return transformOrganisationCSApplicationToBusinessApplications(
       response?.applications

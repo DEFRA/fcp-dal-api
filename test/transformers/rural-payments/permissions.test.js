@@ -3,39 +3,33 @@ import {
   transformOrganisationAuthorisationToCustomerBusinessPermissionLevel,
   transformPrivilegesListToBusinessCustomerPermissions
 } from '../../../app/transformers/rural-payments/permissions.js'
-import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
-const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation({
-  organisationId: '5565448'
-})
+const orgId = '5565448'
+const orgCustomers = organisationPeopleByOrgId(orgId)._data
 
 describe('Permissions transformer', () => {
   test('returns null if no match', () => {
-    const personPrivileges =
-      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
     const result =
       transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
-        personPrivileges[0].personId,
+        orgCustomers[0].id,
         [],
-        personPrivileges
+        orgCustomers
       )
     expect(result).toBeNull()
   })
 
   test('returns level if  match', () => {
-    const personPrivileges =
-      sitiAgriApiAuthorisationOrganisation.data.personPrivileges
     const result =
       transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
-        personPrivileges[0].personId,
+        orgCustomers[0].id,
         [
           {
             level: 'MOCK_LEVEL',
             privilegeNames: ['Full permission - business']
           }
         ],
-        personPrivileges
+        orgCustomers
       )
     expect(result).toEqual('MOCK_LEVEL')
   })

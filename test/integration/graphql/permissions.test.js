@@ -7,21 +7,21 @@ describe('Query.permissionGroups', () => {
   it('should return permissions', async () => {
     const result = await graphql({
       source: `#graphql
-          query PermissionGroups($customerId: String!, $businessId: String!) {
+          query PermissionGroups($crn: ID!, $sbi: ID!) {
             permissionGroups {
               id
               name
               permissions {
+                active(crn: $crn, sbi: $sbi)
                 functions
                 level
-                active(customerId: $customerId, businessId: $businessId)
               }
             }
           }
         `,
       variableValues: {
-        customerId: '5263421',
-        businessId: '5565448'
+        crn: '9102634220',
+        sbi: '890000001'
       },
       schema,
       contextValue: fakeContext
@@ -40,7 +40,11 @@ describe('Query.permissionGroups', () => {
                 active: false
               },
               {
-                functions: ['View business summary', 'View claims', 'View land, features and covers'],
+                functions: [
+                  'View business summary',
+                  'View claims',
+                  'View land, features and covers'
+                ],
                 level: 'VIEW',
                 active: false
               },
@@ -55,9 +59,14 @@ describe('Query.permissionGroups', () => {
                 active: false
               },
               {
-                functions: ['All permissions in Amend BPS', 'Submit a claim', 'Withdraw a claim', 'Receive warnings and notifications'],
+                functions: [
+                  'All permissions in Amend BPS',
+                  'Submit a claim',
+                  'Withdraw a claim',
+                  'Receive warnings and notifications'
+                ],
                 level: 'SUBMIT',
-                active: false
+                active: true
               }
             ]
           },
@@ -66,12 +75,18 @@ describe('Query.permissionGroups', () => {
             name: 'Business details',
             permissions: [
               {
-                functions: ['View business details', 'View people associated with the business'],
+                functions: [
+                  'View business details',
+                  'View people associated with the business'
+                ],
                 level: 'VIEW',
                 active: false
               },
               {
-                functions: ['All permissions in View Business Details', 'Amend business and correspondence contact details'],
+                functions: [
+                  'All permissions in View Business Details',
+                  'Amend business and correspondence contact details'
+                ],
                 level: 'AMEND',
                 active: false
               },
@@ -159,7 +174,12 @@ describe('Query.permissionGroups', () => {
                 active: false
               },
               {
-                functions: ['View CS Scheme eligibility', 'View Applications', 'View land, features and covers', 'View CS agreement offer'],
+                functions: [
+                  'View CS Scheme eligibility',
+                  'View Applications',
+                  'View land, features and covers',
+                  'View CS agreement offer'
+                ],
                 level: 'VIEW',
                 active: false
               },
@@ -201,9 +221,13 @@ describe('Query.permissionGroups', () => {
                 active: false
               },
               {
-                functions: ['View entitlements', 'Transfer entitlements', 'Apply for new entitlements'],
+                functions: [
+                  'View entitlements',
+                  'Transfer entitlements',
+                  'Apply for new entitlements'
+                ],
                 level: 'AMEND',
-                active: false
+                active: true
               }
             ]
           },
@@ -261,7 +285,11 @@ describe('Query.permissionGroups', () => {
                 active: false
               },
               {
-                functions: ['View land, features and covers', 'Amend land, features and covers', 'Transfer land'],
+                functions: [
+                  'View land, features and covers',
+                  'Amend land, features and covers',
+                  'Transfer land'
+                ],
                 level: 'AMEND',
                 active: true
               }

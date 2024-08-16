@@ -48,7 +48,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     page,
     size
   ) {
-    const response = await this.get('/rpp/notifications', {
+    const response = await this.get('notifications', {
       params: {
         personId,
         organisationId,

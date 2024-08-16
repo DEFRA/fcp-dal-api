@@ -6,7 +6,6 @@ import {
   Customer,
   CustomerBusiness
 } from '../../app/graphql/resolvers/customer/customer.js'
-import { sitiAgriAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
 import {
   organisationPeopleByOrgId,
   organisationPersonSummary
@@ -28,9 +27,6 @@ const dataSources = {
     getNotificationsByOrganisationIdAndPersonId: jest.fn()
   },
   ruralPaymentsBusiness: {
-    getAuthorisationByOrganisationId () {
-      return sitiAgriAuthorisationOrganisation({ organisationId: orgId }).data
-    },
     getOrganisationCustomersByOrganisationId () {
       return organisationPeopleByOrgId(orgId)._data
     }
@@ -112,14 +108,14 @@ describe('Customer', () => {
     expect(response).toEqual({
       personId: '5625145',
       name: 'Cliff Spence T/As Abbey Farm',
-      customerId: 5007136,
+      personId: 5007136,
       sbi: 890000004
     })
   })
 
   test('Customer.businesses', async () => {
     const response = await Customer.businesses(
-      { customerId: '5007136' },
+      { personId: '5007136' },
       undefined,
       { dataSources }
     )
@@ -127,8 +123,8 @@ describe('Customer', () => {
       {
         name: 'Cliff Spence T/As Abbey Farm',
         sbi: 890000004,
-        businessId: '5625145',
-        customerId: 5007136,
+        organisationId: '5625145',
+        personId: 5007136,
         crn: undefined
       }
     ])
@@ -136,7 +132,7 @@ describe('Customer', () => {
 
   test('Customer.authenticationQuestions', async () => {
     const response = await Customer.authenticationQuestions(
-      { id: 'mockCustomerId' },
+      { id: 'mockpersonId' },
       undefined,
       { dataSources }
     )
@@ -199,7 +195,7 @@ describe('CustomerBusiness', () => {
 
   test('CustomerBusiness.role', async () => {
     const response = await CustomerBusiness.role(
-      { businessId: '4309257', crn: '9102634220' },
+      { organisationId: '4309257', crn: '9102634220' },
       undefined,
       { dataSources }
     )
@@ -208,7 +204,7 @@ describe('CustomerBusiness', () => {
 
   test('CustomerBusiness.permissionGroups', async () => {
     const response = await CustomerBusiness.permissionGroups(
-      { businessId: '5625145', crn: '9102634220' },
+      { organisationId: '5625145', crn: '9102634220' },
       undefined,
       {
         dataSources
@@ -226,33 +222,33 @@ describe('CustomerBusiness', () => {
   describe('CustomerBusiness.messages', () => {
     test('no args', async () => {
       const response = await CustomerBusiness.messages(
-        { businessId: '4309257', customerId: 'mockCustomerId' },
+        { organisationId: '4309257', personId: 'mockpersonId' },
         {},
         { dataSources }
       )
       expect(
         dataSources.ruralPaymentsCustomer
           .getNotificationsByOrganisationIdAndPersonId
-      ).toHaveBeenCalledWith('4309257', 'mockCustomerId', 1, 5)
+      ).toHaveBeenCalledWith('4309257', 'mockpersonId', 1, 5)
       expect(response).toEqual([parsedMessages[1]])
     })
 
     test('showOnlyDeleted = false', async () => {
       const response = await CustomerBusiness.messages(
-        { businessId: '4309257', customerId: 'mockCustomerId' },
+        { organisationId: '4309257', personId: 'mockpersonId' },
         { showOnlyDeleted: false },
         { dataSources }
       )
       expect(
         dataSources.ruralPaymentsCustomer
           .getNotificationsByOrganisationIdAndPersonId
-      ).toHaveBeenCalledWith('4309257', 'mockCustomerId', 1, 5)
+      ).toHaveBeenCalledWith('4309257', 'mockpersonId', 1, 5)
       expect(response).toEqual([parsedMessages[1]])
     })
 
     test('showOnlyDeleted = true', async () => {
       const response = await CustomerBusiness.messages(
-        { businessId: '123123', customerId: '321321' },
+        { organisationId: '123123', personId: '321321' },
         { showOnlyDeleted: true },
         { dataSources }
       )
@@ -265,7 +261,7 @@ describe('CustomerBusiness', () => {
 
     test('pagination', async () => {
       const response = await CustomerBusiness.messages(
-        { businessId: '123', customerId: '123' },
+        { organisationId: '123', personId: '123' },
         { pagination: { perPage: 5, page: 5 } },
         { dataSources }
       )
@@ -282,7 +278,7 @@ describe('CustomerBusinessPermissionGroup', () => {
   test('CustomerBusinessPermissionGroup.level', async () => {
     const response = await CustomerBusiness.permissionGroups(
       {
-        businessId: orgId,
+        organisationId: orgId,
         crn: '9102634220',
         permissions: [
           {

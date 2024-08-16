@@ -2,12 +2,9 @@ import pick from 'lodash.pick'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
 import {
   transformNotificationsToMessages,
-  transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
-  transformPersonRolesToCustomerAuthorisedBusinessesRoles,
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness,
   transformPersonSummaryToCustomerAuthorisedBusinesses
 } from '../../../app/transformers/rural-payments/customer.js'
-import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
 const organisationId = '5565448'
@@ -50,10 +47,6 @@ const parsedMessages = mockMessages.map(mockMessage => ({
   date: mockMessage.createdAt,
   read: !!mockMessage.readAt
 }))
-const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation(
-  { organisationId }
-).data
-const personId = sitiAgriAuthorisationOrganisationData.personRoles[0].personId
 
 describe('Customer transformer', () => {
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
@@ -63,29 +56,12 @@ describe('Customer transformer', () => {
     )
 
     expect(result).toEqual([
-      { businessId: 5263421 },
-      { businessId: 5302028 },
-      { businessId: 5311964 },
-      { businessId: 5331098 },
-      { businessId: 5778203 }
+      { organisationId: 5263421 },
+      { organisationId: 5302028 },
+      { organisationId: 5311964 },
+      { organisationId: 5331098 },
+      { organisationId: 5778203 }
     ])
-  })
-
-  test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
-    const result = transformPersonRolesToCustomerAuthorisedBusinessesRoles(
-      personId,
-      sitiAgriAuthorisationOrganisationData.personRoles
-    )
-    expect(result).toEqual(['Business Partner'])
-  })
-
-  test('transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges', () => {
-    const result =
-      transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges(
-        personId,
-        sitiAgriAuthorisationOrganisationData.personPrivileges
-      )
-    expect(result).toEqual(['Full permission - business', 'Amend - land'])
   })
 
   test('transformNotificationsToMessages', () => {
@@ -120,7 +96,7 @@ describe('Customer transformer', () => {
       ).toEqual(null)
     })
 
-    test('should return id, name, sbi, and customerId when sbi is matching', () => {
+    test('should return id, name, sbi, and personId when sbi is matching', () => {
       expect(
         transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
           '99133320',
@@ -136,7 +112,7 @@ describe('Customer transformer', () => {
       ).toEqual({
         personId: '32323321',
         name: 'John Doe',
-        customerId: '99133320',
+        personId: '99133320',
         sbi: 123456
       })
     })
