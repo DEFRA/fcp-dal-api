@@ -6,9 +6,7 @@ const ruralPaymentsPortalRoutes = [
   'rpp-authenticate-get-expire-user-session:default',
 
   'rpp-lms-get-parcels-summary:default',
-
-  'rpp-siti-agri-api-get-cph-for-organisation-by-id:default',
-  'rpp-siti-agri-api-get-cph-info-for-organisation-by-id:default'
+  'rpp-organisation-applications-get-by-id:default'
 ]
 
 const release1Routes = [
@@ -22,13 +20,15 @@ const release1Routes = [
   'rural-payments-organisation-get-people-by-org-id:default',
 
   'rural-payments-organisation-get-person-summary-by-person-id:default',
-  'rural-payments-organisation-applications-get-by-id:default',
 
   'rural-payments-lms-get-covers-summary:default',
   'rural-payments-lms-get-land-covers:default',
   'rural-payments-lms-get-parcels:default',
 
-  'rural-payments-messages:default'
+  'rural-payments-messages:default',
+
+  'rural-payments-siti-agri-api-get-cph-for-organisation-by-id:default',
+  'rural-payments-siti-agri-api-get-cph-info-for-organisation-by-id:default'
 ]
 
 export default [

@@ -527,7 +527,7 @@ describe('schema', () => {
         parcels: [BusinessLandParcel]
 
         """The summary of the business land."""
-        summary: BusinessLandSummary
+        summary(historicDate: Date): BusinessLandSummary
       }
 
       enum PermissionLevel {

@@ -19,7 +19,7 @@ const dataSources = {
     getCoversByOrganisationId () {
       return [{ id: 'mockId', info: [{ area: 1000, name: 'Mock Name' }] }]
     },
-    getCoversSummaryByOrganisationId () {
+    getCoversSummaryByOrganisationIdAndDate () {
       return [
         { name: 'Arable Land', area: 1000 },
         { name: 'Permanent Grassland', area: 2000 },
