@@ -1,6 +1,6 @@
 export function transformLandCovers (landCovers) {
   return landCovers.map(({ id, info }) => {
-    const { area, name } = info.find(({ area }) => area !== 0)
+    const { area, name } = info.find(item => item.area !== 0)
 
     return {
       id,
