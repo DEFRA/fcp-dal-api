@@ -1,10 +1,10 @@
 export function transformLandCovers (landCovers) {
   return landCovers.map(({ id, info }) => {
-    const { area, name } = info.find(({ area }) => area !== 0)
+    const { nonZeroArea, name } = info.find(({ area }) => area !== 0)
 
     return {
       id,
-      area,
+      nonZeroArea,
       name: name.toUpperCase().split(' ').join('_')
     }
   })
@@ -16,5 +16,9 @@ export function transformLandCoversToArea (name, landCovers) {
 }
 
 export function transformLandParcels (landParcels) {
-  return landParcels.map(({ id, sheetId, area }) => ({ id: `${id}`, sheetId, area }))
+  return landParcels.map(({ id, sheetId, area }) => ({
+    id: `${id}`,
+    sheetId,
+    area
+  }))
 }

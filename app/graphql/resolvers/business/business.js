@@ -1,6 +1,8 @@
 import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
-import { transformBusinessCustomerPrivilegesToPermissionGroups } from '../../../transformers/rural-payments/business.js'
-import { transformOrganisationCustomers } from '../../../transformers/rural-payments/business.js'
+import {
+  transformOrganisationCustomers,
+  transformBusinessCustomerPrivilegesToPermissionGroups
+} from '../../../transformers/rural-payments/business.js'
 import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 
 export const Business = {

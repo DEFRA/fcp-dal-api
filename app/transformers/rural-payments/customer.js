@@ -124,7 +124,6 @@ export function transformNotificationsToMessages (
 }
 
 export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (
-  personId,
   sbi,
   summary
 ) {
@@ -136,9 +135,8 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (
   }
 
   return {
-    personId: filteredBusinessForCustomer.id,
+    organisationId: filteredBusinessForCustomer.id,
     name: filteredBusinessForCustomer.name,
-    personId,
     sbi
   }
 }

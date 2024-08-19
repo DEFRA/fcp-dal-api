@@ -106,9 +106,8 @@ describe('Customer', () => {
       { dataSources }
     )
     expect(response).toEqual({
-      personId: '5625145',
+      organisationId: '5625145',
       name: 'Cliff Spence T/As Abbey Farm',
-      personId: 5007136,
       sbi: 890000004
     })
   })

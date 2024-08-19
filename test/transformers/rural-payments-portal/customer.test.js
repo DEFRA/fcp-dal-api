@@ -82,37 +82,28 @@ describe('Customer transformer', () => {
   describe('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
     test('should return null when no sbi matching', () => {
       expect(
-        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-          '99133320',
-          123456,
-          [
-            {
-              id: '32323321',
-              name: 'John Doe',
-              sbi: 654321
-            }
-          ]
-        )
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(123456, [
+          {
+            id: '32323321',
+            name: 'John Doe',
+            sbi: 654321
+          }
+        ])
       ).toEqual(null)
     })
 
     test('should return id, name, sbi, and personId when sbi is matching', () => {
       expect(
-        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-          '99133320',
-          123456,
-          [
-            {
-              id: '32323321',
-              name: 'John Doe',
-              sbi: 123456
-            }
-          ]
-        )
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(123456, [
+          {
+            id: '32323321',
+            name: 'John Doe',
+            sbi: 123456
+          }
+        ])
       ).toEqual({
-        personId: '32323321',
+        organisationId: '32323321',
         name: 'John Doe',
-        personId: '99133320',
         sbi: 123456
       })
     })
