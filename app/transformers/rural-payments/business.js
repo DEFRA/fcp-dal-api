@@ -71,12 +71,12 @@ export const transformOrganisationToBusiness = data => {
         doNotContact: data.doNotContact || false
       },
       legalStatus: {
-        code: data.legalStatus.id,
-        type: data.legalStatus.type
+        code: data.legalStatus?.id,
+        type: data.legalStatus?.type
       },
       type: {
-        code: data.businessType.id,
-        type: data.businessType.type
+        code: data.businessType?.id,
+        type: data.businessType?.type
       },
       registrationNumbers: {
         companiesHouse: data.companiesHouseRegistrationNumber,
