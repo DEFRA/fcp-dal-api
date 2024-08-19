@@ -1,10 +1,10 @@
 export function transformLandCovers (landCovers) {
   return landCovers.map(({ id, info }) => {
-    const { nonZeroArea, name } = info.find(({ area }) => area !== 0)
+    const { area, name } = info.find(({ area }) => area !== 0)
 
     return {
       id,
-      nonZeroArea,
+      area,
       name: name.toUpperCase().split(' ').join('_')
     }
   })
