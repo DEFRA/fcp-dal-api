@@ -1,4 +1,4 @@
-import { graphql } from 'graphql'
+import { graphql, GraphQLError } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
@@ -386,6 +386,44 @@ describe('Query.customer.businesses.messages', () => {
           ]
         }
       }
+    })
+  })
+
+  it('should handle error when no businesses', async () => {
+    const result = await graphql({
+      source: `#graphql
+        query Messages($crn: ID!, $pagination: Pagination, $deleted: Boolean) {
+          customer(crn: $crn) {
+            businesses {
+              messages(pagination: $pagination, showOnlyDeleted: $deleted) {
+                title
+                read
+                id
+                date
+              }
+            }
+          }
+        }
+      `,
+      variableValues: {
+        crn: '123',
+        pagination: {
+          page: 1,
+          perPage: 3
+        },
+        deleted: true
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          businesses: null
+        }
+      },
+      errors: [new GraphQLError('404: Not Found')]
     })
   })
 })
