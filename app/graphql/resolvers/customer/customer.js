@@ -1,19 +1,19 @@
 import { transformAuthenticateQuestionsAnswers } from '../../../transformers/authenticate/question-answers.js'
 import {
   ruralPaymentsPortalCustomerTransformer,
-  transformNotificationsToMessages,
-  transformPersonSummaryToCustomerAuthorisedFilteredBusiness,
   transformBusinessCustomerToCustomerPermissionGroups,
   transformBusinessCustomerToCustomerRole,
-  transformPersonSummaryToCustomerAuthorisedBusinesses
+  transformNotificationsToMessages,
+  transformPersonSummaryToCustomerAuthorisedBusinesses,
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments/customer.js'
-// import { logger } from '../../../utils/logger.js'
+import { logger } from '../../../utils/logger.js'
 
 export const Customer = {
   async personId ({ crn }, __, { dataSources }) {
     const { id: personId } =
       await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    // logger.info('Get customer id from crn', { crn, personId })
+    logger.debug('Get customer id from crn', { crn, personId })
     return personId
   },
 
@@ -45,7 +45,7 @@ export const Customer = {
       await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
         personId
       )
-    // logger.info('Get customer businesses', { crn, personId, summary })
+    logger.debug('Get customer businesses', { crn, personId, summary })
     return transformPersonSummaryToCustomerAuthorisedBusinesses(
       { personId, crn },
       summary
@@ -63,7 +63,7 @@ export const Customer = {
 
 export const CustomerBusiness = {
   async role ({ organisationId, crn }, __, { dataSources }) {
-    // logger.info('Get customer business role', { crn, organisationId })
+    logger.debug('Get customer business role', { crn, organisationId })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
