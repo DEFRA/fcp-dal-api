@@ -6,4 +6,4 @@ services:
     image: fcp-data-access-layer-api
     container_name: fcp-data-access-layer-api
     env_file:
-      - .env
+      - .env.test
