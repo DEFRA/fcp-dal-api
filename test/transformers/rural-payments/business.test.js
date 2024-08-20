@@ -1,6 +1,8 @@
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
-import { transformBusinessCustomerPrivilegesToPermissionGroups } from '../../../app/transformers/rural-payments/business.js'
-import { transformOrganisationCustomers } from '../../../app/transformers/rural-payments/business.js'
+import {
+  transformOrganisationCustomers,
+  transformBusinessCustomerPrivilegesToPermissionGroups
+} from '../../../app/transformers/rural-payments/business.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
 describe('Business transformer', () => {
