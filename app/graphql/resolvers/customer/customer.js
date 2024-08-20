@@ -95,10 +95,12 @@ export const CustomerBusiness = {
         organisationId
       )
 
+    const permissionGroups = dataSources.permissions.getPermissionGroups()
+
     return transformBusinessCustomerToCustomerPermissionGroups(
       crn,
       businessCustomers,
-      dataSources.permissions.getPermissionGroups()
+      permissionGroups
     )
   }
 }

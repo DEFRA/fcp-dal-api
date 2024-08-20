@@ -4,10 +4,15 @@ import { RuralPayments } from './RuralPayments.js'
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById (id) {
     logger.debug('Getting organisation by ID', { id })
-    const organisationResponse = await this.get(`organisation/${id}`)
+    try {
+      const organisationResponse = await this.get(`organisation/${id}`)
 
-    logger.debug('Organisation by ID', { organisationResponse })
-    return organisationResponse._data
+      logger.debug('Organisation by ID', { organisationResponse })
+      return organisationResponse._data
+    } catch (error) {
+      logger.error('Error getting organisation by ID', { id, error })
+      throw error
+    }
   }
 
   async getOrganisationBySBI (sbi) {
@@ -19,29 +24,45 @@ export class RuralPaymentsBusiness extends RuralPayments {
       limit: 1
     })
 
-    const organisationResponse = await this.post('organisation/search', {
-      body,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
+    try {
+      const organisationResponse = await this.post('organisation/search', {
+        body,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
 
-    const response = organisationResponse?._data?.pop() || {}
+      const response = organisationResponse?._data?.pop() || {}
 
-    logger.debug('Organisation by SBI', { response })
-    return this.getOrganisationById(response.id)
+      logger.debug('Organisation by SBI', { response })
+      return this.getOrganisationById(response.id)
+    } catch (error) {
+      logger.error('Error getting organisation by SBI', {
+        sbi,
+        error
+      })
+      throw error
+    }
   }
 
   async getOrganisationCustomersByOrganisationId (organisationId) {
     logger.debug('Getting organisation customers by organisation ID', {
       organisationId
     })
-    const response = await this.get(
-      `authorisation/organisation/${organisationId}`
-    )
 
-    logger.debug('Organisation customers by organisation ID', { response })
-    return response._data
+    try {
+      const response = await this.get(
+        `authorisation/organisation/${organisationId}`
+      )
+      logger.debug('Organisation customers by organisation ID', { response })
+      return response._data
+    } catch (error) {
+      logger.error('Error getting organisation customers by organisation ID', {
+        organisationId,
+        error
+      })
+      throw error
+    }
   }
 
   getParcelsByOrganisationId (organisationId) {
