@@ -5,19 +5,5 @@ services:
       target: production
     image: fcp-data-access-layer-api
     container_name: fcp-data-access-layer-api
-    environment:
-      NODE_ENV: development
-      APPINSIGHTS_CLOUDROLE: fcp-data-access-layer-api-local
-      PORT: 3000
-      ENABLE_MOCK_SERVER: true
-      RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
-      RURAL_PAYMENTS_PORTAL_EMAIL: some-email
-      RURAL_PAYMENTS_PORTAL_PASSWORD: 
-      RURAL_PAYMENTS_PORTAL_API_URL: http://localhost:3100/rpp/
-      RURAL_PAYMENTS_PROXY_URL: 
-      API_TENANT_ID: 
-      ADMIN_AD_GROUP_ID:
-      AUTHENTICATE_DB_HOST:
-      AUTHENTICATE_DB_SCHEMA:
-      AUTHENTICATE_DB_USERNAME:
-      AUTHENTICATE_DB_PASSWORD:
+    env_file:
+      - .env
