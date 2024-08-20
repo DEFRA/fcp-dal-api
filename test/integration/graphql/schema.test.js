@@ -62,7 +62,7 @@ describe('schema', () => {
 
       type BusinessCustomerPermissionGroup {
         """The permission group id."""
-        id: PermissionGroupId
+        id: PermissionGroupId!
 
         """The permission level customer has for the business."""
         level: PermissionLevel
@@ -137,7 +137,7 @@ describe('schema', () => {
 
       type CustomerBusinessPermissionGroup {
         """The permission group id."""
-        id: PermissionGroupId
+        id: PermissionGroupId!
 
         """The permission level customer has for the business."""
         level: PermissionLevel
@@ -389,7 +389,7 @@ describe('schema', () => {
 
       type BusinessCustomerPermissionGroup {
         """The permission group id."""
-        id: PermissionGroupId
+        id: PermissionGroupId!
 
         """The permission level customer has for the business."""
         level: PermissionLevel
@@ -688,7 +688,7 @@ describe('schema', () => {
 
       type CustomerBusinessPermissionGroup {
         """The permission group id."""
-        id: PermissionGroupId
+        id: PermissionGroupId!
 
         """The permission level customer has for the business."""
         level: PermissionLevel
