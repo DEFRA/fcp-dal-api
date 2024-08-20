@@ -19,32 +19,28 @@ services:
     environment:
       NODE_ENV: development
       APPINSIGHTS_CLOUDROLE: fcp-data-access-layer-api-local
-      PORT: 3000
       ENABLE_MOCK_SERVER: true
-      API_TENANT_ID=some-tenant-id
-      ADMIN_AD_GROUP_ID=some-ad-group-id
-      CLIENT_ID=some-client-id
-      CLIENT_SECRET=some-client-secret
-      RP_INTERNAL_APIM_TENANT_ID=some-tenant-id
-      RP_INTERNAL_APIM_CLIENT_ID=some-client-id
-      RP_INTERNAL_APIM_CLIENT_SECRET=some-client-secret
-      RP_INTERNAL_APIM_SUBSCRIPTION_KEY=some-subscription-key
-      RP_INTERNAL_APIM_SCOPE=scope
-      RP_INTERNAL_APIM_ACCESS_TOKEN_URL=http://127.0.0.1:4100/apim/
-      RP_INTERNAL_APIM_URL=http://127.0.0.1:4100/v1/
-      AUTHENTICATE_DB_HOST=127.0.0.1
-      AUTHENTICATE_DB_SCHEMA=master
-      AUTHENTICATE_DB_USERNAME=newuser
-      AUTHENTICATE_DB_PASSWORD=Password123!
-      RURAL_PAYMENTS_PORTAL_EMAIL=some-email@email.com
-      RURAL_PAYMENTS_PORTAL_PASSWORD=some-password
-      RURAL_PAYMENTS_PORTAL_API_URL=http://127.0.0.1:4100/rpp/
-      RURAL_PAYMENTS_AGENCY_LAND_API_URL="https://environment.data.gov.uk"
-      MOCK_SERVER_COLLECTION=all
-      PORT_MOCK=4100
-      ENABLE_MOCK_SERVER=true
-      PORT=4000
-      LOG_LEVEL=debug
-      NODE_ENV=development
-      ALL_SCHEMA_ON=true
-
+      API_TENANT_ID: some-tenant-id
+      ADMIN_AD_GROUP_ID: some-ad-group-id
+      CLIENT_ID: some-client-id
+      CLIENT_SECRET: some-client-secret
+      RP_INTERNAL_APIM_TENANT_ID: some-tenant-id
+      RP_INTERNAL_APIM_CLIENT_ID: some-client-id
+      RP_INTERNAL_APIM_CLIENT_SECRET: some-client-secret
+      RP_INTERNAL_APIM_SUBSCRIPTION_KEY: some-subscription-key
+      RP_INTERNAL_APIM_SCOPE: scope
+      RP_INTERNAL_APIM_ACCESS_TOKEN_URL: http://127.0.0.1:4100/apim/
+      RP_INTERNAL_APIM_URL: http://127.0.0.1:4100/v1/
+      AUTHENTICATE_DB_HOST: 127.0.0.1
+      AUTHENTICATE_DB_SCHEMA: master
+      AUTHENTICATE_DB_USERNAME: newuser
+      AUTHENTICATE_DB_PASSWORD: Password123!
+      RURAL_PAYMENTS_PORTAL_EMAIL: some-email@email.com
+      RURAL_PAYMENTS_PORTAL_PASSWORD: some-password
+      RURAL_PAYMENTS_PORTAL_API_URL: http://127.0.0.1:4100/rpp/
+      RURAL_PAYMENTS_AGENCY_LAND_API_URL: "https://environment.data.gov.uk"
+      MOCK_SERVER_COLLECTION: all
+      PORT_MOCK: 4100
+      PORT: 4000
+      LOG_LEVEL: debug
+      ALL_SCHEMA_ON: true
