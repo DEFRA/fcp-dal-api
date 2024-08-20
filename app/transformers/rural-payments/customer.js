@@ -110,6 +110,9 @@ export function transformNotificationsToMessages (
   showOnlyDeleted = false
 ) {
   return notifications
+    .filter(({ archivedAt }) =>
+      showOnlyDeleted ? archivedAt !== null : archivedAt === null
+    )
     .map(message => ({
       id: message.id,
       title: message.title,
@@ -118,9 +121,6 @@ export function transformNotificationsToMessages (
       read: !!message.readAt,
       archivedAt: message.archivedAt
     }))
-    .filter(({ archivedAt }) =>
-      showOnlyDeleted ? archivedAt !== null : archivedAt === null
-    )
 }
 
 export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (

@@ -191,7 +191,7 @@ type CustomerBusinessPermissionGroup {
   """
   The permission group id.
   """
-  id: PermissionGroupId @on
+  id: PermissionGroupId! @on
 
   """
   The permission level customer has for the business.

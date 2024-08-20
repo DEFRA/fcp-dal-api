@@ -3,7 +3,7 @@
 - key: RURAL_PAYMENTS_PORTAL_API_URL
   value: "http://127.0.0.1:3100/rpp/"
 - key: LOG_LEVEL
-  value: "debug"
+  value: "info"
 
 # Secrets
 - key: API_TENANT_ID
