@@ -122,7 +122,7 @@ type Customer {
   """
   The unique identifier of the customer.
   """
-  customerId: ID! #eslint-disable-line @graphql-eslint/no-typename-prefix
+  personId: ID! @on #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
   The CRN (Customer Reference Number) of the customer.
   """
@@ -141,7 +141,7 @@ type Customer {
   """
   The businesses associated with the customer.
   """
-  businesses: [CustomerBusiness]
+  businesses: [CustomerBusiness] @on
 
   """
   The single business filtered by sbi associated with the customer.
@@ -156,42 +156,45 @@ type CustomerBusiness {
   """
   The unique identifier of the business.
   """
-  businessId: ID
+  organisationId: ID @on
 
   """
   The SBI (Single Business Identifier) of the business.
   """
-  sbi: ID!
+  sbi: ID! @on
 
   """
   The name of the business.
   """
-  name: String!
+  name: String! @on
 
   """
-  The roles associated with the business.
+  The role associated with the business.
   """
-  roles: [String]
+  role: String @on
 
   """
   The messages associated with the business.
   """
-  messages(pagination: Pagination, showOnlyDeleted: Boolean): [CustomerBusinessMessage]
+  messages(
+    pagination: Pagination
+    showOnlyDeleted: Boolean
+  ): [CustomerBusinessMessage]
 
   """
   The permission groups associated with the business.
   """
-  permissionGroups: [CustomerBusinessPermissionGroup]
+  permissionGroups: [CustomerBusinessPermissionGroup] @on
 }
 
 type CustomerBusinessPermissionGroup {
   """
   The permission group id.
   """
-  id: PermissionGroupId
+  id: PermissionGroupId! @on
 
   """
   The permission level customer has for the business.
   """
-  level: PermissionLevel
+  level: PermissionLevel @on
 }

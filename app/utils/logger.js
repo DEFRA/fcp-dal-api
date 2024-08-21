@@ -53,7 +53,12 @@ const format = winston.format.combine(
       } catch (e) {
         info.stack = e.stack
           .split('\n')
-          .filter(line => !line.includes('node_modules') && !line.includes('logger.js') && !line.includes('node:internal'))
+          .filter(
+            line =>
+              !line.includes('node_modules') &&
+              !line.includes('logger.js') &&
+              !line.includes('node:internal')
+          )
         info.stack.shift()
       }
     }
@@ -61,10 +66,8 @@ const format = winston.format.combine(
   })
 )
 
-const log = winston.createLogger({
+export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   transports: [new winston.transports.Console()],
   format
 })
-
-export default log

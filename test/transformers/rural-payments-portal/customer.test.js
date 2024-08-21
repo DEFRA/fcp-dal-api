@@ -2,26 +2,13 @@ import pick from 'lodash.pick'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
 import {
   transformNotificationsToMessages,
-  transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges,
-  transformPersonRolesToCustomerAuthorisedBusinessesRoles,
-  transformPersonSummaryToCustomerAuthorisedBusinesses,
-  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
-} from '../../../app/transformers/rural-payments-portal/customer.js'
-import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness,
+  transformPersonSummaryToCustomerAuthorisedBusinesses
+} from '../../../app/transformers/rural-payments/customer.js'
+import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
-const mockOrganisationPersonSummary = {
-  organisationId: '4309257',
-  name: 'company name',
-  sbi: 123123123,
-  additionalSbiIds: [],
-  confirmed: true,
-  lastUpdatedOn: null,
-  landConfirmed: null,
-  deactivated: false,
-  locked: true,
-  unreadNotificationCount: 3,
-  readNotificationCount: 0
-}
+const organisationId = '5565448'
+const personSummary = organisationPeopleByOrgId(organisationId)
 
 const mockMessages = [
   {
@@ -33,7 +20,8 @@ const mockMessages = [
     archivedAt: null,
     archive: null,
     createdAt: 8247074489993,
-    title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
+    title:
+      'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
     body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
     category: 'OrganisationLevel',
     bespokeNotificationId: null
@@ -47,7 +35,8 @@ const mockMessages = [
     archivedAt: 8818544780296,
     archive: null,
     createdAt: 8818544780296,
-    title: 'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
+    title:
+      'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
     body: '<p>Cruentus venia dedecor beatus vinco cultellus clarus.</p>',
     category: 'OrganisationLevel',
     bespokeNotificationId: null
@@ -58,39 +47,20 @@ const parsedMessages = mockMessages.map(mockMessage => ({
   date: mockMessage.createdAt,
   read: !!mockMessage.readAt
 }))
-const organisationId = 123
-const sitiAgriAuthorisationOrganisationData = sitiAgriAuthorisationOrganisation({ organisationId }).data
-const personId = sitiAgriAuthorisationOrganisationData.personRoles[0].personId
 
 describe('Customer transformer', () => {
   test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
-    const result = transformPersonSummaryToCustomerAuthorisedBusinesses('customerId', [mockOrganisationPersonSummary])
-    expect(result).toEqual([{ customerId: 'customerId', businessId: '4309257', name: 'company name', sbi: 123123123 }])
-  })
-
-  test('transformPersonRolesToCustomerAuthorisedBusinessesRoles', () => {
-    const result = transformPersonRolesToCustomerAuthorisedBusinessesRoles(personId, sitiAgriAuthorisationOrganisationData.personRoles)
-    expect(result).toEqual(['Business Partner'])
-  })
-
-  test('transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges', () => {
-    const result = transformPersonPrivilegesToCustomerAuthorisedBusinessesPrivileges(
-      personId,
-      sitiAgriAuthorisationOrganisationData.personPrivileges
+    const result = transformPersonSummaryToCustomerAuthorisedBusinesses(
+      {},
+      personSummary._data
     )
+
     expect(result).toEqual([
-      'Full permission - business',
-      'SUBMIT - CS APP - SA',
-      'SUBMIT - CS AGREE - SA',
-      'Amend - land',
-      'Amend - entitlement',
-      'Submit - bps',
-      'SUBMIT - BPS - SA',
-      'AMEND - ENTITLEMENT - SA',
-      'AMEND - LAND - SA',
-      'Submit - cs app',
-      'Submit - cs agree',
-      'ELM_APPLICATION_SUBMIT'
+      { organisationId: 5263421 },
+      { organisationId: 5302028 },
+      { organisationId: 5311964 },
+      { organisationId: 5331098 },
+      { organisationId: 5778203 }
     ])
   })
 
@@ -112,7 +82,7 @@ describe('Customer transformer', () => {
   describe('transformPersonSummaryToCustomerAuthorisedFilteredBusiness', () => {
     test('should return null when no sbi matching', () => {
       expect(
-        transformPersonSummaryToCustomerAuthorisedFilteredBusiness('99133320', 123456, [
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(123456, [
           {
             id: '32323321',
             name: 'John Doe',
@@ -122,9 +92,9 @@ describe('Customer transformer', () => {
       ).toEqual(null)
     })
 
-    test('should return id, name, sbi, and customerId when sbi is matching', () => {
+    test('should return id, name, sbi, and personId when sbi is matching', () => {
       expect(
-        transformPersonSummaryToCustomerAuthorisedFilteredBusiness('99133320', 123456, [
+        transformPersonSummaryToCustomerAuthorisedFilteredBusiness(123456, [
           {
             id: '32323321',
             name: 'John Doe',
@@ -132,9 +102,8 @@ describe('Customer transformer', () => {
           }
         ])
       ).toEqual({
-        personId: '32323321',
+        organisationId: '32323321',
         name: 'John Doe',
-        customerId: '99133320',
         sbi: 123456
       })
     })
@@ -148,7 +117,9 @@ describe('Customer transformer', () => {
       Location: 'some location'
     }
 
-    const result = transformAuthenticateQuestionsAnswers(mockAuthenticateQuestionsResponse)
+    const result = transformAuthenticateQuestionsAnswers(
+      mockAuthenticateQuestionsResponse
+    )
 
     expect(result).toEqual({
       isFound: true,

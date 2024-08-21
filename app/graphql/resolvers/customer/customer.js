@@ -1,74 +1,106 @@
 import { transformAuthenticateQuestionsAnswers } from '../../../transformers/authenticate/question-answers.js'
 import {
   ruralPaymentsPortalCustomerTransformer,
+  transformBusinessCustomerToCustomerPermissionGroups,
+  transformBusinessCustomerToCustomerRole,
   transformNotificationsToMessages,
-  transformPersonRolesToCustomerAuthorisedBusinessesRoles,
   transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
-} from '../../../transformers/rural-payments-portal/customer.js'
-import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments-portal/permissions.js'
+} from '../../../transformers/rural-payments/customer.js'
+import { logger } from '../../../utils/logger.js'
 
 export const Customer = {
-  async customerId ({ crn }, __, { dataSources }) {
-    const { id: customerId } = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
-    return customerId
+  async personId ({ crn }, __, { dataSources }) {
+    const { id: personId } =
+      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+    logger.debug('Get customer id from crn', { crn, personId })
+    return personId
   },
 
   async info ({ crn }, __, { dataSources }) {
-    const response = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
+    const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(
+      crn
+    )
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
   async business ({ crn }, { sbi }, { dataSources }) {
-    const { id: customerId } = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
+    const { id: personId } =
+      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-      customerId,
       sbi,
-      await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(customerId, sbi)
+      await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
+        personId,
+        sbi
+      )
     )
   },
 
   async businesses ({ crn }, __, { dataSources }) {
-    const { id: customerId } = await dataSources.ruralPaymentsPortalApi.getCustomerByCRN(crn)
-    const summary = await dataSources.ruralPaymentsPortalApi.getPersonSummaryByPersonId(customerId)
-    return transformPersonSummaryToCustomerAuthorisedBusinesses(customerId, summary)
+    const { id: personId } =
+      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+    const summary =
+      await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
+        personId
+      )
+    logger.debug('Get customer businesses', { crn, personId, summary })
+    return transformPersonSummaryToCustomerAuthorisedBusinesses(
+      { personId, crn },
+      summary
+    )
   },
 
   async authenticationQuestions ({ crn }, __, { dataSources }) {
-    const results = await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(crn)
+    const results =
+      await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(
+        crn
+      )
     return transformAuthenticateQuestionsAnswers(results)
   }
 }
 
 export const CustomerBusiness = {
-  async roles ({ businessId, customerId }, __, { dataSources }) {
-    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(businessId)
-    return transformPersonRolesToCustomerAuthorisedBusinessesRoles(customerId, authorisation.personRoles)
+  async role ({ organisationId, crn }, __, { dataSources }) {
+    logger.debug('Get customer business role', { crn, organisationId })
+    const businessCustomers =
+      await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
+        organisationId
+      )
+    return transformBusinessCustomerToCustomerRole(crn, businessCustomers)
   },
 
-  async messages ({ businessId, customerId }, { pagination, showOnlyDeleted }, { dataSources }) {
+  async messages (
+    { organisationId, personId },
+    { pagination, showOnlyDeleted },
+    { dataSources }
+  ) {
     const defaultPaginationPage = 1
     const defaultPaginationPerPage = 5
 
-    const notifications = await dataSources.ruralPaymentsPortalApi.getNotificationsByOrganisationIdAndPersonId(
-      businessId,
-      customerId,
-      pagination?.page || defaultPaginationPage,
-      pagination?.perPage || defaultPaginationPerPage
-    )
+    const notifications =
+      await dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
+        organisationId,
+        personId,
+        pagination?.page || defaultPaginationPage,
+        pagination?.perPage || defaultPaginationPerPage
+      )
 
     return transformNotificationsToMessages(notifications, showOnlyDeleted)
   },
 
-  async permissionGroups ({ businessId, customerId }, __, { dataSources }) {
-    return dataSources.permissions.getPermissionGroups().map(permissionGroup => ({ ...permissionGroup, businessId, customerId }))
-  }
-}
+  async permissionGroups ({ organisationId, crn }, __, { dataSources }) {
+    const businessCustomers =
+      await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
+        organisationId
+      )
 
-export const CustomerBusinessPermissionGroup = {
-  async level ({ businessId, customerId, permissions }, __, { dataSources }) {
-    const authorisation = await dataSources.ruralPaymentsPortalApi.getAuthorisationByOrganisationId(businessId)
-    return transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(customerId, permissions, authorisation.personPrivileges)
+    const permissionGroups = dataSources.permissions.getPermissionGroups()
+
+    return transformBusinessCustomerToCustomerPermissionGroups(
+      crn,
+      businessCustomers,
+      permissionGroups
+    )
   }
 }

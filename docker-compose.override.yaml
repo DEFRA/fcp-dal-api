@@ -2,11 +2,11 @@
 # to provide dependencies and expose ports for local testing
 
 services:
-  ffc-customer-registry-api:
+  fcp-data-access-layer-api:
     build:
       target: development
-    image: ffc-customer-registry-api-development
-    container_name: ffc-customer-registry-api-development
+    image: fcp-data-access-layer-api-development
+    container_name: fcp-data-access-layer-api-development
     ports:
       - "3000:3000"
       - "9229:9229"

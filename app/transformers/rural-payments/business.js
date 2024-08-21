@@ -1,3 +1,42 @@
+export const transformOrganisationCustomers = data => {
+  const transformed = data.map(
+    ({ id, firstName, lastName, customerReference, role, privileges }) => ({
+      personId: id,
+      firstName,
+      lastName,
+      crn: customerReference,
+      role,
+      privileges
+    })
+  )
+
+  return transformed
+}
+
+export function transformBusinessCustomerPrivilegesToPermissionGroups (
+  privileges,
+  permissionGroups
+) {
+  const customerPermissionGroups = []
+
+  for (const permissionGroup of permissionGroups) {
+    for (const permission of permissionGroup.permissions) {
+      if (
+        permission.privilegeNames.some(privilegeName =>
+          privileges.includes(privilegeName)
+        )
+      ) {
+        customerPermissionGroups.push({
+          id: permissionGroup.id,
+          level: permission.level
+        })
+      }
+    }
+  }
+
+  return customerPermissionGroups
+}
+
 export const transformOrganisationToBusiness = data => {
   return {
     info: {
@@ -32,30 +71,19 @@ export const transformOrganisationToBusiness = data => {
         doNotContact: data.doNotContact || false
       },
       legalStatus: {
-        code: data.legalStatus.id,
-        type: data.legalStatus.type
+        code: data.legalStatus?.id,
+        type: data.legalStatus?.type
       },
       type: {
-        code: data.businessType.id,
-        type: data.businessType.type
+        code: data.businessType?.id,
+        type: data.businessType?.type
       },
       registrationNumbers: {
         companiesHouse: data.companiesHouseRegistrationNumber,
         charityCommission: data.charityCommissionRegistrationNumber
       }
     },
-    businessId: `${data.id}`,
+    organisationId: `${data.id}`,
     sbi: `${data.sbi}`
   }
-}
-
-export const transformOrganisationCustomers = data => {
-  return data.map(({ id, firstName, lastName, customerReference, role, privileges }) => ({
-    customerId: id,
-    firstName,
-    lastName,
-    customerReference,
-    role,
-    privileges
-  }))
 }

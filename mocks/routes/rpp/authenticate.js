@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker/locale/en_GB'
 import { okResponse } from '../../utils/requestResponse.js'
+import { randomUUID } from 'node:crypto'
 
 export default [
   {
@@ -12,9 +12,9 @@ export default [
         type: 'text',
         options: {
           status: 200,
-          body: `<html><input name="csrfToken" value="${faker.string.uuid()}"/></html>`,
+          body: `<html><input name="csrfToken" value="${randomUUID()}"/></html>`,
           headers: {
-            'set-cookie': `XSRF-TOKEN=${faker.string.uuid()}`
+            'set-cookie': `XSRF-TOKEN=${randomUUID()}`
           }
         }
       }
@@ -36,7 +36,7 @@ export default [
               return res.send('Session exists')
             }
             res.status(301)
-            res.setHeader('set-cookie', `XSRF-TOKEN=${faker.string.uuid()}`)
+            res.setHeader('set-cookie', `XSRF-TOKEN=${randomUUID()}`)
             res.setHeader('location', '/authenticate')
             res.end()
           }
@@ -55,7 +55,7 @@ export default [
         options: {
           status: 200,
           headers: {
-            'set-cookie': `AUTH_SESSION=${faker.string.uuid()};CapdAccessToken=${faker.string.uuid()};XSRF-TOKEN=${faker.string.uuid()}`
+            'set-cookie': `AUTH_SESSION=${randomUUID()};CapdAccessToken=${randomUUID()};XSRF-TOKEN=${randomUUID()}`
           }
         }
       }
@@ -79,10 +79,10 @@ export default [
 
             return okResponse(res, {
               _data: {
-                callerId: faker.string.numeric(7),
+                callerId: 1234567,
                 type: 'internal',
-                userFirstName: faker.person.firstName(),
-                userLastName: faker.person.lastName()
+                userFirstName: 'mockerUserFirstName',
+                userLastName: 'mockUserLastName'
               }
             })
           }

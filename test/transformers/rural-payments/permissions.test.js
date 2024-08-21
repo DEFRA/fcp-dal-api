@@ -2,43 +2,47 @@ import { Permissions } from '../../../app/data-sources/static/permissions.js'
 import {
   transformOrganisationAuthorisationToCustomerBusinessPermissionLevel,
   transformPrivilegesListToBusinessCustomerPermissions
-} from '../../../app/transformers/rural-payments-portal/permissions.js'
-import { sitiAgriAuthorisationOrganisation } from '../../../mocks/fixtures/authorisation.js'
+} from '../../../app/transformers/rural-payments/permissions.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
-const sitiAgriApiAuthorisationOrganisation = sitiAgriAuthorisationOrganisation()
+const orgId = '5565448'
+const orgCustomers = organisationPeopleByOrgId(orgId)._data
 
 describe('Permissions transformer', () => {
   test('returns null if no match', () => {
-    const personPrivileges = sitiAgriApiAuthorisationOrganisation.data.personPrivileges
-    const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(personPrivileges[0].personId, [], personPrivileges)
+    const result =
+      transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
+        orgCustomers[0].id,
+        [],
+        orgCustomers
+      )
     expect(result).toBeNull()
   })
 
   test('returns level if  match', () => {
-    const personPrivileges = sitiAgriApiAuthorisationOrganisation.data.personPrivileges
-    const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
-      personPrivileges[0].personId,
-      [
-        {
-          level: 'MOCK_LEVEL',
-          privilegeNames: ['Full permission - business']
-        }
-      ],
-      personPrivileges
-    )
+    const result =
+      transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
+        orgCustomers[0].id,
+        [
+          {
+            level: 'MOCK_LEVEL',
+            privilegeNames: ['Full permission - business']
+          }
+        ],
+        orgCustomers
+      )
     expect(result).toEqual('MOCK_LEVEL')
   })
 
   test('returns active permissions', () => {
     const result = transformPrivilegesListToBusinessCustomerPermissions(
-      organisationPeopleByOrgId()._data[0].privileges,
+      organisationPeopleByOrgId('5565448')._data[0].privileges,
       new Permissions().getPermissionGroups()
     )
     expect(result).toEqual([
       {
         id: 'BASIC_PAYMENT_SCHEME',
-        level: 'NO_ACCESS',
+        level: 'SUBMIT',
         name: 'Basic payment scheme (BPS)'
       },
       {

@@ -1,8 +1,8 @@
 {
-  "name": "ffc-customer-registry-api",
-  "version": "1.0.83",
+  "name": "fcp-data-access-layer-api",
+  "version": "1.1.1",
   "description": "Customer Registry GraphQL Service",
-  "homepage": "https://github.com/DEFRA/ffc-customer-registry-api",
+  "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
   "type": "module",
   "scripts": {
@@ -15,6 +15,9 @@
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --forceExit --setupFiles dotenv/config",
+    "test:contract": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/contract  --setupFiles dotenv/config",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --coverage --setupFiles dotenv/config"
   },
@@ -25,7 +28,6 @@
     "@apollo/datasource-rest": "^6.2.2",
     "@apollo/server": "4.9.4",
     "@as-integrations/hapi": "2.0.1",
-    "@faker-js/faker": "8.2.0",
     "@graphql-tools/load-files": "7.0.0",
     "@graphql-tools/merge": "9.0.0",
     "@graphql-tools/mock": "9.0.0",

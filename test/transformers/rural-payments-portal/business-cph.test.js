@@ -1,7 +1,7 @@
 import {
   transformOrganisationCPH,
   transformOrganisationCPHCoordinates
-} from '../../../app/transformers/rural-payments-portal/business-cph.js'
+} from '../../../app/transformers/rural-payments/business-cph.js'
 
 describe('Test Business CPHField Transformer', () => {
   describe('transformOrganisationCPH', () => {
@@ -32,7 +32,7 @@ describe('Test Business CPHField Transformer', () => {
         ])
       ).toEqual([
         {
-          businessId: 'id',
+          organisationId: 'id',
           number: '43/060/0025',
           parcelNumbers: ['SP2936 2318']
         }

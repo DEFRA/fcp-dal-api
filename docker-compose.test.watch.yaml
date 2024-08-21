@@ -1,5 +1,5 @@
 services:
-  ffc-customer-registry-api:
+  fcp-data-access-layer-api:
     command: >
       sh -c "npm run test:watch"
     volumes:

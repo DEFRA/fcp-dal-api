@@ -4,7 +4,7 @@ import mockServer from '../mocks/server.js'
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
 import { server } from './server.js'
-import logger from './utils/logger.js'
+import { logger } from './utils/logger.js'
 
 const init = async () => {
   await apolloServer.start()

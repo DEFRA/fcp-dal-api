@@ -1,4 +1,4 @@
-import { transformOrganisationToBusiness } from '../../../app/transformers/rural-payments-portal/business.js'
+import { transformOrganisationToBusiness } from '../../../app/transformers/rural-payments/business.js'
 import { organisationByOrgId } from '../../../mocks/fixtures/organisation.js'
 
 describe('Business transformer', () => {
@@ -6,7 +6,7 @@ describe('Business transformer', () => {
     const { _data: organisation } = organisationByOrgId(5565448)
 
     expect(transformOrganisationToBusiness(organisation)).toEqual({
-      businessId: '5565448',
+      organisationId: '5565448',
       info: {
         address: {
           buildingName: 'STOCKWELL HALL',
@@ -46,41 +46,38 @@ describe('Business transformer', () => {
     const { _data: organisation } = organisationByOrgId(5625145)
 
     expect(transformOrganisationToBusiness(organisation)).toEqual({
-      businessId: '5625145',
-      info:
-          {
-            address:
-              {
-                buildingName: 'LADYWOOD LODGE FARM',
-                buildingNumberRange: null,
-                city: 'ALNWICK',
-                country: 'United Kingdom',
-                county: null,
-                dependentLocality: 'LAVANT',
-                doubleDependentLocality: null,
-                flatName: null,
-                pafOrganisationName: null,
-                postalCode: 'BD5 9NR',
-                street: 'BARTINDALE ROAD',
-                typeId: null,
-                uprn: '100010079050'
-              },
-            email:
-              {
-                address: 'cliffspencetasabbeyfarmf@mrafyebbasatecnepsffilcm.com.test',
-                doNotContact: false,
-                validated: true
-              },
-            legalStatus: { code: 102108, type: 'Partnership' },
-            name: 'Cliff Spence T/As Abbey Farm',
-            phone: { fax: null, landline: null, mobile: '01234031670' },
-            reference: '9102698830',
-            registrationNumbers: { charityCommission: null, companiesHouse: null },
-            traderNumber: null,
-            type: { code: 101422, type: 'Land Manager' },
-            vat: null,
-            vendorNumber: '284495G'
-          },
+      organisationId: '5625145',
+      info: {
+        address: {
+          buildingName: 'LADYWOOD LODGE FARM',
+          buildingNumberRange: null,
+          city: 'ALNWICK',
+          country: 'United Kingdom',
+          county: null,
+          dependentLocality: 'LAVANT',
+          doubleDependentLocality: null,
+          flatName: null,
+          pafOrganisationName: null,
+          postalCode: 'BD5 9NR',
+          street: 'BARTINDALE ROAD',
+          typeId: null,
+          uprn: '100010079050'
+        },
+        email: {
+          address: 'cliffspencetasabbeyfarmf@mrafyebbasatecnepsffilcm.com.test',
+          doNotContact: false,
+          validated: true
+        },
+        legalStatus: { code: 102108, type: 'Partnership' },
+        name: 'Cliff Spence T/As Abbey Farm',
+        phone: { fax: null, landline: null, mobile: '01234031670' },
+        reference: '9102698830',
+        registrationNumbers: { charityCommission: null, companiesHouse: null },
+        traderNumber: null,
+        type: { code: 101422, type: 'Land Manager' },
+        vat: null,
+        vendorNumber: '284495G'
+      },
       sbi: '890000004'
     })
   })

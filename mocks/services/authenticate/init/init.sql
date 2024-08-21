@@ -117,4 +117,5 @@ INSERT INTO dbo.Answers (CRN,Date,Event,Location,UpdatedBy,Updated) VALUES
 	(9106093410,N'Mon Apr 22 2024','Dam','North Karinestad',NULL,'2024-04-29'),
 	(9106093577,N'Sun Sep 24 2023','cross-media','Deionberg',NULL,'2024-04-29'),
 	(9106262913,N'Mon Feb 05 2024','Fully-configurable Sleek e-enable','Euless',NULL,'2024-04-29'),
+	(0866159801,N'Fri May 26 2023','View land','East Pafa',NULL,'2024-04-29'),
 	(9106262769,N'',N'',N'',NULL,NULL);

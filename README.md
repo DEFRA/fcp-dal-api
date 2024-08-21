@@ -13,6 +13,7 @@ PORT=4000
 # Mock server
 PORT_MOCK=3100
 ENABLE_MOCK_SERVER=true
+MOCK_SERVER_COLLECTION=all #options: all, rural-payments-portal, release-1
 
 # Rural Payments Agency Land API
 RURAL_PAYMENTS_AGENCY_LAND_API_URL=
@@ -21,9 +22,22 @@ RURAL_PAYMENTS_AGENCY_LAND_API_URL=
 RURAL_PAYMENTS_PORTAL_EMAIL=
 RURAL_PAYMENTS_PORTAL_PASSWORD=
 RURAL_PAYMENTS_PORTAL_API_URL=
+RURAL_PAYMENTS_AGENCY_LAND_API_URL=
+
+# Version One API settings
+VERSION_ONE_APIM_SUBSCRIPTION_KEY=
+VERSION_ONE_APIM_SCOPE=
+VERSION_ONE_APIM_ACCESS_TOKEN_URL=
+VERSION_ONE_API_URL=
 
 # Turn on all fields for local development
 ALL_SCHEMA_ON=true
+
+# Generate and validate api bearer token
+API_TENANT_ID=
+ADMIN_AD_GROUP_ID=
+CLIENT_ID=
+CLIENT_SECRET=
 ```
 
 Run:
@@ -39,6 +53,7 @@ The mock server is ran when the development docker environment. The mock server 
 
 Mocks endpoints are defined within the ./mocks directory.
 
+#### Mock Authenticate Database
 In addition there is a mock authenticate database that can be used for local development. To run the database add the environment variables to your `.env`:
 ```env
 AUTHENTICATE_DB_HOST=127.0.0.1

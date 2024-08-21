@@ -1,6 +1,6 @@
 import Core from '@mocks-server/core'
-import { routes } from './routes/index.js'
 import collections from './collections.js'
+import { routes } from './routes/index.js'
 
 const server = new Core({
   log: 'silent',
@@ -18,7 +18,7 @@ const server = new Core({
   },
   mock: {
     collections: {
-      selected: 'base'
+      selected: process.env.MOCK_SERVER_COLLECTION
     }
   }
 })

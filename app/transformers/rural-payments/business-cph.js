@@ -1,5 +1,5 @@
-export function transformOrganisationCPH (businessId, data = []) {
-  if (!businessId) {
+export function transformOrganisationCPH (organisationId, data = []) {
+  if (!organisationId) {
     return null
   }
 
@@ -8,7 +8,7 @@ export function transformOrganisationCPH (businessId, data = []) {
   }
 
   return data.map(({ cphNumber, parcelNumbers }) => ({
-    businessId,
+    organisationId,
     number: cphNumber,
     parcelNumbers
   }))

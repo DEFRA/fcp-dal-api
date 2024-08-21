@@ -1,27 +1,25 @@
-import { Permission, Query } from '../../app/graphql/resolvers/permissions/query.js'
-import { sitiAgriAuthorisationOrganisation } from '../../mocks/fixtures/authorisation.js'
+import {
+  Permission,
+  Query
+} from '../../app/graphql/resolvers/permissions/query.js'
+import { personById } from '../../mocks/fixtures/person.js'
+import {
+  organisationPeopleByOrgId,
+  organisationBySbi
+} from '../../mocks/fixtures/organisation.js'
 
 const dataSources = {
-  ruralPaymentsPortalApi: {
-    getPersonSummaryByPersonId () {
-      return [
-        {
-          id: '4309257',
-          name: 'company name',
-          sbi: 123123123,
-          additionalSbiIds: [],
-          confirmed: true,
-          lastUpdatedOn: null,
-          landConfirmed: null,
-          deactivated: false,
-          locked: true,
-          unreadNotificationCount: 3,
-          readNotificationCount: 0
-        }
-      ]
+  ruralPaymentsBusiness: {
+    getOrganisationCustomersByOrganisationId (organisationId) {
+      return organisationPeopleByOrgId(organisationId)._data
     },
-    getAuthorisationByOrganisationId () {
-      return sitiAgriAuthorisationOrganisation().data
+    getOrganisationBySBI (sbi) {
+      return organisationBySbi(sbi)._data[0]
+    }
+  },
+  ruralPaymentsCustomer: {
+    getCustomerByCRN () {
+      return personById({ id: '5263421' })._data
     }
   },
   permissions: {
@@ -67,11 +65,10 @@ test('Permission.active', async () => {
     {
       privilegeNames: ['Amend - land']
     },
-    { customerId: 'mockCustomerId', businessId: 'mockBusinessId' },
+    { crn: '9102634220', sbi: '890000001' },
     {
       dataSources
     }
   )
-  // TODO this should return true
-  expect(response).toEqual(false)
+  expect(response).toEqual(true)
 })

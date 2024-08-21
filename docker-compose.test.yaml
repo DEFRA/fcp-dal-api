@@ -2,11 +2,11 @@
 # that test output is saved to the host
 
 services:
-  ffc-customer-registry-api:
+  fcp-data-access-layer-api:
     build:
       target: development
-    image: ffc-customer-registry-api-development
-    container_name: ffc-customer-registry-api-test
+    image: fcp-data-access-layer-api-development
+    container_name: fcp-data-access-layer-api-test
     command: npm run test
     volumes:
       - ./app:/home/node/app
@@ -16,11 +16,5 @@ services:
       - ./jest.config.js:/home/node/jest.config.js
       - ./jest.init.js:/home/node/jest.init.js
       - ./package.json:/home/node/package.json
-    environment:
-      NODE_ENV: development
-      ENABLE_MOCK_SERVER: true
-      PORT_MOCK: 3100
-      RURAL_PAYMENTS_AGENCY_LAND_API_URL: https://environment.data.gov.uk
-      RURAL_PAYMENTS_PORTAL_API_URL: http://localhost:3100/rpp/
-      RURAL_PAYMENTS_PORTAL_EMAIL: some-email
-      ADMIN_AD_GROUP_ID: ADGROUPID
+    env_file:
+      - .env.test

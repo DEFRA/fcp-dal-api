@@ -4,6 +4,7 @@ helm/**/*.lock
 *.tgz
 .vscode
 .env
+.env_*
 .idea
 coverage
 .nvmrc

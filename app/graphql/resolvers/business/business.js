@@ -1,23 +1,48 @@
-import { transformOrganisationCPH } from '../../../transformers/rural-payments-portal/business-cph.js'
-import { transformOrganisationCustomers } from '../../../transformers/rural-payments-portal/business.js'
-import { transformPrivilegesListToBusinessCustomerPermissions } from '../../../transformers/rural-payments-portal/permissions.js'
+import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
+import {
+  transformOrganisationCustomers,
+  transformBusinessCustomerPrivilegesToPermissionGroups
+} from '../../../transformers/rural-payments/business.js'
+import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 
 export const Business = {
-  land ({ businessId }) {
-    return { businessId }
+  land ({ organisationId }) {
+    return { organisationId }
   },
 
-  async cph ({ businessId }, _, { dataSources }) {
-    return transformOrganisationCPH(businessId, await dataSources.ruralPaymentsPortalApi.getOrganisationCPHCollectionBySBI(businessId))
+  async cph ({ organisationId }, _, { dataSources }) {
+    return transformOrganisationCPH(
+      organisationId,
+      await dataSources.ruralPaymentsBusiness.getOrganisationCPHCollectionByOrganisationId(
+        organisationId
+      )
+    )
   },
 
-  async customers ({ businessId }, _, { dataSources }) {
-    return transformOrganisationCustomers(await dataSources.ruralPaymentsPortalApi.getOrganisationCustomersByOrganisationId(businessId))
+  async customers ({ organisationId }, _, { dataSources }) {
+    return transformOrganisationCustomers(
+      await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
+        organisationId
+      )
+    )
+  },
+
+  async applications ({ organisationId }, __, { dataSources }) {
+    const response =
+      await dataSources.ruralPaymentsPortalApi.getApplicationsCountrysideStewardship(
+        organisationId
+      )
+    return transformOrganisationCSApplicationToBusinessApplications(
+      response?.applications
+    )
   }
 }
 
 export const BusinessCustomer = {
-  permissions ({ privileges }, __, { dataSources }) {
-    return transformPrivilegesListToBusinessCustomerPermissions(privileges, dataSources.permissions.getPermissionGroups())
+  async permissionGroups ({ privileges }, __, { dataSources }) {
+    return transformBusinessCustomerPrivilegesToPermissionGroups(
+      privileges,
+      dataSources.permissions.getPermissionGroups()
+    )
   }
 }

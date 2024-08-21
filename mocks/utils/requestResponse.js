@@ -1,22 +1,30 @@
 import { StatusCodes } from 'http-status-codes'
 
-const attachData = (res, data) => {
+export const okResponse = (res, data) => {
+  res.status(StatusCodes.OK)
   res.setHeader('Content-Type', 'application/json')
 
-  const isStringifiedData = typeof data === 'string'
-  if (isStringifiedData) {
+  if (typeof data === 'string') {
     res.end(data)
   } else {
-    res.end(JSON.stringify(data))
+    res.json(data)
   }
 }
 
-export const okResponse = (res, data) => {
-  res.status(StatusCodes.OK)
+export const notFoundResponse = (res) => {
+  res.status(StatusCodes.NOT_FOUND)
+  res.end()
+}
 
-  if (data) {
-    attachData(res, data)
+export const badRequestResponse = (res) => {
+  res.status(StatusCodes.BAD_REQUEST)
+  res.end()
+}
+
+export const okOrNotFoundResponse = (res, data) => {
+  if (!data) {
+    return notFoundResponse(res)
   }
 
-  return res
+  return okResponse(res, data)
 }
