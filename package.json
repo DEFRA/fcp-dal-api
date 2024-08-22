@@ -1,6 +1,6 @@
 {
   "name": "fcp-data-access-layer-api",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
