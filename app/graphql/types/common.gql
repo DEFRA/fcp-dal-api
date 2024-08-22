@@ -114,3 +114,7 @@ input Pagination {
   """
   page: Int!
 }
+
+enum AuthRole {
+  ADMIN
+}

@@ -1,6 +1,5 @@
 export const Query = {
-  async customer (__, { crn }, { authorize }) {
-    authorize.checkAuthGroup('ADMIN')
+  async customer (__, { crn }) {
     return { crn }
   }
 }

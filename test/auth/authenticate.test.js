@@ -2,7 +2,8 @@ import { jest } from '@jest/globals'
 
 import jwt from 'jsonwebtoken'
 
-import { getAuth } from '../../app/auth/authenticate.js'
+import { getAuth, checkAuthGroup } from '../../app/auth/authenticate.js'
+import { Unauthorized } from '../../app/errors/graphql'
 
 const tokenPayload = {
   header: {
@@ -35,7 +36,9 @@ const tokenPayload = {
 const token = jwt.sign(tokenPayload, 'secret', { expiresIn: '1h' })
 const tokenDiffSecret = jwt.sign(tokenPayload, 'secret2', { expiresIn: '1h' })
 const mockRequest = { headers: { authorization: `Bearer ${token}` } }
-const mockRequestWrongSign = { headers: { authorization: `Bearer ${tokenDiffSecret}` } }
+const mockRequestWrongSign = {
+  headers: { authorization: `Bearer ${tokenDiffSecret}` }
+}
 const incorrectTokenReq = { headers: { authorization: 'Bearer WRONG' } }
 const decodedToken = jwt.decode(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
@@ -59,5 +62,26 @@ describe('getAuth', () => {
   test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
     expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+  })
+})
+
+describe('checkAuthGroup', () => {
+  const adminGroupId = process.env.ADMIN_AD_GROUP_ID
+
+  it('checkAuthGroup should not throw an error for admins with correct group', () => {
+    const testGroup = 'ADMIN'
+    expect(() => checkAuthGroup([adminGroupId], adminGroupId)).not.toThrow()
+  })
+
+  it('checkAuthGroup should throw Unauthorized when user is not in AD groups', () => {
+    const testGroup = 'ADMIN'
+    expect(() => checkAuthGroup([], testGroup)).toThrow(Unauthorized)
+  })
+
+  it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
+    const testGroup = 'NON_EXISTENT_GROUP'
+    expect(() => checkAuthGroup([testGroup], adminGroupId)).toThrow(
+      Unauthorized
+    )
   })
 })

@@ -13,5 +13,5 @@ export const fakeContext = {
       getAuthenticateQuestionsAnswersByCRN: jest.fn()
     }
   },
-  authorize: { checkAuthGroup: () => [process.env.ADMIN] }
+  auth: { groups: [process.env.ADMIN_AD_GROUP_ID] }
 }
