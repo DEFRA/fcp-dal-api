@@ -1,8 +1,12 @@
 import { jest } from '@jest/globals'
-
 import jwt from 'jsonwebtoken'
+import { buildSchema, findBreakingChanges } from 'graphql'
 
-import { getAuth, checkAuthGroup } from '../../app/auth/authenticate.js'
+import {
+  authDirectiveTransformer,
+  checkAuthGroup,
+  getAuth
+} from '../../app/auth/authenticate.js'
 import { Unauthorized } from '../../app/errors/graphql'
 
 const tokenPayload = {
@@ -83,5 +87,36 @@ describe('checkAuthGroup', () => {
     expect(() => checkAuthGroup([testGroup], adminGroupId)).toThrow(
       Unauthorized
     )
+  })
+})
+
+describe('authDirectiveTransformer', () => {
+  const schema = buildSchema(`#graphql
+    type Query {
+      customer(crn: ID!): Customer
+    }
+
+    type Customer {
+      """
+      The unique identifier of the customer.
+      """
+      personId: ID!
+      """
+      The CRN (Customer Reference Number) of the customer.
+      """
+      crn: ID! @auth(requires: TEST)
+    }
+
+    enum AuthRole {
+      TEST
+    }
+
+    directive @auth(requires: AuthRole = TEST) on OBJECT | FIELD_DEFINITION
+
+  `)
+  it('authDirectiveTransformer should not impact output schema', async () => {
+    process.env.DISABLE_AUTH = true
+    const transformedSchema = authDirectiveTransformer(schema)
+    expect(findBreakingChanges(schema, transformedSchema)).toHaveLength(0)
   })
 })
