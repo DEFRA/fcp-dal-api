@@ -161,6 +161,12 @@ describe('schema', () => {
         ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS
         LAND_DETAILS
       }
+
+      enum AuthRole {
+        ADMIN
+      }
+
+      directive @auth(requires: AuthRole = ADMIN) on OBJECT | FIELD_DEFINITION
    `)
       )
     ).toHaveLength(0)
@@ -715,6 +721,12 @@ describe('schema', () => {
         """Whether the message has been read."""
         read: Boolean
       }
+
+      enum AuthRole {
+        ADMIN
+      }
+
+      directive @auth(requires: AuthRole = ADMIN) on OBJECT | FIELD_DEFINITION
     `)
       )
     ).toHaveLength(0)
