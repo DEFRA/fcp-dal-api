@@ -73,7 +73,6 @@ describe('checkAuthGroup', () => {
   const adminGroupId = process.env.ADMIN_AD_GROUP_ID
 
   it('checkAuthGroup should not throw an error for admins with correct group', () => {
-    const testGroup = 'ADMIN'
     expect(() => checkAuthGroup([adminGroupId], adminGroupId)).not.toThrow()
   })
 

@@ -2,6 +2,7 @@ import { graphql } from 'graphql'
 
 import { context } from '../../../app/graphql/context.js'
 import { schema } from '../../../app/graphql/server.js'
+import { Unauthorized } from '../../../app/errors/graphql.js'
 
 describe('Query.customer without authorization header', () => {
   it('customer query should return an auth error', async () => {
@@ -28,6 +29,11 @@ describe('Query.customer without authorization header', () => {
     })
     expect(result.data.customer).toBeNull()
     expect(result.errors).toHaveLength(1)
+    expect(result.errors[0]).toEqual(
+      new Unauthorized(
+        'Authorization failed, you are not in the correct AD groups'
+      )
+    )
   })
 
   it('business query should return an auth error', async () => {
@@ -51,6 +57,11 @@ describe('Query.customer without authorization header', () => {
     })
     expect(result.data.business).toBeNull()
     expect(result.errors).toHaveLength(1)
+    expect(result.errors[0]).toEqual(
+      new Unauthorized(
+        'Authorization failed, you are not in the correct AD groups'
+      )
+    )
   })
 
   it('permissions query should return an auth error', async () => {
@@ -78,5 +89,10 @@ describe('Query.customer without authorization header', () => {
     })
     expect(result.data.permissionGroups).toBeNull()
     expect(result.errors).toHaveLength(1)
+    expect(result.errors[0]).toEqual(
+      new Unauthorized(
+        'Authorization failed, you are not in the correct AD groups'
+      )
+    )
   })
 })
