@@ -1,6 +1,5 @@
 import { jest } from '@jest/globals'
 
-import pick from 'lodash.pick'
 import { Permissions } from '../../app/data-sources/static/permissions.js'
 import {
   Customer,
@@ -200,10 +199,13 @@ describe('CustomerBusiness', () => {
         bespokeNotificationId: null
       }
     ]
-    parsedMessages = mockMessages.map(mockMessage => ({
-      ...pick(mockMessage, ['id', 'title', 'body', 'archivedAt']),
-      date: mockMessage.createdAt,
-      read: !!mockMessage.readAt
+    parsedMessages = mockMessages.map(({ id, title, body, archivedAt, createdAt, readAt }) => ({
+      id,
+      title,
+      body,
+      archivedAt,
+      date: createdAt,
+      read: !!readAt
     }))
     dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId.mockImplementation(
       () => mockMessages
