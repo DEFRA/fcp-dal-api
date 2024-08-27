@@ -58,3 +58,5 @@ extends:
       filetype: "yaml"
       variableGroups:
         - fcp-data-access-layer-api-<environment>
+    includePlatformEnvs: false
+    includePocEnv: true

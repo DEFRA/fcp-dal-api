@@ -1,15 +1,14 @@
 USE [master];
-GO
 
+-- Create user
 IF NOT EXISTS (SELECT * FROM sys.sql_logins WHERE name = 'newuser')
 BEGIN
     CREATE LOGIN [newuser] WITH PASSWORD = 'Password123!', CHECK_POLICY = OFF;
     ALTER SERVER ROLE [sysadmin] ADD MEMBER [newuser];
-END
-GO
+END;
 
--- Drop table
-DROP TABLE IF EXISTS dbo.Answers
+-- Answers table and data
+DROP TABLE IF EXISTS dbo.Answers;
 
 CREATE TABLE dbo.Answers (
 	CRN bigint NOT NULL,
@@ -117,5 +116,21 @@ INSERT INTO dbo.Answers (CRN,Date,Event,Location,UpdatedBy,Updated) VALUES
 	(9106093410,N'Mon Apr 22 2024','Dam','North Karinestad',NULL,'2024-04-29'),
 	(9106093577,N'Sun Sep 24 2023','cross-media','Deionberg',NULL,'2024-04-29'),
 	(9106262913,N'Mon Feb 05 2024','Fully-configurable Sleek e-enable','Euless',NULL,'2024-04-29'),
+	(9106262769,N'',N'',N'',NULL,NULL),
 	(0866159801,N'Fri May 26 2023','View land','East Pafa',NULL,'2024-04-29'),
 	(9106262769,N'',N'',N'',NULL,NULL);
+
+
+-- Audit table
+DROP TABLE IF EXISTS dbo.Audits;
+
+CREATE TABLE dbo.Audits (
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Date] [datetime] NOT NULL,
+	[User] [nvarchar](max) NULL,
+	[Action] [nvarchar](max) NULL,
+	[CRN] [bigint] NULL,
+	[Value] [nvarchar](max) NULL,
+	[NewValue] [nvarchar](max) NULL,
+ 	CONSTRAINT [PK_dbo.Audits] PRIMARY KEY (Id)
+);

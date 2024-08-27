@@ -51,11 +51,21 @@ export const Customer = {
     )
   },
 
-  async authenticationQuestions ({ crn }, __, { dataSources }) {
+  async authenticationQuestions (
+    { crn },
+    { entraIdUserObjectId },
+    { dataSources }
+  ) {
+    const employeeId = await dataSources.entraIdApi.getEmployeeId(
+      entraIdUserObjectId
+    )
     const results =
       await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(
-        crn
+        crn,
+        employeeId
       )
+
+    logger.info('customer resolver: answers retrieved')
     return transformAuthenticateQuestionsAnswers(results)
   }
 }

@@ -1,36 +1,46 @@
 import Sequelize, { DataTypes } from 'sequelize'
+import { logger } from '../../utils/logger.js'
+
+const databaseName = process.env.AUTHENTICATE_DB_SCHEMA
+const serverHost = process.env.AUTHENTICATE_DB_HOST
+
+const readUsername = process.env.AUTHENTICATE_DB_USERNAME
+const readPassword = process.env.AUTHENTICATE_DB_PASSWORD
+const sequelizeRead = new Sequelize(databaseName, readUsername, readPassword, {
+  host: serverHost,
+  dialect: 'mssql',
+  dialectOptions: { options: { encrypt: false } },
+  logging: false
+})
+
+const auditWriteUsername = process.env.AUTHENTICATE_DB_USERNAME_AUDIT_WRITE
+const auditWritePassword = process.env.AUTHENTICATE_DB_PASSWORD_AUDIT_WRITE
+const sequelizeAuditWrite = new Sequelize(databaseName, auditWriteUsername, auditWritePassword, {
+  host: serverHost,
+  dialect: 'mssql',
+  dialectOptions: { options: { encrypt: false } },
+  logging: false
+})
+
+const Answer = sequelizeRead.define('Answers', {
+  CRN: {
+    type: DataTypes.STRING,
+    primaryKey: true
+  },
+  Date: DataTypes.STRING,
+  Event: DataTypes.STRING,
+  Location: DataTypes.STRING,
+  UpdatedBy: DataTypes.STRING,
+  Updated: DataTypes.DATE
+})
 
 export class AuthenticateDatabase {
-  async getConnection () {
-    const serverUsername = process.env.AUTHENTICATE_DB_USERNAME
-    const serverPassword = process.env.AUTHENTICATE_DB_PASSWORD
-    const serverHost = process.env.AUTHENTICATE_DB_HOST
-    const databaseName = process.env.AUTHENTICATE_DB_SCHEMA
-
-    return new Sequelize(databaseName, serverUsername, serverPassword, {
-      host: serverHost,
-      dialect: 'mssql',
-      dialectOptions: {
-        options: {
-          encrypt: false
-        }
-      }
-    })
-  }
-
-  async getAuthenticateQuestionsAnswersByCRN (crn) {
-    const connection = await this.getConnection()
-
-    const Answer = connection.define('Answers', {
-      CRN: {
-        type: DataTypes.STRING,
-        primaryKey: true
-      },
-      Date: DataTypes.STRING,
-      Event: DataTypes.STRING,
-      Location: DataTypes.STRING,
-      UpdatedBy: DataTypes.STRING,
-      Updated: DataTypes.DATE
+  async getAuthenticateQuestionsAnswersByCRN (crn, employeeId) {
+    await sequelizeAuditWrite.query(`
+      INSERT INTO Audits ([Date], [User], [Action], [Value])
+      VALUES(?, ?, ?, ?); 
+    `, {
+      replacements: [new Date().toISOString(), employeeId, 'Search', crn]
     })
 
     const answers = await Answer.findOne({
@@ -40,6 +50,7 @@ export class AuthenticateDatabase {
       }
     })
 
+    logger.info(`getAuthenticateQuestionsAnswersByCRN: got answers for ${crn}`)
     return answers
   }
 }

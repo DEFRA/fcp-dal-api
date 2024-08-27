@@ -1,4 +1,6 @@
 import { graphql, GraphQLError } from 'graphql'
+import { DefaultAzureCredential } from '@azure/identity'
+import { RESTDataSource } from '@apollo/datasource-rest'
 
 import { schema } from '../../../app/graphql/server.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
@@ -79,6 +81,17 @@ describe('Query.customer', () => {
       }
     })
   })
+})
+
+describe('Query.customer.authenticationQuestions', () => {
+  beforeEach(() => {
+    jest.spyOn(DefaultAzureCredential.prototype, 'getToken').mockImplementation(() => ({ token: 'mockToken' }))
+    jest.spyOn(RESTDataSource.prototype, 'get').mockImplementation(() => ({ employeeId: 'x123456' }))
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
 
   it('should return customer authenticate questions', async () => {
     const authenticateQuestionsResponse = {
@@ -97,7 +110,7 @@ describe('Query.customer', () => {
       source: `#graphql
         query Customer {
           customer(crn: "123") {
-            authenticationQuestions {
+            authenticationQuestions(entraIdUserObjectId: "3ac411c8-858a-4be4-9395-6e86a86923f7") {
               memorableDate
               memorableEvent
               memorablePlace
@@ -107,9 +120,6 @@ describe('Query.customer', () => {
           }
         }
       `,
-      variableValues: {
-        personId: '123'
-      },
       schema,
       contextValue: fakeContext
     })
@@ -134,7 +144,7 @@ describe('Query.customer', () => {
       source: `#graphql
         query Customer {
           customer(crn: "123") {
-            authenticationQuestions {
+            authenticationQuestions(entraIdUserObjectId: "3ac411c8-858a-4be4-9395-6e86a86923f7") {
               memorableDate
               memorableEvent
               memorablePlace
@@ -181,7 +191,7 @@ describe('Query.customer', () => {
       source: `#graphql
         query Customer {
           customer(crn: "123") {
-            authenticationQuestions {
+            authenticationQuestions(entraIdUserObjectId: "3ac411c8-858a-4be4-9395-6e86a86923f7") {
               memorableDate
               memorableEvent
               memorablePlace

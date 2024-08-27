@@ -1,3 +1,4 @@
 scalar Numeric
 scalar Date
 scalar Image
+scalar UUID

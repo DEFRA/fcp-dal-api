@@ -30,127 +30,128 @@ describe('schema', () => {
       findBreakingChanges(
         schema,
         buildSchema(`#graphql
-      scalar Int
-      scalar Float
-      scalar Date
+          type Query {
+            business(sbi: ID!): Business
+            customer(crn: ID!): Customer
+          }
 
-      type Query {
-        business(sbi: ID!): Business
-        customer(crn: ID!): Customer
-      }
+          scalar Int
+          scalar Float
+          scalar Date
+          scalar UUID
 
-      """Represents the a customer of a business."""
-      type BusinessCustomer {
-        """The unique identifier of the customer."""
-        personId: ID
+          """Represents the a customer of a business."""
+          type BusinessCustomer {
+            """The unique identifier of the customer."""
+            personId: ID
 
-        """First name of the customer."""
-        firstName: String
+            """First name of the customer."""
+            firstName: String
 
-        """Last name of the customer."""
-        lastName: String
+            """Last name of the customer."""
+            lastName: String
 
-        """The customer reference of the customer."""
-        crn: String
+            """The customer reference of the customer."""
+            crn: String
 
-        """The role the customer against the business."""
-        role: String
+            """The role the customer against the business."""
+            role: String
 
-        """The permissions the customer against the business."""
-        permissionGroups: [BusinessCustomerPermissionGroup]
-      }
+            """The permissions the customer against the business."""
+            permissionGroups: [BusinessCustomerPermissionGroup]
+          }
 
-      type BusinessCustomerPermissionGroup {
-        """The permission group id."""
-        id: PermissionGroupId!
+          type BusinessCustomerPermissionGroup {
+            """The permission group id."""
+            id: PermissionGroupId!
 
-        """The permission level customer has for the business."""
-        level: PermissionLevel
-      }
+            """The permission level customer has for the business."""
+            level: PermissionLevel
+          }
 
-      """
-      Represents a business.
+          """
+          Represents a business.
 
-      Data Source: Rural Payments Portal (PRR)
-      """
-      type Business {
-        """The first unique identifier of the business."""
-        organisationId: ID
+          Data Source: Rural Payments Portal (PRR)
+          """
+          type Business {
+            """The first unique identifier of the business."""
+            organisationId: ID
 
-        """The Single Business Identifier (SBI) of the business."""
-        sbi: ID!
+            """The Single Business Identifier (SBI) of the business."""
+            sbi: ID!
 
-        """The customers associated with the business."""
-        customers: [BusinessCustomer]
-      }
+            """The customers associated with the business."""
+            customers: [BusinessCustomer]
+          }
 
-      """Represents the security questions of a customer."""
-      type CustomerAuthenticationQuestions {
-        """The memorable date question."""
-        memorableDate: String
+          """Represents the security questions of a customer."""
+          type CustomerAuthenticationQuestions {
+            """The memorable date question."""
+            memorableDate: String
 
-        """The memorable event question."""
-        memorableEvent: String
+            """The memorable event question."""
+            memorableEvent: String
 
-        """The memorable place question."""
-        memorablePlace: String
+            """The memorable place question."""
+            memorablePlace: String
 
-        """The date the record was last updated."""
-        updatedAt: Date
+            """The date the record was last updated."""
+            updatedAt: Date
 
-        """The indicator for customer record been found in authenticate database"""
-        isFound: Boolean
-      }
+            """The indicator for customer record been found in authenticate database"""
+            isFound: Boolean
+          }
 
-      """Represents a customer."""
-      type Customer {
-        """The unique identifier of the customer."""
-        personId: ID!
+          """Represents a customer."""
+          type Customer {
+            """The unique identifier of the customer."""
+            personId: ID!
 
-        """The CRN (Customer Reference Number) of the customer."""
-        crn: ID!
+            """The CRN (Customer Reference Number) of the customer."""
+            crn: ID!
 
-        """The security questions of the customer."""
-        authenticationQuestions: CustomerAuthenticationQuestions
+            """The security questions of the customer."""
+            authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions
 
-        """The businesses associated with the customer."""
-        businesses: [CustomerBusiness]
-      }
+            """The businesses associated with the customer."""
+            businesses: [CustomerBusiness]
+          }
 
-      """Represents a business owned by a customer."""
-      type CustomerBusiness {
-        """The unique identifier of the business."""
-        organisationId: ID
+          """Represents a business owned by a customer."""
+          type CustomerBusiness {
+            """The unique identifier of the business."""
+            organisationId: ID
 
-        """The SBI (Single Business Identifier) of the business."""
-        sbi: ID!
+            """The SBI (Single Business Identifier) of the business."""
+            sbi: ID!
 
-        """The name of the business."""
-        name: String!
+            """The name of the business."""
+            name: String!
 
-        """The role associated with the business."""
-        role: String
+            """The role associated with the business."""
+            role: String
 
-        """The permission groups associated with the business."""
-        permissionGroups: [CustomerBusinessPermissionGroup]
-      }
+            """The permission groups associated with the business."""
+            permissionGroups: [CustomerBusinessPermissionGroup]
+          }
 
-      type CustomerBusinessPermissionGroup {
-        """The permission group id."""
-        id: PermissionGroupId!
+          type CustomerBusinessPermissionGroup {
+            """The permission group id."""
+            id: PermissionGroupId!
 
-        """The permission level customer has for the business."""
-        level: PermissionLevel
-      }
+            """The permission level customer has for the business."""
+            level: PermissionLevel
+          }
 
-      enum PermissionLevel {
-        NO_ACCESS
-        VIEW
-        AMEND
-        SUBMIT
-        MAKE_LEGAL_CHANGES
-        FULL_PERMISSION
-      }
+          enum PermissionLevel {
+            NO_ACCESS
+            VIEW
+            AMEND
+            SUBMIT
+            MAKE_LEGAL_CHANGES
+            FULL_PERMISSION
+          }
 
       enum PermissionGroupId {
         BASIC_PAYMENT_SCHEME
@@ -180,547 +181,550 @@ describe('schema', () => {
       findBreakingChanges(
         schema,
         buildSchema(`#graphql
-      type Query {
-        business(sbi: ID!): Business
-        permissionGroups: [PermissionGroup]
-        customer(crn: ID!): Customer
-      }
+          type Query {
+            business(sbi: ID!): Business
+            customer(crn: ID!): Customer
+            permissionGroups: [PermissionGroup]
+          }
 
-      """Represents data about a customers or business phone/fax details"""
-      type Phone {
-        """Mobile number of the customer or business"""
-        mobile: String
+          """Represents data about a customers or business phone/fax details"""
+          type Phone {
+            """Mobile number of the customer or business"""
+            mobile: String
 
-        """Landline number of the customer or business"""
-        landline: String
+            """Landline number of the customer or business"""
+            landline: String
 
-        """Fax number of the customer or business"""
-        fax: String
-      }
+            """Fax number of the customer or business"""
+            fax: String
+          }
 
-      """Represents data about a customers or business email details"""
-      type Email {
-        """Email address of the customer or business"""
-        address: String
+          """Represents data about a customers or business email details"""
+          type Email {
+            """Email address of the customer or business"""
+            address: String
 
-        """Validated status of the email address"""
-        validated: Boolean
+            """Validated status of the email address"""
+            validated: Boolean
 
-        """Do not contact status of the email address"""
-        doNotContact: Boolean
-      }
+            """Do not contact status of the email address"""
+            doNotContact: Boolean
+          }
 
-      """Represents data about a customers or business address details"""
-      type Address {
-        """PAF organisation name"""
-        pafOrganisationName: String
+          """Represents data about a customers or business address details"""
+          type Address {
+            """PAF organisation name"""
+            pafOrganisationName: String
 
-        """Building number range of the address"""
-        buildingNumberRange: String
+            """Building number range of the address"""
+            buildingNumberRange: String
 
-        """Building name of the address"""
-        buildingName: String
+            """Building name of the address"""
+            buildingName: String
 
-        """Flat name of the address"""
-        flatName: String
+            """Flat name of the address"""
+            flatName: String
 
-        """Street of the address"""
-        street: String
+            """Street of the address"""
+            street: String
 
-        """Locality of the address"""
-        city: String
+            """Locality of the address"""
+            city: String
 
-        """County of the address"""
-        county: String
+            """County of the address"""
+            county: String
 
-        """Postal code of the address"""
-        postalCode: String
+            """Postal code of the address"""
+            postalCode: String
 
-        """Country of the address"""
-        country: String
+            """Country of the address"""
+            country: String
 
-        """UPRN of the address"""
-        uprn: String
+            """UPRN of the address"""
+            uprn: String
 
-        """Dependant locality of the address"""
-        dependentLocality: String
+            """Dependant locality of the address"""
+            dependentLocality: String
 
-        """Double dependant locality of the address"""
-        doubleDependentLocality: String
+            """Double dependant locality of the address"""
+            doubleDependentLocality: String
 
-        """Type ID of the address"""
-        typeId: String
-      }
+            """Type ID of the address"""
+            typeId: String
+          }
 
-      """Represents data about a pagination details for a list of items"""
-      input Pagination {
-        """Number of items per page"""
-        perPage: Int!
+          """Represents data about a pagination details for a list of items"""
+          input Pagination {
+            """Number of items per page"""
+            perPage: Int!
 
-        """Page number"""
-        page: Int!
-      }
+            """Page number"""
+            page: Int!
+          }
 
-      scalar Date
+          scalar Date
 
-      """Represents the status of a business application."""
-      type BusinessApplicationStatus {
-        """The unique identifier of the business application status."""
-        id: ID
+          scalar UUID
 
-        """The open status of the business application."""
-        open: String
+          """Represents the status of a business application."""
+          type BusinessApplicationStatus {
+            """The unique identifier of the business application status."""
+            id: ID
 
-        """The status of the business application."""
-        status: String
+            """The open status of the business application."""
+            open: String
 
-        """The type of the business application."""
-        type: String
+            """The status of the business application."""
+            status: String
 
-        """The sector of the business application."""
-        sector: String
+            """The type of the business application."""
+            type: String
 
-        """The year of the business application."""
-        year: Int
+            """The sector of the business application."""
+            sector: String
 
-        """The FRN (Farm Reference Number) of the business application."""
-        frn: String
+            """The year of the business application."""
+            year: Int
 
-        """The office of the business application."""
-        office: String
-      }
+            """The FRN (Farm Reference Number) of the business application."""
+            frn: String
 
-      """Represents a claim of a business application."""
-      type BusinessApplicationClaim {
-        """The schema year of the business application claim."""
-        schemaYear: Int
+            """The office of the business application."""
+            office: String
+          }
 
-        """The type of the business application claim."""
-        type: String
+          """Represents a claim of a business application."""
+          type BusinessApplicationClaim {
+            """The schema year of the business application claim."""
+            schemaYear: Int
 
-        """The status of the business application claim."""
-        status: String
+            """The type of the business application claim."""
+            type: String
 
-        """The last movement of the business application claim."""
-        lastMovement: String
-      }
+            """The status of the business application claim."""
+            status: String
 
-      """
-      Represents a business application.
+            """The last movement of the business application claim."""
+            lastMovement: String
+          }
 
-      Data Source: Rural Payments Portal (PRR)
-      """
-      type BusinessApplication {
-        """The status of the business application."""
-        applicationStatus: BusinessApplicationStatus
+          """
+          Represents a business application.
 
-        """The claim of the business application."""
-        csClaim: BusinessApplicationClaim
-      }
+          Data Source: Rural Payments Portal (PRR)
+          """
+          type BusinessApplication {
+            """The status of the business application."""
+            applicationStatus: BusinessApplicationStatus
 
-      """Represents the basic information of a business."""
-      type BusinessInfo {
-        """The name of the business."""
-        name: String
+            """The claim of the business application."""
+            csClaim: BusinessApplicationClaim
+          }
 
-        """The reference of the business."""
-        reference: String
+          """Represents the basic information of a business."""
+          type BusinessInfo {
+            """The name of the business."""
+            name: String
 
-        """The VAT number of the business."""
-        vat: String
+            """The reference of the business."""
+            reference: String
 
-        """The trader number of the business."""
-        traderNumber: String
+            """The VAT number of the business."""
+            vat: String
 
-        """The vendor number of the business."""
-        vendorNumber: String
+            """The trader number of the business."""
+            traderNumber: String
 
-        """The address of the business."""
-        address: Address
+            """The vendor number of the business."""
+            vendorNumber: String
 
-        """The phone details of the business."""
-        phone: Phone
+            """The address of the business."""
+            address: Address
 
-        """The email details of the business."""
-        email: Email
+            """The phone details of the business."""
+            phone: Phone
 
-        """The legal status of the business."""
-        legalStatus: BusinessType
+            """The email details of the business."""
+            email: Email
 
-        """The type of the business."""
-        type: BusinessType
+            """The legal status of the business."""
+            legalStatus: BusinessType
 
-        """The registration numbers of the business."""
-        registrationNumbers: BusinessRegistrationNumbers
-      }
+            """The type of the business."""
+            type: BusinessType
 
-      """Represents the registration numbers of a business."""
-      type BusinessRegistrationNumbers {
-        """The Companies House number of the business."""
-        companiesHouse: String
+            """The registration numbers of the business."""
+            registrationNumbers: BusinessRegistrationNumbers
+          }
 
-        """The Charity Commission number of the business."""
-        charityCommission: String
-      }
+          """Represents the registration numbers of a business."""
+          type BusinessRegistrationNumbers {
+            """The Companies House number of the business."""
+            companiesHouse: String
 
-      """Represents the type of a business."""
-      type BusinessType {
-        """The code of the business type."""
-        code: Int
+            """The Charity Commission number of the business."""
+            charityCommission: String
+          }
 
-        """The type of the business."""
-        type: String
-      }
+          """Represents the type of a business."""
+          type BusinessType {
+            """The code of the business type."""
+            code: Int
 
-      """Represents the a customer of a business."""
-      type BusinessCustomer {
-        """The unique identifier of the customer."""
-        personId: ID
+            """The type of the business."""
+            type: String
+          }
 
-        """First name of the customer."""
-        firstName: String
+          """Represents the a customer of a business."""
+          type BusinessCustomer {
+            """The unique identifier of the customer."""
+            personId: ID
 
-        """Last name of the customer."""
-        lastName: String
+            """First name of the customer."""
+            firstName: String
 
-        """The customer reference of the customer."""
-        crn: String
+            """Last name of the customer."""
+            lastName: String
 
-        """The role the customer against the business."""
-        role: String
+            """The customer reference of the customer."""
+            crn: String
 
-        """The permissions the customer against the business."""
-        permissionGroups: [BusinessCustomerPermissionGroup]
-      }
+            """The role the customer against the business."""
+            role: String
 
-      type BusinessCustomerPermissionGroup {
-        """The permission group id."""
-        id: PermissionGroupId!
+            """The permissions the customer against the business."""
+            permissionGroups: [BusinessCustomerPermissionGroup]
+          }
 
-        """The permission level customer has for the business."""
-        level: PermissionLevel
-      }
+          type BusinessCustomerPermissionGroup {
+            """The permission group id."""
+            id: PermissionGroupId!
 
-      """
-      Represents a business.
+            """The permission level customer has for the business."""
+            level: PermissionLevel
+          }
 
-      Data Source: Rural Payments Portal (PRR)
-      """
-      type Business {
-        """The first unique identifier of the business."""
-        organisationId: ID
+          """
+          Represents a business.
 
-        """The Single Business Identifier (SBI) of the business."""
-        sbi: ID!
+          Data Source: Rural Payments Portal (PRR)
+          """
+          type Business {
+            """The first unique identifier of the business."""
+            organisationId: ID
 
-        """The basic information of the business."""
-        info: BusinessInfo
+            """The Single Business Identifier (SBI) of the business."""
+            sbi: ID!
 
-        """The land details of the business."""
-        land: BusinessLand
+            """The basic information of the business."""
+            info: BusinessInfo
 
-        """The applications associated with the business."""
-        applications: [BusinessApplication]
+            """The land details of the business."""
+            land: BusinessLand
 
-        """The CPH (County Parish Holding) numbers of the business."""
-        cph: [CPH]
+            """The applications associated with the business."""
+            applications: [BusinessApplication]
 
-        """The customers associated with the business."""
-        customers: [BusinessCustomer]
-      }
+            """The CPH (County Parish Holding) numbers of the business."""
+            cph: [CPH]
 
-      """Represents a coordinate with x and y values."""
-      type CPHCoordinate {
-        """The x value of the coordinate."""
-        x: Int
+            """The customers associated with the business."""
+            customers: [BusinessCustomer]
+          }
 
-        """The y value of the coordinate."""
-        y: Int
-      }
+          """Represents a coordinate with x and y values."""
+          type CPHCoordinate {
+            """The x value of the coordinate."""
+            x: Int
 
-      """
-      Represents a County Parish Holding (CPH) number.
+            """The y value of the coordinate."""
+            y: Int
+          }
 
-      Data Source: Rural Payments Portal (PRR)
-      """
-      type CPH {
-        """The CPH number."""
-        number: String
+          """
+          Represents a County Parish Holding (CPH) number.
 
-        """The parcel numbers associated with the CPH number."""
-        parcelNumbers: [String]
+          Data Source: Rural Payments Portal (PRR)
+          """
+          type CPH {
+            """The CPH number."""
+            number: String
 
-        """The parish associated with the CPH number."""
-        parish: String
+            """The parcel numbers associated with the CPH number."""
+            parcelNumbers: [String]
 
-        """The start date of the CPH number."""
-        startDate: Int
+            """The parish associated with the CPH number."""
+            parish: String
 
-        """The expiry date of the CPH number."""
-        expiryDate: Int
+            """The start date of the CPH number."""
+            startDate: Int
 
-        """The species associated with the CPH number."""
-        species: [String]
+            """The expiry date of the CPH number."""
+            expiryDate: Int
 
-        """The coordinate of the CPH number."""
-        coordinate: CPHCoordinate
-      }
+            """The species associated with the CPH number."""
+            species: [String]
 
-      """Represents the name of a business land cover."""
-      enum BusinessLandCoverName {
-        """Represents permanent grassland."""
-        PERMANENT_GRASSLAND
+            """The coordinate of the CPH number."""
+            coordinate: CPHCoordinate
+          }
 
-        """Represents permanent crops."""
-        PERMANENT_CROPS
+          """Represents the name of a business land cover."""
+          enum BusinessLandCoverName {
+            """Represents permanent grassland."""
+            PERMANENT_GRASSLAND
 
-        """Represents arable land."""
-        ARABLE_LAND
-      }
+            """Represents permanent crops."""
+            PERMANENT_CROPS
 
-      """Represents a parcel of a business land."""
-      type BusinessLandParcel {
-        """The unique identifier of the land parcel."""
-        id: ID!
+            """Represents arable land."""
+            ARABLE_LAND
+          }
 
-        """The sheet ID of the land parcel."""
-        sheetId: String
+          """Represents a parcel of a business land."""
+          type BusinessLandParcel {
+            """The unique identifier of the land parcel."""
+            id: ID!
 
-        """The area of the land parcel."""
-        area: Float
-      }
+            """The sheet ID of the land parcel."""
+            sheetId: String
 
-      """Represents a summary of a business land."""
-      type BusinessLandSummary {
-        """The area of arable land."""
-        arableLandArea: Float
+            """The area of the land parcel."""
+            area: Float
+          }
 
-        """The area of permanent crops."""
-        permanentCropsArea: Float
+          """Represents a summary of a business land."""
+          type BusinessLandSummary {
+            """The area of arable land."""
+            arableLandArea: Float
 
-        """The area of permanent grassland."""
-        permanentGrasslandArea: Float
+            """The area of permanent crops."""
+            permanentCropsArea: Float
 
-        """The total area of the business land."""
-        totalArea: Float
+            """The area of permanent grassland."""
+            permanentGrasslandArea: Float
 
-        """The total number of parcels in the business land."""
-        totalParcels: Float
-      }
+            """The total area of the business land."""
+            totalArea: Float
 
-      """Represents a cover of a business land."""
-      type BusinessLandCover {
-        """The unique identifier of the land cover."""
-        id: ID!
+            """The total number of parcels in the business land."""
+            totalParcels: Float
+          }
 
-        """The name of the land cover."""
-        name: BusinessLandCoverName
+          """Represents a cover of a business land."""
+          type BusinessLandCover {
+            """The unique identifier of the land cover."""
+            id: ID!
 
-        """The area of the land cover."""
-        area: Float
-      }
+            """The name of the land cover."""
+            name: BusinessLandCoverName
 
-      """
-      Represents a business land.
+            """The area of the land cover."""
+            area: Float
+          }
 
-      Data Source: Rural Payments Portal (PRR)
-      """
-      type BusinessLand {
-        """The covers of the business land."""
-        covers: [BusinessLandCover]
+          """
+          Represents a business land.
 
-        """The parcels of the business land."""
-        parcels: [BusinessLandParcel]
+          Data Source: Rural Payments Portal (PRR)
+          """
+          type BusinessLand {
+            """The covers of the business land."""
+            covers: [BusinessLandCover]
 
-        """The summary of the business land."""
-        summary(historicDate: Date): BusinessLandSummary
-      }
+            """The parcels of the business land."""
+            parcels: [BusinessLandParcel]
 
-      enum PermissionLevel {
-        NO_ACCESS
-        VIEW
-        AMEND
-        SUBMIT
-        MAKE_LEGAL_CHANGES
-        FULL_PERMISSION
-      }
+            """The summary of the business land."""
+            summary(historicDate: Date): BusinessLandSummary
+          }
 
-      enum PermissionGroupId {
-        BASIC_PAYMENT_SCHEME
-        BUSINESS_DETAILS
-        COUNTRYSIDE_STEWARDSHIP_AGREEMENTS
-        COUNTRYSIDE_STEWARDSHIP_APPLICATIONS
-        ENTITLEMENTS
-        ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS
-        LAND_DETAILS
-      }
+          """
+          Represents the basic information of a customer.
 
-      type PermissionGroup {
-        """The permission group id."""
-        id: PermissionGroupId!
+          Data Source: Rural Payments Portal (PRR)
+          """
+          type CustomerInfo {
+            """The name of the customer."""
+            name: CustomerName
 
-        """The permission group name."""
-        name: String!
+            """The date of birth of the customer."""
+            dateOfBirth: String
 
-        """The permissions within the group."""
-        permissions: [Permission]
-      }
+            """The phone details of the customer."""
+            phone: Phone
 
-      type Permission {
-        """The permission level."""
-        level: PermissionLevel
+            """The email details of the customer."""
+            email: Email
 
-        """The functions that can be performed with given permission level."""
-        functions: [String]
+            """The status details of the customer."""
+            status: CustomerStatus
 
-        """Check if this level is active for given customer and business."""
-        active(crn: ID!, sbi: ID!): Boolean
-      }
+            """The address details of the customer."""
+            address: Address
+          }
 
-      """
-      Represents the basic information of a customer.
+          """Represents the full name of a customer."""
+          type CustomerName {
+            """The title of the customer (e.g., Mr., Mrs., Dr.)."""
+            title: String
 
-      Data Source: Rural Payments Portal (PRR)
-      """
-      type CustomerInfo {
-        """The name of the customer."""
-        name: CustomerName
+            """Any other title of the customer."""
+            otherTitle: String
 
-        """The date of birth of the customer."""
-        dateOfBirth: String
+            """The first name of the customer."""
+            first: String
 
-        """The phone details of the customer."""
-        phone: Phone
+            """The middle name of the customer."""
+            middle: String
 
-        """The email details of the customer."""
-        email: Email
+            """The last name of the customer."""
+            last: String
+          }
 
-        """The status details of the customer."""
-        status: CustomerStatus
+          """Represents the status of a customer."""
+          type CustomerStatus {
+            """Whether the customer account is locked."""
+            locked: Boolean
 
-        """The address details of the customer."""
-        address: Address
-      }
+            """Whether the customer account is confirmed."""
+            confirmed: Boolean
 
-      """Represents the full name of a customer."""
-      type CustomerName {
-        """The title of the customer (e.g., Mr., Mrs., Dr.)."""
-        title: String
+            """Whether the customer account is deactivated."""
+            deactivated: Boolean
+          }
 
-        """Any other title of the customer."""
-        otherTitle: String
+          """Represents the security questions of a customer."""
+          type CustomerAuthenticationQuestions {
+            """The memorable date question."""
+            memorableDate: String
 
-        """The first name of the customer."""
-        first: String
+            """The memorable event question."""
+            memorableEvent: String
 
-        """The middle name of the customer."""
-        middle: String
+            """The memorable place question."""
+            memorablePlace: String
 
-        """The last name of the customer."""
-        last: String
-      }
+            """The date the record was last updated."""
+            updatedAt: Date
 
-      """Represents the status of a customer."""
-      type CustomerStatus {
-        """Whether the customer account is locked."""
-        locked: Boolean
+            """The indicator for customer record been found in authenticate database"""
+            isFound: Boolean
+          }
 
-        """Whether the customer account is confirmed."""
-        confirmed: Boolean
+          """Represents a customer."""
+          type Customer {
+            """The unique identifier of the customer."""
+            personId: ID!
 
-        """Whether the customer account is deactivated."""
-        deactivated: Boolean
-      }
+            """The CRN (Customer Reference Number) of the customer."""
+            crn: ID!
 
-      """Represents the security questions of a customer."""
-      type CustomerAuthenticationQuestions {
-        """The memorable date question."""
-        memorableDate: String
+            """The basic information of the customer."""
+            info: CustomerInfo
 
-        """The memorable event question."""
-        memorableEvent: String
+            """The security questions of the customer."""
+            authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions
 
-        """The memorable place question."""
-        memorablePlace: String
+            """The businesses associated with the customer."""
+            businesses: [CustomerBusiness]
 
-        """The date the record was last updated."""
-        updatedAt: Date
+            """The single business filtered by sbi associated with the customer."""
+            business(sbi: ID!): CustomerBusiness
+          }
 
-        """The indicator for customer record been found in authenticate database"""
-        isFound: Boolean
-      }
+          """Represents a business owned by a customer."""
+          type CustomerBusiness {
+            """The unique identifier of the business."""
+            organisationId: ID
 
-      """Represents a customer."""
-      type Customer {
-        """The unique identifier of the customer."""
-        personId: ID!
+            """The SBI (Single Business Identifier) of the business."""
+            sbi: ID!
 
-        """The CRN (Customer Reference Number) of the customer."""
-        crn: ID!
+            """The name of the business."""
+            name: String!
 
-        """The basic information of the customer."""
-        info: CustomerInfo
+            """The role associated with the business."""
+            role: String
 
-        """The security questions of the customer."""
-        authenticationQuestions: CustomerAuthenticationQuestions
+            """The messages associated with the business."""
+            messages(pagination: Pagination, showOnlyDeleted: Boolean): [CustomerBusinessMessage]
 
-        """The businesses associated with the customer."""
-        businesses: [CustomerBusiness]
+            """The permission groups associated with the business."""
+            permissionGroups: [CustomerBusinessPermissionGroup]
+          }
 
-        """The single business filtered by sbi associated with the customer."""
-        business(sbi: ID!): CustomerBusiness
-      }
+          type CustomerBusinessPermissionGroup {
+            """The permission group id."""
+            id: PermissionGroupId!
 
-      """Represents a business owned by a customer."""
-      type CustomerBusiness {
-        """The unique identifier of the business."""
-        organisationId: ID
+            """The permission level customer has for the business."""
+            level: PermissionLevel
+          }
 
-        """The SBI (Single Business Identifier) of the business."""
-        sbi: ID!
+          """
+          Represents a message related to a customer's business.
 
-        """The name of the business."""
-        name: String!
+          Data Source: Rural Payments Portal (PRR)
+          """
+          type CustomerBusinessMessage {
+            """The unique identifier of the message."""
+            id: ID!
 
-        """The role associated with the business."""
-        role: String
+            """The title of the message."""
+            title: String
 
-        """The messages associated with the business."""
-        messages(pagination: Pagination, showOnlyDeleted: Boolean): [CustomerBusinessMessage]
+            """The date of the message."""
+            date: Date
 
-        """The permission groups associated with the business."""
-        permissionGroups: [CustomerBusinessPermissionGroup]
-      }
+            """The body content of the message."""
+            body: String
 
-      type CustomerBusinessPermissionGroup {
-        """The permission group id."""
-        id: PermissionGroupId!
+            """Whether the message has been read."""
+            read: Boolean
+          }
 
-        """The permission level customer has for the business."""
-        level: PermissionLevel
-      }
+          enum PermissionLevel {
+            NO_ACCESS
+            VIEW
+            AMEND
+            SUBMIT
+            MAKE_LEGAL_CHANGES
+            FULL_PERMISSION
+          }
 
-      """
-      Represents a message related to a customer's business.
+          enum PermissionGroupId {
+            BASIC_PAYMENT_SCHEME
+            BUSINESS_DETAILS
+            COUNTRYSIDE_STEWARDSHIP_AGREEMENTS
+            COUNTRYSIDE_STEWARDSHIP_APPLICATIONS
+            ENTITLEMENTS
+            ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS
+            LAND_DETAILS
+          }
 
-      Data Source: Rural Payments Portal (PRR)
-      """
-      type CustomerBusinessMessage {
-        """The unique identifier of the message."""
-        id: ID!
+          type PermissionGroup {
+            """The permission group id."""
+            id: PermissionGroupId!
 
-        """The title of the message."""
-        title: String
+            """The permission group name."""
+            name: String!
 
-        """The date of the message."""
-        date: Date
+            """The permissions within the group."""
+            permissions: [Permission]
+          }
 
-        """The body content of the message."""
-        body: String
+          type Permission {
+            """The permission level."""
+            level: PermissionLevel
 
-        """Whether the message has been read."""
-        read: Boolean
-      }
+            """The functions that can be performed with given permission level."""
+            functions: [String]
+
+            """Check if this level is active for given customer and business."""
+            active(crn: ID!, sbi: ID!): Boolean
+          }
+      
 
       enum AuthRole {
         ADMIN
