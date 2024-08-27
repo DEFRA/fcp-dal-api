@@ -1,4 +1,4 @@
-import { logger } from '../../utils/logger.js'
+import { logger, sampleResponse } from '../../utils/logger.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
@@ -20,7 +20,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
         }
       })
       const response = customerResponse._data.pop() || {}
-      logger.debug('Customer by CRN', { response })
+      logger.debug('Customer by CRN', { response: sampleResponse(response) })
 
       return this.getPersonByPersonId(response.id)
     } catch (error) {
@@ -34,7 +34,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     try {
       const response = await this.get(`person/${personId}/summary`)
 
-      logger.debug('Person by person ID', { response })
+      logger.debug('Person by person ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
       logger.error('Error getting person by person ID', { personId, error })

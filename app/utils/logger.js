@@ -1,4 +1,5 @@
 import winston from 'winston'
+import { AzureApplicationInsightsLogger } from 'winston-azure-application-insights'
 
 Error.stackTraceLimit = Error.stackTraceLimit < 20 ? 20 : Error.stackTraceLimit
 
@@ -43,7 +44,9 @@ function jsonStringifyRecursive (obj) {
   )
 }
 
-const format = winston.format.combine(
+const level = process.env.LOG_LEVEL || 'info'
+const transports = [new winston.transports.Console()]
+let format = winston.format.combine(
   winston.format.align(),
   winston.format.colorize(),
   winston.format.printf(info => {
@@ -66,8 +69,39 @@ const format = winston.format.combine(
   })
 )
 
+if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
+  format = winston.format.json()
+  transports.push(
+    new AzureApplicationInsightsLogger({
+      key: process.env.APPINSIGHTS_CONNECTIONSTRING
+    })
+  )
+} else {
+  transports.push(new winston.transports.Console())
+}
+
 export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
-  transports: [new winston.transports.Console()],
+  level,
+  transports,
   format
 })
+
+const sampleArray = array => {
+  const sampleSize = 5
+  if (array.length <= sampleSize) {
+    return array
+  }
+  return array.slice(0, sampleSize)
+}
+
+export const sampleResponse = response => {
+  if (Array.isArray(response)) {
+    return sampleArray(response)
+  }
+
+  if (Array.isArray(response?._data)) {
+    response._data = sampleArray(response._data)
+  }
+
+  return response
+}

@@ -1,4 +1,4 @@
-import { logger } from '../../utils/logger.js'
+import { logger, sampleResponse } from '../../utils/logger.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsBusiness extends RuralPayments {
@@ -34,7 +34,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
       const response = organisationResponse?._data?.pop() || {}
 
-      logger.debug('Organisation by SBI', { response })
+      logger.debug('Organisation by SBI', { response: sampleResponse(response) })
       return this.getOrganisationById(response.id)
     } catch (error) {
       logger.error('Error getting organisation by SBI', {
@@ -54,7 +54,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       const response = await this.get(
         `authorisation/organisation/${organisationId}`
       )
-      logger.debug('Organisation customers by organisation ID', { response })
+      logger.debug('Organisation customers by organisation ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
       logger.error('Error getting organisation customers by organisation ID', {
