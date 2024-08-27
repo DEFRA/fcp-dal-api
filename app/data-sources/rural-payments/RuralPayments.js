@@ -1,4 +1,5 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
+import { StatusCodes } from 'http-status-codes'
 import fetch from 'node-fetch'
 import qs from 'qs'
 import { logger } from '../../utils/logger.js'
@@ -7,9 +8,58 @@ const defaultHeaders = {
   'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY,
   email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
 }
+const maximumRetries = 3
 
 export class RuralPayments extends RESTDataSource {
   baseURL = process.env.RP_INTERNAL_APIM_URL
+
+  async fetch (path, incomingRequest) {
+    logger.debug('#RuralPayments - new request', {
+      path,
+      method: incomingRequest.method
+    })
+
+    const doRequest = async (count = 1) => {
+      try {
+        const result = await super.fetch(path, incomingRequest)
+        logger.debug('#RuralPayments - response ', {
+          path,
+          status: result.response?.status,
+          body: result.response?.parsedBody
+        })
+        return result
+      } catch (error) {
+        // Handle occasionally 500 error produced by APIM
+        // TODO: Once APIM has been fixed remove retry logic
+        if (error?.extensions?.response?.status === StatusCodes.INTERNAL_SERVER_ERROR && count < maximumRetries) {
+          logger.error(`#RuralPayments - Error, Retrying request (${count})`, {
+            path,
+            method: incomingRequest.method,
+            count,
+            error
+          })
+          return doRequest(count + 1)
+        }
+        logger.error('#RuralPayments - Error fetching data', { error })
+        throw error
+      }
+    }
+
+    return doRequest()
+  }
+
+  async throwIfResponseIsError (options) {
+    const { response } = options
+    if (response.ok) {
+      return
+    }
+    logger.error('#RuralPayments - error', {
+      status: response?.status,
+      url: response?.url,
+      error: response?.error
+    })
+    throw await this.errorFromResponse(options)
+  }
 
   async willSendRequest (_path, request) {
     if (!this.apimAccessToken) {

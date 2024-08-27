@@ -8,6 +8,8 @@ import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformer
 import { personById } from '../../../mocks/fixtures/person.js'
 import { fakeContext } from '../../test-setup.js'
 
+import mockServer from '../../../mocks/server'
+
 const personFixture = personById({ id: '5007136' })
 
 describe('Query.customer', () => {
@@ -220,6 +222,65 @@ describe('Query.customer.authenticationQuestions', () => {
           }
         }
       }
+    })
+  })
+
+  describe('Handle 500 errors', () => {
+    afterEach(async () => {
+      await mockServer.server.mock.restoreRouteVariants()
+    })
+
+    it('should retry request if 500 error', async () => {
+      await mockServer.server.mock.useRouteVariant('rural-payments-person-get-by-crn:error')
+
+      const result = await graphql({
+        source: `#graphql
+          query TestCustomerBusinesses($crn: ID!) {
+            customer(crn: $crn) {
+              personId
+            }
+          }
+        `,
+        variableValues: {
+          crn: '9103020285' // personId: 5007136
+        },
+        schema,
+        contextValue: fakeContext
+      })
+
+      expect(result).toEqual({
+        data: {
+          customer: {
+            personId: '5302028'
+          }
+        }
+      })
+    })
+
+    it('should throw an error after 3 retries', async () => {
+      await mockServer.server.mock.useRouteVariant('rural-payments-person-get-by-crn:error-indefinite')
+
+      const result = await graphql({
+        source: `#graphql
+          query TestCustomerBusinesses($crn: ID!) {
+            customer(crn: $crn) {
+              personId
+            }
+          }
+        `,
+        variableValues: {
+          crn: '9103020285' // personId: 5007136
+        },
+        schema,
+        contextValue: fakeContext
+      })
+
+      expect(result).toEqual({
+        data: {
+          customer: null
+        },
+        errors: [new GraphQLError('500: Internal Server Error')]
+      })
     })
   })
 })

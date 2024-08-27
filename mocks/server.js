@@ -34,5 +34,6 @@ export default {
     return server.server.url
   },
   stop: async () => server.stop(),
-  selectBase: base => server.mock.collections.select(base)
+  selectBase: base => server.mock.collections.select(base),
+  server
 }

@@ -21,6 +21,11 @@ export const badRequestResponse = (res) => {
   res.end()
 }
 
+export const serverInternalErrorResponse = (res) => {
+  res.status(StatusCodes.INTERNAL_SERVER_ERROR)
+  res.end()
+}
+
 export const okOrNotFoundResponse = (res, data) => {
   if (!data) {
     return notFoundResponse(res)
