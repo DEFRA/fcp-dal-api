@@ -1,5 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { DefaultAzureCredential } from '@azure/identity'
+import { logger } from '../../utils/logger.js'
 
 const credential = new DefaultAzureCredential()
 
@@ -26,7 +27,7 @@ export class EntraIdApi extends RESTDataSource {
 
       employeeId = response.employeeId
     } catch (err) {
-      this.logger.error(err)
+      logger.error(err)
       throw new Error(`Could not get the employee ID for the user: ${entraIdUserObjectId}`)
     }
 
