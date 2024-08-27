@@ -1,6 +1,6 @@
-import { graphql, GraphQLError } from 'graphql'
-import { DefaultAzureCredential } from '@azure/identity'
 import { RESTDataSource } from '@apollo/datasource-rest'
+import { DefaultAzureCredential } from '@azure/identity'
+import { graphql, GraphQLError } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
@@ -81,6 +81,65 @@ describe('Query.customer', () => {
           info: customerInfo
         }
       }
+    })
+  })
+
+  describe('Handle 500 errors', () => {
+    afterEach(async () => {
+      await mockServer.server.mock.restoreRouteVariants()
+    })
+
+    it('should retry request if 500 error', async () => {
+      await mockServer.server.mock.useRouteVariant('rural-payments-person-get-by-crn:error')
+
+      const result = await graphql({
+        source: `#graphql
+          query TestCustomerBusinesses($crn: ID!) {
+            customer(crn: $crn) {
+              personId
+            }
+          }
+        `,
+        variableValues: {
+          crn: '9103020285' // personId: 5007136
+        },
+        schema,
+        contextValue: fakeContext
+      })
+
+      expect(result).toEqual({
+        data: {
+          customer: {
+            personId: '5302028'
+          }
+        }
+      })
+    })
+
+    it('should throw an error after 3 retries', async () => {
+      await mockServer.server.mock.useRouteVariant('rural-payments-person-get-by-crn:error-indefinite')
+
+      const result = await graphql({
+        source: `#graphql
+          query TestCustomerBusinesses($crn: ID!) {
+            customer(crn: $crn) {
+              personId
+            }
+          }
+        `,
+        variableValues: {
+          crn: '9103020285' // personId: 5007136
+        },
+        schema,
+        contextValue: fakeContext
+      })
+
+      expect(result).toEqual({
+        data: {
+          customer: null
+        },
+        errors: [new GraphQLError('500: Internal Server Error')]
+      })
     })
   })
 })
@@ -222,65 +281,6 @@ describe('Query.customer.authenticationQuestions', () => {
           }
         }
       }
-    })
-  })
-
-  describe('Handle 500 errors', () => {
-    afterEach(async () => {
-      await mockServer.server.mock.restoreRouteVariants()
-    })
-
-    it('should retry request if 500 error', async () => {
-      await mockServer.server.mock.useRouteVariant('rural-payments-person-get-by-crn:error')
-
-      const result = await graphql({
-        source: `#graphql
-          query TestCustomerBusinesses($crn: ID!) {
-            customer(crn: $crn) {
-              personId
-            }
-          }
-        `,
-        variableValues: {
-          crn: '9103020285' // personId: 5007136
-        },
-        schema,
-        contextValue: fakeContext
-      })
-
-      expect(result).toEqual({
-        data: {
-          customer: {
-            personId: '5302028'
-          }
-        }
-      })
-    })
-
-    it('should throw an error after 3 retries', async () => {
-      await mockServer.server.mock.useRouteVariant('rural-payments-person-get-by-crn:error-indefinite')
-
-      const result = await graphql({
-        source: `#graphql
-          query TestCustomerBusinesses($crn: ID!) {
-            customer(crn: $crn) {
-              personId
-            }
-          }
-        `,
-        variableValues: {
-          crn: '9103020285' // personId: 5007136
-        },
-        schema,
-        contextValue: fakeContext
-      })
-
-      expect(result).toEqual({
-        data: {
-          customer: null
-        },
-        errors: [new GraphQLError('500: Internal Server Error')]
-      })
     })
   })
 })
