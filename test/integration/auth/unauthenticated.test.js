@@ -1,12 +1,14 @@
 import { graphql } from 'graphql'
 
+import { Unauthorized } from '../../../app/errors/graphql.js'
 import { context } from '../../../app/graphql/context.js'
 import { schema } from '../../../app/graphql/server.js'
-import { Unauthorized } from '../../../app/errors/graphql.js'
 
 describe('Query.customer without authorization header', () => {
+  const request = { headers: { email: 'test@defra.gov.uk' } }
+
   it('customer query should return an auth error', async () => {
-    const unAuthedContext = await context({})
+    const unAuthedContext = await context({ request })
     const result = await graphql({
       source: `#graphql
         query Customer {
@@ -37,7 +39,7 @@ describe('Query.customer without authorization header', () => {
   })
 
   it('business query should return an auth error', async () => {
-    const unAuthedContext = await context({})
+    const unAuthedContext = await context({ request })
     const result = await graphql({
       source: `#graphql
         query Business {
@@ -65,7 +67,7 @@ describe('Query.customer without authorization header', () => {
   })
 
   it('permissions query should return an auth error', async () => {
-    const unAuthedContext = await context({})
+    const unAuthedContext = await context({ request })
     const result = await graphql({
       source: `#graphql
           query PermissionGroups($crn: ID!, $sbi: ID!) {
