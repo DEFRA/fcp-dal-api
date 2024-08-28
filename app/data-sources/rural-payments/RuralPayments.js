@@ -5,13 +5,19 @@ import qs from 'qs'
 import { logger } from '../../utils/logger.js'
 
 const defaultHeaders = {
-  'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY,
-  email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
+  'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY
 }
 const maximumRetries = 3
 
 export class RuralPayments extends RESTDataSource {
   baseURL = process.env.RP_INTERNAL_APIM_URL
+  request = null
+
+  constructor (config, request) {
+    super(config)
+
+    this.request = request
+  }
 
   async fetch (path, incomingRequest) {
     logger.debug('#RuralPayments - new request', {
@@ -73,8 +79,13 @@ export class RuralPayments extends RESTDataSource {
     request.headers = {
       ...request.headers,
       ...defaultHeaders,
-      Authorization: `Bearer ${this.apimAccessToken}`
+      Authorization: `Bearer ${this.apimAccessToken}`,
+      email: this.request.headers.email
     }
+
+    logger.debug('Request headers for rural payments', {
+      headers: request.headers
+    })
   }
 
   async getApimAccessToken () {
