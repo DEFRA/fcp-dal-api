@@ -34,9 +34,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     try {
       const response = await this.get(`person/${personId}/summary`)
 
-      logger.debug('Person by person ID', {
-        response: sampleResponse(response)
-      })
+      logger.debug('Person by person ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
       logger.error('Error getting person by person ID', { personId, error })
@@ -49,14 +47,10 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
     try {
       const personBusinessSummaries = await this.get(
-        // Currently requires and empty search parameter or it returns 500 error
-        // Also requires a page-size to ensure all results are retrieved
-        `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE}`
+      `organisation/person/${personId}/summary?search=` // Currently requires and empty search parameter or it returns 500 error
       )
 
-      logger.debug('Person businesses by person ID', {
-        personBusinessSummaries
-      })
+      logger.debug('Person businesses by person ID', { personBusinessSummaries })
       return personBusinessSummaries._data
     } catch (error) {
       logger.error('Error getting person businesses by person ID', {
@@ -96,16 +90,13 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
       return response.notifications
     } catch (error) {
-      logger.error(
-        'Error getting notifications by organisation ID and person ID',
-        {
-          organisationId,
-          personId,
-          page,
-          size,
-          error
-        }
-      )
+      logger.error('Error getting notifications by organisation ID and person ID', {
+        organisationId,
+        personId,
+        page,
+        size,
+        error
+      })
       throw error
     }
   }
