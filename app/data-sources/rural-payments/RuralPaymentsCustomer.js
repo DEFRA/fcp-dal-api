@@ -47,7 +47,9 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
     try {
       const personBusinessSummaries = await this.get(
-      `organisation/person/${personId}/summary?search=` // Currently requires and empty search parameter or it returns 500 error
+        // Currently requires and empty search parameter or it returns 500 error
+        // page-size param set to ensure all orgs are retrieved
+        `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE}`
       )
 
       logger.debug('Person businesses by person ID', { personBusinessSummaries })
@@ -96,7 +98,8 @@ export class RuralPaymentsCustomer extends RuralPayments {
         page,
         size,
         error
-      })
+        }
+      )
       throw error
     }
   }
