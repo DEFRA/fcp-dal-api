@@ -82,6 +82,10 @@ export class RuralPayments extends RESTDataSource {
       Authorization: `Bearer ${this.apimAccessToken}`,
       email: this.request.headers.email
     }
+
+    logger.debug('Request headers for rural payments', {
+      headers: request.headers
+    })
   }
 
   async getApimAccessToken () {
