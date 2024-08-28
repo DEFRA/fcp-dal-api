@@ -1,9 +1,8 @@
-import pick from 'lodash.pick'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
 import {
   transformNotificationsToMessages,
-  transformPersonSummaryToCustomerAuthorisedFilteredBusiness,
-  transformPersonSummaryToCustomerAuthorisedBusinesses
+  transformPersonSummaryToCustomerAuthorisedBusinesses,
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../app/transformers/rural-payments/customer.js'
 import { organisationPeopleByOrgId } from '../../../mocks/fixtures/organisation.js'
 
@@ -42,10 +41,13 @@ const mockMessages = [
     bespokeNotificationId: null
   }
 ]
-const parsedMessages = mockMessages.map(mockMessage => ({
-  ...pick(mockMessage, ['id', 'title', 'body', 'archivedAt']),
-  date: mockMessage.createdAt,
-  read: !!mockMessage.readAt
+const parsedMessages = mockMessages.map(({ id, title, body, archivedAt, createdAt, readAt }) => ({
+  id,
+  title,
+  body,
+  archivedAt,
+  date: createdAt,
+  read: !!readAt
 }))
 
 describe('Customer transformer', () => {

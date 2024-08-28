@@ -1,6 +1,6 @@
 {
   "name": "fcp-data-access-layer-api",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
@@ -26,18 +26,18 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@apollo/datasource-rest": "^6.2.2",
-    "@apollo/server": "4.9.4",
-    "@as-integrations/hapi": "2.0.1",
+    "@apollo/server": "^4.9.4",
+    "@as-integrations/hapi": "^2.0.1",
     "@azure/identity": "^4.4.1",
-    "@graphql-tools/load-files": "7.0.0",
-    "@graphql-tools/merge": "9.0.0",
-    "@graphql-tools/mock": "9.0.0",
-    "@graphql-tools/schema": "10.0.0",
+    "@graphql-tools/load-files": "^7.0.0",
+    "@graphql-tools/merge": "^9.0.0",
+    "@graphql-tools/mock": "^9.0.0",
+    "@graphql-tools/schema": "^10.0.0",
     "@graphql-tools/utils": "^10.2.0",
-    "@hapi/hapi": "21.3.2",
+    "@hapi/hapi": "^21.3.2",
     "@mocks-server/core": "^4.0.2",
-    "applicationinsights": "2.8.0",
-    "graphql": "16.8.1",
+    "applicationinsights": "^2.8.0",
+    "graphql": "^16.8.1",
     "http-status-codes": "^2.3.0",
     "https-proxy-agent": "^7.0.2",
     "jsonwebtoken": "^9.0.2",
@@ -48,16 +48,15 @@
     "winston": "^3.11.0"
   },
   "devDependencies": {
-    "@graphql-eslint/eslint-plugin": "3.20.1",
+    "@graphql-eslint/eslint-plugin": "^3.20.1",
     "dotenv": "^16.3.1",
-    "eslint": "8.52.0",
+    "eslint": "^8.52.0",
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
-    "lodash.pick": "^4.4.0",
-    "nodemon": "3.0.1",
-    "prettier": "3.0.3",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3",
     "sinon": "^17.0.1",
-    "standard": "17.1.0"
+    "standard": "^17.1.0"
   },
   "standard": {
     "globals": [
