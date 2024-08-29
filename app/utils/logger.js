@@ -95,14 +95,16 @@ const sampleArray = array => {
 }
 
 export const sampleResponse = response => {
-  const response_clone = structuredClone(response)
-  if (Array.isArray(response_clone)) {
-    return sampleArray(respresponse_cloneonse)
+  if (Array.isArray(response)) {
+    return sampleArray(response)
   }
 
-  if (Array.isArray(response_clone?._data)) {
-    response_clone._data = sampleArray(response_clone._data)
+  if (Array.isArray(response?._data)) {
+    return {
+      ...response,
+      _data: sampleArray(response._data)
+    }
   }
 
-  return response_clone
+  return response
 }
