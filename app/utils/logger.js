@@ -86,22 +86,6 @@ export const logger = winston.createLogger({
   format
 })
 
-const sampleArray = array => {
-  const sampleSize = 5
-  if (array.length <= sampleSize) {
-    return array
-  }
-  return array.slice(0, sampleSize)
-}
-
 export const sampleResponse = response => {
-  if (Array.isArray(response)) {
-    return sampleArray(response)
-  }
-
-  if (Array.isArray(response?._data)) {
-    response._data = sampleArray(response._data)
-  }
-
   return response
 }
