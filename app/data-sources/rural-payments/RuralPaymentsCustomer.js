@@ -92,12 +92,14 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
       return response.notifications
     } catch (error) {
-      logger.error('Error getting notifications by organisation ID and person ID', {
-        organisationId,
-        personId,
-        page,
-        size,
-        error
+      logger.error(
+        'Error getting notifications by organisation ID and person ID',
+        {
+          organisationId,
+          personId,
+          page,
+          size,
+          error
         }
       )
       throw error
