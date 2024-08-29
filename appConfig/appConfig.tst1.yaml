@@ -6,6 +6,8 @@
   value: "60"
 - key: ENTRA_ID_URL
   value: "https://graph.microsoft.com"
+- key: VERSION_1_PAGE_SIZE
+  value: "10000"
 
 # Secrets
 - key: API_TENANT_ID
@@ -56,4 +58,3 @@
 - key: AUTHENTICATE_DB_PASSWORD_AUDIT_WRITE
   value: "{{servicename}}-AUTHENTICATE-DB-PASSWORD-AUDIT-WRITE"
   type: "keyvault"
-

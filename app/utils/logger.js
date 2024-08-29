@@ -100,7 +100,10 @@ export const sampleResponse = response => {
   }
 
   if (Array.isArray(response?._data)) {
-    response._data = sampleArray(response._data)
+    return {
+      ...response,
+      _data: sampleArray(response._data)
+    }
   }
 
   return response
