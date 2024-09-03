@@ -7,16 +7,19 @@ import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPayme
 import { Permissions } from '../data-sources/static/permissions.js'
 import { apolloServer } from './server.js'
 
+const authenticateDatabase = new AuthenticateDatabase()
+const permissions = new Permissions()
+
 export async function context ({ request }) {
   const auth = await getAuth(request)
   return {
     auth,
     dataSources: {
-      authenticateDatabase: new AuthenticateDatabase(request),
+      authenticateDatabase,
       entraIdApi: new EntraIdApi({ cache: apolloServer.cache }),
-      permissions: new Permissions(),
-      ruralPaymentsCustomer: new RuralPaymentsCustomer(null, request),
+      permissions,
       ruralPaymentsBusiness: new RuralPaymentsBusiness(null, request),
+      ruralPaymentsCustomer: new RuralPaymentsCustomer(null, request),
       ruralPaymentsPortalApi: new RuralPaymentsPortalApi()
     }
   }
