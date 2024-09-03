@@ -51,7 +51,10 @@ export default [
             })
 
             if (!person) {
-              return notFoundResponse(res)
+              return okResponse(res, {
+                _data: [],
+                _page: pagination
+              })
             }
 
             return okResponse(res, {

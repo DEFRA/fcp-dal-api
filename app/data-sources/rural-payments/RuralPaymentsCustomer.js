@@ -22,7 +22,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
       const response = customerResponse._data.pop() || {}
       logger.debug('Customer by CRN', { response: sampleResponse(response) })
 
-      return this.getPersonByPersonId(response.id)
+      return response?.id ? this.getPersonByPersonId(response.id) : null
     } catch (error) {
       logger.error('Error getting customer by CRN', { crn, error })
       throw error

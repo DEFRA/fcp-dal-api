@@ -29,6 +29,7 @@ import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformOrganisationToBusiness
 } from '../../../app/transformers/rural-payments/business.js'
+import { NotFound } from '../../../app/errors/graphql.js'
 
 const organisationFixture = organisationByOrgId('5565448')._data
 const { totalArea, totalParcels } = parcelSummary('5565448')
@@ -101,6 +102,28 @@ describe('Query.business', () => {
       data: {
         business: transformedOrganisation
       }
+    })
+  })
+
+  it('should return NOT_FOUND if business not found', async () => {
+    const result = await graphql({
+      source: `#graphql
+        query Business {
+          business(sbi: "XXX") {
+            sbi
+            organisationId
+          }
+        }
+      `,
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: { business: null },
+      errors: [
+        new NotFound('Business not found')
+      ]
     })
   })
 })

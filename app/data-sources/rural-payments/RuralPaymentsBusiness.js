@@ -35,7 +35,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       const response = organisationResponse?._data?.pop() || {}
 
       logger.debug('Organisation by SBI', { response: sampleResponse(response) })
-      return this.getOrganisationById(response.id)
+      return response?.id ? this.getOrganisationById(response.id) : null
     } catch (error) {
       logger.error('Error getting organisation by SBI', {
         sbi,

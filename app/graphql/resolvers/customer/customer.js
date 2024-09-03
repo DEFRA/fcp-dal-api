@@ -10,13 +10,6 @@ import {
 import { logger } from '../../../utils/logger.js'
 
 export const Customer = {
-  async personId ({ crn }, __, { dataSources }) {
-    const { id: personId } =
-      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    logger.debug('Get customer id from crn', { crn, personId })
-    return personId
-  },
-
   async info ({ crn }, __, { dataSources }) {
     const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(
       crn
@@ -24,26 +17,24 @@ export const Customer = {
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business ({ crn }, { sbi }, { dataSources }) {
-    const { id: personId } =
-      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async business ({ crn, personId }, { sbi }, { dataSources }) {
+    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
+      personId,
+      sbi
+    )
 
+    logger.debug('Get customer business', { crn, personId, summary })
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       sbi,
-      await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
-        personId,
-        sbi
-      )
+      summary
     )
   },
 
-  async businesses ({ crn }, __, { dataSources }) {
-    const { id: personId } =
-      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    const summary =
-      await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
-        personId
-      )
+  async businesses ({ crn, personId }, __, { dataSources }) {
+    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
+      personId
+    )
+
     logger.debug('Get customer businesses', { crn, personId, summary })
     return transformPersonSummaryToCustomerAuthorisedBusinesses(
       { personId, crn },

@@ -5,7 +5,8 @@ import {
 } from '../../fixtures/organisation.js'
 import {
   okOrNotFoundResponse,
-  badRequestResponse
+  badRequestResponse,
+  okResponse
 } from '../../utils/requestResponse.js'
 
 export default [
@@ -46,7 +47,11 @@ export default [
             const searchPhrase = body.primarySearchPhrase
             const data = organisationBySbi(searchPhrase)
 
-            return okOrNotFoundResponse(res, data)
+            if (!data) {
+              return okResponse(res)
+            }
+
+            return okResponse(res, data)
           }
         }
       }
