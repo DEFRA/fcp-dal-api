@@ -1,3 +1,4 @@
+import { NotFound } from '../../errors/graphql.js'
 import { logger, sampleResponse } from '../../utils/logger.js'
 import { RuralPayments } from './RuralPayments.js'
 
@@ -22,7 +23,12 @@ export class RuralPaymentsCustomer extends RuralPayments {
       const response = customerResponse._data.pop() || {}
       logger.debug('Customer by CRN', { response: sampleResponse(response) })
 
-      return response?.id ? this.getPersonByPersonId(response.id) : null
+      if (!response?.id) {
+        logger.info(`Customer not found for CRN: ${crn}`)
+        throw new NotFound('Customer not found')
+      }
+
+      return this.getPersonByPersonId(response.id)
     } catch (error) {
       logger.error('Error getting customer by CRN', { crn, error })
       throw error

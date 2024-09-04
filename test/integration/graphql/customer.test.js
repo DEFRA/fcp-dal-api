@@ -2,13 +2,13 @@ import { DefaultAzureCredential } from '@azure/identity'
 import { graphql, GraphQLError } from 'graphql'
 
 import { EntraIdApi } from '../../../app/data-sources/entra-id/EntraIdApi.js'
-import { fakeContext } from '../../test-setup.js'
 import { NotFound } from '../../../app/errors/graphql.js'
-import { personById } from '../../../mocks/fixtures/person.js'
-import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments/customer.js'
 import { schema } from '../../../app/graphql/server.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../app/transformers/authenticate/question-answers.js'
+import { ruralPaymentsPortalCustomerTransformer } from '../../../app/transformers/rural-payments/customer.js'
+import { personById } from '../../../mocks/fixtures/person.js'
 import mockServer from '../../../mocks/server'
+import { fakeContext } from '../../test-setup.js'
 
 const personFixture = personById({ id: '5007136' })
 
@@ -484,7 +484,9 @@ describe('Query.customer.businesses.messages', () => {
 
     expect(result).toEqual({
       data: {
-        customer: null
+        customer: {
+          businesses: null
+        }
       },
       errors: [
         new NotFound('Customer not found')
