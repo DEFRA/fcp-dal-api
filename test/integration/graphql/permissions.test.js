@@ -236,6 +236,11 @@ describe('Query.permissionGroups', () => {
             name: 'Environmental Land Management (Applications)',
             permissions: [
               {
+                functions: [],
+                level: 'NO_ACCESS',
+                active: false
+              },
+              {
                 functions: [
                   'View Environmental Land Management scheme eligibility',
                   'View Environmental Land Management applications',
