@@ -1,8 +1,8 @@
 import {
-  graphql,
-  getIntrospectionQuery,
   buildSchema,
-  findBreakingChanges
+  findBreakingChanges,
+  getIntrospectionQuery,
+  graphql
 } from 'graphql'
 
 describe('schema', () => {
@@ -116,6 +116,11 @@ describe('schema', () => {
 
             """The businesses associated with the customer."""
             businesses: [CustomerBusiness]
+
+            """
+            The single business filtered by sbi associated with the customer.
+            """
+            business(sbi: ID!): CustomerBusiness
           }
 
           """Represents a business owned by a customer."""
