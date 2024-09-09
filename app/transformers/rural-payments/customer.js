@@ -124,19 +124,30 @@ export function transformNotificationsToMessages (
 }
 
 export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (
-  sbi,
+  properties,
   summary
 ) {
   const filteredBusinessForCustomer = summary.find(
-    person => `${person.sbi}` === `${sbi}`
+    person => `${person.sbi}` === `${properties.sbi}`
   )
   if (!filteredBusinessForCustomer) {
     return null
   }
+  logger.verbose(
+    'Transforming person summary to customer authorised business',
+    {
+      original: { properties, summary },
+      transformed: {
+        organisationId: filteredBusinessForCustomer.id,
+        name: filteredBusinessForCustomer.name,
+        ...properties
+      }
+    }
+  )
 
   return {
     organisationId: filteredBusinessForCustomer.id,
     name: filteredBusinessForCustomer.name,
-    sbi
+    ...properties
   }
 }
