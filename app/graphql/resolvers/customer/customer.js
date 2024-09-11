@@ -25,6 +25,8 @@ export const Customer = {
   },
 
   async business ({ crn }, { sbi }, { dataSources }) {
+    logger.verbose('Get customer business', { crn, sbi })
+
     const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
@@ -32,9 +34,9 @@ export const Customer = {
       sbi
     )
 
-    logger.debug('Get customer business', { crn, personId, summary })
+    logger.verbose('Got customer business', { crn, sbi, personId, summary })
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
-      sbi,
+      { personId, crn, sbi },
       summary
     )
   },

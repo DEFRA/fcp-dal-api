@@ -148,7 +148,7 @@ type Customer {
   """
   The single business filtered by sbi associated with the customer.
   """
-  business(sbi: ID!): CustomerBusiness
+  business(sbi: ID!): CustomerBusiness @on
 }
 
 """
