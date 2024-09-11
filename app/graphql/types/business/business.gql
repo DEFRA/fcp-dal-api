@@ -174,4 +174,9 @@ type Business {
   The customers associated with the business.
   """
   customers: [BusinessCustomer] @on
+
+  """
+  The customers associated with the business.
+  """
+  customer(crn: ID!): BusinessCustomer @on
 }

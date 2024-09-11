@@ -48,7 +48,7 @@ export const Customer = {
       personId
     )
 
-    logger.debug('Get customer businesses', { crn, personId, summary })
+    logger.debug('Got customer businesses', { crn, personId, summary })
     return transformPersonSummaryToCustomerAuthorisedBusinesses(
       { personId, crn },
       summary

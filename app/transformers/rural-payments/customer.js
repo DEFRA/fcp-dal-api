@@ -134,7 +134,7 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (
     return null
   }
   logger.verbose(
-    'Transforming person summary to customer authorised business',
+    'Transforming person summary to customer authorised filtered business',
     {
       original: { properties, summary },
       transformed: {
