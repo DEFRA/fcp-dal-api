@@ -23,23 +23,35 @@ export const Business = {
 
   async customers ({ organisationId }, _, { dataSources }) {
     logger.verbose('Get business customers', { organisationId })
-    const customers = await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
-      organisationId
-    )
-    logger.debug('Got business customers', { organisationId, customers: sampleResponse(customers) })
+    const customers =
+      await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
+        organisationId
+      )
+    logger.debug('Got business customers', {
+      organisationId,
+      customers: sampleResponse(customers)
+    })
     return transformOrganisationCustomers(customers)
   },
 
   async customer ({ organisationId, sbi }, { crn }, { dataSources }) {
     logger.verbose('Get business customer', { crn, organisationId, sbi })
 
-    const customers = await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
-      organisationId
+    const customers =
+      await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
+        organisationId
+      )
+
+    const customer = customers.find(
+      ({ customerReference }) => customerReference === crn
     )
 
-    const customer = customers.find(customer => customer.customerReference === crn)
-
-    logger.debug('Got business customer', { crn, sbi, organisationId, customer })
+    logger.debug('Got business customer', {
+      crn,
+      sbi,
+      organisationId,
+      customer
+    })
     return transformOrganisationCustomer(customer)
   },
 
