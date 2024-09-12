@@ -1,3 +1,4 @@
+import { NotFound } from '../../../errors/graphql.js'
 import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
 import {
@@ -45,6 +46,11 @@ export const Business = {
     const customer = customers.find(
       ({ customerReference }) => customerReference === crn
     )
+
+    if (!customer) {
+      logger.warn('Could not find customer in business', { crn, organisationId, sbi })
+      throw new NotFound('Customer not found')
+    }
 
     logger.debug('Got business customer', {
       crn,
