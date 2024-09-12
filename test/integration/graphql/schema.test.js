@@ -85,7 +85,7 @@ describe('schema', () => {
             customers: [BusinessCustomer]
 
             """
-            The customers associated with the business.
+            The customer associated with the business.
             """
             customer(crn: ID!): BusinessCustomer
           }
@@ -442,7 +442,7 @@ describe('schema', () => {
             customers: [BusinessCustomer]
 
             """
-            The customers associated with the business.
+            The customer associated with the business.
             """
             customer(crn: ID!): BusinessCustomer
           }
