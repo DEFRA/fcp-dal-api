@@ -46,7 +46,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async getOrganisationCustomersByOrganisationId (organisationId) {
-    logger.debug('Getting organisation customers by organisation ID', {
+    logger.verbose('Getting organisation customers by organisation ID', {
       organisationId
     })
 

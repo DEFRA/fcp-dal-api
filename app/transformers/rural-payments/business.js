@@ -1,17 +1,15 @@
 export const transformOrganisationCustomers = data => {
-  const transformed = data.map(
-    ({ id, firstName, lastName, customerReference, role, privileges }) => ({
-      personId: id,
-      firstName,
-      lastName,
-      crn: customerReference,
-      role,
-      privileges
-    })
-  )
-
-  return transformed
+  return data.map(transformOrganisationCustomer)
 }
+
+export const transformOrganisationCustomer = ({ id, firstName, lastName, customerReference, role, privileges }) => ({
+  personId: id,
+  firstName,
+  lastName,
+  crn: customerReference,
+  role,
+  privileges
+})
 
 export function transformBusinessCustomerPrivilegesToPermissionGroups (
   privileges,

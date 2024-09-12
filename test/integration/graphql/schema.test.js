@@ -83,6 +83,11 @@ describe('schema', () => {
 
             """The customers associated with the business."""
             customers: [BusinessCustomer]
+
+            """
+            The customer associated with the business.
+            """
+            customer(crn: ID!): BusinessCustomer
           }
 
           """Represents the security questions of a customer."""
@@ -435,6 +440,11 @@ describe('schema', () => {
 
             """The customers associated with the business."""
             customers: [BusinessCustomer]
+
+            """
+            The customer associated with the business.
+            """
+            customer(crn: ID!): BusinessCustomer
           }
 
           """Represents a coordinate with x and y values."""

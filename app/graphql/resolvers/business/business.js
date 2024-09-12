@@ -1,9 +1,12 @@
+import { NotFound } from '../../../errors/graphql.js'
+import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
 import {
-  transformOrganisationCustomers,
-  transformBusinessCustomerPrivilegesToPermissionGroups
+  transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformOrganisationCustomer,
+  transformOrganisationCustomers
 } from '../../../transformers/rural-payments/business.js'
-import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
+import { logger, sampleResponse } from '../../../utils/logger.js'
 
 export const Business = {
   land ({ organisationId }) {
@@ -20,11 +23,42 @@ export const Business = {
   },
 
   async customers ({ organisationId }, _, { dataSources }) {
-    return transformOrganisationCustomers(
+    logger.verbose('Get business customers', { organisationId })
+    const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
       )
+    logger.debug('Got business customers', {
+      organisationId,
+      customers: sampleResponse(customers)
+    })
+    return transformOrganisationCustomers(customers)
+  },
+
+  async customer ({ organisationId, sbi }, { crn }, { dataSources }) {
+    logger.verbose('Get business customer', { crn, organisationId, sbi })
+
+    const customers =
+      await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
+        organisationId
+      )
+
+    const customer = customers.find(
+      ({ customerReference }) => customerReference === crn
     )
+
+    if (!customer) {
+      logger.warn('Could not find customer in business', { crn, organisationId, sbi })
+      throw new NotFound('Customer not found')
+    }
+
+    logger.debug('Got business customer', {
+      crn,
+      sbi,
+      organisationId,
+      customer
+    })
+    return transformOrganisationCustomer(customer)
   },
 
   async applications ({ organisationId }, __, { dataSources }) {
