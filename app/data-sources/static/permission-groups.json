@@ -56,6 +56,11 @@
     "name": "Business details",
     "permissions": [
       {
+        "level": "NO_ACCESS",
+        "functions": [],
+        "privilegeNames": []
+      },
+      {
         "level": "VIEW",
         "functions": [
           "View business details",

@@ -332,14 +332,7 @@ describe('Query.customer.businesses', () => {
                 { id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS', level: 'SUBMIT' },
                 { id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS', level: 'SUBMIT' },
                 { id: 'ENTITLEMENTS', level: 'AMEND' },
-                {
-                  id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
-                  level: 'AMEND'
-                },
-                {
-                  id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
-                  level: 'SUBMIT'
-                },
+                { id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS', level: 'SUBMIT' },
                 { id: 'LAND_DETAILS', level: 'AMEND' }
               ]
             }

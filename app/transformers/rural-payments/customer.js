@@ -21,24 +21,29 @@ export function transformBusinessCustomerToCustomerPermissionGroups (
     ({ customerReference }) => customerReference === crn
   )
 
-  const customerPermissionGroups = []
+  const customerPrivileges = customer?.privileges?.map((privilege) =>
+    privilege.toLowerCase()
+  )
 
-  for (const permissionGroup of permissionGroups) {
-    for (const permission of permissionGroup.permissions) {
-      if (
-        permission.privilegeNames.some(privilegeName =>
-          customer.privileges.includes(privilegeName)
-        )
-      ) {
-        customerPermissionGroups.push({
-          id: permissionGroup.id,
-          level: permission.level
-        })
-      }
-    }
+  if (!customerPrivileges) {
+    return permissionGroups.map(({ id, permissions }) => ({
+      id,
+      level: permissions[0].level
+    }))
   }
 
-  return customerPermissionGroups
+  return permissionGroups.map(({ id, permissions }) => ({
+    id,
+    level: permissions.reduce(
+      (level, permission) =>
+        permission.privilegeNames.some((privilegeName) =>
+          customerPrivileges.includes(privilegeName.toLowerCase())
+        )
+          ? permission.level
+          : level,
+      permissions[0].level
+    )
+  }))
 }
 
 export function transformPersonSummaryToCustomerAuthorisedBusinesses (
@@ -62,7 +67,7 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses (
   return transformed
 }
 
-export const ruralPaymentsPortalCustomerTransformer = data => {
+export const ruralPaymentsPortalCustomerTransformer = (data) => {
   return {
     name: {
       title: data.title,
@@ -113,7 +118,7 @@ export function transformNotificationsToMessages (
     .filter(({ archivedAt }) =>
       showOnlyDeleted ? archivedAt !== null : archivedAt === null
     )
-    .map(message => ({
+    .map((message) => ({
       id: message.id,
       title: message.title,
       date: message.createdAt,

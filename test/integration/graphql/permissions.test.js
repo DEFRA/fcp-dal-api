@@ -34,39 +34,35 @@ describe('Query.permissionGroups', () => {
             id: 'BASIC_PAYMENT_SCHEME',
             name: 'Basic payment scheme (BPS)',
             permissions: [
+              { active: false, functions: [], level: 'NO_ACCESS' },
               {
-                functions: [],
-                level: 'NO_ACCESS',
-                active: false
-              },
-              {
+                active: false,
                 functions: [
                   'View business summary',
                   'View claims',
                   'View land, features and covers'
                 ],
-                level: 'VIEW',
-                active: false
+                level: 'VIEW'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in View BPS',
                   'Create and edit a claim',
                   'Amend a previously submitted claim',
                   'Amend land, features and covers'
                 ],
-                level: 'AMEND',
-                active: false
+                level: 'AMEND'
               },
               {
+                active: true,
                 functions: [
                   'All permissions in Amend BPS',
                   'Submit a claim',
                   'Withdraw a claim',
                   'Receive warnings and notifications'
                 ],
-                level: 'SUBMIT',
-                active: true
+                level: 'SUBMIT'
               }
             ]
           },
@@ -74,23 +70,25 @@ describe('Query.permissionGroups', () => {
             id: 'BUSINESS_DETAILS',
             name: 'Business details',
             permissions: [
+              { active: false, functions: [], level: 'NO_ACCESS' },
               {
+                active: false,
                 functions: [
                   'View business details',
                   'View people associated with the business'
                 ],
-                level: 'VIEW',
-                active: false
+                level: 'VIEW'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in View Business Details',
                   'Amend business and correspondence contact details'
                 ],
-                level: 'AMEND',
-                active: false
+                level: 'AMEND'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in Amend Business Details',
                   'Amend controlled information, such as business name',
@@ -98,17 +96,16 @@ describe('Query.permissionGroups', () => {
                   'Amend bank account details',
                   'Make young/new farmer declaration'
                 ],
-                level: 'MAKE_LEGAL_CHANGES',
-                active: false
+                level: 'MAKE_LEGAL_CHANGES'
               },
               {
+                active: true,
                 functions: [
                   'All permissions in Make Legal Changes Business Details',
                   'Add someone to the business',
                   'Give permissions on business'
                 ],
-                level: 'FULL_PERMISSION',
-                active: true
+                level: 'FULL_PERMISSION'
               }
             ]
           },
@@ -116,12 +113,9 @@ describe('Query.permissionGroups', () => {
             id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS',
             name: 'Countryside Stewardship (Agreements)',
             permissions: [
+              { active: false, functions: [], level: 'NO_ACCESS' },
               {
-                functions: [],
-                level: 'NO_ACCESS',
-                active: false
-              },
-              {
+                active: false,
                 functions: [
                   'View CS Agreements',
                   'View Land, Features and Cover',
@@ -129,10 +123,10 @@ describe('Query.permissionGroups', () => {
                   'View CS agreement Transfers',
                   'View CS Claims'
                 ],
-                level: 'VIEW',
-                active: false
+                level: 'VIEW'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in View CS Agreements',
                   'Amend land, Features and Covers',
@@ -143,10 +137,10 @@ describe('Query.permissionGroups', () => {
                   'Create and Edit a CS agreement transfer',
                   'Revise a previously submitted agreement transfer'
                 ],
-                level: 'AMEND',
-                active: false
+                level: 'AMEND'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in Amend CS agreements',
                   'Submit Acceptance of CS Agreement offer',
@@ -159,8 +153,7 @@ describe('Query.permissionGroups', () => {
                   'Withdraw a CS agreement transfer',
                   'Receive warnings and notifications'
                 ],
-                level: 'SUBMIT',
-                active: false
+                level: 'SUBMIT'
               }
             ]
           },
@@ -168,22 +161,19 @@ describe('Query.permissionGroups', () => {
             id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS',
             name: 'Countryside Stewardship (Applications)',
             permissions: [
+              { active: false, functions: [], level: 'NO_ACCESS' },
               {
-                functions: [],
-                level: 'NO_ACCESS',
-                active: false
-              },
-              {
+                active: false,
                 functions: [
                   'View CS Scheme eligibility',
                   'View Applications',
                   'View land, features and covers',
                   'View CS agreement offer'
                 ],
-                level: 'VIEW',
-                active: false
+                level: 'VIEW'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in View CS Applications',
                   'View draft CS Agreements',
@@ -191,18 +181,17 @@ describe('Query.permissionGroups', () => {
                   'Amend a previously submitted CS application',
                   'Amend Land, Features and Covers'
                 ],
-                level: 'AMEND',
-                active: false
+                level: 'AMEND'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in Amend CS permissions',
                   'Submit CS Application',
                   'Withdraw CS application',
                   'Receive warnings and notifications'
                 ],
-                level: 'SUBMIT',
-                active: false
+                level: 'SUBMIT'
               }
             ]
           },
@@ -210,24 +199,20 @@ describe('Query.permissionGroups', () => {
             id: 'ENTITLEMENTS',
             name: 'Entitlements',
             permissions: [
+              { active: false, functions: [], level: 'NO_ACCESS' },
               {
-                functions: [],
-                level: 'NO_ACCESS',
-                active: false
-              },
-              {
+                active: false,
                 functions: ['View entitlements'],
-                level: 'VIEW',
-                active: false
+                level: 'VIEW'
               },
               {
+                active: true,
                 functions: [
                   'View entitlements',
                   'Transfer entitlements',
                   'Apply for new entitlements'
                 ],
-                level: 'AMEND',
-                active: true
+                level: 'AMEND'
               }
             ]
           },
@@ -235,22 +220,19 @@ describe('Query.permissionGroups', () => {
             id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
             name: 'Environmental Land Management (Applications)',
             permissions: [
+              { active: false, functions: [], level: 'NO_ACCESS' },
               {
-                functions: [],
-                level: 'NO_ACCESS',
-                active: false
-              },
-              {
+                active: false,
                 functions: [
                   'View Environmental Land Management scheme eligibility',
                   'View Environmental Land Management applications',
                   'View land, features and covers',
                   'View Environmental Land Management agreement offer'
                 ],
-                level: 'VIEW',
-                active: false
+                level: 'VIEW'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in View Environmental Land Management',
                   'View Environmental Land Management agreements',
@@ -258,10 +240,10 @@ describe('Query.permissionGroups', () => {
                   'Amend (but not resubmit) a previously submitted Environmental Land Management application',
                   'Amend land, features and covers'
                 ],
-                level: 'AMEND',
-                active: false
+                level: 'AMEND'
               },
               {
+                active: false,
                 functions: [
                   'All permissions in Amend Environmental Land Management',
                   'Submit Environmental Land Management application',
@@ -270,8 +252,7 @@ describe('Query.permissionGroups', () => {
                   'Submit rejection of Environmental Land Management agreement offer',
                   'Receive all application correspondence including all warnings and notifications'
                 ],
-                level: 'SUBMIT',
-                active: false
+                level: 'SUBMIT'
               }
             ]
           },
@@ -279,24 +260,20 @@ describe('Query.permissionGroups', () => {
             id: 'LAND_DETAILS',
             name: 'Land details',
             permissions: [
+              { active: false, functions: [], level: 'NO_ACCESS' },
               {
-                functions: [],
-                level: 'NO_ACCESS',
-                active: false
-              },
-              {
+                active: false,
                 functions: ['View land, features and covers'],
-                level: 'VIEW',
-                active: false
+                level: 'VIEW'
               },
               {
+                active: true,
                 functions: [
                   'View land, features and covers',
                   'Amend land, features and covers',
                   'Transfer land'
                 ],
-                level: 'AMEND',
-                active: true
+                level: 'AMEND'
               }
             ]
           }

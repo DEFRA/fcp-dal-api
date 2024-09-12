@@ -235,7 +235,10 @@ describe('CustomerBusiness', () => {
     expect(response).toEqual([
       { id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' },
       { id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' },
+      { id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS', level: 'NO_ACCESS' },
+      { id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS', level: 'NO_ACCESS' },
       { id: 'ENTITLEMENTS', level: 'AMEND' },
+      { id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS', level: 'NO_ACCESS' },
       { id: 'LAND_DETAILS', level: 'AMEND' }
     ])
   })
@@ -316,7 +319,10 @@ describe('CustomerBusinessPermissionGroup', () => {
     expect(response).toEqual([
       { id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' },
       { id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' },
+      { id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS', level: 'NO_ACCESS' },
+      { id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS', level: 'NO_ACCESS' },
       { id: 'ENTITLEMENTS', level: 'AMEND' },
+      { id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS', level: 'NO_ACCESS' },
       { id: 'LAND_DETAILS', level: 'AMEND' }
     ])
   })
