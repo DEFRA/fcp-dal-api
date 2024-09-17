@@ -2,6 +2,10 @@ import { graphql } from 'graphql'
 
 import { schema } from '../../../app/graphql/server.js'
 import { fakeContext } from '../../test-setup.js'
+import mockServer from '../../../mocks/server'
+
+beforeAll(mockServer.start)
+afterAll(mockServer.stop)
 
 describe('Query.permissionGroups', () => {
   it('should return permissions', async () => {

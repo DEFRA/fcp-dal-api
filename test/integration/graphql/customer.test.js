@@ -12,6 +12,9 @@ import { fakeContext } from '../../test-setup.js'
 
 const personFixture = personById({ id: '5007136' })
 
+beforeAll(mockServer.start)
+afterAll(mockServer.stop)
+
 describe('Query.customer', () => {
   it('should return customer data', async () => {
     const customerInfo = ruralPaymentsPortalCustomerTransformer(

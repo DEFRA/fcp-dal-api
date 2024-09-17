@@ -1,6 +1,10 @@
 import { graphql } from 'graphql/index.js'
 import { schema } from '../../../app/graphql/server.js'
 import { fakeContext } from '../../test-setup.js'
+import mockServer from '../../../mocks/server'
+
+beforeAll(mockServer.start)
+afterAll(mockServer.stop)
 
 describe('Query business.applications', () => {
   it('should return application data', async () => {

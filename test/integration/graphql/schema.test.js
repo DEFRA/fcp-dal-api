@@ -4,6 +4,10 @@ import {
   getIntrospectionQuery,
   graphql
 } from 'graphql'
+import mockServer from '../../../mocks/server'
+
+beforeAll(mockServer.start)
+afterAll(mockServer.stop)
 
 describe('schema', () => {
   beforeEach(() => {

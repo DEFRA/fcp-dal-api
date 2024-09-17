@@ -5,11 +5,6 @@ import { apolloServer } from './graphql/server.js'
 import { server } from './server.js'
 import { logger } from './utils/logger.js'
 
-let mockServer
-if (process.env.ENABLE_MOCK_SERVER) {
-  mockServer = await import('../mocks/server.js')
-}
-
 const init = async () => {
   await apolloServer.start()
 
@@ -24,11 +19,6 @@ const init = async () => {
 
   await server.start()
   logger.info(`Server running on ${server.info.uri}`)
-
-  if (process.env.ENABLE_MOCK_SERVER && mockServer) {
-    const url = await mockServer.default.start()
-    logger.info(`Mock server running ${url}`)
-  }
 }
 
 process.on('unhandledRejection', err => {

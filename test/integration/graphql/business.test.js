@@ -30,11 +30,15 @@ import {
   transformOrganisationToBusiness
 } from '../../../app/transformers/rural-payments/business.js'
 import { NotFound } from '../../../app/errors/graphql.js'
+import mockServer from '../../../mocks/server'
 
 const organisationFixture = organisationByOrgId('5565448')._data
 const { totalArea, totalParcels } = parcelSummary('5565448')
 const organisationCPHInfoFixture = organisationCPHInfo('5565448').data
 const organisationCPHFixture = organisationCPH('5565448').data
+
+beforeAll(mockServer.start)
+afterAll(mockServer.stop)
 
 describe('Query.business', () => {
   it('should return business data', async () => {

@@ -19,8 +19,6 @@ const release1Routes = [
   'rural-payments-organisation-get-by-sbi:default',
   'rural-payments-organisation-get-people-by-org-id:default',
 
-  'rural-payments-organisation-get-person-summary-by-person-id:default',
-
   'rural-payments-lms-get-covers-summary:default',
   'rural-payments-lms-get-land-covers:default',
   'rural-payments-lms-get-parcels:default',

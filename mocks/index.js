@@ -1,3 +1,4 @@
 import server from './server.js'
 
-server.start()
+const url = await server.start()
+console.log(`Mock server running ${url}`)
