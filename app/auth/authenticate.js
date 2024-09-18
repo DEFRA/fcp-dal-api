@@ -1,11 +1,12 @@
+import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
+import { defaultFieldResolver } from 'graphql'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
-import { defaultFieldResolver } from 'graphql'
-import { MapperKind, getDirective, mapSchema } from '@graphql-tools/utils'
+import { FCP_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 
-import { logger } from '../utils/logger.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { AuthRole } from '../graphql/resolvers/authenticate.js'
+import { logger } from '../logger/logger.js'
 
 export async function getJwtPublicKey (kid) {
   const client = jwksClient({
@@ -25,9 +26,11 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
     const decodedToken = jwt.decode(token, { complete: true })
     const header = decodedToken.header
     const signingKey = await getJwtPublicKeyFunc(header.kid)
-    return jwt.verify(token, signingKey)
+    const verified = jwt.verify(token, signingKey)
+    logger.health('#authenticate - JWT verified', { code: FCP_REQUEST_AUTHENTICATION_001 })
+    return verified
   } catch (error) {
-    logger.error('#authenticate - Error verifying jwt', { error })
+    logger.error('#authenticate - Error verifying jwt', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
     return {}
   }
 }

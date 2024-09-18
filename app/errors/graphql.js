@@ -12,5 +12,6 @@ export class NotFound extends GraphQLError {
   constructor (opts) {
     super(opts)
     this.extensions = { code: StatusCodes.NOT_FOUND, http: { status: StatusCodes.NOT_FOUND } }
+    this.code = StatusCodes.NOT_FOUND
   }
 }

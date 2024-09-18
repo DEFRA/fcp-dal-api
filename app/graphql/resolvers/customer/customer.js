@@ -1,19 +1,20 @@
+import { logger } from '../../../logger/logger.js'
+import { sampleResponse } from '../../../logger/utils.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../transformers/authenticate/question-answers.js'
 import {
-  ruralPaymentsPortalCustomerTransformer,
-  transformBusinessCustomerToCustomerPermissionGroups,
-  transformBusinessCustomerToCustomerRole,
-  transformNotificationsToMessages,
-  transformPersonSummaryToCustomerAuthorisedBusinesses,
-  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
+    ruralPaymentsPortalCustomerTransformer,
+    transformBusinessCustomerToCustomerPermissionGroups,
+    transformBusinessCustomerToCustomerRole,
+    transformNotificationsToMessages,
+    transformPersonSummaryToCustomerAuthorisedBusinesses,
+    transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments/customer.js'
-import { logger } from '../../../utils/logger.js'
 
 export const Customer = {
   async personId ({ crn }, __, { dataSources }) {
     const { id: personId } =
       await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    logger.debug('Get customer id from crn', { crn, personId })
+    logger.verbose('Get customer id from crn', { crn, personId })
     return personId
   },
 
@@ -34,7 +35,7 @@ export const Customer = {
       sbi
     )
 
-    logger.verbose('Got customer business', { crn, sbi, personId, summary })
+    logger.debug('Got customer business', { crn, personId, summary: sampleResponse(summary) })
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       { personId, crn, sbi },
       summary
@@ -48,7 +49,7 @@ export const Customer = {
       personId
     )
 
-    logger.debug('Got customer businesses', { crn, personId, summary })
+    logger.debug('Got customer businesses', { crn, personId, summary: sampleResponse(summary) })
     return transformPersonSummaryToCustomerAuthorisedBusinesses(
       { personId, crn },
       summary
@@ -76,7 +77,7 @@ export const Customer = {
 
 export const CustomerBusiness = {
   async role ({ organisationId, crn }, __, { dataSources }) {
-    logger.debug('Get customer business role', { crn, organisationId })
+    logger.verbose('Get customer business role', { crn, organisationId })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId

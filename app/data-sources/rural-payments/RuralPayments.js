@@ -1,8 +1,10 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
-import { StatusCodes } from 'http-status-codes'
+import { GraphQLError } from 'graphql'
+import StatusCodes from 'http-status-codes'
 import fetch from 'node-fetch'
 import qs from 'qs'
-import { logger } from '../../utils/logger.js'
+import { APIM_REQUEST_ACCESS_TOKEN_001, APIM_REQUEST_RURAL_PAYMENTS_REQUEST_001, RURALPAYMENTS_REQUEST_ALL_001 } from '../../logger/codes.js'
+import { logger } from '../../logger/logger.js'
 
 const defaultHeaders = {
   'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY
@@ -20,33 +22,56 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async fetch (path, incomingRequest) {
-    logger.debug('#RuralPayments - new request', {
+    logger.verbose('#RuralPayments - new request', {
       path,
       method: incomingRequest.method
     })
 
     const doRequest = async (count = 1) => {
       try {
+        const requestStart = Date.now()
         const result = await super.fetch(path, incomingRequest)
-        logger.debug('#RuralPayments - response ', {
+        const requestEnd = (Date.now() - requestStart)
+        logger.verbose('#RuralPayments - response ', {
           path,
-          status: result.response?.status,
-          body: result.response?.parsedBody
+          status: result.response?.status
+        })
+        logger.health('#RuralPayments - request success', {
+          code: RURALPAYMENTS_REQUEST_ALL_001,
+          requestTimeMs: requestEnd
+        })
+        logger.health('#APIM - request success', {
+          code: APIM_REQUEST_RURAL_PAYMENTS_REQUEST_001
         })
         return result
       } catch (error) {
         // Handle occasionally 500 error produced by APIM
-        // TODO: Once APIM has been fixed remove retry logic
+        // TODO: Once APIM has been fixed, remove retry logic
         if (error?.extensions?.response?.status === StatusCodes.INTERNAL_SERVER_ERROR && count < maximumRetries) {
-          logger.error(`#RuralPayments - Error, Retrying request (${count})`, {
+          logger.warn(`#RuralPayments - Error, Retrying request (${count})`, { error })
+          return doRequest(count + 1)
+        }
+        // if response is text, then the error is from RoralPayments
+        if (error?.extensions?.response?.headers?.get('Content-Type')?.includes('text/html')) {
+          logger.error('#RuralPayments - error', {
+            error,
             path,
             method: incomingRequest.method,
             count,
-            error
+            response: error?.extensions?.response,
+            code: RURALPAYMENTS_REQUEST_ALL_001
           })
-          return doRequest(count + 1)
+        } else {
+        // if response is json, then the error is from APIM
+          logger.error('#APIM - error', {
+            error,
+            path,
+            method: incomingRequest.method,
+            count,
+            response: error?.extensions?.response,
+            code: APIM_REQUEST_RURAL_PAYMENTS_REQUEST_001
+          })
         }
-        logger.error('#RuralPayments - Error fetching data', { error })
         throw error
       }
     }
@@ -59,19 +84,17 @@ export class RuralPayments extends RESTDataSource {
     if (response.ok) {
       return
     }
-    logger.error('#RuralPayments - error', {
-      status: response?.status,
-      url: response?.url,
-      error: response?.error
+
+    throw new GraphQLError(`${options.response.status}: ${options.response.statusText}`, {
+      extensions: options
     })
-    throw await this.errorFromResponse(options)
   }
 
   async willSendRequest (_path, request) {
     if (!this.apimAccessToken) {
-      logger.debug('Getting APIM access token')
+      logger.verbose('Getting APIM access token')
       await this.getApimAccessToken()
-      logger.debug('APIM access token', {
+      logger.verbose('APIM access token', {
         apimAccessToken: this.apimAccessToken
       })
     }
@@ -105,7 +128,7 @@ export class RuralPayments extends RESTDataSource {
     }
 
     try {
-      logger.debug(
+      logger.verbose(
         `Token request url: ${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`
       )
       const response = await fetch(
@@ -123,9 +146,10 @@ export class RuralPayments extends RESTDataSource {
         throw new Error('No access token returned')
       }
 
+      logger.health('Successfully got APIM access token', { code: APIM_REQUEST_ACCESS_TOKEN_001 })
       this.apimAccessToken = data.access_token
     } catch (error) {
-      logger.error('Error getting APIM access token', { error })
+      logger.error('Error getting APIM access token', { error, code: APIM_REQUEST_ACCESS_TOKEN_001 })
       throw error
     }
   }

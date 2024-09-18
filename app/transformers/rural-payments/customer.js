@@ -1,4 +1,5 @@
-import { logger } from '../../utils/logger.js'
+import { logger } from '../../logger/logger.js'
+import { sampleResponse } from '../../logger/utils.js'
 
 export function transformBusinessCustomerToCustomerRole (crn, customers) {
   const customer = customers.find(
@@ -62,7 +63,7 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses (
 
   logger.debug(
     'Transforming person summary to customer authorised businesses',
-    { original: { properties, summary }, transformed }
+    { original: { properties, summary: sampleResponse(summary) }, transformed: sampleResponse(transformed) }
   )
   return transformed
 }

@@ -1,6 +1,6 @@
-import { transformOrganisationToBusiness } from '../../../transformers/rural-payments/business.js'
 import { NotFound } from '../../../errors/graphql.js'
-import { logger } from '../../../utils/logger.js'
+import { logger } from '../../../logger/logger.js'
+import { transformOrganisationToBusiness } from '../../../transformers/rural-payments/business.js'
 
 export const Query = {
   async business (__, { sbi }, { dataSources }) {
