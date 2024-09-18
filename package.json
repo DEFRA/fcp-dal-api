@@ -20,7 +20,9 @@
     "test:contract": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/contract  --setupFiles dotenv/config",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --coverage --setupFiles dotenv/config"
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --coverage --setupFiles dotenv/config",
+    "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=main --coverage --onlyChanged --setupFiles dotenv/config"
+
   },
   "author": "Defra",
   "contributors": [],
