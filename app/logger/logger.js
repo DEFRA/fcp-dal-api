@@ -28,9 +28,12 @@ const levels = {
 const transportTypes = []
 // If AppInsights is enabled, send logs to it
 if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
+  const queryString = process.env.APPINSIGHTS_CONNECTIONSTRING.replaceAll(";", "&");
+  const query = new URLSearchParams(queryString);
+  const output = Object.fromEntries(query);
   transportTypes.push(
     new AzureApplicationInsightsLogger({
-      key: process.env.APPINSIGHTS_CONNECTIONSTRING,
+      key: output.InstrumentationKey,
       format: format.combine(stackTraceFormatter, format.json())
     })
   )
