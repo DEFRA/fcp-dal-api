@@ -60,3 +60,9 @@
 - key: AUTHENTICATE_DB_PASSWORD_AUDIT_WRITE
   value: "{{servicename}}-AUTHENTICATE-DB-PASSWORD-AUDIT-WRITE"
   type: "keyvault"
+- key: RP_INTERNAL_HEALTH_CHECK_ORGANISATION_ID
+  value: "{{servicename}}-RP-INTERNAL-HEALTH-CHECK-ORGANISATION-ID"
+  type: "keyvault"
+- key: ENTRA_HEALTH_CHECK_USER_OBJECT_ID
+  value: "{{servicename}}-ENTRA-HEALTH-CHECK-USER-OBJECT-ID"
+  type: "keyvault"
