@@ -1,7 +1,5 @@
-import { createLogger, format, transports } from 'winston'
-import { AzureApplicationInsightsLogger } from 'winston-azure-application-insights'
+import { addColors, createLogger, format, transports } from 'winston'
 import { jsonStringify } from './utils.js'
-
 import { stackTraceFormatter } from './winstonFormatters.js'
 
 const levels = {
@@ -15,7 +13,7 @@ const levels = {
     silly: 7
   },
   colors: {
-    health: 'lightblue',
+    health: 'white',
     error: 'red',
     warn: 'yellow',
     info: 'green',
@@ -24,16 +22,13 @@ const levels = {
     silly: 'magenta'
   }
 }
+addColors(levels.colors)
 
 const transportTypes = []
-// If AppInsights is enabled, send logs to it
+// If AppInsights is enabled, means we are running in Azure, format logs for AppInsights
 if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
-  const queryString = process.env.APPINSIGHTS_CONNECTIONSTRING.replaceAll(";", "&");
-  const query = new URLSearchParams(queryString);
-  const output = Object.fromEntries(query);
   transportTypes.push(
-    new AzureApplicationInsightsLogger({
-      key: output.InstrumentationKey,
+    new transports.Console({
       format: format.combine(stackTraceFormatter, format.json())
     })
   )
