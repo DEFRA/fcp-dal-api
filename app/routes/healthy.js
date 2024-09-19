@@ -2,6 +2,8 @@ import { StatusCodes } from 'http-status-codes'
 import { AuthenticateDatabase } from '../../app/data-sources/authenticate/AuthenticateDatabase.js'
 import { EntraIdApi } from '../../app/data-sources/entra-id/EntraIdApi.js'
 import { RuralPaymentsBusiness } from '../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
+import { FCP_UNHANDLED_ERROR_001 } from '../logger/codes.js'
+import { logger } from '../logger/logger.js'
 
 const authenticateDatabaseHealthCheck = () => {
   const authenticateDatabase = new AuthenticateDatabase()
@@ -37,6 +39,8 @@ export const healthyRoute = {
         entraHealthCheck(),
         crmHealthCheck()
       ])
+
+      logger.health('Application health check', { code: FCP_UNHANDLED_ERROR_001 })
 
       return h.response('ok').code(StatusCodes.OK)
     } catch (error) {
