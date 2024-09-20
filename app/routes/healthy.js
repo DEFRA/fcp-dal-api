@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { AuthenticateDatabase } from '../../app/data-sources/authenticate/AuthenticateDatabase.js'
 import { EntraIdApi } from '../../app/data-sources/entra-id/EntraIdApi.js'
+import { RuralPaymentsBusiness } from '../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { FCP_UNHANDLED_ERROR_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 
@@ -9,16 +10,15 @@ const authenticateDatabaseHealthCheck = () => {
   return authenticateDatabase.healthCheck()
 }
 
-// const ruralPaymentsAPIMHealthCheck = () => {
-//   const ruralPaymentsBusiness = new RuralPaymentsBusiness(null, {
-//     headers: {
-//       email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
-//     }
-//   })
-//   return ruralPaymentsBusiness.getOrganisationById(process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_ID)
-// }
+const ruralPaymentsAPIMHealthCheck = () => {
+  const ruralPaymentsBusiness = new RuralPaymentsBusiness(null, {
+    headers: {
+      email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
+    }
+  })
+  return ruralPaymentsBusiness.getOrganisationById(process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_ID)
+}
 
-// TODO: implement health check for entra
 const entraHealthCheck = () => {
   const entraIdApi = new EntraIdApi()
   return entraIdApi.getEmployeeId(process.env.ENTRA_HEALTH_CHECK_USER_OBJECT_ID)
@@ -34,7 +34,7 @@ export const healthyRoute = {
     try {
       await Promise.all([
         authenticateDatabaseHealthCheck(),
-        // ruralPaymentsAPIMHealthCheck(),
+        ruralPaymentsAPIMHealthCheck(),
         entraHealthCheck(),
         crmHealthCheck()
       ])
