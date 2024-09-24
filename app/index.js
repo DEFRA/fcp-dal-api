@@ -19,7 +19,7 @@ const init = async () => {
   })
 
   await server.start()
-  logger.health(`Server running on ${server.info.uri}`, { code: FCP_UNHANDLED_ERROR_001 })
+  logger.health(`Server running on ${server.info.uri}`)
 }
 
 process.on('unhandledRejection', error => {
