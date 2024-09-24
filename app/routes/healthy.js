@@ -4,7 +4,8 @@ import { EntraIdApi } from '../../app/data-sources/entra-id/EntraIdApi.js'
 import { RuralPaymentsBusiness } from '../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { logger } from '../logger/logger.js'
 
-const fiveMinutes = 60 * 1000 * 5
+const minute = 60 * 1000
+const fiveMinutes = 5 * minute
 
 // Throttle health checks to prevent them from being called too frequently
 const throttle = (fn, time) => {
