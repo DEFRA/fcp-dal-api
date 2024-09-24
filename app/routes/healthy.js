@@ -5,24 +5,42 @@ import { RuralPaymentsBusiness } from '../../app/data-sources/rural-payments/Rur
 import { FCP_UNHANDLED_ERROR_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 
-const authenticateDatabaseHealthCheck = () => {
-  const authenticateDatabase = new AuthenticateDatabase()
-  return authenticateDatabase.healthCheck()
+const fiveMinutes = 60 * 1000 * 5
+
+// Throttle health checks to prevent them from being called too frequently
+const throttle = (fn, time) => {
+  let shouldThrottle = false
+  return (...args) => {
+    if (!shouldThrottle) {
+      shouldThrottle = true
+      setTimeout(() => {
+        shouldThrottle = false
+      }, time)
+      return fn(...args)
+    } else {
+      return true
+    }
+  }
 }
 
-const ruralPaymentsAPIMHealthCheck = () => {
+const authenticateDatabaseHealthCheck = throttle(async () => {
+  const authenticateDatabase = new AuthenticateDatabase()
+  return authenticateDatabase.healthCheck()
+}, process.env.HEALTH_CHECK_AUTHENTICATE_DATABASE_THROTTLE_TIME_MS || fiveMinutes)
+
+const ruralPaymentsAPIMHealthCheck = throttle(async () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(null, {
     headers: {
       email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
     }
   })
   return ruralPaymentsBusiness.getOrganisationById(process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_ID)
-}
+}, process.env.HEALTH_CHECK_RURAL_PAYMENTS_APIM_THROTTLE_TIME_MS || fiveMinutes)
 
-const entraHealthCheck = () => {
+const entraHealthCheck = throttle(async () => {
   const entraIdApi = new EntraIdApi()
   return entraIdApi.getEmployeeId(process.env.ENTRA_HEALTH_CHECK_USER_OBJECT_ID)
-}
+}, process.env.HEALTH_CHECK_ENTRA_THROTTLE_TIME_MS || fiveMinutes)
 
 // TODO: implement health check for CRM
 const crmHealthCheck = () => true
