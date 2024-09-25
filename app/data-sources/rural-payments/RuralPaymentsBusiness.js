@@ -1,13 +1,14 @@
-import { logger, sampleResponse } from '../../utils/logger.js'
+import { logger } from '../../logger/logger.js'
+import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById (id) {
-    logger.debug('Getting organisation by ID', { id })
+    logger.verbose('Getting organisation by ID', { id })
     try {
       const organisationResponse = await this.get(`organisation/${id}`)
 
-      logger.debug('Organisation by ID', { organisationResponse })
+      logger.verbose('Organisation by ID', { organisationResponse })
       return organisationResponse._data
     } catch (error) {
       logger.error('Error getting organisation by ID', { id, error })
@@ -16,7 +17,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async getOrganisationBySBI (sbi) {
-    logger.debug('Getting organisation by SBI', { sbi })
+    logger.verbose('Getting organisation by SBI', { sbi })
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,

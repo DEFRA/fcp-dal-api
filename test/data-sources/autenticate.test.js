@@ -123,4 +123,17 @@ describe('AuthenticateDatabase', () => {
 
     expect(answers).toEqual('mockAnswers')
   })
+
+  test('health check', async () => {
+    const authenticateMock = jest.fn()
+    Sequelize.mockImplementation(() => ({
+      define: jest.fn(),
+      authenticate: authenticateMock
+    }))
+
+    const db = new AuthenticateDatabase()
+    await db.healthCheck()
+
+    expect(authenticateMock).toHaveBeenCalled()
+  })
 })

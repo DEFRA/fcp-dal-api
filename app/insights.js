@@ -1,5 +1,5 @@
 import appInsights from 'applicationinsights'
-import { logger } from './utils/logger.js'
+import { logger } from './logger/logger.js'
 
 export function setupAppInsights () {
   if (process.env.APPINSIGHTS_CONNECTIONSTRING) {

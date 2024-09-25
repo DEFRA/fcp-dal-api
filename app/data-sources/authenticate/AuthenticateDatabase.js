@@ -1,5 +1,6 @@
-import { Sequelize, DataTypes } from 'sequelize'
-import { logger } from '../../utils/logger.js'
+import { DataTypes, Sequelize } from 'sequelize'
+import { AUTHENTICATE_DATABASE_ALL_001 } from '../../logger/codes.js'
+import { logger } from '../../logger/logger.js'
 
 const dbOptions = {
   database: process.env.AUTHENTICATE_DB_SCHEMA,
@@ -34,22 +35,41 @@ export class AuthenticateDatabase {
     Updated: DataTypes.DATE
   })
 
+  async healthCheck () {
+    try {
+      await this.dbRead.authenticate()
+      logger.health('#authenticate - database authenticated', { code: AUTHENTICATE_DATABASE_ALL_001 })
+    } catch (error) {
+      logger.error('Authenticate database error', { error, code: AUTHENTICATE_DATABASE_ALL_001 })
+      throw error
+    }
+  }
+
   async getAuthenticateQuestionsAnswersByCRN (crn, employeeId) {
-    await this.dbAuditWrite.query(`
+    try {
+      logger.silly('Creating audit record in authenticate database', { employeeId, crn })
+      await this.dbAuditWrite.query(`
       INSERT INTO Audits ([Date], [User], [Action], [Value])
       VALUES(?, ?, ?, ?);
     `, {
-      replacements: [new Date().toISOString(), employeeId, 'Search', crn]
-    })
+        replacements: [new Date().toISOString(), employeeId, 'Search', crn]
+      })
+      logger.debug('Created audit record in authenticate database', { employeeId, crn })
 
-    const answers = await this.Answer.findOne({
-      attributes: ['CRN', 'Date', 'Event', 'Location', 'Updated'],
-      where: {
-        CRN: crn
-      }
-    })
+      logger.silly('Getting authenticate questions answers by CRN', { crn, employeeId })
+      const answers = await this.Answer.findOne({
+        attributes: ['CRN', 'Date', 'Event', 'Location', 'Updated'],
+        where: {
+          CRN: crn
+        }
+      })
+      logger.debug('Got authenticate questions answers by CRN', { crn, answers })
 
-    logger.info(`getAuthenticateQuestionsAnswersByCRN: got answers for ${crn}`)
-    return answers
+      logger.health('#authenticate - answers retrieved', { code: AUTHENTICATE_DATABASE_ALL_001 })
+      return answers
+    } catch (error) {
+      logger.error('Authenticate database error', { error, code: AUTHENTICATE_DATABASE_ALL_001 })
+      throw error
+    }
   }
 }

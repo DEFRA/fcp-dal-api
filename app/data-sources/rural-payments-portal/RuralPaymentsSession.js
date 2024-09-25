@@ -8,7 +8,7 @@ import { HttpsProxyAgent } from 'https-proxy-agent'
 import qs from 'qs'
 import { CookieJar } from 'tough-cookie'
 import { URL } from 'url'
-import { logger } from '../../utils/logger.js'
+import { logger } from '../../logger/logger.js'
 
 const defaultHeaders = {
   'Accept-Encoding': 'gzip, deflate, br',
@@ -26,7 +26,7 @@ const apiCredentials = {
   password: process.env.RURAL_PAYMENTS_PORTAL_PASSWORD
 }
 
-logger.debug('#RuralPaymentsSession - Set api credentials', { apiCredentials })
+logger.verbose('#RuralPaymentsSession - Set api credentials', { apiCredentials })
 
 export class RuralPaymentsSession extends RESTDataSource {
   baseURL = process.env.RURAL_PAYMENTS_PORTAL_API_URL
@@ -85,7 +85,7 @@ export class RuralPaymentsSession extends RESTDataSource {
   async handleRedirects (response) {
     if ([301, 302, 303].includes(response?.status)) {
       const redirectUrl = new URL(response.headers.get('location'))
-      logger.debug('#RuralPaymentsSession - handle redirect', {
+      logger.verbose('#RuralPaymentsSession - handle redirect', {
         status: response?.status,
         redirect: redirectUrl.pathname
       })
@@ -107,7 +107,7 @@ export class RuralPaymentsSession extends RESTDataSource {
   }
 
   async fetch (path, incomingRequest) {
-    logger.debug('#RuralPaymentsSession - new request ', {
+    logger.verbose('#RuralPaymentsSession - new request ', {
       path,
       method: incomingRequest.method,
       cookies: this.jar
@@ -116,7 +116,7 @@ export class RuralPaymentsSession extends RESTDataSource {
         .join(', ')
     })
     const result = await super.fetch(path, incomingRequest)
-    logger.debug('#RuralPaymentsSession - response ', {
+    logger.verbose('#RuralPaymentsSession - response ', {
       path,
       status: result.response?.status,
       body: result.response.parsedBody,
