@@ -4,9 +4,9 @@ import { sampleResponse } from '../../../logger/utils.js'
 import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
 import {
-    transformBusinessCustomerPrivilegesToPermissionGroups,
-    transformOrganisationCustomer,
-    transformOrganisationCustomers
+  transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformOrganisationCustomer,
+  transformOrganisationCustomers
 } from '../../../transformers/rural-payments/business.js'
 
 export const Business = {

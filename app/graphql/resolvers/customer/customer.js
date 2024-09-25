@@ -2,12 +2,12 @@ import { logger } from '../../../logger/logger.js'
 import { sampleResponse } from '../../../logger/utils.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../transformers/authenticate/question-answers.js'
 import {
-    ruralPaymentsPortalCustomerTransformer,
-    transformBusinessCustomerToCustomerPermissionGroups,
-    transformBusinessCustomerToCustomerRole,
-    transformNotificationsToMessages,
-    transformPersonSummaryToCustomerAuthorisedBusinesses,
-    transformPersonSummaryToCustomerAuthorisedFilteredBusiness
+  ruralPaymentsPortalCustomerTransformer,
+  transformBusinessCustomerToCustomerPermissionGroups,
+  transformBusinessCustomerToCustomerRole,
+  transformNotificationsToMessages,
+  transformPersonSummaryToCustomerAuthorisedBusinesses,
+  transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments/customer.js'
 
 export const Customer = {
