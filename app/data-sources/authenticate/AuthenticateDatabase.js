@@ -48,6 +48,7 @@ export class AuthenticateDatabase {
   async getAuthenticateQuestionsAnswersByCRN (crn, employeeId) {
     try {
       logger.silly('Creating audit record in authenticate database', { employeeId, crn })
+      const requestStart = Date.now()
       await this.dbAuditWrite.query(`
       INSERT INTO Audits ([Date], [User], [Action], [Value])
       VALUES(?, ?, ?, ?);
@@ -63,9 +64,10 @@ export class AuthenticateDatabase {
           CRN: crn
         }
       })
+      const requestTimeMs = (Date.now() - requestStart)
       logger.debug('Got authenticate questions answers by CRN', { crn, answers })
 
-      logger.health('#authenticate - answers retrieved', { code: AUTHENTICATE_DATABASE_ALL_001 })
+      logger.health('#authenticate - answers retrieved', { code: AUTHENTICATE_DATABASE_ALL_001, requestTimeMs })
       return answers
     } catch (error) {
       logger.error('Authenticate database error', { error, code: AUTHENTICATE_DATABASE_ALL_001 })

@@ -1,6 +1,6 @@
 import { format } from 'winston'
 
-const maxStackTrace = 20
+const maxStackTrace = 50
 
 Error.stackTraceFormatterLimit = Error.stackTraceFormatterLimit < maxStackTrace ? maxStackTrace : Error.stackTraceFormatterLimit
 

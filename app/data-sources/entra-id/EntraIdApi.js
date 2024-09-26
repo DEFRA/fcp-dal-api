@@ -10,8 +10,9 @@ export class EntraIdApi extends RESTDataSource {
 
   async getEmployeeId (entraIdUserObjectId) {
     let employeeId
-
+    let requestTimeMs
     try {
+      const requestStart = Date.now()
       const { token } = await credential.getToken(`${this.baseURL}/.default`)
 
       const response = await this.get(
@@ -25,6 +26,7 @@ export class EntraIdApi extends RESTDataSource {
           }
         }
       )
+      requestTimeMs = (Date.now() - requestStart)
       employeeId = response.employeeId
     } catch (error) {
       logger.error('Could not get the employee ID for the user', { entraIdUserObjectId, error, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
@@ -36,7 +38,7 @@ export class EntraIdApi extends RESTDataSource {
       throw new Error(`Missing employee ID for user: ${entraIdUserObjectId}`)
     }
 
-    logger.health('Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
+    logger.health('Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001, requestTimeMs })
 
     return employeeId
   }
