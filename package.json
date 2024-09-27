@@ -15,7 +15,7 @@
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js",
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
-    "start:mock": "nodemon ./mocks --watch ./mocks",
+    "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
     "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --detectOpenHandles --setupFiles dotenv/config",
     "test:contract": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/contract  --setupFiles dotenv/config",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
@@ -46,6 +46,7 @@
     "sequelize": "^6.37.3",
     "tedious": "^18.1.0",
     "tough-cookie": "^4.1.3",
+    "uuid": "^10.0.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {

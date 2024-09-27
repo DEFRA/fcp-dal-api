@@ -1,23 +1,22 @@
-import { logger } from '../../logger/logger.js'
 import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById (id) {
-    logger.verbose('Getting organisation by ID', { id })
+    this.logger.verbose('Getting organisation by ID', { id })
     try {
       const organisationResponse = await this.get(`organisation/${id}`)
 
-      logger.verbose('Organisation by ID', { organisationResponse })
+      this.logger.verbose('Organisation by ID', { organisationResponse })
       return organisationResponse._data
     } catch (error) {
-      logger.error('Error getting organisation by ID', { id, error })
+      this.logger.error('Error getting organisation by ID', { id, error })
       throw error
     }
   }
 
   async getOrganisationBySBI (sbi) {
-    logger.verbose('Getting organisation by SBI', { sbi })
+    this.logger.verbose('Getting organisation by SBI', { sbi })
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,
@@ -35,10 +34,10 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
       const response = organisationResponse?._data?.pop() || {}
 
-      logger.debug('Organisation by SBI', { response: sampleResponse(response) })
+      this.logger.debug('Organisation by SBI', { response: sampleResponse(response) })
       return response?.id ? this.getOrganisationById(response.id) : null
     } catch (error) {
-      logger.error('Error getting organisation by SBI', {
+      this.logger.error('Error getting organisation by SBI', {
         sbi,
         error
       })
@@ -47,7 +46,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async getOrganisationCustomersByOrganisationId (organisationId) {
-    logger.verbose('Getting organisation customers by organisation ID', {
+    this.logger.verbose('Getting organisation customers by organisation ID', {
       organisationId
     })
 
@@ -55,10 +54,10 @@ export class RuralPaymentsBusiness extends RuralPayments {
       const response = await this.get(
         `authorisation/organisation/${organisationId}`
       )
-      logger.debug('Organisation customers by organisation ID', { response: sampleResponse(response) })
+      this.logger.debug('Organisation customers by organisation ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
-      logger.error('Error getting organisation customers by organisation ID', {
+      this.logger.error('Error getting organisation customers by organisation ID', {
         organisationId,
         error
       })

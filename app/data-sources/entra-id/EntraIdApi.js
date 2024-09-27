@@ -1,7 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { DefaultAzureCredential } from '@azure/identity'
 import { ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 } from '../../logger/codes.js'
-import { logger } from '../../logger/logger.js'
 
 const credential = new DefaultAzureCredential()
 
@@ -29,16 +28,16 @@ export class EntraIdApi extends RESTDataSource {
       requestTimeMs = (Date.now() - requestStart)
       employeeId = response.employeeId
     } catch (error) {
-      logger.error('Could not get the employee ID for the user', { entraIdUserObjectId, error, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
+      this.logger.error('Could not get the employee ID for the user', { entraIdUserObjectId, error, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
       throw new Error(`Could not get the employee ID for the user: ${entraIdUserObjectId}`)
     }
 
     if (!employeeId) {
-      logger.error('Missing employee ID for user', { entraIdUserObjectId, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
+      this.logger.error('Missing employee ID for user', { entraIdUserObjectId, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
       throw new Error(`Missing employee ID for user: ${entraIdUserObjectId}`)
     }
 
-    logger.health('Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001, requestTimeMs })
+    this.logger.health('Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001, requestTimeMs })
 
     return employeeId
   }

@@ -1,11 +1,10 @@
 import { NotFound } from '../../errors/graphql.js'
-import { logger } from '../../logger/logger.js'
 import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getCustomerByCRN (crn) {
-    logger.verbose('Getting customer by CRN', { crn })
+    this.logger.verbose('Getting customer by CRN', { crn })
 
     try {
       const body = JSON.stringify({
@@ -22,7 +21,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
         }
       })
       const response = customerResponse._data.pop() || {}
-      logger.debug('Customer by CRN', { response: sampleResponse(response) })
+      this.logger.debug('Customer by CRN', { response: sampleResponse(response) })
 
       if (!response?.id) {
         throw new NotFound('Customer not found')
@@ -31,29 +30,29 @@ export class RuralPaymentsCustomer extends RuralPayments {
       return this.getPersonByPersonId(response.id)
     } catch (error) {
       if (error instanceof NotFound) {
-        logger.warn('Customer not found for CRN', { crn, error })
+        this.logger.warn('Customer not found for CRN', { crn, error })
       } else {
-        logger.error('Error getting customer by CRN', { crn, error })
+        this.logger.error('Error getting customer by CRN', { crn, error })
       }
       throw error
     }
   }
 
   async getPersonByPersonId (personId) {
-    logger.verbose('Getting person by person ID', { personId })
+    this.logger.verbose('Getting person by person ID', { personId })
     try {
       const response = await this.get(`person/${personId}/summary`)
 
-      logger.debug('Person by person ID', { response: sampleResponse(response) })
+      this.logger.debug('Person by person ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
-      logger.error('Error getting person by person ID', { personId, error })
+      this.logger.error('Error getting person by person ID', { personId, error })
       throw error
     }
   }
 
   async getPersonBusinessesByPersonId (personId, sbi) {
-    logger.verbose('Getting person businesses by person ID', { personId, sbi })
+    this.logger.verbose('Getting person businesses by person ID', { personId, sbi })
 
     try {
       const personBusinessSummaries = await this.get(
@@ -62,10 +61,10 @@ export class RuralPaymentsCustomer extends RuralPayments {
         `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE || 100}`
       )
 
-      logger.debug('Person businesses by person ID', { response: sampleResponse(personBusinessSummaries) })
+      this.logger.debug('Person businesses by person ID', { response: sampleResponse(personBusinessSummaries) })
       return personBusinessSummaries._data
     } catch (error) {
-      logger.error('Error getting person businesses by person ID', {
+      this.logger.error('Error getting person businesses by person ID', {
         personId,
         sbi,
         error
@@ -80,7 +79,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     page,
     size
   ) {
-    logger.verbose('Getting notifications by organisation ID and person ID', {
+    this.logger.verbose('Getting notifications by organisation ID and person ID', {
       organisationId,
       personId,
       page,
@@ -96,13 +95,13 @@ export class RuralPaymentsCustomer extends RuralPayments {
           size
         }
       })
-      logger.verbose('Notifications by organisation ID and person ID', {
+      this.logger.verbose('Notifications by organisation ID and person ID', {
         response
       })
 
       return response.notifications
     } catch (error) {
-      logger.error('Error getting notifications by organisation ID and person ID', {
+      this.logger.error('Error getting notifications by organisation ID and person ID', {
         organisationId,
         personId,
         page,
