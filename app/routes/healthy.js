@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { AuthenticateDatabase } from '../../app/data-sources/authenticate/AuthenticateDatabase.js'
 import { EntraIdApi } from '../../app/data-sources/entra-id/EntraIdApi.js'
 import { RuralPaymentsBusiness } from '../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
+import { FCP_APPLICATION_HEALTH_CHECK_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 
 const minute = 60 * 1000
@@ -57,7 +58,7 @@ export const healthyRoute = {
         crmHealthCheck()
       ])
 
-      logger.health('Application health check')
+      logger.health('Application health check', { code: FCP_APPLICATION_HEALTH_CHECK_001 })
 
       return h.response('ok').code(StatusCodes.OK)
     } catch (error) {
