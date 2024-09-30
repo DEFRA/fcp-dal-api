@@ -19,7 +19,8 @@ const init = async () => {
   })
 
   await server.start()
-  logger.health(`Server running on ${server.info.uri}`)
+
+  logger.info(`Server running on ${server.info.uri}`)
 }
 
 process.on('unhandledRejection', error => {

@@ -28,6 +28,13 @@ export default [
             return okOrNotFoundResponse(res, data)
           }
         }
+      },
+      {
+        id: 'error',
+        type: 'status',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR
+        }
       }
     ]
   },
@@ -115,6 +122,13 @@ export default [
 
             return okOrNotFoundResponse(res, data)
           }
+        }
+      },
+      {
+        id: 'error',
+        type: 'status',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR
         }
       }
     ]

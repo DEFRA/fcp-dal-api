@@ -22,15 +22,16 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
     if (!authHeader) {
       return {}
     }
+    logger.verbose('#FCP - Request authentication - Check verification', { code: FCP_REQUEST_AUTHENTICATION_001 })
     const token = authHeader.split(' ')[1]
     const decodedToken = jwt.decode(token, { complete: true })
     const header = decodedToken.header
     const signingKey = await getJwtPublicKeyFunc(header.kid)
     const verified = jwt.verify(token, signingKey)
-    logger.health('#authenticate - JWT verified', { code: FCP_REQUEST_AUTHENTICATION_001 })
+    logger.debug('#FCP Request authentication - JWT verified', { code: FCP_REQUEST_AUTHENTICATION_001 })
     return verified
   } catch (error) {
-    logger.error('#authenticate - Error verifying jwt', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
+    logger.error('#FCP Request authentication - Error verifying jwt', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
     return {}
   }
 }

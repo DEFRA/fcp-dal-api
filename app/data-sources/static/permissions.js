@@ -5,7 +5,7 @@ const permissionGroups = createRequire(import.meta.url)('./permission-groups.jso
 export class Permissions {
   logger = null
 
-  constructor (config) {
+  constructor (config = {}) {
     this.logger = config.logger
   }
 

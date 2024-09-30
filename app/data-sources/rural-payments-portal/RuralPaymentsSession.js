@@ -26,8 +26,6 @@ const apiCredentials = {
   password: process.env.RURAL_PAYMENTS_PORTAL_PASSWORD
 }
 
-logger.verbose('#RuralPaymentsSession - Set api credentials', { apiCredentials })
-
 export class RuralPaymentsSession extends RESTDataSource {
   baseURL = process.env.RURAL_PAYMENTS_PORTAL_API_URL
 

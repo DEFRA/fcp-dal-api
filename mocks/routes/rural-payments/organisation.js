@@ -1,11 +1,12 @@
+import { StatusCodes } from 'http-status-codes'
 import {
   organisationByOrgId,
   organisationBySbi,
   organisationPeopleByOrgId
 } from '../../fixtures/organisation.js'
 import {
-  okOrNotFoundResponse,
   badRequestResponse,
+  okOrNotFoundResponse,
   okResponse
 } from '../../utils/requestResponse.js'
 
@@ -25,6 +26,13 @@ export default [
 
             return okOrNotFoundResponse(res, data)
           }
+        }
+      },
+      {
+        id: 'error',
+        type: 'status',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR
         }
       }
     ]

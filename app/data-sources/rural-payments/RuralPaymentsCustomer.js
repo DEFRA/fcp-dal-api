@@ -1,10 +1,11 @@
 import { NotFound } from '../../errors/graphql.js'
+import { RURALPAYMENTS_API_ERROR_001, RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getCustomerByCRN (crn) {
-    this.logger.verbose('Getting customer by CRN', { crn })
+    this.logger.silly('Getting customer by CRN', { crn })
 
     try {
       const body = JSON.stringify({
@@ -21,7 +22,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
         }
       })
       const response = customerResponse._data.pop() || {}
-      this.logger.debug('Customer by CRN', { response: sampleResponse(response) })
+      this.logger.silly('Customer by CRN', { response: sampleResponse(response) })
 
       if (!response?.id) {
         throw new NotFound('Customer not found')
@@ -30,20 +31,20 @@ export class RuralPaymentsCustomer extends RuralPayments {
       return this.getPersonByPersonId(response.id)
     } catch (error) {
       if (error instanceof NotFound) {
-        this.logger.warn('Customer not found for CRN', { crn, error })
+        this.logger.warn('Customer not found for CRN', { crn, error, code: RURALPAYMENTS_API_NOT_FOUND_001 })
       } else {
-        this.logger.error('Error getting customer by CRN', { crn, error })
+        this.logger.error('Error getting customer by CRN', { crn, error: RURALPAYMENTS_API_ERROR_001 })
       }
       throw error
     }
   }
 
   async getPersonByPersonId (personId) {
-    this.logger.verbose('Getting person by person ID', { personId })
+    this.logger.silly('Getting person by person ID', { personId })
     try {
       const response = await this.get(`person/${personId}/summary`)
 
-      this.logger.debug('Person by person ID', { response: sampleResponse(response) })
+      this.logger.silly('Person by person ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
       this.logger.error('Error getting person by person ID', { personId, error })
@@ -52,7 +53,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
   }
 
   async getPersonBusinessesByPersonId (personId, sbi) {
-    this.logger.verbose('Getting person businesses by person ID', { personId, sbi })
+    this.logger.silly('Getting person businesses by person ID', { personId, sbi })
 
     try {
       const personBusinessSummaries = await this.get(
@@ -61,13 +62,14 @@ export class RuralPaymentsCustomer extends RuralPayments {
         `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE || 100}`
       )
 
-      this.logger.debug('Person businesses by person ID', { response: sampleResponse(personBusinessSummaries) })
+      this.logger.silly('Person businesses by person ID', { response: sampleResponse(personBusinessSummaries) })
       return personBusinessSummaries._data
     } catch (error) {
       this.logger.error('Error getting person businesses by person ID', {
         personId,
         sbi,
-        error
+        error,
+        code: RURALPAYMENTS_API_ERROR_001
       })
       throw error
     }
@@ -79,7 +81,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     page,
     size
   ) {
-    this.logger.verbose('Getting notifications by organisation ID and person ID', {
+    this.logger.silly('Getting notifications by organisation ID and person ID', {
       organisationId,
       personId,
       page,
@@ -95,7 +97,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
           size
         }
       })
-      this.logger.verbose('Notifications by organisation ID and person ID', {
+      this.logger.silly('Notifications by organisation ID and person ID', {
         response
       })
 
@@ -106,7 +108,8 @@ export class RuralPaymentsCustomer extends RuralPayments {
         personId,
         page,
         size,
-        error
+        error,
+        code: RURALPAYMENTS_API_ERROR_001
       })
       throw error
     }

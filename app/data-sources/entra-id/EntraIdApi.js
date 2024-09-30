@@ -14,6 +14,7 @@ export class EntraIdApi extends RESTDataSource {
       const requestStart = Date.now()
       const { token } = await credential.getToken(`${this.baseURL}/.default`)
 
+      this.logger.verbose('#datasource - entra - get the employee ID for the user', { entraIdUserObjectId, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
       const response = await this.get(
         `v1.0/users/${entraIdUserObjectId}?$select=employeeId`,
         {
@@ -27,17 +28,16 @@ export class EntraIdApi extends RESTDataSource {
       )
       requestTimeMs = (Date.now() - requestStart)
       employeeId = response.employeeId
+
+      if (!employeeId) {
+        throw new Error(`Missing employee ID for user: ${entraIdUserObjectId}`)
+      }
+
+      this.logger.debug('#datasource - entra - Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001, requestTimeMs })
     } catch (error) {
-      this.logger.error('Could not get the employee ID for the user', { entraIdUserObjectId, error, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
-      throw new Error(`Could not get the employee ID for the user: ${entraIdUserObjectId}`)
+      this.logger.error('#datasource - entra - Could not get the employee ID for the user', { entraIdUserObjectId, error, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
+      throw error
     }
-
-    if (!employeeId) {
-      this.logger.error('Missing employee ID for user', { entraIdUserObjectId, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
-      throw new Error(`Missing employee ID for user: ${entraIdUserObjectId}`)
-    }
-
-    this.logger.health('Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001, requestTimeMs })
 
     return employeeId
   }

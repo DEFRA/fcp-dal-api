@@ -1,10 +1,15 @@
-import { graphql } from 'graphql'
+import { graphql, GraphQLError } from 'graphql'
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
+import { NotFound } from '../../../app/errors/graphql.js'
 import { schema } from '../../../app/graphql/server.js'
 import {
   transformOrganisationCPH,
   transformOrganisationCPHCoordinates
 } from '../../../app/transformers/rural-payments/business-cph.js'
+import {
+  transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformOrganisationToBusiness
+} from '../../../app/transformers/rural-payments/business.js'
 import {
   transformLandCovers,
   transformLandCoversToArea,
@@ -24,13 +29,8 @@ import {
   organisationByOrgId,
   organisationPeopleByOrgId
 } from '../../../mocks/fixtures/organisation.js'
-import { fakeContext } from '../../test-setup.js'
-import {
-  transformBusinessCustomerPrivilegesToPermissionGroups,
-  transformOrganisationToBusiness
-} from '../../../app/transformers/rural-payments/business.js'
-import { NotFound } from '../../../app/errors/graphql.js'
 import mockServer from '../../../mocks/server'
+import { fakeContext } from '../../test-setup.js'
 
 const organisationFixture = organisationByOrgId('5565448')._data
 const { totalArea, totalParcels } = parcelSummary('5565448')
@@ -129,6 +129,34 @@ describe('Query.business', () => {
         new NotFound('Business not found')
       ]
     })
+  })
+
+  it('should handle error from the data source', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-organisation-get-by-id:error'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query Business {
+          business(sbi: "890000001") {
+            sbi
+            organisationId
+          }
+        }
+      `,
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: { business: null },
+      errors: [new GraphQLError('500: Internal Server Error')]
+    })
+
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-organisation-get-by-id:default'
+    )
   })
 })
 

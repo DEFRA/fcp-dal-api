@@ -1,22 +1,23 @@
+import { RURALPAYMENTS_API_ERROR_001 } from '../../logger/codes.js'
 import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsBusiness extends RuralPayments {
-  async getOrganisationById (id) {
-    this.logger.verbose('Getting organisation by ID', { id })
+  async getOrganisationById (organisationId) {
+    this.logger.silly('Getting organisation by ID', { organisationId })
     try {
-      const organisationResponse = await this.get(`organisation/${id}`)
+      const organisationResponse = await this.get(`organisation/${organisationId}`)
 
-      this.logger.verbose('Organisation by ID', { organisationResponse })
+      this.logger.silly('Organisation by ID', { organisationResponse })
       return organisationResponse._data
     } catch (error) {
-      this.logger.error('Error getting organisation by ID', { id, error })
+      this.logger.error('Error getting organisation by ID', { organisationId, error, code: RURALPAYMENTS_API_ERROR_001 })
       throw error
     }
   }
 
   async getOrganisationBySBI (sbi) {
-    this.logger.verbose('Getting organisation by SBI', { sbi })
+    this.logger.silly('Getting organisation by SBI', { sbi })
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,
@@ -34,19 +35,20 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
       const response = organisationResponse?._data?.pop() || {}
 
-      this.logger.debug('Organisation by SBI', { response: sampleResponse(response) })
+      this.logger.silly('Organisation by SBI', { response: sampleResponse(response) })
       return response?.id ? this.getOrganisationById(response.id) : null
     } catch (error) {
       this.logger.error('Error getting organisation by SBI', {
         sbi,
-        error
+        error,
+        code: RURALPAYMENTS_API_ERROR_001
       })
       throw error
     }
   }
 
   async getOrganisationCustomersByOrganisationId (organisationId) {
-    this.logger.verbose('Getting organisation customers by organisation ID', {
+    this.logger.silly('Getting organisation customers by organisation ID', {
       organisationId
     })
 
@@ -54,12 +56,13 @@ export class RuralPaymentsBusiness extends RuralPayments {
       const response = await this.get(
         `authorisation/organisation/${organisationId}`
       )
-      this.logger.debug('Organisation customers by organisation ID', { response: sampleResponse(response) })
+      this.logger.silly('Organisation customers by organisation ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
       this.logger.error('Error getting organisation customers by organisation ID', {
         organisationId,
-        error
+        error,
+        code: RURALPAYMENTS_API_ERROR_001
       })
       throw error
     }
