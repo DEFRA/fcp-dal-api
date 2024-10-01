@@ -216,7 +216,7 @@ describe('CustomerBusiness', () => {
 
   test('CustomerBusiness.role', async () => {
     const response = await CustomerBusiness.role(
-      { organisationId: '4309257', crn: '9102634220' },
+      { organisationId: '4309257', crn: '9638563942' },
       undefined,
       { dataSources }
     )
@@ -225,7 +225,7 @@ describe('CustomerBusiness', () => {
 
   test('CustomerBusiness.permissionGroups', async () => {
     const response = await CustomerBusiness.permissionGroups(
-      { organisationId: '5625145', crn: '9102634220' },
+      { organisationId: '5625145', crn: '9638563942' },
       undefined,
       {
         dataSources
@@ -303,7 +303,7 @@ describe('CustomerBusinessPermissionGroup', () => {
     const response = await CustomerBusiness.permissionGroups(
       {
         organisationId: orgId,
-        crn: '9102634220',
+        crn: '9638563942',
         permissions: [
           {
             level: 'MOCK_PRIVILEGE_LEVEL',
