@@ -28,6 +28,7 @@ server.ext({
         path: request.path,
         params: request.params,
         payload: request.payload,
+        body: request.body,
         headers: request.raw.req.headers,
         remoteAddress: request.info.remoteAddress
       },
