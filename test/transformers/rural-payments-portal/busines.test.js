@@ -69,7 +69,7 @@ describe('Business transformer', () => {
           validated: true
         },
         legalStatus: { code: 102108, type: 'Partnership' },
-        name: 'Cliff Spence T/As Abbey Farm',
+        name: 'Cliff Spence Teritorial Army\'s Abbey Farm, Hop-Worthering on the Naze a.k.a. the Donkey Sanctuary',
         phone: { fax: null, landline: null, mobile: '01234031670' },
         reference: '9102698830',
         registrationNumbers: { charityCommission: null, companiesHouse: null },

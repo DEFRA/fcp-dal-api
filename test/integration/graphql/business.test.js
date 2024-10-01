@@ -374,7 +374,7 @@ describe('Query.business.customers', () => {
             },
             {
               personId: '5302028',
-              firstName: 'Ivan',
+              firstName: 'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
               lastName: 'Cook',
               crn: '9103020285',
               role: 'Agent'
