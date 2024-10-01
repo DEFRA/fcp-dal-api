@@ -2,8 +2,10 @@ import Core from '@mocks-server/core'
 import collections from './collections.js'
 import { routes } from './routes/index.js'
 
+const logLevel = process.env.MOCK_LOG_LEVEL || 'silent'
+
 const server = new Core({
-  log: 'info',
+  log: logLevel,
   server: {
     port: Number(process.env.PORT_MOCK || 3100)
   },
