@@ -31,7 +31,11 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
     logger.debug('#FCP Request authentication - JWT verified', { code: FCP_REQUEST_AUTHENTICATION_001 })
     return verified
   } catch (error) {
-    logger.error('#FCP Request authentication - Error verifying jwt', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
+    if (error.name === 'TokenExpiredError') {
+      logger.warn('#FCP - request authentication - token expired', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
+    } else {
+      logger.error('#FCP - request authentication - Error verifying jwt', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
+    }
     return {}
   }
 }

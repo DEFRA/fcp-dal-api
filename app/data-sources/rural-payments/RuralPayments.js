@@ -67,7 +67,7 @@ export class RuralPayments extends RESTDataSource {
         // Handle occasionally 500 error produced by APIM
         // TODO: Once APIM has been fixed, remove retry logic
         if (error?.extensions?.response?.status === StatusCodes.INTERNAL_SERVER_ERROR && count < maximumRetries) {
-          this.logger.warn('#datasource - apim - retrying request', { request, error, APIM_APIM_REQUEST_001, retryCount: count })
+          this.logger.warn('#datasource - apim - retrying request', { request, error, code: APIM_APIM_REQUEST_001, retryCount: count })
           return doRequest(count + 1)
         }
         // if response is text, then the error is from RoralPayments

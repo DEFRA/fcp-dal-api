@@ -24,12 +24,12 @@ const init = async () => {
 }
 
 process.on('unhandledRejection', error => {
-  logger.error('#unhandledRejection', { error, code: FCP_UNHANDLED_ERROR_001 })
+  logger.error('#FCP - unhandled rejection', { error, code: FCP_UNHANDLED_ERROR_001 })
   process.exit(1)
 })
 
 process.on('uncaughtException', error => {
-  logger.error('#uncaughtException', { error, code: FCP_UNHANDLED_ERROR_001 })
+  logger.error('#FCP - uncaught reception', { error, code: FCP_UNHANDLED_ERROR_001 })
   process.exit(1)
 })
 
