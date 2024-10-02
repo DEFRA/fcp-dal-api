@@ -97,6 +97,36 @@ describe('AuthenticateDatabase', () => {
     )
   })
 
+  test('should handle error when creating audit record', async () => {
+    const error = new Error()
+    Sequelize.mockImplementation(() => ({
+      define: () => ({ findOne: jest.fn() }),
+      query: jest.fn().mockRejectedValue(error)
+    }))
+
+    const assertion = async () => {
+      const db = new AuthenticateDatabase({ logger })
+      await db.getAuthenticateQuestionsAnswersByCRN('mockCrn', 'mockEmployeeId')
+    }
+
+    expect(assertion).rejects.toEqual(error)
+  })
+
+  test('should handle error when finding record', async () => {
+    const error = new Error()
+    Sequelize.mockImplementation(() => ({
+      define: () => ({ findOne: jest.fn().mockRejectedValue(error) }),
+      query: jest.fn()
+    }))
+
+    const assertion = async () => {
+      const db = new AuthenticateDatabase({ logger })
+      await db.getAuthenticateQuestionsAnswersByCRN('mockCrn', 'mockEmployeeId')
+    }
+
+    expect(assertion).rejects.toEqual(error)
+  })
+
   test('should findOne using the Answer model', async () => {
     const mockFindOne = jest.fn()
     Sequelize.mockImplementation(() => ({
