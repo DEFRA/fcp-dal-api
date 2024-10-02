@@ -11,7 +11,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       this.logger.silly('Organisation by ID', { organisationResponse })
       return organisationResponse._data
     } catch (error) {
-      this.logger.error('#datasource - roral payments - Error getting organisation by ID', { organisationId, error, code: RURALPAYMENTS_API_ERROR_001 })
+      this.logger.error('#datasource - Rural payments - Error getting organisation by ID', { organisationId, error, code: RURALPAYMENTS_API_ERROR_001 })
       throw error
     }
   }
@@ -38,7 +38,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       this.logger.silly('Organisation by SBI', { response: sampleResponse(response) })
       return response?.id ? this.getOrganisationById(response.id) : null
     } catch (error) {
-      this.logger.error('#datasource - roral payments - Error getting organisation by SBI', {
+      this.logger.error('#datasource - Rural payments - Error getting organisation by SBI', {
         sbi,
         error,
         code: RURALPAYMENTS_API_ERROR_001
@@ -59,7 +59,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       this.logger.silly('Organisation customers by organisation ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
-      this.logger.error('#datasource - roral payments - Error getting organisation customers by organisation ID', {
+      this.logger.error('#datasource - Rural payments - Error getting organisation customers by organisation ID', {
         organisationId,
         error,
         code: RURALPAYMENTS_API_ERROR_001

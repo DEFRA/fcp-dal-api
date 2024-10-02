@@ -30,7 +30,7 @@ export class RuralPayments extends RESTDataSource {
 
     const doRequest = async (count = 1) => {
       try {
-        this.logger.verbose('#datasource - roral payments - request', {
+        this.logger.verbose('#datasource - Rural payments - request', {
           request,
           code: RURALPAYMENTS_API_REQUEST_001
         })
@@ -44,7 +44,7 @@ export class RuralPayments extends RESTDataSource {
         const result = await super.fetch(path, incomingRequest)
         const requestTimeMs = (Date.now() - requestStart)
 
-        this.logger.debug('#datasource - roral payments - response', {
+        this.logger.debug('#datasource - Rural payments - response', {
           request,
           response: {
             status: result.response?.status
@@ -70,9 +70,9 @@ export class RuralPayments extends RESTDataSource {
           this.logger.warn('#datasource - apim - retrying request', { request, error, code: APIM_APIM_REQUEST_001, retryCount: count })
           return doRequest(count + 1)
         }
-        // if response is text, then the error is from RoralPayments
+        // if response is text, then the error is from RuralPayments
         if (error?.extensions?.response?.headers?.get('Content-Type')?.includes('text/html')) {
-          this.logger.error('#datasource - roral payments - request error', {
+          this.logger.error('#datasource - Rural payments - request error', {
             error,
             request,
             retryCount: count,

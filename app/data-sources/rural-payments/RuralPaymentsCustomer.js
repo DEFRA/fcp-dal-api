@@ -31,9 +31,9 @@ export class RuralPaymentsCustomer extends RuralPayments {
       return this.getPersonByPersonId(response.id)
     } catch (error) {
       if (error instanceof NotFound) {
-        this.logger.warn('#datasource - roral payments - Customer not found for CRN', { crn, error, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+        this.logger.warn('#datasource - Rural payments - Customer not found for CRN', { crn, error, code: RURALPAYMENTS_API_NOT_FOUND_001 })
       } else {
-        this.logger.error('#datasource - roral payments - Error getting customer by CRN', { crn, error, code: RURALPAYMENTS_API_ERROR_001 })
+        this.logger.error('#datasource - Rural payments - Error getting customer by CRN', { crn, error, code: RURALPAYMENTS_API_ERROR_001 })
       }
       throw error
     }
@@ -47,7 +47,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
       this.logger.silly('Person by person ID', { response: sampleResponse(response) })
       return response._data
     } catch (error) {
-      this.logger.error('#datasource - roral payments - Error getting person by person ID', { personId, error })
+      this.logger.error('#datasource - Rural payments - Error getting person by person ID', { personId, error })
       throw error
     }
   }
@@ -65,7 +65,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
       this.logger.silly('Person businesses by person ID', { response: sampleResponse(personBusinessSummaries) })
       return personBusinessSummaries._data
     } catch (error) {
-      this.logger.error('#datasource - roral payments - Error getting person businesses by person ID', {
+      this.logger.error('#datasource - Rural payments - Error getting person businesses by person ID', {
         personId,
         sbi,
         error,
@@ -103,7 +103,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
       return response.notifications
     } catch (error) {
-      this.logger.error('#datasource - roral payments - Error getting notifications by organisation ID and person ID', {
+      this.logger.error('#datasource - Rural payments - Error getting notifications by organisation ID and person ID', {
         organisationId,
         personId,
         page,
