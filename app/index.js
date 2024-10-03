@@ -2,7 +2,7 @@ import hapiApollo from '@as-integrations/hapi'
 
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
-import { FCP_UNHANDLED_ERROR_001 } from './logger/codes.js'
+import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { server } from './server.js'
 
@@ -24,12 +24,12 @@ const init = async () => {
 }
 
 process.on('unhandledRejection', error => {
-  logger.error('#FCP - unhandled rejection', { error, code: FCP_UNHANDLED_ERROR_001 })
+  logger.error('#FCP - unhandled rejection', { error, code: DAL_UNHANDLED_ERROR_001 })
   process.exit(1)
 })
 
 process.on('uncaughtException', error => {
-  logger.error('#FCP - uncaught reception', { error, code: FCP_UNHANDLED_ERROR_001 })
+  logger.error('#FCP - uncaught reception', { error, code: DAL_UNHANDLED_ERROR_001 })
   process.exit(1)
 })
 

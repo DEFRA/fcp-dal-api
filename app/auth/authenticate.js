@@ -2,7 +2,7 @@ import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { defaultFieldResolver } from 'graphql'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
-import { FCP_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
+import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 
 import { Unauthorized } from '../errors/graphql.js'
 import { AuthRole } from '../graphql/resolvers/authenticate.js'
@@ -22,19 +22,19 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
     if (!authHeader) {
       return {}
     }
-    logger.verbose('#FCP - Request authentication - Check verification', { code: FCP_REQUEST_AUTHENTICATION_001 })
+    logger.verbose('#FCP - Request authentication - Check verification', { code: DAL_REQUEST_AUTHENTICATION_001 })
     const token = authHeader.split(' ')[1]
     const decodedToken = jwt.decode(token, { complete: true })
     const header = decodedToken.header
     const signingKey = await getJwtPublicKeyFunc(header.kid)
     const verified = jwt.verify(token, signingKey)
-    logger.debug('#FCP Request authentication - JWT verified', { code: FCP_REQUEST_AUTHENTICATION_001 })
+    logger.debug('#FCP Request authentication - JWT verified', { code: DAL_REQUEST_AUTHENTICATION_001 })
     return verified
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      logger.warn('#FCP - request authentication - token expired', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
+      logger.warn('#FCP - request authentication - token expired', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
     } else {
-      logger.error('#FCP - request authentication - Error verifying jwt', { error, code: FCP_REQUEST_AUTHENTICATION_001 })
+      logger.error('#FCP - request authentication - Error verifying jwt', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
     }
     return {}
   }
