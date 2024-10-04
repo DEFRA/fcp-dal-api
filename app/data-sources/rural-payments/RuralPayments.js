@@ -70,8 +70,16 @@ export class RuralPayments extends RESTDataSource {
           this.logger.warn('#datasource - apim - retrying request', { request, error, code: APIM_APIM_REQUEST_001, retryCount: count })
           return doRequest(count + 1)
         }
-        // if response is text, then the error is from RuralPayments
-        if (error?.extensions?.response?.headers?.get('Content-Type')?.includes('text/html')) {
+
+        if (error?.extensions?.response?.status === StatusCodes.FORBIDDEN) {
+          // If user does not have access log a warning
+          this.logger.warn('#datasource - apim - user does not have permission to resource', {
+            request,
+            error,
+            code: RURALPAYMENTS_API_REQUEST_001
+          })
+        } else if (error?.extensions?.response?.headers?.get('Content-Type')?.includes('text/html')) {
+          // If response is text, then the error is from RuralPayments
           this.logger.error('#datasource - Rural payments - request error', {
             error,
             request,
@@ -80,7 +88,7 @@ export class RuralPayments extends RESTDataSource {
             code: RURALPAYMENTS_API_REQUEST_001
           })
         } else {
-        // if response is json, then the error is from APIM
+          // if response is json, then the error is from APIM
           this.logger.error('#datasource - apim - request error', {
             error,
             request,

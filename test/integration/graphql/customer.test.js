@@ -181,6 +181,40 @@ describe('Query.customer', () => {
   })
 })
 
+describe('Handle other errors', () => {
+  afterEach(async () => {
+    await mockServer.server.mock.restoreRouteVariants()
+  })
+
+  it('should handle 403 error', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-crn:error-permission'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query TestCustomerBusinesses($crn: ID!) {
+          customer(crn: $crn) {
+            personId
+          }
+        }
+      `,
+      variableValues: {
+        crn: '9103020285' // personId: 5007136
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: null
+      },
+      errors: [new GraphQLError('403: Forbidden')]
+    })
+  })
+})
+
 describe('Query.customer.authenticationQuestions', () => {
   beforeEach(() => {
     jest

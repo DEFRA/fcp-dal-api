@@ -104,6 +104,13 @@ export default [
         options: {
           status: StatusCodes.INTERNAL_SERVER_ERROR
         }
+      },
+      {
+        id: 'error-permission',
+        type: 'status',
+        options: {
+          status: StatusCodes.FORBIDDEN
+        }
       }
     ]
   },
