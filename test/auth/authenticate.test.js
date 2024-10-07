@@ -1,11 +1,13 @@
 import { jest } from '@jest/globals'
-import jwt from 'jsonwebtoken'
 import { buildSchema, findBreakingChanges } from 'graphql'
+import jwt from 'jsonwebtoken'
+import { createJWKSMock } from 'mock-jwks'
 
 import {
   authDirectiveTransformer,
   checkAuthGroup,
-  getAuth
+  getAuth,
+  getJwtPublicKey
 } from '../../app/auth/authenticate.js'
 import { Unauthorized } from '../../app/errors/graphql'
 
@@ -47,6 +49,33 @@ const incorrectTokenReq = { headers: { authorization: 'Bearer WRONG' } }
 const decodedToken = jwt.decode(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
 
+describe('getJwtPublicKey', () => {
+  let jwksMock
+  let stopMock
+  beforeEach(() => {
+    jwksMock = createJWKSMock('https://login.microsoftonline.com', `/${process.env.API_TENANT_ID}/discovery/v2.0/keys`)
+    stopMock = jwksMock.start()
+  })
+
+  afterEach(() => {
+    stopMock()
+  })
+
+  test('should return the public key', async () => {
+    const token = jwksMock.token({
+      aud: 'private',
+      iss: 'master'
+    })
+
+    const key = await getJwtPublicKey(jwksMock.kid())
+
+    const verified = jwt.verify(token, key)
+
+    expect(verified.aud).toEqual('private')
+    expect(verified.iss).toEqual('master')
+  })
+})
+
 describe('getAuth', () => {
   test('should return an empty object when no authHeader is provided', async () => {
     expect(await getAuth({})).toEqual({})
@@ -64,6 +93,14 @@ describe('getAuth', () => {
   })
 
   test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
+    expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
+    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+  })
+
+  test.only('should return an empty object when token verification fails, due to token expiry', async () => {
+    const error = new Error('TokenExpiredError')
+    error.name = 'TokenExpiredError'
+    mockPublicKeyFunc.mockImplementation(() => { throw error })
     expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })

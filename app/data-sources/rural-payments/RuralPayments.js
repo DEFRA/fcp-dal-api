@@ -73,7 +73,7 @@ export class RuralPayments extends RESTDataSource {
 
         if (error?.extensions?.response?.status === StatusCodes.FORBIDDEN) {
           // If user does not have access log a warning
-          this.logger.warn('#datasource - apim - user does not have permission to resource', {
+          this.logger.warn('#datasource - Rural payments - user does not have permission to resource', {
             request,
             error,
             code: RURALPAYMENTS_API_REQUEST_001
