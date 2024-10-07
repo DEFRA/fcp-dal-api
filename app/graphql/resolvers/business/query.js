@@ -7,7 +7,7 @@ export const Query = {
     const response = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
 
     if (!response) {
-      this.logger.warn('#graphql - business/query - Business not found for SBI', { sbi, code: GRAPHQL_RESOLVERS_BUSINESS_001 })
+      logger.warn('#graphql - business/query - Business not found for SBI', { sbi, code: GRAPHQL_RESOLVERS_BUSINESS_001 })
       throw new NotFound('Business not found')
     }
 
