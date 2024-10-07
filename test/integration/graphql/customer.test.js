@@ -581,7 +581,7 @@ describe('Query.customer.businesses.messages', () => {
         }
       },
       errors: [
-        new NotFound('Customer not found')
+        new NotFound('Rural payments customer not found')
       ]
     })
   })

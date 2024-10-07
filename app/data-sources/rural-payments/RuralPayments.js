@@ -115,7 +115,7 @@ export class RuralPayments extends RESTDataSource {
     })
   }
 
-  async willSendRequest (_path, request) {
+  async willSendRequest (path, request) {
     if (!this.apimAccessToken) {
       await this.getApimAccessToken()
     }
@@ -126,6 +126,8 @@ export class RuralPayments extends RESTDataSource {
       Authorization: `Bearer ${this.apimAccessToken}`,
       email: this.request.headers.email
     }
+
+    this.logger.silly('#datasource - Rural payments - add headers', { headers: request.headers, path })
   }
 
   async getApimAccessToken () {
@@ -205,4 +207,14 @@ export class RuralPayments extends RESTDataSource {
   ) {
     return fn()
   }
+
+  // ensure that the same request is not sent twice
+  // requestDeduplicationPolicyFor (url, request) {
+  //   const method = request.method ?? 'GET'
+  //   const cacheKey = this.cacheKeyFor(url, request)
+  //   return {
+  //     policy: 'deduplicate-during-request-lifetime',
+  //     deduplicationKey: `${method} ${cacheKey}`
+  //   }
+  // }
 }

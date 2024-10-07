@@ -126,7 +126,7 @@ describe('Query.business', () => {
     expect(result).toEqual({
       data: { business: null },
       errors: [
-        new NotFound('Business not found')
+        new NotFound('Rural payments organisation not found')
       ]
     })
   })

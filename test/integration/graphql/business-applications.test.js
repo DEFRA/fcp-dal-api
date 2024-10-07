@@ -1,7 +1,7 @@
 import { graphql } from 'graphql/index.js'
 import { schema } from '../../../app/graphql/server.js'
-import { fakeContext } from '../../test-setup.js'
 import mockServer from '../../../mocks/server'
+import { fakeContext } from '../../test-setup.js'
 
 beforeAll(mockServer.start)
 afterAll(mockServer.stop)

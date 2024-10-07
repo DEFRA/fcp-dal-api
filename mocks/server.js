@@ -3,7 +3,7 @@ import collections from './collections.js'
 import { routes } from './routes/index.js'
 
 const server = new Core({
-  log: 'silent',
+  log: 'info',
   server: {
     port: Number(process.env.PORT_MOCK || 3100)
   },
