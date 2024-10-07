@@ -15,6 +15,7 @@ export async function context ({ request }) {
 
   return {
     auth,
+    requestLogger,
     dataSources: {
       authenticateDatabase: new AuthenticateDatabase({ logger: requestLogger }),
       entraIdApi: new EntraIdApi({ cache: apolloServer.cache, logger: requestLogger }),

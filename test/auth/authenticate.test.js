@@ -97,7 +97,7 @@ describe('getAuth', () => {
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 
-  test.only('should return an empty object when token verification fails, due to token expiry', async () => {
+  test('should return an empty object when token verification fails, due to token expiry', async () => {
     const error = new Error('TokenExpiredError')
     error.name = 'TokenExpiredError'
     mockPublicKeyFunc.mockImplementation(() => { throw error })
