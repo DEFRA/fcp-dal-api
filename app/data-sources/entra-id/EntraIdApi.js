@@ -33,7 +33,7 @@ export class EntraIdApi extends RESTDataSource {
         throw new Error(`Missing employee ID for user: ${entraIdUserObjectId}`)
       }
 
-      this.logger.debug('#datasource - entra - Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001, requestTimeMs })
+      this.logger.http('#datasource - entra - Successful get employee ID for user', { code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001, requestTimeMs })
     } catch (error) {
       this.logger.error('#datasource - entra - Could not get the employee ID for the user', { entraIdUserObjectId, error, code: ENTRA_REQUEST_EMPLOYEE_LOOKUP_001 })
       throw error

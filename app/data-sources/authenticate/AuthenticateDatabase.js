@@ -42,7 +42,7 @@ export class AuthenticateDatabase {
 
   async healthCheck () {
     try {
-      this.logger.verbose('#datasource - authenticate - checking database connection', { code: AUTHENTICATE_DATABASE_READ_001 })
+      this.logger.http('#datasource - authenticate - checking database connection', { code: AUTHENTICATE_DATABASE_READ_001 })
       await this.dbRead.authenticate()
       this.logger.debug('#datasource - authenticate - database connection established', { code: AUTHENTICATE_DATABASE_READ_001 })
     } catch (error) {
@@ -62,6 +62,7 @@ export class AuthenticateDatabase {
         replacements: [new Date().toISOString(), employeeId, 'Search', crn]
       })
       const requestTimeMs = (Date.now() - requestStart)
+      this.logger.http('#datasource - authenticate - Created audit record in authenticate database', { employeeIdcode: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
       this.logger.debug('#datasource - authenticate - Created audit record in authenticate database', { employeeId, crn, code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
     } catch (error) {
       this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_WRITE_001 })
@@ -78,6 +79,7 @@ export class AuthenticateDatabase {
         }
       })
       const requestTimeMs = (Date.now() - requestStart)
+      this.logger.http('#datasource - authenticate - Got authenticate questions answers by CRN', { code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
       this.logger.debug('#datasource - authenticate - Got authenticate questions answers by CRN', { crn, answers, code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
       return answers
     } catch (error) {

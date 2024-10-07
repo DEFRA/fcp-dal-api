@@ -22,7 +22,7 @@ server.ext({
   method: function (request, h) {
     request.id = request.headers['x-ms-client-request-id'] || request.headers['x-ms-client-tracking-id'] || uuidv4()
 
-    logger.info('FCP - Access log', {
+    logger.debug('FCP - Access log', {
       request: {
         method: request.method.toUpperCase(),
         path: request.path,
@@ -42,6 +42,18 @@ server.ext({
 
 server.events.on('response', function (request) {
   const requestTimeMs = request.info.responded - request.info.received
+
+  logger.http('FCP - Access log', {
+    code: DAL_APPLICATION_REQUEST_001,
+    requestId: request.id,
+    request: {
+      path: request.path,
+      method: request.method.toUpperCase()
+    },
+    response: {
+      statusCode: request.response.statusCode
+    }
+  })
   logger.verbose('FCP - Response log', {
     request: {
       method: request.method.toUpperCase(),
