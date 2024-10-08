@@ -8,3 +8,4 @@ helm/**/*.lock
 .idea
 coverage
 .nvmrc
+.DS_Store
