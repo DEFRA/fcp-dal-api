@@ -35,5 +35,5 @@ export const stackTraceFormatter = format.printf((info) => {
 })
 
 export const redactSensitiveData = format.printf(info => {
-  return redact(info)
+  return redact(JSON.parse(JSON.stringify(info)))
 })

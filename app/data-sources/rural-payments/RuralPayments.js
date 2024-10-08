@@ -1,8 +1,8 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
-import { GraphQLError } from 'graphql'
 import StatusCodes from 'http-status-codes'
 import fetch from 'node-fetch'
 import qs from 'qs'
+import { HttpError } from '../../errors/graphql.js'
 import { APIM_ACCESS_TOKEN_REQUEST_001, APIM_APIM_REQUEST_001, RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 
 const defaultHeaders = {
@@ -91,17 +91,17 @@ export class RuralPayments extends RESTDataSource {
       return
     }
 
-    const errorAsText = StatusCodes.getStatusText(options.response.status)
-
-    throw new GraphQLError(errorAsText, {
-      extensions: {
-        ...options,
-        response: {
-          status: options.response.status,
-          headers: options.response.headers,
-          body: options.parsedBody
-        }
+    const extensions = {
+      ...options,
+      response: {
+        status: options.response.status,
+        headers: options.response.headers,
+        body: options.parsedBody
       }
+    }
+
+    throw new HttpError(options.response.status, {
+      extensions
     })
   }
 
@@ -245,8 +245,6 @@ export class RuralPayments extends RESTDataSource {
       request: { ...request, path },
       response: { status: result.response?.status }
     })
-    // console.log(response)
-    // const parsedBody = await this.parseBody(result.parsedBody)
     this.logger.debug('#datasource - apim - response detail', {
       request: { ...request, path },
       response: { ...response, body: result.parsedBody },
