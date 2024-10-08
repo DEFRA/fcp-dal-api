@@ -29,7 +29,15 @@ export default [
         }
       },
       {
-        id: 'error',
+        id: 'rpp-error',
+        type: 'text',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          body: 'RPP API error'
+        }
+      },
+      {
+        id: 'apim-error',
         type: 'status',
         options: {
           status: StatusCodes.INTERNAL_SERVER_ERROR

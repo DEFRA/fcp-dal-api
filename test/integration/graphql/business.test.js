@@ -131,9 +131,37 @@ describe('Query.business', () => {
     })
   })
 
-  it('should handle error from the data source', async () => {
+  it('should handle error from rpp', async () => {
     await mockServer.server.mock.useRouteVariant(
-      'rural-payments-organisation-get-by-id:error'
+      'rural-payments-organisation-get-by-id:rpp-error'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query Business {
+          business(sbi: "890000001") {
+            sbi
+            organisationId
+          }
+        }
+      `,
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: { business: null },
+      errors: [new GraphQLError('500: Internal Server Error')]
+    })
+
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-organisation-get-by-id:default'
+    )
+  })
+
+  it('should handle error from apim', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-organisation-get-by-id:apim-error'
     )
 
     const result = await graphql({

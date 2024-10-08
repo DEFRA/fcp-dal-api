@@ -167,4 +167,17 @@ describe('AuthenticateDatabase', () => {
 
     expect(authenticateMock).toHaveBeenCalled()
   })
+
+  test('health check error', async () => {
+    const error = new Error('Database error')
+    const authenticateMock = jest.fn().mockImplementation(() => { throw error })
+    Sequelize.mockImplementation(() => ({
+      define: jest.fn(),
+      authenticate: authenticateMock
+    }))
+
+    const db = new AuthenticateDatabase({ logger })
+
+    expect(() => db.healthCheck()).rejects.toEqual(error)
+  })
 })
