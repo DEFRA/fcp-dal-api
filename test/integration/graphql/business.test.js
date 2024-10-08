@@ -41,6 +41,10 @@ beforeAll(mockServer.start)
 afterAll(mockServer.stop)
 
 describe('Query.business', () => {
+  afterEach(async () => {
+    await mockServer.server.mock.restoreRouteVariants()
+  })
+
   it('should return business data', async () => {
     const transformedOrganisation =
       transformOrganisationToBusiness(organisationFixture)
@@ -138,25 +142,21 @@ describe('Query.business', () => {
 
     const result = await graphql({
       source: `#graphql
-        query Business {
-          business(sbi: "890000001") {
-            sbi
-            organisationId
+          query Business {
+            business(sbi: "890000001") {
+              sbi
+              organisationId
+            }
           }
-        }
-      `,
+        `,
       schema,
       contextValue: fakeContext
     })
 
     expect(result).toEqual({
       data: { business: null },
-      errors: [new GraphQLError('500: Internal Server Error')]
+      errors: [new GraphQLError('Internal Server Error')]
     })
-
-    await mockServer.server.mock.useRouteVariant(
-      'rural-payments-organisation-get-by-id:default'
-    )
   })
 
   it('should handle error from apim', async () => {
@@ -179,12 +179,8 @@ describe('Query.business', () => {
 
     expect(result).toEqual({
       data: { business: null },
-      errors: [new GraphQLError('500: Internal Server Error')]
+      errors: [new GraphQLError('Internal Server Error')]
     })
-
-    await mockServer.server.mock.useRouteVariant(
-      'rural-payments-organisation-get-by-id:default'
-    )
   })
 })
 

@@ -11,14 +11,14 @@
 
 import { createLogger, format, transports } from 'winston'
 import { jsonStringify } from './utils.js'
-import { stackTraceFormatter } from './winstonFormatters.js'
+import { stackTraceFormatter, redactSensitiveData } from './winstonFormatters.js'
 
 const transportTypes = []
 // If AppInsights is enabled, means we are running in Azure, format logs for AppInsights
 if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
   transportTypes.push(
     new transports.Console({
-      format: format.combine(stackTraceFormatter, format.json())
+      format: format.combine(redactSensitiveData, stackTraceFormatter, format.json())
     })
   )
 } else {
@@ -27,6 +27,7 @@ if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
     format: format.combine(
       format.align(),
       format.colorize(),
+      redactSensitiveData,
       stackTraceFormatter,
       format.printf(info => {
         return `${info.level}: ${info.message} ${jsonStringify(info)}`

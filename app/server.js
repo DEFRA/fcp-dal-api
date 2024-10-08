@@ -29,7 +29,7 @@ server.ext({
         params: request.params,
         payload: request.payload,
         body: request.body,
-        headers: request.raw.req.headers,
+        headers: request.headers,
         remoteAddress: request.info.remoteAddress
       },
       code: DAL_APPLICATION_REQUEST_001,
@@ -48,7 +48,8 @@ server.events.on('response', function (request) {
     requestId: request.id,
     request: {
       path: request.path,
-      method: request.method.toUpperCase()
+      method: request.method.toUpperCase(),
+      body: request.body
     },
     response: {
       statusCode: request.response.statusCode

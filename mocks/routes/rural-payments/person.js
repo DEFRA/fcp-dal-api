@@ -119,7 +119,10 @@ export default [
         type: 'text',
         options: {
           status: StatusCodes.FORBIDDEN,
-          body: 'RPP API error'
+          body: 'User does not have permission to access resource',
+          headers: {
+            'Content-Type': 'text/html'
+          }
         }
       }
     ]

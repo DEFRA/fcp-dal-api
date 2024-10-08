@@ -15,5 +15,19 @@ export const apolloServer = new ApolloServer({
 
       return ApolloServerPluginLandingPageLocalDefault()
     })()
-  ]
+  ],
+  formatError: (formattedError, _error) => {
+    const responseError = {
+      message: formattedError.message,
+      locations: formattedError.locations,
+      path: formattedError.path,
+      statusCode: formattedError?.extensions?.response?.status
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      responseError.extensions = formattedError.extensions
+    }
+
+    return responseError
+  }
 })

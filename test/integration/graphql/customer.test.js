@@ -139,7 +139,7 @@ describe('Query.customer', () => {
 
     expect(result).toEqual({
       data: { customer: { info: null } },
-      errors: [new GraphQLError('500: Internal Server Error')]
+      errors: [new GraphQLError('Internal Server Error')]
     })
 
     await mockServer.server.mock.useRouteVariant(
@@ -205,7 +205,7 @@ describe('Query.customer', () => {
         data: {
           customer: null
         },
-        errors: [new GraphQLError('500: Internal Server Error')]
+        errors: [new GraphQLError('Internal Server Error')]
       })
     })
   })
@@ -240,7 +240,7 @@ describe('Handle other errors', () => {
       data: {
         customer: null
       },
-      errors: [new GraphQLError('403: Forbidden')]
+      errors: [new GraphQLError('Forbidden')]
     })
   })
 })
@@ -463,7 +463,7 @@ describe('Query.customer.businesses', () => {
 
     expect(result).toEqual({
       data: { customer: { businesses: null } },
-      errors: [new GraphQLError('500: Internal Server Error')]
+      errors: [new GraphQLError('Internal Server Error')]
     })
 
     await mockServer.server.mock.useRouteVariant(

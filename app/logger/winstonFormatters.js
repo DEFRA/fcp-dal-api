@@ -1,8 +1,14 @@
+import fastRedact from 'fast-redact'
 import { format } from 'winston'
 
 const maxStackTrace = 50
 
 Error.stackTraceFormatterLimit = Error.stackTraceFormatterLimit < maxStackTrace ? maxStackTrace : Error.stackTraceFormatterLimit
+
+const redact = fastRedact({
+  paths: ['request.headers.authorization'],
+  serialize: false
+})
 
 export const stackTraceFormatter = format.printf((info) => {
   if (!info?.stack && !info?.error?.stack) {
@@ -26,4 +32,8 @@ export const stackTraceFormatter = format.printf((info) => {
   }
 
   return info
+})
+
+export const redactSensitiveData = format.printf(info => {
+  return redact(info)
 })
