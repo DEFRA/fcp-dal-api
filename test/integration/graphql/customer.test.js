@@ -87,6 +87,36 @@ describe('Query.customer', () => {
     })
   })
 
+  it('should handle person not found error', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-id:not-found'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query Customer($crn: ID!) {
+          customer(crn: $crn) {
+            info { dateOfBirth }
+          }
+        }
+      `,
+      variableValues: {
+        crn: '0866159801'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: { customer: { info: null } },
+      errors: [new GraphQLError('Rural payments customer not found')]
+    })
+
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-id:default'
+    )
+  })
+
   it('should handle error', async () => {
     await mockServer.server.mock.useRouteVariant(
       'rural-payments-person-get-by-id:error'

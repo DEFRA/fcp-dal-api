@@ -30,6 +30,15 @@ export default [
         }
       },
       {
+        id: 'not-found',
+        type: 'middleware',
+        options: {
+          middleware: (req, res) => {
+            return okOrNotFoundResponse(res, { _data: null })
+          }
+        }
+      },
+      {
         id: 'error',
         type: 'status',
         options: {
