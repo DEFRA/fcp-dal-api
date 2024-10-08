@@ -116,9 +116,10 @@ export default [
       },
       {
         id: 'error-permission',
-        type: 'status',
+        type: 'text',
         options: {
-          status: StatusCodes.FORBIDDEN
+          status: StatusCodes.FORBIDDEN,
+          body: 'RPP API error'
         }
       }
     ]
