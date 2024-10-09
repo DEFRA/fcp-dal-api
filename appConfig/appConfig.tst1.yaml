@@ -8,6 +8,8 @@
   value: "https://graph.microsoft.com"
 - key: VERSION_1_PAGE_SIZE
   value: "10000"
+- key: LOG_LEVEL
+  value: "http"
 
 # Secrets
 - key: API_TENANT_ID

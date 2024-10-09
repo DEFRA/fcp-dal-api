@@ -1,4 +1,5 @@
 import { NotFound } from '../../../errors/graphql.js'
+import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
 import { sampleResponse } from '../../../logger/utils.js'
 import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
@@ -24,12 +25,12 @@ export const Business = {
   },
 
   async customers ({ organisationId }, _, { dataSources }) {
-    logger.verbose('Get business customers', { organisationId })
+    logger.silly('Get business customers', { organisationId })
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
       )
-    logger.debug('Got business customers', {
+    logger.silly('Got business customers', {
       organisationId,
       customers: sampleResponse(customers)
     })
@@ -37,7 +38,7 @@ export const Business = {
   },
 
   async customer ({ organisationId, sbi }, { crn }, { dataSources }) {
-    logger.verbose('Get business customer', { crn, organisationId, sbi })
+    logger.silly('Get business customer', { crn, organisationId, sbi })
 
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
@@ -49,11 +50,11 @@ export const Business = {
     )
 
     if (!customer) {
-      logger.warn('Could not find customer in business', { crn, organisationId, sbi })
+      logger.warn('Could not find customer in business', { crn, organisationId, sbi, code: RURALPAYMENTS_API_NOT_FOUND_001 })
       throw new NotFound('Customer not found')
     }
 
-    logger.debug('Got business customer', {
+    logger.silly('Got business customer', {
       crn,
       sbi,
       organisationId,

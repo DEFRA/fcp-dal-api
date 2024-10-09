@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { logger } from '../../app/logger/logger.js'
 
 const Sequelize = jest.fn()
 jest.mock('sequelize', () => ({
@@ -25,7 +26,7 @@ describe('AuthenticateDatabase', () => {
     }))
 
     // eslint-disable-next-line no-new
-    new AuthenticateDatabase()
+    new AuthenticateDatabase({ logger })
 
     const dbOptions = {
       host: 'AUTHENTICATE_DB_HOST',
@@ -56,7 +57,7 @@ describe('AuthenticateDatabase', () => {
     }))
 
     // eslint-disable-next-line no-new
-    new AuthenticateDatabase()
+    new AuthenticateDatabase({ logger })
 
     expect(defineMock).toHaveBeenCalledWith('Answers', {
       CRN: { primaryKey: true, type: 'STRING' },
@@ -77,7 +78,7 @@ describe('AuthenticateDatabase', () => {
 
     jest.useFakeTimers().setSystemTime(new Date('2024-08-28T00:00:00.000Z'))
 
-    const db = new AuthenticateDatabase()
+    const db = new AuthenticateDatabase({ logger })
     await db.getAuthenticateQuestionsAnswersByCRN('mockCrn', 'mockEmployeeId')
 
     expect(queryMock).toHaveBeenCalledWith(
@@ -96,6 +97,36 @@ describe('AuthenticateDatabase', () => {
     )
   })
 
+  test('should handle error when creating audit record', async () => {
+    const error = new Error()
+    Sequelize.mockImplementation(() => ({
+      define: () => ({ findOne: jest.fn() }),
+      query: jest.fn().mockRejectedValue(error)
+    }))
+
+    const assertion = async () => {
+      const db = new AuthenticateDatabase({ logger })
+      await db.getAuthenticateQuestionsAnswersByCRN('mockCrn', 'mockEmployeeId')
+    }
+
+    expect(assertion).rejects.toEqual(error)
+  })
+
+  test('should handle error when finding record', async () => {
+    const error = new Error()
+    Sequelize.mockImplementation(() => ({
+      define: () => ({ findOne: jest.fn().mockRejectedValue(error) }),
+      query: jest.fn()
+    }))
+
+    const assertion = async () => {
+      const db = new AuthenticateDatabase({ logger })
+      await db.getAuthenticateQuestionsAnswersByCRN('mockCrn', 'mockEmployeeId')
+    }
+
+    expect(assertion).rejects.toEqual(error)
+  })
+
   test('should findOne using the Answer model', async () => {
     const mockFindOne = jest.fn()
     Sequelize.mockImplementation(() => ({
@@ -103,7 +134,7 @@ describe('AuthenticateDatabase', () => {
       query: jest.fn()
     }))
 
-    const db = new AuthenticateDatabase()
+    const db = new AuthenticateDatabase({ logger })
     await db.getAuthenticateQuestionsAnswersByCRN('mockCrn', 'mockEmployeeId')
 
     expect(mockFindOne).toHaveBeenCalledWith({
@@ -118,7 +149,7 @@ describe('AuthenticateDatabase', () => {
       query: jest.fn()
     }))
 
-    const db = new AuthenticateDatabase()
+    const db = new AuthenticateDatabase({ logger })
     const answers = await db.getAuthenticateQuestionsAnswersByCRN('mockCrn', 'mockEmployeeId')
 
     expect(answers).toEqual('mockAnswers')
@@ -131,9 +162,22 @@ describe('AuthenticateDatabase', () => {
       authenticate: authenticateMock
     }))
 
-    const db = new AuthenticateDatabase()
+    const db = new AuthenticateDatabase({ logger })
     await db.healthCheck()
 
     expect(authenticateMock).toHaveBeenCalled()
+  })
+
+  test('health check error', async () => {
+    const error = new Error('Database error')
+    const authenticateMock = jest.fn().mockImplementation(() => { throw error })
+    Sequelize.mockImplementation(() => ({
+      define: jest.fn(),
+      authenticate: authenticateMock
+    }))
+
+    const db = new AuthenticateDatabase({ logger })
+
+    expect(() => db.healthCheck()).rejects.toEqual(error)
   })
 })

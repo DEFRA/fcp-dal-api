@@ -1,6 +1,5 @@
 import { DataTypes, Sequelize } from 'sequelize'
-import { AUTHENTICATE_DATABASE_ALL_001 } from '../../logger/codes.js'
-import { logger } from '../../logger/logger.js'
+import { AUTHENTICATE_DATABASE_READ_001, AUTHENTICATE_DATABASE_WRITE_001, AUTHENTICATE_DATABASE_WRITE_002 } from '../../logger/codes.js'
 
 const dbOptions = {
   database: process.env.AUTHENTICATE_DB_SCHEMA,
@@ -11,6 +10,8 @@ const dbOptions = {
 }
 
 export class AuthenticateDatabase {
+  logger = null
+
   dbRead = new Sequelize({
     ...dbOptions,
     username: process.env.AUTHENTICATE_DB_USERNAME,
@@ -35,40 +36,54 @@ export class AuthenticateDatabase {
     Updated: DataTypes.DATE
   })
 
+  constructor (config = {}) {
+    this.logger = config.logger
+  }
+
   async healthCheck () {
     try {
+      this.logger.http('#datasource - authenticate - checking database connection', { code: AUTHENTICATE_DATABASE_READ_001 })
       await this.dbRead.authenticate()
-      logger.health('#authenticate - database authenticated', { code: AUTHENTICATE_DATABASE_ALL_001 })
+      this.logger.debug('#datasource - authenticate - database connection established', { code: AUTHENTICATE_DATABASE_READ_001 })
     } catch (error) {
-      logger.error('Authenticate database error', { error, code: AUTHENTICATE_DATABASE_ALL_001 })
+      this.logger.error('#datasource - authenticate - connection error', { error, code: AUTHENTICATE_DATABASE_READ_001 })
       throw error
     }
   }
 
   async getAuthenticateQuestionsAnswersByCRN (crn, employeeId) {
     try {
-      logger.silly('Creating audit record in authenticate database', { employeeId, crn })
+      this.logger.verbose('#datasource - authenticate - Creating audit record in authenticate database', { employeeId, crn, code: AUTHENTICATE_DATABASE_WRITE_001 })
+      const requestStart = Date.now()
       await this.dbAuditWrite.query(`
       INSERT INTO Audits ([Date], [User], [Action], [Value])
       VALUES(?, ?, ?, ?);
     `, {
         replacements: [new Date().toISOString(), employeeId, 'Search', crn]
       })
-      logger.debug('Created audit record in authenticate database', { employeeId, crn })
+      const requestTimeMs = (Date.now() - requestStart)
+      this.logger.http('#datasource - authenticate - Created audit record in authenticate database', { employeeIdcode: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
+      this.logger.debug('#datasource - authenticate - Created audit record in authenticate database', { employeeId, crn, code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
+    } catch (error) {
+      this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_WRITE_001 })
+      throw error
+    }
 
-      logger.silly('Getting authenticate questions answers by CRN', { crn, employeeId })
+    try {
+      this.logger.verbose('#datasource - authenticate - Getting authenticate questions answers by CRN', { crn, employeeId, code: AUTHENTICATE_DATABASE_WRITE_002 })
+      const requestStart = Date.now()
       const answers = await this.Answer.findOne({
         attributes: ['CRN', 'Date', 'Event', 'Location', 'Updated'],
         where: {
           CRN: crn
         }
       })
-      logger.debug('Got authenticate questions answers by CRN', { crn, answers })
-
-      logger.health('#authenticate - answers retrieved', { code: AUTHENTICATE_DATABASE_ALL_001 })
+      const requestTimeMs = (Date.now() - requestStart)
+      this.logger.http('#datasource - authenticate - Got authenticate questions answers by CRN', { code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
+      this.logger.debug('#datasource - authenticate - Got authenticate questions answers by CRN', { crn, answers, code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
       return answers
     } catch (error) {
-      logger.error('Authenticate database error', { error, code: AUTHENTICATE_DATABASE_ALL_001 })
+      this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_WRITE_002 })
       throw error
     }
   }

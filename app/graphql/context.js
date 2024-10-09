@@ -5,21 +5,23 @@ import { RuralPaymentsPortalApi } from '../data-sources/rural-payments-portal/Ru
 import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { Permissions } from '../data-sources/static/permissions.js'
+import { logger } from '../logger/logger.js'
 import { apolloServer } from './server.js'
-
-const authenticateDatabase = new AuthenticateDatabase()
-const permissions = new Permissions()
 
 export async function context ({ request }) {
   const auth = await getAuth(request)
+
+  const requestLogger = logger.child({ requestId: request.id })
+
   return {
     auth,
+    requestLogger,
     dataSources: {
-      authenticateDatabase,
-      entraIdApi: new EntraIdApi({ cache: apolloServer.cache }),
-      permissions,
-      ruralPaymentsBusiness: new RuralPaymentsBusiness(null, request),
-      ruralPaymentsCustomer: new RuralPaymentsCustomer(null, request),
+      authenticateDatabase: new AuthenticateDatabase({ logger: requestLogger }),
+      entraIdApi: new EntraIdApi({ cache: apolloServer.cache, logger: requestLogger }),
+      permissions: new Permissions({ logger: requestLogger }),
+      ruralPaymentsBusiness: new RuralPaymentsBusiness({ logger: requestLogger }, request),
+      ruralPaymentsCustomer: new RuralPaymentsCustomer({ logger: requestLogger }, request),
       ruralPaymentsPortalApi: new RuralPaymentsPortalApi()
     }
   }

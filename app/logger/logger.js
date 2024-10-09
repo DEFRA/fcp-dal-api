@@ -1,35 +1,24 @@
-import { addColors, createLogger, format, transports } from 'winston'
-import { jsonStringify } from './utils.js'
-import { stackTraceFormatter } from './winstonFormatters.js'
+/*
+ *
+ * Levels:
+ * error: // Used for errors that prevent the application from operating correctly
+ * warn: // Used for errors that do not prevent the application from operating correctly, but may cause issues
+ * info: // Application access logs
+ * verbose: // Third party access logs
+ * debug: // Third party response logs
+ * silly: // Detailed function logs
+ */
 
-const levels = {
-  levels: {
-    health: 1,
-    error: 2,
-    warn: 3,
-    info: 4,
-    verbose: 5,
-    debug: 6,
-    silly: 7
-  },
-  colors: {
-    health: 'white',
-    error: 'red',
-    warn: 'yellow',
-    info: 'green',
-    verbose: 'cyan',
-    debug: 'blue',
-    silly: 'magenta'
-  }
-}
-addColors(levels.colors)
+import { createLogger, format, transports } from 'winston'
+import { jsonStringify } from './utils.js'
+import { stackTraceFormatter, redactSensitiveData } from './winstonFormatters.js'
 
 const transportTypes = []
 // If AppInsights is enabled, means we are running in Azure, format logs for AppInsights
 if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
   transportTypes.push(
     new transports.Console({
-      format: format.combine(stackTraceFormatter, format.json())
+      format: format.combine(redactSensitiveData, stackTraceFormatter, format.json())
     })
   )
 } else {
@@ -38,6 +27,7 @@ if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
     format: format.combine(
       format.align(),
       format.colorize(),
+      redactSensitiveData,
       stackTraceFormatter,
       format.printf(info => {
         return `${info.level}: ${info.message} ${jsonStringify(info)}`
@@ -47,7 +37,6 @@ if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
 }
 
 export const logger = createLogger({
-  levels: levels.levels,
   level: process.env.LOG_LEVEL || 'info',
   transports: transportTypes
 })

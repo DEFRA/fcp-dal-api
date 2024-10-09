@@ -24,12 +24,12 @@ const throttle = (fn, time) => {
 }
 
 const authenticateDatabaseHealthCheck = throttle(async () => {
-  const authenticateDatabase = new AuthenticateDatabase()
+  const authenticateDatabase = new AuthenticateDatabase({ logger })
   return authenticateDatabase.healthCheck()
 }, process.env.HEALTH_CHECK_AUTHENTICATE_DATABASE_THROTTLE_TIME_MS || fiveMinutes)
 
 const ruralPaymentsAPIMHealthCheck = throttle(async () => {
-  const ruralPaymentsBusiness = new RuralPaymentsBusiness(null, {
+  const ruralPaymentsBusiness = new RuralPaymentsBusiness({ logger }, {
     headers: {
       email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL
     }
@@ -38,7 +38,7 @@ const ruralPaymentsAPIMHealthCheck = throttle(async () => {
 }, process.env.HEALTH_CHECK_RURAL_PAYMENTS_APIM_THROTTLE_TIME_MS || fiveMinutes)
 
 const entraHealthCheck = throttle(async () => {
-  const entraIdApi = new EntraIdApi()
+  const entraIdApi = new EntraIdApi({ logger })
   return entraIdApi.getEmployeeId(process.env.ENTRA_HEALTH_CHECK_USER_OBJECT_ID)
 }, process.env.HEALTH_CHECK_ENTRA_THROTTLE_TIME_MS || fiveMinutes)
 
@@ -56,8 +56,6 @@ export const healthyRoute = {
         entraHealthCheck(),
         crmHealthCheck()
       ])
-
-      logger.health('Application health check')
 
       return h.response('ok').code(StatusCodes.OK)
     } catch (error) {

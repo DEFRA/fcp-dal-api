@@ -87,6 +87,66 @@ describe('Query.customer', () => {
     })
   })
 
+  it('should handle person not found error', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-id:not-found'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query Customer($crn: ID!) {
+          customer(crn: $crn) {
+            info { dateOfBirth }
+          }
+        }
+      `,
+      variableValues: {
+        crn: '0866159801'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: { customer: { info: null } },
+      errors: [new GraphQLError('Rural payments customer not found')]
+    })
+
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-id:default'
+    )
+  })
+
+  it('should handle error', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-id:error'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query Customer($crn: ID!) {
+          customer(crn: $crn) {
+            info { dateOfBirth }
+          }
+        }
+      `,
+      variableValues: {
+        crn: '0866159801'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: { customer: { info: null } },
+      errors: [new GraphQLError('Internal Server Error')]
+    })
+
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-id:default'
+    )
+  })
+
   describe('Handle 500 errors', () => {
     afterEach(async () => {
       await mockServer.server.mock.restoreRouteVariants()
@@ -145,8 +205,42 @@ describe('Query.customer', () => {
         data: {
           customer: null
         },
-        errors: [new GraphQLError('500: Internal Server Error')]
+        errors: [new GraphQLError('Internal Server Error')]
       })
+    })
+  })
+})
+
+describe('Handle other errors', () => {
+  afterEach(async () => {
+    await mockServer.server.mock.restoreRouteVariants()
+  })
+
+  it('should handle 403 error', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-person-get-by-crn:error-permission'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query TestCustomerBusinesses($crn: ID!) {
+          customer(crn: $crn) {
+            personId
+          }
+        }
+      `,
+      variableValues: {
+        crn: '9103020285' // personId: 5007136
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: null
+      },
+      errors: [new GraphQLError('Forbidden')]
     })
   })
 })
@@ -344,6 +438,38 @@ describe('Query.customer.businesses', () => {
       }
     })
   })
+
+  it('should handle error', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-get-person-organisations-summary-by-person-id:error'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query Customer($crn: ID!) {
+          customer(crn: $crn) {
+            businesses {
+              sbi
+            }
+          }
+        }
+      `,
+      variableValues: {
+        crn: '0866159801'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: { customer: { businesses: null } },
+      errors: [new GraphQLError('Internal Server Error')]
+    })
+
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-get-person-organisations-summary-by-person-id:default'
+    )
+  })
 })
 
 describe('Query.customer.businesses.messages', () => {
@@ -485,7 +611,7 @@ describe('Query.customer.businesses.messages', () => {
         }
       },
       errors: [
-        new NotFound('Customer not found')
+        new NotFound('Rural payments customer not found')
       ]
     })
   })

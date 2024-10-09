@@ -1,13 +1,13 @@
 import { NotFound } from '../../../errors/graphql.js'
-import { logger } from '../../../logger/logger.js'
+import { GRAPHQL_RESOLVERS_BUSINESS_001 } from '../../../logger/codes.js'
 import { transformOrganisationToBusiness } from '../../../transformers/rural-payments/business.js'
 
 export const Query = {
-  async business (__, { sbi }, { dataSources }) {
+  async business (__, { sbi }, { dataSources, logger }) {
     const response = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
 
     if (!response) {
-      logger.info(`Business not found for SBI: ${sbi}`)
+      logger.warn('#graphql - business/query - Business not found for SBI', { sbi, code: GRAPHQL_RESOLVERS_BUSINESS_001 })
       throw new NotFound('Business not found')
     }
 

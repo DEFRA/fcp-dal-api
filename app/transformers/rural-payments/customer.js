@@ -6,7 +6,7 @@ export function transformBusinessCustomerToCustomerRole (crn, customers) {
     ({ customerReference }) => customerReference === crn
   )
 
-  logger.debug('Transforming business customer to customer role', {
+  logger.silly('Transforming business customer to customer role', {
     original: { crn, customers },
     transformed: customer.role
   })
@@ -61,7 +61,7 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses (
       ...properties
     }))
 
-  logger.debug(
+  logger.silly(
     'Transforming person summary to customer authorised businesses',
     { original: { properties, summary: sampleResponse(summary) }, transformed: sampleResponse(transformed) }
   )
@@ -139,7 +139,7 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness (
   if (!filteredBusinessForCustomer) {
     return null
   }
-  logger.verbose(
+  logger.silly(
     'Transforming person summary to customer authorised filtered business',
     {
       original: { properties, summary },

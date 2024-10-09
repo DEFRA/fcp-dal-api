@@ -14,7 +14,7 @@ export const Customer = {
   async personId ({ crn }, __, { dataSources }) {
     const { id: personId } =
       await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    logger.verbose('Get customer id from crn', { crn, personId })
+    logger.silly('Get customer id from crn', { crn, personId })
     return personId
   },
 
@@ -26,7 +26,7 @@ export const Customer = {
   },
 
   async business ({ crn }, { sbi }, { dataSources }) {
-    logger.verbose('Get customer business', { crn, sbi })
+    logger.silly('Get customer business', { crn, sbi })
 
     const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
@@ -35,7 +35,7 @@ export const Customer = {
       sbi
     )
 
-    logger.debug('Got customer business', { crn, personId, summary: sampleResponse(summary) })
+    logger.silly('Got customer business', { crn, personId, summary: sampleResponse(summary) })
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       { personId, crn, sbi },
       summary
@@ -49,7 +49,7 @@ export const Customer = {
       personId
     )
 
-    logger.debug('Got customer businesses', { crn, personId, summary: sampleResponse(summary) })
+    logger.silly('Got customer businesses', { crn, personId, summary: sampleResponse(summary) })
     return transformPersonSummaryToCustomerAuthorisedBusinesses(
       { personId, crn },
       summary
@@ -69,15 +69,13 @@ export const Customer = {
         crn,
         employeeId
       )
-
-    logger.info('customer resolver: answers retrieved')
     return transformAuthenticateQuestionsAnswers(results)
   }
 }
 
 export const CustomerBusiness = {
   async role ({ organisationId, crn }, __, { dataSources }) {
-    logger.verbose('Get customer business role', { crn, organisationId })
+    logger.silly('Get customer business role', { crn, organisationId })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId

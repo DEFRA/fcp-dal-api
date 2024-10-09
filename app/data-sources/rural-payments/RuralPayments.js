@@ -1,10 +1,9 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
-import { GraphQLError } from 'graphql'
 import StatusCodes from 'http-status-codes'
 import fetch from 'node-fetch'
 import qs from 'qs'
-import { APIM_REQUEST_ACCESS_TOKEN_001, APIM_REQUEST_RURAL_PAYMENTS_REQUEST_001, RURALPAYMENTS_REQUEST_ALL_001 } from '../../logger/codes.js'
-import { logger } from '../../logger/logger.js'
+import { HttpError } from '../../errors/graphql.js'
+import { APIM_ACCESS_TOKEN_REQUEST_001, APIM_APIM_REQUEST_001, RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 
 const defaultHeaders = {
   'Ocp-Apim-Subscription-Key': process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY
@@ -22,81 +21,93 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async fetch (path, incomingRequest) {
-    logger.verbose('#RuralPayments - new request', {
-      path,
-      method: incomingRequest.method
-    })
+    incomingRequest.retryCount = incomingRequest.retryCount || 1
 
-    const doRequest = async (count = 1) => {
-      try {
-        const requestStart = Date.now()
-        const result = await super.fetch(path, incomingRequest)
-        const requestEnd = (Date.now() - requestStart)
-        logger.verbose('#RuralPayments - response ', {
-          path,
-          status: result.response?.status
+    try {
+      const result = await super.fetch(path, incomingRequest)
+
+      return result
+    } catch (error) {
+      // Handle occasionally 500 error produced by APIM
+      // TODO: Once APIM has been fixed, remove retry logic
+      if (error?.extensions?.response?.status === StatusCodes.INTERNAL_SERVER_ERROR && incomingRequest.retryCount < maximumRetries) {
+        this.logger.warn('#datasource - apim - retrying request', {
+          request: {
+            method: incomingRequest.method.toUpperCase(),
+            path
+          },
+          response: {
+            status: error?.extensions?.response?.status,
+            headers: error?.extensions?.response?.headers.raw(),
+            body: error?.extensions?.parsedBody
+          },
+          code: APIM_APIM_REQUEST_001
         })
-        logger.health('#RuralPayments - request success', {
-          code: RURALPAYMENTS_REQUEST_ALL_001,
-          requestTimeMs: requestEnd
-        })
-        logger.health('#APIM - request success', {
-          code: APIM_REQUEST_RURAL_PAYMENTS_REQUEST_001
-        })
-        return result
-      } catch (error) {
-        // Handle occasionally 500 error produced by APIM
-        // TODO: Once APIM has been fixed, remove retry logic
-        if (error?.extensions?.response?.status === StatusCodes.INTERNAL_SERVER_ERROR && count < maximumRetries) {
-          logger.warn(`#RuralPayments - Error, Retrying request (${count})`, { error })
-          return doRequest(count + 1)
-        }
-        // if response is text, then the error is from RoralPayments
-        if (error?.extensions?.response?.headers?.get('Content-Type')?.includes('text/html')) {
-          logger.error('#RuralPayments - error', {
-            error,
-            path,
-            method: incomingRequest.method,
-            count,
-            response: error?.extensions?.response,
-            code: RURALPAYMENTS_REQUEST_ALL_001
-          })
-        } else {
-        // if response is json, then the error is from APIM
-          logger.error('#APIM - error', {
-            error,
-            path,
-            method: incomingRequest.method,
-            count,
-            response: error?.extensions?.response,
-            code: APIM_REQUEST_RURAL_PAYMENTS_REQUEST_001
-          })
-        }
-        throw error
+        incomingRequest.retryCount++
+
+        return this.fetch(path, incomingRequest)
       }
-    }
 
-    return doRequest()
+      throw error
+    }
+  }
+
+  didEncounterError (error, request, url) {
+    request.path = url
+    const { response } = error.extensions
+
+    // response is text, then the error is from RuralPayments
+    const isRuralPaymentsError = response?.headers?.get('Content-Type')?.includes('text/html')
+
+    // If response is text, then the error is from RuralPayments
+    if (isRuralPaymentsError) {
+      if (response?.status === StatusCodes.FORBIDDEN) {
+        // If user does not have access log a warning
+        this.logger.warn('#datasource - Rural payments - user does not have permission to resource', {
+          request,
+          code: RURALPAYMENTS_API_REQUEST_001
+        })
+      } else {
+        this.logger.error('#datasource - Rural payments - request error', {
+          error,
+          request,
+          response,
+          code: RURALPAYMENTS_API_REQUEST_001
+        })
+      }
+    } else {
+      // if response is json, then the error is from APIM
+      this.logger.error('#datasource - apim - request error', {
+        error,
+        request,
+        response,
+        code: APIM_APIM_REQUEST_001
+      })
+    }
   }
 
   async throwIfResponseIsError (options) {
-    const { response } = options
-    if (response.ok) {
+    if (options.response?.ok) {
       return
     }
 
-    throw new GraphQLError(`${options.response.status}: ${options.response.statusText}`, {
-      extensions: options
+    const extensions = {
+      ...options,
+      response: {
+        status: options.response.status,
+        headers: options.response.headers,
+        body: options.parsedBody
+      }
+    }
+
+    throw new HttpError(options.response.status, {
+      extensions
     })
   }
 
-  async willSendRequest (_path, request) {
+  async willSendRequest (path, request) {
     if (!this.apimAccessToken) {
-      logger.verbose('Getting APIM access token')
       await this.getApimAccessToken()
-      logger.verbose('APIM access token', {
-        apimAccessToken: this.apimAccessToken
-      })
     }
 
     request.headers = {
@@ -106,8 +117,14 @@ export class RuralPayments extends RESTDataSource {
       email: this.request.headers.email
     }
 
-    logger.debug('Request headers for rural payments', {
-      headers: request.headers
+    this.logger.verbose('#datasource - Rural payments - request', {
+      request: { ...request, path },
+      code: RURALPAYMENTS_API_REQUEST_001
+    })
+
+    this.logger.verbose('#datasource - apim - request', {
+      request: { ...request, path },
+      code: APIM_APIM_REQUEST_001
     })
   }
 
@@ -120,6 +137,7 @@ export class RuralPayments extends RESTDataSource {
     const basicAuthHeader = Buffer.from(
       `${process.env.RP_INTERNAL_APIM_CLIENT_ID}:${process.env.RP_INTERNAL_APIM_CLIENT_SECRET}`
     ).toString('base64')
+
     const headers = {
       'Content-Type': 'application/x-www-form-urlencoded',
       'Ocp-Apim-Subscription-Key':
@@ -127,12 +145,21 @@ export class RuralPayments extends RESTDataSource {
       Authorization: `Basic ${basicAuthHeader}`
     }
 
+    const url = `${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`
+
     try {
-      logger.verbose(
-        `Token request url: ${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`
-      )
-      const response = await fetch(
-        `${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.RP_INTERNAL_APIM_TENANT_ID}/oauth2/v2.0/token`,
+      this.logger.verbose('#datasource - apim - request access token', {
+        code: APIM_ACCESS_TOKEN_REQUEST_001,
+        request: {
+          method: 'post',
+          url,
+          headers,
+          body
+        }
+      })
+
+      const requestStart = Date.now()
+      const response = await fetch(url,
         {
           method: 'post',
           body,
@@ -140,17 +167,102 @@ export class RuralPayments extends RESTDataSource {
         }
       )
       const data = await response.json()
-      logger.debug('Token request response', { data })
+      const requestTimeMs = (Date.now() - requestStart)
 
       if (!data?.access_token?.length) {
         throw new Error('No access token returned')
       }
 
-      logger.health('Successfully got APIM access token', { code: APIM_REQUEST_ACCESS_TOKEN_001 })
+      this.logger.http('#datasource - apim - access token response', {
+        code: APIM_ACCESS_TOKEN_REQUEST_001,
+        requestTimeMs,
+        request: {
+          path: url,
+          method: 'POST'
+        },
+        response: {
+          status: response.status
+        }
+      })
+      this.logger.debug('#datasource - apim - access token response', {
+        request: {
+          method: 'post',
+          url,
+          headers,
+          body
+        },
+        response: {
+          status: response.status,
+          headers: response.headers.raw(),
+          body: data
+        },
+        code: APIM_ACCESS_TOKEN_REQUEST_001,
+        requestTimeMs
+      })
+
       this.apimAccessToken = data.access_token
     } catch (error) {
-      logger.error('Error getting APIM access token', { error, code: APIM_REQUEST_ACCESS_TOKEN_001 })
+      this.logger.error('#datasource - apim - access token error', {
+        error,
+        code: APIM_ACCESS_TOKEN_REQUEST_001
+      })
       throw error
+    }
+  }
+
+  // override trace function to avoid unnecessary logging
+  async trace (
+    path,
+    request,
+    fn
+  ) {
+    const requestStart = Date.now()
+    const result = await fn()
+    const requestTimeMs = (Date.now() - requestStart)
+
+    const response = {
+      status: result.response?.status,
+      headers: result.response?.headers.raw(),
+      body: result.response?.body
+    }
+
+    this.logger.http('#datasource - Rural payments - response', {
+      code: RURALPAYMENTS_API_REQUEST_001,
+      requestTimeMs,
+      request: { ...request, path },
+      response: { statusCode: request.response?.status }
+    })
+    this.logger.debug('#datasource - Rural payments - response detail', {
+      request: { ...request, path },
+      response: { ...response, body: result.parsedBody },
+      code: RURALPAYMENTS_API_REQUEST_001,
+      requestTimeMs
+    })
+
+    this.logger.http('#datasource - apim - response', {
+      code: APIM_APIM_REQUEST_001,
+      requestTimeMs,
+      request: { ...request, path },
+      response: { status: result.response?.status }
+    })
+    this.logger.debug('#datasource - apim - response detail', {
+      request: { ...request, path },
+      response: { ...response, body: result.parsedBody },
+      code: APIM_APIM_REQUEST_001,
+      requestTimeMs
+    })
+
+    return result
+  }
+
+  // ensure that the same request is not sent twice
+  requestDeduplicationPolicyFor (url, request) {
+    const method = request.method ?? 'GET'
+    const cacheKey = this.cacheKeyFor(url, request)
+    const requestId = request.id
+    return {
+      policy: 'deduplicate-during-request-lifetime',
+      deduplicationKey: `${requestId} ${method} ${cacheKey}`
     }
   }
 }

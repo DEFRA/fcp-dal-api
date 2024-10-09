@@ -28,6 +28,22 @@ export default [
             return okOrNotFoundResponse(res, data)
           }
         }
+      },
+      {
+        id: 'not-found',
+        type: 'middleware',
+        options: {
+          middleware: (req, res) => {
+            return okOrNotFoundResponse(res, { _data: null })
+          }
+        }
+      },
+      {
+        id: 'error',
+        type: 'status',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR
+        }
       }
     ]
   },
@@ -97,6 +113,17 @@ export default [
         options: {
           status: StatusCodes.INTERNAL_SERVER_ERROR
         }
+      },
+      {
+        id: 'error-permission',
+        type: 'text',
+        options: {
+          status: StatusCodes.FORBIDDEN,
+          body: 'User does not have permission to access resource',
+          headers: {
+            'Content-Type': 'text/html'
+          }
+        }
       }
     ]
   },
@@ -115,6 +142,13 @@ export default [
 
             return okOrNotFoundResponse(res, data)
           }
+        }
+      },
+      {
+        id: 'error',
+        type: 'status',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR
         }
       }
     ]

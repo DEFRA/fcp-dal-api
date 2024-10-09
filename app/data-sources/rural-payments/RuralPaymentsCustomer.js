@@ -1,77 +1,61 @@
 import { NotFound } from '../../errors/graphql.js'
-import { logger } from '../../logger/logger.js'
+import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getCustomerByCRN (crn) {
-    logger.verbose('Getting customer by CRN', { crn })
+    this.logger.silly('Getting customer by CRN', { crn })
 
-    try {
-      const body = JSON.stringify({
-        searchFieldType: 'CUSTOMER_REFERENCE',
-        primarySearchPhrase: crn,
-        offset: 0,
-        limit: 1
-      })
+    const body = JSON.stringify({
+      searchFieldType: 'CUSTOMER_REFERENCE',
+      primarySearchPhrase: crn,
+      offset: 0,
+      limit: 1
+    })
 
-      const customerResponse = await this.post('person/search', {
-        body,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      const response = customerResponse._data.pop() || {}
-      logger.debug('Customer by CRN', { response: sampleResponse(response) })
-
-      if (!response?.id) {
-        throw new NotFound('Customer not found')
+    const customerResponse = await this.post('person/search', {
+      body,
+      headers: {
+        'Content-Type': 'application/json'
       }
+    })
+    const response = customerResponse._data.pop() || {}
+    this.logger.silly('Customer by CRN response', { response: sampleResponse(response) })
 
-      return this.getPersonByPersonId(response.id)
-    } catch (error) {
-      if (error instanceof NotFound) {
-        logger.warn('Customer not found for CRN', { crn, error })
-      } else {
-        logger.error('Error getting customer by CRN', { crn, error })
-      }
-      throw error
+    if (!response?.id) {
+      this.logger.warn('#datasource - Rural payments - Customer not found for CRN', { crn, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+      throw new NotFound('Rural payments customer not found')
     }
+
+    return this.getPersonByPersonId(response.id)
   }
 
   async getPersonByPersonId (personId) {
-    logger.verbose('Getting person by person ID', { personId })
-    try {
-      const response = await this.get(`person/${personId}/summary`)
+    this.logger.silly('Getting person by person ID', { personId })
 
-      logger.debug('Person by person ID', { response: sampleResponse(response) })
-      return response._data
-    } catch (error) {
-      logger.error('Error getting person by person ID', { personId, error })
-      throw error
+    const response = await this.get(`person/${personId}/summary`)
+
+    if (!response?._data?.id) {
+      this.logger.warn('#datasource - Rural payments - Customer not found for Person ID', { personId, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+      throw new NotFound('Rural payments customer not found')
     }
+
+    this.logger.silly('Person by person ID response', { response: sampleResponse(response) })
+    return response._data
   }
 
   async getPersonBusinessesByPersonId (personId, sbi) {
-    logger.verbose('Getting person businesses by person ID', { personId, sbi })
+    this.logger.silly('Getting person businesses by person ID', { personId, sbi })
 
-    try {
-      const personBusinessSummaries = await this.get(
-        // Currently requires and empty search parameter or it returns 500 error
-        // page-size param set to ensure all orgs are retrieved
-        `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE || 100}`
-      )
+    const personBusinessSummaries = await this.get(
+      // Currently requires and empty search parameter or it returns 500 error
+      // page-size param set to ensure all orgs are retrieved
+      `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE || 100}`
+    )
 
-      logger.debug('Person businesses by person ID', { response: sampleResponse(personBusinessSummaries) })
-      return personBusinessSummaries._data
-    } catch (error) {
-      logger.error('Error getting person businesses by person ID', {
-        personId,
-        sbi,
-        error
-      })
-      throw error
-    }
+    this.logger.silly('Person businesses by person ID response', { response: sampleResponse(personBusinessSummaries) })
+    return personBusinessSummaries._data
   }
 
   async getNotificationsByOrganisationIdAndPersonId (
@@ -80,36 +64,27 @@ export class RuralPaymentsCustomer extends RuralPayments {
     page,
     size
   ) {
-    logger.verbose('Getting notifications by organisation ID and person ID', {
+    this.logger.silly('Getting notifications by organisation ID and person ID', {
       organisationId,
       personId,
       page,
       size
     })
-    try {
-      const response = await this.get('notifications', {
-        params: {
-          personId,
-          organisationId,
-          filter: '',
-          page,
-          size
-        }
-      })
-      logger.verbose('Notifications by organisation ID and person ID', {
-        response
-      })
 
-      return response.notifications
-    } catch (error) {
-      logger.error('Error getting notifications by organisation ID and person ID', {
-        organisationId,
+    const response = await this.get('notifications', {
+      params: {
         personId,
+        organisationId,
+        filter: '',
         page,
-        size,
-        error
-      })
-      throw error
-    }
+        size
+      }
+    })
+
+    this.logger.silly('Notifications by organisation ID and person ID response', {
+      response
+    })
+
+    return response.notifications
   }
 }

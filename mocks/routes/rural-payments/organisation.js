@@ -1,11 +1,12 @@
+import { StatusCodes } from 'http-status-codes'
 import {
   organisationByOrgId,
   organisationBySbi,
   organisationPeopleByOrgId
 } from '../../fixtures/organisation.js'
 import {
-  okOrNotFoundResponse,
   badRequestResponse,
+  okOrNotFoundResponse,
   okResponse
 } from '../../utils/requestResponse.js'
 
@@ -25,6 +26,21 @@ export default [
 
             return okOrNotFoundResponse(res, data)
           }
+        }
+      },
+      {
+        id: 'rpp-error',
+        type: 'text',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR,
+          body: 'RPP API error'
+        }
+      },
+      {
+        id: 'apim-error',
+        type: 'status',
+        options: {
+          status: StatusCodes.INTERNAL_SERVER_ERROR
         }
       }
     ]
