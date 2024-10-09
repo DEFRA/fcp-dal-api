@@ -45,6 +45,7 @@ server.events.on('response', function (request) {
 
   logger.http('FCP - Access log', {
     code: DAL_APPLICATION_REQUEST_001,
+    requestTimeMs,
     requestId: request.id,
     request: {
       path: request.path,
