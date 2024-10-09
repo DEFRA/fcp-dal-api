@@ -152,7 +152,7 @@ export class RuralPayments extends RESTDataSource {
         code: APIM_ACCESS_TOKEN_REQUEST_001,
         request: {
           method: 'post',
-          url,
+          path: url,
           headers,
           body
         }
@@ -187,7 +187,7 @@ export class RuralPayments extends RESTDataSource {
       this.logger.debug('#datasource - apim - access token response', {
         request: {
           method: 'post',
-          url,
+          path: url,
           headers,
           body
         },

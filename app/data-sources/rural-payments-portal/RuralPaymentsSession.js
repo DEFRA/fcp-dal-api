@@ -98,7 +98,7 @@ export class RuralPaymentsSession extends RESTDataSource {
     }
     logger.error('#RuralPaymentsSession - error', {
       status: response?.status,
-      url: response?.url,
+      path: response?.url,
       error: response?.error
     })
     throw await this.errorFromResponse(options)
