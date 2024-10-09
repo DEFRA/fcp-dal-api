@@ -62,8 +62,8 @@ export class AuthenticateDatabase {
         replacements: [new Date().toISOString(), employeeId, 'Search', crn]
       })
       const requestTimeMs = (Date.now() - requestStart)
-      this.logger.http('#datasource - authenticate - Created audit record in authenticate database', { employeeIdcode: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
-      this.logger.debug('#datasource - authenticate - Created audit record in authenticate database', { employeeId, crn, code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
+      this.logger.http('#datasource - authenticate - Created audit record in authenticate database', { code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
+      this.logger.debug('#datasource - authenticate - Created audit record in authenticate database', { code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs, employeeId, crn })
     } catch (error) {
       this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_WRITE_001 })
       throw error

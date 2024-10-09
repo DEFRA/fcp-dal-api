@@ -22,19 +22,21 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
     if (!authHeader) {
       return {}
     }
-    logger.verbose('#FCP - Request authentication - Check verification', { code: DAL_REQUEST_AUTHENTICATION_001 })
+    logger.verbose('#DAL - Request authentication - Check verification', { code: DAL_REQUEST_AUTHENTICATION_001 })
     const token = authHeader.split(' ')[1]
     const decodedToken = jwt.decode(token, { complete: true })
     const header = decodedToken.header
+    const requestStart = Date.now()
     const signingKey = await getJwtPublicKeyFunc(header.kid)
+    const requestTimeMs = (Date.now() - requestStart)
     const verified = jwt.verify(token, signingKey)
-    logger.debug('#FCP Request authentication - JWT verified', { code: DAL_REQUEST_AUTHENTICATION_001 })
+    logger.http('#DAL Request authentication - JWT verified', { code: DAL_REQUEST_AUTHENTICATION_001, requestTimeMs })
     return verified
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      logger.warn('#FCP - request authentication - token expired', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
+      logger.warn('#DAL - request authentication - token expired', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
     } else {
-      logger.error('#FCP - request authentication - Error verifying jwt', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
+      logger.error('#DAL - request authentication - Error verifying jwt', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
     }
     return {}
   }
