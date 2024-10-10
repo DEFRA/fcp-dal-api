@@ -12,7 +12,7 @@ describe('Healthy test', () => {
     }
 
     const response = await server.inject(options)
-    expect(response.statusCode).toEqual(500)
+    expect(response.statusCode).toEqual(200)
   })
 
   afterEach(async () => {

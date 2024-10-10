@@ -10,6 +10,10 @@
   value: "10000"
 - key: LOG_LEVEL
   value: "http"
+- key: ENVIRONMENT
+  value: "tst1"
+- key: HEALTH_CHECK_ENABLED
+  value: "false"
 
 # Secrets
 - key: API_TENANT_ID

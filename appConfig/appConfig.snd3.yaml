@@ -10,6 +10,10 @@
   value: "https://graph.microsoft.com"
 - key: VERSION_1_PAGE_SIZE
   value: "10000"
+- key: ENVIRONMENT
+  value: "snd3"
+- key: HEALTH_CHECK_ENABLED
+  value: "true"
 
 # Secrets
 - key: API_TENANT_ID
