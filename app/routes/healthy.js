@@ -64,9 +64,9 @@ export const healthyRoute = {
         }
 
         if (
-          process.env.AUTHENTICATE_DB_USERNAME?.length,
-          process.env.AUTHENTICATE_DB_PASSWORD?.length,
-          process.env.AUTHENTICATE_DB_USERNAME_AUDIT_WRITE?.length,
+          process.env.AUTHENTICATE_DB_USERNAME?.length &&
+          process.env.AUTHENTICATE_DB_PASSWORD?.length &&
+          process.env.AUTHENTICATE_DB_USERNAME_AUDIT_WRITE?.length &&
           process.env.AUTHENTICATE_DB_PASSWORD_AUDIT_WRITE?.length
         ) {
           healthChecks.push(authenticateDatabaseHealthCheck())
