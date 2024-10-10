@@ -1,5 +1,4 @@
 import { logger } from '../../../logger/logger.js'
-import { sampleResponse } from '../../../logger/utils.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../transformers/authenticate/question-answers.js'
 import {
   ruralPaymentsPortalCustomerTransformer,
@@ -35,7 +34,7 @@ export const Customer = {
       sbi
     )
 
-    logger.silly('Got customer business', { crn, personId, summary: sampleResponse(summary) })
+    logger.silly('Got customer business', { crn, personId, response: { body: summary } })
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       { personId, crn, sbi },
       summary
@@ -49,7 +48,7 @@ export const Customer = {
       personId
     )
 
-    logger.silly('Got customer businesses', { crn, personId, summary: sampleResponse(summary) })
+    logger.silly('Got customer businesses', { crn, personId, response: { body: summary } })
     return transformPersonSummaryToCustomerAuthorisedBusinesses(
       { personId, crn },
       summary

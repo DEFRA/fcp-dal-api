@@ -48,9 +48,10 @@ server.events.on('response', function (request) {
     requestTimeMs,
     requestId: request.id,
     request: {
+      headers: request.headers,
       path: request.path,
       method: request.method.toUpperCase(),
-      body: request.body
+      body: request.payload
     },
     response: {
       statusCode: request.response.statusCode
@@ -68,7 +69,7 @@ server.events.on('response', function (request) {
     response: {
       statusCode: request.response.statusCode,
       headers: request.response.headers,
-      payload: request.response.source
+      body: request.response.source
     },
     requestTimeMs,
     code: DAL_APPLICATION_RESPONSE_001,

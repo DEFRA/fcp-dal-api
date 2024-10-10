@@ -229,7 +229,11 @@ export class RuralPayments extends RESTDataSource {
     this.logger.http('#datasource - Rural payments - response', {
       code: RURALPAYMENTS_API_REQUEST_001,
       requestTimeMs,
-      request: { ...request, path },
+      request: {
+        method: request.method.toUpperCase(),
+        headers: request.headers,
+        path
+      },
       response: { statusCode: request.response?.status }
     })
     this.logger.debug('#datasource - Rural payments - response detail', {
@@ -242,7 +246,11 @@ export class RuralPayments extends RESTDataSource {
     this.logger.http('#datasource - apim - response', {
       code: APIM_APIM_REQUEST_001,
       requestTimeMs,
-      request: { ...request, path },
+      request: {
+        method: request.method.toUpperCase(),
+        headers: request.headers,
+        path
+      },
       response: { status: result.response?.status }
     })
     this.logger.debug('#datasource - apim - response detail', {

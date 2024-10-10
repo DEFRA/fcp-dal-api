@@ -1,7 +1,6 @@
 import { NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
-import { sampleResponse } from '../../../logger/utils.js'
 import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
 import {
@@ -32,7 +31,7 @@ export const Business = {
       )
     logger.silly('Got business customers', {
       organisationId,
-      customers: sampleResponse(customers)
+      response: { body: customers }
     })
     return transformOrganisationCustomers(customers)
   },
