@@ -83,7 +83,6 @@ export const healthyRoute = {
 
       return h.response('ok').code(StatusCodes.OK)
     } catch (error) {
-      logger.error('#health check - error', { error, code: DAL_HEALTH_CHECK_001 })
       return h.response('error').code(StatusCodes.INTERNAL_SERVER_ERROR)
     }
   }
