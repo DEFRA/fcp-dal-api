@@ -1,5 +1,3 @@
-import { setTimeout } from 'node:timers/promises'
-
 export const throttle = (fn, time) => {
   let shouldThrottle = false
   let success = true
@@ -11,9 +9,9 @@ export const throttle = (fn, time) => {
       } catch (error) {
         success = false
       }
-      setTimeout(time).then(() => {
+      setTimeout(() => {
         shouldThrottle = false
-      })
+      }, time)
       return success
     } else {
       return success
