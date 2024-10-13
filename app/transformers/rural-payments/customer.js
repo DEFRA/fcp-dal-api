@@ -63,7 +63,7 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses (
 
   logger.silly(
     'Transforming person summary to customer authorised businesses',
-    { original: { properties, summary: sampleResponse(summary) }, transformed: sampleResponse(transformed) }
+    { properties, original: sampleResponse(summary), transformed: sampleResponse(transformed) }
   )
   return transformed
 }

@@ -1,6 +1,5 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
-import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsBusiness extends RuralPayments {
@@ -39,9 +38,10 @@ export class RuralPaymentsBusiness extends RuralPayments {
       throw new NotFound('Rural payments organisation not found')
     }
 
+    this.logger.silly('Organisation by SBI', { response: { body: organisationResponse } })
+
     const response = organisationResponse?._data?.pop() || {}
 
-    this.logger.silly('Organisation by SBI', { response: sampleResponse(response) })
     return response?.id ? this.getOrganisationById(response.id) : null
   }
 
@@ -51,7 +51,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     const response = await this.get(
         `authorisation/organisation/${organisationId}`
     )
-    this.logger.silly('Organisation customers by organisation ID', { response: sampleResponse(response) })
+    this.logger.silly('Organisation customers by organisation ID', { response: { body: response } })
     return response._data
   }
 
@@ -89,7 +89,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       `SitiAgriApi/cph/organisation/${organisationId}/cph-numbers`
     )
 
-    this.logger.silly('Organisation CPH collection by organisation ID', { response: sampleResponse(response) })
+    this.logger.silly('Organisation CPH collection by organisation ID', { response: { body: response } })
     return response.data
   }
 
@@ -105,7 +105,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       )}`
     )
 
-    this.logger.silly('Organisation CPH info by organisation ID and CPH number', { response: sampleResponse(response) })
+    this.logger.silly('Organisation CPH info by organisation ID and CPH number', { response: { body: response } })
 
     return response.data
   }

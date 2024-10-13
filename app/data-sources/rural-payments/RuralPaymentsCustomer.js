@@ -1,6 +1,5 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
-import { sampleResponse } from '../../logger/utils.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
@@ -20,11 +19,12 @@ export class RuralPaymentsCustomer extends RuralPayments {
         'Content-Type': 'application/json'
       }
     })
+    this.logger.silly('Customer by CRN response', { response: { body: customerResponse } })
+
     const response = customerResponse._data.pop() || {}
-    this.logger.silly('Customer by CRN response', { response: sampleResponse(response) })
 
     if (!response?.id) {
-      this.logger.warn('#datasource - Rural payments - Customer not found for CRN', { crn, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+      this.logger.warn('#datasource - Rural payments - Customer not found for CRN', { crn, code: RURALPAYMENTS_API_NOT_FOUND_001, response: { body: customerResponse } })
       throw new NotFound('Rural payments customer not found')
     }
 
@@ -37,11 +37,11 @@ export class RuralPaymentsCustomer extends RuralPayments {
     const response = await this.get(`person/${personId}/summary`)
 
     if (!response?._data?.id) {
-      this.logger.warn('#datasource - Rural payments - Customer not found for Person ID', { personId, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+      this.logger.warn('#datasource - Rural payments - Customer not found for Person ID', { personId, code: RURALPAYMENTS_API_NOT_FOUND_001, response: { body: response } })
       throw new NotFound('Rural payments customer not found')
     }
 
-    this.logger.silly('Person by person ID response', { response: sampleResponse(response) })
+    this.logger.silly('Person by person ID response', { response: { body: response } })
     return response._data
   }
 
@@ -54,7 +54,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
       `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE || 100}`
     )
 
-    this.logger.silly('Person businesses by person ID response', { response: sampleResponse(personBusinessSummaries) })
+    this.logger.silly('Person businesses by person ID response', { response: { body: personBusinessSummaries } })
     return personBusinessSummaries._data
   }
 

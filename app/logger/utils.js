@@ -62,7 +62,8 @@ export const sampleResponse = response => {
   if (Array.isArray(response?._data)) {
     return {
       ...response,
-      _data: sampleArray(response._data)
+      _data: sampleArray(response._data),
+      __sampled: true
     }
   }
 

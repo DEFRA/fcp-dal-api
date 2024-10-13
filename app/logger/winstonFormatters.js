@@ -1,39 +1,29 @@
 import fastRedact from 'fast-redact'
 import { format } from 'winston'
+import { sampleResponse } from './utils.js'
 
-const maxStackTrace = 50
-
-Error.stackTraceFormatterLimit = Error.stackTraceFormatterLimit < maxStackTrace ? maxStackTrace : Error.stackTraceFormatterLimit
+const serialize = info => {
+  const symbols = Object.getOwnPropertySymbols(info).reduce((symbols, symbol) => {
+    symbols[symbol] = info[symbol]
+    return symbols
+  }, {})
+  const infoCloned = structuredClone(info)
+  return {
+    ...infoCloned,
+    ...symbols
+  }
+}
 
 const redact = fastRedact({
-  paths: ['request.headers.authorization'],
-  serialize: false
+  paths: ['*.*.authorization', '*.*.Authorization'],
+  serialize
 })
 
-export const stackTraceFormatter = format.printf((info) => {
-  if (!info?.stack && !info?.error?.stack) {
-    try {
-      throw new Error()
-    } catch (e) {
-      info.stack = e.stack
-        .split('\n')
-        .filter(
-          line =>
-            !line.includes('node_modules') &&
-            !line.includes('logger.js') &&
-            !line.includes('winstonFormatters.js') &&
-            !line.includes('node:')
-        )
-      info.stack.shift()
-      if (!info?.stack?.length) {
-        delete info.stack
-      }
-    }
+export const redactSensitiveData = format(redact)
+
+export const sampleResponseBodyData = format(info => {
+  if (info?.response?.body) {
+    info.response.body = sampleResponse(info.response.body)
   }
-
   return info
-})
-
-export const redactSensitiveData = format.printf(info => {
-  return redact(JSON.parse(JSON.stringify(info)))
 })
