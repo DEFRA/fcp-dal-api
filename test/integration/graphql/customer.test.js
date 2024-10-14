@@ -166,7 +166,7 @@ describe('Query.customer', () => {
           }
         `,
         variableValues: {
-          crn: '9103020285' // personId: 5007136
+          crn: '9477368292'
         },
         schema,
         contextValue: fakeContext
@@ -195,7 +195,7 @@ describe('Query.customer', () => {
           }
         `,
         variableValues: {
-          crn: '9103020285' // personId: 5007136
+          crn: '9477368292'
         },
         schema,
         contextValue: fakeContext
@@ -409,7 +409,7 @@ describe('Query.customer.businesses', () => {
         }
       `,
       variableValues: {
-        crn: '9103020285' // personId: 5007136
+        crn: '9477368292'
       },
       schema,
       contextValue: fakeContext
