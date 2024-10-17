@@ -12,7 +12,7 @@
 
 import { createLogger, format, transports } from 'winston'
 import { jsonStringify } from './utils.js'
-import { EventHubTransport } from './eventHub.js'
+import { AzureEventHubTransport } from './AzureEventHubTransport.js'
 import {
   redactSensitiveData,
   sampleResponseBodyData
@@ -50,9 +50,24 @@ if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
   )
 }
 
-transportTypes.push(new EventHubTransport({}))
+if (!process.env.EVENT_HUB_DISABLED) {
+  transportTypes.push(
+    new AzureEventHubTransport({
+      connectionString: process.env.EVENT_HUB_CONNECTION_STRING,
+      eventHubName: process.env.EVENT_HUB_NAME
+    })
+  )
+}
 
 export const logger = createLogger({
   level: process.env.LOG_LEVEL || 'info',
   transports: transportTypes
+})
+
+process.on('exit', () => {
+  logger.transports.forEach(transport => {
+    if (typeof transport.close === 'function') {
+      transport.close()
+    }
+  })
 })
