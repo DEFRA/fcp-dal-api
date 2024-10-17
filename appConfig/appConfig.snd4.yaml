@@ -74,5 +74,5 @@
   value: "{{servicename}}-EVENT-HUB-NAME"
   type: "keyvault"
 - key: EVENT_HUB_CONNECTION_STRING
-  value: "{{servicename}}-EVENT-HUB-CONNECTION_STRING"
+  value: "{{servicename}}-EVENT-HUB-CONNECTION-STRING"
   type: "keyvault"
