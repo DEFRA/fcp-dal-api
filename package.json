@@ -30,6 +30,7 @@
     "@apollo/datasource-rest": "^6.2.2",
     "@apollo/server": "^4.9.4",
     "@as-integrations/hapi": "^2.0.1",
+    "@azure/event-hubs": "^5.12.2",
     "@azure/identity": "^4.4.1",
     "@graphql-tools/load-files": "^7.0.0",
     "@graphql-tools/merge": "^9.0.0",
