@@ -12,7 +12,7 @@
 
 import { createLogger, format, transports } from 'winston'
 import { jsonStringify } from './utils.js'
-import { EventHubTransport } from 'eventHub.js'
+import { EventHubTransport } from './eventHub.js'
 import {
   redactSensitiveData,
   sampleResponseBodyData
