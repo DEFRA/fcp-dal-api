@@ -13,7 +13,7 @@
 - key: ENVIRONMENT
   value: "snd4"
 - key: HEALTH_CHECK_ENABLED
-  value: "false"
+  value: "true"
 
 # Secrets
 - key: API_TENANT_ID
@@ -69,4 +69,10 @@
   type: "keyvault"
 - key: ENTRA_HEALTH_CHECK_USER_OBJECT_ID
   value: "{{servicename}}-ENTRA-HEALTH-CHECK-USER-OBJECT-ID"
+  type: "keyvault"
+- key: EVENT_HUB_NAME
+  value: "{{servicename}}-EVENT-HUB-NAME"
+  type: "keyvault"
+- key: EVENT_HUB_CONNECTION_STRING
+  value: "{{servicename}}-EVENT-HUB-CONNECTION-STRING"
   type: "keyvault"

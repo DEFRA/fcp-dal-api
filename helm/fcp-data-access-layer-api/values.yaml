@@ -29,7 +29,7 @@ readinessProbe:
   path: /healthy
   port: 3000
   initialDelaySeconds: 60
-  periodSeconds: 10
+  periodSeconds: 60
   failureThreshold: 3
 
 livenessProbe:
