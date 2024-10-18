@@ -50,7 +50,7 @@ if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
   )
 }
 
-if (!process.env.EVENT_HUB_DISABLED) {
+if (process.env.EVENT_HUB_DISABLED !== 'true') {
   transportTypes.push(
     new AzureEventHubTransport({
       connectionString: process.env.EVENT_HUB_CONNECTION_STRING,

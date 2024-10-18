@@ -5,11 +5,11 @@
 - key: REST_CLIENT_TIMEOUT_IN_MILLIS
   value: "20000"
 - key: STATIC_CACHE_TIMEOUT_IN_MILLIS
-  value: "54000"  
+  value: "54000"
 - key: APPINSIGHTS_CLOUDROLE
-  value: "{{serviceName}}"            
+  value: "{{serviceName}}"
 - key: APPINSIGHTS_CONNECTIONSTRING
-  value: "{{servicename}}-APPINSIGHTS-CONNECTIONSTRING" 
+  value: "{{servicename}}-APPINSIGHTS-CONNECTIONSTRING"
   type: "keyvault"
 - key: HEALTH_CHECK_AUTHENTICATE_DATABASE_THROTTLE_TIME_MS
   value: "{{servicename}}-HEALTH-CHECK-AUTHENTICATE-DATABASE-THROTTLE-TIME-MS"
