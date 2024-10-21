@@ -2,7 +2,10 @@ import hapi from '@hapi/hapi'
 
 import { v4 as uuidv4 } from 'uuid'
 import { setupAppInsights } from './insights.js'
-import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
+import {
+  DAL_APPLICATION_REQUEST_001,
+  DAL_APPLICATION_RESPONSE_001
+} from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { healthyRoute } from './routes/healthy.js'
 import { healthzRoute } from './routes/healthz.js'
@@ -20,7 +23,10 @@ server.route(routes)
 server.ext({
   type: 'onRequest',
   method: function (request, h) {
-    request.id = request.headers['x-ms-client-request-id'] || request.headers['x-ms-client-tracking-id'] || uuidv4()
+    request.id =
+      request.headers['x-ms-client-request-id'] ||
+      request.headers['x-ms-client-tracking-id'] ||
+      uuidv4()
 
     logger.debug('FCP - Access log', {
       request: {

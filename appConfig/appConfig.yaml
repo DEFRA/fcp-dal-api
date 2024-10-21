@@ -8,6 +8,9 @@
   value: "54000"
 - key: APPINSIGHTS_CLOUDROLE
   value: "{{serviceName}}"
+- key: SOC_APPPLICATION_IDENTIFIER
+  value: DAL001
+
 - key: APPINSIGHTS_CONNECTIONSTRING
   value: "{{servicename}}-APPINSIGHTS-CONNECTIONSTRING"
   type: "keyvault"
