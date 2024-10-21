@@ -21,7 +21,7 @@ export class AzureEventHubTransport extends TransportStream {
   }
 
   log (info, callback) {
-    // We only want to send certain events to SOC, also need ot ensure no PII
+    // We only want to send certain events to SOC, also need ot ensure no PII.
     if (this.event_hub_enabled_codes.includes(info.message.code)) {
       setImmediate(() => this.emit('logged', info))
 
