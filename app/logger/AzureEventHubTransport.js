@@ -1,5 +1,9 @@
 import { EventHubProducerClient } from '@azure/event-hubs'
 import TransportStream from 'winston-transport'
+import {
+  DAL_APPLICATION_REQUEST_001,
+  DAL_REQUEST_AUTHENTICATION_001
+} from './codes.js'
 
 export class AzureEventHubTransport extends TransportStream {
   constructor (options) {
@@ -10,23 +14,31 @@ export class AzureEventHubTransport extends TransportStream {
       this.connectionString,
       this.eventHubName
     )
+    this.event_hub_enabled_codes = [
+      DAL_APPLICATION_REQUEST_001,
+      DAL_REQUEST_AUTHENTICATION_001
+    ]
   }
 
   log (info, callback) {
-    setImmediate(() => this.emit('logged', info))
+    // We only want to send certain events to SOC, also need ot ensure no PII.
+    if (this.event_hub_enabled_codes.includes(info.message.code)) {
+      setImmediate(() => this.emit('logged', info))
 
-    const logEntry = {
-      message: info.message,
-      level: info.level,
-      timestamp: new Date().toISOString(),
-      ...info
+      const logEntry = {
+        application: process.env.SOC_APPPLICATION_IDENTIFIER,
+        message: info.message,
+        level: info.level,
+        timestamp: new Date().toISOString(),
+        ...info
+      }
+
+      this.sendToEventHub(logEntry).catch(err => {
+        console.error('Error sending log to Event Hub:', err)
+      })
+
+      callback()
     }
-
-    this.sendToEventHub(logEntry).catch(err => {
-      console.error('Error sending log to Event Hub:', err)
-    })
-
-    callback()
   }
 
   async sendToEventHub (logEntry) {
