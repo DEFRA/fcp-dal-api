@@ -3,7 +3,7 @@ import TransportStream from 'winston-transport'
 import {
   DAL_APPLICATION_REQUEST_001,
   DAL_REQUEST_AUTHENTICATION_001
-} from './codes'
+} from './codes.js'
 
 export class AzureEventHubTransport extends TransportStream {
   constructor (options) {
