@@ -143,7 +143,7 @@ type Customer {
   """
   The businesses associated with the customer.
   """
-  businesses: [CustomerBusiness] @on
+  businesses: [CustomerBusinesses] @on
 
   """
   The single business filtered by sbi associated with the customer.
@@ -187,6 +187,31 @@ type CustomerBusiness {
   The permission groups associated with the business.
   """
   permissionGroups: [CustomerBusinessPermissionGroup] @on
+}
+
+"""
+Represents a business owned by a customer.
+"""
+type CustomerBusinesses {
+  """
+  The unique identifier of the business.
+  """
+  organisationId: ID @on
+
+  """
+  The SBI (Single Business Identifier) of the business.
+  """
+  sbi: ID! @on
+
+  """
+  The name of the business.
+  """
+  name: String! @on
+
+  """
+  The role associated with the business.
+  """
+  role: String @on
 }
 
 type CustomerBusinessPermissionGroup {

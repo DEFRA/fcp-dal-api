@@ -407,11 +407,12 @@ describe('Query.business.customers', () => {
   })
 
   it('permissions', async () => {
+    const personId = 5302028
     const result = await graphql({
       source: `#graphql
         query BusinessCustomersPermissions {
           business(sbi: "890000001") {
-            customers {
+            customer(crn: "9477368292") {
               permissionGroups {
                 id
                 level
@@ -427,7 +428,7 @@ describe('Query.business.customers', () => {
     expect(result).toEqual({
       data: {
         business: {
-          customers: organisationPeopleByOrgId('5565448')._data.map(
+          customer: organisationPeopleByOrgId('5565448')._data.filter(person => person.id === personId).map(
             ({ privileges }) => ({
               permissionGroups:
                 transformBusinessCustomerPrivilegesToPermissionGroups(
@@ -435,7 +436,7 @@ describe('Query.business.customers', () => {
                   new Permissions().getPermissionGroups()
                 )
             })
-          )
+          )[0]
         }
       }
     })

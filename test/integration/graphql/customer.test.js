@@ -16,6 +16,10 @@ beforeAll(mockServer.start)
 afterAll(mockServer.stop)
 
 describe('Query.customer', () => {
+  afterEach(async () => {
+    await mockServer.server.mock.restoreRouteVariants()
+  })
+
   it('should return customer data', async () => {
     const customerInfo = ruralPaymentsPortalCustomerTransformer(
       personFixture._data
@@ -111,10 +115,6 @@ describe('Query.customer', () => {
       data: { customer: { info: null } },
       errors: [new GraphQLError('Rural payments customer not found')]
     })
-
-    await mockServer.server.mock.useRouteVariant(
-      'rural-payments-person-get-by-id:default'
-    )
   })
 
   it('should handle error', async () => {
@@ -141,17 +141,9 @@ describe('Query.customer', () => {
       data: { customer: { info: null } },
       errors: [new GraphQLError('Internal Server Error')]
     })
-
-    await mockServer.server.mock.useRouteVariant(
-      'rural-payments-person-get-by-id:default'
-    )
   })
 
   describe('Handle 500 errors', () => {
-    afterEach(async () => {
-      await mockServer.server.mock.restoreRouteVariants()
-    })
-
     it('should retry request if 500 error', async () => {
       await mockServer.server.mock.useRouteVariant(
         'rural-payments-person-get-by-crn:error'
@@ -391,6 +383,10 @@ describe('Query.customer.authenticationQuestions', () => {
 })
 
 describe('Query.customer.businesses', () => {
+  afterEach(async () => {
+    await mockServer.server.mock.restoreRouteVariants()
+  })
+
   it('should return customer businesses', async () => {
     const result = await graphql({
       source: `#graphql
@@ -399,11 +395,7 @@ describe('Query.customer.businesses', () => {
             businesses {
               sbi
               organisationId
-              role
-               permissionGroups {
-                 id
-                 level
-               }
+              name
             }
           }
         }
@@ -420,18 +412,9 @@ describe('Query.customer.businesses', () => {
         customer: {
           businesses: [
             {
+              name: "Cliff Spence Teritorial Army's Abbey Farm, Hop-Worthering on the Naze a.k.a. the Donkey Sanctuary",
               sbi: '890000004',
-              organisationId: '5625145',
-              role: 'Agent',
-              permissionGroups: [
-                { id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' },
-                { id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' },
-                { id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS', level: 'SUBMIT' },
-                { id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS', level: 'SUBMIT' },
-                { id: 'ENTITLEMENTS', level: 'AMEND' },
-                { id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS', level: 'SUBMIT' },
-                { id: 'LAND_DETAILS', level: 'AMEND' }
-              ]
+              organisationId: '5625145'
             }
           ]
         }
@@ -465,20 +448,72 @@ describe('Query.customer.businesses', () => {
       data: { customer: { businesses: null } },
       errors: [new GraphQLError('Internal Server Error')]
     })
-
-    await mockServer.server.mock.useRouteVariant(
-      'rural-payments-get-person-organisations-summary-by-person-id:default'
-    )
   })
 })
 
-describe('Query.customer.businesses.messages', () => {
-  it('should return customer businesses messages', async () => {
+describe('Query.customer.business', () => {
+  it('should return customer business permissions', async () => {
     const result = await graphql({
       source: `#graphql
-        query Messages($crn: ID!, $pagination: Pagination, $deleted: Boolean) {
+        query Permissions($crn: ID!, $sbi: ID!) {
           customer(crn: $crn) {
-            businesses {
+            business(sbi: $sbi) {
+              role
+              permissionGroups {
+                id
+                level
+              }
+            }
+          }
+        }
+      `,
+      variableValues: {
+        crn: '0866159801',
+        sbi: '890000004'
+      },
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result).toEqual({
+      data: {
+        customer: {
+          business: {
+            role: 'Employee',
+            permissionGroups: [{
+              id: 'BASIC_PAYMENT_SCHEME',
+              level: 'NO_ACCESS'
+            }, {
+              id: 'BUSINESS_DETAILS',
+              level: 'AMEND'
+            }, {
+              id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS',
+              level: 'SUBMIT'
+            }, {
+              id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS',
+              level: 'SUBMIT'
+            }, {
+              id: 'ENTITLEMENTS',
+              level: 'NO_ACCESS'
+            }, {
+              id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
+              level: 'NO_ACCESS'
+            }, {
+              id: 'LAND_DETAILS',
+              level: 'VIEW'
+            }]
+          }
+        }
+      }
+    })
+  })
+
+  it('should return customer business messages', async () => {
+    const result = await graphql({
+      source: `#graphql
+        query Messages($crn: ID!, $sbi: ID!, $pagination: Pagination, $deleted: Boolean) {
+          customer(crn: $crn) {
+            business(sbi: $sbi) {
               messages(pagination: $pagination, showOnlyDeleted: $deleted) {
                 title
                 read
@@ -492,6 +527,7 @@ describe('Query.customer.businesses.messages', () => {
       `,
       variableValues: {
         crn: '0866159801',
+        sbi: '890000004',
         pagination: {
           page: 1,
           perPage: 3
@@ -505,24 +541,22 @@ describe('Query.customer.businesses.messages', () => {
     expect(result).toEqual({
       data: {
         customer: {
-          businesses: [
-            {
-              messages: [
-                {
-                  title: 'Permission changed for David Paul',
-                  read: false,
-                  id: '11401',
-                  date: 6010706997254
-                },
-                {
-                  title: 'Permission changed for David Paul',
-                  read: true,
-                  id: '7551987',
-                  date: 8327630499790
-                }
-              ]
-            }
-          ]
+          business: {
+            messages: [
+              {
+                title: 'Permission changed for David Paul',
+                read: false,
+                id: '11401',
+                date: 6010706997254
+              },
+              {
+                title: 'Permission changed for David Paul',
+                read: true,
+                id: '7551987',
+                date: 8327630499790
+              }
+            ]
+          }
         }
       }
     })
@@ -531,9 +565,9 @@ describe('Query.customer.businesses.messages', () => {
   it('should return deleted customer businesses messages', async () => {
     const result = await graphql({
       source: `#graphql
-        query Messages($crn: ID!, $pagination: Pagination, $deleted: Boolean) {
+        query Messages($crn: ID!, $sbi: ID!, $pagination: Pagination, $deleted: Boolean) {
           customer(crn: $crn) {
-            businesses {
+            business(sbi: $sbi) {
               messages(pagination: $pagination, showOnlyDeleted: $deleted) {
                 title
                 read
@@ -546,6 +580,7 @@ describe('Query.customer.businesses.messages', () => {
       `,
       variableValues: {
         crn: '0866159801',
+        sbi: '890000004',
         pagination: {
           page: 1,
           perPage: 3
@@ -559,18 +594,16 @@ describe('Query.customer.businesses.messages', () => {
     expect(result).toEqual({
       data: {
         customer: {
-          businesses: [
-            {
-              messages: [
-                {
-                  title: 'Permission changed for David Paul',
-                  read: false,
-                  id: '9315941',
-                  date: 8862388585856
-                }
-              ]
-            }
-          ]
+          business: {
+            messages: [
+              {
+                title: 'Permission changed for David Paul',
+                read: false,
+                id: '9315941',
+                date: 8862388585856
+              }
+            ]
+          }
         }
       }
     })
@@ -579,15 +612,10 @@ describe('Query.customer.businesses.messages', () => {
   it('should handle error when no businesses', async () => {
     const result = await graphql({
       source: `#graphql
-        query Messages($crn: ID!, $pagination: Pagination, $deleted: Boolean) {
+        query Messages($crn: ID!) {
           customer(crn: $crn) {
             businesses {
-              messages(pagination: $pagination, showOnlyDeleted: $deleted) {
-                title
-                read
-                id
-                date
-              }
+              name
             }
           }
         }

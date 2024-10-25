@@ -91,6 +91,36 @@ type BusinessType {
 """
 Represents the a customer of a business.
 """
+type BusinessCustomers {
+  """
+  The unique identifier of the customer.
+  """
+  personId: ID @on
+
+  """
+  First name of the customer.
+  """
+  firstName: String @on
+
+  """
+  Last name of the customer.
+  """
+  lastName: String @on
+
+  """
+  The customer reference of the customer.
+  """
+  crn: String @on
+
+  """
+  The role the customer against the business.
+  """
+  role: String @on
+}
+
+"""
+Represents the a customer of a business.
+"""
 type BusinessCustomer {
   """
   The unique identifier of the customer.
@@ -173,7 +203,7 @@ type Business {
   """
   The customers associated with the business.
   """
-  customers: [BusinessCustomer] @on
+  customers: [BusinessCustomers] @on
 
   """
   The customer associated with the business.

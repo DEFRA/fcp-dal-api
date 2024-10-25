@@ -45,6 +45,24 @@ describe('schema', () => {
           scalar UUID
 
           """Represents the a customer of a business."""
+          type BusinessCustomers {
+            """The unique identifier of the customer."""
+            personId: ID
+
+            """First name of the customer."""
+            firstName: String
+
+            """Last name of the customer."""
+            lastName: String
+
+            """The customer reference of the customer."""
+            crn: String
+
+            """The role the customer against the business."""
+            role: String
+          }
+
+          """Represents the a customer of a business."""
           type BusinessCustomer {
             """The unique identifier of the customer."""
             personId: ID
@@ -86,7 +104,7 @@ describe('schema', () => {
             sbi: ID!
 
             """The customers associated with the business."""
-            customers: [BusinessCustomer]
+            customers: [BusinessCustomers]
 
             """
             The customer associated with the business.
@@ -124,12 +142,27 @@ describe('schema', () => {
             authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions
 
             """The businesses associated with the customer."""
-            businesses: [CustomerBusiness]
+            businesses: [CustomerBusinesses]
 
             """
             The single business filtered by sbi associated with the customer.
             """
             business(sbi: ID!): CustomerBusiness
+          }
+
+          """Represents a business owned by a customer."""
+          type CustomerBusinesses {
+            """The unique identifier of the business."""
+            organisationId: ID
+
+            """The SBI (Single Business Identifier) of the business."""
+            sbi: ID!
+
+            """The name of the business."""
+            name: String!
+
+            """The role associated with the business."""
+            role: String
           }
 
           """Represents a business owned by a customer."""
@@ -390,6 +423,24 @@ describe('schema', () => {
           }
 
           """Represents the a customer of a business."""
+          type BusinessCustomers {
+            """The unique identifier of the customer."""
+            personId: ID
+
+            """First name of the customer."""
+            firstName: String
+
+            """Last name of the customer."""
+            lastName: String
+
+            """The customer reference of the customer."""
+            crn: String
+
+            """The role the customer against the business."""
+            role: String
+          }
+
+          """Represents the a customer of a business."""
           type BusinessCustomer {
             """The unique identifier of the customer."""
             personId: ID
@@ -443,7 +494,7 @@ describe('schema', () => {
             cph: [CPH]
 
             """The customers associated with the business."""
-            customers: [BusinessCustomer]
+            customers: [BusinessCustomers]
 
             """
             The customer associated with the business.
@@ -646,7 +697,7 @@ describe('schema', () => {
             authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions
 
             """The businesses associated with the customer."""
-            businesses: [CustomerBusiness]
+            businesses: [CustomerBusinesses]
 
             """The single business filtered by sbi associated with the customer."""
             business(sbi: ID!): CustomerBusiness
@@ -671,6 +722,21 @@ describe('schema', () => {
 
             """The permission groups associated with the business."""
             permissionGroups: [CustomerBusinessPermissionGroup]
+          }
+
+          """Represents a business owned by a customer."""
+          type CustomerBusinesses {
+            """The unique identifier of the business."""
+            organisationId: ID
+
+            """The SBI (Single Business Identifier) of the business."""
+            sbi: ID!
+
+            """The name of the business."""
+            name: String!
+
+            """The role associated with the business."""
+            role: String
           }
 
           type CustomerBusinessPermissionGroup {
