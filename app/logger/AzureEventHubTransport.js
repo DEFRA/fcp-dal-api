@@ -14,7 +14,7 @@ export class AzureEventHubTransport extends TransportStream {
       this.connectionString,
       this.eventHubName
     )
-    this.event_hub_enabled_codes = [
+    this.enabledCodes = [
       DAL_APPLICATION_REQUEST_001,
       DAL_REQUEST_AUTHENTICATION_001
     ]
@@ -22,9 +22,7 @@ export class AzureEventHubTransport extends TransportStream {
 
   log (info, callback) {
     // We only want to send certain events to SOC, also need ot ensure no PII.
-    if (this.event_hub_enabled_codes.includes(info.message.code)) {
-      setImmediate(() => this.emit('logged', info))
-
+    if (this.enabledCodes.includes(info?.code)) {
       const logEntry = {
         application: process.env.SOC_APPPLICATION_IDENTIFIER,
         message: info.message,
@@ -36,9 +34,8 @@ export class AzureEventHubTransport extends TransportStream {
       this.sendToEventHub(logEntry).catch(err => {
         console.error('Error sending log to Event Hub:', err)
       })
-
-      callback()
     }
+    callback()
   }
 
   async sendToEventHub (logEntry) {
