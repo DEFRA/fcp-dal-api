@@ -13,7 +13,7 @@
 - key: ENVIRONMENT
   value: "snd3"
 - key: HEALTH_CHECK_ENABLED
-  value: "false"
+  value: "true"
 
 # Secrets
 - key: API_TENANT_ID
