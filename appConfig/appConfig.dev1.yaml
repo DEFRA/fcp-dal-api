@@ -14,6 +14,8 @@
   value: "false"
 - key: LOG_LEVEL
   value: "http"
+- key: ENVIRONMENT_URL
+  value: "https://fcp-data-access-layer-api.snd3.adp.defra.gov.uk"
 
 # Secrets
 - key: API_TENANT_ID

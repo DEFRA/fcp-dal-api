@@ -14,6 +14,8 @@
   value: "pre1"
 - key: HEALTH_CHECK_ENABLED
   value: "true"
+- key: ENVIRONMENT_URL
+  value: "https://fcp-data-access-layer-api.snd3.adp.defra.gov.uk"
 
 # Secrets
 - key: API_TENANT_ID

@@ -14,6 +14,8 @@
   value: "snd4"
 - key: HEALTH_CHECK_ENABLED
   value: "false"
+- key: ENVIRONMENT_URL
+  value: "https://fcp-data-access-layer-api.snd3.adp.defra.gov.uk"
 
 # Secrets
 - key: API_TENANT_ID
@@ -75,4 +77,10 @@
   type: "keyvault"
 - key: EVENT_HUB_CONNECTION_STRING
   value: "{{servicename}}-EVENT-HUB-CONNECTION-STRING"
+  type: "keyvault"
+- key: RP_INTERNAL_HEALTH_CHECK_ORGANISATION_SBI
+  value: "{{servicename}}-RP-INTERNAL-HEALTH-CHECK-ORGANISATION-SBI"
+  type: "keyvault"
+- key: RP_INTERNAL_HEALTH_CHECK_CUSTOMER_CRN
+  value: "{{servicename}}-RP-INTERNAL-HEALTH-CHECK-CUSTOMER-CRN"
   type: "keyvault"
