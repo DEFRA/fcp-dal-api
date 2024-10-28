@@ -22,21 +22,44 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
     if (!authHeader) {
       return {}
     }
-    logger.verbose('#DAL - Request authentication - Check verification', { code: DAL_REQUEST_AUTHENTICATION_001 })
+    logger.verbose('#DAL - Request authentication - Check verification', {
+      code: DAL_REQUEST_AUTHENTICATION_001,
+      request: {
+        remoteAddress: request.info.remoteAddress
+      }
+    })
     const token = authHeader.split(' ')[1]
     const decodedToken = jwt.decode(token, { complete: true })
     const header = decodedToken.header
     const requestStart = Date.now()
     const signingKey = await getJwtPublicKeyFunc(header.kid)
-    const requestTimeMs = (Date.now() - requestStart)
+    const requestTimeMs = Date.now() - requestStart
     const verified = jwt.verify(token, signingKey)
-    logger.http('#DAL Request authentication - JWT verified', { code: DAL_REQUEST_AUTHENTICATION_001, requestTimeMs })
+    logger.http('#DAL Request authentication - JWT verified', {
+      code: DAL_REQUEST_AUTHENTICATION_001,
+      requestTimeMs,
+      request: {
+        remoteAddress: request.info.remoteAddress
+      }
+    })
     return verified
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      logger.warn('#DAL - request authentication - token expired', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
+      logger.warn('#DAL - request authentication - token expired', {
+        error,
+        code: DAL_REQUEST_AUTHENTICATION_001,
+        request: {
+          remoteAddress: request.info.remoteAddress
+        }
+      })
     } else {
-      logger.error('#DAL - request authentication - Error verifying jwt', { error, code: DAL_REQUEST_AUTHENTICATION_001 })
+      logger.error('#DAL - request authentication - Error verifying jwt', {
+        error,
+        code: DAL_REQUEST_AUTHENTICATION_001,
+        request: {
+          remoteAddress: request.info.remoteAddress
+        }
+      })
     }
     return {}
   }
