@@ -15,7 +15,7 @@ const serialize = info => {
 }
 
 const redact = fastRedact({
-  paths: ['*.*.authorization', '*.*.Authorization'],
+  paths: ['*.*.authorization', '*.*.Authorization', '*.*.access_token'],
   serialize
 })
 
