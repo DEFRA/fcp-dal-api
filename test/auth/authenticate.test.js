@@ -41,11 +41,22 @@ const tokenPayload = {
 
 const token = jwt.sign(tokenPayload, 'secret', { expiresIn: '1h' })
 const tokenDiffSecret = jwt.sign(tokenPayload, 'secret2', { expiresIn: '1h' })
-const mockRequest = { headers: { authorization: `Bearer ${token}` } }
-const mockRequestWrongSign = {
-  headers: { authorization: `Bearer ${tokenDiffSecret}` }
+const mockRequest = {
+  headers: {
+    authorization: `Bearer ${token}`
+  },
+  info: { remoteAddress: '0.0.0.0' }
 }
-const incorrectTokenReq = { headers: { authorization: 'Bearer WRONG' } }
+const mockRequestWrongSign = {
+  headers: {
+    authorization: `Bearer ${tokenDiffSecret}`
+  },
+  info: { remoteAddress: '0.0.0.0' }
+}
+const incorrectTokenReq = {
+  headers: { authorization: 'Bearer WRONG' },
+  info: { remoteAddress: '0.0.0.0' }
+}
 const decodedToken = jwt.decode(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
 
@@ -53,7 +64,10 @@ describe('getJwtPublicKey', () => {
   let jwksMock
   let stopMock
   beforeEach(() => {
-    jwksMock = createJWKSMock('https://login.microsoftonline.com', `/${process.env.API_TENANT_ID}/discovery/v2.0/keys`)
+    jwksMock = createJWKSMock(
+      'https://login.microsoftonline.com',
+      `/${process.env.API_TENANT_ID}/discovery/v2.0/keys`
+    )
     stopMock = jwksMock.start()
   })
 
@@ -100,7 +114,9 @@ describe('getAuth', () => {
   test('should return an empty object when token verification fails, due to token expiry', async () => {
     const error = new Error('TokenExpiredError')
     error.name = 'TokenExpiredError'
-    mockPublicKeyFunc.mockImplementation(() => { throw error })
+    mockPublicKeyFunc.mockImplementation(() => {
+      throw error
+    })
     expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })

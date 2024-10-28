@@ -25,7 +25,7 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
     logger.verbose('#DAL - Request authentication - Check verification', {
       code: DAL_REQUEST_AUTHENTICATION_001,
       request: {
-        remoteAddress: request.info.remoteAddress
+        remoteAddress: request?.info?.remoteAddress
       }
     })
     const token = authHeader.split(' ')[1]
@@ -39,7 +39,7 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
       code: DAL_REQUEST_AUTHENTICATION_001,
       requestTimeMs,
       request: {
-        remoteAddress: request.info.remoteAddress
+        remoteAddress: request?.info?.remoteAddress
       }
     })
     return verified
@@ -49,7 +49,7 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,
         request: {
-          remoteAddress: request.info.remoteAddress
+          remoteAddress: request?.info?.remoteAddress
         }
       })
     } else {
@@ -57,7 +57,7 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,
         request: {
-          remoteAddress: request.info.remoteAddress
+          remoteAddress: request?.info?.remoteAddress
         }
       })
     }
