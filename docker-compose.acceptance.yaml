@@ -1,0 +1,11 @@
+# This override file should be used when running automated tests so
+# that test output is saved to the host
+
+services:
+  fcp-data-access-layer-api-test-runner:
+    build:
+      context: .
+      target: development
+    image: fcp-data-access-layer-api-development
+    container_name: fcp-data-access-layer-api-test
+    command: npm run test:acceptance
