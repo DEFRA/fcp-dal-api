@@ -54,10 +54,13 @@ server.events.on('response', function (request) {
     requestTimeMs,
     requestId: request.id,
     request: {
-      headers: request.headers,
-      path: request.path,
       method: request.method.toUpperCase(),
-      body: request.payload
+      path: request.path,
+      params: request.params,
+      payload: request.payload,
+      body: request.body,
+      headers: request.headers,
+      remoteAddress: request.info.remoteAddress
     },
     response: {
       statusCode: request.response.statusCode
