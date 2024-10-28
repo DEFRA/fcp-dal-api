@@ -4,6 +4,15 @@ import qs from 'qs'
 describe('authenticate contract', () => {
   let token
   beforeAll(async () => {
+    console.log('CLIENT_ID', process.env.CLIENT_ID)
+    console.log('CLIENT_SECRET', process.env.CLIENT_SECRET)
+    console.log('API_TENANT_ID', process.env.API_TENANT_ID)
+    console.log('RP_INTERNAL_APIM_ACCESS_TOKEN_URL', process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL)
+    console.log('RP_INTERNAL_HEALTH_CHECK_CUSTOMER_CRN', process.env.RP_INTERNAL_HEALTH_CHECK_CUSTOMER_CRN)
+    console.log('ENTRA_HEALTH_CHECK_USER_OBJECT_ID', process.env.ENTRA_HEALTH_CHECK_USER_OBJECT_ID)
+    console.log('RURAL_PAYMENTS_PORTAL_EMAIL', process.env.RURAL_PAYMENTS_PORTAL_EMAIL)
+    console.log('RP_INTERNAL_HEALTH_CHECK_ORGANISATION_SBI', process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_SBI)
+
     const body = qs.stringify({
       client_id: process.env.CLIENT_ID,
       client_secret: process.env.CLIENT_SECRET,
