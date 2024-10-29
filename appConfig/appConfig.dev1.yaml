@@ -12,6 +12,8 @@
   value: "dev1"
 - key: HEALTH_CHECK_ENABLED
   value: "false"
+- key: LOG_LEVEL
+  value: "http"
 
 # Secrets
 - key: API_TENANT_ID
