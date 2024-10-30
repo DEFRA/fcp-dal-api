@@ -11,7 +11,7 @@
 - key: ENVIRONMENT
   value: "prd1"
 - key: HEALTH_CHECK_ENABLED
-  value: "true"
+  value: "false"
 
 # Secrets
 - key: API_TENANT_ID
