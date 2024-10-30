@@ -11,7 +11,7 @@
 - key: ENVIRONMENT
   value: "prd1"
 - key: HEALTH_CHECK_ENABLED
-  value: "true"
+  value: "false"
 - key: LOG_LEVEL
   value: "http"
 
