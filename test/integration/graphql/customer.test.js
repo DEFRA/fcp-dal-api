@@ -151,7 +151,7 @@ describe('Query.customer', () => {
 
       const result = await graphql({
         source: `#graphql
-          query TestCustomerBusinesses($crn: ID!) {
+          query TestCustomerBusiness($crn: ID!) {
             customer(crn: $crn) {
               personId
             }
@@ -180,7 +180,7 @@ describe('Query.customer', () => {
 
       const result = await graphql({
         source: `#graphql
-          query TestCustomerBusinesses($crn: ID!) {
+          query TestCustomerBusiness($crn: ID!) {
             customer(crn: $crn) {
               personId
             }
@@ -215,7 +215,7 @@ describe('Handle other errors', () => {
 
     const result = await graphql({
       source: `#graphql
-        query TestCustomerBusinesses($crn: ID!) {
+        query TestCustomerBusiness($crn: ID!) {
           customer(crn: $crn) {
             personId
           }
@@ -390,7 +390,7 @@ describe('Query.customer.businesses', () => {
   it('should return customer businesses', async () => {
     const result = await graphql({
       source: `#graphql
-        query TestCustomerBusinesses($crn: ID!) {
+        query TestCustomerBusiness($crn: ID!) {
           customer(crn: $crn) {
             businesses {
               sbi

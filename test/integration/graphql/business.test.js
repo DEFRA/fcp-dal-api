@@ -345,7 +345,7 @@ describe('Query.business.customers', () => {
   it('customer', async () => {
     const result = await graphql({
       source: `#graphql
-      query BusinessCustomers {
+      query BusinessCustomer {
         business(sbi: "890000001") {
           customers {
             personId
@@ -410,7 +410,7 @@ describe('Query.business.customers', () => {
     const personId = 5302028
     const result = await graphql({
       source: `#graphql
-        query BusinessCustomersPermissions {
+        query BusinessCustomerPermissions {
           business(sbi: "890000001") {
             customer(crn: "9477368292") {
               permissionGroups {

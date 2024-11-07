@@ -143,18 +143,20 @@ type Customer {
   """
   The businesses associated with the customer.
   """
-  businesses: [CustomerBusinesses] @on
+  businesses: [CustomerBusiness] @on
 
   """
   The single business filtered by sbi associated with the customer.
   """
-  business(sbi: ID!): CustomerBusiness @on
+  business(sbi: ID!): CustomerBusinessDetail @on
 }
 
 """
-Represents a business owned by a customer.
+Represents a business owned by a customer. Additional properties over CustomerBusiness:
+ - messages
+ - permissionGroups
 """
-type CustomerBusiness {
+type CustomerBusinessDetail {
   """
   The unique identifier of the business.
   """
@@ -192,7 +194,7 @@ type CustomerBusiness {
 """
 Represents a business owned by a customer.
 """
-type CustomerBusinesses {
+type CustomerBusiness {
   """
   The unique identifier of the business.
   """

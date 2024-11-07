@@ -44,8 +44,8 @@ describe('schema', () => {
           scalar Date
           scalar UUID
 
-          """Represents the a customer of a business."""
-          type BusinessCustomers {
+          """Represents the customer of a business."""
+          type BusinessCustomer {
             """The unique identifier of the customer."""
             personId: ID
 
@@ -62,8 +62,8 @@ describe('schema', () => {
             role: String
           }
 
-          """Represents the a customer of a business."""
-          type BusinessCustomer {
+          """Represents the customer of a business."""
+          type BusinessCustomerDetail {
             """The unique identifier of the customer."""
             personId: ID
 
@@ -104,12 +104,12 @@ describe('schema', () => {
             sbi: ID!
 
             """The customers associated with the business."""
-            customers: [BusinessCustomers]
+            customers: [BusinessCustomer]
 
             """
             The customer associated with the business.
             """
-            customer(crn: ID!): BusinessCustomer
+            customer(crn: ID!): BusinessCustomerDetail
           }
 
           """Represents the security questions of a customer."""
@@ -142,16 +142,16 @@ describe('schema', () => {
             authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions
 
             """The businesses associated with the customer."""
-            businesses: [CustomerBusinesses]
+            businesses: [CustomerBusiness]
 
             """
             The single business filtered by sbi associated with the customer.
             """
-            business(sbi: ID!): CustomerBusiness
+            business(sbi: ID!): CustomerBusinessDetail
           }
 
           """Represents a business owned by a customer."""
-          type CustomerBusinesses {
+          type CustomerBusiness {
             """The unique identifier of the business."""
             organisationId: ID
 
@@ -166,7 +166,7 @@ describe('schema', () => {
           }
 
           """Represents a business owned by a customer."""
-          type CustomerBusiness {
+          type CustomerBusinessDetail {
             """The unique identifier of the business."""
             organisationId: ID
 
@@ -422,8 +422,8 @@ describe('schema', () => {
             type: String
           }
 
-          """Represents the a customer of a business."""
-          type BusinessCustomers {
+          """Represents the customer of a business."""
+          type BusinessCustomer {
             """The unique identifier of the customer."""
             personId: ID
 
@@ -440,8 +440,8 @@ describe('schema', () => {
             role: String
           }
 
-          """Represents the a customer of a business."""
-          type BusinessCustomer {
+          """Represents the customer of a business."""
+          type BusinessCustomerDetail {
             """The unique identifier of the customer."""
             personId: ID
 
@@ -494,12 +494,12 @@ describe('schema', () => {
             cph: [CPH]
 
             """The customers associated with the business."""
-            customers: [BusinessCustomers]
+            customers: [BusinessCustomer]
 
             """
             The customer associated with the business.
             """
-            customer(crn: ID!): BusinessCustomer
+            customer(crn: ID!): BusinessCustomerDetail
           }
 
           """Represents a coordinate with x and y values."""
@@ -697,14 +697,14 @@ describe('schema', () => {
             authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions
 
             """The businesses associated with the customer."""
-            businesses: [CustomerBusinesses]
+            businesses: [CustomerBusiness]
 
             """The single business filtered by sbi associated with the customer."""
-            business(sbi: ID!): CustomerBusiness
+            business(sbi: ID!): CustomerBusinessDetail
           }
 
           """Represents a business owned by a customer."""
-          type CustomerBusiness {
+          type CustomerBusinessDetail {
             """The unique identifier of the business."""
             organisationId: ID
 
@@ -725,7 +725,7 @@ describe('schema', () => {
           }
 
           """Represents a business owned by a customer."""
-          type CustomerBusinesses {
+          type CustomerBusiness {
             """The unique identifier of the business."""
             organisationId: ID
 

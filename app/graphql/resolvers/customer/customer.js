@@ -72,7 +72,7 @@ export const Customer = {
   }
 }
 
-export const CustomerBusiness = {
+export const CustomerBusinessDetail = {
   async role ({ organisationId, crn }, __, { dataSources }) {
     logger.silly('Get customer business role', { crn, organisationId })
     const businessCustomers =

@@ -89,9 +89,9 @@ type BusinessType {
 }
 
 """
-Represents the a customer of a business.
+Represents the customer of a business.
 """
-type BusinessCustomers {
+type BusinessCustomer {
   """
   The unique identifier of the customer.
   """
@@ -119,9 +119,10 @@ type BusinessCustomers {
 }
 
 """
-Represents the a customer of a business.
+Represents the customer of a business. Additional properties over BusinessCustomer:
+ - permissionGroups
 """
-type BusinessCustomer {
+type BusinessCustomerDetail {
   """
   The unique identifier of the customer.
   """
@@ -203,10 +204,10 @@ type Business {
   """
   The customers associated with the business.
   """
-  customers: [BusinessCustomers] @on
+  customers: [BusinessCustomer] @on
 
   """
   The customer associated with the business.
   """
-  customer(crn: ID!): BusinessCustomer @on
+  customer(crn: ID!): BusinessCustomerDetail @on
 }
