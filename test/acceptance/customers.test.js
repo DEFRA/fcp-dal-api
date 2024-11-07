@@ -45,7 +45,7 @@ describe('customers contract', () => {
     expect(parsedResponse).toHaveProperty('data.customer.businesses[0].name')
   })
 
-  it('should return customers permission for a business', async () => {
+  it('should return customer\'s permission for a business', async () => {
     const response = await fetch(`${process.env.ACCEPTANCE_TEST_ENVIRONMENT_URL}/graphql`, {
       method: 'POST',
       headers: {
