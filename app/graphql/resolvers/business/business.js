@@ -73,7 +73,7 @@ export const Business = {
   }
 }
 
-export const BusinessCustomer = {
+export const BusinessCustomerDetail = {
   async permissionGroups ({ privileges }, __, { dataSources }) {
     return transformBusinessCustomerPrivilegesToPermissionGroups(
       privileges,
