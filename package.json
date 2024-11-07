@@ -17,7 +17,7 @@
     "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
     "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config",
-    "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/acceptance",
+    "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env jest --testPathPattern=test/acceptance --setupFiles dotenv/config",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --coverage --setupFiles dotenv/config",

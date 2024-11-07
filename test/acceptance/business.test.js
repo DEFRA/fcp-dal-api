@@ -1,28 +1,10 @@
 import fetch from 'node-fetch'
-import qs from 'qs'
+import { retrieveApimAccessToken } from '../test-helpers/apim.js'
 
 describe('business contract', () => {
   let token
   beforeAll(async () => {
-    const body = qs.stringify({
-      client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-      scope: `api://${process.env.CLIENT_ID}/.default`,
-      grant_type: 'client_credentials'
-    })
-
-    const headers = {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    }
-
-    const response = await fetch(`${process.env.RP_INTERNAL_APIM_ACCESS_TOKEN_URL}${process.env.API_TENANT_ID}/oauth2/v2.0/token`, {
-      method: 'POST',
-      body,
-      redirect: 'follow',
-      headers
-    })
-    const parsedResponse = await response.json()
-    token = parsedResponse.access_token
+    token = await retrieveApimAccessToken()
   })
 
   it('should return business customers', async () => {
@@ -34,7 +16,7 @@ describe('business contract', () => {
         authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        query: `
+        query: `#graphql
           query BusinessCustomers {
             business(sbi: "${process.env.ACCEPTANCE_TEST_RP_INTERNAL_ORGANISATION_SBI}") {
               customers {
@@ -72,7 +54,7 @@ describe('business contract', () => {
         authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
-        query: `
+        query: `#graphql
           query BusinessCustomerPermissions {
             business(sbi: "${process.env.ACCEPTANCE_TEST_RP_INTERNAL_ORGANISATION_SBI}") {
               customer(crn: "${process.env.ACCEPTANCE_TEST_RP_INTERNAL_CUSTOMER_CRN}") {
