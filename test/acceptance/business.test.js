@@ -26,17 +26,17 @@ describe('business contract', () => {
   })
 
   it('should return business customers', async () => {
-    const response = await fetch(`${process.env.ENVIRONMENT_URL}/graphql`, {
+    const response = await fetch(`${process.env.ACCEPTANCE_TEST_ENVIRONMENT_URL}/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL,
+        email: process.env.ACCEPTANCE_TEST_RP_INTERNAL_USER_EMAIL,
         authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
         query: `
           query BusinessCustomers {
-            business(sbi: "${process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_SBI}") {
+            business(sbi: "${process.env.ACCEPTANCE_TEST_RP_INTERNAL_ORGANISATION_SBI}") {
               customers {
                 firstName
                 lastName
@@ -64,18 +64,18 @@ describe('business contract', () => {
   })
 
   it('should return business customers permissions', async () => {
-    const response = await fetch(`${process.env.ENVIRONMENT_URL}/graphql`, {
+    const response = await fetch(`${process.env.ACCEPTANCE_TEST_ENVIRONMENT_URL}/graphql`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL,
+        email: process.env.ACCEPTANCE_TEST_RP_INTERNAL_USER_EMAIL,
         authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
         query: `
           query BusinessCustomerPermissions {
-            business(sbi: "${process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_SBI}") {
-              customer(crn: "${process.env.RP_INTERNAL_HEALTH_CHECK_CUSTOMER_CRN}") {
+            business(sbi: "${process.env.ACCEPTANCE_TEST_RP_INTERNAL_ORGANISATION_SBI}") {
+              customer(crn: "${process.env.ACCEPTANCE_TEST_RP_INTERNAL_CUSTOMER_CRN}") {
                 role
                 permissionGroups {
                   id

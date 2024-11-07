@@ -76,9 +76,3 @@
 - key: EVENT_HUB_CONNECTION_STRING
   value: "{{servicename}}-EVENT-HUB-CONNECTION-STRING"
   type: "keyvault"
-- key: RP_INTERNAL_HEALTH_CHECK_ORGANISATION_SBI
-  value: "{{servicename}}-RP-INTERNAL-HEALTH-CHECK-ORGANISATION-SBI"
-  type: "keyvault"
-- key: RP_INTERNAL_HEALTH_CHECK_CUSTOMER_CRN
-  value: "{{servicename}}-RP-INTERNAL-HEALTH-CHECK-CUSTOMER-CRN"
-  type: "keyvault"
