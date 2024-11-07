@@ -58,7 +58,7 @@ describe('schema', () => {
             """The customer reference of the customer."""
             crn: String
 
-            """The role the customer against the business."""
+            """The role of the customer against the business."""
             role: String
           }
 
@@ -76,7 +76,7 @@ describe('schema', () => {
             """The customer reference of the customer."""
             crn: String
 
-            """The role the customer against the business."""
+            """The role of the customer against the business."""
             role: String
 
             """The permissions the customer against the business."""
@@ -436,7 +436,7 @@ describe('schema', () => {
             """The customer reference of the customer."""
             crn: String
 
-            """The role the customer against the business."""
+            """The role of the customer against the business."""
             role: String
           }
 
@@ -454,7 +454,7 @@ describe('schema', () => {
             """The customer reference of the customer."""
             crn: String
 
-            """The role the customer against the business."""
+            """The role of the customer against the business."""
             role: String
 
             """The permissions the customer against the business."""

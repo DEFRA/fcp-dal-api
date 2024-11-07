@@ -113,7 +113,7 @@ type BusinessCustomers {
   crn: String @on
 
   """
-  The role the customer against the business.
+  The role of the customer against the business.
   """
   role: String @on
 }
