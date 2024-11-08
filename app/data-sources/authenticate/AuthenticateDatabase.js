@@ -1,5 +1,5 @@
 import { DataTypes, Sequelize } from 'sequelize'
-import { AUTHENTICATE_DATABASE_READ_001, AUTHENTICATE_DATABASE_WRITE_001, AUTHENTICATE_DATABASE_WRITE_002 } from '../../logger/codes.js'
+import { AUTHENTICATE_DATABASE_READ_001, AUTHENTICATE_DATABASE_WRITE_001 } from '../../logger/codes.js'
 
 const dbOptions = {
   database: process.env.AUTHENTICATE_DB_SCHEMA,
@@ -70,7 +70,7 @@ export class AuthenticateDatabase {
     }
 
     try {
-      this.logger.verbose('#datasource - authenticate - Getting authenticate questions answers by CRN', { crn, employeeId, code: AUTHENTICATE_DATABASE_WRITE_002 })
+      this.logger.verbose('#datasource - authenticate - Getting authenticate questions answers by CRN', { crn, employeeId, code: AUTHENTICATE_DATABASE_READ_001 })
       const requestStart = Date.now()
       const answers = await this.Answer.findOne({
         attributes: ['CRN', 'Date', 'Event', 'Location', 'Updated'],
@@ -79,11 +79,11 @@ export class AuthenticateDatabase {
         }
       })
       const requestTimeMs = (Date.now() - requestStart)
-      this.logger.http('#datasource - authenticate - Got authenticate questions answers by CRN', { code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
-      this.logger.debug('#datasource - authenticate - Got authenticate questions answers by CRN', { crn, answers, code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
+      this.logger.http('#datasource - authenticate - Got authenticate questions answers by CRN', { code: AUTHENTICATE_DATABASE_READ_001, requestTimeMs })
+      this.logger.debug('#datasource - authenticate - Got authenticate questions answers by CRN', { crn, answers, code: AUTHENTICATE_DATABASE_READ_001, requestTimeMs })
       return answers
     } catch (error) {
-      this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_WRITE_002 })
+      this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_READ_001 })
       throw error
     }
   }
