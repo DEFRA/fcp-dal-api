@@ -18,8 +18,7 @@ import {
 import {
   coversSummary,
   landCovers,
-  landParcels,
-  parcelSummary
+  landParcels
 } from '../../../../mocks/fixtures/lms.js'
 import {
   organisationCPH,
@@ -33,7 +32,6 @@ import mockServer from '../../../../mocks/server.js'
 import { fakeContext } from '../../../test-setup.js'
 
 const organisationFixture = organisationByOrgId('5565448')._data
-const { totalArea, totalParcels } = parcelSummary('5565448')
 const organisationCPHInfoFixture = organisationCPHInfo('5565448').data
 const organisationCPHFixture = organisationCPH('5565448').data
 
@@ -225,8 +223,8 @@ describe('Query.business.land', () => {
                 'Permanent Grassland',
                 coversSummaryData
               ),
-              totalArea,
-              totalParcels
+              totalArea: 7658303.68,
+              totalParcels: 302
             }
           }
         }

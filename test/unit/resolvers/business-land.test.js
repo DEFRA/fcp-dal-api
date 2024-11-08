@@ -55,7 +55,7 @@ describe('BusinessLandSummary', () => {
       await BusinessLandSummary.totalParcels({ id: 'mockId' }, null, {
         dataSources
       })
-    ).toEqual(1000)
+    ).toEqual(1)
   })
 
   it('totalArea', async () => {
@@ -63,7 +63,7 @@ describe('BusinessLandSummary', () => {
       await BusinessLandSummary.totalArea({ id: 'mockId' }, null, {
         dataSources
       })
-    ).toEqual(2000)
+    ).toEqual(6000)
   })
 
   it('arableLandArea', async () => {

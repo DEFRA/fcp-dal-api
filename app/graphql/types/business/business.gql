@@ -192,11 +192,6 @@ type Business {
   land: BusinessLand
 
   """
-  The applications associated with the business.
-  """
-  applications: [BusinessApplication]
-
-  """
   The CPH (County Parish Holding) numbers of the business.
   """
   cph: [CPH]

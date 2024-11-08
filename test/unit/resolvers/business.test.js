@@ -4,9 +4,6 @@ import {
   Business,
   BusinessCustomerDetail
 } from '../../../app/graphql/resolvers/business/business.js'
-import {
-  transformOrganisationCSApplicationToBusinessApplications
-} from '../../../app/transformers/rural-payments/applications-cs.js'
 import { transformOrganisationCPH } from '../../../app/transformers/rural-payments/business-cph.js'
 import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
@@ -87,13 +84,6 @@ describe('Business', () => {
     )).rejects.toEqual(
       new NotFound('Customer not found')
     )
-  })
-
-  it('applications', async () => {
-    const transformedData = transformOrganisationCSApplicationToBusinessApplications(organisationApplicationsByOrgId('5565448').applications)
-    expect(
-      await Business.applications(mockBusiness, null, { dataSources })
-    ).toEqual(transformedData)
   })
 })
 

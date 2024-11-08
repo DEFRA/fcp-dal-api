@@ -20,7 +20,7 @@ const server = new Core({
   },
   mock: {
     collections: {
-      selected: process.env.MOCK_SERVER_COLLECTION
+      selected: 'all'
     }
   }
 })

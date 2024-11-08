@@ -313,61 +313,6 @@ describe('schema', () => {
 
           scalar UUID
 
-          """Represents the status of a business application."""
-          type BusinessApplicationStatus {
-            """The unique identifier of the business application status."""
-            id: ID
-
-            """The open status of the business application."""
-            open: String
-
-            """The status of the business application."""
-            status: String
-
-            """The type of the business application."""
-            type: String
-
-            """The sector of the business application."""
-            sector: String
-
-            """The year of the business application."""
-            year: Int
-
-            """The FRN (Farm Reference Number) of the business application."""
-            frn: String
-
-            """The office of the business application."""
-            office: String
-          }
-
-          """Represents a claim of a business application."""
-          type BusinessApplicationClaim {
-            """The schema year of the business application claim."""
-            schemaYear: Int
-
-            """The type of the business application claim."""
-            type: String
-
-            """The status of the business application claim."""
-            status: String
-
-            """The last movement of the business application claim."""
-            lastMovement: String
-          }
-
-          """
-          Represents a business application.
-
-          Data Source: Rural Payments Portal (PRR)
-          """
-          type BusinessApplication {
-            """The status of the business application."""
-            applicationStatus: BusinessApplicationStatus
-
-            """The claim of the business application."""
-            csClaim: BusinessApplicationClaim
-          }
-
           """Represents the basic information of a business."""
           type BusinessInfo {
             """The name of the business."""
@@ -486,9 +431,6 @@ describe('schema', () => {
 
             """The land details of the business."""
             land: BusinessLand
-
-            """The applications associated with the business."""
-            applications: [BusinessApplication]
 
             """The CPH (County Parish Holding) numbers of the business."""
             cph: [CPH]

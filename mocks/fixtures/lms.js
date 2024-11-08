@@ -6,10 +6,6 @@ export const coversSummary = orgId => {
   return getJSON(`./orgId/${orgId}/covers-summary.json`)
 }
 
-export const parcelSummary = orgId => {
-  return getJSON(`./orgId/${orgId}/parcels-summary.json`)
-}
-
 export const landCovers = orgId => {
   return getJSON(`./orgId/${orgId}/land-covers.json`)
 }

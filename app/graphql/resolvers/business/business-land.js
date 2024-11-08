@@ -1,7 +1,9 @@
 import {
   transformLandCovers,
   transformLandCoversToArea,
-  transformLandParcels
+  transformLandParcels,
+  transformTotalArea,
+  transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
 
 export const BusinessLand = {
@@ -28,19 +30,16 @@ export const BusinessLand = {
 
 export const BusinessLandSummary = {
   async totalParcels ({ organisationId }, __, { dataSources }) {
-    const { totalParcels } =
-      await dataSources.ruralPaymentsPortalApi.getParcelsSummaryByOrganisationId(
-        organisationId
-      )
-    return totalParcels
+    return transformTotalParcels(await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationId(
+      organisationId
+    ))
   },
 
-  async totalArea ({ organisationId }, __, { dataSources }) {
-    const { totalArea } =
-      await dataSources.ruralPaymentsPortalApi.getParcelsSummaryByOrganisationId(
-        organisationId
-      )
-    return totalArea
+  async totalArea ({ organisationId, historicDate = new Date() }, __, { dataSources }) {
+    return transformTotalArea(await dataSources.ruralPaymentsBusiness.getCoversSummaryByOrganisationIdAndDate(
+      organisationId,
+      historicDate
+    ))
   },
 
   async arableLandArea (
