@@ -89,40 +89,9 @@ type BusinessType {
 }
 
 """
-Represents the customer of a business.
+Represents the a customer of a business.
 """
 type BusinessCustomer {
-  """
-  The unique identifier of the customer.
-  """
-  personId: ID @on
-
-  """
-  First name of the customer.
-  """
-  firstName: String @on
-
-  """
-  Last name of the customer.
-  """
-  lastName: String @on
-
-  """
-  The customer reference of the customer.
-  """
-  crn: String @on
-
-  """
-  The role of the customer against the business.
-  """
-  role: String @on
-}
-
-"""
-Represents the customer of a business. Additional properties over BusinessCustomer:
- - permissionGroups
-"""
-type BusinessCustomerDetail {
   """
   The unique identifier of the customer.
   """
@@ -192,6 +161,11 @@ type Business {
   land: BusinessLand
 
   """
+  The applications associated with the business.
+  """
+  applications: [BusinessApplication]
+
+  """
   The CPH (County Parish Holding) numbers of the business.
   """
   cph: [CPH]
@@ -204,5 +178,5 @@ type Business {
   """
   The customer associated with the business.
   """
-  customer(crn: ID!): BusinessCustomerDetail @on
+  customer(crn: ID!): BusinessCustomer @on
 }
