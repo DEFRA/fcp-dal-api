@@ -1,6 +1,7 @@
 import { NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
+import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
 import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
 import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
@@ -59,10 +60,20 @@ export const Business = {
       customer
     })
     return transformOrganisationCustomer(customer)
+  },
+
+  async applications ({ organisationId }, __, { dataSources }) {
+    const response =
+      await dataSources.ruralPaymentsPortalApi.getApplicationsCountrysideStewardship(
+        organisationId
+      )
+    return transformOrganisationCSApplicationToBusinessApplications(
+      response?.applications
+    )
   }
 }
 
-export const BusinessCustomerDetail = {
+export const BusinessCustomer = {
   async permissionGroups ({ privileges }, __, { dataSources }) {
     return transformBusinessCustomerPrivilegesToPermissionGroups(
       privileges,

@@ -22,11 +22,3 @@ export function transformLandParcels (landParcels) {
     area
   }))
 }
-
-export function transformTotalParcels (landParcels) {
-  return new Set(landParcels.map(parcel => parcel.id)).size
-}
-
-export function transformTotalArea (landCovers) {
-  return landCovers.reduce((totalArea, { area }) => totalArea + area, 0)
-}
