@@ -54,7 +54,7 @@ export class RuralPayments extends RESTDataSource {
 
   didEncounterError (error, request, url) {
     request.path = url
-    if (!error?.extensions) {
+    if (!error || !error.extensions || !error.extensions.response) {
       this.logger.error('#datasource - Rural payments - Unable to determine error location', {
         error,
         request,
@@ -62,7 +62,7 @@ export class RuralPayments extends RESTDataSource {
       })
       return
     }
-    const { response } = error?.extensions
+    const { response } = error.extensions
 
     // response is text, then the error is from RuralPayments
     const isRuralPaymentsError = response?.headers?.get('Content-Type')?.includes('text/html')
