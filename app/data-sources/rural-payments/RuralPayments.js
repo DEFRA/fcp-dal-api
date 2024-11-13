@@ -54,7 +54,7 @@ export class RuralPayments extends RESTDataSource {
 
   didEncounterError (error, request, url) {
     request.path = url
-    if (!error || !error.extensions || !error.extensions.response) {
+    if (!error?.extensions?.response) {
       this.logger.error('#datasource - Rural payments - Unable to determine error location', {
         error,
         request,
