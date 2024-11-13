@@ -13,7 +13,7 @@
 - key: HEALTH_CHECK_ENABLED
   value: "false"
 - key: LOG_LEVEL
-  value: "http"
+  value: "debug"
 
 # Secrets
 - key: API_TENANT_ID
