@@ -1,6 +1,6 @@
 {
   "name": "fcp-data-access-layer-api",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
@@ -10,7 +10,7 @@
     "format:js": "standard --fix",
     "format": "npm run format:js && npm run format:gql",
     "lint:gql": "eslint \"app/graphql/types\" && prettier \"app/graphql/types/**/*.gql\" --check",
-    "lint:js": "standard",
+    "lint:js": "standard app/ test/",
     "pretest": "npm run lint:js && npm run lint:gql",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
     "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js",
