@@ -1,6 +1,5 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import StatusCodes from 'http-status-codes'
-import qs from 'qs'
 import { HttpError } from '../../errors/graphql.js'
 import { APIM_ACCESS_TOKEN_REQUEST_001, APIM_APIM_REQUEST_001, RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 
@@ -136,10 +135,10 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async getApimAccessToken () {
-    const body = qs.stringify({
+    const body = new URLSearchParams({
       grant_type: 'client_credentials',
       scope: process.env.RP_INTERNAL_APIM_SCOPE
-    })
+    }).toString()
 
     const basicAuthHeader = Buffer.from(
       `${process.env.RP_INTERNAL_APIM_CLIENT_ID}:${process.env.RP_INTERNAL_APIM_CLIENT_SECRET}`

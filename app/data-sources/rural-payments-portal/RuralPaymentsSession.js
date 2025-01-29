@@ -5,7 +5,6 @@
 
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { HttpsProxyAgent } from 'https-proxy-agent'
-import qs from 'qs'
 import { CookieJar } from 'tough-cookie'
 import { URL } from 'url'
 import { logger } from '../../logger/logger.js'
@@ -143,11 +142,11 @@ export class RuralPaymentsSession extends RESTDataSource {
     let validSession = await this.hasValidSession()
 
     if (!validSession) {
-      const body = qs.stringify({
+      const body = new URLSearchParams({
         email: apiCredentials.email,
         password: apiCredentials.password,
         csrfToken: await this.getCSRFToken()
-      })
+      }).toString()
 
       const authenticateResponse = await this.post('login', {
         body,
