@@ -47,6 +47,7 @@ extends:
     deployConfigOnly: ${{ parameters.deployConfigOnly }}
     appBuildConfig:
       appFrameworkType: "nodejs"
+      frameworkVersion: "v22.13.1"
       projectPath: "./package.json"
       manifestPath: "./package.json"
       imageRepoName: "fcp-data-access-layer-api"

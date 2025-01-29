@@ -11,23 +11,16 @@
  */
 
 import { createLogger, format, transports } from 'winston'
-import { jsonStringify } from './utils.js'
 import { AzureEventHubTransport } from './AzureEventHubTransport.js'
-import {
-  redactSensitiveData,
-  sampleResponseBodyData
-} from './winstonFormatters.js'
+import { jsonStringify } from './utils.js'
+import { redactSensitiveData, sampleResponseBodyData } from './winstonFormatters.js'
 
 const transportTypes = []
 // If AppInsights is enabled, means we are running in Azure, format logs for AppInsights
 if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
   transportTypes.push(
     new transports.Console({
-      format: format.combine(
-        sampleResponseBodyData(),
-        redactSensitiveData(),
-        format.json()
-      )
+      format: format.combine(sampleResponseBodyData(), redactSensitiveData(), format.json())
     })
   )
 } else {
@@ -40,7 +33,7 @@ if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
         format.align(),
         format.colorize(),
         format.printf(
-          info =>
+          (info) =>
             `${info.level}: ${info.message}${
               Object.keys(info).length > 2 ? `\n${jsonStringify(info)}` : ''
             }`
@@ -65,7 +58,7 @@ export const logger = createLogger({
 })
 
 process.on('exit', () => {
-  logger.transports.forEach(transport => {
+  logger.transports.forEach((transport) => {
     if (typeof transport.close === 'function') {
       transport.close()
     }

@@ -1,6 +1,5 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import StatusCodes from 'http-status-codes'
-import fetch from 'node-fetch'
 import qs from 'qs'
 import { HttpError } from '../../errors/graphql.js'
 import { APIM_ACCESS_TOKEN_REQUEST_001, APIM_APIM_REQUEST_001, RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
@@ -38,7 +37,7 @@ export class RuralPayments extends RESTDataSource {
           },
           response: {
             status: error?.extensions?.response?.status,
-            headers: error?.extensions?.response?.headers.raw(),
+            headers: error?.extensions?.response?.headers,
             body: error?.extensions?.parsedBody
           },
           code: APIM_APIM_REQUEST_001
@@ -201,7 +200,7 @@ export class RuralPayments extends RESTDataSource {
         },
         response: {
           status: response.status,
-          headers: response.headers.raw(),
+          headers: response.headers,
           body: data
         },
         code: APIM_ACCESS_TOKEN_REQUEST_001,
@@ -230,7 +229,7 @@ export class RuralPayments extends RESTDataSource {
 
     const response = {
       status: result.response?.status,
-      headers: result.response?.headers.raw(),
+      headers: result.response?.headers,
       body: result.response?.body
     }
 
