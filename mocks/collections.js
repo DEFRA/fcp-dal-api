@@ -1,15 +1,4 @@
-const ruralPaymentsPortalRoutes = [
-  'rpp-authenticate-get-login:default',
-  'rpp-authenticate-post-login:default',
-  'rpp-authenticate-get-authenticate:default',
-  'rpp-authenticate-get-person-context:default',
-  'rpp-authenticate-get-expire-user-session:default',
-
-  'rpp-lms-get-parcels-summary:default',
-  'rpp-organisation-applications-get-by-id:default'
-]
-
-const release1Routes = [
+const routes = [
   'apim-authentication-get-token:default',
 
   'rural-payments-person-get-by-id:default',
@@ -21,7 +10,11 @@ const release1Routes = [
 
   'rural-payments-lms-get-covers-summary:default',
   'rural-payments-lms-get-land-covers:default',
+  'rural-payments-lms-get-land-covers-by-sheet-id-and-parcel-id:default',
+  'rural-payments-lms-get-land-parcels-effective-dates:default',
   'rural-payments-lms-get-parcels:default',
+  'rural-payments-lms-get-parcels-geometry:default',
+  'rural-payments-lms-get-parcels-historic:default',
 
   'rural-payments-messages:default',
 
@@ -31,15 +24,7 @@ const release1Routes = [
 
 export default [
   {
-    id: 'rural-payments-portal',
-    routes: ruralPaymentsPortalRoutes
-  },
-  {
-    id: 'release-1',
-    routes: release1Routes
-  },
-  {
     id: 'all',
-    routes: [...ruralPaymentsPortalRoutes, ...release1Routes]
+    routes
   }
 ]

@@ -1,4 +1,4 @@
-export function transformAuthenticateQuestionsAnswers (questionAnswers) {
+export function transformAuthenticateQuestionsAnswers(questionAnswers) {
   return {
     memorableDate: questionAnswers?.Date !== '' ? questionAnswers?.Date : null,
     memorableEvent: questionAnswers?.Event !== '' ? questionAnswers?.Event : null,

@@ -1,8 +1,10 @@
 import { NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
-import { transformOrganisationCSApplicationToBusinessApplications } from '../../../transformers/rural-payments/applications-cs.js'
-import { transformOrganisationCPH } from '../../../transformers/rural-payments/business-cph.js'
+import {
+  transformCPHInfo,
+  transformOrganisationCPH
+} from '../../../transformers/rural-payments/business-cph.js'
 import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformOrganisationCustomer,
@@ -10,11 +12,11 @@ import {
 } from '../../../transformers/rural-payments/business.js'
 
 export const Business = {
-  land ({ organisationId }) {
+  land({ organisationId }) {
     return { organisationId }
   },
 
-  async cph ({ organisationId }, _, { dataSources }) {
+  async cphs({ organisationId }, _, { dataSources }) {
     return transformOrganisationCPH(
       organisationId,
       await dataSources.ruralPaymentsBusiness.getOrganisationCPHCollectionByOrganisationId(
@@ -23,7 +25,22 @@ export const Business = {
     )
   },
 
-  async customers ({ organisationId }, _, { dataSources }) {
+  async cph({ organisationId }, { number }, { dataSources }) {
+    return transformCPHInfo(
+      number,
+      ...(await Promise.all([
+        dataSources.ruralPaymentsBusiness.getOrganisationCPHCollectionByOrganisationId(
+          organisationId
+        ),
+        dataSources.ruralPaymentsBusiness.getOrganisationCPHInfoByOrganisationIdAndCPHNumber(
+          organisationId,
+          number
+        )
+      ]))
+    )
+  },
+
+  async customers({ organisationId }, _, { dataSources }) {
     logger.silly('Get business customers', { organisationId })
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
@@ -36,7 +53,7 @@ export const Business = {
     return transformOrganisationCustomers(customers)
   },
 
-  async customer ({ organisationId, sbi }, { crn }, { dataSources }) {
+  async customer({ organisationId, sbi }, { crn }, { dataSources }) {
     logger.silly('Get business customer', { crn, organisationId, sbi })
 
     const customers =
@@ -44,12 +61,15 @@ export const Business = {
         organisationId
       )
 
-    const customer = customers.find(
-      ({ customerReference }) => customerReference === crn
-    )
+    const customer = customers.find(({ customerReference }) => customerReference === crn)
 
     if (!customer) {
-      logger.warn('Could not find customer in business', { crn, organisationId, sbi, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+      logger.warn('Could not find customer in business', {
+        crn,
+        organisationId,
+        sbi,
+        code: RURALPAYMENTS_API_NOT_FOUND_001
+      })
       throw new NotFound('Customer not found')
     }
 
@@ -60,21 +80,11 @@ export const Business = {
       customer
     })
     return transformOrganisationCustomer(customer)
-  },
-
-  async applications ({ organisationId }, __, { dataSources }) {
-    const response =
-      await dataSources.ruralPaymentsPortalApi.getApplicationsCountrysideStewardship(
-        organisationId
-      )
-    return transformOrganisationCSApplicationToBusinessApplications(
-      response?.applications
-    )
   }
 }
 
 export const BusinessCustomer = {
-  async permissionGroups ({ privileges }, __, { dataSources }) {
+  async permissionGroups({ privileges }, __, { dataSources }) {
     return transformBusinessCustomerPrivilegesToPermissionGroups(
       privileges,
       dataSources.permissions.getPermissionGroups()

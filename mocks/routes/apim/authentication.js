@@ -13,7 +13,10 @@ export default [
         options: {
           middleware: (req, res) => {
             const headers = req.headers
-            if (!headers['ocp-apim-subscription-key'] || headers['ocp-apim-subscription-key'] !== process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY) {
+            if (
+              !headers['ocp-apim-subscription-key'] ||
+              headers['ocp-apim-subscription-key'] !== process.env.RP_INTERNAL_APIM_SUBSCRIPTION_KEY
+            ) {
               res.status(401)
               return res.send()
             }

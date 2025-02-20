@@ -1,1 +1,13 @@
-{"data":{"cphNumber":"38/064/0035","parish":"WESTLETON","startDate":1140652800000,"expiryDate":253402214400000,"species":["OTHER"],"xCoordinate":645429.0,"yCoordinate":267667.0},"success":true,"errorString":null}
+{
+  "data": {
+    "cphNumber": "38/064/0035",
+    "parish": "WESTLETON",
+    "startDate": 1140652800000,
+    "expiryDate": 253402214400000,
+    "species": ["OTHER"],
+    "xCoordinate": 645429.0,
+    "yCoordinate": 267667.0
+  },
+  "success": true,
+  "errorString": null
+}

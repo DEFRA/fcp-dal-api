@@ -1,1 +1,5 @@
-[{"code":"110","name":"Arable Land","area":2282947.36},{"code":"130","name":"Permanent Grassland","area":5301987.91},{"code":"140","name":"Permanent Crops","area":73368.41}]
+[
+  { "code": "110", "name": "Arable Land", "area": 2282947.36 },
+  { "code": "130", "name": "Permanent Grassland", "area": 5301987.91 },
+  { "code": "140", "name": "Permanent Crops", "area": 73368.41 }
+]

@@ -1,0 +1,6 @@
+# until we can update the prettier parser to add go template support
+helm/fcp-data-access-layer-api/templates/
+helm/fcp-data-access-layer-api-infra/templates/
+
+# definitely do not start linting other people's assets!
+ADO-Pipeline-Common/

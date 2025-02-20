@@ -1,5 +1,8 @@
 import { DataTypes, Sequelize } from 'sequelize'
-import { AUTHENTICATE_DATABASE_READ_001, AUTHENTICATE_DATABASE_WRITE_001, AUTHENTICATE_DATABASE_WRITE_002 } from '../../logger/codes.js'
+import {
+  AUTHENTICATE_DATABASE_READ_001,
+  AUTHENTICATE_DATABASE_WRITE_001
+} from '../../logger/codes.js'
 
 const dbOptions = {
   database: process.env.AUTHENTICATE_DB_SCHEMA,
@@ -36,41 +39,66 @@ export class AuthenticateDatabase {
     Updated: DataTypes.DATE
   })
 
-  constructor (config = {}) {
+  constructor(config = {}) {
     this.logger = config.logger
   }
 
-  async healthCheck () {
+  async healthCheck() {
     try {
-      this.logger.http('#datasource - authenticate - checking database connection', { code: AUTHENTICATE_DATABASE_READ_001 })
+      this.logger.http('#datasource - authenticate - checking database connection', {
+        code: AUTHENTICATE_DATABASE_READ_001
+      })
       await this.dbRead.authenticate()
-      this.logger.debug('#datasource - authenticate - database connection established', { code: AUTHENTICATE_DATABASE_READ_001 })
+      this.logger.debug('#datasource - authenticate - database connection established', {
+        code: AUTHENTICATE_DATABASE_READ_001
+      })
     } catch (error) {
-      this.logger.error('#datasource - authenticate - connection error', { error, code: AUTHENTICATE_DATABASE_READ_001 })
+      this.logger.error('#datasource - authenticate - connection error', {
+        error,
+        code: AUTHENTICATE_DATABASE_READ_001
+      })
       throw error
     }
   }
 
-  async getAuthenticateQuestionsAnswersByCRN (crn, employeeId) {
+  async getAuthenticateQuestionsAnswersByCRN(crn, employeeId) {
     try {
-      this.logger.verbose('#datasource - authenticate - Creating audit record in authenticate database', { employeeId, crn, code: AUTHENTICATE_DATABASE_WRITE_001 })
+      this.logger.verbose(
+        '#datasource - authenticate - Creating audit record in authenticate database',
+        { employeeId, crn, code: AUTHENTICATE_DATABASE_WRITE_001 }
+      )
       const requestStart = Date.now()
-      await this.dbAuditWrite.query(`
+      await this.dbAuditWrite.query(
+        `
       INSERT INTO Audits ([Date], [User], [Action], [Value])
       VALUES(?, ?, ?, ?);
-    `, {
-        replacements: [new Date().toISOString(), employeeId, 'Search', crn]
-      })
-      const requestTimeMs = (Date.now() - requestStart)
-      this.logger.http('#datasource - authenticate - Created audit record in authenticate database', { code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs })
-      this.logger.debug('#datasource - authenticate - Created audit record in authenticate database', { code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs, employeeId, crn })
+    `,
+        {
+          replacements: [new Date().toISOString(), employeeId, 'Search', crn]
+        }
+      )
+      const requestTimeMs = Date.now() - requestStart
+      this.logger.http(
+        '#datasource - authenticate - Created audit record in authenticate database',
+        { code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs }
+      )
+      this.logger.debug(
+        '#datasource - authenticate - Created audit record in authenticate database',
+        { code: AUTHENTICATE_DATABASE_WRITE_001, requestTimeMs, employeeId, crn }
+      )
     } catch (error) {
-      this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_WRITE_001 })
+      this.logger.error('#datasource - authenticate - Authenticate database error', {
+        error,
+        code: AUTHENTICATE_DATABASE_WRITE_001
+      })
       throw error
     }
 
     try {
-      this.logger.verbose('#datasource - authenticate - Getting authenticate questions answers by CRN', { crn, employeeId, code: AUTHENTICATE_DATABASE_WRITE_002 })
+      this.logger.verbose(
+        '#datasource - authenticate - Getting authenticate questions answers by CRN',
+        { crn, employeeId, code: AUTHENTICATE_DATABASE_READ_001 }
+      )
       const requestStart = Date.now()
       const answers = await this.Answer.findOne({
         attributes: ['CRN', 'Date', 'Event', 'Location', 'Updated'],
@@ -78,12 +106,23 @@ export class AuthenticateDatabase {
           CRN: crn
         }
       })
-      const requestTimeMs = (Date.now() - requestStart)
-      this.logger.http('#datasource - authenticate - Got authenticate questions answers by CRN', { code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
-      this.logger.debug('#datasource - authenticate - Got authenticate questions answers by CRN', { crn, answers, code: AUTHENTICATE_DATABASE_WRITE_002, requestTimeMs })
+      const requestTimeMs = Date.now() - requestStart
+      this.logger.http('#datasource - authenticate - Got authenticate questions answers by CRN', {
+        code: AUTHENTICATE_DATABASE_READ_001,
+        requestTimeMs
+      })
+      this.logger.debug('#datasource - authenticate - Got authenticate questions answers by CRN', {
+        crn,
+        answers,
+        code: AUTHENTICATE_DATABASE_READ_001,
+        requestTimeMs
+      })
       return answers
     } catch (error) {
-      this.logger.error('#datasource - authenticate - Authenticate database error', { error, code: AUTHENTICATE_DATABASE_WRITE_002 })
+      this.logger.error('#datasource - authenticate - Authenticate database error', {
+        error,
+        code: AUTHENTICATE_DATABASE_READ_001
+      })
       throw error
     }
   }

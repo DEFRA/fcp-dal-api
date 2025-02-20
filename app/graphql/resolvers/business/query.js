@@ -3,11 +3,14 @@ import { DAL_RESOLVERS_BUSINESS_001 } from '../../../logger/codes.js'
 import { transformOrganisationToBusiness } from '../../../transformers/rural-payments/business.js'
 
 export const Query = {
-  async business (__, { sbi }, { dataSources, logger }) {
+  async business(__, { sbi }, { dataSources, logger }) {
     const response = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
 
     if (!response) {
-      logger.warn('#graphql - business/query - Business not found for SBI', { sbi, code: DAL_RESOLVERS_BUSINESS_001 })
+      logger.warn('#graphql - business/query - Business not found for SBI', {
+        sbi,
+        code: DAL_RESOLVERS_BUSINESS_001
+      })
       throw new NotFound('Business not found')
     }
 

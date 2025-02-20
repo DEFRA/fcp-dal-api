@@ -136,9 +136,7 @@ type Customer {
   """
   The security questions of the customer.
   """
-  authenticationQuestions(
-    entraIdUserObjectId: UUID!
-  ): CustomerAuthenticationQuestions @on
+  authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions @on
 
   """
   The businesses associated with the customer.
@@ -152,7 +150,7 @@ type Customer {
 }
 
 """
-Represents a business owned by a customer.
+Represents a business owned by a customer
 """
 type CustomerBusiness {
   """
@@ -178,25 +176,10 @@ type CustomerBusiness {
   """
   The messages associated with the business.
   """
-  messages(
-    pagination: Pagination
-    showOnlyDeleted: Boolean
-  ): [CustomerBusinessMessage]
+  messages: [CustomerBusinessMessage] @on @excludeFromList
 
   """
   The permission groups associated with the business.
   """
-  permissionGroups: [CustomerBusinessPermissionGroup] @on
-}
-
-type CustomerBusinessPermissionGroup {
-  """
-  The permission group id.
-  """
-  id: PermissionGroupId! @on
-
-  """
-  The permission level customer has for the business.
-  """
-  level: PermissionLevel @on
+  permissionGroups: [ActivePermissionGroup] @on @excludeFromList
 }

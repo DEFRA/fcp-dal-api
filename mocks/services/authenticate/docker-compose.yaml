@@ -1,7 +1,7 @@
 volumes:
   sqlserver_data:
-  
-name: authenticate-sql 
+
+name: authenticate-sql
 services:
   dal-with-entra:
     container_name: dal-with-entra
@@ -32,7 +32,11 @@ services:
       - sqlserver_data:/var/opt/mssql
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ${Sa_Password:-Password123} -Q 'SELECT 1' || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P ${Sa_Password:-Password123} -Q 'SELECT 1' || exit 1"
+        ]
       interval: 10s
       retries: 10
       start_period: 10s

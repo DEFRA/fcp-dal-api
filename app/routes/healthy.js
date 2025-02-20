@@ -13,21 +13,35 @@ const authenticateDatabaseHealthCheck = async () => {
   const authenticateDatabase = new AuthenticateDatabase({ logger })
   return authenticateDatabase.healthCheck()
 }
-const authenticateDatabaseHealthCheckThrottled = throttle(authenticateDatabaseHealthCheck, process.env.HEALTH_CHECK_AUTHENTICATE_DATABASE_THROTTLE_TIME_MS || fiveMinutes)
+const authenticateDatabaseHealthCheckThrottled = throttle(
+  authenticateDatabaseHealthCheck,
+  process.env.HEALTH_CHECK_AUTHENTICATE_DATABASE_THROTTLE_TIME_MS || fiveMinutes
+)
 
 const ruralPaymentsAPIMHealthCheck = async () => {
-  const ruralPaymentsBusiness = new RuralPaymentsBusiness({ logger }, {
-    headers: { email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL }
-  })
-  return ruralPaymentsBusiness.getOrganisationById(process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_ID)
+  const ruralPaymentsBusiness = new RuralPaymentsBusiness(
+    { logger },
+    {
+      headers: { email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL }
+    }
+  )
+  return ruralPaymentsBusiness.getOrganisationById(
+    process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
+  )
 }
-const ruralPaymentsAPIMHealthCheckThrottled = throttle(ruralPaymentsAPIMHealthCheck, process.env.HEALTH_CHECK_RURAL_PAYMENTS_APIM_THROTTLE_TIME_MS || fiveMinutes)
+const ruralPaymentsAPIMHealthCheckThrottled = throttle(
+  ruralPaymentsAPIMHealthCheck,
+  process.env.HEALTH_CHECK_RURAL_PAYMENTS_APIM_THROTTLE_TIME_MS || fiveMinutes
+)
 
 const entraHealthCheck = async () => {
   const entraIdApi = new EntraIdApi({ logger })
-  return entraIdApi.getEmployeeId(process.env.ENTRA_HEALTH_CHECK_USER_OBJECT_ID)
+  return entraIdApi.getEmployeeId(process.env.HEALTH_CHECK_ENTRA_USER_OBJECT_ID)
 }
-const entraHealthCheckThrottled = throttle(entraHealthCheck, process.env.HEALTH_CHECK_ENTRA_THROTTLE_TIME_MS || fiveMinutes)
+const entraHealthCheckThrottled = throttle(
+  entraHealthCheck,
+  process.env.HEALTH_CHECK_ENTRA_THROTTLE_TIME_MS || fiveMinutes
+)
 
 export const healthyRoute = {
   method: 'GET',
@@ -40,16 +54,27 @@ export const healthyRoute = {
         Entra: 'up'
       }
       if (process.env.HEALTH_CHECK_ENABLED === 'true') {
-        if (process.env.RP_INTERNAL_HEALTH_CHECK_ORGANISATION_ID && process.env.RURAL_PAYMENTS_PORTAL_EMAIL) {
-          services.RuralPaymentsPortal = await ruralPaymentsAPIMHealthCheckThrottled() ? 'up' : 'down'
+        if (
+          process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID &&
+          process.env.RURAL_PAYMENTS_PORTAL_EMAIL
+        ) {
+          services.RuralPaymentsPortal = (await ruralPaymentsAPIMHealthCheckThrottled())
+            ? 'up'
+            : 'down'
         } else {
-          logger.error('#health check - missing environment variable "RP_INTERNAL_HEALTH_CHECK_ORGANISATION_ID"', { code: DAL_HEALTH_CHECK_001 })
+          logger.error(
+            '#health check - missing environment variable "HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID"',
+            { code: DAL_HEALTH_CHECK_001 }
+          )
         }
 
-        if (process.env.ENTRA_HEALTH_CHECK_USER_OBJECT_ID) {
-          services.Entra = await entraHealthCheckThrottled() ? 'up' : 'down'
+        if (process.env.HEALTH_CHECK_ENTRA_USER_OBJECT_ID) {
+          services.Entra = (await entraHealthCheckThrottled()) ? 'up' : 'down'
         } else {
-          logger.error('#health check - missing environment variable "ENTRA_HEALTH_CHECK_USER_OBJECT_ID"', { code: DAL_HEALTH_CHECK_001 })
+          logger.error(
+            '#health check - missing environment variable "HEALTH_CHECK_ENTRA_USER_OBJECT_ID"',
+            { code: DAL_HEALTH_CHECK_001 }
+          )
         }
 
         if (
@@ -58,9 +83,14 @@ export const healthyRoute = {
           process.env.AUTHENTICATE_DB_USERNAME_AUDIT_WRITE &&
           process.env.AUTHENTICATE_DB_PASSWORD_AUDIT_WRITE
         ) {
-          services.AuthenticateDatabase = await authenticateDatabaseHealthCheckThrottled() ? 'up' : 'down'
+          services.AuthenticateDatabase = (await authenticateDatabaseHealthCheckThrottled())
+            ? 'up'
+            : 'down'
         } else {
-          logger.error('#health check - missing one or all environment variables "AUTHENTICATE_DB_USERNAME","AUTHENTICATE_DB_PASSWORD","AUTHENTICATE_DB_USERNAME_AUDIT_WRITE","AUTHENTICATE_DB_PASSWORD_AUDIT_WRITE"', { code: DAL_HEALTH_CHECK_001 })
+          logger.error(
+            '#health check - missing one or all environment variables "AUTHENTICATE_DB_USERNAME","AUTHENTICATE_DB_PASSWORD","AUTHENTICATE_DB_USERNAME_AUDIT_WRITE","AUTHENTICATE_DB_PASSWORD_AUDIT_WRITE"',
+            { code: DAL_HEALTH_CHECK_001 }
+          )
         }
       } else if (process.env.ENVIRONMENT === 'prd1') {
         logger.error('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })

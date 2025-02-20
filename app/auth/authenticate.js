@@ -8,7 +8,7 @@ import { Unauthorized } from '../errors/graphql.js'
 import { AuthRole } from '../graphql/resolvers/authenticate.js'
 import { logger } from '../logger/logger.js'
 
-export async function getJwtPublicKey (kid) {
+export async function getJwtPublicKey(kid) {
   const client = jwksClient({
     jwksUri: `https://login.microsoftonline.com/${process.env.API_TENANT_ID}/discovery/v2.0/keys`
   })
@@ -16,7 +16,7 @@ export async function getJwtPublicKey (kid) {
   return key.getPublicKey()
 }
 
-export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
+export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
   try {
     const authHeader = request?.headers?.authorization
     if (!authHeader) {
@@ -65,29 +65,26 @@ export async function getAuth (request, getJwtPublicKeyFunc = getJwtPublicKey) {
   }
 }
 
-export function checkAuthGroup (userGroups, groupId) {
+export function checkAuthGroup(userGroups, groupId) {
   if (!userGroups.includes(groupId)) {
-    throw new Unauthorized(
-      'Authorization failed, you are not in the correct AD groups'
-    )
+    throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
   }
 }
 
-export function authDirectiveTransformer (schema) {
+export function authDirectiveTransformer(schema) {
   const typeDirectiveArgumentMaps = {}
   const directiveName = 'auth'
   return mapSchema(schema, {
-    [MapperKind.TYPE] (type) {
+    [MapperKind.TYPE](type) {
       const authDirective = getDirective(schema, type, directiveName)?.[0]
       if (authDirective) {
         typeDirectiveArgumentMaps[type.name] = authDirective
       }
       return undefined
     },
-    [MapperKind.OBJECT_FIELD] (fieldConfig, _fieldName, typeName) {
+    [MapperKind.OBJECT_FIELD](fieldConfig, _fieldName, typeName) {
       const authDirective =
-        getDirective(schema, fieldConfig, directiveName)?.[0] ??
-        typeDirectiveArgumentMaps[typeName]
+        getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
       const requires = authDirective ? authDirective.requires : AuthRole.ADMIN
       const { resolve = defaultFieldResolver } = fieldConfig
       fieldConfig.resolve = function (source, args, context, info) {

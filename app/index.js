@@ -23,12 +23,12 @@ const init = async () => {
   logger.info(`Server running on ${server.info.uri}`)
 }
 
-process.on('unhandledRejection', error => {
+process.on('unhandledRejection', (error) => {
   logger.error('#DAL - unhandled rejection', { error, code: DAL_UNHANDLED_ERROR_001 })
   process.exit(1)
 })
 
-process.on('uncaughtException', error => {
+process.on('uncaughtException', (error) => {
   logger.error('#DAL - uncaught reception', { error, code: DAL_UNHANDLED_ERROR_001 })
   process.exit(1)
 })

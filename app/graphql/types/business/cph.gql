@@ -20,7 +20,7 @@ Data Source: Rural Payments Portal (PRR)
 """
 type CPH {
   """
-  The CPH number.
+  The CPH number, example: "10/327/0023"
   """
   number: String
 
@@ -32,25 +32,25 @@ type CPH {
   """
   The parish associated with the CPH number.
   """
-  parish: String
+  parish: String @excludeFromList
 
   """
   The start date of the CPH number.
   """
-  startDate: Int
+  startDate: Date @excludeFromList
 
   """
   The expiry date of the CPH number.
   """
-  expiryDate: Int
+  expiryDate: Date @excludeFromList
 
   """
   The species associated with the CPH number.
   """
-  species: [String]
+  species: [String] @excludeFromList
 
   """
   The coordinate of the CPH number.
   """
-  coordinate: CPHCoordinate
+  coordinate: CPHCoordinate @excludeFromList
 }

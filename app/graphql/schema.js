@@ -1,51 +1,39 @@
+import { loadFiles } from '@graphql-tools/load-files'
+import { mergeResolvers } from '@graphql-tools/merge'
+import { makeExecutableSchema } from '@graphql-tools/schema'
+import { filterSchema, pruneSchema } from '@graphql-tools/utils'
 import { dirname, join } from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
-
-import { loadFiles } from '@graphql-tools/load-files'
-import { makeExecutableSchema } from '@graphql-tools/schema'
-import { mergeResolvers } from '@graphql-tools/merge'
-import {
-  MapperKind,
-  filterSchema,
-  getDirective,
-  mapSchema,
-  pruneSchema
-} from '@graphql-tools/utils'
-
 import { authDirectiveTransformer } from '../auth/authenticate.js'
+import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
+import { onDirectiveTransformer } from './directives/onDirectiveTransformer.js'
 
-async function getFiles (path) {
+async function getFiles(path) {
   return loadFiles(join(dirname(fileURLToPath(import.meta.url)), path), {
     recursive: true,
-    requireMethod: async filePath => import(pathToFileURL(filePath))
+    requireMethod: async (filePath) => import(pathToFileURL(filePath))
   })
 }
 
-export async function createSchema () {
+export async function createSchema() {
   let schema = makeExecutableSchema({
     typeDefs: await getFiles('types'),
     resolvers: mergeResolvers(await getFiles('resolvers'))
   })
+
   if (!process.env.ALL_SCHEMA_ON) {
-    schema = mapSchema(schema, {
-      [MapperKind.FIELD] (fieldConfig) {
-        return getDirective(schema, fieldConfig, 'on')?.[0] ? fieldConfig : null
-      }
-    })
+    schema = onDirectiveTransformer(schema)
   }
 
   if (!process.env.DISABLE_AUTH) {
     schema = authDirectiveTransformer(schema)
   }
 
-  schema = pruneSchema(schema)
+  schema = excludeFromListTransformer(schema)
 
-  schema = filterSchema({
-    schema,
-    directiveFilter (directiveName) {
-      return directiveName !== 'on'
-    }
-  })
+  schema = filterSchema({ schema, directiveFilter: () => false })
+
+  schema = pruneSchema(schema)
 
   return schema
 }

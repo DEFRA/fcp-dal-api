@@ -2,4 +2,4 @@ services:
   fcp-data-access-layer-api:
     command: npm run test:debug
     ports:
-      - "9229:9229"
+      - '9229:9229'

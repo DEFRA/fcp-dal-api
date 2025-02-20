@@ -1,13 +1,13 @@
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments/permissions.js'
 
 export const Query = {
-  async permissionGroups (_, __, { dataSources }) {
+  async permissionGroups(_, __, { dataSources }) {
     return dataSources.permissions.getPermissionGroups()
   }
 }
 
 export const Permission = {
-  async active (permissionGroup, { crn, sbi }, { dataSources }) {
+  async active(permissionGroup, { crn, sbi }, { dataSources }) {
     const [person, organisation] = await Promise.all([
       dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn),
       dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)

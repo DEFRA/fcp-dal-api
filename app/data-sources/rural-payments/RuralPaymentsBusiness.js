@@ -3,13 +3,16 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsBusiness extends RuralPayments {
-  async getOrganisationById (organisationId) {
+  async getOrganisationById(organisationId) {
     this.logger.silly('Getting organisation by ID', { organisationId })
 
     const organisationResponse = await this.get(`organisation/${organisationId}`)
 
     if (!organisationResponse?._data?.id) {
-      this.logger.warn('#datasource - Rural payments - organisation not found for organisation ID', { organisationId, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+      this.logger.warn(
+        '#datasource - Rural payments - organisation not found for organisation ID',
+        { organisationId, code: RURALPAYMENTS_API_NOT_FOUND_001 }
+      )
       throw new NotFound('Rural payments organisation not found')
     }
 
@@ -17,7 +20,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
-  async getOrganisationBySBI (sbi) {
+  async getOrganisationBySBI(sbi) {
     this.logger.silly('Getting organisation by SBI', { sbi })
     const body = JSON.stringify({
       searchFieldType: 'SBI',
@@ -34,7 +37,10 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
 
     if (!organisationResponse?._data?.length) {
-      this.logger.warn('#datasource - Rural payments - organisation not found for organisation SBI', { sbi, code: RURALPAYMENTS_API_NOT_FOUND_001 })
+      this.logger.warn(
+        '#datasource - Rural payments - organisation not found for organisation SBI',
+        { sbi, code: RURALPAYMENTS_API_NOT_FOUND_001 }
+      )
       throw new NotFound('Rural payments organisation not found')
     }
 
@@ -45,67 +51,120 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response?.id ? this.getOrganisationById(response.id) : null
   }
 
-  async getOrganisationCustomersByOrganisationId (organisationId) {
+  async getOrganisationCustomersByOrganisationId(organisationId) {
     this.logger.silly('Getting organisation customers by organisation ID', { organisationId })
 
-    const response = await this.get(
-        `authorisation/organisation/${organisationId}`
-    )
+    const response = await this.get(`authorisation/organisation/${organisationId}`)
     this.logger.silly('Organisation customers by organisation ID', { response: { body: response } })
     return response._data
   }
 
-  getParcelsByOrganisationId (organisationId) {
+  getParcelsByOrganisationId(organisationId) {
     this.logger.silly('Getting organisation parcels by organisation ID', { organisationId })
 
     return this.get(`lms/organisation/${organisationId}/parcels`)
   }
 
-  getCoversByOrganisationId (organisationId) {
-    this.logger.silly('Getting organisation covers by organisation ID', { organisationId })
+  getParcelsByOrganisationIdAndDate(organisationId, date) {
+    this.logger.silly('Getting organisation parcels by organisation ID and date', {
+      organisationId,
+      date
+    })
 
-    return this.get(`lms/organisation/${organisationId}/land-covers`)
-  }
-
-  getCoversSummaryByOrganisationIdAndDate (organisationId, historicDate) {
-    this.logger.silly('Getting organisation covers summary by organisation ID and date', { organisationId, historicDate })
-
-    const formattedHistoricDate = historicDate
-      .toLocaleString('en-GB', {
-        day: 'numeric',
+    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
+    const formattedDate = new Date(date)
+      .toLocaleDateString('en-GB', {
+        day: '2-digit',
         month: 'short',
         year: '2-digit'
       })
       .replace(/ /g, '-')
+
+    return this.get(`lms/organisation/${organisationId}/parcels/historic/${formattedDate}`)
+  }
+
+  getParcelEffectiveDatesByOrganisationIdAndDate(organisationId, date) {
+    this.logger.silly('Getting organisation parcel effective dates by organisation ID and date', {
+      organisationId,
+      date
+    })
+
+    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
+    const formattedDate = new Date(date)
+      .toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: '2-digit'
+      })
+      .replace(/ /g, '-')
+
+    return this.get(`lms/organisation/${organisationId}/parcel-details/historic/${formattedDate}`)
+  }
+
+  getCoversByOrgSheetParcelIdDate(organisationId, sheetId, parcelId, date) {
+    this.logger.silly('Getting organisation covers by sheet ID, parcel ID and date', {
+      organisationId,
+      sheetId,
+      parcelId,
+      date
+    })
+
+    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
+    const formattedDate = new Date(date)
+      .toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: '2-digit'
+      })
+      .replace(/ /g, '-')
+
     return this.get(
-      `lms/organisation/${organisationId}/covers-summary/historic/${formattedHistoricDate}`
+      `lms/organisation/${organisationId}/parcel/sheet-id/${sheetId}/parcel-id/${parcelId}/historic/${formattedDate}/land-covers`
     )
   }
 
-  async getOrganisationCPHCollectionByOrganisationId (organisationId) {
+  getCoversSummaryByOrganisationIdAndDate(organisationId, date) {
+    this.logger.silly('Getting organisation covers summary by organisation ID and date', {
+      organisationId,
+      date
+    })
+
+    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
+    const formattedDate = new Date(date)
+      .toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: '2-digit'
+      })
+      .replace(/ /g, '-')
+
+    return this.get(`lms/organisation/${organisationId}/covers-summary/historic/${formattedDate}`)
+  }
+
+  async getOrganisationCPHCollectionByOrganisationId(organisationId) {
     this.logger.silly('Getting organisation CPH collection by organisation ID', { organisationId })
 
-    const response = await this.get(
-      `SitiAgriApi/cph/organisation/${organisationId}/cph-numbers`
-    )
+    const response = await this.get(`SitiAgriApi/cph/organisation/${organisationId}/cph-numbers`)
 
-    this.logger.silly('Organisation CPH collection by organisation ID', { response: { body: response } })
+    this.logger.silly('Organisation CPH collection by organisation ID', {
+      response: { body: response }
+    })
     return response.data
   }
 
-  async getOrganisationCPHInfoByOrganisationIdAndCPHNumber (
-    organisationId,
-    cphNumber
-  ) {
-    this.logger.silly('Getting organisation CPH info by organisation ID and CPH number', { organisationId, cphNumber })
+  async getOrganisationCPHInfoByOrganisationIdAndCPHNumber(organisationId, cphNumber) {
+    this.logger.silly('Getting organisation CPH info by organisation ID and CPH number', {
+      organisationId,
+      cphNumber
+    })
 
     const response = await this.get(
-      `SitiAgriApi/cph/organisation/${organisationId}/cph-numbers/${encodeURIComponent(
-        cphNumber
-      )}`
+      `SitiAgriApi/cph/organisation/${organisationId}/cph-numbers/${encodeURIComponent(cphNumber)}`
     )
 
-    this.logger.silly('Organisation CPH info by organisation ID and CPH number', { response: { body: response } })
+    this.logger.silly('Organisation CPH info by organisation ID and CPH number', {
+      response: { body: response }
+    })
 
     return response.data
   }

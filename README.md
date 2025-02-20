@@ -1,9 +1,10 @@
 # FFC Customer Registry
 
-Customer Registry GraphQL API created from template to support rapid delivery of microservices for FFC Platform. 
+Customer Registry GraphQL API created from template to support rapid delivery of microservices for FFC Platform.
 It contains the configuration needed to deploy a simple Hapi Node server to the Azure Kubernetes Platform.
 
 ## Local development
+
 Create a `.env` file:
 
 ```env
@@ -49,12 +50,15 @@ make dev
 Access GraphQL landing page at: [http://localhost:4000/graphql](http://localhost:4000/graphql)
 
 #### Mock Server
+
 The mock server is ran when the development docker environment. The mock server service is provided by [Mock Server](https://www.mocks-server.org/).
 
 Mocks endpoints are defined within the ./mocks directory.
 
 #### Mock Authenticate Database
+
 In addition there is a mock authenticate database that can be used for local development. To run the database add the environment variables to your `.env`:
+
 ```env
 AUTHENTICATE_DB_HOST=127.0.0.1
 AUTHENTICATE_DB_SCHEMA=master
@@ -72,23 +76,24 @@ For example:
 
 ```graphql
 type Query {
-    customers: [Customer] @on
+  customers: [Customer] @on
 }
 
 type Customer {
-    id: ID! @on
-    name: String # this field is not included in the final schema
+  id: ID! @on
+  name: String # this field is not included in the final schema
 }
-
 ```
 
 For local development and lower environments, all fields can be turned on by setting the env variable `ALL_SCHEMA_ON`.
 
 ## Prerequisites
+
 - Docker
 - Docker Compose
 
 Optional:
+
 - Kubernetes
 - Helm
 
@@ -103,8 +108,7 @@ The application is designed to run in containerised environments, using Docker C
 Container images are built using Docker Compose, with the same images used to run the service with either Docker Compose or Kubernetes.
 
 When using the Docker Compose files in development the local `app` folder will
-be mounted on top of the `app` folder within the Docker container, hiding the CSS files that were generated during the Docker build.  For the site to render correctly locally `npm run build` must be run on the host system.
-
+be mounted on top of the `app` folder within the Docker container, hiding the CSS files that were generated during the Docker build. For the site to render correctly locally `npm run build` must be run on the host system.
 
 By default, the start script will build (or rebuild) images so there will
 rarely be a need to build images manually. However, this can be achieved
@@ -168,4 +172,5 @@ The Open Government Licence (OGL) was developed by the Controller of Her Majesty
 It is designed to encourage use and re-use of information freely and flexibly, with only a few conditions.
 
 # Running defra machine
+
 Ensure add the proxy url your .env: `RURAL_PAYMENTS_PORTAL_PROXY_URL=http://10.255.1.3:443`

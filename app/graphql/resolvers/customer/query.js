@@ -1,5 +1,5 @@
 export const Query = {
-  async customer (__, { crn }) {
+  async customer(__, { crn }) {
     return { crn }
   }
 }

@@ -1,7 +1,4 @@
-import {
-  organisationCPH,
-  organisationCPHInfo
-} from '../../fixtures/organisation-cph.js'
+import { organisationCPH, organisationCPHInfo } from '../../fixtures/organisation-cph.js'
 import { okOrNotFoundResponse } from '../../utils/requestResponse.js'
 
 export default [

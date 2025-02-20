@@ -2,10 +2,7 @@ import hapi from '@hapi/hapi'
 
 import { v4 as uuidv4 } from 'uuid'
 import { setupAppInsights } from './insights.js'
-import {
-  DAL_APPLICATION_REQUEST_001,
-  DAL_APPLICATION_RESPONSE_001
-} from './logger/codes.js'
+import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { healthyRoute } from './routes/healthy.js'
 import { healthzRoute } from './routes/healthz.js'

@@ -10,21 +10,18 @@ import {
 } from '../../../transformers/rural-payments/customer.js'
 
 export const Customer = {
-  async personId ({ crn }, __, { dataSources }) {
-    const { id: personId } =
-      await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async personId({ crn }, __, { dataSources }) {
+    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
     logger.silly('Get customer id from crn', { crn, personId })
     return personId
   },
 
-  async info ({ crn }, __, { dataSources }) {
-    const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(
-      crn
-    )
+  async info({ crn }, __, { dataSources }) {
+    const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business ({ crn }, { sbi }, { dataSources }) {
+  async business({ crn }, { sbi }, { dataSources }) {
     logger.silly('Get customer business', { crn, sbi })
 
     const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
@@ -41,39 +38,27 @@ export const Customer = {
     )
   },
 
-  async businesses ({ crn }, __, { dataSources }) {
+  async businesses({ crn }, __, { dataSources }) {
     const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
-    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
-      personId
-    )
+    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
     logger.silly('Got customer businesses', { crn, personId, response: { body: summary } })
-    return transformPersonSummaryToCustomerAuthorisedBusinesses(
-      { personId, crn },
-      summary
-    )
+    return transformPersonSummaryToCustomerAuthorisedBusinesses({ personId, crn }, summary)
   },
 
-  async authenticationQuestions (
-    { crn },
-    { entraIdUserObjectId },
-    { dataSources }
-  ) {
-    const employeeId = await dataSources.entraIdApi.getEmployeeId(
-      entraIdUserObjectId
+  async authenticationQuestions({ crn }, { entraIdUserObjectId }, { dataSources }) {
+    const employeeId = await dataSources.entraIdApi.getEmployeeId(entraIdUserObjectId)
+    const results = await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(
+      crn,
+      employeeId
     )
-    const results =
-      await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(
-        crn,
-        employeeId
-      )
     return transformAuthenticateQuestionsAnswers(results)
   }
 }
 
 export const CustomerBusiness = {
-  async role ({ organisationId, crn }, __, { dataSources }) {
+  async role({ organisationId, crn }, __, { dataSources }) {
     logger.silly('Get customer business role', { crn, organisationId })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
@@ -82,26 +67,18 @@ export const CustomerBusiness = {
     return transformBusinessCustomerToCustomerRole(crn, businessCustomers)
   },
 
-  async messages (
-    { organisationId, personId },
-    { pagination, showOnlyDeleted },
-    { dataSources }
-  ) {
-    const defaultPaginationPage = 1
-    const defaultPaginationPerPage = 5
-
+  async messages({ organisationId, personId }, __, { dataSources }) {
     const notifications =
       await dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
         organisationId,
         personId,
-        pagination?.page || defaultPaginationPage,
-        pagination?.perPage || defaultPaginationPerPage
+        new Date().setFullYear(new Date().getFullYear() - 1)
       )
 
-    return transformNotificationsToMessages(notifications, showOnlyDeleted)
+    return transformNotificationsToMessages(notifications)
   },
 
-  async permissionGroups ({ organisationId, crn }, __, { dataSources }) {
+  async permissionGroups({ organisationId, crn }, __, { dataSources }) {
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId

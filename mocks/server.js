@@ -20,7 +20,7 @@ const server = new Core({
   },
   mock: {
     collections: {
-      selected: process.env.MOCK_SERVER_COLLECTION
+      selected: 'all'
     }
   }
 })
@@ -36,6 +36,6 @@ export default {
     return server.server.url
   },
   stop: async () => server.stop(),
-  selectBase: base => server.mock.collections.select(base),
+  selectBase: (base) => server.mock.collections.select(base),
   server
 }

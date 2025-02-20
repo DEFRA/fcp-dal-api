@@ -1,8 +1,15 @@
-export const transformOrganisationCustomers = data => {
+export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
 }
 
-export const transformOrganisationCustomer = ({ id, firstName, lastName, customerReference, role, privileges }) => ({
+export const transformOrganisationCustomer = ({
+  id,
+  firstName,
+  lastName,
+  customerReference,
+  role,
+  privileges
+}) => ({
   personId: id,
   firstName,
   lastName,
@@ -11,7 +18,7 @@ export const transformOrganisationCustomer = ({ id, firstName, lastName, custome
   privileges
 })
 
-export function transformBusinessCustomerPrivilegesToPermissionGroups (
+export function transformBusinessCustomerPrivilegesToPermissionGroups(
   privileges,
   permissionGroups
 ) {
@@ -19,14 +26,11 @@ export function transformBusinessCustomerPrivilegesToPermissionGroups (
 
   for (const permissionGroup of permissionGroups) {
     for (const permission of permissionGroup.permissions) {
-      if (
-        permission.privilegeNames.some(privilegeName =>
-          privileges.includes(privilegeName)
-        )
-      ) {
+      if (permission.privilegeNames.some((privilegeName) => privileges.includes(privilegeName))) {
         customerPermissionGroups.push({
           id: permissionGroup.id,
-          level: permission.level
+          level: permission.level,
+          functions: permission.functions
         })
       }
     }
@@ -35,7 +39,7 @@ export function transformBusinessCustomerPrivilegesToPermissionGroups (
   return customerPermissionGroups
 }
 
-export const transformOrganisationToBusiness = data => {
+export const transformOrganisationToBusiness = (data) => {
   return {
     info: {
       name: data.name,

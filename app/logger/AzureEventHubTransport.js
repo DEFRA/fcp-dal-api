@@ -1,26 +1,17 @@
 import { EventHubProducerClient } from '@azure/event-hubs'
 import TransportStream from 'winston-transport'
-import {
-  DAL_APPLICATION_REQUEST_001,
-  DAL_REQUEST_AUTHENTICATION_001
-} from './codes.js'
+import { DAL_APPLICATION_REQUEST_001, DAL_REQUEST_AUTHENTICATION_001 } from './codes.js'
 
 export class AzureEventHubTransport extends TransportStream {
-  constructor (options) {
+  constructor(options) {
     super(options)
     this.connectionString = options.connectionString
     this.eventHubName = options.eventHubName
-    this.producerClient = new EventHubProducerClient(
-      this.connectionString,
-      this.eventHubName
-    )
-    this.enabledCodes = [
-      DAL_APPLICATION_REQUEST_001,
-      DAL_REQUEST_AUTHENTICATION_001
-    ]
+    this.producerClient = new EventHubProducerClient(this.connectionString, this.eventHubName)
+    this.enabledCodes = [DAL_APPLICATION_REQUEST_001, DAL_REQUEST_AUTHENTICATION_001]
   }
 
-  log (info, callback) {
+  log(info, callback) {
     // We only want to send certain events to SOC, also need ot ensure no PII.
     if (this.enabledCodes.includes(info?.code)) {
       const logEntry = {
@@ -31,21 +22,21 @@ export class AzureEventHubTransport extends TransportStream {
         ...info
       }
 
-      this.sendToEventHub(logEntry).catch(err => {
+      this.sendToEventHub(logEntry).catch((err) => {
         console.error('Error sending log to Event Hub:', err)
       })
     }
     callback()
   }
 
-  async sendToEventHub (logEntry) {
+  async sendToEventHub(logEntry) {
     const batch = await this.producerClient.createBatch()
     batch.tryAdd({ body: logEntry })
 
     await this.producerClient.sendBatch(batch)
   }
 
-  close () {
+  close() {
     return this.producerClient.close()
   }
 }

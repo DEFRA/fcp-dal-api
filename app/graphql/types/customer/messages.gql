@@ -7,25 +7,30 @@ type CustomerBusinessMessage {
   """
   The unique identifier of the message.
   """
-  id: ID!
+  id: ID! @on
 
   """
-  The title of the message.
+  The subject of the message.
   """
-  title: String
+  subject: String @on
 
   """
   The date of the message.
   """
-  date: Date
+  date: Date @on
 
   """
   The body content of the message.
   """
-  body: String
+  body: String @on
 
   """
   Whether the message has been read.
   """
-  read: Boolean
+  read: Boolean @on
+
+  """
+  Whether the message has been deleted.
+  """
+  deleted: Boolean @on
 }

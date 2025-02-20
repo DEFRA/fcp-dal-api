@@ -1,4 +1,6 @@
-export function transformOrganisationCPH (organisationId, data = []) {
+import { validateDate } from '../../utils/date.js'
+
+export function transformOrganisationCPH(organisationId, data = []) {
   if (!organisationId) {
     return null
   }
@@ -8,19 +10,26 @@ export function transformOrganisationCPH (organisationId, data = []) {
   }
 
   return data.map(({ cphNumber, parcelNumbers }) => ({
-    organisationId,
     number: cphNumber,
     parcelNumbers
   }))
 }
 
-export function transformOrganisationCPHCoordinates (data = {}) {
-  if (!data) {
+export function transformCPHInfo(cphNumber, list = [], info = {}) {
+  if (!cphNumber) {
     return null
   }
 
   return {
-    y: data.yCoordinate,
-    x: data.xCoordinate
+    parish: info.parish,
+    species: info.species,
+    parcelNumbers: list.find((cph) => cph.cphNumber === cphNumber)?.parcelNumbers,
+    number: cphNumber,
+    startDate: validateDate(info.startDate).toISOString(),
+    expiryDate: validateDate(info.expiryDate).toISOString(),
+    coordinate: {
+      y: info.yCoordinate,
+      x: info.xCoordinate
+    }
   }
 }

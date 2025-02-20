@@ -89,7 +89,7 @@ type BusinessType {
 }
 
 """
-Represents the a customer of a business.
+Represents the customer of a business.
 """
 type BusinessCustomer {
   """
@@ -120,19 +120,7 @@ type BusinessCustomer {
   """
   The permissions the customer against the business.
   """
-  permissionGroups: [BusinessCustomerPermissionGroup] @on
-}
-
-type BusinessCustomerPermissionGroup {
-  """
-  The permission group id.
-  """
-  id: PermissionGroupId! @on
-
-  """
-  The permission level customer has for the business.
-  """
-  level: PermissionLevel @on
+  permissionGroups: [ActivePermissionGroup] @on @excludeFromList
 }
 
 """
@@ -158,17 +146,17 @@ type Business {
   """
   The land details of the business.
   """
-  land: BusinessLand
-
-  """
-  The applications associated with the business.
-  """
-  applications: [BusinessApplication]
+  land: BusinessLand @on
 
   """
   The CPH (County Parish Holding) numbers of the business.
   """
-  cph: [CPH]
+  cphs: [CPH]
+
+  """
+  The CPH (County Parish Holding) numbers of the business.
+  """
+  cph(number: String!): CPH
 
   """
   The customers associated with the business.

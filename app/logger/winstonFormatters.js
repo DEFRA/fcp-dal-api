@@ -62,7 +62,8 @@ export const redactSensitiveData = format(
 
 export const sampleResponseBodyData = format((info) => {
   if (info?.response?.body) {
-    info.response.body = sampleResponse(info.response.body)
+    info.response.sampleResponseBody = sampleResponse(info.response.body)
+    delete info.response.body
   }
   return info
 })
