@@ -1,7 +1,7 @@
 {
   "name": "fcp-dal-api",
   "version": "0.0.0",
-  "description": "CDP Backend Template",
+  "description": "Customer Registry GraphQL Service",
   "main": ".server/index.js",
   "type": "module",
   "engines": {
@@ -46,10 +46,6 @@
     "hapi-pino": "^12.1.0",
     "hapi-pulse": "^3.0.1",
     "https-proxy-agent": "^7.0.5",
-    "lodash": "^4.17.21",
-    "mongo-locks": "^3.0.2",
-    "mongodb": "^6.10.0",
-    "node-fetch": "^3.3.2",
     "pino": "^9.5.0",
     "pino-pretty": "^13.0.0",
     "undici": "^6.20.1"
@@ -58,10 +54,8 @@
     "@babel/cli": "^7.25.9",
     "@babel/core": "^7.26.0",
     "@babel/preset-env": "^7.26.0",
-    "@shelf/jest-mongodb": "4.3.2",
     "@types/convict": "^6.1.6",
     "@types/jest": "^29.5.14",
-    "@types/lodash": "^4.17.13",
     "@types/node": "^22.9.0",
     "@types/nunjucks": "^3.2.6",
     "@types/webpack-assets-manifest": "^5.1.4",

@@ -1,6 +1,6 @@
 import { config } from '~/src/config/index.js'
-import { getGlobalDispatcher, ProxyAgent } from 'undici'
 import { setupProxy } from '~/src/api/common/helpers/proxy/setup-proxy.js'
+import { getGlobalDispatcher, ProxyAgent } from 'undici'
 
 describe('setupProxy', () => {
   afterEach(() => {
