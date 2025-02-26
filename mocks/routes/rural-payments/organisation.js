@@ -42,6 +42,18 @@ export default [
         options: {
           status: StatusCodes.INTERNAL_SERVER_ERROR
         }
+      },
+      {
+        id: 'missing-address',
+        type: 'middleware',
+        options: {
+          middleware: (req, res) => {
+            const orgId = req.params.orgId
+            const data = organisationByOrgId(orgId)
+            delete data._data.address
+            return okOrNotFoundResponse(res, data)
+          }
+        }
       }
     ]
   },

@@ -169,6 +169,71 @@ describe('Query.business', () => {
       errors: [new GraphQLError('Internal Server Error')]
     })
   })
+
+  it('should handle missing address', async () => {
+    await mockServer.server.mock.useRouteVariant(
+      'rural-payments-organisation-get-by-id:missing-address'
+    )
+
+    const result = await graphql({
+      source: `#graphql
+        query Business {
+          business(sbi: "890000001") {
+            sbi
+            organisationId
+            info {
+              name
+              reference
+              vat
+              traderNumber
+              vendorNumber
+              address {
+                pafOrganisationName
+                buildingNumberRange
+                buildingName
+                flatName
+                street
+                city
+                county
+                postalCode
+                country
+                uprn
+                dependentLocality
+                doubleDependentLocality
+                typeId
+              }
+              phone {
+                mobile
+                landline
+                fax
+              }
+              email {
+                address
+                validated
+                doNotContact
+              }
+              legalStatus {
+                code
+                type
+              }
+              type {
+                code
+                type
+              }
+              registrationNumbers {
+                companiesHouse
+                charityCommission
+              }
+            }
+          }
+        }
+      `,
+      schema,
+      contextValue: fakeContext
+    })
+
+    expect(result.data.business.info.address.pafOrganisationName).toBeNull()
+  })
 })
 
 describe('Query.business.land', () => {
