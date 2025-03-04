@@ -1,0 +1,21 @@
+{
+  "files.autoSave": "onFocusChange",
+  "editor.codeActions.triggerOnFocusChange": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.removeUnusedImports": "explicit",
+    "source.fixAll.eslint": "always",
+    "source.sortImports": "explicit"
+  },
+  "prettier.enable": true,
+  "prettier.configPath": "prettier.config.js",
+  "prettier.requireConfig": true,
+  "prettier.useEditorConfig": false,
+  "prettier.printWidth": 100,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "sonarlint.connectedMode.project": {
+    "connectionId": "defra",
+    "projectKey": "fcp-data-access-layer-api"
+  }
+}
