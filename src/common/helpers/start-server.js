@@ -12,7 +12,7 @@ async function startServer () {
 
     server.logger.info('Server started successfully')
     server.logger.info(
-      `Access your backend on http://localhost:${config.get('port')}`
+      `API listening on http://localhost:${config.get('port')}`
     )
   } catch (error) {
     const logger = createLogger()

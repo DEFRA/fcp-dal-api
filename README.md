@@ -1,6 +1,6 @@
-# CDP Node.js Backend Template
+# fcp-dal-api
 
-Core delivery platform Node.js Backend Template.
+The Data Access Layer (DAL) for the Farming and Countryside Programme (FCP) - a GraphQL API.
 
 - [Requirements](#requirements)
   - [Node.js](#nodejs)
@@ -35,7 +35,7 @@ easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
 To use the correct version of Node.js for this application, via nvm:
 
 ```bash
-cd cdp-node-backend-template
+cd fcp-dal-api
 nvm use
 ```
 
@@ -105,56 +105,11 @@ git config --global core.autocrlf false
 
 ## API endpoints
 
-| Endpoint             | Description                    |
-| :------------------- | :----------------------------- |
-| `GET: /health`       | Health                         |
-| `GET: /example    `  | Example API (remove as needed) |
-| `GET: /example/<id>` | Example API (remove as needed) |
+| Endpoint       | Description |
+| :------------- | :---------- |
+| `GET: /health` | Health      |
 
 ## Development helpers
-
-### MongoDB Locks
-
-If you require a write lock for Mongo you can acquire it via `server.locker` or `request.locker`:
-
-```javascript
-async function doStuff(server) {
-  const lock = await server.locker.lock('unique-resource-name')
-
-  if (!lock) {
-    // Lock unavailable
-    return
-  }
-
-  try {
-    // do stuff
-  } finally {
-    await lock.free()
-  }
-}
-```
-
-Keep it small and atomic.
-
-You may use **using** for the lock resource management.
-Note test coverage reports do not like that syntax.
-
-```javascript
-async function doStuff(server) {
-  await using lock = await server.locker.lock('unique-resource-name')
-
-  if (!lock) {
-    // Lock unavailable
-    return
-  }
-
-  // do stuff
-
-  // lock automatically released
-}
-```
-
-Helper methods are also available in `/src/helpers/mongo-lock.js`.
 
 ### Proxy
 
@@ -183,13 +138,13 @@ return await fetch(url, {
 Build:
 
 ```bash
-docker build --target development --no-cache --tag cdp-node-backend-template:development .
+docker build --target development --no-cache --tag fcp-dal-api:development .
 ```
 
 Run:
 
 ```bash
-docker run -e PORT=3001 -p 3001:3001 cdp-node-backend-template:development
+docker run -e PORT=3001 -p 3001:3001 fcp-dal-api:development
 ```
 
 ### Production image
@@ -197,24 +152,20 @@ docker run -e PORT=3001 -p 3001:3001 cdp-node-backend-template:development
 Build:
 
 ```bash
-docker build --no-cache --tag cdp-node-backend-template .
+docker build --no-cache --tag fcp-dal-api .
 ```
 
 Run:
 
 ```bash
-docker run -e PORT=3001 -p 3001:3001 cdp-node-backend-template
+docker run -e PORT=3001 -p 3001:3001 fcp-dal-api
 ```
 
 ### Docker Compose
 
 A local environment with:
 
-- Localstack for AWS services (S3, SQS)
-- Redis
-- MongoDB
 - This service.
-- A commented out frontend example.
 
 ```bash
 docker compose up --build -d
