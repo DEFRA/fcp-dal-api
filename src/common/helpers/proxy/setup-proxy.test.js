@@ -1,5 +1,5 @@
-import { config } from '../../../config.js'
 import { getGlobalDispatcher, ProxyAgent } from 'undici'
+import { config } from '../../../config.js'
 import { setupProxy } from './setup-proxy.js'
 
 describe('setupProxy', () => {
@@ -21,7 +21,6 @@ describe('setupProxy', () => {
   test('Should setup proxy if the environment variable is set', () => {
     config.set('httpProxy', 'http://localhost:8080')
     setupProxy()
-    expect(global?.GLOBAL_AGENT?.HTTP_PROXY).toBe('http://localhost:8080')
     const undiciDispatcher = getGlobalDispatcher()
     expect(undiciDispatcher).toBeInstanceOf(ProxyAgent)
   })

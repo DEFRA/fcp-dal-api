@@ -1,4 +1,0 @@
-*.config.*
-*.test.*
-__fixtures__
-test-helpers
