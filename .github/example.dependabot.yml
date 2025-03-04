@@ -10,20 +10,13 @@ updates:
     groups:
       build:
         patterns:
-          - '@babel/*'
           - 'autoprefixer'
-          - 'babel-plugin-module-resolver'
-          - 'babel-loader'
-          - 'babel-plugin-transform-import-meta'
-          - 'tsx'
 
       lint:
         patterns:
-          - '@typescript-eslint/*'
           - 'prettier'
           - 'stylelint'
           - 'stylelint-*'
-          - 'typescript'
 
       logging:
         patterns:
@@ -34,7 +27,6 @@ updates:
 
       tools:
         patterns:
-          - 'babel-jest'
           - 'husky'
           - 'jest'
           - 'nodemon'
@@ -47,7 +39,6 @@ updates:
     ignore:
       - dependency-name: 'eslint-*'
       - dependency-name: 'eslint'
-      - dependency-name: '@typescript-eslint/*'
 
     # Schedule run every Monday, local time
     schedule:

@@ -1,4 +1,3 @@
-version: '3.4'
 services:
   localstack:
     image: localstack/localstack:3.0.2
@@ -43,8 +42,8 @@ services:
 
   ################################################################################
 
-  # your-frontend:
-  #   image: defradigital/your-frontend:${YOUR_FRONTEND_VERSION:-latest}
+  # frontend:
+  #   image: defradigital/frontend:${FRONTEND_VERSION:-latest}
   #   ports:
   #     - '3000:3000'
   #   links:
@@ -66,10 +65,12 @@ services:
   #   networks:
   #     - cdp-tenant
 
-  your-backend:
-    build: ./
+  cdp-node-backend-template:
+    build:
+      context: .
+      target: development
     ports:
-      - '3555:3555'
+      - '3001:3001'
     links:
       - 'localstack:localstack'
       - 'mongodb:mongodb'
@@ -81,12 +82,15 @@ services:
     env_file:
       - 'compose/aws.env'
     environment:
-      PORT: 3555
+      PORT: 3001
       NODE_ENV: development
       LOCALSTACK_ENDPOINT: http://localstack:4566
       MONGO_URI: mongodb://mongodb:27017/
     networks:
       - cdp-tenant
+    volumes:
+      - ./src:/home/node/src
+      - ./package.json:/home/node/package.json
 
 ################################################################################
 
@@ -96,3 +100,4 @@ volumes:
 networks:
   cdp-tenant:
     driver: bridge
+    name: cdp-tenant

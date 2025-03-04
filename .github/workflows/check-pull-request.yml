@@ -22,11 +22,10 @@ jobs:
       - name: Test code and Create Test Coverage Reports
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: |
           npm ci
-          npm run build
           npm run format:check
           npm run lint
           npm test

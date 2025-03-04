@@ -1,6 +1,3 @@
-/**
- * @type {Config}
- */
 export default {
   rootDir: '.',
   verbose: true,
@@ -30,7 +27,3 @@ export default {
     ].join('|')}/)`
   ]
 }
-
-/**
- * @import { Config } from 'jest'
- */

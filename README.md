@@ -1,4 +1,4 @@
-# fcp-dal-api
+# CDP Node.js Backend Template
 
 Core delivery platform Node.js Backend Template.
 
@@ -29,13 +29,13 @@ Core delivery platform Node.js Backend Template.
 
 ### Node.js
 
-Please install [Node.js](http://nodejs.org/) `>= v18` and [npm](https://nodejs.org/) `>= v9`. You will find it
+Please install [Node.js](http://nodejs.org/) `>= v22` and [npm](https://nodejs.org/) `>= v11`. You will find it
 easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
 
 To use the correct version of Node.js for this application, via nvm:
 
 ```bash
-cd fcp-dal-api
+cd cdp-node-backend-template
 nvm use
 ```
 
@@ -183,13 +183,13 @@ return await fetch(url, {
 Build:
 
 ```bash
-docker build --target development --no-cache --tag fcp-dal-api:development .
+docker build --target development --no-cache --tag cdp-node-backend-template:development .
 ```
 
 Run:
 
 ```bash
-docker run -e PORT=3001 -p 3001:3001 fcp-dal-api:development
+docker run -e PORT=3001 -p 3001:3001 cdp-node-backend-template:development
 ```
 
 ### Production image
@@ -197,13 +197,13 @@ docker run -e PORT=3001 -p 3001:3001 fcp-dal-api:development
 Build:
 
 ```bash
-docker build --no-cache --tag fcp-dal-api .
+docker build --no-cache --tag cdp-node-backend-template .
 ```
 
 Run:
 
 ```bash
-docker run -e PORT=3001 -p 3001:3001 fcp-dal-api
+docker run -e PORT=3001 -p 3001:3001 cdp-node-backend-template
 ```
 
 ### Docker Compose

@@ -5,7 +5,7 @@ export default {
     },
     autoStart: false,
     instance: {
-      dbName: 'fcp-dal-api'
+      dbName: 'cdp-node-backend-template'
     }
   },
   mongoURLEnvName: 'MONGO_URI',
