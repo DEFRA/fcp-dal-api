@@ -110,4 +110,38 @@ describe('Rural Payments Customer', () => {
     expect(notifications).toEqual([{ id: 2, createdAt: 1698796800000 }])
     expect(httpGet).toHaveBeenCalledTimes(1)
   })
+
+  test('should return security answers via getAuthenticateAnswersByCRN', async () => {
+    const results = {
+      memorableDate: '11/11/2000',
+      memorableEvent: 'Birthday',
+      memorableLocation: 'location',
+      lastUpdatedOn: '2025-02-10T09:21:24.285'
+    }
+    httpGet.mockImplementationOnce(async () => results)
+
+    const getAuthenticate = await ruralPaymentsCustomer.getAuthenticateAnswersByCRN(123123123)
+
+    expect(getAuthenticate).toEqual(results)
+    expect(httpGet).toHaveBeenCalledTimes(1)
+  })
+
+  test('should handle 204 reponse and return null via getAuthenticateAnswersByCRN', async () => {
+    httpGet.mockImplementationOnce(async () => ({ status: 204, body: '' }))
+
+    const authenticateAnswers = await ruralPaymentsCustomer.getAuthenticateAnswersByCRN(123123123)
+
+    expect(authenticateAnswers).toEqual(null)
+    expect(httpGet).toHaveBeenCalledTimes(1)
+  })
+
+  test('should throw error via getAuthenticateAnswersByCRN', async () => {
+    httpGet.mockRejectedValue({
+      extensions: { response: { status: 404 } }
+    })
+    await expect(ruralPaymentsCustomer.getAuthenticateAnswersByCRN(123123123)).rejects.toEqual({
+      extensions: { response: { status: 404 } }
+    })
+    expect(httpGet).toHaveBeenCalledTimes(1)
+  })
 })

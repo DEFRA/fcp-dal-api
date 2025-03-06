@@ -298,4 +298,20 @@ export class RuralPayments extends RESTDataSource {
       deduplicationKey: `${requestId} ${method} ${cacheKey}`
     }
   }
+
+  parseBody(response) {
+    const contentType = response.headers.get('Content-Type')
+    const contentLength = response.headers.get('Content-Length')
+    if (response.status === StatusCodes.NO_CONTENT) {
+      return { status: StatusCodes.NO_CONTENT }
+    } else if (
+      contentLength !== '0' &&
+      contentType &&
+      (contentType.startsWith('application/json') || contentType.endsWith('+json'))
+    ) {
+      return response.json()
+    } else {
+      return response.text()
+    }
+  }
 }

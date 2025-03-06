@@ -112,10 +112,9 @@ describe('Customer transformer', () => {
 
   test('transformAuthenticateQuestionsAnswers', () => {
     const mockAuthenticateQuestionsResponse = {
-      CRN: '123',
-      Date: 'some date',
-      Event: 'some event',
-      Location: 'some location'
+      memorableDate: 'some date',
+      memorableEvent: 'some event',
+      memorableLocation: 'some location'
     }
 
     const result = transformAuthenticateQuestionsAnswers(mockAuthenticateQuestionsResponse)
@@ -124,7 +123,7 @@ describe('Customer transformer', () => {
       isFound: true,
       memorableDate: 'some date',
       memorableEvent: 'some event',
-      memorablePlace: 'some location',
+      memorableLocation: 'some location',
       updatedAt: undefined
     })
   })
@@ -136,7 +135,25 @@ describe('Customer transformer', () => {
       isFound: false,
       memorableDate: undefined,
       memorableEvent: undefined,
-      memorablePlace: undefined,
+      memorableLocation: undefined,
+      updatedAt: undefined
+    })
+  })
+
+  test('transformAuthenticateQuestionsAnswers with partially null results', () => {
+    const mockAuthenticateQuestionsResponse = {
+      memorableDate: 'some date',
+      memorableEvent: null,
+      memorableLocation: ''
+    }
+
+    const result = transformAuthenticateQuestionsAnswers(mockAuthenticateQuestionsResponse)
+
+    expect(result).toEqual({
+      isFound: true,
+      memorableDate: 'some date',
+      memorableEvent: null,
+      memorableLocation: '',
       updatedAt: undefined
     })
   })

@@ -13,7 +13,7 @@ echo "Token: ${token}"
 curl --location "${dal_url}" \
 --header 'Content-Type: application/json' \
 --header "Authorization: Bearer ${token}" \
---data '{"query":"query Customer ($crn: ID!) {\n    customer(crn: $crn) {\n        crn\n        authenticationQuestions(entraIdUserObjectId: \"e99e8cec-6b83-4de8-b9d1-cccfeeb82dbc\") {\n            isFound\n            updatedAt\n            memorableDate\n            memorableEvent\n            memorablePlace\n        }\n    }\n}","variables":{"crn":"9103020285"}}'
+--data '{"query":"query Customer ($crn: ID!) {\n    customer(crn: $crn) {\n        crn\n        authenticationQuestions {\n            isFound\n            updatedAt\n            memorableDate\n            memorableEvent\n            memorableLocation\n        }\n    }\n}","variables":{"crn":"9103020285"}}'
 
 # Customer businesses
 curl --location "${dal_url}" \

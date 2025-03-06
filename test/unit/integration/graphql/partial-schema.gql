@@ -279,7 +279,7 @@ type CustomerAuthenticationQuestions {
   """
   The memorable place question.
   """
-  memorablePlace: String
+  memorableLocation: String
 
   """
   The date the record was last updated.
@@ -309,7 +309,7 @@ type Customer {
   """
   The security questions of the customer.
   """
-  authenticationQuestions(entraIdUserObjectId: UUID!): CustomerAuthenticationQuestions
+  authenticationQuestions: CustomerAuthenticationQuestions
 
   """
   The businesses associated with the customer.

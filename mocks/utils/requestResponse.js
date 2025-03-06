@@ -26,9 +26,22 @@ export const serverInternalErrorResponse = (res) => {
   res.end()
 }
 
+export const noContentResponse = (res) => {
+  res.status(StatusCodes.NO_CONTENT)
+  res.end()
+}
+
 export const okOrNotFoundResponse = (res, data) => {
   if (!data) {
     return notFoundResponse(res)
+  }
+
+  return okResponse(res, data)
+}
+
+export const okOrNoContentResponse = (res, data) => {
+  if (!data) {
+    return noContentResponse(res)
   }
 
   return okResponse(res, data)

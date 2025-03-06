@@ -19,12 +19,12 @@ describe('authenticate contract', () => {
           query CustomerAuthenticateQuestions {
             customer(crn: "${process.env.ACCEPTANCE_TEST_RP_INTERNAL_CUSTOMER_CRN}") {
               crn
-              authenticationQuestions(entraIdUserObjectId: "${process.env.ACCEPTANCE_TEST_AUTHENTICATE_USER_OBJECT_ID}") {
+              authenticationQuestions {
                 isFound
                 updatedAt
                 memorableDate
                 memorableEvent
-                memorablePlace
+                memorableLocation
               }
             }
           }
@@ -40,7 +40,7 @@ describe('authenticate contract', () => {
     expect(parsedResponse).toHaveProperty('data')
     expect(parsedResponse).toHaveProperty('data.customer.authenticationQuestions.isFound')
     expect(parsedResponse).toHaveProperty('data.customer.authenticationQuestions.memorableDate')
-    expect(parsedResponse).toHaveProperty('data.customer.authenticationQuestions.memorablePlace')
+    expect(parsedResponse).toHaveProperty('data.customer.authenticationQuestions.memorableLocation')
     expect(parsedResponse).toHaveProperty('data.customer.authenticationQuestions.memorableEvent')
     expect(parsedResponse).toHaveProperty('data.customer.authenticationQuestions.updatedAt')
   })

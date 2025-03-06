@@ -47,12 +47,9 @@ export const Customer = {
     return transformPersonSummaryToCustomerAuthorisedBusinesses({ personId, crn }, summary)
   },
 
-  async authenticationQuestions({ crn }, { entraIdUserObjectId }, { dataSources }) {
-    const employeeId = await dataSources.entraIdApi.getEmployeeId(entraIdUserObjectId)
-    const results = await dataSources.authenticateDatabase.getAuthenticateQuestionsAnswersByCRN(
-      crn,
-      employeeId
-    )
+  async authenticationQuestions({ crn }, __, { dataSources }) {
+    const results = await dataSources.ruralPaymentsCustomer.getAuthenticateAnswersByCRN(crn)
+    logger.silly('Got authenticate answers', { crn, response: { body: results } })
     return transformAuthenticateQuestionsAnswers(results)
   }
 }

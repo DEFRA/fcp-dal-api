@@ -19,7 +19,9 @@ const routes = [
   'rural-payments-messages:default',
 
   'rural-payments-siti-agri-api-get-cph-for-organisation-by-id:default',
-  'rural-payments-siti-agri-api-get-cph-info-for-organisation-by-id:default'
+  'rural-payments-siti-agri-api-get-cph-info-for-organisation-by-id:default',
+
+  'rural-payments-authenticate-get-by-crn:default'
 ]
 
 export default [

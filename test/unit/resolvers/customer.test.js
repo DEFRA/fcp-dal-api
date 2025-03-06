@@ -21,27 +21,21 @@ const dataSources = {
     getPersonBusinessesByPersonId() {
       return organisationPersonSummary({ id: personId })._data
     },
-    getNotificationsByOrganisationIdAndPersonId: jest.fn()
+    getNotificationsByOrganisationIdAndPersonId: jest.fn(),
+    getAuthenticateAnswersByCRN(_) {
+      return {
+        memorableDate: 'some date',
+        memorableEvent: 'some event',
+        memorableLocation: 'some location'
+      }
+    }
   },
   ruralPaymentsBusiness: {
     getOrganisationCustomersByOrganisationId() {
       return organisationPeopleByOrgId(orgId)._data
     }
   },
-  permissions: new Permissions(),
-  authenticateDatabase: {
-    getAuthenticateQuestionsAnswersByCRN() {
-      return {
-        CRN: '123',
-        Date: 'some date',
-        Event: 'some event',
-        Location: 'some location'
-      }
-    }
-  },
-  entraIdApi: {
-    getEmployeeId: jest.fn()
-  }
+  permissions: new Permissions()
 }
 
 describe('Customer', () => {
@@ -128,34 +122,21 @@ describe('Customer', () => {
   })
 
   test('Customer.authenticationQuestions', async () => {
-    dataSources.entraIdApi.getEmployeeId.mockResolvedValue({ employeeId: 'x123456' })
-
-    const response = await Customer.authenticationQuestions(
-      { id: 'mockCustomerId' },
-      { entraIdUserObjectId: 'mockEntraIdUserObjectId' },
-      { dataSources }
-    )
-
-    expect(dataSources.entraIdApi.getEmployeeId).toHaveBeenCalledWith('mockEntraIdUserObjectId')
-
+    const response = await Customer.authenticationQuestions({ crn: 'mockCustomerCRN' }, undefined, {
+      dataSources
+    })
     expect(response).toEqual({
       isFound: true,
       memorableDate: 'some date',
       memorableEvent: 'some event',
-      memorablePlace: 'some location',
+      memorableLocation: 'some location',
       updatedAt: undefined
     })
   })
 
   test('Customer.authenticationQuestions - error', async () => {
-    dataSources.entraIdApi.getEmployeeId.mockRejectedValue(new Error())
-
     expect(
-      Customer.authenticationQuestions(
-        { id: 'mockCustomerId' },
-        { entraIdUserObjectId: 'mockEntraIdUserObjectId' },
-        { dataSources }
-      )
+      Customer.authenticationQuestions({ id: 'mockCustomerId' }, { dataSources })
     ).rejects.toThrow(Error)
   })
 })
