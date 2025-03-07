@@ -6,11 +6,7 @@
   "main": "app/index.js",
   "type": "module",
   "scripts": {
-    "format:gql": "prettier \"app/graphql/types/**/*.gql\" --write",
-    "format:js": "standard --fix",
-    "format": "eslint --fix . && prettier --write .",
-    "lint:gql": "eslint \"app/graphql/types\" && prettier \"app/graphql/types/**/*.gql\" --check",
-    "lint:js": "standard app/ test/",
+    "format": "eslint --fix . && prettier --log-level warn --write .",
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --write .",
     "prepare": "[ -d '.git' ] && husky || echo 'skipping husky'",
@@ -55,12 +51,9 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.25.9",
     "@graphql-eslint/eslint-plugin": "^3.20.1",
     "@mocks-server/core": "^4.0.2",
     "dotenv": "^16.4.7",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.9.0",
     "eslint": "^8.57.1",
