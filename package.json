@@ -1,6 +1,6 @@
 {
   "name": "fcp-dal-api",
-  "version": "0.3.0",
+  "version": "0.3.5",
   "description": "The Data Access Layer (DAL) for the Farming and Countryside Programme (FCP) - a GraphQL API",
   "main": "src/index.js",
   "type": "module",
