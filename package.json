@@ -62,6 +62,7 @@
       "describe",
       "beforeEach",
       "expect",
+      "it",
       "test",
       "afterEach",
       "jest",
