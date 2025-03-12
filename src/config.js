@@ -84,9 +84,13 @@ const config = convict({
     redact: {
       doc: 'Log paths to redact',
       format: Array,
-      default: isProduction
-        ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : ['req', 'res', 'responseTime']
+      default: [
+        'req.headers.authorization',
+        'req.headers.cookie',
+        'res.headers',
+        'kitsConnection.key',
+        'kitsConnection.cert'
+      ]
     }
   },
   httpProxy: {
