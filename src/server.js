@@ -22,6 +22,7 @@ async function createServer () {
         failAction
       },
       security: {
+        /* cspell:disable-next-line */
         hsts: {
           maxAge: 31536000,
           includeSubDomains: true,
@@ -29,6 +30,7 @@ async function createServer () {
         },
         xss: 'enabled',
         noSniff: true,
+        /* cspell:disable-next-line */
         xframe: true
       }
     },
