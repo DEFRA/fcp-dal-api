@@ -10,7 +10,7 @@ permissions:
 
 env:
   AWS_REGION: eu-west-2
-  AWS_ACCOUNT_ID: "094954420758"
+  AWS_ACCOUNT_ID: '094954420758'
 
 jobs:
   build:
@@ -35,7 +35,8 @@ jobs:
         uses: DEFRA/cdp-build-action/build-hotfix@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
+#
+# prettier-ignore
 #     - run: npm install && npm test
 #     - name: SonarCloud Scan
 #       uses: SonarSource/sonarcloud-github-action@master
