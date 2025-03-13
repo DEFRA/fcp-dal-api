@@ -14,8 +14,23 @@
   "prettier.printWidth": 100,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
-  "sonarlint.connectedMode.project": {
-    "connectionId": "defra",
-    "projectKey": "fcp-data-access-layer-api"
-  }
+  "cSpell.words": [
+    "autoprefixer",
+    "defra",
+    "defradigital",
+    "nationalarchives",
+    "nodemon",
+    "pino",
+    "sonarcloud",
+    "TRUSTSTORE"
+  ],
+  "cSpell.ignorePaths": [
+    ".git",
+    ".husky/_",
+    ".vscode",
+    "coverage",
+    "node_modules",
+    "package-lock.json"
+  ],
+  "cSpell.language": "en,en-GB"
 }

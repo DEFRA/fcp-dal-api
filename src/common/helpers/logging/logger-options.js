@@ -18,10 +18,25 @@ const formatters = {
 
 export const loggerOptions = {
   enabled: logConfig.enabled,
-  ignorePaths: ['/health'],
+  // ignorePaths: ['/health'],
   redact: {
     paths: logConfig.redact,
-    remove: true
+    censor: (value, path) => {
+      const dotPath = path.join('.')
+      if (
+        !value &&
+        [
+          'kitsConnection.key',
+          'kitsConnection.cert',
+          'req.headers.authorization'
+        ].includes(dotPath)
+      ) {
+        return '<empty>'
+      } else if (['req.headers.cookie', 'res.headers'].includes(dotPath)) {
+        return '<truncated>'
+      }
+      return '[REDACTED]'
+    }
   },
   level: logConfig.level,
   ...formatters[logConfig.format],

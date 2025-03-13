@@ -109,6 +109,12 @@ git config --global core.autocrlf false
 | :------------- | :---------- |
 | `GET: /health` | Health      |
 
+### Security
+
+The platform provides features for handling authentication to the DAL, connecting clients can follow the [CDP docs](https://portal.cdp-int.defra.cloud/documentation/how-to/apis.md#how-do-clients-authenticate-and-access-my-api-).
+
+> NOTE: the endpoint protection can be changed by submitting a PR with changes to this [spec file](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/dev/apis/fcp-dal-api.yml)
+
 ## Development helpers
 
 ### Proxy

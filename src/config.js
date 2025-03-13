@@ -84,9 +84,13 @@ const config = convict({
     redact: {
       doc: 'Log paths to redact',
       format: Array,
-      default: isProduction
-        ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : ['req', 'res', 'responseTime']
+      default: [
+        'req.headers.authorization',
+        'req.headers.cookie',
+        'res.headers',
+        'kitsConnection.key',
+        'kitsConnection.cert'
+      ]
     }
   },
   httpProxy: {
@@ -114,6 +118,39 @@ const config = convict({
       format: String,
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
+    }
+  },
+  kitsConnection: {
+    host: {
+      doc: 'The host part of the URL for connections to KITS',
+      format: String,
+      default: null,
+      env: 'KITS_HOST',
+      nullable: true
+    },
+    port: {
+      doc: 'The port part of the URL for connections to KITS',
+      format: String,
+      default: '',
+      env: 'KITS_PORT'
+    },
+    path: {
+      doc: 'The path part of the URL for connections to KITS',
+      format: String,
+      default: '',
+      env: 'KITS_PATH'
+    },
+    key: {
+      doc: 'The client key for SSL connections to KITS',
+      format: String,
+      default: '',
+      env: 'KITS_CONNECTION_KEY'
+    },
+    cert: {
+      doc: 'The client cert for SSL connections to KITS',
+      format: String,
+      default: '',
+      env: 'KITS_CONNECTION_CERT'
     }
   }
 })
