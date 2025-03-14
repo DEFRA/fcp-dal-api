@@ -89,7 +89,9 @@ const config = convict({
         'req.headers.cookie',
         'res.headers',
         'kitsConnection.key',
-        'kitsConnection.cert'
+        'kitsConnection.cert',
+        'key',
+        'cert'
       ]
     }
   },
