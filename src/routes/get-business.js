@@ -8,7 +8,7 @@ const getBusiness = {
   path: '/get-business/{id}',
   handler: async (request, h) => {
     logger.info(`GET /get-business with params: ${JSON.stringify(request.params)}`)
-    const result = await fetcher.fetch(`organisation/${request.params.id}`)
+    const result = await fetcher.fetch(`/organisation/${request.params.id}`)
     const { name, sbi, orgId } = result.body
 
     logger.info(`business object with keys: ${Object.keys(result.body)}`)

@@ -38,7 +38,7 @@ describe('getBusiness route', () => {
     await getBusiness.handler(request, h)
 
     expect(mockInfo).toHaveBeenCalledWith('GET /get-business with params: {"id":"12345"}')
-    expect(fetcher.fetch).toHaveBeenCalledWith('organisation/12345')
+    expect(fetcher.fetch).toHaveBeenCalledWith('/organisation/12345')
     expect(mockInfo).toHaveBeenCalledWith('business object with keys: name,sbi,orgId,someOther')
     expect(h.response).toHaveBeenCalledWith({ name: 'Test Org', sbi: '67890', orgId: '12345' })
   })
@@ -49,6 +49,6 @@ describe('getBusiness route', () => {
     await expect(getBusiness.handler(request, h)).rejects.toThrow(new Error('some error'))
 
     expect(mockInfo).toHaveBeenCalledWith('GET /get-business with params: {"id":"12345"}')
-    expect(fetcher.fetch).toHaveBeenCalledWith('organisation/12345')
+    expect(fetcher.fetch).toHaveBeenCalledWith('/organisation/12345')
   })
 })
