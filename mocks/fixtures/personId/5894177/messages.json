@@ -1,0 +1,21 @@
+{
+  "notifications": [
+    {
+      "id": 4354810,
+      "personId": 5894177,
+      "organisationId": "5625145",
+      "messageId": 1711975,
+      "readAt": 13000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6217099705823,
+      "title": "Permission changed for Deborah Sacker",
+      "body": "<p>Your permission for Deborah Sacker was changed on Sat Jul 08 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 1,
+  "readCount": 1,
+  "unreadCount": 0
+}

@@ -1,0 +1,77 @@
+{
+  "notifications": [
+    {
+      "id": 6957834,
+      "personId": 5777821,
+      "organisationId": "5625145",
+      "messageId": 3780285,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9959286469187,
+      "title": "Permission changed for Jacqueline Smakman",
+      "body": "<p>Your permission for Jacqueline Smakman was changed on Thu Oct 05 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6284389,
+      "personId": 5777821,
+      "organisationId": "5625145",
+      "messageId": 2876508,
+      "readAt": 17000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2474473001772,
+      "title": "Permission changed for Jacqueline Smakman",
+      "body": "<p>Your permission for Jacqueline Smakman was changed on Wed Mar 20 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3848379,
+      "personId": 5777821,
+      "organisationId": "5625145",
+      "messageId": 7124725,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7496363941980,
+      "title": "Permission changed for Jacqueline Smakman",
+      "body": "<p>Your permission for Jacqueline Smakman was changed on Fri Dec 09 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9757513,
+      "personId": 5777821,
+      "organisationId": "5625145",
+      "messageId": 1690171,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9851619540065,
+      "title": "Permission changed for Jacqueline Smakman",
+      "body": "<p>Your permission for Jacqueline Smakman was changed on Mon Feb 20 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4140548,
+      "personId": 5777821,
+      "organisationId": "5625145",
+      "messageId": 5904230,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7701777062543,
+      "title": "Permission changed for Jacqueline Smakman",
+      "body": "<p>Your permission for Jacqueline Smakman was changed on Sun Aug 28 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 5,
+  "readCount": 1,
+  "unreadCount": 4
+}

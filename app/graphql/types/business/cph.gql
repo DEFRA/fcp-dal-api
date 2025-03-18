@@ -1,0 +1,56 @@
+"""
+Represents a coordinate with x and y values.
+"""
+type CPHCoordinate {
+  """
+  The x value of the coordinate.
+  """
+  x: Int
+
+  """
+  The y value of the coordinate.
+  """
+  y: Int
+}
+
+"""
+Represents a County Parish Holding (CPH) number.
+
+Data Source: Rural Payments Portal (PRR)
+"""
+type CPH {
+  """
+  The CPH number, example: "10/327/0023"
+  """
+  number: String
+
+  """
+  The parcel numbers associated with the CPH number.
+  """
+  parcelNumbers: [String]
+
+  """
+  The parish associated with the CPH number.
+  """
+  parish: String @excludeFromList
+
+  """
+  The start date of the CPH number.
+  """
+  startDate: Date @excludeFromList
+
+  """
+  The expiry date of the CPH number.
+  """
+  expiryDate: Date @excludeFromList
+
+  """
+  The species associated with the CPH number.
+  """
+  species: [String] @excludeFromList
+
+  """
+  The coordinate of the CPH number.
+  """
+  coordinate: CPHCoordinate @excludeFromList
+}

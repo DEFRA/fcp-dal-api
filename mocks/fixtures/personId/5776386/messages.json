@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 8359339,
+      "personId": 5776386,
+      "organisationId": "5625145",
+      "messageId": 2163439,
+      "readAt": 23000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1284671757545,
+      "title": "Permission changed for Donna Perry",
+      "body": "<p>Your permission for Donna Perry was changed on Wed Jul 12 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9989923,
+      "personId": 5776386,
+      "organisationId": "5625145",
+      "messageId": 9908423,
+      "readAt": 9000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7232545473835,
+      "title": "Permission changed for Donna Perry",
+      "body": "<p>Your permission for Donna Perry was changed on Sat Oct 01 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 341705,
+      "personId": 5776386,
+      "organisationId": "5625145",
+      "messageId": 648761,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8582904488728,
+      "title": "Permission changed for Donna Perry",
+      "body": "<p>Your permission for Donna Perry was changed on Mon Jan 09 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4602168,
+      "personId": 5776386,
+      "organisationId": "5625145",
+      "messageId": 9145834,
+      "readAt": 29000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3845892977397,
+      "title": "Permission changed for Donna Perry",
+      "body": "<p>Your permission for Donna Perry was changed on Fri Apr 26 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 3,
+  "unreadCount": 1
+}

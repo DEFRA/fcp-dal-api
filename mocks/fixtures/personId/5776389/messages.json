@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 8271077,
+      "personId": 5776389,
+      "organisationId": "5625145",
+      "messageId": 272546,
+      "readAt": 10000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6938923587730,
+      "title": "Permission changed for Adam Brown",
+      "body": "<p>Your permission for Adam Brown was changed on Sun Aug 14 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1778913,
+      "personId": 5776389,
+      "organisationId": "5625145",
+      "messageId": 26816,
+      "readAt": 8000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5730668228533,
+      "title": "Permission changed for Adam Brown",
+      "body": "<p>Your permission for Adam Brown was changed on Fri Dec 30 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 2,
+  "unreadCount": 0
+}

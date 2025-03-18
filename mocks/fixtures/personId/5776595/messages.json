@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 6518536,
+      "personId": 5776595,
+      "organisationId": "5625145",
+      "messageId": 7911119,
+      "readAt": 6000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7708020907142,
+      "title": "Permission changed for Janet Jones",
+      "body": "<p>Your permission for Janet Jones was changed on Thu Nov 02 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8096686,
+      "personId": 5776595,
+      "organisationId": "5625145",
+      "messageId": 1687416,
+      "readAt": 28000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7233040842495,
+      "title": "Permission changed for Janet Jones",
+      "body": "<p>Your permission for Janet Jones was changed on Fri Jul 26 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2287980,
+      "personId": 5776595,
+      "organisationId": "5625145",
+      "messageId": 751801,
+      "readAt": 30000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6606834069058,
+      "title": "Permission changed for Janet Jones",
+      "body": "<p>Your permission for Janet Jones was changed on Sat Nov 18 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 3,
+  "unreadCount": 0
+}

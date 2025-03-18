@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 8236552,
+      "personId": 5768194,
+      "organisationId": "5625145",
+      "messageId": 5862302,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3614518289545,
+      "title": "Permission changed for George Pugsley",
+      "body": "<p>Your permission for George Pugsley was changed on Fri Nov 18 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6795765,
+      "personId": 5768194,
+      "organisationId": "5625145",
+      "messageId": 122692,
+      "readAt": 28000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3353356815169,
+      "title": "Permission changed for George Pugsley",
+      "body": "<p>Your permission for George Pugsley was changed on Mon Feb 26 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7261479,
+      "personId": 5768194,
+      "organisationId": "5625145",
+      "messageId": 5592550,
+      "readAt": 3000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1852545861827,
+      "title": "Permission changed for George Pugsley",
+      "body": "<p>Your permission for George Pugsley was changed on Mon Aug 22 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7586679,
+      "personId": 5768194,
+      "organisationId": "5625145",
+      "messageId": 4123012,
+      "readAt": 16000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7323737336862,
+      "title": "Permission changed for George Pugsley",
+      "body": "<p>Your permission for George Pugsley was changed on Sat Oct 15 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 3,
+  "unreadCount": 1
+}

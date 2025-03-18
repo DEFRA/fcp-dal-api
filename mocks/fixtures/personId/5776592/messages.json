@@ -1,0 +1,91 @@
+{
+  "notifications": [
+    {
+      "id": 7559010,
+      "personId": 5776592,
+      "organisationId": "5625145",
+      "messageId": 6212096,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6020807957755,
+      "title": "Permission changed for Martin Griffin",
+      "body": "<p>Your permission for Martin Griffin was changed on Wed Aug 24 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 9571596,
+      "personId": 5776592,
+      "organisationId": "5625145",
+      "messageId": 3332900,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5344510587263,
+      "title": "Permission changed for Martin Griffin",
+      "body": "<p>Your permission for Martin Griffin was changed on Sun Aug 28 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4049844,
+      "personId": 5776592,
+      "organisationId": "5625145",
+      "messageId": 5019241,
+      "readAt": 19000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8042603833864,
+      "title": "Permission changed for Martin Griffin",
+      "body": "<p>Your permission for Martin Griffin was changed on Wed Oct 19 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8396782,
+      "personId": 5776592,
+      "organisationId": "5625145",
+      "messageId": 8225612,
+      "readAt": 19000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 858883890861,
+      "title": "Permission changed for Martin Griffin",
+      "body": "<p>Your permission for Martin Griffin was changed on Sun Feb 26 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8455813,
+      "personId": 5776592,
+      "organisationId": "5625145",
+      "messageId": 6424186,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6852731923782,
+      "title": "Permission changed for Martin Griffin",
+      "body": "<p>Your permission for Martin Griffin was changed on Sat Feb 11 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6472929,
+      "personId": 5776592,
+      "organisationId": "5625145",
+      "messageId": 2143150,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9271599538420,
+      "title": "Permission changed for Martin Griffin",
+      "body": "<p>Your permission for Martin Griffin was changed on Sat Dec 10 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 6,
+  "readCount": 2,
+  "unreadCount": 4
+}

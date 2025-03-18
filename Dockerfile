@@ -13,10 +13,10 @@ EXPOSE ${PORT} ${PORT_DEBUG}
 
 COPY --chown=node:node package*.json ./
 RUN npm install
-COPY --chown=node:node ./src ./src
+COPY --chown=node:node . .
+CMD [ "npm", "run", "start:watch" ]
 
-CMD [ "npm", "run", "docker:dev" ]
-
+# Production
 FROM defradigital/node:${PARENT_VERSION} AS production
 ARG PARENT_VERSION
 LABEL uk.gov.defra.ffc.parent-image=defradigital/node:${PARENT_VERSION}
@@ -28,7 +28,6 @@ RUN apk add --no-cache curl
 USER node
 
 COPY --from=development /home/node/package*.json ./
-COPY --from=development /home/node/src ./src/
 
 RUN npm ci --omit=dev
 
@@ -36,4 +35,8 @@ ARG PORT
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
-CMD [ "node", "src" ]
+COPY --from=development /home/node/mocks/ ./mocks/
+COPY --from=development /home/node/app/ ./app/
+COPY --from=development /home/node/package*.json ./
+RUN npm ci
+CMD [ "node", "app" ]

@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 9828352,
+      "personId": 5338844,
+      "organisationId": "5625145",
+      "messageId": 1481408,
+      "readAt": 10000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 1807982953797,
+      "title": "Permission changed for Janet Paisley",
+      "body": "<p>Your permission for Janet Paisley was changed on Tue Nov 21 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4567905,
+      "personId": 5338844,
+      "organisationId": "5625145",
+      "messageId": 9972735,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2764553532064,
+      "title": "Permission changed for Janet Paisley",
+      "body": "<p>Your permission for Janet Paisley was changed on Mon Sep 05 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 1,
+  "unreadCount": 1
+}

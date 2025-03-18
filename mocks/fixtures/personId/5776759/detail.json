@@ -1,0 +1,37 @@
+{
+  "_data": {
+    "title": "Mr.",
+    "otherTitle": null,
+    "firstName": "Clive",
+    "middleName": "Barnett",
+    "lastName": "Barnett",
+    "dateOfBirth": "1959-07-03T01:22:47.626Z",
+    "landline": null,
+    "fax": null,
+    "mobile": "1042220279",
+    "email": "Linnea_Feeney89@gmail.com",
+    "doNotContact": false,
+    "emailValidated": false,
+    "address": {
+      "pafOrganisationName": null,
+      "flatName": null,
+      "buildingNumberRange": null,
+      "buildingName": "79",
+      "street": "Herzog Walk",
+      "city": "High Sipes Bridge",
+      "county": "Borders",
+      "postalCode": "ST4 2ZY",
+      "country": "United Kingdom",
+      "uprn": null,
+      "dependentLocality": null,
+      "doubleDependentLocality": null,
+      "addressTypeId": null
+    },
+    "locked": false,
+    "id": 5776759,
+    "confirmed": null,
+    "customerReferenceNumber": "6057757394",
+    "personalIdentifiers": null,
+    "deactivated": false
+  }
+}

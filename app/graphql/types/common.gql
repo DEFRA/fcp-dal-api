@@ -1,0 +1,120 @@
+"Represents data about a customers or business phone/fax details"
+type Phone {
+  """
+  Mobile number of the customer or business
+  """
+  mobile: String
+
+  """
+  Landline number of the customer or business
+  """
+  landline: String
+
+  """
+  Fax number of the customer or business
+  """
+  fax: String
+}
+
+"Represents data about a customers or business email details"
+type Email {
+  """
+  Email address of the customer or business
+  """
+  address: String
+
+  """
+  Validated status of the email address
+  """
+  validated: Boolean
+
+  """
+  Do not contact status of the email address
+  """
+  doNotContact: Boolean
+}
+
+"Represents data about a customers or business address details"
+type Address {
+  """
+  PAF organisation name
+  """
+  pafOrganisationName: String
+
+  """
+  Building number range of the address
+  """
+  buildingNumberRange: String
+
+  """
+  Building name of the address
+  """
+  buildingName: String
+
+  """
+  Flat name of the address
+  """
+  flatName: String
+
+  """
+  Street of the address
+  """
+  street: String
+
+  """
+  Locality of the address
+  """
+  city: String
+
+  """
+  County of the address
+  """
+  county: String
+
+  """
+  Postal code of the address
+  """
+  postalCode: String
+
+  """
+  Country of the address
+  """
+  country: String
+
+  """
+  UPRN of the address
+  """
+  uprn: String
+
+  """
+  Dependant locality of the address
+  """
+  dependentLocality: String
+
+  """
+  Double dependant locality of the address
+  """
+  doubleDependentLocality: String
+
+  """
+  Type ID of the address
+  """
+  typeId: String
+}
+
+"Represents data about a pagination details for a list of items"
+input Pagination {
+  """
+  Number of items per page
+  """
+  perPage: Int!
+
+  """
+  Page number
+  """
+  page: Int!
+}
+
+enum AuthRole {
+  ADMIN
+}

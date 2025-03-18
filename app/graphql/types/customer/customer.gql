@@ -1,0 +1,185 @@
+"""
+Represents the basic information of a customer.
+
+Data Source: Rural Payments Portal (PRR)
+"""
+type CustomerInfo {
+  """
+  The name of the customer.
+  """
+  name: CustomerName
+
+  """
+  The date of birth of the customer.
+  """
+  dateOfBirth: String
+
+  """
+  The phone details of the customer.
+  """
+  phone: Phone
+
+  """
+  The email details of the customer.
+  """
+  email: Email
+
+  """
+  The status details of the customer.
+  """
+  status: CustomerStatus
+
+  """
+  The address details of the customer.
+  """
+  address: Address
+}
+
+"""
+Represents the full name of a customer.
+"""
+type CustomerName {
+  """
+  The title of the customer (e.g., Mr., Mrs., Dr.).
+  """
+  title: String
+
+  """
+  Any other title of the customer.
+  """
+  otherTitle: String
+
+  """
+  The first name of the customer.
+  """
+  first: String
+
+  """
+  The middle name of the customer.
+  """
+  middle: String
+
+  """
+  The last name of the customer.
+  """
+  last: String
+}
+
+"""
+Represents the status of a customer.
+"""
+type CustomerStatus {
+  """
+  Whether the customer account is locked.
+  """
+  locked: Boolean
+
+  """
+  Whether the customer account is confirmed.
+  """
+  confirmed: Boolean
+
+  """
+  Whether the customer account is deactivated.
+  """
+  deactivated: Boolean
+}
+
+"""
+Represents the security questions of a customer.
+"""
+type CustomerAuthenticationQuestions {
+  """
+  The memorable date question.
+  """
+  memorableDate: String @on
+
+  """
+  The memorable event question.
+  """
+  memorableEvent: String @on
+
+  """
+  The memorable place question.
+  """
+  memorableLocation: String @on
+
+  """
+  The date the record was last updated.
+  """
+  updatedAt: Date @on
+
+  """
+  The indicator for customer record been found in authenticate database
+  """
+  isFound: Boolean @on
+}
+
+"""
+Represents a customer.
+"""
+type Customer {
+  """
+  The unique identifier of the customer.
+  """
+  personId: ID! @on #eslint-disable-line @graphql-eslint/no-typename-prefix
+  """
+  The CRN (Customer Reference Number) of the customer.
+  """
+  crn: ID! @on
+
+  """
+  The basic information of the customer.
+  """
+  info: CustomerInfo
+
+  """
+  The security questions of the customer.
+  """
+  authenticationQuestions: CustomerAuthenticationQuestions @on
+
+  """
+  The businesses associated with the customer.
+  """
+  businesses: [CustomerBusiness] @on
+
+  """
+  The single business filtered by sbi associated with the customer.
+  """
+  business(sbi: ID!): CustomerBusiness @on
+}
+
+"""
+Represents a business owned by a customer
+"""
+type CustomerBusiness {
+  """
+  The unique identifier of the business.
+  """
+  organisationId: ID @on
+
+  """
+  The SBI (Single Business Identifier) of the business.
+  """
+  sbi: ID! @on
+
+  """
+  The name of the business.
+  """
+  name: String! @on
+
+  """
+  The role associated with the business.
+  """
+  role: String @on
+
+  """
+  The messages associated with the business.
+  """
+  messages: [CustomerBusinessMessage] @on @excludeFromList
+
+  """
+  The permission groups associated with the business.
+  """
+  permissionGroups: [ActivePermissionGroup] @on @excludeFromList
+}

@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 168982,
+      "personId": 5776762,
+      "organisationId": "5625145",
+      "messageId": 7387913,
+      "readAt": 8000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5034873644944,
+      "title": "Permission changed for Ruth Davies",
+      "body": "<p>Your permission for Ruth Davies was changed on Thu Jun 15 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3904793,
+      "personId": 5776762,
+      "organisationId": "5625145",
+      "messageId": 5727867,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4668963074019,
+      "title": "Permission changed for Ruth Davies",
+      "body": "<p>Your permission for Ruth Davies was changed on Fri Nov 03 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 1,
+  "unreadCount": 1
+}

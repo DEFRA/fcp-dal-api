@@ -1,0 +1,21 @@
+{
+  "testMatch": ["<rootDir>/test/**/*.test.js"],
+  "transform": {},
+  "collectCoverage": true,
+  "collectCoverageFrom": ["<rootDir>/app/**/*.js"],
+  "coverageDirectory": "test-output",
+  "coverageReporters": ["text-summary", "cobertura", "lcov"],
+  "reporters": [
+    "default",
+    [
+      "jest-junit",
+      {
+        "suiteName": "jest tests",
+        "outputDirectory": "test-output",
+        "outputName": "junit.xml"
+      }
+    ]
+  ],
+  "verbose": true,
+  "resetMocks": true
+}

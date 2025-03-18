@@ -1,0 +1,21 @@
+{
+  "notifications": [
+    {
+      "id": 7883494,
+      "personId": 5302028,
+      "organisationId": "5625145",
+      "messageId": 252740,
+      "readAt": 11000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9464501481453,
+      "title": "Permission changed for Ivan Cook",
+      "body": "<p>Your permission for Ivan Cook was changed on Fri Jul 26 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 1,
+  "readCount": 1,
+  "unreadCount": 0
+}

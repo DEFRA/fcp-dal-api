@@ -1,0 +1,126 @@
+"""
+Represents a parcel of a business land.
+"""
+type BusinessLandParcel {
+  """
+  The unique identifier of the land parcel.
+  """
+  id: ID! @on
+
+  """
+  The sheet ID of the land parcel.
+  """
+  sheetId: String @on
+
+  """
+  The parcel ID of the land parcel.
+  """
+  parcelId: String @on
+
+  """
+  The area of the land parcel.
+  """
+  area: Float @on
+
+  """
+  Whether the parcel is pending digitisation.
+  """
+  pendingDigitisation: Boolean @on
+
+  """
+  The effective to date of the land parcel.
+  """
+  effectiveToDate: Date @on @excludeFromList
+
+  """
+  The effective from date of the land parcel.
+  """
+  effectiveFromDate: Date @on @excludeFromList
+}
+
+"""
+Represents a summary of a business land.
+"""
+type BusinessLandSummary {
+  """
+  The area of arable land.
+  """
+  arableLandArea: Float @on
+
+  """
+  The area of permanent crops.
+  """
+  permanentCropsArea: Float @on
+
+  """
+  The area of permanent grassland.
+  """
+  permanentGrasslandArea: Float @on
+
+  """
+  The total area of the business land.
+  """
+  totalArea: Float @on
+
+  """
+  The total number of parcels in the business land.
+  """
+  totalParcels: Float @on
+}
+
+"""
+Represents a cover of a business land.
+"""
+type BusinessLandCover {
+  """
+  The unique identifier of the land cover.
+  """
+  id: ID! @on
+
+  """
+  The name of the land cover.
+  """
+  name: String @on
+
+  """
+  The area of the land cover.
+  """
+  area: Float @on
+
+  """
+  The code of the land cover.
+  """
+  code: String @on
+
+  """
+  Whether the land cover is BPS eligible.
+  """
+  isBpsEligible: Boolean @on
+}
+
+"""
+Represents a business land.
+
+Data Source: Rural Payments Portal (PRR)
+"""
+type BusinessLand {
+  """
+  The parcels of the business land.
+  """
+  parcels(date: Date): [BusinessLandParcel] @on
+
+  """
+  A single parcel of the business land.
+  """
+  parcel(date: Date, sheetId: ID!, parcelId: ID!): BusinessLandParcel @on
+
+  """
+  The covers of a single parcel of the business land.
+  """
+  parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover] @on
+
+  """
+  The summary of the business land.
+  """
+  summary(date: Date): BusinessLandSummary @on
+}

@@ -1,0 +1,49 @@
+{
+  "notifications": [
+    {
+      "id": 4023832,
+      "personId": 5872270,
+      "organisationId": "5625145",
+      "messageId": 2204581,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 891991448576,
+      "title": "Permission changed for Sheila Malone",
+      "body": "<p>Your permission for Sheila Malone was changed on Wed Sep 20 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2835837,
+      "personId": 5872270,
+      "organisationId": "5625145",
+      "messageId": 32285,
+      "readAt": 23000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 144048621786,
+      "title": "Permission changed for Sheila Malone",
+      "body": "<p>Your permission for Sheila Malone was changed on Thu Jun 20 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4522964,
+      "personId": 5872270,
+      "organisationId": "5625145",
+      "messageId": 954528,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5453674472320,
+      "title": "Permission changed for Sheila Malone",
+      "body": "<p>Your permission for Sheila Malone was changed on Fri Jun 14 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 3,
+  "readCount": 1,
+  "unreadCount": 2
+}

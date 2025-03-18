@@ -2,6 +2,7 @@
   "files.autoSave": "onFocusChange",
   "editor.codeActions.triggerOnFocusChange": true,
   "editor.codeActionsOnSave": {
+    "source.addMissingImports.ts": "explicit",
     "source.organizeImports": "explicit",
     "source.removeUnusedImports": "explicit",
     "source.fixAll.eslint": "always",
@@ -32,5 +33,7 @@
     "node_modules",
     "package-lock.json"
   ],
-  "cSpell.language": "en,en-GB"
+  "cSpell.language": "en,en-GB",
+  "jestrunner.jestCommand": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test ./node_modules/jest/bin/jest.js --setupFiles dotenv/config",
+  "jestrunner.runOptions": []
 }

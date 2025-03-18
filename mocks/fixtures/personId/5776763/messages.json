@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 8346582,
+      "personId": 5776763,
+      "organisationId": "5625145",
+      "messageId": 2375408,
+      "readAt": 12000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 8878865762859,
+      "title": "Permission changed for Jeremy McCabe",
+      "body": "<p>Your permission for Jeremy McCabe was changed on Tue Jan 17 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3800888,
+      "personId": 5776763,
+      "organisationId": "5625145",
+      "messageId": 90902,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 422908822679,
+      "title": "Permission changed for Jeremy McCabe",
+      "body": "<p>Your permission for Jeremy McCabe was changed on Fri Oct 14 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 2203421,
+      "personId": 5776763,
+      "organisationId": "5625145",
+      "messageId": 4915000,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4507175138959,
+      "title": "Permission changed for Jeremy McCabe",
+      "body": "<p>Your permission for Jeremy McCabe was changed on Wed Sep 13 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5203810,
+      "personId": 5776763,
+      "organisationId": "5625145",
+      "messageId": 6639687,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3932085183856,
+      "title": "Permission changed for Jeremy McCabe",
+      "body": "<p>Your permission for Jeremy McCabe was changed on Wed May 10 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 1,
+  "unreadCount": 3
+}

@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 5490918,
+      "personId": 5311964,
+      "organisationId": "5565448",
+      "messageId": 3921356,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9465939354078,
+      "title": "Permission changed for Trevor Graham",
+      "body": "<p>Your permission for Trevor Graham was changed on Tue Oct 25 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5937724,
+      "personId": 5311964,
+      "organisationId": "5565448",
+      "messageId": 8218619,
+      "readAt": 21000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6638899759267,
+      "title": "Permission changed for Trevor Graham",
+      "body": "<p>Your permission for Trevor Graham was changed on Fri Mar 01 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 1,
+  "unreadCount": 1
+}

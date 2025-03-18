@@ -1,0 +1,54 @@
+{
+  "data": {
+    "personRoles": [
+      {
+        "personId": 5263421,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5302028,
+        "role": "Agent"
+      },
+      {
+        "personId": 5311964,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5331098,
+        "role": "Business Partner"
+      },
+      {
+        "personId": 5778203,
+        "role": "Agent"
+      }
+    ],
+    "personPrivileges": [
+      {
+        "personId": 5263421,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5263421,
+        "privilegeNames": ["Amend - land"]
+      },
+      {
+        "personId": 5302028,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5311964,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5331098,
+        "privilegeNames": ["Full permission - business"]
+      },
+      {
+        "personId": 5778203,
+        "privilegeNames": ["Full permission - business"]
+      }
+    ]
+  },
+  "success": true,
+  "errorString": null
+}

@@ -1,0 +1,22 @@
+- key: NODE_ENV
+  value: 'development'
+- key: PORT
+  value: '3000'
+- key: REST_CLIENT_TIMEOUT_IN_MILLIS
+  value: '20000'
+- key: STATIC_CACHE_TIMEOUT_IN_MILLIS
+  value: '54000'
+- key: APPINSIGHTS_CLOUDROLE
+  value: '{{serviceName}}'
+- key: SOC_APPPLICATION_IDENTIFIER
+  value: DAL001
+
+- key: APPINSIGHTS_CONNECTIONSTRING
+  value: '{{servicename}}-APPINSIGHTS-CONNECTIONSTRING'
+  type: 'keyvault'
+- key: HEALTH_CHECK_AUTHENTICATE_DATABASE_THROTTLE_TIME_MS
+  value: '{{servicename}}-HEALTH-CHECK-AUTHENTICATE-DATABASE-THROTTLE-TIME-MS'
+  type: 'keyvault'
+- key: HEALTH_CHECK_RURAL_PAYMENTS_APIM_THROTTLE_TIME_MS
+  value: '{{servicename}}-HEALTH-CHECK-RURAL-PAYMENTS-APIM-THROTTLE-TIME-MS'
+  type: 'keyvault'

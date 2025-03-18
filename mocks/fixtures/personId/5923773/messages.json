@@ -1,0 +1,91 @@
+{
+  "notifications": [
+    {
+      "id": 8705494,
+      "personId": 5923773,
+      "organisationId": "5625145",
+      "messageId": 5828624,
+      "readAt": 7000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2292668342115,
+      "title": "Permission changed for Debbie Yaxley",
+      "body": "<p>Your permission for Debbie Yaxley was changed on Fri Oct 20 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 5850379,
+      "personId": 5923773,
+      "organisationId": "5625145",
+      "messageId": 9306897,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6407832918822,
+      "title": "Permission changed for Debbie Yaxley",
+      "body": "<p>Your permission for Debbie Yaxley was changed on Sun Oct 22 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 4430633,
+      "personId": 5923773,
+      "organisationId": "5625145",
+      "messageId": 7671206,
+      "readAt": 7000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5014054219042,
+      "title": "Permission changed for Debbie Yaxley",
+      "body": "<p>Your permission for Debbie Yaxley was changed on Sat Sep 30 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8490423,
+      "personId": 5923773,
+      "organisationId": "5625145",
+      "messageId": 4254759,
+      "readAt": 23000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 2951728446053,
+      "title": "Permission changed for Debbie Yaxley",
+      "body": "<p>Your permission for Debbie Yaxley was changed on Tue May 07 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8030938,
+      "personId": 5923773,
+      "organisationId": "5625145",
+      "messageId": 3624093,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5521725527663,
+      "title": "Permission changed for Debbie Yaxley",
+      "body": "<p>Your permission for Debbie Yaxley was changed on Sun Jul 30 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 3305665,
+      "personId": 5923773,
+      "organisationId": "5625145",
+      "messageId": 6363121,
+      "readAt": 14000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6909611751695,
+      "title": "Permission changed for Debbie Yaxley",
+      "body": "<p>Your permission for Debbie Yaxley was changed on Sun Feb 05 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 6,
+  "readCount": 4,
+  "unreadCount": 2
+}

@@ -1,0 +1,77 @@
+{
+  "notifications": [
+    {
+      "id": 5809234,
+      "personId": 5811864,
+      "organisationId": "5625145",
+      "messageId": 660474,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4602475936262,
+      "title": "Permission changed for Derek Rogers",
+      "body": "<p>Your permission for Derek Rogers was changed on Mon Jul 08 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6231628,
+      "personId": 5811864,
+      "organisationId": "5625145",
+      "messageId": 8158415,
+      "readAt": 14000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 5982160369562,
+      "title": "Permission changed for Derek Rogers",
+      "body": "<p>Your permission for Derek Rogers was changed on Sun Feb 04 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7451549,
+      "personId": 5811864,
+      "organisationId": "5625145",
+      "messageId": 6444577,
+      "readAt": 6000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 3930626808620,
+      "title": "Permission changed for Derek Rogers",
+      "body": "<p>Your permission for Derek Rogers was changed on Thu May 18 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 8106246,
+      "personId": 5811864,
+      "organisationId": "5625145",
+      "messageId": 8847070,
+      "readAt": 3000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6259994438811,
+      "title": "Permission changed for Derek Rogers",
+      "body": "<p>Your permission for Derek Rogers was changed on Mon Sep 19 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 6427042,
+      "personId": 5811864,
+      "organisationId": "5625145",
+      "messageId": 9390657,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6747436813378,
+      "title": "Permission changed for Derek Rogers",
+      "body": "<p>Your permission for Derek Rogers was changed on Thu Jul 13 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 5,
+  "readCount": 3,
+  "unreadCount": 2
+}

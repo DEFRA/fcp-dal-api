@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 3090256,
+      "personId": 5776832,
+      "organisationId": "5625145",
+      "messageId": 4354537,
+      "readAt": 14000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9279776240491,
+      "title": "Permission changed for Peter Fitzalan Howard",
+      "body": "<p>Your permission for Peter Fitzalan Howard was changed on Sun Apr 16 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1273442,
+      "personId": 5776832,
+      "organisationId": "5625145",
+      "messageId": 302976,
+      "readAt": 10000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4437697282471,
+      "title": "Permission changed for Peter Fitzalan Howard",
+      "body": "<p>Your permission for Peter Fitzalan Howard was changed on Sat Jul 08 2023</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 2,
+  "unreadCount": 0
+}

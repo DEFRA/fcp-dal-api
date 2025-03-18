@@ -1,0 +1,20 @@
+# This override file should be used when running automated tests so
+# that test output is saved to the host
+
+services:
+  fcp-data-access-layer-api:
+    build:
+      target: development
+    image: fcp-data-access-layer-api-development
+    container_name: fcp-data-access-layer-api-test
+    command: npm run test
+    volumes:
+      - ./app:/home/node/app
+      - ./mocks:/home/node/mocks
+      - ./test:/home/node/test
+      - ./test-output:/home/node/test-output
+      - ./jest.config.js:/home/node/jest.config.js
+      - ./jest.init.js:/home/node/jest.init.js
+      - ./package.json:/home/node/package.json
+    env_file:
+      - .env.test

@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": 4102482,
+      "personId": 5318480,
+      "organisationId": "5625145",
+      "messageId": 9527981,
+      "readAt": 21000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4147613042248,
+      "title": "Permission changed for Natalie Elder",
+      "body": "<p>Your permission for Natalie Elder was changed on Mon Dec 19 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1294400,
+      "personId": 5318480,
+      "organisationId": "5625145",
+      "messageId": 6327858,
+      "readAt": 13000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 6506871051609,
+      "title": "Permission changed for Natalie Elder",
+      "body": "<p>Your permission for Natalie Elder was changed on Mon Feb 26 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 2,
+  "readCount": 2,
+  "unreadCount": 0
+}

@@ -1,0 +1,63 @@
+{
+  "notifications": [
+    {
+      "id": 6595498,
+      "personId": 5776409,
+      "organisationId": "5625145",
+      "messageId": 7693824,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 7519226924878,
+      "title": "Permission changed for David Eliffe",
+      "body": "<p>Your permission for David Eliffe was changed on Sat Oct 08 2022</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 1689161,
+      "personId": 5776409,
+      "organisationId": "5625145",
+      "messageId": 2716213,
+      "readAt": 3000,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 9859553572735,
+      "title": "Permission changed for David Eliffe",
+      "body": "<p>Your permission for David Eliffe was changed on Fri Mar 29 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7735209,
+      "personId": 5776409,
+      "organisationId": "5625145",
+      "messageId": 3458410,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4042389507574,
+      "title": "Permission changed for David Eliffe",
+      "body": "<p>Your permission for David Eliffe was changed on Thu Feb 29 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    },
+    {
+      "id": 7402606,
+      "personId": 5776409,
+      "organisationId": "5625145",
+      "messageId": 8997123,
+      "readAt": null,
+      "archivedAt": null,
+      "archive": null,
+      "createdAt": 4453416124475,
+      "title": "Permission changed for David Eliffe",
+      "body": "<p>Your permission for David Eliffe was changed on Tue Mar 12 2024</p>",
+      "category": "OrganisationLevel",
+      "bespokeNotificationId": null
+    }
+  ],
+  "resultCount": 4,
+  "readCount": 1,
+  "unreadCount": 3
+}

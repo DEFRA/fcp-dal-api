@@ -1,0 +1,3 @@
+services:
+  fcp-data-access-layer-api:
+    command: npm run start:debug
