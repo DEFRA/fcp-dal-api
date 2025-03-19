@@ -1,3 +1,0 @@
-{{- include "adp-helm-library.azure-ingress" (list . "fcp-data-access-layer-api.ingress") -}}
-{{- define "fcp-data-access-layer-api.ingress" -}}
-{{- end -}}

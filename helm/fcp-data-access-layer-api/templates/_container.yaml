@@ -1,4 +1,0 @@
-{{- define "fcp-data-access-layer-api.container" -}}
-livenessProbe: {{ include "adp-helm-library.http-get-probe" (list . .Values.livenessProbe) | nindent 4}}
-readinessProbe: {{ include "adp-helm-library.http-get-probe" (list . .Values.readinessProbe) | nindent 4}}
-{{- end -}}

@@ -1,3 +1,0 @@
-{{- include "adp-helm-library.cluster-ip-service" (list . "fcp-data-access-layer-api.cluster-ip-service") -}}
-{{- define "fcp-data-access-layer-api.cluster-ip-service" -}}
-{{- end -}}
