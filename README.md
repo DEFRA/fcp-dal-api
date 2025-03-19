@@ -2,42 +2,15 @@
 
 The Data Access Layer (DAL) for the Farming and Countryside Programme (FCP) - a GraphQL API.
 
-- [Requirements](#requirements)
-  - [Node.js](#nodejs)
-- [Local development](#local-development)
-  - [Setup](#setup)
-  - [Development](#development)
-  - [Testing](#testing)
-  - [Production](#production)
-  - [Npm scripts](#npm-scripts)
-  - [Update dependencies](#update-dependencies)
-  - [Formatting](#formatting)
-    - [Windows prettier issue](#windows-prettier-issue)
-- [API endpoints](#api-endpoints)
-- [Development helpers](#development-helpers)
-  - [MongoDB Locks](#mongodb-locks)
-- [Docker](#docker)
-  - [Development image](#development-image)
-  - [Production image](#production-image)
-  - [Docker Compose](#docker-compose)
-  - [Dependabot](#dependabot)
-  - [SonarCloud](#sonarcloud)
-- [Licence](#licence)
-  - [About the licence](#about-the-licence)
-
 ## Requirements
 
-### Node.js
+- ### Node.js
 
-Please install [Node.js](http://nodejs.org/) `>= v22` and [npm](https://nodejs.org/) `>= v11`. You will find it
-easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
+  The service is built in JavaScript code and requires [Node.js](http://nodejs.org/) `v22` or later, and [npm](https://nodejs.org/) `v11` or later.
 
-To use the correct version of Node.js for this application, via nvm:
+- ### Docker
 
-```bash
-cd fcp-dal-api
-nvm use
-```
+  A modern version of `docker` (with the `compose` extensions) will allow a local environment to be simply run. This will mimic the live services, and facilitate development and testing.
 
 ## Local development
 
@@ -57,6 +30,18 @@ To run the application in `development` mode run:
 npm run dev
 ```
 
+This will spin up the API and automatically reload when changes are made to the API code.
+
+### KITS API mock
+
+There is a local mock for the KITS API (the source of all the DAL's data). It can be started by running:
+
+```bash
+npm run mock
+```
+
+Again, starting the mock this way will listen for (and reload with) relevant changes to its code and mock data (which can be found at `/mocks` and `/mocks/fixtures` respectively).
+
 ### Testing
 
 To test the application run:
@@ -70,7 +55,7 @@ npm run test
 To mimic the application running in `production` mode locally run:
 
 ```bash
-npm start
+docker compose up
 ```
 
 ### Npm scripts
@@ -84,16 +69,12 @@ npm run
 
 ### Update dependencies
 
-To update dependencies use [npm-check-updates](https://github.com/raineorshine/npm-check-updates):
-
-> The following script is a good start. Check out all the options on
-> the [npm-check-updates](https://github.com/raineorshine/npm-check-updates)
-
-```bash
-ncu --interactive --format group
-```
+To update dependencies just run `npm it`! And commit any changes.
 
 ### Formatting
+
+[Prettier](https://prettier.io/docs/) is used for all formatting (and syntax checking).
+[ESLint](https://eslint.org/docs/latest/) is used for linting and semantic checking (NOT formatting).
 
 #### Windows prettier issue
 
@@ -105,53 +86,39 @@ git config --global core.autocrlf false
 
 ## API endpoints
 
-| Endpoint       | Description |
-| :------------- | :---------- |
-| `GET: /health` | Health      |
+| Endpoint         | Description                                                                      |
+| :--------------- | :------------------------------------------------------------------------------- |
+| `GET: /health`   | Health check (should also be publicly available without auth on live envs).      |
+| `GET: /graphql`  | The interactive GraphQL service frontend (like Swagger docs but for GraphQL 😉). |
+| `POST: /graphql` | For making GraphQL requests to the DAL API.                                      |
 
 ### Security
 
-The platform provides features for handling authentication to the DAL, connecting clients can follow the [CDP docs](https://portal.cdp-int.defra.cloud/documentation/how-to/apis.md#how-do-clients-authenticate-and-access-my-api-).
+The platform provides features for handling authentication to the DAL.
+Connecting clients can follow the [CDP docs](https://portal.cdp-int.defra.cloud/documentation/how-to/apis.md#how-do-clients-authenticate-and-access-my-api-) to get AWS Cognito access to the live `/graphql` service.
 
-> NOTE: the endpoint protection can be changed by submitting a PR with changes to this [spec file](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/dev/apis/fcp-dal-api.yml)
+> NOTE: all endpoints (expect `/health`) are protected by default. Modifications can be made by submitting a PR with changes to the relevant spec files:
+>
+> - [dev](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/dev/apis/fcp-dal-api.yml)
+> - [test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/test/apis/fcp-dal-api.yml)
+> - [ext-test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/ext-test/apis/fcp-dal-api.yml)
+> - [perf-test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/perf-test/apis/fcp-dal-api.yml)
+> - [prod](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/prod/apis/fcp-dal-api.yml)
 
 ## Development helpers
 
 ### Proxy
 
-We are using forward-proxy which is set up by default. To make use of this: `import { fetch } from 'undici'` then because of the `setGlobalDispatcher(new ProxyAgent(proxyUrl))` calls will use the ProxyAgent Dispatcher
+CPD uses a [forward-proxy](https://portal.cdp-int.defra.cloud/documentation/how-to/proxy.md) which is set up by default.
+Modifications can be made by submitting a PR with changes to the relevant spec files:
 
-If you are not using Wreck, Axios or Undici or a similar http that uses `Request`. Then you may have to provide the proxy dispatcher:
-
-To add the dispatcher to your own client:
-
-```javascript
-import { ProxyAgent } from 'undici'
-
-return await fetch(url, {
-  dispatcher: new ProxyAgent({
-    uri: proxyUrl,
-    keepAliveTimeout: 10,
-    keepAliveMaxTimeout: 10
-  })
-})
-```
+- [dev](https://github.com/DEFRA/cdp-squid-proxy/blob/main/configs/dev/fcp-dal-api.json)
+- [test](https://github.com/DEFRA/cdp-squid-proxy/blob/main/configs/test/fcp-dal-api.json)
+- [ext-test](https://github.com/DEFRA/cdp-squid-proxy/blob/main/configs/ext-test/fcp-dal-api.json)
+- [perf-test](https://github.com/DEFRA/cdp-squid-proxy/blob/main/configs/perf-test/fcp-dal-api.json)
+- [prod](https://github.com/DEFRA/cdp-squid-proxy/blob/main/configs/prod/fcp-dal-api.json)
 
 ## Docker
-
-### Development image
-
-Build:
-
-```bash
-docker build --target development --no-cache --tag fcp-dal-api:development .
-```
-
-Run:
-
-```bash
-docker run -e PORT=3001 -p 3001:3001 fcp-dal-api:development
-```
 
 ### Production image
 
@@ -161,21 +128,23 @@ Build:
 docker build --no-cache --tag fcp-dal-api .
 ```
 
-Run:
+Then run:
 
 ```bash
-docker run -e PORT=3001 -p 3001:3001 fcp-dal-api
+docker run -p 3000:3000 fcp-dal-api
 ```
 
 ### Docker Compose
 
-A local environment with:
-
-- This service.
+To run the DAL API backed by the KITS API mock, run:
 
 ```bash
-docker compose up --build -d
+docker compose up --build
 ```
+
+## TODO
+
+Complete the following 2 sections to add the `Dependabot` and `SonarCloud` tools...
 
 ### Dependabot
 
@@ -185,10 +154,10 @@ the [.github/example.dependabot.yml](.github/example.dependabot.yml) to `.github
 ### SonarCloud
 
 Instructions for setting up SonarCloud can be found in [sonar-project.properties](./sonar-project.properties)
-# FFC Customer Registry
 
-Customer Registry GraphQL API created from template to support rapid delivery of microservices for FFC Platform.
-It contains the configuration needed to deploy a simple Hapi Node server to the Azure Kubernetes Platform.
+## TODO...
+
+Check what's still needed/relevant from the old docs (which follow)...
 
 ## Local development
 
@@ -278,17 +247,6 @@ For local development and lower environments, all fields can be turned on by set
 
 - Docker
 - Docker Compose
-
-Optional:
-
-- Kubernetes
-- Helm
-
-## Running the application
-
-The application is designed to run in containerised environments, using Docker Compose in development and Kubernetes in production.
-
-- A Helm chart is provided for production deployments to Kubernetes.
 
 ### Build container image
 
