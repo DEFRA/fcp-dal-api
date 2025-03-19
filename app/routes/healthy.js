@@ -10,9 +10,7 @@ const fiveMinutes = 5 * minute
 const ruralPaymentsAPIMHealthCheck = async () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(
     { logger },
-    {
-      headers: { email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL }
-    }
+    { headers: { email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL } }
   )
   return ruralPaymentsBusiness.getOrganisationById(
     process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
@@ -28,9 +26,7 @@ export const healthyRoute = {
   path: '/healthy',
   handler: async (_request, h) => {
     try {
-      const services = {
-        RuralPaymentsPortal: 'up'
-      }
+      const services = { RuralPaymentsPortal: 'up' }
       if (process.env.HEALTH_CHECK_ENABLED === 'true') {
         if (
           process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID &&
