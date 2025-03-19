@@ -6,15 +6,13 @@
   "main": "app/index.js",
   "type": "module",
   "scripts": {
-    "format": "eslint --fix . && prettier --log-level warn --write .",
     "lint": "eslint . && prettier --check .",
-    "lint:fix": "eslint . --fix && prettier --write .",
+    "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "prepare": "[ -d '.git' ] && husky || echo 'skipping husky'",
     "pretest": "npm run lint",
-    "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch app/index.js",
-    "start:dev": "nodemon -r dotenv/config --ext js,gql app/index.js --watch app/",
+    "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",
+    "start:dev": "nodemon -r dotenv/config --ext js,gql --watch app/ app/index.js",
     "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
-    "start:watch": "nodemon --inspect=0.0.0.0 --ext js --legacy-watch app/index.js",
     "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env jest --testPathPattern=test/acceptance --setupFiles dotenv/config",
     "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
@@ -68,11 +66,6 @@
     "extends": [
       "eslint-plugin-import",
       "eslint-plugin-jest"
-    ]
-  },
-  "nodemonConfig": {
-    "ignore": [
-      "**/test-output/**"
     ]
   },
   "overrides": {
