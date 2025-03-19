@@ -25,8 +25,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: |
+          npm audit --omit=dev
           npm ci
-          npm run format:check
           npm run lint
           npm test
 

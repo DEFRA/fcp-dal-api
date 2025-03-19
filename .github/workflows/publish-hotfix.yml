@@ -22,21 +22,22 @@ jobs:
         with:
           fetch-depth: 0 # Depth 0 is required for branch-based versioning
 
-      - uses: actions/setup-node@v4
+      - name: Test code and Create Test Coverage Reports
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
-      # Ensure tests pass. Add more checks if required
-      - run: npm ci
-      - run: npm test
+      - run: |
+          npm audit --omit=dev
+          npm ci
+          npm run lint
+          npm test
 
       - name: Publish Hot Fix
         uses: DEFRA/cdp-build-action/build-hotfix@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 #
-# prettier-ignore
 #     - run: npm install && npm test
 #     - name: SonarCloud Scan
 #       uses: SonarSource/sonarcloud-github-action@master
