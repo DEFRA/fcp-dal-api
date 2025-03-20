@@ -1,9 +1,0 @@
-services:
-  fcp-data-access-layer-api:
-    build:
-      context: .
-      target: production
-    image: fcp-data-access-layer-api
-    container_name: fcp-data-access-layer-api
-    env_file:
-      - .env.test

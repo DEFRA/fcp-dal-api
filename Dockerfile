@@ -12,7 +12,7 @@ ENV PORT=${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
 COPY --chown=node:node package*.json ./
-RUN npm install
+RUN npm ci
 COPY --chown=node:node . .
 CMD [ "npm", "run", "start:watch" ]
 
@@ -21,22 +21,19 @@ FROM defradigital/node:${PARENT_VERSION} AS production
 ARG PARENT_VERSION
 LABEL uk.gov.defra.ffc.parent-image=defradigital/node:${PARENT_VERSION}
 
-# Add curl to template.
+# Add curl to image
 # CDP PLATFORM HEALTHCHECK REQUIREMENT
 USER root
 RUN apk add --no-cache curl
 USER node
 
-COPY --from=development /home/node/package*.json ./
-
-RUN npm ci --omit=dev
+COPY package*.json ./
+RUN npm ci --omit=dev \
+ && rm -fr .npm
 
 ARG PORT
 ENV PORT=${PORT}
 EXPOSE ${PORT}
 
-COPY --from=development /home/node/mocks/ ./mocks/
-COPY --from=development /home/node/app/ ./app/
-COPY --from=development /home/node/package*.json ./
-RUN npm ci
+COPY app/ ./app/
 CMD [ "node", "app" ]

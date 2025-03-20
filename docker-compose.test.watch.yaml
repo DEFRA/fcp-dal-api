@@ -1,6 +1,0 @@
-services:
-  fcp-data-access-layer-api:
-    command: >
-      sh -c "npm run test:watch"
-    volumes:
-      - ./.git:/home/node/.git
