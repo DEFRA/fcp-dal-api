@@ -118,6 +118,8 @@ Modifications can be made by submitting a PR with changes to the relevant spec f
 - [perf-test](https://github.com/DEFRA/cdp-squid-proxy/blob/main/configs/perf-test/fcp-dal-api.json)
 - [prod](https://github.com/DEFRA/cdp-squid-proxy/blob/main/configs/prod/fcp-dal-api.json)
 
+> NOTE: to ensure the proxy has been correctly configured, connections to the API's data source (KITS) can be tested by following [the steps in this guide](./test_scripts/kits-testing-on-cdp.md).
+
 ## Docker
 
 ### Production image
