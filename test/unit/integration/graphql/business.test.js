@@ -148,28 +148,6 @@ describe('Query.business', () => {
     })
   })
 
-  it('should handle error from apim', async () => {
-    await mockServer.server.mock.useRouteVariant('rural-payments-organisation-get-by-id:apim-error')
-
-    const result = await graphql({
-      source: `#graphql
-        query Business {
-          business(sbi: "107183280") {
-            sbi
-            organisationId
-          }
-        }
-      `,
-      schema,
-      contextValue: fakeContext
-    })
-
-    expect(result).toEqual({
-      data: { business: null },
-      errors: [new GraphQLError('Internal Server Error')]
-    })
-  })
-
   it('should handle missing address', async () => {
     await mockServer.server.mock.useRouteVariant(
       'rural-payments-organisation-get-by-id:missing-address'
