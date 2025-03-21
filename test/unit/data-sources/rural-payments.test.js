@@ -1,5 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
+import StatusCodes from 'http-status-codes'
 import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
@@ -32,7 +33,7 @@ describe('RuralPayments', () => {
     describe('throws upstream errors from RPP', () => {
       test('when the RPP service encounters an error', async () => {
         const error = new Error('Server error')
-        error.extensions = { response: { status: 500 } }
+        error.extensions = { response: { status: StatusCodes.INTERNAL_SERVER_ERROR } }
 
         mockFetch.mockRejectedValue(error)
 
@@ -40,8 +41,10 @@ describe('RuralPayments', () => {
         try {
           await rp.fetch('path', dummyRequest)
         } catch (thrownError) {
-          expect(thrownError.extensions).toMatchObject({ response: { status: 500 } })
-          expect(mockFetch).toBeCalledTimes(3) // same as `maximumRetries` in RuralPayments.js
+          expect(thrownError.extensions).toMatchObject({
+            response: { status: StatusCodes.INTERNAL_SERVER_ERROR }
+          })
+          expect(mockFetch).toBeCalledTimes(1)
         }
         expect.assertions(2)
       })

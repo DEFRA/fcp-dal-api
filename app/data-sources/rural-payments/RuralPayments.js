@@ -14,23 +14,14 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async fetch(path, incomingRequest) {
-    try {
-      const result = await super.fetch(path, incomingRequest)
-      return result
-    } catch (error) {
-      throw new HttpError(StatusCodes.BAD_GATEWAY, {
-        extensions: {
-          response: {
-            status: StatusCodes.BAD_GATEWAY,
-            body: error.message
-          }
-        }
-      })
-    }
+    const result = await super.fetch(path, incomingRequest)
+    return result
   }
 
   didEncounterError(error, request, url) {
     request.path = url
+    const { response } = error?.extensions
+
     this.logger.error('#datasource - Rural payments - request error', {
       error,
       request,
