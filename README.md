@@ -163,41 +163,7 @@ Check what's still needed/relevant from the old docs (which follow)...
 
 ## Local development
 
-Create a `.env` file:
-
-```env
-NODE_ENV=development
-PORT=4000
-
-# Mock server
-PORT_MOCK=3100
-ENABLE_MOCK_SERVER=true
-MOCK_SERVER_COLLECTION=all #options: all, rural-payments-portal, release-1
-
-# Rural Payments Agency Land API
-RURAL_PAYMENTS_AGENCY_LAND_API_URL=
-
-# Rural Payments Portal API settings
-RURAL_PAYMENTS_PORTAL_EMAIL=
-RURAL_PAYMENTS_PORTAL_PASSWORD=
-RURAL_PAYMENTS_PORTAL_API_URL=
-RURAL_PAYMENTS_AGENCY_LAND_API_URL=
-
-# Version One API settings
-VERSION_ONE_APIM_SUBSCRIPTION_KEY=
-VERSION_ONE_APIM_SCOPE=
-VERSION_ONE_APIM_ACCESS_TOKEN_URL=
-VERSION_ONE_API_URL=
-
-# Turn on all fields for local development
-ALL_SCHEMA_ON=true
-
-# Generate and validate api bearer token
-API_TENANT_ID=
-ADMIN_AD_GROUP_ID=
-CLIENT_ID=
-CLIENT_SECRET=
-```
+Create a `.env` file matching the example .env.test
 
 Run:
 
