@@ -5,7 +5,7 @@ import { setupAppInsights } from './insights.js'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { healthyRoute } from './routes/healthy.js'
-import { healthzRoute } from './routes/healthz.js'
+import { healthRoute } from './routes/health.js'
 
 setupAppInsights()
 
@@ -13,7 +13,7 @@ export const server = hapi.server({
   port: process.env.PORT
 })
 
-const routes = [].concat(healthyRoute, healthzRoute)
+const routes = [].concat(healthyRoute, healthRoute)
 
 server.route(routes)
 
