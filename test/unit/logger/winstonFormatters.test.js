@@ -1,3 +1,4 @@
+import { HeaderMap } from '@apollo/server'
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
 import {
   redactSensitiveData,
@@ -6,7 +7,6 @@ import {
   sampleResponseBodyData,
   serialize
 } from '../../../app/logger/winstonFormatters'
-import { HeaderMap } from '@apollo/server'
 
 const someURL = new URL('http://localhost/path')
 const path = 'http://localhost/path'

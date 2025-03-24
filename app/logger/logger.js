@@ -9,7 +9,7 @@
  * debug: // Third party response logs with body
  * silly: // Detailed function logs
  */
-import ecsFormat from 'ecs-winston-format'
+import ecsFormat from '@elastic/ecs-winston-format'
 import { createLogger, format, transports } from 'winston'
 import { redactSensitiveData, sampleResponseBodyData } from './winstonFormatters.js'
 
