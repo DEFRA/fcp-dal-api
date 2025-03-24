@@ -7,7 +7,7 @@ import { throttle } from '../utils/throttle.js'
 const minute = 60 * 1000
 const fiveMinutes = 5 * minute
 
-const ruralPaymentsAPIMHealthCheck = async () => {
+const ruralPaymentsHealthCheck = async () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(
     { logger },
     { headers: { email: process.env.RURAL_PAYMENTS_PORTAL_EMAIL } }
@@ -16,9 +16,9 @@ const ruralPaymentsAPIMHealthCheck = async () => {
     process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
   )
 }
-const ruralPaymentsAPIMHealthCheckThrottled = throttle(
-  ruralPaymentsAPIMHealthCheck,
-  process.env.HEALTH_CHECK_RURAL_PAYMENTS_APIM_THROTTLE_TIME_MS || fiveMinutes
+const ruralPaymentsHealthCheckThrottled = throttle(
+  ruralPaymentsHealthCheck,
+  process.env.HEALTH_CHECK_RURAL_PAYMENTS_THROTTLE_TIME_MS || fiveMinutes
 )
 
 export const healthyRoute = {
@@ -32,9 +32,7 @@ export const healthyRoute = {
           process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID &&
           process.env.RURAL_PAYMENTS_PORTAL_EMAIL
         ) {
-          services.RuralPaymentsPortal = (await ruralPaymentsAPIMHealthCheckThrottled())
-            ? 'up'
-            : 'down'
+          services.RuralPaymentsPortal = (await ruralPaymentsHealthCheckThrottled()) ? 'up' : 'down'
         } else {
           logger.error(
             '#health check - missing environment variable "HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID"',

@@ -1,5 +1,3 @@
-import apimAuthentication from './apim/authentication.js'
-
 import ruralPaymentsAuthenticate from './rural-payments/authenticate.js'
 import ruralPaymentsLms from './rural-payments/lms.js'
 import ruralPaymentsMessages from './rural-payments/messages.js'
@@ -11,7 +9,6 @@ export const routes = [
   ...ruralPaymentsMessages,
   ...ruralPaymentsPerson,
   ...ruralPaymentsOrganisation,
-  ...apimAuthentication,
   ...ruralPaymentsLms,
   ...ruralPaymentsSitiAgri,
   ...ruralPaymentsAuthenticate

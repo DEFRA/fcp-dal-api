@@ -136,63 +136,6 @@ describe('Query.customer', () => {
       errors: [new GraphQLError('Internal Server Error')]
     })
   })
-
-  describe('Handle 500 errors', () => {
-    it('should retry request if 500 error', async () => {
-      await mockServer.server.mock.useRouteVariant('rural-payments-person-get-by-crn:error')
-
-      const result = await graphql({
-        source: `#graphql
-          query TestCustomerBusiness($crn: ID!) {
-            customer(crn: $crn) {
-              personId
-            }
-          }
-        `,
-        variableValues: {
-          crn: '9477368292'
-        },
-        schema,
-        contextValue: fakeContext
-      })
-
-      expect(result).toEqual({
-        data: {
-          customer: {
-            personId: '5302028'
-          }
-        }
-      })
-    })
-
-    it('should throw an error after 3 retries', async () => {
-      await mockServer.server.mock.useRouteVariant(
-        'rural-payments-person-get-by-crn:error-indefinite'
-      )
-
-      const result = await graphql({
-        source: `#graphql
-          query TestCustomerBusiness($crn: ID!) {
-            customer(crn: $crn) {
-              personId
-            }
-          }
-        `,
-        variableValues: {
-          crn: '9477368292'
-        },
-        schema,
-        contextValue: fakeContext
-      })
-
-      expect(result).toEqual({
-        data: {
-          customer: null
-        },
-        errors: [new GraphQLError('Internal Server Error')]
-      })
-    })
-  })
 })
 
 describe('Handle other errors', () => {

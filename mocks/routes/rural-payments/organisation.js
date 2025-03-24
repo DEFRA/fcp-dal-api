@@ -37,13 +37,6 @@ export default [
         }
       },
       {
-        id: 'apim-error',
-        type: 'status',
-        options: {
-          status: StatusCodes.INTERNAL_SERVER_ERROR
-        }
-      },
-      {
         id: 'missing-address',
         type: 'middleware',
         options: {
