@@ -38,7 +38,7 @@ const fixture = {
     headers: headersMap,
     body: { data: 'some data', access_token: 'something super secret' }
   },
-  code: 'RURALPAYMENTS_API_REQUEST_001',
+  event: 'RURALPAYMENTS_API_REQUEST_001',
   level: 'verbose',
   message: '#datasource - Rural payments - request',
   ...symbols
@@ -61,13 +61,13 @@ describe('winstonFormatters', () => {
 
   describe('safeStructuredClone', () => {
     it('should clone objects with known unserialisable request properties', () => {
-      const obj = { code: 'some code', request: { params, path: someURL, other: 'stuff' } }
+      const obj = { event: 'some event', request: { params, path: someURL, other: 'stuff' } }
       const clone = safeStructuredClone(obj)
       expect(clone).toEqual({ ...obj, request: { params: paramsObject, path, other: 'stuff' } })
       expect(clone).not.toBe(obj)
     })
     it('should clone objects with known unserialisable response properties', () => {
-      const obj = { code: 'some code', response: { headers: headersMap, other: 'stuff' } }
+      const obj = { event: 'some event', response: { headers: headersMap, other: 'stuff' } }
       const clone = safeStructuredClone(obj)
       expect(clone).toEqual({ ...obj, response: { headers, other: 'stuff' } })
       expect(clone).not.toBe(obj)
@@ -120,14 +120,14 @@ describe('winstonFormatters', () => {
     })
     it('should redact all data and add a note to the log when cloning fails', () => {
       const cloneSpy = jest.spyOn(global, 'structuredClone')
-      const { message, code } = fixture
+      const { message, event } = fixture
       const clone = serialize({ ...fixture, response: { url: someURL } })
 
       expect(clone).not.toHaveProperty('request')
       expect(clone).not.toHaveProperty('response')
 
       expect(clone).toEqual({
-        code,
+        event,
         level: 'error',
         message: `Error cloning log data! Redacting for safety\n${message}`,
         stack: clone.stack,
@@ -156,7 +156,7 @@ describe('winstonFormatters', () => {
           path
         },
         response: { headers, body: { data: 'some data', access_token: '[REDACTED]' } },
-        code: 'RURALPAYMENTS_API_REQUEST_001',
+        event: 'RURALPAYMENTS_API_REQUEST_001',
         level: 'verbose',
         message: '#datasource - Rural payments - request',
         ...symbols

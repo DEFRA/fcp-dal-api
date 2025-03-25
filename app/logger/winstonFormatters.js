@@ -19,7 +19,7 @@ export const serialize = (info) => {
       return {
         level: 'error',
         message: `Error cloning log data! Redacting for safety\n${info.message}`,
-        code: info.code,
+        event: info.event,
         stack: error.stack,
         ...infoSymbols
       }
