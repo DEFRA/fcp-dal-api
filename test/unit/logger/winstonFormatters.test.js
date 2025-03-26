@@ -1,12 +1,6 @@
 import { HeaderMap } from '@apollo/server'
-import { afterEach, describe, expect, it, jest } from '@jest/globals'
-import {
-  redactSensitiveData,
-  safeSerialise,
-  safeStructuredClone,
-  sampleResponseBodyData,
-  serialize
-} from '../../../app/logger/winstonFormatters'
+import { describe, expect, it } from '@jest/globals'
+import { cdpSchemaTranslator, sampleResponseBodyData } from '../../../app/logger/winstonFormatters'
 
 const someURL = new URL('http://localhost/path')
 const path = 'http://localhost/path'
@@ -18,9 +12,22 @@ const paramsObject = { p1: 'v1', p2: 'v2' }
 const headers = { h1: 'v1', h2: 'v2' }
 const headersMap = new HeaderMap(Object.entries(headers))
 
-const symbols = { [Symbol('level')]: 'verbose', [Symbol('message')]: 'message contents' }
 const fixture = {
-  requestId: '00000000-0000-0000-0000-000000000000',
+  event: 'RURALPAYMENTS_API_REQUEST_001',
+  message: '#datasource - Rural payments - request',
+  http: {
+    request: {
+      id: 'upstream-request',
+      method: 'GET',
+      other: 'stuff'
+    },
+    response: {
+      mime_type: 'application/json',
+      status_code: 200,
+      other: 'stuff'
+    }
+  },
+  level: 'info',
   request: {
     method: 'POST',
     body: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}',
@@ -28,7 +35,8 @@ const fixture = {
       'content-type': 'application/json',
       'Ocp-Apim-Subscription-Key': '00000000000000000000000000000000',
       Authorization: 'Bearer token',
-      email: 'probably.should@redacted.be'
+      email: 'probably.should@redacted.be',
+      'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
     },
     retryCount: 1,
     params,
@@ -36,130 +44,62 @@ const fixture = {
   },
   response: {
     headers: headersMap,
-    body: { data: 'some data', access_token: 'something super secret' }
+    body: { data: 'some data' },
+    statusCode: 200
   },
-  event: 'RURALPAYMENTS_API_REQUEST_001',
-  level: 'verbose',
-  message: '#datasource - Rural payments - request',
-  ...symbols
+  responseTimeMs: 100,
+  otherItems: 'will be omitted' // because they will be pruned by CDP's log processing
 }
 
 describe('winstonFormatters', () => {
-  describe('safeSerialise', () => {
-    it('should simply return falsy values', () => {
-      expect(safeSerialise(null)).toBe(null)
-      expect(safeSerialise(undefined)).toBe(undefined)
-      expect(safeSerialise(0)).toBe(0)
-    })
-    it('should turn unserialisable objects into plain serialisable equivalents', () => {
-      expect(safeSerialise(params)).toEqual(paramsObject)
-    })
-    it('should fallback to converting the input to a string', () => {
-      expect(safeSerialise(someURL)).toEqual(path)
-    })
-  })
-
-  describe('safeStructuredClone', () => {
-    it('should clone objects with known unserialisable request properties', () => {
-      const obj = { event: 'some event', request: { params, path: someURL, other: 'stuff' } }
-      const clone = safeStructuredClone(obj)
-      expect(clone).toEqual({ ...obj, request: { params: paramsObject, path, other: 'stuff' } })
-      expect(clone).not.toBe(obj)
-    })
-    it('should clone objects with known unserialisable response properties', () => {
-      const obj = { event: 'some event', response: { headers: headersMap, other: 'stuff' } }
-      const clone = safeStructuredClone(obj)
-      expect(clone).toEqual({ ...obj, response: { headers, other: 'stuff' } })
-      expect(clone).not.toBe(obj)
-    })
-    it('will not work for unknown unserialisable properties', () => {
-      const error = 'Cannot clone object of unsupported type.'
-      expect(() => safeStructuredClone({ path: someURL })).toThrow(error)
-      expect(() => safeStructuredClone({ params })).toThrow(error)
-      expect(() => safeStructuredClone({ request: { paths: someURL } })).toThrow(error)
-      expect(() => safeStructuredClone({ request: { parameters: params } })).toThrow(error)
-    })
-  })
-
-  describe('serialize', () => {
-    afterEach(() => {
-      jest.restoreAllMocks()
-    })
-
-    it('should handle simple message log requests', () => {
-      const info = {
-        level: 'info',
-        message: 'hello',
-        [Symbol('level')]: 'info',
-        [Symbol('message')]: 'hello'
-      }
-      const cloneSpy = jest.spyOn(global, 'structuredClone')
-      expect(serialize(info)).toEqual(info)
-      expect(cloneSpy).toHaveBeenCalledTimes(1)
-    })
-    it('should copy object contents ready for redaction', () => {
-      const cloneSpy = jest.spyOn(global, 'structuredClone')
-      const clone = serialize(fixture)
-      expect(clone).toEqual({
-        ...fixture,
-        request: {
-          ...fixture.request,
-          params: paramsObject,
-          path
+  describe('cdpSchemaTranslator', () => {
+    it('should return a new object conforming to the CDP schema', () => {
+      const error = new Error('test error')
+      const result = cdpSchemaTranslator().transform({ error, ...fixture })
+      expect(result).toEqual({
+        // NOTE: this example was built based on the CDP source schema config, found at:
+        // https://github.com/DEFRA/cdp-tf-modules/blob/b061f1bc62c8653d173046307ec18d1d888207c2/opensearch_ingestion/vars.tf#L157
+        error: {
+          type: 'Error',
+          message: 'test error',
+          stack_trace: error.stack
         },
-        response: { ...fixture.response, headers }
-      })
-      expect(clone).not.toBe(fixture)
-      expect(cloneSpy).toHaveBeenCalledTimes(2)
-    })
-    it('should copy all keep all symbols too', () => {
-      const symbols = Object.getOwnPropertySymbols(fixture)
-      const cloneSymbols = Object.getOwnPropertySymbols(serialize(fixture))
-      expect(cloneSymbols).toEqual(symbols)
-      symbols.forEach((symbol, i) => expect(symbol).toBe(cloneSymbols[i]))
-    })
-    it('should redact all data and add a note to the log when cloning fails', () => {
-      const cloneSpy = jest.spyOn(global, 'structuredClone')
-      const { message, event } = fixture
-      const clone = serialize({ ...fixture, response: { url: someURL } })
-
-      expect(clone).not.toHaveProperty('request')
-      expect(clone).not.toHaveProperty('response')
-
-      expect(clone).toEqual({
-        event,
-        level: 'error',
-        message: `Error cloning log data! Redacting for safety\n${message}`,
-        stack: clone.stack,
-        ...symbols
-      })
-      expect(cloneSpy).toHaveBeenCalledTimes(2)
-    })
-  })
-
-  describe('redactSensitiveData', () => {
-    it('should redact sensitive data', () => {
-      const clone = redactSensitiveData().transform(fixture)
-      expect(clone).toEqual({
-        requestId: '00000000-0000-0000-0000-000000000000',
-        request: {
+        event: 'RURALPAYMENTS_API_REQUEST_001',
+        message: '#datasource - Rural payments - request',
+        http: {
+          request: {
+            id: 'upstream-request',
+            method: 'GET',
+            other: 'stuff'
+          },
+          response: {
+            mime_type: 'application/json',
+            status_code: 200,
+            other: 'stuff'
+          }
+        },
+        level: 'info',
+        req: {
           method: 'POST',
           body: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}',
           headers: {
             'content-type': 'application/json',
             'Ocp-Apim-Subscription-Key': '00000000000000000000000000000000',
-            Authorization: '[REDACTED]',
-            email: 'probably.should@redacted.be'
+            Authorization: 'Bearer token',
+            email: 'probably.should@redacted.be',
+            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
           },
           retryCount: 1,
-          params: paramsObject,
-          path
+          params,
+          path: someURL
         },
-        response: { headers, body: { data: 'some data', access_token: '[REDACTED]' } },
-        event: 'RURALPAYMENTS_API_REQUEST_001',
-        level: 'verbose',
-        message: '#datasource - Rural payments - request',
-        ...symbols
+        res: {
+          headers: headersMap,
+          body: { data: 'some data' },
+          statusCode: 200
+        },
+        responseTime: 100,
+        'trace.id': '00000000-0000-0000-0000-000000000000'
       })
     })
   })
