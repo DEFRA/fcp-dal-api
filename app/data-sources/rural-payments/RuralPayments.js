@@ -19,6 +19,11 @@ export class RuralPayments extends RESTDataSource {
     })
   }
 
+  async fetch(path, incomingRequest) {
+    const result = await super.fetch(path, incomingRequest)
+    return result
+  }
+
   didEncounterError(error, request, url) {
     request.path = url
     const { response } = error?.extensions
