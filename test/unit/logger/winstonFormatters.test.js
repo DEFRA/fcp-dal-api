@@ -13,7 +13,7 @@ const headers = { h1: 'v1', h2: 'v2' }
 const headersMap = new HeaderMap(Object.entries(headers))
 
 const fixture = {
-  event: 'RURALPAYMENTS_API_REQUEST_001',
+  code: 'RURALPAYMENTS_API_REQUEST_001',
   message: '#datasource - Rural payments - request',
   http: {
     request: {
@@ -64,7 +64,7 @@ describe('winstonFormatters', () => {
           message: 'test error',
           stack_trace: error.stack
         },
-        event: 'RURALPAYMENTS_API_REQUEST_001',
+        event: { code: 'RURALPAYMENTS_API_REQUEST_001' },
         message: '#datasource - Rural payments - request',
         http: {
           request: {

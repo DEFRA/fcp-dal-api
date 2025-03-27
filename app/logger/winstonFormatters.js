@@ -2,12 +2,12 @@ import { format } from 'winston'
 import { sampleResponse } from './utils.js'
 
 export const cdpSchemaTranslator = format(
-  ({ error, event, http, level, message, request, response, responseTimeMs }) =>
+  ({ error, code, http, level, message, request, response, responseTimeMs }) =>
     Object.assign(
       { level },
       ...[
         error && { error: { type: error.name, message: error.message, stack_trace: error.stack } },
-        event && { event },
+        code && { event: { code } },
         http && { http },
         message && { message },
         request && { req: request },

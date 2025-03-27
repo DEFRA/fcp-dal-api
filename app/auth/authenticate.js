@@ -23,7 +23,7 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
       return {}
     }
     logger.verbose('#DAL - Request authentication - Check verification', {
-      event: DAL_REQUEST_AUTHENTICATION_001,
+      code: DAL_REQUEST_AUTHENTICATION_001,
       request: {
         remoteAddress: request?.info?.remoteAddress
       }
@@ -36,7 +36,7 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
     const requestTimeMs = Date.now() - requestStart
     const verified = jwt.verify(token, signingKey)
     logger.http('#DAL Request authentication - JWT verified', {
-      event: DAL_REQUEST_AUTHENTICATION_001,
+      code: DAL_REQUEST_AUTHENTICATION_001,
       requestTimeMs,
       request: {
         remoteAddress: request?.info?.remoteAddress
@@ -47,7 +47,7 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
     if (error.name === 'TokenExpiredError') {
       logger.warn('#DAL - request authentication - token expired', {
         error,
-        event: DAL_REQUEST_AUTHENTICATION_001,
+        code: DAL_REQUEST_AUTHENTICATION_001,
         request: {
           remoteAddress: request?.info?.remoteAddress
         }
@@ -55,7 +55,7 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
     } else {
       logger.error('#DAL - request authentication - Error verifying jwt', {
         error,
-        event: DAL_REQUEST_AUTHENTICATION_001,
+        code: DAL_REQUEST_AUTHENTICATION_001,
         request: {
           remoteAddress: request?.info?.remoteAddress
         }

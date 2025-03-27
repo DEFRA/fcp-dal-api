@@ -26,7 +26,7 @@ export class RuralPayments extends RESTDataSource {
       error,
       request,
       response,
-      event: RURALPAYMENTS_API_REQUEST_001
+      code: RURALPAYMENTS_API_REQUEST_001
     })
   }
 
@@ -57,7 +57,7 @@ export class RuralPayments extends RESTDataSource {
 
     this.logger.verbose('#datasource - Rural payments - request', {
       request: { ...request, path: path.toString() },
-      event: RURALPAYMENTS_API_REQUEST_001
+      code: RURALPAYMENTS_API_REQUEST_001
     })
   }
 
@@ -74,7 +74,7 @@ export class RuralPayments extends RESTDataSource {
     }
 
     this.logger.http('#datasource - Rural payments - response', {
-      event: RURALPAYMENTS_API_REQUEST_001,
+      code: RURALPAYMENTS_API_REQUEST_001,
       requestTimeMs,
       request: {
         method: request.method.toUpperCase(),
@@ -90,7 +90,7 @@ export class RuralPayments extends RESTDataSource {
         body: result.parsedBody,
         size: Buffer.byteLength(JSON.stringify(response.body))
       },
-      event: RURALPAYMENTS_API_REQUEST_001,
+      code: RURALPAYMENTS_API_REQUEST_001,
       requestTimeMs
     })
 
