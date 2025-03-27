@@ -1,4 +1,3 @@
-import { DefaultAzureCredential } from '@azure/identity'
 import { graphql, GraphQLError } from 'graphql'
 
 import { NotFound } from '../../../../app/errors/graphql.js'
@@ -173,12 +172,6 @@ describe('Handle other errors', () => {
 })
 
 describe('Query.customer.authenticationQuestions', () => {
-  beforeEach(() => {
-    jest
-      .spyOn(DefaultAzureCredential.prototype, 'getToken')
-      .mockImplementation(() => ({ token: 'mockToken' }))
-  })
-
   afterEach(() => {
     jest.restoreAllMocks()
   })
