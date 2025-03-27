@@ -36,13 +36,13 @@ export const healthyRoute = {
         } else {
           logger.error(
             '#health check - missing environment variable "HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID"',
-            { code: DAL_HEALTH_CHECK_001 }
+            { event: DAL_HEALTH_CHECK_001 }
           )
         }
       } else if (process.env.ENVIRONMENT === 'prd1') {
-        logger.error('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })
+        logger.error('#health check - health check disabled', { event: DAL_HEALTH_CHECK_001 })
       } else {
-        logger.warn('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })
+        logger.warn('#health check - health check disabled', { event: DAL_HEALTH_CHECK_001 })
       }
 
       return h.response(services).code(StatusCodes.OK)

@@ -9,7 +9,7 @@ export const Query = {
     if (!response) {
       logger.warn('#graphql - business/query - Business not found for SBI', {
         sbi,
-        code: DAL_RESOLVERS_BUSINESS_001
+        event: DAL_RESOLVERS_BUSINESS_001
       })
       throw new NotFound('Business not found')
     }

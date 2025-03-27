@@ -75,7 +75,7 @@ describe('RuralPayments', () => {
         error,
         request,
         response: error.extensions.response,
-        code: RURALPAYMENTS_API_REQUEST_001
+        event: RURALPAYMENTS_API_REQUEST_001
       })
     })
   })

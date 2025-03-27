@@ -32,7 +32,7 @@ server.ext({
         headers: request.headers,
         remoteAddress: request.info.remoteAddress
       },
-      code: DAL_APPLICATION_REQUEST_001,
+      event: DAL_APPLICATION_REQUEST_001,
       requestId: request.id
     })
 
@@ -44,7 +44,7 @@ server.events.on('response', function (request) {
   const requestTimeMs = request.info.responded - request.info.received
 
   logger.http('FCP - Access log', {
-    code: DAL_APPLICATION_REQUEST_001,
+    event: DAL_APPLICATION_REQUEST_001,
     requestTimeMs,
     requestId: request.id,
     request: {
@@ -75,7 +75,7 @@ server.events.on('response', function (request) {
       body: request.response.source
     },
     requestTimeMs,
-    code: DAL_APPLICATION_RESPONSE_001,
+    event: DAL_APPLICATION_RESPONSE_001,
     requestId: request.id
   })
 })

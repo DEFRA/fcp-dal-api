@@ -1,5 +1,4 @@
 /*
- *
  * Levels:
  * error: // Used for errors that prevent the application from operating correctly
  * warn: // Used for errors that do not prevent the application from operating correctly, but may cause issues
@@ -11,12 +10,15 @@
  */
 import ecsFormat from '@elastic/ecs-winston-format'
 import { createLogger, format, transports } from 'winston'
-import { redactSensitiveData, sampleResponseBodyData } from './winstonFormatters.js'
+import { cdpSchemaTranslator, sampleResponseBodyData } from './winstonFormatters.js'
 
 const transportTypes = []
 transportTypes.push(
   new transports.Console({
-    format: format.combine(sampleResponseBodyData(), redactSensitiveData(), ecsFormat())
+    format:
+      process.env.NODE_ENV === 'production'
+        ? format.combine(cdpSchemaTranslator(), ecsFormat())
+        : sampleResponseBodyData()
   })
 )
 
