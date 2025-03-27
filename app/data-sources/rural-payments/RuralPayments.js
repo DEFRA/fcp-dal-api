@@ -1,5 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import StatusCodes from 'http-status-codes'
+import https from 'https'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 
@@ -11,11 +12,11 @@ export class RuralPayments extends RESTDataSource {
     super(config)
 
     this.request = request
-  }
 
-  async fetch(path, incomingRequest) {
-    const result = await super.fetch(path, incomingRequest)
-    return result
+    this.agent = new https.Agent({
+      cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
+      key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
+    })
   }
 
   didEncounterError(error, request, url) {
@@ -50,6 +51,7 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async willSendRequest(path, request) {
+    request.agent = this.agent
     request.headers = {
       ...request.headers,
       email: this.request.headers.email
