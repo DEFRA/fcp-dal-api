@@ -11,7 +11,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     if (!organisationResponse?._data?.id) {
       this.logger.warn(
         '#datasource - Rural payments - organisation not found for organisation ID',
-        { organisationId, event: RURALPAYMENTS_API_NOT_FOUND_001 }
+        { organisationId, code: RURALPAYMENTS_API_NOT_FOUND_001 }
       )
       throw new NotFound('Rural payments organisation not found')
     }
@@ -39,7 +39,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     if (!organisationResponse?._data?.length) {
       this.logger.warn(
         '#datasource - Rural payments - organisation not found for organisation SBI',
-        { sbi, event: RURALPAYMENTS_API_NOT_FOUND_001 }
+        { sbi, code: RURALPAYMENTS_API_NOT_FOUND_001 }
       )
       throw new NotFound('Rural payments organisation not found')
     }

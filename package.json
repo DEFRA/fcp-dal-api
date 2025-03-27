@@ -10,6 +10,7 @@
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "prepare": "[ -d '.git' ] && husky || echo 'skipping husky'",
     "pretest": "npm run lint",
+    "start": "node -r dotenv/config app/index.js | jq .",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",
     "start:dev": "nodemon -r dotenv/config --ext js,gql --watch app/ app/index.js",
     "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
@@ -49,7 +50,6 @@
     "eslint-plugin-jest": "^28.9.0",
     "husky": "^9.1.7",
     "jest": "^29.7.0",
-    "jest-junit": "^16.0.0",
     "mock-jwks": "3.2.2",
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2"
