@@ -10,6 +10,7 @@
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "prepare": "[ -d '.git' ] && husky || echo 'skipping husky'",
     "pretest": "npm run lint",
+    "start": "node -r dotenv/config app/index.js | jq .",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",
     "start:dev": "nodemon -r dotenv/config --ext js,gql --watch app/ app/index.js",
     "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
