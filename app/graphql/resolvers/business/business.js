@@ -68,7 +68,7 @@ export const Business = {
         crn,
         organisationId,
         sbi,
-        event: RURALPAYMENTS_API_NOT_FOUND_001
+        code: RURALPAYMENTS_API_NOT_FOUND_001
       })
       throw new NotFound('Customer not found')
     }

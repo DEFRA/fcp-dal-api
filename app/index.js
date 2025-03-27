@@ -24,12 +24,12 @@ const init = async () => {
 }
 
 process.on('unhandledRejection', (error) => {
-  logger.error('#DAL - unhandled rejection', { error, event: DAL_UNHANDLED_ERROR_001 })
+  logger.error('#DAL - unhandled rejection', { error, code: DAL_UNHANDLED_ERROR_001 })
   process.exit(1)
 })
 
 process.on('uncaughtException', (error) => {
-  logger.error('#DAL - uncaught reception', { error, event: DAL_UNHANDLED_ERROR_001 })
+  logger.error('#DAL - uncaught reception', { error, code: DAL_UNHANDLED_ERROR_001 })
   process.exit(1)
 })
 
