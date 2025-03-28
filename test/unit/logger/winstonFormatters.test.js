@@ -1,16 +1,11 @@
-import { HeaderMap } from '@apollo/server'
 import { describe, expect, it } from '@jest/globals'
 import { cdpSchemaTranslator, sampleResponseBodyData } from '../../../app/logger/winstonFormatters'
 
-const someURL = new URL('http://localhost/path')
-const path = 'http://localhost/path'
 const params = new URLSearchParams([
   ['p1', 'v1'],
   ['p2', 'v2']
 ])
-const paramsObject = { p1: 'v1', p2: 'v2' }
 const headers = { h1: 'v1', h2: 'v2' }
-const headersMap = new HeaderMap(Object.entries(headers))
 
 const fixture = {
   code: 'RURALPAYMENTS_API_REQUEST_001',
@@ -33,17 +28,17 @@ const fixture = {
     body: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}',
     headers: {
       'content-type': 'application/json',
-      'Ocp-Apim-Subscription-Key': '00000000000000000000000000000000',
       Authorization: 'Bearer token',
       email: 'probably.should@redacted.be',
       'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
     },
     retryCount: 1,
     params,
-    path: someURL
+    path: 'http://localhost/path',
+    url: 'http://localhost/path'
   },
   response: {
-    headers: headersMap,
+    headers,
     body: { data: 'some data' },
     statusCode: 200
   },
@@ -84,17 +79,17 @@ describe('winstonFormatters', () => {
           body: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}',
           headers: {
             'content-type': 'application/json',
-            'Ocp-Apim-Subscription-Key': '00000000000000000000000000000000',
             Authorization: 'Bearer token',
             email: 'probably.should@redacted.be',
             'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
           },
           retryCount: 1,
           params,
-          path: someURL
+          path: 'http://localhost/path',
+          url: 'http://localhost/path'
         },
         res: {
-          headers: headersMap,
+          headers,
           body: { data: 'some data' },
           statusCode: 200
         },
