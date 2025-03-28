@@ -26,7 +26,7 @@ export class RuralPayments extends RESTDataSource {
 
   didEncounterError(error, request, url) {
     request.path = url
-    const { response } = error?.extensions
+    const response = error?.extensions?.response
 
     this.logger.error('#datasource - Rural payments - request error', {
       error,
