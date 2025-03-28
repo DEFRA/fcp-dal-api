@@ -31,10 +31,7 @@ const organisationFixture = organisationByOrgId('5565448')._data
 const organisationCPHInfoFixture = organisationCPHInfo('5565448').data
 const organisationCPHFixture = organisationCPH('5565448').data
 
-beforeAll(async () => {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
-  mockServer.start()
-})
+beforeAll(mockServer.start)
 afterAll(mockServer.stop)
 
 describe('Query.business', () => {
