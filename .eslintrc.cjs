@@ -3,6 +3,11 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module'
   },
+  env: {
+    node: true,
+    es2021: true
+  },
+  extends: ['eslint:recommended'],
   overrides: [
     {
       files: ['*.gql'],
