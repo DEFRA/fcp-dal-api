@@ -7,7 +7,12 @@ const logLevel = process.env.MOCK_LOG_LEVEL || 'silent'
 const server = new Core({
   log: logLevel,
   server: {
-    port: Number(process.env.PORT_MOCK || 3100)
+    port: Number(process.env.PORT_MOCK || 3100),
+    https: {
+      enabled: true,
+      cert: './mocks/certs/cert.pem',
+      key: './mocks/certs/key.pem'
+    }
   },
   config: {
     allowUnknownArguments: true,
