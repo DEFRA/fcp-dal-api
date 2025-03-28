@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 
+import { Unauthorized } from '../errors/graphql.js'
 import { AuthRole } from '../graphql/resolvers/authenticate.js'
 import { logger } from '../logger/logger.js'
 
