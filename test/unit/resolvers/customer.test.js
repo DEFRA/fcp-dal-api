@@ -22,7 +22,7 @@ const dataSources = {
       return organisationPersonSummary({ id: personId })._data
     },
     getNotificationsByOrganisationIdAndPersonId: jest.fn(),
-    getAuthenticateAnswersByCRN(_) {
+    getAuthenticateAnswersByCRN() {
       return {
         memorableDate: 'some date',
         memorableEvent: 'some event',
@@ -142,7 +142,6 @@ describe('Customer', () => {
 })
 
 describe('CustomerBusiness', () => {
-  let parsedMessages = []
   beforeEach(() => {
     jest.clearAllMocks()
 
