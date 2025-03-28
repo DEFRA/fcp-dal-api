@@ -16,10 +16,10 @@
     "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
     "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env jest --testPathPattern=test/acceptance --setupFiles dotenv/config",
     "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
-    "test:integration": "NODE_OPTIONS=--experimental-vm-modules NODE_TLS_REJECT_UNAUTHORIZED=0 jest --testPathPattern=test/unit/integration  --setupFiles dotenv/config",
-    "test:local": "NODE_OPTIONS=--experimental-vm-modules NODE_TLS_REJECT_UNAUTHORIZED=0 jest --runInBand --setupFiles dotenv/config",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/unit/integration  --setupFiles dotenv/config",
+    "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --coverage --setupFiles dotenv/config",
-    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_TLS_REJECT_UNAUTHORIZED=0 DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config"
+    "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config"
   },
   "author": "Defra",
   "contributors": [],
