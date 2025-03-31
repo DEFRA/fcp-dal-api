@@ -13,18 +13,6 @@ export class RuralPayments extends RESTDataSource {
 
     this.request = request
 
-    this.logger.debug(`CDP_HTTPS_PROXY: ${process.env.CDP_HTTPS_PROXY}`, {
-      code: 'DEBUG'
-    })
-
-    this.logger.debug(`KITS_CONNECTION_CERT: ${!!process.env.KITS_CONNECTION_CERT}`, {
-      code: 'DEBUG'
-    })
-
-    this.logger.debug(`KITS_CONNECTION_CERT: ${!!process.env.KITS_CONNECTION_KEY}`, {
-      code: 'DEBUG'
-    })
-
     this.agent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY, {
       cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
       key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
@@ -67,6 +55,18 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async willSendRequest(path, request) {
+    this.logger.debug(`CDP_HTTPS_PROXY: ${process.env.CDP_HTTPS_PROXY}`, {
+      code: 'DEBUG'
+    })
+
+    this.logger.debug(`KITS_CONNECTION_CERT: ${!!process.env.KITS_CONNECTION_CERT}`, {
+      code: 'DEBUG'
+    })
+
+    this.logger.debug(`KITS_CONNECTION_CERT: ${!!process.env.KITS_CONNECTION_KEY}`, {
+      code: 'DEBUG'
+    })
+
     if (process.env.NODE_ENV != 'test') {
       request.agent = this.agent
     }
