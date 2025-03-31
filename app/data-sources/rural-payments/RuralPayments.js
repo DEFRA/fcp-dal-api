@@ -13,7 +13,7 @@ export class RuralPayments extends RESTDataSource {
 
     this.request = request
 
-    this.agent = new HttpsProxyAgent({
+    this.agent = new HttpsProxyAgent(process.env.HTTPS_PROXY, {
       cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
       key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
     })
@@ -55,7 +55,9 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async willSendRequest(path, request) {
-    request.agent = this.agent
+    if (process.env.NODE_ENV != 'test') {
+      request.agent = this.agent
+    }
     request.headers = {
       ...request.headers,
       email: this.request.headers.email
