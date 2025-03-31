@@ -24,13 +24,15 @@ const fixture = {
   },
   level: 'info',
   request: {
+    id: 'power-apps-req-id',
     method: 'POST',
     body: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}',
     headers: {
       'content-type': 'application/json',
       Authorization: 'Bearer token',
       email: 'probably.should@redacted.be',
-      'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
+      'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
+      'x-ms-client-request-id': 'power-apps-req-id'
     },
     retryCount: 1,
     params,
@@ -75,13 +77,15 @@ describe('winstonFormatters', () => {
         },
         level: 'info',
         req: {
+          id: 'power-apps-req-id',
           method: 'POST',
           body: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}',
           headers: {
             'content-type': 'application/json',
             Authorization: 'Bearer token',
             email: 'probably.should@redacted.be',
-            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
+            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
+            'x-ms-client-request-id': 'power-apps-req-id'
           },
           retryCount: 1,
           params,

@@ -61,7 +61,6 @@ describe('RuralPayments', () => {
 
   describe('didEncounterError', () => {
     test('handles RPP errors', () => {
-      // eslint-disable-next-line no-new
       const rp = new RuralPayments({ logger })
 
       const error = new Error('test error')
@@ -75,6 +74,22 @@ describe('RuralPayments', () => {
         error,
         request,
         response: error.extensions.response,
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+    test('handles unknown RPP errors', () => {
+      const rp = new RuralPayments({ logger })
+
+      const error = undefined
+      const request = {}
+      const url = 'test url'
+
+      rp.didEncounterError(error, request, url)
+
+      expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
+        error,
+        request,
+        response: {},
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })

@@ -10,7 +10,7 @@ export const cdpSchemaTranslator = format(
         code && { event: { code } },
         http && { http },
         message && { message },
-        request && { req: request },
+        request && { req: { url: request.path, ...request } },
         response && { res: response },
         responseTimeMs && { responseTime: responseTimeMs },
         request?.headers?.['x-cdp-request-id'] && {
