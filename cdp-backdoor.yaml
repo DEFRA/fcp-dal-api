@@ -1,0 +1,15 @@
+#
+services:
+  forwarder:
+    image: saucelabs/forwarder
+    environment:
+      - FORWARDER_PROXY=${CDP_HTTPS_PROXY}
+    command:
+      [
+        'run',
+        '--log-http=proxy:headers,url,body,errors',
+        '--log-level=debug',
+        '--proxy-localhost=direct'
+      ]
+    ports:
+      - 3128:3128
