@@ -13,7 +13,7 @@ export class RuralPayments extends RESTDataSource {
 
     this.request = request
 
-    this.agent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY, {
+    this.agent = new HttpsProxyAgent('http://localhost:3128', {
       cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
       key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
     })
