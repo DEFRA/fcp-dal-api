@@ -23,7 +23,7 @@ export class RuralPayments extends RESTDataSource {
     }
 
     const proxyRequestOptions = {
-      protocol: 'https:',
+      protocol: 'http:',
       host: 'localhost',
       port: 3128,
       timeout: 123000,
