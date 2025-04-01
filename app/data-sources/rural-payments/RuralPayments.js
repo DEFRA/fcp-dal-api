@@ -19,17 +19,13 @@ export class RuralPayments extends RESTDataSource {
       timeout: 55000,
       maxSockets: 20,
       maxFreeSockets: 5,
-      maxCachedSessions: 500
+      maxCachedSessions: 500,
+      cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
+      key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
     }
 
     const proxyRequestOptions = {
-      protocol: 'http:',
-      host: 'localhost',
-      port: 3128,
-      timeout: 123000,
-      maxSockets: 100,
-      cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
-      key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
+      proxy: process.env.CDP_HTTPS_PROXY
     }
 
     this.agent = new Agent(httpsAgentOptions, proxyRequestOptions)
