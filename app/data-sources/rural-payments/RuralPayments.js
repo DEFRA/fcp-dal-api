@@ -1,6 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
-import { Agent } from 'better-https-proxy-agent'
 import StatusCodes from 'http-status-codes'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
@@ -14,21 +14,10 @@ export class RuralPayments extends RESTDataSource {
 
     this.request = request
 
-    const httpsAgentOptions = {
-      keepAlive: true,
-      timeout: 55000,
-      maxSockets: 20,
-      maxFreeSockets: 5,
-      maxCachedSessions: 500,
+    this.agent = new HttpsProxyAgent('http://localhost:3128', {
       cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
       key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
-    }
-
-    const proxyRequestOptions = {
-      proxy: 'http://localhost:3128'
-    }
-
-    this.agent = new Agent(httpsAgentOptions, proxyRequestOptions)
+    })
   }
 
   async fetch(path, incomingRequest) {
