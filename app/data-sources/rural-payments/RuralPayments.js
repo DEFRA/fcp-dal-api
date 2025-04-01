@@ -1,6 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import StatusCodes from 'http-status-codes'
-import { HttpsProxyAgent } from 'https-proxy-agent'
+import { httpsOverHttp } from 'tunnel'
 
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
@@ -14,7 +14,11 @@ export class RuralPayments extends RESTDataSource {
 
     this.request = request
 
-    this.agent = new HttpsProxyAgent('http://localhost:3128', {
+    this.agent = new httpsOverHttp({
+      proxy: {
+        host: 'localhost',
+        port: 3128
+      },
       cert: Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64').toString('utf-8'),
       key: Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8')
     })
@@ -98,7 +102,6 @@ export class RuralPayments extends RESTDataSource {
       code: RURALPAYMENTS_API_REQUEST_001,
       requestTimeMs,
       request: {
-        id: request.id,
         method: request.method.toUpperCase(),
         headers: request.headers,
         path: url.toString()
