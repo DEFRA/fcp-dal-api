@@ -24,6 +24,7 @@ server.ext({
 
     logger.debug('FCP - Access log', {
       request: {
+        id: request.id,
         method: request.method.toUpperCase(),
         path: request.path,
         params: request.params,
@@ -46,8 +47,8 @@ server.events.on('response', function (request) {
   logger.http('FCP - Access log', {
     code: DAL_APPLICATION_REQUEST_001,
     requestTimeMs,
-    requestId: request.id,
     request: {
+      id: request.id,
       method: request.method.toUpperCase(),
       path: request.path,
       params: request.params,
@@ -61,21 +62,12 @@ server.events.on('response', function (request) {
     }
   })
   logger.verbose('FCP - Response log', {
-    request: {
-      method: request.method.toUpperCase(),
-      path: request.path,
-      params: request.params,
-      payload: request.payload,
-      headers: request.raw.req.headers,
-      remoteAddress: request.info.remoteAddress
-    },
     response: {
       statusCode: request.response.statusCode,
       headers: request.response.headers,
       body: request.response.source
     },
     requestTimeMs,
-    code: DAL_APPLICATION_RESPONSE_001,
-    requestId: request.id
+    code: DAL_APPLICATION_RESPONSE_001
   })
 })

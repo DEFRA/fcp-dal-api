@@ -98,6 +98,7 @@ export class RuralPayments extends RESTDataSource {
       code: RURALPAYMENTS_API_REQUEST_001,
       requestTimeMs,
       request: {
+        id: request.id,
         method: request.method.toUpperCase(),
         headers: request.headers,
         path: url.toString()
