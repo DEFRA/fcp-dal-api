@@ -25,7 +25,7 @@ export class RuralPayments extends RESTDataSource {
     }
 
     const proxyRequestOptions = {
-      proxy: process.env.CDP_HTTPS_PROXY
+      proxy: 'http://localhost:3128'
     }
 
     this.agent = new Agent(httpsAgentOptions, proxyRequestOptions)
