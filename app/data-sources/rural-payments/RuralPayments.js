@@ -1,8 +1,38 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import StatusCodes from 'http-status-codes'
+import tls from 'node:tls'
+import { ProxyAgent } from 'undici'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 
+const customFetch = async (url, options) => {
+  const clientCert = Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64')
+    .toString('utf-8')
+    .trim()
+  const clientKey = Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8').trim()
+
+  const kitsURL = new URL(process.env.RP_KITS_GATEWAY_INTERNAL_URL)
+
+  const requestTls = {
+    host: kitsURL.hostname,
+    port: kitsURL.port,
+    servername: kitsURL.hostname,
+    secureContext: tls.createSecureContext({
+      key: clientKey,
+      cert: clientCert
+    })
+  }
+
+  const proxyAgent = new ProxyAgent({
+    uri: process.env.CDP_HTTPS_PROXY,
+    requestTls
+  })
+
+  return fetch(url, {
+    ...options,
+    dispatcher: proxyAgent
+  })
+}
 export class RuralPayments extends RESTDataSource {
   baseURL = process.env.RP_KITS_GATEWAY_INTERNAL_URL
   request = null
@@ -11,11 +41,9 @@ export class RuralPayments extends RESTDataSource {
     super(config)
 
     this.request = request
-  }
-
-  async fetch(path, incomingRequest) {
-    const result = await super.fetch(path, incomingRequest)
-    return result
+    if (process.env.NODE_ENV != 'test') {
+      this.httpCache.httpFetch = customFetch
+    }
   }
 
   didEncounterError(error, request, url) {
