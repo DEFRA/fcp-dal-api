@@ -80,6 +80,9 @@ describe('getJwtPublicKey', () => {
       aud: 'private',
       iss: 'master'
     })
+    process.env.OIDC_JWKS_URI =
+      'https://login.microsoftonline.com/some-tenant-id/discovery/v2.0/keys'
+    process.env.CDP_HTTPS_PROXY = 'https://localhost:3128'
 
     const key = await getJwtPublicKey(jwksMock.kid())
 

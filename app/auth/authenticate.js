@@ -1,5 +1,6 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { defaultFieldResolver } from 'graphql'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
@@ -9,9 +10,13 @@ import { AuthRole } from '../graphql/resolvers/authenticate.js'
 import { logger } from '../logger/logger.js'
 
 export async function getJwtPublicKey(kid) {
-  const client = jwksClient({
-    jwksUri: `https://login.microsoftonline.com/${process.env.API_TENANT_ID}/discovery/v2.0/keys`
-  })
+  const jwksOptions = {
+    jwksUri: process.env.OIDC_JWKS_URI
+  }
+  if (process.env.NODE_ENV != 'test') {
+    jwksOptions.requestAgent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
+  }
+  const client = jwksClient(jwksOptions)
   const key = await client.getSigningKey(kid)
   return key.getPublicKey()
 }
