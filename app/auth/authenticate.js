@@ -9,17 +9,16 @@ import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 
 export async function getJwtPublicKey(kid) {
-  let client
-  if (process.env.NODE_ENV != 'test') {
-    client = jwksClient({
-      jwksUri: process.env.OIDC_JWKS_URI,
-      requestAgent: new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
-    })
-  } else {
-    client = jwksClient({
-      jwksUri: process.env.OIDC_JWKS_URI
-    })
+  const clientOptions = {
+    jwksUri: process.env.OIDC_JWKS_URI
   }
+  if (process.env.NODE_ENV != 'test') {
+    clientOptions.requestAgent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
+  }
+
+  const client = jwksClient({
+    jwksUri: process.env.OIDC_JWKS_URI
+  })
 
   const key = await client.getSigningKey(kid)
   return key.getPublicKey()

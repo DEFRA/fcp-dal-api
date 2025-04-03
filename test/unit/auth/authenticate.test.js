@@ -64,10 +64,8 @@ describe('getJwtPublicKey', () => {
   let jwksMock
   let stopMock
   beforeEach(() => {
-    jwksMock = createJWKSMock(
-      'https://login.microsoftonline.com',
-      `/${process.env.API_TENANT_ID}/discovery/v2.0/keys`
-    )
+    const jwkURL = new URL(process.env.OIDC_JWKS_URI)
+    jwksMock = createJWKSMock(`${jwkURL.protocol}//${jwkURL.host}`, jwkURL.pathname)
     stopMock = jwksMock.start()
   })
 
