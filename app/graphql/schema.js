@@ -25,8 +25,13 @@ export async function createSchema() {
     schema = onDirectiveTransformer(schema)
   }
 
-  if (!process.env.DISABLE_AUTH) {
+  if (process.env.DISABLE_AUTH !== 'true') {
     schema = authDirectiveTransformer(schema)
+  } else if (process.env.ENVIRONMENT !== 'dev') {
+    throw new Error(
+      'Cannot disable auth outside of dev envirnment',
+      `DISABLE_AUTH:${process.env.DISABLE_AUTH} ENVIRONMENT:${process.env.ENVIRONMENT}`
+    )
   }
 
   schema = excludeFromListTransformer(schema)
