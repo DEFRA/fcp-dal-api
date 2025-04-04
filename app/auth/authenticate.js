@@ -1,6 +1,5 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { defaultFieldResolver } from 'graphql'
-import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
 import { Unauthorized } from '../errors/graphql.js'
@@ -13,7 +12,7 @@ export async function getJwtPublicKey(kid) {
     jwksUri: process.env.OIDC_JWKS_URI
   }
   if (process.env.NODE_ENV != 'test') {
-    clientOptions.requestAgent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
+    clientOptions.proxy = process.env.CDP_HTTPS_PROXY
   }
 
   const client = jwksClient(clientOptions)
