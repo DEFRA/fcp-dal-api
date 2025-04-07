@@ -104,6 +104,7 @@ export class RuralPayments extends RESTDataSource {
     try {
       const metrics = createMetricsLogger()
       metrics.putMetric('RequestTime', requestTimeMs, Unit.Milliseconds, StorageResolution.Standard)
+      metrics.putDimensions({ Service: RURALPAYMENTS_API_REQUEST_001 })
       metrics.setProperty('Path', url.toString())
       await metrics.flush()
     } catch (e) {
