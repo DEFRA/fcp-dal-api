@@ -1,4 +1,5 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
+import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwt from 'jsonwebtoken'
@@ -7,7 +8,6 @@ import { Unauthorized } from '../errors/graphql.js'
 import { AuthRole } from '../graphql/resolvers/authenticate.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
-
 export async function getJwtPublicKey(kid) {
   const clientOptions = {
     jwksUri: process.env.OIDC_JWKS_URI
@@ -41,6 +41,10 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
     const signingKey = await getJwtPublicKeyFunc(header.kid)
     const requestTimeMs = Date.now() - requestStart
     const verified = jwt.verify(token, signingKey)
+
+    logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+      code: DAL_REQUEST_AUTHENTICATION_001
+    })
     logger.http('#DAL Request authentication - JWT verified', {
       code: DAL_REQUEST_AUTHENTICATION_001,
       requestTimeMs,
