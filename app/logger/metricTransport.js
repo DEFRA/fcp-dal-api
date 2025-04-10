@@ -28,18 +28,18 @@ export class AWSMetricTransport extends Transport {
 
     const metricValue = logArguments[0]
     let metricUnit = Unit.Count
-    let dimentions = {}
+    let dimensions = {}
 
     switch (logArguments.length) {
       case 3:
         metricUnit = logArguments[1]
-        dimentions = logArguments[2]
+        dimensions = logArguments[2]
         break
       case 2:
         if (typeof logArguments[1] === 'string') {
           metricUnit = logArguments[1]
         } else {
-          dimentions = logArguments[1]
+          dimensions = logArguments[1]
         }
         break
       case 1:
@@ -58,29 +58,29 @@ export class AWSMetricTransport extends Transport {
       throw new Error('Metric unit must be a valid unit')
     }
 
-    // check if dimentions is an object
-    if (!dimentions || Object.prototype.toString.call(dimentions) !== '[object Object]') {
-      throw new Error('Dimentions must be an object')
+    // check if dimensions is an object
+    if (!dimensions || Object.prototype.toString.call(dimensions) !== '[object Object]') {
+      throw new Error('Dimensions must be an object')
     }
 
     return {
       metricName: message,
       metricValue,
       metricUnit,
-      dimentions: {
-        ...dimentions,
+      dimensions: {
+        ...dimensions,
         ...additionalDimensions
       }
     }
   }
 
   sendMetric(metric) {
-    const { metricName, metricValue, metricUnit, dimentions } = metric
+    const { metricName, metricValue, metricUnit, dimensions } = metric
 
     this.metrics.putMetric(metricName, metricValue, metricUnit)
 
-    if (Object.keys(dimentions).length > 0) {
-      this.metrics.setDimensions(dimentions)
+    if (Object.keys(dimensions).length > 0) {
+      this.metrics.setDimensions(dimensions)
     }
   }
 

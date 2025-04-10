@@ -28,7 +28,7 @@ describe('#AWSMetricTransport', () => {
         metricName: 'ResponseTime',
         metricValue: 129,
         metricUnit: Unit.Count,
-        dimentions: {}
+        dimensions: {}
       })
     })
 
@@ -43,11 +43,11 @@ describe('#AWSMetricTransport', () => {
         metricName: 'ResponseTime',
         metricValue: 129,
         metricUnit: Unit.Milliseconds,
-        dimentions: {}
+        dimensions: {}
       })
     })
 
-    it('should parse metric with metric unit and dimentions', () => {
+    it('should parse metric with metric unit and dimensions', () => {
       const metric = transport.parseMetric({
         level: 'metric',
         message: 'ResponseTime',
@@ -58,7 +58,7 @@ describe('#AWSMetricTransport', () => {
         metricName: 'ResponseTime',
         metricValue: 129,
         metricUnit: Unit.Milliseconds,
-        dimentions: { foo: 'bar' }
+        dimensions: { foo: 'bar' }
       })
     })
     it('should throw an error if the metric name is not provided', () => {
@@ -105,19 +105,19 @@ describe('#AWSMetricTransport', () => {
       }).toThrow('Metric unit must be a valid unit')
     })
 
-    it('should throw an error if dimentions is not an object', () => {
+    it('should throw an error if dimensions is not an object', () => {
       expect(() => {
         const metricValue = 129
-        const dimentions = [1, 2, 3]
+        const dimensions = [1, 2, 3]
 
         transport.parseMetric({
           level: 'metric',
           message: 'ResponseTime',
-          [SPLAT]: [metricValue, dimentions],
+          [SPLAT]: [metricValue, dimensions],
           [LEVEL]: 'metric',
           [MESSAGE]: 'Some message'
         })
-      }).toThrow('Dimentions must be an object')
+      }).toThrow('Dimensions must be an object')
     })
   })
 
@@ -127,12 +127,12 @@ describe('#AWSMetricTransport', () => {
       jest.spyOn(transport.metrics, 'setDimensions')
     })
 
-    it('should send metric with dimentions', () => {
+    it('should send metric with dimensions', () => {
       transport.sendMetric({
         metricName: 'ResponseTime',
         metricValue: 129,
         metricUnit: Unit.Milliseconds,
-        dimentions: { foo: 'bar' }
+        dimensions: { foo: 'bar' }
       })
 
       expect(transport.metrics.putMetric).toHaveBeenCalledWith(
@@ -143,12 +143,12 @@ describe('#AWSMetricTransport', () => {
       expect(transport.metrics.setDimensions).toHaveBeenCalledWith({ foo: 'bar' })
     })
 
-    it('should send metric without dimentions', () => {
+    it('should send metric without dimensions', () => {
       transport.sendMetric({
         metricName: 'ResponseTime',
         metricValue: 129,
         metricUnit: Unit.Milliseconds,
-        dimentions: {}
+        dimensions: {}
       })
 
       expect(transport.metrics.putMetric).toHaveBeenCalledWith(
