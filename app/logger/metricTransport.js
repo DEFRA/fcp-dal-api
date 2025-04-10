@@ -13,8 +13,8 @@ export class AWSMetricTransport extends Transport {
       message,
       level,
       [SPLAT]: logArguments,
-      [LEVEL]: _level, // eslint-disable-line
-      [MESSAGE]: _message, // eslint-disable-line
+      [LEVEL]: _level, // eslint-disable-line no-unused-vars
+      [MESSAGE]: _message, // eslint-disable-line no-unused-vars
       ...additionalDimensions
     } = info
 
@@ -26,18 +26,16 @@ export class AWSMetricTransport extends Transport {
       throw new Error(`Only metric level logs are supported in this transport. Received: ${level}`)
     }
 
-    let metricValue = logArguments[0]
+    const metricValue = logArguments[0]
     let metricUnit = Unit.Count
     let dimentions = {}
 
     switch (logArguments.length) {
       case 3:
-        metricValue = logArguments[0]
         metricUnit = logArguments[1]
         dimentions = logArguments[2]
         break
       case 2:
-        metricValue = logArguments[0]
         if (typeof logArguments[1] === 'string') {
           metricUnit = logArguments[1]
         } else {
@@ -45,7 +43,7 @@ export class AWSMetricTransport extends Transport {
         }
         break
       case 1:
-        metricValue = logArguments[0]
+        // No unit or dimensions provided
         break
       default:
         throw new Error('Invalid number of arguments')
