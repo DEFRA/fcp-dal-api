@@ -1,5 +1,5 @@
 import { NotFound } from '../../../errors/graphql.js'
-import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
+import { RURAL_PAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
 import {
   transformCPHInfo,
@@ -68,7 +68,7 @@ export const Business = {
         crn,
         organisationId,
         sbi,
-        code: RURALPAYMENTS_API_NOT_FOUND_001
+        code: RURAL_PAYMENTS_API_NOT_FOUND_001
       })
       throw new NotFound('Customer not found')
     }

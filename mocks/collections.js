@@ -1,6 +1,4 @@
 const routes = [
-  'apim-authentication-get-token:default',
-
   'rural-payments-person-get-by-id:default',
   'rural-payments-person-get-by-crn:default',
   'rural-payments-get-person-organisations-summary-by-person-id:default',

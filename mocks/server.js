@@ -1,5 +1,6 @@
 import Core from '@mocks-server/core'
 import collections from './collections.js'
+import { MTLSServer } from './mtls-server.js'
 import { routes } from './routes/index.js'
 
 const logLevel = process.env.MOCK_LOG_LEVEL || 'silent'
@@ -7,7 +8,8 @@ const logLevel = process.env.MOCK_LOG_LEVEL || 'silent'
 const server = new Core({
   log: logLevel,
   server: {
-    port: Number(process.env.PORT_MOCK || 3100)
+    https: { enabled: !!(process.env.MOCK_SERVER_CERT && process.env.MOCK_SERVER_KEY) },
+    port: Number(process.env.MOCK_SERVER_PORT || 3100)
   },
   config: {
     allowUnknownArguments: true,
@@ -24,6 +26,14 @@ const server = new Core({
     }
   }
 })
+
+const mtlsServer = new MTLSServer({
+  config: server._config.addNamespace('mtls-sever'),
+  logger: server._logger.namespace(MTLSServer.id),
+  alerts: server._alerts.collection(MTLSServer.id),
+  routesRouter: server._mock.router
+})
+server._server = mtlsServer
 
 export default {
   start: async () => {

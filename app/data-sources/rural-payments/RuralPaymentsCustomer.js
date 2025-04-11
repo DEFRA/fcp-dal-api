@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { NotFound } from '../../errors/graphql.js'
-import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import { RURAL_PAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
@@ -27,7 +27,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     if (!response?.id) {
       this.logger.warn('#datasource - Rural payments - Customer not found for CRN', {
         crn,
-        code: RURALPAYMENTS_API_NOT_FOUND_001,
+        code: RURAL_PAYMENTS_API_NOT_FOUND_001,
         response: { body: customerResponse }
       })
       throw new NotFound('Rural payments customer not found')
@@ -44,7 +44,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     if (!response?._data?.id) {
       this.logger.warn('#datasource - Rural payments - Customer not found for Person ID', {
         personId,
-        code: RURALPAYMENTS_API_NOT_FOUND_001,
+        code: RURAL_PAYMENTS_API_NOT_FOUND_001,
         response: { body: response }
       })
       throw new NotFound('Rural payments customer not found')
@@ -120,7 +120,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     if (response.status === StatusCodes.NO_CONTENT) {
       this.logger.silly('#datasource - Rural payments - authenticate answers not found for CRN', {
         crn,
-        code: RURALPAYMENTS_API_NOT_FOUND_001
+        code: RURAL_PAYMENTS_API_NOT_FOUND_001
       })
       return null
     }

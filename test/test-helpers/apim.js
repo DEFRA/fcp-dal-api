@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import qs from 'qs'
 
 export const retrieveApimAccessToken = async () => {

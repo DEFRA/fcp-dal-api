@@ -2,7 +2,7 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
 import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
-import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
+import { RURAL_PAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
 const logger = {
   error: jest.fn(),
@@ -74,7 +74,7 @@ describe('RuralPayments', () => {
         error,
         request,
         response: error.extensions.response,
-        code: RURALPAYMENTS_API_REQUEST_001
+        code: RURAL_PAYMENTS_API_REQUEST_001
       })
     })
     test('handles unknown RPP errors', () => {
@@ -90,7 +90,7 @@ describe('RuralPayments', () => {
         error,
         request,
         response: {},
-        code: RURALPAYMENTS_API_REQUEST_001
+        code: RURAL_PAYMENTS_API_REQUEST_001
       })
     })
   })

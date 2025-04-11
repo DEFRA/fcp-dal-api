@@ -1,5 +1,5 @@
 import { NotFound } from '../../errors/graphql.js'
-import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import { RURAL_PAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsBusiness extends RuralPayments {
@@ -11,7 +11,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     if (!organisationResponse?._data?.id) {
       this.logger.warn(
         '#datasource - Rural payments - organisation not found for organisation ID',
-        { organisationId, code: RURALPAYMENTS_API_NOT_FOUND_001 }
+        { organisationId, code: RURAL_PAYMENTS_API_NOT_FOUND_001 }
       )
       throw new NotFound('Rural payments organisation not found')
     }
@@ -39,7 +39,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     if (!organisationResponse?._data?.length) {
       this.logger.warn(
         '#datasource - Rural payments - organisation not found for organisation SBI',
-        { sbi, code: RURALPAYMENTS_API_NOT_FOUND_001 }
+        { sbi, code: RURAL_PAYMENTS_API_NOT_FOUND_001 }
       )
       throw new NotFound('Rural payments organisation not found')
     }

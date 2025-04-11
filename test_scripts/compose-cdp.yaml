@@ -1,0 +1,78 @@
+services:
+  kits-mock:
+    image: kits-mock
+    build:
+      context: ..
+      target: kits-mock
+    ports:
+      - '3443:3443'
+    environment:
+      MOCK_LOG_LEVEL: error
+      MOCK_SERVER_COLLECTION: all
+      # TODO: remove CA var in favour of implicitly using the CA correctly loaded into the system certs
+      MOCK_SERVER_CA: /etc/ssl/certs/ca-cert-kits-mock.crt
+      MOCK_SERVER_KEY: /home/nonroot/server.key
+      MOCK_SERVER_CERT: /home/nonroot/server.crt
+      MOCK_SERVER_HOST: 0.0.0.0
+      MOCK_SERVER_PORT: 3443
+      NODE_ENV: production
+    networks:
+      - cdp-external
+    volumes:
+      - ./mtls/ca.crt:/etc/ssl/certs/ca-cert-kits-mock.crt:ro
+      - ./mtls/server-cdp.key:/home/nonroot/server.key:ro
+      - ./mtls/server-cdp.crt:/home/nonroot/server.crt:ro
+
+  proxy:
+    image: fake-cdp-proxy
+    build:
+      context: ..
+      target: proxy
+    environment:
+      NODE_ENV: production
+      PROXY_HOST: 0.0.0.0 # listen on all interfaces, needed to be reachable from both networks
+      PROXY_PORT: 3128
+      PROXY_USERNAME: test-user
+      PROXY_PASSWORD: test-password
+    ports:
+      - 3128:3128
+    networks:
+      - cdp-external
+      - cdp-tenant
+  # NOTE: the proxy is on both networks so it is the only route the DAL-API can take to the kits-mock!
+
+  fcp-dal-api:
+    image: fcp-dal-api
+    build:
+      context: ..
+      target: production
+      args:
+        PORT: 3400
+    ports:
+      - 3400:3400
+    environment:
+      ALL_SCHEMA_ON: true
+      DISABLE_AUTH: true
+      CDP_HTTPS_PROXY: http://test-user:test-password@proxy:3128
+      KITS_CONNECTION_KEY: ${KITS_CONNECTION_KEY:?KITS_CONNECTION_KEY must be provided! Run test_scripts/emulate-cdp.sh instead of docker compose directly.}
+      KITS_CONNECTION_CERT: ${KITS_CONNECTION_CERT:?KITS_CONNECTION_CERT must be provided! Run test_scripts/emulate-cdp.sh instead of docker compose directly.}
+      LOG_LEVEL: http
+      NODE_ENV: production
+      PORT: 3400
+      RP_KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3443/v1/
+    networks:
+      - cdp-tenant
+    volumes:
+      - ./mtls/ca.crt:/etc/ssl/certs/ca-cert-kits-mock.crt:ro
+
+################################################################################
+
+networks:
+  # the parts that sit within CDP infrastructure
+  cdp-tenant:
+    driver: bridge
+    name: cdp-tenant
+  # the parts that sit external to CDP infrastructure (and the outbound proxy)
+  cdp-external:
+    driver: bridge
+    name: cdp-external

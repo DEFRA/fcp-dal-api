@@ -1,0 +1,22 @@
+services:
+  kits-mock:
+    environment:
+      MOCK_LOG_LEVEL: debug
+
+  fcp-dal-api:
+    environment:
+      LOG_LEVEL: debug
+
+  fcp-dal-dev:
+    image: fcp-dal-dev
+    build:
+      context: ..
+      target: development
+    entrypoint: ['bash']
+    networks:
+      - cdp-external
+      - cdp-tenant
+    volumes:
+      - ./mtls/ca.crt:/etc/ssl/certs/ca-cert-kits-mock.crt:ro
+      - ./mtls/client-cdp.key:/home/node/client.key:ro
+      - ./mtls/client-cdp.crt:/home/node/client.crt:ro

@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import { retrieveApimAccessToken } from '../test-helpers/apim.js'
 
 describe('business contract', () => {

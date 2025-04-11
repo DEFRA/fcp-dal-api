@@ -8,7 +8,7 @@ const params = new URLSearchParams([
 const headers = { h1: 'v1', h2: 'v2' }
 
 const fixture = {
-  code: 'RURALPAYMENTS_API_REQUEST_001',
+  code: 'RURAL_PAYMENTS_API_REQUEST_001',
   message: '#datasource - Rural payments - request',
   http: {
     request: {
@@ -31,8 +31,8 @@ const fixture = {
       'content-type': 'application/json',
       Authorization: 'Bearer token',
       email: 'probably.should@redacted.be',
-      'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
-      'x-ms-client-request-id': 'power-apps-req-id'
+      'x-cdp-request-id': 'cdp-platform-req-id',
+      'x-ms-client-request-id': 'powerapps-req-id'
     },
     retryCount: 1,
     params,
@@ -61,7 +61,7 @@ describe('winstonFormatters', () => {
           message: 'test error',
           stack_trace: error.stack
         },
-        event: { code: 'RURALPAYMENTS_API_REQUEST_001' },
+        event: { code: 'RURAL_PAYMENTS_API_REQUEST_001' },
         message: '#datasource - Rural payments - request',
         http: {
           request: {
@@ -84,8 +84,8 @@ describe('winstonFormatters', () => {
             'content-type': 'application/json',
             Authorization: 'Bearer token',
             email: 'probably.should@redacted.be',
-            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
-            'x-ms-client-request-id': 'power-apps-req-id'
+            'x-cdp-request-id': 'cdp-platform-req-id',
+            'x-ms-client-request-id': 'powerapps-req-id'
           },
           retryCount: 1,
           params,
@@ -98,7 +98,7 @@ describe('winstonFormatters', () => {
           statusCode: 200
         },
         responseTime: 100,
-        'trace.id': '00000000-0000-0000-0000-000000000000'
+        'trace.id': 'cdp-platform-req-id'
       })
     })
   })
