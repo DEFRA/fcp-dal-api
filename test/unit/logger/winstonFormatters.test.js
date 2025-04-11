@@ -62,6 +62,7 @@ describe('winstonFormatters', () => {
           stack_trace: error.stack
         },
         event: { code: 'RURALPAYMENTS_API_REQUEST_001' },
+        'event.code': 'RURALPAYMENTS_API_REQUEST_001',
         message: '#datasource - Rural payments - request',
         http: {
           request: {
