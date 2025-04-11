@@ -1,5 +1,6 @@
 import hapi from '@hapi/hapi'
 
+import { Unit } from 'aws-embedded-metrics'
 import { v4 as uuidv4 } from 'uuid'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
@@ -44,6 +45,9 @@ server.ext({
 server.events.on('response', function (request) {
   const requestTimeMs = request.info.responded - request.info.received
 
+  logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+    code: DAL_APPLICATION_REQUEST_001
+  })
   logger.http('FCP - Access log', {
     code: DAL_APPLICATION_REQUEST_001,
     requestTimeMs,
