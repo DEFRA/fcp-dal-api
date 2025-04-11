@@ -8,6 +8,7 @@ export const cdpSchemaTranslator = format(
       ...[
         error && { error: { type: error.name, message: error.message, stack_trace: error.stack } },
         code && { event: { code } },
+        code && { 'event.code': code },
         http && { http },
         message && { message },
         request && { req: { url: request.path, ...request } },
