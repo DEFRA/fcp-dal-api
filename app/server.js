@@ -23,6 +23,8 @@ server.ext({
       request.headers['x-ms-client-tracking-id'] ||
       uuidv4()
 
+    console.log('request.id', request.id)
+
     logger.debug('FCP - Access log', {
       request: {
         id: request.id,

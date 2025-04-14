@@ -113,7 +113,7 @@ export class RuralPayments extends RESTDataSource {
         headers: request.headers,
         path: url.toString()
       },
-      response: { statusCode: request.response?.status }
+      response: { statusCode: response?.status }
     })
     this.logger.debug('#datasource - Rural payments - response detail', {
       request: { ...request, path: url.toString() },
