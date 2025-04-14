@@ -18,7 +18,7 @@ const transportTypes = []
 transportTypes.push(
   new transports.Console({
     format:
-      process.env.NODE_ENV === 'test'
+      process.env.NODE_ENV === 'production'
         ? format.combine(cdpSchemaTranslator(), ecsFormat())
         : sampleResponseBodyData()
   }),
