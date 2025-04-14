@@ -1,4 +1,5 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
+import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import tls from 'node:tls'
 import { ProxyAgent } from 'undici'
@@ -100,6 +101,9 @@ export class RuralPayments extends RESTDataSource {
       body: result.response?.body
     }
 
+    this.logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+      code: RURALPAYMENTS_API_REQUEST_001
+    })
     this.logger.http('#datasource - Rural payments - response', {
       code: RURALPAYMENTS_API_REQUEST_001,
       requestTimeMs,
