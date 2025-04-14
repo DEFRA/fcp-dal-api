@@ -58,10 +58,10 @@ export const cdpSchemaTranslator = format((info) => {
             ]
           )
         } catch (error) {
-          console.error('Error parsing URL', error)
-          log.error = {
-            message: `Error parsing URL for: ${request?.path}`
-          }
+          // console.error('Error parsing URL', error)
+          // log.error = {
+          //   message: `Error parsing URL for: ${request?.path}`
+          // }
         }
       }
       break
