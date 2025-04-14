@@ -12,7 +12,7 @@ export async function getJwtPublicKey(kid) {
   const clientOptions = {
     jwksUri: process.env.OIDC_JWKS_URI
   }
-  if (process.env.NODE_ENV != 'test') {
+  if (process.env.NODE_ENV !== 'test') {
     clientOptions.requestAgent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
   }
 
