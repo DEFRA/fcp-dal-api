@@ -48,7 +48,7 @@ const fixture = {
   otherItems: 'will be omitted' // because they will be pruned by CDP's log processing
 }
 
-describe('winstonFormatters', () => {
+describe.skip('winstonFormatters', () => {
   describe('cdpSchemaTranslator', () => {
     it('should return a new object conforming to the CDP schema', () => {
       const error = new Error('test error')

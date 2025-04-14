@@ -45,17 +45,24 @@ export const cdpSchemaTranslator = format((info) => {
             response && { status_code: response.statusCode }
           ]
         )
-        const url = new URL(request?.path, request?.headers?.host)
-        log.url = Object.assign(
-          {},
-          ...[
-            request && { domain: url.hostname },
-            request && { full: url.href },
-            request && { path: url.pathname },
-            request && { port: url.port },
-            request && { query: url.search }
-          ]
-        )
+        try {
+          const url = new URL(request?.path, request?.headers?.host)
+          log.url = Object.assign(
+            {},
+            ...[
+              request && { domain: url.hostname },
+              request && { full: url.href },
+              request && { path: url.pathname },
+              request && { port: url.port },
+              request && { query: url.search }
+            ]
+          )
+        } catch (error) {
+          console.error('Error parsing URL', error)
+          log.error = {
+            message: `Error parsing URL for: ${request?.path}`
+          }
+        }
       }
       break
     case 'error':
