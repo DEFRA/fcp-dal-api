@@ -7,8 +7,6 @@ import { logger } from '../logger/logger.js'
 export async function context({ request }) {
   const auth = await getAuth(request)
 
-  console.log('request.id', request.id)
-
   const requestLogger = logger.child({ requestId: request.id })
 
   return {
