@@ -23,12 +23,16 @@ export const cdpSchemaTranslator = format((info) => {
       },
       request && {
         http: {
-          ...(request?.id && { id: request.id }),
-          ...(request?.method && { method: request.method }),
-          ...(request?.path && { url: request.path }),
-          ...(request?.remoteAddress && { url: request.remoteAddress }),
-          ...(request?.headers && { headers: request.headers }),
-          ...(response?.statusCode && { status_code: response.statusCode })
+          request: {
+            ...(request?.id && { id: request.id }),
+            ...(request?.method && { method: request.method }),
+            ...(request?.path && { url: request.path }),
+            ...(request?.remoteAddress && { url: request.remoteAddress }),
+            ...(request?.headers && { headers: request.headers })
+          },
+          response: {
+            ...(response?.statusCode && { status_code: response.statusCode })
+          }
         }
       },
       {

@@ -46,13 +46,13 @@ const fixture = {
   },
   responseTimeMs: 100,
   otherItems: 'will be omitted', // because they will be pruned by CDP's log processing
-  requestId: '00000000-0000-0000-0000-000000000000'
+  requestId: 'request-id'
 }
 
 describe('winstonFormatters', () => {
   describe('cdpSchemaTranslator', () => {
     beforeEach(() => {
-      process.env.API_TENANT_ID = '00000000-0000-0000-0000-000000000000'
+      process.env.API_TENANT_ID = 'tenant-id'
     })
 
     afterEach(() => {
@@ -65,11 +65,11 @@ describe('winstonFormatters', () => {
       expect(result).toEqual({
         message: '#datasource - Rural payments - request',
         level: 'info',
-        'transaction.id': '00000000-0000-0000-0000-000000000000',
-        'span.id': '00000000-0000-0000-0000-000000000000',
-        tenant: { id: '00000000-0000-0000-0000-000000000000' },
+        'transaction.id': 'request-id',
+        'span.id': 'request-id',
+        tenant: { id: 'tenant-id' },
         // NOTE: this example was built based on the CDP source schema config, found at:
-        // https://github.com/DEFRA/cdp-tf-modules/blob/b061f1bc62c8653d173046307ec18d1d888207c2/opensearch_ingestion/vars.tf#L157
+        // https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md#current-streamlined-ecs-schema-on-cdp
         error: {
           code: 'RURALPAYMENTS_API_REQUEST_001',
           type: 'Error',
@@ -83,17 +83,21 @@ describe('winstonFormatters', () => {
           type: 'POST'
         },
         http: {
-          id: 'power-apps-req-id',
-          method: 'POST',
-          url: 'http://localhost/path',
-          headers: {
-            'content-type': 'application/json',
-            Authorization: 'Bearer token',
-            email: 'probably.should@redacted.be',
-            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
-            'x-ms-client-request-id': 'power-apps-req-id'
+          request: {
+            id: 'power-apps-req-id',
+            method: 'POST',
+            url: 'http://localhost/path',
+            headers: {
+              'content-type': 'application/json',
+              Authorization: 'Bearer token',
+              email: 'probably.should@redacted.be',
+              'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
+              'x-ms-client-request-id': 'power-apps-req-id'
+            }
           },
-          status_code: 200
+          response: {
+            status_code: 200
+          }
         }
       })
     })
