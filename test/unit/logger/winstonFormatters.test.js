@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { beforeEach, describe, expect, it } from '@jest/globals'
 import { cdpSchemaTranslator, sampleResponseBodyData } from '../../../app/logger/winstonFormatters'
 
 const params = new URLSearchParams([
@@ -45,41 +45,47 @@ const fixture = {
     statusCode: 200
   },
   responseTimeMs: 100,
-  otherItems: 'will be omitted' // because they will be pruned by CDP's log processing
+  otherItems: 'will be omitted', // because they will be pruned by CDP's log processing
+  requestId: '00000000-0000-0000-0000-000000000000'
 }
 
 describe('winstonFormatters', () => {
   describe('cdpSchemaTranslator', () => {
+    beforeEach(() => {
+      process.env.API_TENANT_ID = '00000000-0000-0000-0000-000000000000'
+    })
+
+    afterEach(() => {
+      delete process.env.API_TENANT_ID
+    })
+
     it('should return a new object conforming to the CDP schema', () => {
       const error = new Error('test error')
       const result = cdpSchemaTranslator().transform({ error, ...fixture })
       expect(result).toEqual({
+        message: '#datasource - Rural payments - request',
+        level: 'info',
+        'transaction.id': '00000000-0000-0000-0000-000000000000',
+        'span.id': '00000000-0000-0000-0000-000000000000',
+        tenant: { id: '00000000-0000-0000-0000-000000000000' },
         // NOTE: this example was built based on the CDP source schema config, found at:
         // https://github.com/DEFRA/cdp-tf-modules/blob/b061f1bc62c8653d173046307ec18d1d888207c2/opensearch_ingestion/vars.tf#L157
         error: {
+          code: 'RURALPAYMENTS_API_REQUEST_001',
           type: 'Error',
           message: 'test error',
           stack_trace: error.stack
         },
-        event: { code: 'RURALPAYMENTS_API_REQUEST_001' },
-        message: '#datasource - Rural payments - request',
-        http: {
-          request: {
-            id: 'upstream-request',
-            method: 'GET',
-            other: 'stuff'
-          },
-          response: {
-            mime_type: 'application/json',
-            status_code: 200,
-            other: 'stuff'
-          }
+        event: {
+          category: 'RURALPAYMENTS_API_REQUEST_001',
+          outcome: 200,
+          reference: 'http://localhost/path',
+          type: 'POST'
         },
-        level: 'info',
-        req: {
+        http: {
           id: 'power-apps-req-id',
           method: 'POST',
-          body: '{"searchFieldType":"SBI","primarySearchPhrase":"890000001","offset":0,"limit":1}',
+          url: 'http://localhost/path',
           headers: {
             'content-type': 'application/json',
             Authorization: 'Bearer token',
@@ -87,18 +93,8 @@ describe('winstonFormatters', () => {
             'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
             'x-ms-client-request-id': 'power-apps-req-id'
           },
-          retryCount: 1,
-          params,
-          path: 'http://localhost/path',
-          url: 'http://localhost/path'
-        },
-        res: {
-          headers,
-          body: { data: 'some data' },
-          statusCode: 200
-        },
-        responseTime: 100,
-        'trace.id': '00000000-0000-0000-0000-000000000000'
+          status_code: 200
+        }
       })
     })
   })
