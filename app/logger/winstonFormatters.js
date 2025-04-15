@@ -2,7 +2,7 @@ import { format } from 'winston'
 import { sampleResponse } from './utils.js'
 
 export const cdpSchemaTranslator = format((info) => {
-  const { error, code, level, request, response, requestTimeMs, requestId } = info
+  const { error, code, level, request, response, requestTimeMs, transactionId, traceId } = info
   const tenantId = process.env.API_TENANT_ID
 
   return Object.assign(
@@ -11,7 +11,8 @@ export const cdpSchemaTranslator = format((info) => {
       message: info.message
     },
     ...[
-      requestId && { 'transaction.id': requestId, 'span.id': requestId },
+      transactionId && { 'transaction.id': transactionId },
+      traceId && { 'span.id': traceId, 'trace.id': traceId },
       tenantId && { tenant: { id: tenantId } },
       error && {
         error: {

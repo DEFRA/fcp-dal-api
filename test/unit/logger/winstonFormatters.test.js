@@ -46,7 +46,8 @@ const fixture = {
   },
   responseTimeMs: 100,
   otherItems: 'will be omitted', // because they will be pruned by CDP's log processing
-  requestId: 'request-id'
+  transactionId: 'transaction-id',
+  traceId: 'trace-id'
 }
 
 describe('winstonFormatters', () => {
@@ -65,8 +66,9 @@ describe('winstonFormatters', () => {
       expect(result).toEqual({
         message: '#datasource - Rural payments - request',
         level: 'info',
-        'transaction.id': 'request-id',
-        'span.id': 'request-id',
+        'transaction.id': 'transaction-id',
+        'trace.id': 'trace-id',
+        'span.id': 'trace-id',
         tenant: { id: 'tenant-id' },
         // NOTE: this example was built based on the CDP source schema config, found at:
         // https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md#current-streamlined-ecs-schema-on-cdp
