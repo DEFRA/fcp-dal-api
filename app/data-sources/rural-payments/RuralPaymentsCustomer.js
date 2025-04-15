@@ -25,7 +25,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     const response = customerResponse._data.pop() || {}
 
     if (!response?.id) {
-      this.logger.warn('#datasource - Rural payments - Customer not found for CRN', {
+      this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
         crn,
         code: RURALPAYMENTS_API_NOT_FOUND_001,
         response: { body: customerResponse }

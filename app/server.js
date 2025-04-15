@@ -18,14 +18,15 @@ server.route(routes)
 server.ext({
   type: 'onRequest',
   method: function (request, h) {
-    request.id =
+    request.transactionId =
       request.headers['x-ms-client-request-id'] ||
       request.headers['x-ms-client-tracking-id'] ||
       uuidv4()
+    request.traceId = request.headers['x-cdp-request-id'] || uuidv4()
 
     logger.debug('FCP - Access log', {
       request: {
-        id: request.id,
+        id: request.traceId,
         method: request.method.toUpperCase(),
         path: request.path,
         params: request.params,
@@ -35,7 +36,8 @@ server.ext({
         remoteAddress: request.info.remoteAddress
       },
       code: DAL_APPLICATION_REQUEST_001,
-      requestId: request.id
+      transactionId: request.transactionId,
+      traceId: request.traceId
     })
 
     return h.continue
@@ -50,9 +52,11 @@ server.events.on('response', function (request) {
   })
   logger.http('FCP - Access log', {
     code: DAL_APPLICATION_REQUEST_001,
+    transactionId: request.transactionId,
+    traceId: request.traceId,
     requestTimeMs,
     request: {
-      id: request.id,
+      id: request.traceId,
       method: request.method.toUpperCase(),
       path: request.path,
       params: request.params,
@@ -72,6 +76,8 @@ server.events.on('response', function (request) {
       body: request.response.source
     },
     requestTimeMs,
+    transactionId: request.transactionId,
+    traceId: request.traceId,
     code: DAL_APPLICATION_RESPONSE_001
   })
 })

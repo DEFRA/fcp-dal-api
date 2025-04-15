@@ -3,7 +3,7 @@ import { jest } from '@jest/globals'
 global.jest = jest
 
 const { context } = await import('../app/graphql/context.js')
-const request = { headers: { email: 'test@defra.gov.uk' } }
+const request = { headers: { email: 'test@defra.gov.uk' }, id: '123' }
 const contextObject = await context({ request })
 
 export const fakeContext = {
