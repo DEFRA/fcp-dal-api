@@ -32,7 +32,8 @@ export const cdpSchemaTranslator = format((info) => {
             ...(request?.headers && { headers: request.headers })
           },
           response: {
-            ...(response?.statusCode && { status_code: response.statusCode })
+            ...(response?.statusCode && { status_code: response.statusCode }),
+            ...(requestTimeMs && { response_time: requestTimeMs })
           }
         }
       },
