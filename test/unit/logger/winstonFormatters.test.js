@@ -44,7 +44,7 @@ const fixture = {
     body: { data: 'some data' },
     statusCode: 200
   },
-  responseTimeMs: 100,
+  requestTimeMs: 100,
   otherItems: 'will be omitted', // because they will be pruned by CDP's log processing
   transactionId: 'transaction-id',
   traceId: 'trace-id'
@@ -82,7 +82,8 @@ describe('winstonFormatters', () => {
           category: 'RURALPAYMENTS_API_REQUEST_001',
           outcome: 200,
           reference: 'http://localhost/path',
-          type: 'POST'
+          type: 'POST',
+          duration: 100000000
         },
         http: {
           request: {
@@ -98,7 +99,8 @@ describe('winstonFormatters', () => {
             }
           },
           response: {
-            status_code: 200
+            status_code: 200,
+            response_time: 100
           }
         }
       })
