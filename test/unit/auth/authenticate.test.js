@@ -1,8 +1,8 @@
-import { jest } from '@jest/globals'
+import { beforeAll, jest } from '@jest/globals'
+import { generateKeyPairSync } from 'crypto'
 import { buildSchema, findBreakingChanges } from 'graphql'
 import jwt from 'jsonwebtoken'
-import { createJWKSMock } from 'mock-jwks'
-
+import nock from 'nock'
 import {
   authDirectiveTransformer,
   checkAuthGroup,
@@ -61,30 +61,46 @@ const decodedToken = jwt.decode(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
 
 describe('getJwtPublicKey', () => {
-  let jwksMock
-  let stopMock
-  beforeEach(() => {
-    const jwkURL = new URL(process.env.OIDC_JWKS_URI)
-    jwksMock = createJWKSMock(`${jwkURL.protocol}//${jwkURL.host}`, jwkURL.pathname)
-    stopMock = jwksMock.start()
+  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+    modulusLength: 2048
   })
 
-  afterEach(() => {
-    stopMock()
+  beforeAll(() => {
+    nock.disableNetConnect()
+
+    nock(process.env.OIDC_JWKS_URI)
+      .get('/')
+      .reply(200, {
+        keys: [
+          {
+            kty: 'RSA',
+            kid: 'mock-key-id-123',
+            alg: 'RS256',
+            use: 'sig',
+            n: publicKey.export({ format: 'jwk' }).n,
+            e: publicKey.export({ format: 'jwk' }).e
+          }
+        ]
+      })
   })
 
-  test('should return the public key', async () => {
-    const token = jwksMock.token({
-      aud: 'private',
-      iss: 'master'
+  afterAll(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
+  it('should return the public key', async () => {
+    const mockTokenPayload = {
+      iat: Math.floor(Date.now() / 1000)
+    }
+
+    const mockToken = jwt.sign(mockTokenPayload, privateKey, {
+      algorithm: 'RS256'
     })
 
-    const key = await getJwtPublicKey(jwksMock.kid())
-
-    const verified = jwt.verify(token, key)
-
-    expect(verified.aud).toEqual('private')
-    expect(verified.iss).toEqual('master')
+    expect(jwt.verify(mockToken, await getJwtPublicKey('mock-key-id-123'))).toEqual(
+      mockTokenPayload
+    )
   })
 })
 

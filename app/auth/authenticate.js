@@ -8,15 +8,12 @@ import { Unauthorized } from '../errors/graphql.js'
 import { AuthRole } from '../graphql/resolvers/authenticate.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
-export async function getJwtPublicKey(kid) {
-  const clientOptions = {
-    jwksUri: process.env.OIDC_JWKS_URI
-  }
-  if (process.env.NODE_ENV !== 'test') {
-    clientOptions.requestAgent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
-  }
 
-  const client = jwksClient(clientOptions)
+export async function getJwtPublicKey(kid) {
+  const client = jwksClient({
+    jwksUri: process.env.OIDC_JWKS_URI,
+    requestAgent: new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
+  })
 
   const key = await client.getSigningKey(kid)
   return key.getPublicKey()
