@@ -1,11 +1,20 @@
 import hapi from '@hapi/hapi'
 
 import { Unit } from 'aws-embedded-metrics'
+import { createHash } from 'crypto'
 import { v4 as uuidv4 } from 'uuid'
-import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
+import {
+  DAL_APPLICATION_REQUEST_001,
+  DAL_APPLICATION_RESPONSE_001,
+  DAL_USER_REQUEST_001
+} from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { healthRoute } from './routes/health.js'
 import { healthyRoute } from './routes/healthy.js'
+
+function hashEmail(email) {
+  return createHash('sha256').update(email.toLowerCase().trim()).digest('hex')
+}
 
 export const server = hapi.server({
   port: process.env.PORT
@@ -23,6 +32,13 @@ server.ext({
       request.headers['x-ms-client-tracking-id'] ||
       uuidv4()
     request.traceId = request.headers['x-cdp-request-id'] || uuidv4()
+
+    if (request.headers['email']) {
+      logger.metric('UserRequest', 1, Unit.Count, {
+        code: DAL_USER_REQUEST_001,
+        userId: hashEmail(request.headers['email'])
+      })
+    }
 
     logger.debug('FCP - Access log', {
       request: {
