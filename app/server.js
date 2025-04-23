@@ -12,7 +12,7 @@ import { logger } from './logger/logger.js'
 import { healthRoute } from './routes/health.js'
 import { healthyRoute } from './routes/healthy.js'
 
-function hashEmail(email) {
+export const hashEmail = (email) => {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex')
 }
 
