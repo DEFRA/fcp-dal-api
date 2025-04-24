@@ -48,7 +48,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return response._data
   }
 
-  async getPersonBusinessesByPersonId(personId, sbi) {
+  async getPersonBusinessesByPersonId(personId) {
     const personBusinessSummaries = await this.get(
       // Currently requires and empty search parameter or it returns 500 error
       // page-size param set to ensure all orgs are retrieved

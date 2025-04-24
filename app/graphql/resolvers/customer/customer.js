@@ -22,10 +22,7 @@ export const Customer = {
   async business({ crn }, { sbi }, { dataSources }) {
     const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
-    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
-      personId,
-      sbi
-    )
+    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       { personId, crn, sbi },
