@@ -5,8 +5,6 @@ import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getCustomerByCRN(crn) {
-    this.logger.silly('Getting customer by CRN', { crn })
-
     const body = JSON.stringify({
       searchFieldType: 'CUSTOMER_REFERENCE',
       primarySearchPhrase: crn,
@@ -20,7 +18,6 @@ export class RuralPaymentsCustomer extends RuralPayments {
         'Content-Type': 'application/json'
       }
     })
-    this.logger.silly('Customer by CRN response', { response: { body: customerResponse } })
 
     const response = customerResponse._data.pop() || {}
 
@@ -37,8 +34,6 @@ export class RuralPaymentsCustomer extends RuralPayments {
   }
 
   async getPersonByPersonId(personId) {
-    this.logger.silly('Getting person by person ID', { personId })
-
     const response = await this.get(`person/${personId}/summary`)
 
     if (!response?._data?.id) {
@@ -50,31 +45,20 @@ export class RuralPaymentsCustomer extends RuralPayments {
       throw new NotFound('Rural payments customer not found')
     }
 
-    this.logger.silly('Person by person ID response', { response: { body: response } })
     return response._data
   }
 
-  async getPersonBusinessesByPersonId(personId, sbi) {
-    this.logger.silly('Getting person businesses by person ID', { personId, sbi })
-
+  async getPersonBusinessesByPersonId(personId) {
     const personBusinessSummaries = await this.get(
       // Currently requires and empty search parameter or it returns 500 error
       // page-size param set to ensure all orgs are retrieved
       `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE || 100}`
     )
 
-    this.logger.silly('Person businesses by person ID response', {
-      response: { body: personBusinessSummaries }
-    })
     return personBusinessSummaries._data
   }
 
   async getNotificationsByOrganisationIdAndPersonId(organisationId, personId, dateFrom) {
-    this.logger.silly('Getting notifications by organisation ID and person ID', {
-      organisationId,
-      personId
-    })
-
     const makeRecursiveRequest = async (page = 1, accumulatedNotifications = []) => {
       // Fetch notifications for the given page
       const response = await this.get('notifications', {
@@ -107,21 +91,12 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
     const notifications = await makeRecursiveRequest()
 
-    this.logger.silly('Notifications by organisation ID and person ID response', {
-      notifications
-    })
-
     return notifications
   }
 
   async getAuthenticateAnswersByCRN(crn) {
-    this.logger.silly('Getting authenticate answers by crn', { crn })
     const response = await this.get(`external-auth/security-answers/${crn}`)
     if (response.status === StatusCodes.NO_CONTENT) {
-      this.logger.silly('#datasource - Rural payments - authenticate answers not found for CRN', {
-        crn,
-        code: RURALPAYMENTS_API_NOT_FOUND_001
-      })
       return null
     }
     return response

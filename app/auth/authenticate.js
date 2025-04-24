@@ -25,7 +25,7 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
     if (!authHeader) {
       return {}
     }
-    logger.verbose('#DAL - Request authentication - Check verification', {
+    logger.debug('#DAL - Request authentication - Check verification', {
       code: DAL_REQUEST_AUTHENTICATION_001,
       request: {
         remoteAddress: request?.info?.remoteAddress
@@ -38,11 +38,12 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
     const signingKey = await getJwtPublicKeyFunc(header.kid)
     const requestTimeMs = Date.now() - requestStart
     const verified = jwt.verify(token, signingKey)
-
     logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: DAL_REQUEST_AUTHENTICATION_001
     })
-    logger.http('#DAL Request authentication - JWT verified', {
+
+    logger.info('#DAL Request authentication - JWT verified', {
+      type: 'http',
       code: DAL_REQUEST_AUTHENTICATION_001,
       requestTimeMs,
       request: {

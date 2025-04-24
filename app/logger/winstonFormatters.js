@@ -2,7 +2,8 @@ import { format } from 'winston'
 import { sampleResponse } from './utils.js'
 
 export const cdpSchemaTranslator = format((info) => {
-  const { error, code, level, request, response, requestTimeMs, transactionId, traceId } = info
+  const { error, code, type, level, request, response, requestTimeMs, transactionId, traceId } =
+    info
   const tenantId = process.env.API_TENANT_ID
 
   return Object.assign(
@@ -39,6 +40,7 @@ export const cdpSchemaTranslator = format((info) => {
       },
       {
         event: {
+          ...(type && { kind: type }),
           ...(code && { category: code }),
           ...(request?.method && { type: request?.method }), // Specific action taken or observed (e.g., user_login).
           ...(info['@timestamp'] && { created: info['@timestamp'] }), // Time the event was created in the system.

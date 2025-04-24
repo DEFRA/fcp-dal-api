@@ -81,7 +81,7 @@ export class RuralPayments extends RESTDataSource {
       email: this.request.headers.email
     }
 
-    this.logger.verbose('#datasource - Rural payments - request', {
+    this.logger.debug('#datasource - Rural payments - request', {
       request: { ...request, path: path.toString() },
       code: RURALPAYMENTS_API_REQUEST_001
     })
@@ -102,7 +102,9 @@ export class RuralPayments extends RESTDataSource {
     this.logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: RURALPAYMENTS_API_REQUEST_001
     })
-    this.logger.http('#datasource - Rural payments - response', {
+
+    this.logger.info('#datasource - Rural payments - response', {
+      type: 'http',
       code: RURALPAYMENTS_API_REQUEST_001,
       requestTimeMs,
       request: {

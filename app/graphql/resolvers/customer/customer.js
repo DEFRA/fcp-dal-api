@@ -1,4 +1,3 @@
-import { logger } from '../../../logger/logger.js'
 import { transformAuthenticateQuestionsAnswers } from '../../../transformers/authenticate/question-answers.js'
 import {
   ruralPaymentsPortalCustomerTransformer,
@@ -12,7 +11,6 @@ import {
 export const Customer = {
   async personId({ crn }, __, { dataSources }) {
     const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    logger.silly('Get customer id from crn', { crn, personId })
     return personId
   },
 
@@ -22,16 +20,10 @@ export const Customer = {
   },
 
   async business({ crn }, { sbi }, { dataSources }) {
-    logger.silly('Get customer business', { crn, sbi })
-
     const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
 
-    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(
-      personId,
-      sbi
-    )
+    const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
-    logger.silly('Got customer business', { crn, personId, response: { body: summary } })
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       { personId, crn, sbi },
       summary
@@ -43,20 +35,17 @@ export const Customer = {
 
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
-    logger.silly('Got customer businesses', { crn, personId, response: { body: summary } })
     return transformPersonSummaryToCustomerAuthorisedBusinesses({ personId, crn }, summary)
   },
 
   async authenticationQuestions({ crn }, __, { dataSources }) {
     const results = await dataSources.ruralPaymentsCustomer.getAuthenticateAnswersByCRN(crn)
-    logger.silly('Got authenticate answers', { crn, response: { body: results } })
     return transformAuthenticateQuestionsAnswers(results)
   }
 }
 
 export const CustomerBusiness = {
   async role({ organisationId, crn }, __, { dataSources }) {
-    logger.silly('Get customer business role', { crn, organisationId })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
