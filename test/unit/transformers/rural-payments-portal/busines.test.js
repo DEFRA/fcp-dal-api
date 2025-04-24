@@ -1,5 +1,5 @@
 import { transformOrganisationToBusiness } from '../../../../app/transformers/rural-payments/business.js'
-import { organisationByOrgId } from '../../../../mocks/fixtures/organisation.js'
+import { organisationByOrgId } from '../../../fixtures/organisation.js'
 
 describe('Business transformer', () => {
   test('transformOrganisationToBusiness', () => {

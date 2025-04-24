@@ -4,7 +4,7 @@ import {
   transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../../app/transformers/rural-payments/customer.js'
-import { organisationPeopleByOrgId } from '../../../../mocks/fixtures/organisation.js'
+import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
 
 const organisationId = '5565448'
 const personSummary = organisationPeopleByOrgId(organisationId)

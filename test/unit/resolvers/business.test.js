@@ -7,11 +7,11 @@ import {
   transformOrganisationCustomer,
   transformOrganisationCustomers
 } from '../../../app/transformers/rural-payments/business.js'
-import { organisationCPH } from '../../../mocks/fixtures/organisation-cph.js'
+import { organisationCPH } from '../../fixtures/organisation-cph.js'
 import {
   organisationApplicationsByOrgId,
   organisationPeopleByOrgId
-} from '../../../mocks/fixtures/organisation.js'
+} from '../../fixtures/organisation.js'
 
 const permissionGroups = createRequire(import.meta.url)(
   '../../../app/data-sources/static/permission-groups.json'
