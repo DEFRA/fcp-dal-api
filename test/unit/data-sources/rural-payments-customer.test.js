@@ -1,12 +1,34 @@
 import { jest } from '@jest/globals'
 import { RuralPaymentsCustomer } from '../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
-
-jest.mock('../../../app/logger/logger.js')
-const { logger } = await import('../../../app/logger/logger.js')
+import { NotFound } from '../../../app/errors/graphql.js'
 
 describe('Rural Payments Customer', () => {
+  const logger = {
+    error: jest.fn(),
+    warn: jest.fn(),
+    silly: jest.fn()
+  }
   const ruralPaymentsCustomer = new RuralPaymentsCustomer({ logger })
   const httpGet = jest.spyOn(ruralPaymentsCustomer, 'get')
+  const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
+
+  test('should handle customer not found', async () => {
+    jest.useFakeTimers().setSystemTime(Date.parse('2024-09-30'))
+    httpPost.mockImplementationOnce(async () => ({ _data: [] }))
+
+    await expect(ruralPaymentsCustomer.getCustomerByCRN('11111111')).rejects.toEqual(
+      new NotFound('Rural payments customer not found')
+    )
+    expect(httpPost).toHaveBeenCalledTimes(1)
+    expect(logger.warn).toHaveBeenCalledWith(
+      '#datasource - Rural payments - Customer not found for CRN: 11111111',
+      {
+        code: 'RURALPAYMENTS_API_NOT_FOUND_001',
+        crn: '11111111',
+        response: { body: { _data: [] } }
+      }
+    )
+  })
 
   test('should handle no notifications', async () => {
     jest.useFakeTimers().setSystemTime(Date.parse('2024-09-30'))
