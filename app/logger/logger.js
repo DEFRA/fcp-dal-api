@@ -1,14 +1,3 @@
-/*
- * Levels:
- * error: // Used for errors that prevent the application from operating correctly
- * warn: // Used for errors that do not prevent the application from operating correctly, but may cause issues
- * metric: // Used for metrics
- * info: // Application access logs
- * http: // Third party response logs without body
- * verbose: // Third party access logs
- * debug: // Third party response logs with body
- * silly: // Detailed function logs
- */
 import ecsFormat from '@elastic/ecs-winston-format'
 import { createLogger, format, transports } from 'winston'
 import { AWSMetricTransport } from './metricTransport.js'
@@ -32,10 +21,8 @@ const logLevels = {
   warn: 1,
   metric: 2,
   info: 3,
-  http: 4,
-  verbose: 5,
-  debug: 6,
-  silly: 7
+  debug: 4,
+  trace: 5
 }
 
 export const logger = createLogger({

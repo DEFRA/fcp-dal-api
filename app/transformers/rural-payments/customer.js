@@ -1,14 +1,8 @@
-import { logger } from '../../logger/logger.js'
-import { sampleResponse } from '../../logger/utils.js'
 import { validateDate } from '../../utils/date.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
 
-  logger.silly('Transforming business customer to customer role', {
-    original: { crn, customers },
-    transformed: customer.role
-  })
   return customer.role
 }
 
@@ -54,11 +48,6 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses(properties,
       ...properties
     }))
 
-  logger.silly('Transforming person summary to customer authorised businesses', {
-    properties,
-    original: sampleResponse(summary),
-    transformed: sampleResponse(transformed)
-  })
   return transformed
 }
 
@@ -123,14 +112,6 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness(prope
   if (!filteredBusinessForCustomer) {
     return null
   }
-  logger.silly('Transforming person summary to customer authorised filtered business', {
-    original: { properties, summary },
-    transformed: {
-      organisationId: filteredBusinessForCustomer.id,
-      name: filteredBusinessForCustomer.name,
-      ...properties
-    }
-  })
 
   return {
     organisationId: filteredBusinessForCustomer.id,

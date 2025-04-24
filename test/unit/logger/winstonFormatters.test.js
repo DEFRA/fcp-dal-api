@@ -10,6 +10,7 @@ const headers = { h1: 'v1', h2: 'v2' }
 const fixture = {
   code: 'RURALPAYMENTS_API_REQUEST_001',
   message: '#datasource - Rural payments - request',
+  type: 'http',
   http: {
     request: {
       id: 'upstream-request',
@@ -83,7 +84,8 @@ describe('winstonFormatters', () => {
           outcome: 200,
           reference: 'http://localhost/path',
           type: 'POST',
-          duration: 100000000
+          duration: 100000000,
+          kind: 'http'
         },
         http: {
           request: {

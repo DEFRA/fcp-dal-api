@@ -41,21 +41,14 @@ export const Business = {
   },
 
   async customers({ organisationId }, _, { dataSources }) {
-    logger.silly('Get business customers', { organisationId })
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
       )
-    logger.silly('Got business customers', {
-      organisationId,
-      response: { body: customers }
-    })
     return transformOrganisationCustomers(customers)
   },
 
   async customer({ organisationId, sbi }, { crn }, { dataSources }) {
-    logger.silly('Get business customer', { crn, organisationId, sbi })
-
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
@@ -73,12 +66,6 @@ export const Business = {
       throw new NotFound('Customer not found')
     }
 
-    logger.silly('Got business customer', {
-      crn,
-      sbi,
-      organisationId,
-      customer
-    })
     return transformOrganisationCustomer(customer)
   }
 }

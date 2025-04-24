@@ -50,7 +50,9 @@ server.events.on('response', function (request) {
   logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
     code: DAL_APPLICATION_REQUEST_001
   })
-  logger.http('FCP - Access log', {
+
+  logger.info('FCP - Access log', {
+    type: 'http',
     code: DAL_APPLICATION_REQUEST_001,
     transactionId: request.transactionId,
     traceId: request.traceId,
@@ -69,7 +71,7 @@ server.events.on('response', function (request) {
       statusCode: request.response.statusCode
     }
   })
-  logger.verbose('FCP - Response log', {
+  logger.debug('FCP - Response log', {
     response: {
       statusCode: request.response.statusCode,
       headers: request.response.headers,
