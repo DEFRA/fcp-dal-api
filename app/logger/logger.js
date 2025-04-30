@@ -3,12 +3,17 @@ import { createLogger, format, transports } from 'winston'
 import { AWSMetricTransport } from './metricTransport.js'
 import { cdpSchemaTranslator, sampleResponseBodyData } from './winstonFormatters.js'
 
+const excludedECSLevels = ['metric']
+
+const excludeLevelsFilter = (levels) =>
+  format((info) => (levels.includes(info.level) ? false : info))()
+
 const transportTypes = []
 transportTypes.push(
   new transports.Console({
     format:
       process.env.NODE_ENV === 'production'
-        ? format.combine(cdpSchemaTranslator(), ecsFormat())
+        ? format.combine(excludeLevelsFilter(excludedECSLevels), cdpSchemaTranslator(), ecsFormat())
         : sampleResponseBodyData()
   }),
   new AWSMetricTransport({
