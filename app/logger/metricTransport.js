@@ -1,6 +1,8 @@
-import { createMetricsLogger, Unit } from 'aws-embedded-metrics'
+import { createMetricsLogger, StorageResolution, Unit } from 'aws-embedded-metrics'
 import { LEVEL, MESSAGE, SPLAT } from 'triple-beam'
 import Transport from 'winston-transport'
+import { DAL_METRIC_ERROR_001 } from './codes.js'
+import { logger } from './logger.js'
 
 export class AWSMetricTransport extends Transport {
   constructor(options) {
@@ -29,8 +31,14 @@ export class AWSMetricTransport extends Transport {
     const metricValue = logArguments[0]
     let metricUnit = Unit.Count
     let dimensions = {}
+    let storageResolution = StorageResolution.Standard
 
     switch (logArguments.length) {
+      case 4:
+        metricUnit = logArguments[1]
+        dimensions = logArguments[2]
+        storageResolution = logArguments[3]
+        break
       case 3:
         metricUnit = logArguments[1]
         dimensions = logArguments[2]
@@ -70,21 +78,22 @@ export class AWSMetricTransport extends Transport {
       dimensions: {
         ...dimensions,
         ...additionalDimensions
-      }
+      },
+      storageResolution
     }
   }
 
   sendMetric(metric) {
-    const { metricName, metricValue, metricUnit, dimensions } = metric
+    const { metricName, metricValue, metricUnit, dimensions, storageResolution } = metric
 
-    this.metrics.putMetric(metricName, metricValue, metricUnit)
+    this.metrics.putMetric(metricName, metricValue, metricUnit, storageResolution)
 
     if (Object.keys(dimensions).length > 0) {
       this.metrics.setDimensions(dimensions)
     }
   }
 
-  log(info, callback) {
+  async log(info, callback) {
     if (info.level !== 'metric') {
       return callback()
     }
@@ -93,8 +102,13 @@ export class AWSMetricTransport extends Transport {
       this.emit('logged', info)
     })
 
-    const metric = this.parseMetric(info)
-    this.sendMetric(metric)
+    try {
+      const metric = this.parseMetric(info)
+      this.sendMetric(metric)
+      await this.metrics.flush()
+    } catch (error) {
+      logger.error('#DAL - failed to send err', { error, code: DAL_METRIC_ERROR_001 })
+    }
 
     callback()
   }
