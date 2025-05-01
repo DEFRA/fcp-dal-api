@@ -5,6 +5,7 @@ import tls from 'node:tls'
 import { ProxyAgent } from 'undici'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
+import { sendMetric } from '../../logger/sendMetric.js'
 
 const customFetch = async (url, options) => {
   const clientCert = Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64')
@@ -99,7 +100,7 @@ export class RuralPayments extends RESTDataSource {
       body: result.response?.body
     }
 
-    this.logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+    sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: RURALPAYMENTS_API_REQUEST_001
     })
 

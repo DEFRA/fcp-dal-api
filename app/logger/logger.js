@@ -1,6 +1,5 @@
 import ecsFormat from '@elastic/ecs-winston-format'
 import { createLogger, format, transports } from 'winston'
-import { AWSMetricTransport } from './metricTransport.js'
 import { cdpSchemaTranslator, sampleResponseBodyData } from './winstonFormatters.js'
 
 const transportTypes = []
@@ -10,19 +9,15 @@ transportTypes.push(
       process.env.NODE_ENV === 'production'
         ? format.combine(cdpSchemaTranslator(), ecsFormat())
         : sampleResponseBodyData()
-  }),
-  new AWSMetricTransport({
-    level: 'metric'
   })
 )
 
 const logLevels = {
   error: 0,
   warn: 1,
-  metric: 2,
-  info: 3,
-  debug: 4,
-  trace: 5
+  info: 2,
+  debug: 3,
+  trace: 4
 }
 
 export const logger = createLogger({

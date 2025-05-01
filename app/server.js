@@ -4,6 +4,7 @@ import { Unit } from 'aws-embedded-metrics'
 import { v4 as uuidv4 } from 'uuid'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
+import { sendMetric } from './logger/sendMetric.js'
 import { healthRoute } from './routes/health.js'
 import { healthyRoute } from './routes/healthy.js'
 
@@ -47,7 +48,7 @@ server.ext({
 server.events.on('response', function (request) {
   const requestTimeMs = request.info.responded - request.info.received
 
-  logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+  sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
     code: DAL_APPLICATION_REQUEST_001
   })
 
