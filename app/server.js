@@ -4,6 +4,7 @@ import { Unit } from 'aws-embedded-metrics'
 import { v4 as uuidv4 } from 'uuid'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
+import { sendMetric } from './logger/sendMetric.js'
 import { healthRoute } from './routes/health.js'
 import { healthyRoute } from './routes/healthy.js'
 
@@ -47,30 +48,34 @@ server.ext({
 server.events.on('response', function (request) {
   const requestTimeMs = request.info.responded - request.info.received
 
-  logger.metric('RequestTime', requestTimeMs, Unit.Milliseconds, {
-    code: DAL_APPLICATION_REQUEST_001
-  })
+  if (request.path !== healthRoute.path) {
+    // Only send metrics and logs for non-health check paths
+    sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+      code: DAL_APPLICATION_REQUEST_001
+    })
 
-  logger.info('FCP - Access log', {
-    type: 'http',
-    code: DAL_APPLICATION_REQUEST_001,
-    transactionId: request.transactionId,
-    traceId: request.traceId,
-    requestTimeMs,
-    request: {
-      id: request.traceId,
-      method: request.method.toUpperCase(),
-      path: request.path,
-      params: request.params,
-      payload: request.payload,
-      body: request.body,
-      headers: request.headers,
-      remoteAddress: request.info.remoteAddress
-    },
-    response: {
-      statusCode: request.response.statusCode
-    }
-  })
+    logger.info('FCP - Access log', {
+      type: 'http',
+      code: DAL_APPLICATION_REQUEST_001,
+      transactionId: request.transactionId,
+      traceId: request.traceId,
+      requestTimeMs,
+      request: {
+        id: request.traceId,
+        method: request.method.toUpperCase(),
+        path: request.path,
+        params: request.params,
+        payload: request.payload,
+        body: request.body,
+        headers: request.headers,
+        remoteAddress: request.info.remoteAddress
+      },
+      response: {
+        statusCode: request.response.statusCode
+      }
+    })
+  }
+
   logger.debug('FCP - Response log', {
     response: {
       statusCode: request.response.statusCode,
