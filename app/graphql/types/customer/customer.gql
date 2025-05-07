@@ -1,42 +1,40 @@
 """
-Represents the basic information of a customer.
-
-Data Source: Rural Payments Portal (PRR)
+Basic information of a customer.
 """
 type CustomerInfo {
   """
-  The name of the customer.
+  Name of the customer.
   """
   name: CustomerName
 
   """
-  The date of birth of the customer.
+  Date of birth of the customer.
   """
   dateOfBirth: String
 
   """
-  The phone details of the customer.
+  Telephone number of the customer.
   """
   phone: Phone
 
   """
-  The email details of the customer.
+  Email address of the customer.
   """
   email: Email
 
   """
-  The status details of the customer.
+  Status of the customer record/account.
   """
   status: CustomerStatus
 
   """
-  The address details of the customer.
+  Address of the customer.
   """
   address: Address
 }
 
 """
-Represents the full name of a customer.
+Full name of a customer.
 """
 type CustomerName {
   """
@@ -50,57 +48,64 @@ type CustomerName {
   otherTitle: String
 
   """
-  The first name of the customer.
+  First name of the customer.
   """
   first: String
 
   """
-  The middle name of the customer.
+  Middle names of the customer.
   """
   middle: String
 
   """
-  The last name of the customer.
+  Last name of the customer.
   """
   last: String
 }
 
 """
-Represents the status of a customer.
+Status of a customer record/account.
 """
 type CustomerStatus {
   """
-  Whether the customer account is locked.
+  Indicates whether the customer account is locked.
   """
   locked: Boolean
 
   """
-  Whether the customer account is confirmed.
+  Indicates whether the customer account has been confirmed.
   """
   confirmed: Boolean
 
   """
-  Whether the customer account is deactivated.
+  Indicates whether the customer account has been deactivated.
   """
   deactivated: Boolean
 }
 
 """
-Represents the security questions of a customer.
+Authenticate questions of the customer.
+
+Data source: Rural Payments Portal
+
+These are the memorable words (date, place, event) used to verify the
+customer when they call the RPA. Originally, these were held in the
+'Authenticate' system, but the data and functionality transferred to
+the portal.
 """
 type CustomerAuthenticationQuestions {
   """
-  The memorable date question.
+  Memorable date response for the customer.
   """
   memorableDate: String @on
 
   """
-  The memorable event question.
+  Memorable event response for the customer.
   """
   memorableEvent: String @on
 
   """
-  The memorable place question.
+  Memorable place response for the customer.
   """
   memorableLocation: String @on
 
@@ -110,76 +115,83 @@ type CustomerAuthenticationQuestions {
   updatedAt: Date @on
 
   """
-  The indicator for customer record been found in authenticate database
+  Indicates whether the authenticate questions record was found for the customer.
   """
   isFound: Boolean @on
 }
 
 """
-Represents a customer.
+Customer details.
+
+Data source: Rural Payments Portal
 """
 type Customer {
   """
-  The unique identifier of the customer.
+  Internal SitiAgri/Portal unique identifier of the customer.
   """
   personId: ID! @on #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
-  The CRN (Customer Reference Number) of the customer.
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer. The customer should know their CRN, although their
+  Single Business Identifier (SBI) for their business is more commonly quoted.
   """
   crn: ID! @on
 
   """
-  The basic information of the customer.
+  Basic information of the customer.
   """
   info: CustomerInfo
 
   """
-  The security questions of the customer.
+  Security questions (memorable words) of the customer.
   """
   authenticationQuestions: CustomerAuthenticationQuestions @on
 
   """
-  The businesses associated with the customer.
+  Businesses associated with the customer.
   """
   businesses: [CustomerBusiness] @on
 
   """
-  The single business filtered by sbi associated with the customer.
+  A single business filtered by the businesses using Single Business Identifier (SBI) associated with the customer.
   """
   business(sbi: ID!): CustomerBusiness @on
 }
 
 """
-Represents a business owned by a customer
+A business associated with the customer.
 """
 type CustomerBusiness {
   """
-  The unique identifier of the business.
+  Internal SitiAgri/Portal unique identifier of the customer.
   """
   organisationId: ID @on
 
   """
-  The SBI (Single Business Identifier) of the business.
+  Single Business Identifier (SBI) of the business. A unique 9-digit identifier
+  for the business.
   """
   sbi: ID! @on
 
   """
-  The name of the business.
+  Name of the business.
   """
   name: String! @on
 
   """
-  The role associated with the business.
+  Role that the customer has for the business.
   """
   role: String @on
 
   """
-  The messages associated with the business.
+  Messages for the customer for the business.  These message are those shown in the
+  Rural Payements Portal, and not any correspondence the customer may have had with
+  the Rural Payments Agency (RPA).
   """
   messages: [CustomerBusinessMessage] @on @excludeFromList
 
   """
-  The permission groups associated with the business.
+  Permission groups for the customer for the business.
   """
   permissionGroups: [ActivePermissionGroup] @on @excludeFromList
 }
