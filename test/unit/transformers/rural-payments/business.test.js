@@ -3,8 +3,8 @@ import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformOrganisationCustomers
 } from '../../../../app/transformers/rural-payments/business.js'
-import { organisationPeopleByOrgId } from '../../../../mocks/fixtures/organisation.js'
-import { buildPermissionsFromIdsAndLevels } from '../../../../test/test-helpers/permissions.js'
+import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
+import { buildPermissionsFromIdsAndLevels } from '../../../test-helpers/permissions.js'
 
 describe('Business transformer', () => {
   test('#transformOrganisationCustomers', () => {

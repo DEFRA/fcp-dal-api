@@ -1,20 +1,4 @@
 services:
-  kits-mock:
-    image: fcp-dal-kits-mock
-    build:
-      context: .
-      target: development
-    entrypoint: ['npm', 'run', 'start:mock']
-    ports:
-      - '3100:3100'
-    environment:
-      MOCK_LOG_LEVEL: http
-      MOCK_SERVER_COLLECTION: all
-      NODE_ENV: development
-      PORT: 3100
-    networks:
-      - cdp-tenant
-
   fcp-dal-api:
     image: fcp-dal-api
     build:
@@ -27,7 +11,7 @@ services:
       LOG_LEVEL: http
       NODE_ENV: development
       PORT: 3000
-      RURAL_PAYMENTS_PORTAL_API_URL: http://kits-mock:3100/rpp/
+      RURAL_PAYMENTS_PORTAL_API_URL: http://fcp-dal-upstream-mock:3100/rpp/
       SOC_APPPLICATION_IDENTIFIER: DAL001
     networks:
       - cdp-tenant

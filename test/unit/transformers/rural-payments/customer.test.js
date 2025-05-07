@@ -7,11 +7,11 @@ import {
 import {
   organisationPeopleByOrgId,
   organisationPersonSummary
-} from '../../../../mocks/fixtures/organisation.js'
+} from '../../../fixtures/organisation.js'
 import {
   buildPermissionsFromIdsAndLevels,
   getPermissionFunctionsFromIdAndLevel
-} from '../../../../test/test-helpers/permissions.js'
+} from '../../../test-helpers/permissions.js'
 
 describe('Customer transformer', () => {
   test('#transformBusinessCustomerToCustomerRole', () => {

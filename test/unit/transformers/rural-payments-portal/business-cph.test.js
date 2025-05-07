@@ -2,10 +2,7 @@ import {
   transformCPHInfo,
   transformOrganisationCPH
 } from '../../../../app/transformers/rural-payments/business-cph.js'
-import {
-  organisationCPH,
-  organisationCPHInfo
-} from '../../../../mocks/fixtures/organisation-cph.js'
+import { organisationCPH, organisationCPHInfo } from '../../../fixtures/organisation-cph.js'
 
 const organisationCPHInfoFixture = organisationCPHInfo('5565448').data
 const organisationCPHFixture = organisationCPH('5565448').data
