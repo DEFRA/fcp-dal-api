@@ -1,6 +1,7 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
+import { ProxyAgent } from 'undici'
 import {
   RuralPayments,
   customFetch
@@ -65,6 +66,24 @@ describe('RuralPayments', () => {
       const rp = new RuralPayments({ logger })
       const rpCustomFetch = rp.httpCache.httpFetch
       expect(rpCustomFetch).toBe(customFetch)
+    })
+
+    it('should call fetch with an AbortSignal with timeout', async () => {
+      const mockFetch = jest.fn().mockResolvedValue({ ok: true })
+
+      global.fetch = mockFetch
+
+      await customFetch('https://some-api.com', { method: 'GET' })
+
+      expect(mockFetch).toHaveBeenCalled()
+
+      const options = mockFetch.mock.calls[0][1]
+
+      expect(options).toHaveProperty('signal')
+      expect(options.signal).toBeInstanceOf(AbortSignal)
+
+      expect(options).toHaveProperty('dispatcher')
+      expect(options.dispatcher).toBeInstanceOf(ProxyAgent)
     })
   })
 
