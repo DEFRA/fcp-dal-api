@@ -1,99 +1,104 @@
 """
-Represents the basic information of a business.
+Common details for a business.
 """
 type BusinessInfo {
   """
-  The name of the business.
+  Name of the business.
   """
   name: String
 
   """
-  The reference of the business.
+  Firm Refererence Number (FRN) of the business.
+
+  A unique 10-digit number that is known to the customer, for example, 1234567890.
+  However a customer is more likely to be familiar with their Single Business Identified
+  (SBI). FRN is commonly used in RPA's payment systems. The format is the same as the
+  Customer Reference Number (CRN), which is also a 10-digit number.
   """
   reference: String
 
   """
-  The VAT number of the business.
+  VAT number of the business.
   """
   vat: String
 
   """
-  The trader number of the business.
+  Trader number of the business.
   """
   traderNumber: String
 
   """
-  The vendor number of the business.
+  Vendor number of the business.
   """
   vendorNumber: String
 
   """
-  The address of the business.
+  Address of the business.
   """
   address: Address
 
   """
-  The phone details of the business.
+  Telephone number of the business.
   """
   phone: Phone
 
   """
-  The email details of the business.
+  Email address of the business.
   """
   email: Email
 
   """
-  The legal status of the business.
+  Legal status of the business. For example, Sole Proprietorship.
   """
   legalStatus: BusinessType
 
   """
-  The type of the business.
+  Type of the business.
   """
   type: BusinessType
 
   """
-  The registration numbers of the business.
+  Various registration numbers for the business. For example, Companies House number.
   """
   registrationNumbers: BusinessRegistrationNumbers
 }
 
 """
-Represents the registration numbers of a business.
+Various registration numbers of the business.
 """
 type BusinessRegistrationNumbers {
   """
-  The Companies House number of the business.
+  Companies House number of the business.
   """
   companiesHouse: String
 
   """
-  The Charity Commission number of the business.
+  Charity Commission number of the business.
   """
   charityCommission: String
 }
 
 """
-Represents the type of a business.
+Type of the business represented by a code/description pair. For example, used for business type and legal status.
 """ # eslint-disable-next-line @graphql-eslint/naming-convention
 type BusinessType {
   """
-  The code of the business type.
+  Code of the business type.
   """
   code: Int
 
   """
-  The type of the business.
+  Description of the business type.
   """
   type: String
 }
 
 """
-Represents the customer of a business.
+Customers/contacts of the business.
 """
 type BusinessCustomer {
   """
-  The unique identifier of the customer.
+  Interal SitiAgri/Portal unique identifier of the customer.
   """
   personId: ID @on
 
@@ -108,63 +113,66 @@ type BusinessCustomer {
   lastName: String @on
 
   """
-  The customer reference of the customer.
+  Unique Customer Reference Number (CRN) of the customer. 10-digit number that should
+  be known to to the customer, for example, 1234567890. This is the same format as the
+  Firm Reference Number (FRN).
   """
   crn: String @on
 
   """
-  The role the customer against the business.
+  Role the customer has for the business. For example, 'Owner', 'Agent', 'Employee'.
   """
   role: String @on
 
   """
-  The permissions the customer against the business.
+  Permissions the customer has for the business.
   """
   permissionGroups: [ActivePermissionGroup] @on @excludeFromList
 }
 
 """
-Represents a business.
-
-Data Source: Rural Payments Portal (PRR)
+Details for the business - 'business' and 'organisation' can be used interchangeably.
 """
 type Business {
   """
-  The first unique identifier of the business.
+  Internal SitiAgri/Portal unique identifier for the business.
   """
   organisationId: ID @on #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
-  The Single Business Identifier (SBI) of the business.
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
   sbi: ID! @on
 
   """
-  The basic information of the business.
+  Information of the business.
   """
   info: BusinessInfo
 
   """
-  The land details of the business.
+  Land for the business.
   """
   land: BusinessLand @on
 
   """
-  The CPH (County Parish Holding) numbers of the business.
+  County Parish Holding (CPH) numbers of the business.
   """
   cphs: [CPH]
 
   """
-  The CPH (County Parish Holding) numbers of the business.
+  County Parish Holding (CPH) number of the business.
   """
   cph(number: String!): CPH
 
   """
-  The customers associated with the business.
+  Customers associated with the business.
   """
   customers: [BusinessCustomer] @on
 
   """
-  The customer associated with the business.
+  Customer associated with the business.
   """
   customer(crn: ID!): BusinessCustomer @on
 }
