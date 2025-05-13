@@ -19,34 +19,34 @@ enum PermissionGroupId {
 
 type ActivePermissionGroup {
   """
-  The permission group id.
+  Permission group for the customer. For example, 'BUSINESS_DETAILS', 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS'.
   """
   id: PermissionGroupId! @on
 
   """
-  The permission level customer has for the business.
+  Permission level customer has for the business. For example, 'VIEW', 'AMEND.
   """
   level: PermissionLevel @on
 
   """
-  The functions that can be performed with given permission level.
+  Functions that can be performed with given permission level.
   """
   functions: [String] @on
 }
 
 type PermissionGroup {
   """
-  The permission group id.
+  Permission group id.
   """
   id: PermissionGroupId!
 
   """
-  The permission group name.
+  Permission group name.
   """
   name: String!
 
   """
-  The permissions within the group.
+  Permissions within the group.
   """
   permissions: [Permission]
 }
