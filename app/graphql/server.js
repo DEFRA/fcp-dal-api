@@ -5,15 +5,15 @@ import { createSchema } from './schema.js'
 
 export const schema = await createSchema()
 
+export const enableApolloLandingPage = () => {
+  if (process.env.GRAPHQL_DASHBOARD_ENABLED === 'true') {
+    return ApolloServerPluginLandingPageLocalDefault()
+  }
+
+  return ApolloServerPluginLandingPageDisabled()
+}
+
 export const apolloServer = new ApolloServer({
   schema,
-  plugins: [
-    (() => {
-      if (process.env?.NODE_ENV === 'production') {
-        return ApolloServerPluginLandingPageDisabled()
-      }
-
-      return ApolloServerPluginLandingPageLocalDefault()
-    })()
-  ]
+  plugins: [enableApolloLandingPage()]
 })
