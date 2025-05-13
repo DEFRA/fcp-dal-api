@@ -1,56 +1,66 @@
 """
-Represents a coordinate with x and y values.
+X and Y co-ordinates for a CPH.
 """
 type CPHCoordinate {
   """
-  The x value of the coordinate.
+  X value of the coordinate.
   """
   x: Int
 
   """
-  The y value of the coordinate.
+  Y value of the coordinate.
   """
   y: Int
 }
 
 """
-Represents a County Parish Holding (CPH) number.
+County Parish Holding (CPH) number. It's a unique 9-digit identified for land
+or buildings used to keep livestock and is used for tracking and managing
+livestock movements to help prevent and control disease.
 
-Data Source: Rural Payments Portal (PRR)
+Data Source: SitiAgri
+
+Note that Animal Plant and Health Agency (APHA) also have a source of CPH data.
+While RPA issues the CPH number to the customer, APHA is interested in CPH
+for disease control, therefore they may have more up-to-date and granular
+information on species, for example.
 """
 type CPH {
   """
-  The CPH number, example: "10/327/0023"
+  CPH number. Consists of the county, the parish and the holding numbers, for example '10/327/0023'
   """
   number: String
 
   """
-  The parcel numbers associated with the CPH number.
+  Parcel numbers associated with the CPH.  This isn't always up-to-date.
   """
   parcelNumbers: [String]
 
   """
-  The parish associated with the CPH number.
+  Parish associated with the CPH.
   """
   parish: String @excludeFromList
 
   """
-  The start date of the CPH number.
+  Start date of the CPH.
   """
   startDate: Date @excludeFromList
 
   """
-  The expiry date of the CPH number.
+  Expiry (end) date of the CPH.
   """
   expiryDate: Date @excludeFromList
 
   """
-  The species associated with the CPH number.
+  A list of species associated with the CPH. For example, 'Cattle', Pigs'.
+
+  Animal Plant and Health Agency (APHA) also have CPH data. APHA tend to hold more
+  up-to-date information regarding species.
   """
   species: [String] @excludeFromList
 
   """
-  The coordinate of the CPH number.
+  Coordinates of the CPH.
   """
   coordinate: CPHCoordinate @excludeFromList
 }

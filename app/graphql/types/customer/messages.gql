@@ -1,36 +1,38 @@
 """
-Represents a message related to a customer's business.
+Business message sent via the rural payments portal to a customer.
 
 Data Source: Rural Payments Portal (PRR)
 """
 type CustomerBusinessMessage {
   """
-  The unique identifier of the message.
+  Unique identifier of the message.
   """
   id: ID! @on
 
   """
-  The subject of the message.
+  Subject of the message.
   """
   subject: String @on
 
   """
-  The date of the message.
+  Date the message was sent.
   """
   date: Date @on
 
   """
-  The body content of the message.
+  Body content of the message.
   """
   body: String @on
 
   """
-  Whether the message has been read.
+  Indicates whether the customer has read the business message.
   """
   read: Boolean @on
 
   """
-  Whether the message has been deleted.
+  Indicates whether the customer has marked the business message as deleted.
+  Messages in the portal are not deleted, they are moved to a deleted section
+  (more akin to archiving a message).
   """
   deleted: Boolean @on
 }
