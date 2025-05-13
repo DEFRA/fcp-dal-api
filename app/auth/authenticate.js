@@ -12,6 +12,7 @@ import { logger } from '../logger/logger.js'
 export async function getJwtPublicKey(kid) {
   const client = jwksClient({
     jwksUri: process.env.OIDC_JWKS_URI,
+    timeout: parseInt(process.env.OIDC_JWKS_TIMEOUT_MS),
     requestAgent: new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
   })
 

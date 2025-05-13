@@ -1,7 +1,10 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
+import {
+  RuralPayments,
+  customFetch
+} from '../../../app/data-sources/rural-payments/RuralPayments.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
 const logger = {
@@ -56,6 +59,12 @@ describe('RuralPayments', () => {
         await expect(rp.fetch('path', dummyRequest)).rejects.toThrow(new Error('ECONNREFUSED'))
         expect(mockFetch).toBeCalledTimes(1)
       })
+    })
+
+    test('customFetch set', async () => {
+      const rp = new RuralPayments({ logger })
+      const rpCustomFetch = rp.httpCache.httpFetch
+      expect(rpCustomFetch).toBe(customFetch)
     })
   })
 
