@@ -12,6 +12,10 @@ export const server = hapi.server({
   port: process.env.PORT
 })
 
+server.ext('onPreStart', () => {
+  server.listener.setTimeout(process.env.DAL_REQUEST_TIMEOUT_MS)
+})
+
 const routes = [].concat(healthyRoute, healthRoute)
 
 server.route(routes)
