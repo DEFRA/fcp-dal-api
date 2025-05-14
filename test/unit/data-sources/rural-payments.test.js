@@ -1,11 +1,7 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import { ProxyAgent } from 'undici'
-import {
-  RuralPayments,
-  customFetch
-} from '../../../app/data-sources/rural-payments/RuralPayments.js'
+import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
 const logger = {
@@ -60,30 +56,6 @@ describe('RuralPayments', () => {
         await expect(rp.fetch('path', dummyRequest)).rejects.toThrow(new Error('ECONNREFUSED'))
         expect(mockFetch).toBeCalledTimes(1)
       })
-    })
-
-    test('customFetch set', async () => {
-      const rp = new RuralPayments({ logger })
-      const rpCustomFetch = rp.httpCache.httpFetch
-      expect(rpCustomFetch).toBe(customFetch)
-    })
-
-    it('should call fetch with an AbortSignal with timeout', async () => {
-      const mockFetch = jest.fn().mockResolvedValue({ ok: true })
-
-      global.fetch = mockFetch
-
-      await customFetch('https://some-api.com', { method: 'GET' })
-
-      expect(mockFetch).toHaveBeenCalled()
-
-      const options = mockFetch.mock.calls[0][1]
-
-      expect(options).toHaveProperty('signal')
-      expect(options.signal).toBeInstanceOf(AbortSignal)
-
-      expect(options).toHaveProperty('dispatcher')
-      expect(options.dispatcher).toBeInstanceOf(ProxyAgent)
     })
   })
 
