@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import qs from 'qs'
 
-export const retrieveApimAccessToken = async () => {
+export const retrieveAccessToken = async () => {
   const body = qs.stringify({
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,

@@ -7,7 +7,7 @@ import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
-const customFetch = async (url, options) => {
+export const customFetch = async (url, options) => {
   const clientCert = Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64')
     .toString('utf-8')
     .trim()
@@ -32,7 +32,8 @@ const customFetch = async (url, options) => {
 
   return fetch(url, {
     ...options,
-    dispatcher: proxyAgent
+    dispatcher: proxyAgent,
+    signal: AbortSignal.timeout(parseInt(process.env.RP_KITS_GATEWAY_TIMEOUT_MS))
   })
 }
 export class RuralPayments extends RESTDataSource {

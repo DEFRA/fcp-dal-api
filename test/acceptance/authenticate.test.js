@@ -1,10 +1,10 @@
 import fetch from 'node-fetch'
-import { retrieveApimAccessToken } from '../test-helpers/apim.js'
+import { retrieveAccessToken } from '../test-helpers/apim.js'
 
 describe('authenticate contract', () => {
   let token
   beforeAll(async () => {
-    token = await retrieveApimAccessToken()
+    token = await retrieveAccessToken()
   })
 
   it('should return business customers', async () => {
