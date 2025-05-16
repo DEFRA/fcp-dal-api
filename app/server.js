@@ -13,7 +13,7 @@ export const server = hapi.server({
 })
 
 server.ext('onPreStart', () => {
-  server.listener.setTimeout(process.env.DAL_REQUEST_TIMEOUT_MS)
+  server.listener.setTimeout(parseInt(process.env.DAL_REQUEST_TIMEOUT_MS))
 })
 
 const routes = [].concat(healthyRoute, healthRoute)
