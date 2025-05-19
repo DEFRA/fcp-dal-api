@@ -19,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Test code and Create Test Coverage Reports
+      - name: Setup npm and audit
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -27,26 +27,11 @@ jobs:
       - run: |
           npm audit --omit=dev
           npm ci
-          npm test -- --coverage --coverageReporters="text" --coverageReporters="lcov" > ./coverage.txt 2>&1 || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
-      - name: Prepare coverage comment
-        run: |
-          echo '## 🧪 Jest Coverage Report' > coverage.txt
-          echo '```' >> coverage.txt
-          cat coverage.txt >> coverage.txt
-          echo '```' >> coverage.txt
-
-      - name: Comment coverage on PR
-        uses: marocchino/sticky-pull-request-comment@v2
+      - name: Jest Coverage Comment
+        uses: ArtiomTr/jest-coverage-report-action@v2
         with:
-          recreate: true
-          path: coverage.txt
-
-      - name: Fail job if tests failed
-        if: env.TESTS_FAILED == 'true'
-        run: |
-          echo "Tests or coverage threshold failed"
-          exit 1
+          test-script: npm test
 
       - name: Test Docker Image Build
         run: |
