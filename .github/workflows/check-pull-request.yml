@@ -19,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Linting and Audit
+      - name: Test code and Create Test Coverage Reports
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -28,6 +28,7 @@ jobs:
           npm audit --omit=dev
           npm ci
           npm run lint
+          npm test -- --coverage --coverageReporters json-summary || tests_failed=1
 
       - name: Test and Coverage
         uses: MishaKav/jest-coverage-comment@main
