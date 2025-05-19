@@ -33,7 +33,7 @@ jobs:
         run: |
           echo '## 🧪 Jest Coverage Report' > coverage.txt
           echo '```' >> coverage.txt
-          cat coverage/jest-output.txt >> coverage.txt
+          cat coverage.txt >> coverage.txt
           echo '```' >> coverage.txt
 
       - name: Comment coverage on PR
