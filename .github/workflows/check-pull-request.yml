@@ -30,9 +30,7 @@ jobs:
           npm run lint
 
       - name: Test and Coverage
-        uses: ArtiomTr/jest-coverage-report-action@v2
-        with:
-          test-script: npm test
+        uses: MishaKav/jest-coverage-comment@main
 
       - name: Test Docker Image Build
         run: |
