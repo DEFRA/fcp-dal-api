@@ -2,6 +2,7 @@ import { createMetricsLogger, StorageResolution, Unit } from 'aws-embedded-metri
 import { DAL_METRICS_ERROR_001 } from './codes.js'
 import { logger } from './logger.js'
 
+if(process.env.NODE_ENV==='production') {
 export async function sendMetric(
   metricName,
   value = 1,
@@ -18,5 +19,10 @@ export async function sendMetric(
     await metricsLogger.flush()
   } catch (error) {
     logger.error('#DAL - failed to send metric', { error, code: DAL_METRICS_ERROR_001 })
+  }
+}
+} else {
+  export async function sendMetric() {
+    return Promise.resolve()
   }
 }
