@@ -10,7 +10,7 @@ describe('GraphQL Dashboard test with mocks', () => {
   const mockSchemaModule = {
     createSchema: jest.fn()
   }
-  jest.unstable_mockModule('../../../../../app/graphql/schema.js', () => mockSchemaModule)
+  jest.unstable_mockModule('../../../app/graphql/schema.js', () => mockSchemaModule)
 
   const mockApolloPluginDisabled = jest.fn()
   const mockApolloPluginDisabledModule = {
@@ -34,7 +34,7 @@ describe('GraphQL Dashboard test with mocks', () => {
   it('expect ApolloServer to have been called with correct args to disable landing page', async () => {
     process.env.GRAPHQL_DASHBOARD_ENABLED = 'false'
     mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
-    const { apolloServer } = await import('../../../../../app/graphql/server.js')
+    const { apolloServer } = await import('../../../app/graphql/server.js')
 
     expect(apolloServer).toBeDefined()
     expect(mockSchemaModule.createSchema).toHaveBeenCalledTimes(1)
@@ -54,7 +54,7 @@ describe('GraphQL Dashboard test with mocks', () => {
   it('expect ApolloServer to have been called with correct args to enable landing page', async () => {
     process.env.GRAPHQL_DASHBOARD_ENABLED = 'true'
     mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
-    const { apolloServer } = await import('../../../../../app/graphql/server.js')
+    const { apolloServer } = await import('../../../app/graphql/server.js')
 
     expect(apolloServer).toBeDefined()
 
