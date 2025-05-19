@@ -28,10 +28,12 @@ jobs:
           npm audit --omit=dev
           npm ci
           npm run lint
-          npm test -- --coverage --coverageReporters json-summary || tests_failed=1
+          npm test -- --coverage | tee ./coverage.txt || tests_failed=1
 
       - name: Test and Coverage
         uses: MishaKav/jest-coverage-comment@main
+        with:
+          coverage-path: ./coverage.txt
 
       - name: Test Docker Image Build
         run: |
