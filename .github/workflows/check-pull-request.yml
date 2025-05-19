@@ -29,10 +29,18 @@ jobs:
           npm ci
           npm test -- --coverage --coverageReporters="text" --coverageReporters="lcov" > ./coverage.txt 2>&1 || echo "TESTS_FAILED=true" >> $GITHUB_ENV
 
-      - name: Report Coverage
-        uses: MishaKav/jest-coverage-comment@main
+      - name: Prepare coverage comment
+        run: |
+          echo '## 🧪 Jest Coverage Report' > coverage.txt
+          echo '```' >> coverage.txt
+          cat coverage/jest-output.txt >> coverage.txt
+          echo '```' >> coverage.txt
+
+      - name: Comment coverage on PR
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          coverage-path: ./coverage.txt
+          recreate: true
+          path: coverage.txt
 
       - name: Fail job if tests failed
         if: env.TESTS_FAILED == 'true'
