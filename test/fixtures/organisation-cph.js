@@ -1,4 +1,4 @@
-import files from '../utils/files.js'
+import files from './files.js'
 
 const { getJSON } = files(import.meta.url)
 

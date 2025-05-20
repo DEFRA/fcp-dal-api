@@ -13,7 +13,6 @@
     "start": "node -r dotenv/config app/index.js | jq .",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",
     "start:dev": "nodemon -r dotenv/config --ext js,gql --watch app/ app/index.js",
-    "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
     "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env jest --testPathPattern=test/acceptance --setupFiles dotenv/config",
     "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
@@ -47,7 +46,6 @@
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^3.20.1",
-    "@mocks-server/core": "^4.0.2",
     "dotenv": "^16.4.7",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
