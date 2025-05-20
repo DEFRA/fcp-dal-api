@@ -15,5 +15,6 @@ export const enableApolloLandingPage = () => {
 
 export const apolloServer = new ApolloServer({
   schema,
-  plugins: [enableApolloLandingPage()]
+  plugins: [enableApolloLandingPage()],
+  introspection: process.env.GRAPHQL_DASHBOARD_ENABLED === 'true'
 })
