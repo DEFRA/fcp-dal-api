@@ -4,11 +4,7 @@ export const throttle = (fn, time) => {
   return async (...args) => {
     if (!shouldThrottle) {
       shouldThrottle = true
-      try {
-        await fn(...args)
-      } catch (error) {
-        success = false
-      }
+      success = await fn(...args)
       setTimeout(() => {
         shouldThrottle = false
       }, time)
@@ -18,3 +14,5 @@ export const throttle = (fn, time) => {
     }
   }
 }
+
+export default { throttle }
