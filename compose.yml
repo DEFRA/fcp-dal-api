@@ -27,8 +27,7 @@ services:
       LOG_LEVEL: http
       NODE_ENV: development
       PORT: 3000
-      RURAL_PAYMENTS_PORTAL_API_URL: http://kits-mock:3100/rpp/
-      SOC_APPPLICATION_IDENTIFIER: DAL001
+      RP_KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3100/rpp/
     networks:
       - cdp-tenant
 
