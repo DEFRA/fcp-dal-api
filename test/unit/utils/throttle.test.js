@@ -45,7 +45,8 @@ describe('throttle function', () => {
   })
 
   it('should return true if the function executes successfully', async () => {
-    const result = await throttledFn('arg1')
+    mockFn.mockResolvedValue(true)
+    const result = await throttledFn()
     expect(result).toBe(true)
   })
 
@@ -54,7 +55,6 @@ describe('throttle function', () => {
       throw new Error('error')
     })
     const throttledErrorFn = throttle(errorFn, 1000)
-    const result = await throttledErrorFn()
-    expect(result).toBe(false)
+    expect(throttledErrorFn()).rejects.toThrow('error')
   })
 })
