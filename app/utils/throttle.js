@@ -14,5 +14,3 @@ export const throttle = (fn, time) => {
     }
   }
 }
-
-export default { throttle }
