@@ -44,7 +44,13 @@ export class RuralPayments extends RESTDataSource {
     super(config)
 
     this.request = request
-    this.httpCache.httpFetch = customFetch
+    if (
+      process.env.KITS_CONNECTION_CERT &&
+      process.env.KITS_CONNECTION_KEY &&
+      process.env.CDP_HTTPS_PROXY
+    ) {
+      this.httpCache.httpFetch = customFetch
+    }
   }
 
   didEncounterError(error, request, url) {

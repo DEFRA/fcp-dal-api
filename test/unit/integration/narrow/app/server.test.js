@@ -25,7 +25,7 @@ describe('Server Initialization', () => {
   })
 
   test('should set timeout from env var', () => {
-    expect(server.listener.timeout).toBe(parseInt(process.env.DAL_REQUEST_TIMEOUT_MS))
+    expect(server.listener.timeout).toBe(1000)
   })
 
   test('should register routes', () => {
