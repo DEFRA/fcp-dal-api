@@ -19,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Test code and Create Test Coverage Reports
+      - name: Setup npm and audit
         uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -27,8 +27,11 @@ jobs:
       - run: |
           npm audit --omit=dev
           npm ci
-          npm run lint
-          npm test
+
+      - name: Jest Coverage Comment
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          test-script: npm test
 
       - name: Test Docker Image Build
         run: |
