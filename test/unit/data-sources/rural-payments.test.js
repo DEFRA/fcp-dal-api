@@ -6,7 +6,9 @@ import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
 const logger = {
   error: jest.fn(),
-  warn: jest.fn()
+  warn: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn()
 }
 
 describe('RuralPayments', () => {
@@ -92,6 +94,132 @@ describe('RuralPayments', () => {
         response: {},
         code: RURALPAYMENTS_API_REQUEST_001
       })
+    })
+  })
+
+  describe('willSendRequest', () => {
+    test('adds email header from request headers', () => {
+      const rp = new RuralPayments({ logger }, { headers: { email: 'test@example.com' } })
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      rp.willSendRequest(path, request)
+
+      expect(request.headers).toEqual({ email: 'test@example.com' })
+      expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
+        request: { ...request, path: 'test-path' },
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+  })
+
+  describe('trace', () => {
+    test('logs request and response details', async () => {
+      const rp = new RuralPayments({ logger })
+      const url = 'test-url'
+      const request = { id: '123', method: 'GET', headers: {} }
+      const mockResult = {
+        response: {
+          status: 200,
+          headers: new Headers(),
+          body: { data: 'test' }
+        },
+        parsedBody: { data: 'test' }
+      }
+      const mockFn = jest.fn().mockResolvedValue(mockResult)
+
+      const result = await rp.trace(url, request, mockFn)
+
+      expect(result).toBe(mockResult)
+      expect(logger.info).toHaveBeenCalledWith(
+        '#datasource - Rural payments - response',
+        expect.objectContaining({
+          type: 'http',
+          code: RURALPAYMENTS_API_REQUEST_001,
+          request: {
+            id: '123',
+            method: 'GET',
+            headers: {},
+            path: 'test-url'
+          },
+          response: { statusCode: 200 }
+        })
+      )
+      expect(logger.debug).toHaveBeenCalledWith(
+        '#datasource - Rural payments - response detail',
+        expect.objectContaining({
+          request: { ...request, path: 'test-url' },
+          response: expect.objectContaining({
+            body: { data: 'test' }
+          }),
+          code: RURALPAYMENTS_API_REQUEST_001
+        })
+      )
+    })
+  })
+
+  describe('requestDeduplicationPolicyFor', () => {
+    test('returns correct deduplication policy', () => {
+      const rp = new RuralPayments({ logger })
+      const url = 'test-url'
+      const request = { id: '123', method: 'POST' }
+
+      const policy = rp.requestDeduplicationPolicyFor(url, request)
+
+      expect(policy).toEqual({
+        policy: 'deduplicate-during-request-lifetime',
+        deduplicationKey: expect.stringContaining('123 POST')
+      })
+    })
+  })
+
+  describe('parseBody', () => {
+    test('returns NO_CONTENT status for 204 responses', () => {
+      const rp = new RuralPayments({ logger })
+      const response = {
+        status: StatusCodes.NO_CONTENT,
+        headers: new Headers()
+      }
+
+      const result = rp.parseBody(response)
+
+      expect(result).toEqual({ status: StatusCodes.NO_CONTENT })
+    })
+
+    test('parses JSON response when content type is application/json', async () => {
+      const rp = new RuralPayments({ logger })
+      const mockJson = { data: 'test' }
+      const response = {
+        status: 200,
+        headers: new Headers({
+          'Content-Type': 'application/json',
+          'Content-Length': '20'
+        }),
+        json: jest.fn().mockResolvedValue(mockJson)
+      }
+
+      const result = await rp.parseBody(response)
+
+      expect(result).toBe(mockJson)
+      expect(response.json).toHaveBeenCalled()
+    })
+
+    test('parses text response for non-JSON content', async () => {
+      const rp = new RuralPayments({ logger })
+      const mockText = 'plain text response'
+      const response = {
+        status: 200,
+        headers: new Headers({
+          'Content-Type': 'text/plain',
+          'Content-Length': '20'
+        }),
+        text: jest.fn().mockResolvedValue(mockText)
+      }
+
+      const result = await rp.parseBody(response)
+
+      expect(result).toBe(mockText)
+      expect(response.text).toHaveBeenCalled()
     })
   })
 })
