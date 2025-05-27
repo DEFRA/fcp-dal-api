@@ -14,7 +14,7 @@ describe('Permissions transformer', () => {
     expect(result).toBeNull()
   })
 
-  test('returns level if  match', () => {
+  test('returns level if matched', () => {
     const result = transformOrganisationAuthorisationToCustomerBusinessPermissionLevel(
       orgCustomers[0].id,
       [
