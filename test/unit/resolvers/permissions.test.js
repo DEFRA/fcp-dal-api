@@ -1,9 +1,6 @@
 import { Permission, Query } from '../../../app/graphql/resolvers/permissions/query.js'
-import {
-  organisationBySbi,
-  organisationPeopleByOrgId
-} from '../../../mocks/fixtures/organisation.js'
-import { personById } from '../../../mocks/fixtures/person.js'
+import { organisationBySbi, organisationPeopleByOrgId } from '../../fixtures/organisation.js'
+import { personById } from '../../fixtures/person.js'
 
 const dataSources = {
   ruralPaymentsBusiness: {

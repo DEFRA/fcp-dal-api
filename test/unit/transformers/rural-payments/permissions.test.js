@@ -1,5 +1,5 @@
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../../app/transformers/rural-payments/permissions.js'
-import { organisationPeopleByOrgId } from '../../../../mocks/fixtures/organisation.js'
+import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
 
 const orgId = '5565448'
 const orgCustomers = organisationPeopleByOrgId(orgId)._data

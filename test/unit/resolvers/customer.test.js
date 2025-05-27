@@ -5,9 +5,9 @@ import { Customer, CustomerBusiness } from '../../../app/graphql/resolvers/custo
 import {
   organisationPeopleByOrgId,
   organisationPersonSummary
-} from '../../../mocks/fixtures/organisation.js'
-import { personById } from '../../../mocks/fixtures/person.js'
-import { buildPermissionsFromIdsAndLevels } from '../../../test/test-helpers/permissions.js'
+} from '../../fixtures/organisation.js'
+import { personById } from '../../fixtures/person.js'
+import { buildPermissionsFromIdsAndLevels } from '../../test-helpers/permissions.js'
 
 const orgId = '5565448'
 const personId = '5007136'

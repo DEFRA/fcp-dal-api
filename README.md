@@ -32,16 +32,6 @@ npm run dev
 
 This will spin up the API and automatically reload when changes are made to the API code.
 
-### KITS API mock
-
-There is a local mock for the KITS API (the source of all the DAL's data). It can be started by running:
-
-```bash
-npm run mock
-```
-
-Again, starting the mock this way will listen for (and reload with) relevant changes to its code and mock data (which can be found at `/mocks` and `/mocks/fixtures` respectively).
-
 ### Testing
 
 To test the application run:
@@ -172,12 +162,6 @@ make dev
 ```
 
 Access GraphQL landing page at: [http://localhost:4000/graphql](http://localhost:4000/graphql)
-
-#### Mock Server
-
-The mock server is ran when the development docker environment. The mock server service is provided by [Mock Server](https://www.mocks-server.org/).
-
-Mocks endpoints are defined within the ./mocks directory.
 
 #### Mock Authenticate Database
 
