@@ -67,7 +67,7 @@ describe('Healthy test', () => {
 
   it('GET /healthy route returns 200 with services status when health check is disabled in production', async () => {
     process.env.HEALTH_CHECK_ENABLED = 'false'
-    process.env.ENVIRONMENT = 'prd1'
+    process.env.ENVIRONMENT = 'prod'
 
     const options = {
       method: 'GET',
