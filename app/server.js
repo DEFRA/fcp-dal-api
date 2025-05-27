@@ -17,7 +17,6 @@ server.ext('onPreStart', () => {
 })
 
 const routes = [].concat(healthyRoute, healthRoute)
-
 server.route(routes)
 
 server.ext({
