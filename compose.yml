@@ -1,14 +1,10 @@
 services:
   kits-mock:
-    image: fcp-dal-kits-mock
-    build:
-      context: .
-      target: development
-    entrypoint: ['npm', 'run', 'start:mock']
+    image: defradigital/fcp-dal-upstream-mock
     ports:
       - '3100:3100'
     environment:
-      MOCK_LOG_LEVEL: http
+      MOCK_LOG_LEVEL: info
       MOCK_SERVER_COLLECTION: all
       NODE_ENV: development
       PORT: 3100
@@ -23,12 +19,13 @@ services:
       - '3000:3000'
     environment:
       ALL_SCHEMA_ON: true
-      EVENT_HUB_DISABLED: true
-      LOG_LEVEL: http
+      LOG_LEVEL: info
       NODE_ENV: development
       PORT: 3000
-      RURAL_PAYMENTS_PORTAL_API_URL: http://kits-mock:3100/rpp/
-      SOC_APPPLICATION_IDENTIFIER: DAL001
+      ENVIRONMENT: dev
+      DISABLE_AUTH: true
+      RP_KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3100/v1/
+      GRAPHQL_DASHBOARD_ENABLED: true
     networks:
       - cdp-tenant
 

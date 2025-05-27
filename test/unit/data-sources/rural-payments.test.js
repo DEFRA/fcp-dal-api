@@ -23,6 +23,19 @@ describe('RuralPayments', () => {
       mockFetch.mockRestore()
     })
 
+    test('should not use custom fetch unless all env vars are set', async () => {
+      const { RuralPayments, customFetch } = await import(
+        '../../../app/data-sources/rural-payments/RuralPayments.js'
+      )
+      delete process.env.KITS_CONNECTION_CERT
+      delete process.env.KITS_CONNECTION_KEY
+      delete process.env.CDP_HTTPS_PROXY
+
+      const rp = new RuralPayments()
+      expect(rp.httpCache.httpFetch).not.toBe(customFetch)
+      expect(rp.httpCache.httpFetch).toBe(new RESTDataSource().httpCache.httpFetch)
+    })
+
     test('returns data from RPP', async () => {
       const rp = new RuralPayments({ logger })
 

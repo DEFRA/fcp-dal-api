@@ -19,12 +19,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup npm and audit
+      - name: Setup npm
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: |
+
+      - name: Install and audit
+        run: |
           npm audit --omit=dev
           npm ci
 
@@ -34,10 +36,21 @@ jobs:
           test-script: npm test
 
       - name: Test Docker Image Build
+        run: docker build --no-cache --tag fcp-dal-api .
+
+      - name: Local dev check
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
         run: |
+          docker compose up --quiet-pull -d
           set +e
-          docker build --no-cache --tag fcp-dal-api .
-          exit $?
+          npm i graphql-request
+          curl -s --max-time 10 --retry 5 --retry-delay 1 --retry-all-errors http://localhost:3000/health
+          npx jest --coverage false test/acceptance/local-dev-check.test.js
+          RESULT=$?
+          docker compose down --remove-orphans
+          set -e
+          exit $RESULT
 
       - name: Sonarqube Cloud Scan
         if: github.actor != 'dependabot[bot]'
