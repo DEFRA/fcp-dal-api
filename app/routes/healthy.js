@@ -39,7 +39,7 @@ export const healthyRoute = {
             { code: DAL_HEALTH_CHECK_001 }
           )
         }
-      } else if (process.env.ENVIRONMENT === 'prd1') {
+      } else if (process.env.ENVIRONMENT === 'prod') {
         logger.error('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })
       } else {
         logger.warn('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })
