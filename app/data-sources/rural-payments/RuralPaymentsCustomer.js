@@ -72,16 +72,18 @@ export class RuralPaymentsCustomer extends RuralPayments {
         return accumulatedNotifications
       }
 
-      // Filter notifications based on creation date
-      const newNotifications = currentPageNotifications.filter(
-        (notification) => notification.createdAt > dateFrom.valueOf()
-      )
+      // Filter notifications based on creation date if dateFrom is provided
+      const newNotifications = dateFrom
+        ? currentPageNotifications.filter(
+            (notification) => notification.createdAt > dateFrom.valueOf()
+          )
+        : currentPageNotifications
 
       // Combine new notifications with existing ones
       const allNotificationsSoFar = [...accumulatedNotifications, ...newNotifications]
 
-      // If not all notifications from this page are included, stop recursion
-      if (newNotifications.length < currentPageNotifications.length) {
+      // If dateFrom is provided and not all notifications from this page are included, stop recursion
+      if (dateFrom && newNotifications.length < currentPageNotifications.length) {
         return allNotificationsSoFar
       }
 

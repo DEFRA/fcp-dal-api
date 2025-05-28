@@ -142,45 +142,6 @@ describe('Customer', () => {
 })
 
 describe('CustomerBusiness', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-
-    const mockMessages = [
-      {
-        id: 5875045,
-        personId: 5824285,
-        organisationId: 8008496,
-        messageId: 6062814,
-        readAt: null,
-        archivedAt: 8862388585856,
-        archive: null,
-        createdAt: 8247074489993,
-        title: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
-        body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
-        category: 'OrganisationLevel',
-        bespokeNotificationId: null
-      },
-      {
-        id: 2514276,
-        personId: 7337791,
-        organisationId: 7542172,
-        messageId: 9588060,
-        readAt: 21000,
-        archivedAt: null,
-        archive: null,
-        createdAt: 8818544780296,
-        title: 'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
-        body: '<p>Cruentus venia dedecor beatus vinco cultellus clarus.</p>',
-        category: 'OrganisationLevel',
-        bespokeNotificationId: null
-      }
-    ]
-
-    dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId.mockImplementation(
-      () => mockMessages
-    )
-  })
-
   test('CustomerBusiness.role', async () => {
     const response = await CustomerBusiness.role(
       { organisationId: '4309257', crn: '1638563942' },
@@ -214,36 +175,119 @@ describe('CustomerBusiness', () => {
   })
 
   describe('CustomerBusiness.messages', () => {
-    test('get messages', async () => {
-      jest.useFakeTimers().setSystemTime(Date.parse('2025-01-01'))
+    beforeEach(() => {
+      jest.clearAllMocks()
 
+      dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId.mockImplementation(
+        () => [
+          {
+            id: 'mockId1',
+            personId: 'mockPersonId1',
+            organisationId: 'mockOrganisationId1',
+            messageId: 'mockMessageId1',
+            readAt: null,
+            archivedAt: new Date(Date.parse('2024-01-01')),
+            archive: null,
+            createdAt: new Date(Date.parse('2024-01-01')),
+            title: 'Mock Title 1',
+            body: 'Mock Body 1',
+            category: 'Mock Category 1',
+            bespokeNotificationId: null
+          },
+          {
+            id: 'mockId2',
+            personId: 'mockPersonId2',
+            organisationId: 'mockOrganisationId2',
+            messageId: 'mockMessageId2',
+            readAt: null,
+            archivedAt: new Date(Date.parse('2025-01-01')),
+            archive: null,
+            createdAt: new Date(Date.parse('2025-01-01')),
+            title: 'Mock Title 2',
+            body: 'Mock Body 2',
+            category: 'Mock Category 2',
+            bespokeNotificationId: null
+          }
+        ]
+      )
+    })
+
+    test('get all messages', async () => {
       const response = await CustomerBusiness.messages(
-        { organisationId: '4309257', personId: 'mockpersonId' },
+        { organisationId: 'mockOrganisationId', personId: 'mockPersonId' },
         {},
         { dataSources }
       )
+
       expect(
         dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId
-      ).toHaveBeenCalledWith('4309257', 'mockpersonId', 1704067200000)
+      ).toHaveBeenCalledWith('mockOrganisationId', 'mockPersonId', undefined)
 
       expect(response).toEqual([
         {
-          id: 5875045,
-          subject: 'Vomica aiunt alveus pectus volo argumentum derelinquo ambulo audacia certe.',
-          date: '2231-05-05T06:01:29.993Z',
-          body: '<p>Adversus crastinus suggero caste adhuc vomer accusamus acies iure.</p>',
+          id: 'mockId1',
+          subject: 'Mock Title 1',
+          date: '2024-01-01T00:00:00.000Z',
+          body: 'Mock Body 1',
           read: false,
           deleted: true
         },
         {
-          id: 2514276,
-          subject: 'Cohibeo conspergo crux ulciscor cubo adamo aufero tepesco odit suppono.',
-          date: '2249-06-13T11:46:20.296Z',
-          body: '<p>Cruentus venia dedecor beatus vinco cultellus clarus.</p>',
-          read: true,
-          deleted: false
+          id: 'mockId2',
+          subject: 'Mock Title 2',
+          date: '2025-01-01T00:00:00.000Z',
+          body: 'Mock Body 2',
+          read: false,
+          deleted: true
         }
       ])
+    })
+
+    test('get messages fromDate', async () => {
+      const response = await CustomerBusiness.messages(
+        { organisationId: 'mockOrganisationId', personId: 'mockPersonId' },
+        { fromDate: '2024-12-31' },
+        { dataSources }
+      )
+
+      expect(
+        dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId
+      ).toHaveBeenCalledWith(
+        'mockOrganisationId',
+        'mockPersonId',
+        new Date(Date.parse('2024-12-31'))
+      )
+
+      expect(response).toEqual([
+        {
+          id: 'mockId1',
+          subject: 'Mock Title 1',
+          date: '2024-01-01T00:00:00.000Z',
+          body: 'Mock Body 1',
+          read: false,
+          deleted: true
+        },
+        {
+          id: 'mockId2',
+          subject: 'Mock Title 2',
+          date: '2025-01-01T00:00:00.000Z',
+          body: 'Mock Body 2',
+          read: false,
+          deleted: true
+        }
+      ])
+    })
+
+    test('get messages fromDate; should fail if date is in the future', async () => {
+      const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000 * 2).toISOString().slice(0, 10)
+
+      await expect(
+        CustomerBusiness.messages(
+          { organisationId: 'mockOrganisationId', personId: 'mockPersonId' },
+          { fromDate: futureDate },
+          { dataSources }
+        )
+      ).rejects.toThrow(`Invalid date: "${futureDate}" must be in the past.`)
     })
   })
 })
