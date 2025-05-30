@@ -5,12 +5,12 @@ type CustomerInfo {
   """
   Name of the customer.
   """
-  name: CustomerName
+  name: CustomerName @on
 
   """
   Date of birth of the customer.
   """
-  dateOfBirth: String
+  dateOfBirth: String @on
 
   """
   Telephone number of the customer.
@@ -40,27 +40,27 @@ type CustomerName {
   """
   The title of the customer (e.g., Mr., Mrs., Dr.).
   """
-  title: String
+  title: String @on
 
   """
   Any other title of the customer.
   """
-  otherTitle: String
+  otherTitle: String @on
 
   """
   First name of the customer.
   """
-  first: String
+  first: String @on
 
   """
   Middle names of the customer.
   """
-  middle: String
+  middle: String @on
 
   """
   Last name of the customer.
   """
-  last: String
+  last: String @on
 }
 
 """
@@ -140,7 +140,7 @@ type Customer {
   """
   Basic information of the customer.
   """
-  info: CustomerInfo
+  info: CustomerInfo @on
 
   """
   Security questions (memorable words) of the customer.
@@ -184,11 +184,14 @@ type CustomerBusiness {
   role: String @on
 
   """
-  Messages for the customer for the business.  These message are those shown in the
-  Rural Payements Portal, and not any correspondence the customer may have had with
+  Messages for the customer for the business. These message are those shown in the
+  Rural Payments Portal, and not any correspondence the customer may have had with
   the Rural Payments Agency (RPA).
+
+  Retrieves messages from fromDate to today if provided; otherwise, returns all messages.
+  - fromDate: Optional. Include messages on or after this date up to the current date.
   """
-  messages: [CustomerBusinessMessage] @on @excludeFromList
+  messages(fromDate: Date): [CustomerBusinessMessage] @on @excludeFromList
 
   """
   Permission groups for the customer for the business.

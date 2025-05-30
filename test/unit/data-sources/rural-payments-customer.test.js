@@ -13,12 +13,12 @@ describe('Rural Payments Customer', () => {
   const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
 
   test('should handle customer not found', async () => {
-    jest.useFakeTimers().setSystemTime(Date.parse('2024-09-30'))
     httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
     await expect(ruralPaymentsCustomer.getCustomerByCRN('11111111')).rejects.toEqual(
       new NotFound('Rural payments customer not found')
     )
+
     expect(httpPost).toHaveBeenCalledTimes(1)
     expect(logger.warn).toHaveBeenCalledWith(
       '#datasource - Rural payments - Customer not found for CRN: 11111111',
@@ -31,21 +31,19 @@ describe('Rural Payments Customer', () => {
   })
 
   test('should handle no notifications', async () => {
-    jest.useFakeTimers().setSystemTime(Date.parse('2024-09-30'))
     httpGet.mockImplementationOnce(async () => ({ notifications: [] }))
 
     const notifications = await ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
-      0,
-      0,
+      'mockOrganisationId',
+      'mockPersonId',
       new Date(Date.parse('2023-09-30'))
     )
+
     expect(notifications).toEqual([])
     expect(httpGet).toHaveBeenCalledTimes(1)
   })
 
   test('should fetch notifications from single page', async () => {
-    jest.useFakeTimers().setSystemTime(Date.parse('2024-09-30'))
-
     httpGet
       .mockImplementationOnce(async () => ({
         notifications: [
@@ -62,20 +60,19 @@ describe('Rural Payments Customer', () => {
       .mockImplementationOnce(async () => ({ notifications: [] }))
 
     const notifications = await ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
-      0,
-      0,
+      'mockOrganisationId',
+      'mockPersonId',
       new Date(Date.parse('2023-09-30'))
     )
+
     expect(notifications).toEqual([
-      { id: 2, createdAt: 1698796800000 },
-      { id: 1, createdAt: 1696118400000 }
+      { id: 2, createdAt: Date.parse('2023-11-01') },
+      { id: 1, createdAt: Date.parse('2023-10-01') }
     ])
     expect(httpGet).toHaveBeenCalledTimes(2)
   })
 
   test('should fetch notifications across pages', async () => {
-    jest.useFakeTimers().setSystemTime(Date.parse('2024-09-30'))
-
     httpGet
       .mockImplementationOnce(async () => ({
         notifications: [
@@ -96,20 +93,19 @@ describe('Rural Payments Customer', () => {
       .mockImplementationOnce(async () => ({ notifications: [] }))
 
     const notifications = await ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
-      0,
-      0,
+      'mockOrganisationId',
+      'mockPersonId',
       new Date(Date.parse('2023-09-30'))
     )
+
     expect(notifications).toEqual([
-      { id: 2, createdAt: 1698796800000 },
-      { id: 1, createdAt: 1696118400000 }
+      { id: 2, createdAt: Date.parse('2023-11-01') },
+      { id: 1, createdAt: Date.parse('2023-10-01') }
     ])
     expect(httpGet).toHaveBeenCalledTimes(3)
   })
 
   test('should stop fetching once last message found', async () => {
-    jest.useFakeTimers().setSystemTime(Date.parse('2024-10-02'))
-
     httpGet.mockImplementationOnce(async () => ({
       notifications: [
         {
@@ -124,13 +120,31 @@ describe('Rural Payments Customer', () => {
     }))
 
     const notifications = await ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
-      0,
-      0,
+      'mockOrganisationId',
+      'mockPersonId',
       new Date(Date.parse('2023-10-02'))
     )
 
     expect(notifications).toEqual([{ id: 2, createdAt: 1698796800000 }])
     expect(httpGet).toHaveBeenCalledTimes(1)
+  })
+
+  test('should filter notifications using dateFrom argument', async () => {
+    httpGet.mockImplementationOnce(async () => ({
+      notifications: [
+        { id: 3, createdAt: Date.parse('2023-12-01') },
+        { id: 2, createdAt: Date.parse('2023-11-01') },
+        { id: 1, createdAt: Date.parse('2023-10-01') }
+      ]
+    }))
+
+    const notifications = await ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId(
+      'mockOrganisationId',
+      'mockPersonId',
+      new Date(Date.parse('2023-11-01'))
+    )
+
+    expect(notifications).toEqual([{ id: 3, createdAt: Date.parse('2023-12-01') }])
   })
 
   test('should return security answers via getAuthenticateAnswersByCRN', async () => {
