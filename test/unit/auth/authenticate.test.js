@@ -9,6 +9,7 @@ import {
   getAuth,
   getJwtPublicKey
 } from '../../../app/auth/authenticate.js'
+import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
 const tokenPayload = {
@@ -68,7 +69,7 @@ describe('getJwtPublicKey', () => {
   beforeAll(() => {
     nock.disableNetConnect()
 
-    nock(process.env.OIDC_JWKS_URI)
+    nock(config.get('oidc.jwksURI'))
       .get('/')
       .reply(200, {
         keys: [
@@ -137,7 +138,7 @@ describe('getAuth', () => {
 })
 
 describe('checkAuthGroup', () => {
-  const adminGroupId = process.env.ADMIN_AD_GROUP_ID
+  const adminGroupId = config.get('auth.groups.admin')
 
   it('checkAuthGroup should not throw an error for admins with correct group', () => {
     expect(() => checkAuthGroup([adminGroupId], adminGroupId)).not.toThrow()
@@ -179,7 +180,7 @@ describe('authDirectiveTransformer', () => {
 
   `)
   it('authDirectiveTransformer should not impact output schema', async () => {
-    process.env.DISABLE_AUTH = true
+    config.set('disableAuth', true)
     const transformedSchema = authDirectiveTransformer(schema)
     expect(findBreakingChanges(schema, transformedSchema)).toHaveLength(0)
   })

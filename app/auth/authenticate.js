@@ -13,7 +13,7 @@ import { sendMetric } from '../logger/sendMetric.js'
 export async function getJwtPublicKey(kid) {
   const client = jwksClient({
     jwksUri: config.get('oidc.jwksURI'),
-    timeout: config.get('OIDC_JWKS_TIMEOUT_MS)'),
+    timeout: config.get('oidc.jwksTimeoutMs'),
     requestAgent: new HttpsProxyAgent(config.get('cdp.httpsProxy'))
   })
 

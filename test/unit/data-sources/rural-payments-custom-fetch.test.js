@@ -1,4 +1,5 @@
 import { describe, expect, jest } from '@jest/globals'
+import { config } from '../../../app/config.js'
 
 describe('RuralPayments Custom Fetch', () => {
   describe('customFetch', () => {
@@ -7,10 +8,10 @@ describe('RuralPayments Custom Fetch', () => {
       const fakeKey = 'KITS_CONNECTION_KEY'
       const fakeURL = 'https://rp_kits_gateway_internal_url/v1/'
       const timeout = 1500
-      process.env.RP_KITS_GATEWAY_TIMEOUT_MS = `${timeout}`
-      process.env.KITS_CONNECTION_CERT = Buffer.from(fakeCert).toString('base64')
-      process.env.KITS_CONNECTION_KEY = Buffer.from(fakeKey).toString('base64')
-      process.env.RP_KITS_GATEWAY_INTERNAL_URL = fakeURL
+      config.set('kits.gatewayTimeoutMs', `${timeout}`)
+      config.set('kits.connectionCert', Buffer.from(fakeCert).toString('base64'))
+      config.set('kits.connectionKey', Buffer.from(fakeKey).toString('base64'))
+      config.set('kits.gatewayUrl', fakeURL)
       const kitsURL = new URL(fakeURL)
 
       const mockProxyAgent = jest.fn((...args) => args)
@@ -59,7 +60,7 @@ describe('RuralPayments Custom Fetch', () => {
       }
 
       expect(mockProxyAgent).toHaveBeenCalledWith({
-        uri: process.env.CDP_HTTPS_PROXY,
+        uri: config.get('cdp.httpsProxy'),
         requestTls
       })
 

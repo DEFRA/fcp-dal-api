@@ -48,7 +48,7 @@ cp .env.example .env
 Also make sure to set the `RP_KITS_GATEWAY_INTERNAL_URL` variable to the desired data source, e.g. for local testing:
 
 ```env
-RP_KITS_GATEWAY_INTERNAL_URL=http://localhost:3100/v1
+KITS_GATEWAY_INTERNAL_URL=http://localhost:3100/v1
 ```
 
 ### Development

@@ -1,5 +1,6 @@
 import { jest } from '@jest/globals'
 import ConsoleTransportInstance from 'winston-transport'
+import { config } from '../../../app/config.js'
 
 describe('logger', () => {
   it('Single default log transport enabled', async () => {
@@ -9,13 +10,13 @@ describe('logger', () => {
   })
 
   it('should use ecsFormat in production environment', async () => {
-    process.env.NODE_ENV = 'production'
+    config.set('nodeEnv', 'production')
     const { logger } = await import(`../../../app/logger/logger.js?version=${Date.now()}`)
     expect(logger.transports[0].format).toBeDefined()
   })
 
   it('should set the log level based on LOG_LEVEL environment variable', async () => {
-    process.env.LOG_LEVEL = 'debug'
+    config.set('logLevel', 'debug')
     const { logger } = await import(`../../../app/logger/logger.js?version=${Date.now()}`)
     expect(logger.level).toEqual('debug')
   })

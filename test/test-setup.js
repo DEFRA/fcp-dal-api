@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { config } from '../app/config.js'
 
 global.jest = jest
 
@@ -8,5 +9,5 @@ const contextObject = await context({ request })
 
 export const fakeContext = {
   ...contextObject,
-  auth: { groups: [process.env.ADMIN_AD_GROUP_ID] }
+  auth: { groups: [config.get('auth.groups.admin')] }
 }

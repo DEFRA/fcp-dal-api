@@ -24,7 +24,7 @@ services:
       PORT: 3000
       ENVIRONMENT: dev
       DISABLE_AUTH: true
-      RP_KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3100/v1/
+      KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3100/v1/
       GRAPHQL_DASHBOARD_ENABLED: true
     networks:
       - cdp-tenant

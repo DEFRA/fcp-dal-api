@@ -1,6 +1,7 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
+import { config } from '../../../app/config.js'
 import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
@@ -27,9 +28,9 @@ describe('RuralPayments', () => {
       const { RuralPayments, customFetch } = await import(
         '../../../app/data-sources/rural-payments/RuralPayments.js'
       )
-      delete process.env.KITS_CONNECTION_CERT
-      delete process.env.KITS_CONNECTION_KEY
-      delete process.env.CDP_HTTPS_PROXY
+      config.set('kits.connectionCert', null)
+      config.set('kits.connectionKey', null)
+      config.set('cdp.httpsProxy', null)
 
       const rp = new RuralPayments()
       expect(rp.httpCache.httpFetch).not.toBe(customFetch)
