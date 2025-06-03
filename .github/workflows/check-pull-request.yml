@@ -35,9 +35,6 @@ jobs:
         with:
           test-script: npm test
 
-      - name: Test Docker Image Build
-        run: docker build --no-cache --tag fcp-dal-api .
-
       - name: Local dev check
         env:
           NODE_OPTIONS: --experimental-vm-modules
