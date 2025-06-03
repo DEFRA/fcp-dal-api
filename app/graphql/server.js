@@ -7,7 +7,8 @@ import { createSchema } from './schema.js'
 export const schema = await createSchema()
 
 export const enableApolloLandingPage = () => {
-  if (config.get('graphqlDashboardEnabled')) {
+  const graphqlDashboardEnabled = config.get('graphqlDashboardEnabled')
+  if (graphqlDashboardEnabled) {
     return ApolloServerPluginLandingPageLocalDefault()
   }
 

@@ -13,7 +13,7 @@ import { sendMetric } from '../logger/sendMetric.js'
 export async function getJwtPublicKey(kid) {
   const client = jwksClient({
     jwksUri: config.get('oidc.jwksURI'),
-    timeout: config.get('oidc.jwksTimeoutMs'),
+    timeout: config.get('oidc.timeoutMs'),
     requestAgent: new HttpsProxyAgent(config.get('cdp.httpsProxy'))
   })
 
@@ -95,7 +95,7 @@ export function authDirectiveTransformer(schema) {
     [MapperKind.OBJECT_FIELD](fieldConfig, _fieldName, typeName) {
       const authDirective =
         getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
-      const requires = authDirective ? authDirective.requires : config.get('auth.groups').admin
+      const requires = authDirective ? authDirective.requires : config.get('auth.groups.admin')
       const { resolve = defaultFieldResolver } = fieldConfig
       fieldConfig.resolve = function (source, args, context, info) {
         checkAuthGroup(context.auth.groups || [], requires)

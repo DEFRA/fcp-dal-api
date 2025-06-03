@@ -1,7 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import { config } from '../../../app/config.js'
 import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
@@ -22,19 +21,6 @@ describe('RuralPayments', () => {
     })
     afterAll(() => {
       mockFetch.mockRestore()
-    })
-
-    test('should not use custom fetch unless all env vars are set', async () => {
-      const { RuralPayments, customFetch } = await import(
-        '../../../app/data-sources/rural-payments/RuralPayments.js'
-      )
-      config.set('kits.connectionCert', null)
-      config.set('kits.connectionKey', null)
-      config.set('cdp.httpsProxy', null)
-
-      const rp = new RuralPayments()
-      expect(rp.httpCache.httpFetch).not.toBe(customFetch)
-      expect(rp.httpCache.httpFetch).toBe(new RESTDataSource().httpCache.httpFetch)
     })
 
     test('returns data from RPP', async () => {

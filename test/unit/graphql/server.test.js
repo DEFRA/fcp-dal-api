@@ -1,5 +1,4 @@
 import { jest } from '@jest/globals'
-import { config } from '../../../app/config.js'
 
 describe('GraphQL Dashboard test with mocks', () => {
   const mockApolloServer = jest.fn()
@@ -33,7 +32,7 @@ describe('GraphQL Dashboard test with mocks', () => {
   })
 
   it('expect ApolloServer to have been called with correct args to disable landing page', async () => {
-    config.set('graphqlDashboardEnabled', false)
+    process.env.GRAPHQL_DASHBOARD_ENABLED = 'false'
     mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
     const { apolloServer } = await import('../../../app/graphql/server.js')
 
@@ -53,7 +52,7 @@ describe('GraphQL Dashboard test with mocks', () => {
   })
 
   it('expect ApolloServer to have been called with correct args to enable landing page', async () => {
-    config.set('graphqlDashboardEnabled', true)
+    process.env.GRAPHQL_DASHBOARD_ENABLED = 'true'
     mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
     const { apolloServer } = await import('../../../app/graphql/server.js')
 

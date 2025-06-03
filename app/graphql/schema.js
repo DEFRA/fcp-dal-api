@@ -26,13 +26,13 @@ export async function createSchema() {
     schema = onDirectiveTransformer(schema)
   }
 
-  if (!config.get('disableAuth')) {
-    schema = authDirectiveTransformer(schema)
-  } else if (config.get('cdp.env') !== 'dev') {
+  if (config.get('disableAuth') && config.get('cdp.env') !== 'dev') {
     throw new Error(
       'Cannot disable auth outside of dev envirnment',
       `DISABLE_AUTH:${config.get('disableAuth')} env:${config.get('cdp.env')}`
     )
+  } else {
+    schema = authDirectiveTransformer(schema)
   }
 
   schema = excludeFromListTransformer(schema)
