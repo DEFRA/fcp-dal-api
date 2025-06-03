@@ -51,7 +51,7 @@ describe('Healthy test', () => {
   })
 
   it('GET /healthy route returns 200 with services status when health check is disabled', async () => {
-    config.set('healthCheck.enabled', 'false')
+    config.set('healthCheck.enabled', false)
     config.set('cdp.env', 'dev')
 
     const options = {
@@ -67,7 +67,7 @@ describe('Healthy test', () => {
   })
 
   it('GET /healthy route returns 200 with services status when health check is disabled in production', async () => {
-    config.set('healthCheck.enabled', 'false')
+    config.set('healthCheck.enabled', false)
     config.set('cdp.env', 'prod')
 
     const options = {

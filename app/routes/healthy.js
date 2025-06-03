@@ -40,7 +40,7 @@ export const healthyRoute = {
             { code: DAL_HEALTH_CHECK_001 }
           )
         }
-      } else if (config.get('env') === 'prod') {
+      } else if (config.get('cdp.env') === 'prod') {
         logger.error('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })
       } else {
         logger.warn('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })
