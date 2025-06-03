@@ -1,12 +1,13 @@
 import ecsFormat from '@elastic/ecs-winston-format'
 import { createLogger, format, transports } from 'winston'
+import { config } from '../config.js'
 import { cdpSchemaTranslator, sampleResponseBodyData } from './winstonFormatters.js'
 
 const transportTypes = []
 transportTypes.push(
   new transports.Console({
     format:
-      process.env.NODE_ENV === 'production'
+      config.get('nodeEnv') === 'production'
         ? format.combine(cdpSchemaTranslator(), ecsFormat())
         : sampleResponseBodyData()
   })
@@ -21,7 +22,7 @@ const logLevels = {
 }
 
 export const logger = createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: config.get('logLevel'),
   transports: transportTypes,
   levels: logLevels
 })

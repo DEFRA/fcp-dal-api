@@ -3,17 +3,20 @@ import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import tls from 'node:tls'
 import { ProxyAgent } from 'undici'
+import { config as appConfig } from '../../config.js'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
 export const customFetch = async (url, options) => {
-  const clientCert = Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64')
+  const clientCert = Buffer.from(appConfig.get('kits.connectionCert'), 'base64')
     .toString('utf-8')
     .trim()
-  const clientKey = Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8').trim()
+  const clientKey = Buffer.from(appConfig.get('kits.connectionKey'), 'base64')
+    .toString('utf-8')
+    .trim()
 
-  const kitsURL = new URL(process.env.RP_KITS_GATEWAY_INTERNAL_URL)
+  const kitsURL = new URL(appConfig.get('kits.gatewayUrl'))
 
   const requestTls = {
     host: kitsURL.hostname,
@@ -26,31 +29,25 @@ export const customFetch = async (url, options) => {
   }
 
   const proxyAgent = new ProxyAgent({
-    uri: process.env.CDP_HTTPS_PROXY,
+    uri: appConfig.get('cdp.httpsProxy'),
     requestTls
   })
 
   return fetch(url, {
     ...options,
     dispatcher: proxyAgent,
-    signal: AbortSignal.timeout(parseInt(process.env.RP_KITS_GATEWAY_TIMEOUT_MS))
+    signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
   })
 }
 export class RuralPayments extends RESTDataSource {
-  baseURL = process.env.RP_KITS_GATEWAY_INTERNAL_URL
+  baseURL = appConfig.get('kits.gatewayUrl')
   request = null
 
   constructor(config, request) {
     super(config)
 
     this.request = request
-    if (
-      process.env.KITS_CONNECTION_CERT &&
-      process.env.KITS_CONNECTION_KEY &&
-      process.env.CDP_HTTPS_PROXY
-    ) {
-      this.httpCache.httpFetch = customFetch
-    }
+    this.httpCache.httpFetch = customFetch
   }
 
   didEncounterError(error, request, url) {
