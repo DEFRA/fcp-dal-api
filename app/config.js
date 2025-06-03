@@ -4,8 +4,7 @@ export const config = convict({
   nodeEnv: {
     doc: 'The application environment.',
     format: ['production', 'development', 'test'],
-    default: null,
-    default: 'development',
+    default: 'production',
     env: 'NODE_ENV'
   },
   cdp: {
