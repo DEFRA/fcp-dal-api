@@ -65,6 +65,12 @@ export const config = convict({
     default: null,
     env: 'DAL_REQUEST_TIMEOUT_MS'
   },
+  disableProxy: {
+    doc: 'Disable proxy for DAL requests, used for testing',
+    format: Boolean,
+    default: false,
+    env: 'DISABLE_PROXY'
+  },
   oidc: {
     jwksURI: {
       doc: 'The URL used to validate the JWT, should be entra OIDC endpoint',

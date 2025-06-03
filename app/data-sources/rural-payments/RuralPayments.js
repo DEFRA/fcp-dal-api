@@ -47,7 +47,9 @@ export class RuralPayments extends RESTDataSource {
     super(config)
 
     this.request = request
-    this.httpCache.httpFetch = customFetch
+    if (appConfig.get('disableProxy') === false) {
+      this.httpCache.httpFetch = customFetch
+    }
   }
 
   didEncounterError(error, request, url) {

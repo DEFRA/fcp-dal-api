@@ -26,6 +26,7 @@ services:
       DISABLE_AUTH: true
       KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3100/v1/
       GRAPHQL_DASHBOARD_ENABLED: true
+      DISABLE_PROXY: true
     networks:
       - cdp-tenant
 
