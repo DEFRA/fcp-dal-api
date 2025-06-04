@@ -20,6 +20,8 @@ describe('config', () => {
     delete process.env.ADMIN_AD_GROUP_ID
     delete process.env.CDP_HTTPS_PROXY
     delete process.env.CDP_HTTP_PROXY
+    delete process.env.OIDC_JWKS_TIMEOUT_MS
+    delete process.env.OIDC_JWKS_URI
   })
 
   it('should have default values', async () => {
