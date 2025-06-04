@@ -3,12 +3,6 @@ import { generateKeyPairSync } from 'crypto'
 import { buildSchema, findBreakingChanges } from 'graphql'
 import jwt from 'jsonwebtoken'
 import nock from 'nock'
-import {
-  authDirectiveTransformer,
-  checkAuthGroup,
-  getAuth,
-  getJwtPublicKey
-} from '../../../app/auth/authenticate.js'
 import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
@@ -61,6 +55,15 @@ const incorrectTokenReq = {
 const decodedToken = jwt.decode(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
 
+const mockHttpsProxyAgent = jest.fn()
+const mockProxyAgentModule = {
+  HttpsProxyAgent: mockHttpsProxyAgent
+}
+jest.unstable_mockModule('https-proxy-agent', () => mockProxyAgentModule)
+const { authDirectiveTransformer, checkAuthGroup, getAuth } = await import(
+  '../../../app/auth/authenticate.js'
+)
+
 describe('getJwtPublicKey', () => {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', {
     modulusLength: 2048
@@ -68,7 +71,9 @@ describe('getJwtPublicKey', () => {
 
   beforeAll(() => {
     nock.disableNetConnect()
+  })
 
+  beforeEach(() => {
     nock(config.get('oidc.jwksURI'))
       .get('/')
       .reply(200, {
@@ -90,7 +95,8 @@ describe('getJwtPublicKey', () => {
     nock.enableNetConnect()
   })
 
-  it('should return the public key', async () => {
+  it('should return the public key and proxy called', async () => {
+    const { getJwtPublicKey } = await import('../../../app/auth/authenticate.js')
     const mockTokenPayload = {
       iat: Math.floor(Date.now() / 1000)
     }
@@ -102,6 +108,24 @@ describe('getJwtPublicKey', () => {
     expect(jwt.verify(mockToken, await getJwtPublicKey('mock-key-id-123'))).toEqual(
       mockTokenPayload
     )
+    expect(mockHttpsProxyAgent).toHaveBeenCalledWith(config.get('cdp.httpsProxy'))
+  })
+
+  it('should return the public key without proxy', async () => {
+    config.set('disableProxy', true)
+    const { getJwtPublicKey } = await import('../../../app/auth/authenticate.js')
+    const mockTokenPayload = {
+      iat: Math.floor(Date.now() / 1000)
+    }
+
+    const mockToken = jwt.sign(mockTokenPayload, privateKey, {
+      algorithm: 'RS256'
+    })
+
+    expect(jwt.verify(mockToken, await getJwtPublicKey('mock-key-id-123'))).toEqual(
+      mockTokenPayload
+    )
+    expect(mockHttpsProxyAgent).not.toHaveBeenCalled()
   })
 })
 
