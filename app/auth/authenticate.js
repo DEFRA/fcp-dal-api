@@ -16,7 +16,7 @@ export async function getJwtPublicKey(kid) {
     timeout: config.get('oidc.timeoutMs')
   })
 
-  if (!config.get('disableProxy')) {
+  if (config.get('disableProxy') !== true) {
     client.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
   }
 

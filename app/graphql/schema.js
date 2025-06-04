@@ -22,16 +22,15 @@ export async function createSchema() {
     resolvers: mergeResolvers(await getFiles('resolvers'))
   })
 
-  if (!config.get('allSchemaOn')) {
+  if (config.get('allSchemaOn') !== true) {
     schema = onDirectiveTransformer(schema)
   }
-
-  if (!config.get('auth.disabled')) {
+  if (config.get('auth.disabled') !== true) {
     schema = authDirectiveTransformer(schema)
   } else if (config.get('cdp.env') !== 'dev') {
     throw new Error(
       'Cannot disable auth outside of dev envirnment',
-      `DISABLE_AUTH:${config.get('auth.disabled')} env:${config.get('cdp.env')}`
+      `DISABLE_AUTH:${config.get('auth.disabled')} ENVIRONMENT:${config.get('cdp.env')}`
     )
   }
 

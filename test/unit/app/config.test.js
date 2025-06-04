@@ -52,7 +52,7 @@ describe('config', () => {
     expect(config.get('port')).toBe(4000)
     expect(config.get('logLevel')).toBe('debug')
     expect(config.get('allSchemaOn')).toBe(true)
-    expect(config.get('auth.disable')).toBe(true)
+    expect(config.get('auth.disabled')).toBe(true)
     expect(config.get('graphqlDashboardEnabled')).toBe(true)
     expect(config.get('requestTimeoutMs')).toBe(1234)
     expect(config.get('cdp.env')).toBe('dev')
