@@ -2,7 +2,7 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import tls from 'node:tls'
-import { ProxyAgent } from 'undici'
+import { Agent, ProxyAgent } from 'undici'
 import { config as appConfig } from '../../config.js'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
@@ -28,14 +28,19 @@ export const customFetch = async (url, options) => {
     })
   }
 
-  const proxyAgent = new ProxyAgent({
-    uri: appConfig.get('cdp.httpsProxy'),
-    requestTls
-  })
+  if (appConfig.get('disableProxy')) {
+    options.dispatcher = new Agent({
+      requestTls
+    })
+  } else {
+    options.dispatcher = new ProxyAgent({
+      uri: appConfig.get('cdp.httpsProxy'),
+      requestTls
+    })
+  }
 
   return fetch(url, {
     ...options,
-    dispatcher: proxyAgent,
     signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
   })
 }
@@ -47,9 +52,7 @@ export class RuralPayments extends RESTDataSource {
     super(config)
 
     this.request = request
-    if (appConfig.get('disableProxy') === false) {
-      this.httpCache.httpFetch = customFetch
-    }
+    this.httpCache.httpFetch = customFetch
   }
 
   didEncounterError(error, request, url) {
