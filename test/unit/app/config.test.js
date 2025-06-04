@@ -51,7 +51,8 @@ describe('config', () => {
     expect(config.get('oidc.timeoutMs')).toBe(null)
   })
 
-  it('should throw an error if DISABLE_AUTH false and required env vars not set', async () => {
+  it('should throw an error any invalid combinations of env vars', async () => {
+    // These are in a single test to avoid race conditions when setting env vars
     process.env.KITS_DISABLE_MTLS = 'true'
     process.env.DISABLE_PROXY = 'true'
     process.env.HEALTH_CHECK_ENABLED = 'false'
@@ -60,58 +61,36 @@ describe('config', () => {
 
     process.env.DISABLE_AUTH = 'false'
 
-    const expectedErrors = [
-      'oidc.jwksURI: must be of type String',
-      'oidc.timeoutMs: must be an integer'
-    ]
+    let expectedErrors
+
+    expectedErrors = ['oidc.jwksURI: must be of type String', 'oidc.timeoutMs: must be an integer']
 
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-  })
 
-  it('should throw an error if KITS_DISABLE_MTLS false and required env vars not set', async () => {
     process.env.DISABLE_AUTH = 'true'
-    process.env.DISABLE_PROXY = 'true'
-    process.env.HEALTH_CHECK_ENABLED = 'false'
-
-    delete process.env.KITS_CONNECTION_CERT
-    delete process.env.KITS_CONNECTION_KEY
     process.env.KITS_DISABLE_MTLS = 'false'
 
-    const expectedErrors = [
+    expectedErrors = [
       'kits.connectionCert: must be of type String',
       'kits.connectionKey: must be of type String'
     ]
 
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-  })
 
-  it('should throw an error if DISABLE_PROXY false and required env vars not set', async () => {
-    process.env.DISABLE_AUTH = 'true'
     process.env.KITS_DISABLE_MTLS = 'true'
-    process.env.HEALTH_CHECK_ENABLED = 'false'
-
-    delete process.env.CDP_HTTPS_PROXY
-    delete process.env.CDP_HTTP_PROXY
     process.env.DISABLE_PROXY = 'false'
 
-    const expectedErrors = [
+    expectedErrors = [
       'cdp.httpsProxy: must be of type String',
       'cdp.httpProxy: must be of type String'
     ]
 
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-  })
 
-  it('should throw an error if HEALTH_CHECK_ENABLED true and required env vars not set', async () => {
-    process.env.DISABLE_AUTH = 'true'
-    process.env.KITS_DISABLE_MTLS = 'true'
     process.env.DISABLE_PROXY = 'true'
-
-    delete process.env.HEALTH_CHECK_RP_PORTAL_EMAIL
-    delete process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
     process.env.HEALTH_CHECK_ENABLED = 'true'
 
-    const expectedErrors = [
+    expectedErrors = [
       'healthCheck.ruralPaymentsPortalEmail: must be of type String',
       'healthCheck.ruralPaymentsInternalOrganisationId: must be of type String'
     ]
