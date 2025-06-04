@@ -23,7 +23,7 @@ describe('config', () => {
     delete process.env.OIDC_JWKS_URI
   })
 
-  it('should have default values with everything disabled', async () => {
+  it('should have default values when optional env vars are unset', async () => {
     process.env.DISABLE_AUTH = 'true'
     process.env.KITS_DISABLE_MTLS = 'true'
     process.env.DISABLE_PROXY = 'true'
@@ -56,8 +56,6 @@ describe('config', () => {
     process.env.KITS_DISABLE_MTLS = 'true'
     process.env.DISABLE_PROXY = 'true'
     process.env.HEALTH_CHECK_ENABLED = 'false'
-    delete process.env.OIDC_JWKS_URI
-    delete process.env.OIDC_JWKS_TIMEOUT_MS
 
     process.env.DISABLE_AUTH = 'false'
 
@@ -105,7 +103,7 @@ describe('config', () => {
     )
   })
 
-  it('should allow nullable healthCheck fields', async () => {
+  it('should allow optional fields to be unset', async () => {
     const { config } = await loadFreshConfig()
 
     expect(() => config.set('healthCheck.ruralPaymentsPortalEmail', null)).not.toThrow()

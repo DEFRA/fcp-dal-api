@@ -104,7 +104,7 @@ export const config = convict({
     enabled: {
       doc: 'Enable health check endpoint',
       format: Boolean,
-      default: true,
+      default: false,
       env: 'HEALTH_CHECK_ENABLED'
     },
     ruralPaymentsPortalEmail: {

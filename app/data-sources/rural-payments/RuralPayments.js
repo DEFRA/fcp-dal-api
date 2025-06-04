@@ -17,7 +17,7 @@ export const customFetch = async (url, options) => {
     servername: kitsURL.hostname
   }
 
-  if (appConfig.get('kits.disableMTLS') !== true) {
+  if (!appConfig.get('kits.disableMTLS')) {
     const clientCert = Buffer.from(appConfig.get('kits.connectionCert'), 'base64')
       .toString('utf-8')
       .trim()

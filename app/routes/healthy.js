@@ -5,9 +5,6 @@ import { DAL_HEALTH_CHECK_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { throttle } from '../utils/throttle.js'
 
-const minute = 60 * 1000
-const fiveMinutes = 5 * minute
-
 const ruralPaymentsHealthCheck = async () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(
     { logger },
@@ -19,7 +16,7 @@ const ruralPaymentsHealthCheck = async () => {
 }
 const ruralPaymentsHealthCheckThrottled = throttle(
   ruralPaymentsHealthCheck,
-  config.get('healthCheck.throttleTimeMs') || fiveMinutes
+  config.get('healthCheck.throttleTimeMs')
 )
 
 export const healthyRoute = {

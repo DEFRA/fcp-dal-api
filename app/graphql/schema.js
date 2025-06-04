@@ -22,10 +22,10 @@ export async function createSchema() {
     resolvers: mergeResolvers(await getFiles('resolvers'))
   })
 
-  if (config.get('allSchemaOn') !== true) {
+  if (!config.get('allSchemaOn')) {
     schema = onDirectiveTransformer(schema)
   }
-  if (config.get('auth.disabled') !== true) {
+  if (!config.get('auth.disabled')) {
     schema = authDirectiveTransformer(schema)
   } else if (config.get('cdp.env') !== 'dev') {
     throw new Error(
