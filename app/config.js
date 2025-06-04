@@ -47,12 +47,6 @@ export const config = convict({
     default: false,
     env: 'ALL_SCHEMA_ON'
   },
-  disableAuth: {
-    doc: 'Disable authentication, used for testing',
-    format: Boolean,
-    default: false,
-    env: 'DISABLE_AUTH'
-  },
   graphqlDashboardEnabled: {
     doc: 'Enable GraphQL dashboard',
     format: Boolean,
@@ -76,12 +70,14 @@ export const config = convict({
       doc: 'The URL used to validate the JWT, should be entra OIDC endpoint',
       format: String,
       default: null,
+      nullable: true,
       env: 'OIDC_JWKS_URI'
     },
     timeoutMs: {
       doc: 'Timeout of OIDC request in milliseconds',
       format: 'int',
       default: null,
+      nullable: true,
       env: 'OIDC_JWKS_TIMEOUT_MS'
     }
   },
@@ -93,6 +89,12 @@ export const config = convict({
         default: null,
         env: 'ADMIN_AD_GROUP_ID'
       }
+    },
+    disabled: {
+      doc: 'Whether authentication is disabled, used for testing',
+      format: Boolean,
+      default: false,
+      env: 'DISABLE_AUTH'
     }
   },
   healthCheck: {

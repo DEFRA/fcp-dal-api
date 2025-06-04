@@ -180,7 +180,7 @@ describe('authDirectiveTransformer', () => {
 
   `)
   it('authDirectiveTransformer should not impact output schema', async () => {
-    config.set('disableAuth', true)
+    config.set('auth.disable', true)
     const transformedSchema = authDirectiveTransformer(schema)
     expect(findBreakingChanges(schema, transformedSchema)).toHaveLength(0)
   })
