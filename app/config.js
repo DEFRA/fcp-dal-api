@@ -13,7 +13,7 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
-      nullable: true,
+      nullable: process.env.DISABLE_PROXY === 'true',
       env: 'CDP_HTTPS_PROXY'
     },
     httpProxy: {
@@ -21,7 +21,7 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
-      nullable: true,
+      nullable: process.env.DISABLE_PROXY === 'true',
       env: 'CDP_HTTP_PROXY'
     },
     env: {
@@ -72,14 +72,14 @@ export const config = convict({
       doc: 'The URL used to validate the JWT, should be entra OIDC endpoint',
       format: String,
       default: null,
-      nullable: true,
+      nullable: process.env.DISABLE_AUTH === 'true',
       env: 'OIDC_JWKS_URI'
     },
     timeoutMs: {
       doc: 'Timeout of OIDC request in milliseconds',
       format: 'int',
       default: null,
-      nullable: true,
+      nullable: process.env.DISABLE_AUTH === 'true',
       env: 'OIDC_JWKS_TIMEOUT_MS'
     }
   },
@@ -111,14 +111,14 @@ export const config = convict({
       doc: 'Email used for Rural Payments Portal health check',
       format: String,
       default: null,
-      nullable: true,
+      nullable: process.env.HEALTH_CHECK_ENABLED ?? 'true' !== 'false',
       env: 'HEALTH_CHECK_RP_PORTAL_EMAIL'
     },
     ruralPaymentsInternalOrganisationId: {
       doc: 'Internal organisation ID used for Rural Payments Portal health check',
       format: String,
       default: null,
-      nullable: true,
+      nullable: process.env.HEALTH_CHECK_ENABLED ?? 'true' !== 'false',
       env: 'HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID'
     },
     throttleTimeMs: {
@@ -134,7 +134,7 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
-      nullable: true,
+      nullable: process.env.KITS_DISABLE_MTLS === 'true',
       env: 'KITS_CONNECTION_CERT'
     },
     connectionKey: {
@@ -142,7 +142,7 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
-      nullable: true,
+      nullable: process.env.KITS_DISABLE_MTLS === 'true',
       env: 'KITS_CONNECTION_KEY'
     },
     disableMTLS: {

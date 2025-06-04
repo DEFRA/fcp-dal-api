@@ -29,17 +29,7 @@ export const healthyRoute = {
     try {
       const services = { RuralPaymentsPortal: 'up' }
       if (config.get('healthCheck.enabled')) {
-        if (
-          config.get('healthCheck.ruralPaymentsInternalOrganisationId') &&
-          config.get('healthCheck.ruralPaymentsPortalEmail')
-        ) {
-          services.RuralPaymentsPortal = (await ruralPaymentsHealthCheckThrottled()) ? 'up' : 'down'
-        } else {
-          logger.error(
-            '#health check - missing environment variable "HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID"',
-            { code: DAL_HEALTH_CHECK_001 }
-          )
-        }
+        services.RuralPaymentsPortal = (await ruralPaymentsHealthCheckThrottled()) ? 'up' : 'down'
       } else if (config.get('cdp.env') === 'prod') {
         logger.error('#health check - health check disabled', { code: DAL_HEALTH_CHECK_001 })
       } else {
