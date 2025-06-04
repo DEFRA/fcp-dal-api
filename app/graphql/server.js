@@ -5,10 +5,9 @@ import { config } from '../config.js'
 import { createSchema } from './schema.js'
 
 export const schema = await createSchema()
-const graphqlDashboardEnabled = config.get('graphqlDashboardEnabled')
 
 export const enableApolloLandingPage = () => {
-  if (graphqlDashboardEnabled) {
+  if (config.get('graphqlDashboardEnabled')) {
     return ApolloServerPluginLandingPageLocalDefault()
   }
 
@@ -18,5 +17,5 @@ export const enableApolloLandingPage = () => {
 export const apolloServer = new ApolloServer({
   schema,
   plugins: [enableApolloLandingPage()],
-  introspection: graphqlDashboardEnabled
+  introspection: config.get('graphqlDashboardEnabled')
 })

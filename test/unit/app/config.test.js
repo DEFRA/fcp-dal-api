@@ -56,43 +56,38 @@ describe('config', () => {
     process.env.KITS_DISABLE_MTLS = 'true'
     process.env.DISABLE_PROXY = 'true'
     process.env.HEALTH_CHECK_ENABLED = 'false'
-
-    process.env.DISABLE_AUTH = 'false'
-
     let expectedErrors
 
+    // DISABLE_AUTH check
+    process.env.DISABLE_AUTH = 'false'
     expectedErrors = ['oidc.jwksURI: must be of type String', 'oidc.timeoutMs: must be an integer']
-
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-
     process.env.DISABLE_AUTH = 'true'
-    process.env.KITS_DISABLE_MTLS = 'false'
 
+    // KITS_DISABLE_MTLS check
+    process.env.KITS_DISABLE_MTLS = 'false'
     expectedErrors = [
       'kits.connectionCert: must be of type String',
       'kits.connectionKey: must be of type String'
     ]
-
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-
     process.env.KITS_DISABLE_MTLS = 'true'
-    process.env.DISABLE_PROXY = 'false'
 
+    // DISABLE_PROXY check
+    process.env.DISABLE_PROXY = 'false'
     expectedErrors = [
       'cdp.httpsProxy: must be of type String',
       'cdp.httpProxy: must be of type String'
     ]
-
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-
     process.env.DISABLE_PROXY = 'true'
-    process.env.HEALTH_CHECK_ENABLED = 'true'
 
+    // HEALTH_CHECK_ENABLED check
+    process.env.HEALTH_CHECK_ENABLED = 'true'
     expectedErrors = [
       'healthCheck.ruralPaymentsPortalEmail: must be of type String',
       'healthCheck.ruralPaymentsInternalOrganisationId: must be of type String'
     ]
-
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
   })
 
