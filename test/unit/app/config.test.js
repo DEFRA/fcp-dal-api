@@ -38,7 +38,7 @@ describe('config', () => {
     expect(config.get('auth.disabled')).toBe(true)
     expect(config.get('auth.groups.admin')).toBe(null)
     expect(config.get('graphqlDashboardEnabled')).toBe(false)
-    expect(config.get('healthCheck.enabled')).toBe(true)
+    expect(config.get('healthCheck.enabled')).toBe(false)
     expect(config.get('healthCheck.throttleTimeMs')).toBe(300000)
     expect(config.get('kits.requestPageSize')).toBe(100)
     expect(config.get('kits.disableMTLS')).toBe(true)
@@ -109,7 +109,7 @@ describe('config', () => {
 
     delete process.env.HEALTH_CHECK_RP_PORTAL_EMAIL
     delete process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
-    process.env.HEALTH_CHECK_ENABLED = 'false'
+    process.env.HEALTH_CHECK_ENABLED = 'true'
 
     const expectedErrors = [
       'healthCheck.ruralPaymentsPortalEmail: must be of type String',

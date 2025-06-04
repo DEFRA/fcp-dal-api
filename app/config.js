@@ -111,14 +111,14 @@ export const config = convict({
       doc: 'Email used for Rural Payments Portal health check',
       format: String,
       default: null,
-      nullable: process.env.HEALTH_CHECK_ENABLED ?? 'true' !== 'false',
+      nullable: process.env.HEALTH_CHECK_ENABLED !== 'true',
       env: 'HEALTH_CHECK_RP_PORTAL_EMAIL'
     },
     ruralPaymentsInternalOrganisationId: {
       doc: 'Internal organisation ID used for Rural Payments Portal health check',
       format: String,
       default: null,
-      nullable: process.env.HEALTH_CHECK_ENABLED ?? 'true' !== 'false',
+      nullable: process.env.HEALTH_CHECK_ENABLED !== 'true',
       env: 'HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID'
     },
     throttleTimeMs: {

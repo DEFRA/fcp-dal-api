@@ -111,9 +111,8 @@ describe('Healthy test', () => {
     expect(response.payload).toEqual('error')
   })
 
-  it('GET /healthy route returns 200 with services status when environment variables are missing', async () => {
-    config.set('healthCheck.ruralPaymentsInternalOrganisationId', null)
-    config.set('healthCheck.ruralPaymentsPortalEmail', null)
+  it('GET /healthy route returns 200 with services status when health check disabled', async () => {
+    config.set('healthCheck.enabled', false)
 
     const options = {
       method: 'GET',
