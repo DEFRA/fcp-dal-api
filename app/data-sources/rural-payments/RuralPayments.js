@@ -9,13 +9,6 @@ import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
 export const customFetch = async (url, options) => {
-  const clientCert = Buffer.from(appConfig.get('kits.connectionCert'), 'base64')
-    .toString('utf-8')
-    .trim()
-  const clientKey = Buffer.from(appConfig.get('kits.connectionKey'), 'base64')
-    .toString('utf-8')
-    .trim()
-
   const kitsURL = new URL(appConfig.get('kits.gatewayUrl'))
 
   const requestTls = {
@@ -25,6 +18,12 @@ export const customFetch = async (url, options) => {
   }
 
   if (appConfig.get('kits.disableMTLS') !== true) {
+    const clientCert = Buffer.from(appConfig.get('kits.connectionCert'), 'base64')
+      .toString('utf-8')
+      .trim()
+    const clientKey = Buffer.from(appConfig.get('kits.connectionKey'), 'base64')
+      .toString('utf-8')
+      .trim()
     requestTls.secureContext = tls.createSecureContext({
       key: clientKey,
       cert: clientCert
