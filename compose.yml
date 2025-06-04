@@ -23,18 +23,13 @@ services:
       PORT: 3000
       ENVIRONMENT: dev
       DISABLE_AUTH: true
-      GRAPHQL_DASHBOARD_ENABLED: true
       DISABLE_PROXY: true
-      OIDC_JWKS_URI: unused
-      OIDC_JWKS_TIMEOUT_MS: 0
+      GRAPHQL_DASHBOARD_ENABLED: true
       ADMIN_AD_GROUP_ID: unused
       KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3100/v1/
       KITS_GATEWAY_TIMEOUT_MS: 3000
-      KITS_CONNECTION_CERT: unused
-      KITS_CONNECTION_KEY: unused
+      KITS_DISABLE_MTLS: true
       DAL_REQUEST_TIMEOUT_MS: 3000
-      CDP_HTTP_PROXY: unused
-      CDP_HTTPS_PROXY: unused
 
     networks:
       - cdp-tenant

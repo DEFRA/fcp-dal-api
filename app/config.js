@@ -13,6 +13,7 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
+      nullable: true,
       env: 'CDP_HTTPS_PROXY'
     },
     httpProxy: {
@@ -20,6 +21,7 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
+      nullable: true,
       env: 'CDP_HTTP_PROXY'
     },
     env: {
@@ -87,7 +89,8 @@ export const config = convict({
         doc: 'AD group ID for admin users',
         format: String,
         default: null,
-        env: 'ADMIN_AD_GROUP_ID'
+        env: 'ADMIN_AD_GROUP_ID',
+        nullable: true
       }
     },
     disabled: {
@@ -131,6 +134,7 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
+      nullable: true,
       env: 'KITS_CONNECTION_CERT'
     },
     connectionKey: {
@@ -138,7 +142,14 @@ export const config = convict({
       format: String,
       default: null,
       sensitive: true,
+      nullable: true,
       env: 'KITS_CONNECTION_KEY'
+    },
+    disableMTLS: {
+      doc: 'Disables mTLS for KITS connection, used for testing',
+      format: Boolean,
+      default: false,
+      env: 'KITS_DISABLE_MTLS'
     },
     gatewayUrl: {
       doc: 'KITS gateway internal URL',

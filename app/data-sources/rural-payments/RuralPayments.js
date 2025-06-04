@@ -21,8 +21,11 @@ export const customFetch = async (url, options) => {
   const requestTls = {
     host: kitsURL.hostname,
     port: kitsURL.port,
-    servername: kitsURL.hostname,
-    secureContext: tls.createSecureContext({
+    servername: kitsURL.hostname
+  }
+
+  if (appConfig.get('kits.disableMTLS') !== true) {
+    requestTls.secureContext = tls.createSecureContext({
       key: clientKey,
       cert: clientCert
     })

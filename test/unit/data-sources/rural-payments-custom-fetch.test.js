@@ -86,13 +86,14 @@ describe('RuralPayments Custom Fetch', () => {
       }
     ])
   })
-  it('should call fetch with an AbortSignal with timeout and proxy disabled', async () => {
+  it('should call fetch with an AbortSignal with timeout and proxy disabled without mTLS', async () => {
     mockAgent.mockImplementation((...args) => args)
     mockCreateSecureContext.mockImplementation((...args) => args)
     mockAbortSignal.mockImplementation((...args) => args)
     mockFetch.mockImplementation((...args) => args)
 
     config.set('disableProxy', true)
+    config.set('kits.disableMTLS', true)
 
     const { customFetch } = await import(
       '../../../app/data-sources/rural-payments/RuralPayments.js'
@@ -100,19 +101,12 @@ describe('RuralPayments Custom Fetch', () => {
 
     const returnedCustomFetch = await customFetch('example-path', { method: 'GET' })
 
-    expect(mockCreateSecureContext).toHaveBeenCalledWith({
-      key: fakeKey,
-      cert: fakeCert
-    })
+    expect(mockCreateSecureContext).not.toHaveBeenCalled()
 
     const requestTls = {
       host: kitsURL.hostname,
       port: kitsURL.port,
-      servername: kitsURL.hostname,
-      secureContext: mockCreateSecureContext({
-        key: fakeKey,
-        cert: fakeCert
-      })
+      servername: kitsURL.hostname
     }
 
     expect(mockAgent).toHaveBeenCalledWith({
