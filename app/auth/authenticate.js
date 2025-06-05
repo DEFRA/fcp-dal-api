@@ -4,18 +4,21 @@ import { defaultFieldResolver } from 'graphql'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
+import { config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
-import { AuthRole } from '../graphql/resolvers/authenticate.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
 
 export async function getJwtPublicKey(kid) {
   const client = jwksClient({
-    jwksUri: process.env.OIDC_JWKS_URI,
-    timeout: parseInt(process.env.OIDC_JWKS_TIMEOUT_MS),
-    requestAgent: new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
+    jwksUri: config.get('oidc.jwksURI'),
+    timeout: config.get('oidc.timeoutMs')
   })
+
+  if (!config.get('disableProxy')) {
+    client.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
+  }
 
   const key = await client.getSigningKey(kid)
   return key.getPublicKey()
@@ -95,7 +98,7 @@ export function authDirectiveTransformer(schema) {
     [MapperKind.OBJECT_FIELD](fieldConfig, _fieldName, typeName) {
       const authDirective =
         getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
-      const requires = authDirective ? authDirective.requires : AuthRole.ADMIN
+      const requires = authDirective ? authDirective.requires : config.get('auth.groups.admin')
       const { resolve = defaultFieldResolver } = fieldConfig
       fieldConfig.resolve = function (source, args, context, info) {
         checkAuthGroup(context.auth.groups || [], requires)

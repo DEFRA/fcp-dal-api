@@ -2,6 +2,7 @@ import hapi from '@hapi/hapi'
 
 import { Unit } from 'aws-embedded-metrics'
 import { v4 as uuidv4 } from 'uuid'
+import { config } from './config.js'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { sendMetric } from './logger/sendMetric.js'
@@ -9,11 +10,11 @@ import { healthRoute } from './routes/health.js'
 import { healthyRoute } from './routes/healthy.js'
 
 export const server = hapi.server({
-  port: process.env.PORT
+  port: config.get('port')
 })
 
 server.ext('onPreStart', () => {
-  server.listener.setTimeout(parseInt(process.env.DAL_REQUEST_TIMEOUT_MS))
+  server.listener.setTimeout(config.get('requestTimeoutMs'))
 })
 
 const routes = [].concat(healthyRoute, healthRoute)

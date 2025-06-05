@@ -70,7 +70,6 @@ describe('winstonFormatters', () => {
         'transaction.id': 'transaction-id',
         'trace.id': 'trace-id',
         'span.id': 'trace-id',
-        tenant: { id: 'tenant-id' },
         // NOTE: this example was built based on the CDP source schema config, found at:
         // https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md#current-streamlined-ecs-schema-on-cdp
         error: {

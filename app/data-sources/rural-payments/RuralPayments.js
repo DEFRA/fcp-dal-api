@@ -2,55 +2,59 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import tls from 'node:tls'
-import { ProxyAgent } from 'undici'
+import { Agent, ProxyAgent } from 'undici'
+import { config as appConfig } from '../../config.js'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
 export const customFetch = async (url, options) => {
-  const clientCert = Buffer.from(process.env.KITS_CONNECTION_CERT, 'base64')
-    .toString('utf-8')
-    .trim()
-  const clientKey = Buffer.from(process.env.KITS_CONNECTION_KEY, 'base64').toString('utf-8').trim()
-
-  const kitsURL = new URL(process.env.RP_KITS_GATEWAY_INTERNAL_URL)
+  const kitsURL = new URL(appConfig.get('kits.gatewayUrl'))
 
   const requestTls = {
     host: kitsURL.hostname,
     port: kitsURL.port,
-    servername: kitsURL.hostname,
-    secureContext: tls.createSecureContext({
+    servername: kitsURL.hostname
+  }
+
+  if (!appConfig.get('kits.disableMTLS')) {
+    const clientCert = Buffer.from(appConfig.get('kits.connectionCert'), 'base64')
+      .toString('utf-8')
+      .trim()
+    const clientKey = Buffer.from(appConfig.get('kits.connectionKey'), 'base64')
+      .toString('utf-8')
+      .trim()
+    requestTls.secureContext = tls.createSecureContext({
       key: clientKey,
       cert: clientCert
     })
   }
 
-  const proxyAgent = new ProxyAgent({
-    uri: process.env.CDP_HTTPS_PROXY,
-    requestTls
-  })
+  if (appConfig.get('disableProxy')) {
+    options.dispatcher = new Agent({
+      requestTls
+    })
+  } else {
+    options.dispatcher = new ProxyAgent({
+      uri: appConfig.get('cdp.httpsProxy'),
+      requestTls
+    })
+  }
 
   return fetch(url, {
     ...options,
-    dispatcher: proxyAgent,
-    signal: AbortSignal.timeout(parseInt(process.env.RP_KITS_GATEWAY_TIMEOUT_MS))
+    signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
   })
 }
 export class RuralPayments extends RESTDataSource {
-  baseURL = process.env.RP_KITS_GATEWAY_INTERNAL_URL
+  baseURL = appConfig.get('kits.gatewayUrl')
   request = null
 
   constructor(config, request) {
     super(config)
 
     this.request = request
-    if (
-      process.env.KITS_CONNECTION_CERT &&
-      process.env.KITS_CONNECTION_KEY &&
-      process.env.CDP_HTTPS_PROXY
-    ) {
-      this.httpCache.httpFetch = customFetch
-    }
+    this.httpCache.httpFetch = customFetch
   }
 
   didEncounterError(error, request, url) {

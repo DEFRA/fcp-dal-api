@@ -36,7 +36,8 @@
   "cSpell.language": "en,en-GB",
   "jestrunner.debugOptions": {
     "env": {
-      "NODE_OPTIONS": "--experimental-vm-modules"
+      "NODE_OPTIONS": "--experimental-vm-modules",
+      "DOTENV_CONFIG_PATH": ".env.test"
     }
   },
   "jestrunner.jestCommand": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test ./node_modules/jest/bin/jest.js",

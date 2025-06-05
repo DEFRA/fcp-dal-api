@@ -5,6 +5,7 @@ import { filterSchema, pruneSchema } from '@graphql-tools/utils'
 import { dirname, join } from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
 import { authDirectiveTransformer } from '../auth/authenticate.js'
+import { config } from '../config.js'
 import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
 import { onDirectiveTransformer } from './directives/onDirectiveTransformer.js'
 
@@ -21,16 +22,15 @@ export async function createSchema() {
     resolvers: mergeResolvers(await getFiles('resolvers'))
   })
 
-  if (!process.env.ALL_SCHEMA_ON) {
+  if (!config.get('allSchemaOn')) {
     schema = onDirectiveTransformer(schema)
   }
-
-  if (process.env.DISABLE_AUTH !== 'true') {
+  if (!config.get('auth.disabled')) {
     schema = authDirectiveTransformer(schema)
-  } else if (process.env.ENVIRONMENT !== 'dev') {
+  } else if (config.get('cdp.env') !== 'dev') {
     throw new Error(
       'Cannot disable auth outside of dev envirnment',
-      `DISABLE_AUTH:${process.env.DISABLE_AUTH} ENVIRONMENT:${process.env.ENVIRONMENT}`
+      `DISABLE_AUTH:${config.get('auth.disabled')} ENVIRONMENT:${config.get('cdp.env')}`
     )
   }
 

@@ -1,6 +1,7 @@
 import { describe, expect, jest } from '@jest/globals'
 import net from 'net'
 import { setTimeout } from 'node:timers/promises'
+import { config } from '../../../../../app/config.js'
 
 const mockSendMetric = { sendMetric: jest.fn() }
 const mockLogger = {
@@ -29,8 +30,8 @@ const socketTimeoutTest = (socket, reject) => {
   }
 }
 
-process.env.PORT = '3000'
-process.env.DAL_REQUEST_TIMEOUT_MS = `${timeout}`
+config.set('PORT', '3000')
+config.set('requestTimeoutMs', `${timeout}`)
 const { server } = await import('../../../../../app/server.js')
 
 describe('Server config and startup', () => {
@@ -49,7 +50,7 @@ describe('Server config and startup', () => {
 
     test('idle socket should be closed by timeout', () => {
       return new Promise((resolve, reject) => {
-        const socket = net.connect({ port: process.env.PORT })
+        const socket = net.connect({ port: config.get('port') })
         socket.on('connect', socketTimeoutTest(socket, reject))
         socket.on('close', resolve)
         socket.on('error', console.error)

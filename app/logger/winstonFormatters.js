@@ -4,7 +4,6 @@ import { sampleResponse } from './utils.js'
 export const cdpSchemaTranslator = format((info) => {
   const { error, code, type, level, request, response, requestTimeMs, transactionId, traceId } =
     info
-  const tenantId = process.env.API_TENANT_ID
 
   return Object.assign(
     {
@@ -14,7 +13,6 @@ export const cdpSchemaTranslator = format((info) => {
     ...[
       transactionId && { 'transaction.id': transactionId },
       traceId && { 'span.id': traceId, 'trace.id': traceId },
-      tenantId && { tenant: { id: tenantId } },
       error && {
         error: {
           ...(error?.name && { type: error.name }),

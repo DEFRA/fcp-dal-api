@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { config } from '../../../../../app/config.js'
 import { RuralPaymentsBusiness } from '../../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 
 const mockThrottle = (fn) => {
@@ -19,10 +20,10 @@ describe('Healthy test', () => {
   const mockGetOrganisationById = jest.spyOn(RuralPaymentsBusiness.prototype, 'getOrganisationById')
 
   beforeEach(async () => {
-    process.env.HEALTH_CHECK_ENABLED = 'true'
-    process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID = 'test-org-id'
-    process.env.RURAL_PAYMENTS_PORTAL_EMAIL = 'test@example.com'
-    process.env.HEALTH_CHECK_RURAL_PAYMENTS_THROTTLE_TIME_MS = 1
+    config.set('healthCheck.enabled', true)
+    config.set('healthCheck.ruralPaymentsInternalOrganisationId', 'test-org-id')
+    config.set('healthCheck.ruralPaymentsPortalEmail', 'test@example.com')
+    config.set('healthCheck.gatewayTimeoutMs', 1)
 
     await server.start()
   })
@@ -50,8 +51,8 @@ describe('Healthy test', () => {
   })
 
   it('GET /healthy route returns 200 with services status when health check is disabled', async () => {
-    process.env.HEALTH_CHECK_ENABLED = 'false'
-    process.env.ENVIRONMENT = 'dev'
+    config.set('healthCheck.enabled', false)
+    config.set('cdp.env', 'dev')
 
     const options = {
       method: 'GET',
@@ -66,8 +67,8 @@ describe('Healthy test', () => {
   })
 
   it('GET /healthy route returns 200 with services status when health check is disabled in production', async () => {
-    process.env.HEALTH_CHECK_ENABLED = 'false'
-    process.env.ENVIRONMENT = 'prod'
+    config.set('healthCheck.enabled', false)
+    config.set('cdp.env', 'prod')
 
     const options = {
       method: 'GET',
@@ -110,9 +111,8 @@ describe('Healthy test', () => {
     expect(response.payload).toEqual('error')
   })
 
-  it('GET /healthy route returns 200 with services status when environment variables are missing', async () => {
-    delete process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
-    delete process.env.RURAL_PAYMENTS_PORTAL_EMAIL
+  it('GET /healthy route returns 200 with services status when health check disabled', async () => {
+    config.set('healthCheck.enabled', false)
 
     const options = {
       method: 'GET',

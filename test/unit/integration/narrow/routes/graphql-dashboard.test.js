@@ -1,3 +1,4 @@
+import { config } from '../../../../../app/config.js'
 import { apolloServer, enableApolloLandingPage } from '../../../../../app/graphql/server.js'
 
 describe('GraphQL Dashboard test', () => {
@@ -7,7 +8,7 @@ describe('GraphQL Dashboard test', () => {
   })
 
   it('enables graphql dashboard when GRAPHQL_DASHBOARD_ENABLED is enabled', async () => {
-    process.env.GRAPHQL_DASHBOARD_ENABLED = 'true'
+    config.set('graphqlDashboardEnabled', 'true')
 
     const response = enableApolloLandingPage()
 
@@ -15,7 +16,7 @@ describe('GraphQL Dashboard test', () => {
   })
 
   it('disables graphql dashboard when GRAPHQL_DASHBOARD_ENABLED is disabled', async () => {
-    process.env.GRAPHQL_DASHBOARD_ENABLED = 'false'
+    config.set('graphqlDashboardEnabled', 'false')
 
     const response = enableApolloLandingPage()
 

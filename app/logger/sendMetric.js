@@ -1,9 +1,10 @@
 import { createMetricsLogger, StorageResolution, Unit } from 'aws-embedded-metrics'
+import { config } from '../config.js'
 import { DAL_METRICS_ERROR_001 } from './codes.js'
 import { logger } from './logger.js'
 
 const sendMetric =
-  process.env.NODE_ENV === 'production'
+  config.get('nodeEnv') === 'production'
     ? async (
         metricName,
         value = 1,

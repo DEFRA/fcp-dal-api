@@ -1,7 +1,17 @@
 import hapiApollo from '@as-integrations/hapi'
-import { jest } from '@jest/globals'
+import { expect, jest } from '@jest/globals'
 import { apolloServer } from '../../../app/graphql/server.js'
-import { server } from '../../../app/server.js'
+
+const mockLogger = {
+  logger: {
+    error: jest.fn(),
+    info: jest.fn()
+  }
+}
+
+jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
+
+const { server } = await import('../../../app/server.js')
 
 describe('App initialization', () => {
   beforeEach(() => {
@@ -49,6 +59,10 @@ describe('App initialization', () => {
 
     // Verify process exit was called
     expect(process.exit).toHaveBeenCalledWith(1)
+    expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - unhandled rejection', {
+      error,
+      code: expect.any(String)
+    })
   })
 
   it('should handle uncaught exceptions', async () => {
@@ -62,5 +76,9 @@ describe('App initialization', () => {
 
     // Verify process exit was called
     expect(process.exit).toHaveBeenCalledWith(1)
+    expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - uncaught reception', {
+      error,
+      code: expect.any(String)
+    })
   })
 })

@@ -1,11 +1,13 @@
+config.set('auth.disabled', false)
 import nock from 'nock'
+import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 beforeAll(() => {
   nock.disableNetConnect()
 
-  const v1 = nock(process.env.RP_KITS_GATEWAY_INTERNAL_URL)
+  const v1 = nock(config.get('kits.gatewayUrl'))
 
   v1.post('/organisation/search', {
     searchFieldType: 'SBI',

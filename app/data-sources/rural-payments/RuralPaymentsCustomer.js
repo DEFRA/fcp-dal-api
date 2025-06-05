@@ -1,4 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
+import { config } from '../../config.js'
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
@@ -52,7 +53,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     const personBusinessSummaries = await this.get(
       // Currently requires and empty search parameter or it returns 500 error
       // page-size param set to ensure all orgs are retrieved
-      `organisation/person/${personId}/summary?search=&page-size=${process.env.VERSION_1_PAGE_SIZE || 100}`
+      `organisation/person/${personId}/summary?search=&page-size=${config.get('kits.requestPageSize')}`
     )
 
     return personBusinessSummaries._data

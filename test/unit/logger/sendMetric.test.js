@@ -1,4 +1,5 @@
-import { afterAll, beforeAll, jest } from '@jest/globals'
+import { beforeAll, jest } from '@jest/globals'
+import { config } from '../../../app/config.js'
 import { DAL_METRICS_ERROR_001 } from '../../../app/logger/codes.js'
 
 const mockStorageResolution = { Standard: 'Standard', High: 'High' }
@@ -37,16 +38,12 @@ const mockLogger = {
 jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
 
 describe('sendMetric - with NODE_ENV=production', () => {
-  let env, sendMetric
+  let sendMetric
   beforeAll(async () => {
-    env = { ...process.env }
-    process.env.NODE_ENV = 'production'
+    config.set('nodeEnv', 'production')
     jest.unstable_mockModule('aws-embedded-metrics', () => mockawsEmbeddedReturnValue)
     const importedSendMetric = await import('../../../app/logger/sendMetric.js')
     sendMetric = importedSendMetric.sendMetric
-  })
-  afterAll(() => {
-    process.env = env
   })
 
   it('logs a metric with default values and no dimensions', async () => {
