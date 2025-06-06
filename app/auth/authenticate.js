@@ -17,6 +17,12 @@ export async function getJwtPublicKey(kid) {
   })
 
   if (!config.get('disableProxy')) {
+    logger.debug(`#DAL - getJwtPublicKey - using proxy`, {
+      code: DAL_REQUEST_AUTHENTICATION_001,
+      request: {
+        path: config.get('cdp.httpsProxy')
+      }
+    })
     client.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
   } else {
     logger.warn('#DAL - getJwtPublicKey - Proxy disabled', {
