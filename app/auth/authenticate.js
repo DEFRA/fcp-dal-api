@@ -18,8 +18,21 @@ export async function getJwtPublicKey(kid) {
 
   if (!config.get('disableProxy')) {
     client.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
+  } else {
+    logger.warn('#DAL - getJwtPublicKey - Proxy disabled', {
+      code: DAL_REQUEST_AUTHENTICATION_001
+    })
   }
 
+  logger.debug(
+    `#DAL - getJwtPublicKey - getting signing key timeout: ${config.get('oidc.timeoutMs')}`,
+    {
+      code: DAL_REQUEST_AUTHENTICATION_001,
+      request: {
+        path: config.get('oidc.jwksURI')
+      }
+    }
+  )
   const key = await client.getSigningKey(kid)
   return key.getPublicKey()
 }
