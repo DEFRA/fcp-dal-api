@@ -4,6 +4,7 @@ import { defaultFieldResolver } from 'graphql'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwt from 'jsonwebtoken'
 import jwksClient from 'jwks-rsa'
+import { config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { AuthRole } from '../graphql/resolvers/authenticate.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
@@ -11,11 +12,13 @@ import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
 
 export async function getJwtPublicKey(kid) {
-  const client = jwksClient({
-    jwksUri: process.env.OIDC_JWKS_URI,
-    timeout: parseInt(process.env.OIDC_JWKS_TIMEOUT_MS),
-    requestAgent: new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
-  })
+  if (!config.get('disableProxy')) {
+    const client = jwksClient({
+      jwksUri: process.env.OIDC_JWKS_URI,
+      timeout: parseInt(process.env.OIDC_JWKS_TIMEOUT_MS),
+      requestAgent: new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
+    })
+  }
 
   const key = await client.getSigningKey(kid)
   return key.getPublicKey()
