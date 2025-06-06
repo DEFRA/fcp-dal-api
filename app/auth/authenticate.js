@@ -11,14 +11,18 @@ import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
 
 export async function getJwtPublicKey(kid) {
-  const client = jwksClient({
+  const clientConfig = {
     jwksUri: config.get('oidc.jwksURI'),
     timeout: config.get('oidc.timeoutMs')
-  })
+  }
 
   if (!config.get('disableProxy')) {
-    client.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
+    clientConfig.requestAgent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
   }
+
+  const client = jwksClient({
+    ...clientConfig
+  })
 
   const key = await client.getSigningKey(kid)
   return key.getPublicKey()
