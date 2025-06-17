@@ -17,7 +17,7 @@ export async function getJwtPublicKey(kid) {
   }
 
   if (!config.get('disableProxy')) {
-    clientConfig.requestAgent = new HttpsProxyAgent(process.env.CDP_HTTPS_PROXY)
+    clientConfig.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
   }
 
   const client = jwksClient({
