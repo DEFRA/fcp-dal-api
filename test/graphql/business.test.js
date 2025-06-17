@@ -84,6 +84,24 @@ beforeAll(() => {
     { name: 'Permanent Grassland', area: 1 },
     { name: 'Permanent Crops', area: 1 }
   ])
+
+  v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list').reply(200, {
+    data: [
+      {
+        sbi: 'mockSbi',
+        dt_insert: 'mockDtInsert1',
+        dt_delete: 'mockDtDelete1',
+        cph_number: 'mockCph1',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2020-03-20T00:00:00:000+0100',
+        end_date: '2021-03-20T00:00:00:000+0100',
+        address: 'mockAddress',
+        x: 123456,
+        y: 654321
+      }
+    ]
+  })
 })
 
 afterAll(() => {
@@ -147,6 +165,15 @@ describe('Query.business', () => {
             level
             functions
           }
+        }
+        countyParishHoldings {
+          cphNumber
+          parish
+          startDate
+          endDate
+          species
+          xCoordinate
+          yCoordinate
         }
       }
     }
@@ -222,7 +249,18 @@ describe('Query.business', () => {
                 ]
               }
             ]
-          }
+          },
+          countyParishHoldings: [
+            {
+              cphNumber: 'mockCph1',
+              endDate: '2021-03-20',
+              parish: 'mockParish',
+              species: 'mockSpecies',
+              startDate: '2020-03-20',
+              xCoordinate: 123456,
+              yCoordinate: 654321
+            }
+          ]
         }
       }
     })

@@ -89,3 +89,27 @@ export const transformOrganisationToBusiness = (data) => {
     sbi: `${data?.sbi}`
   }
 }
+
+export function transformCountyParishHoldings(data) {
+  return [...data]
+    .sort((a, b) => {
+      if (a.cph_number < b.cph_number) {
+        return -1
+      }
+
+      if (a.cph_number > b.cph_number) {
+        return 1
+      }
+
+      return new Date(b.start_date) - new Date(a.start_date)
+    })
+    .map(({ cph_number, end_date, parish, species, start_date, x, y }) => ({
+      cphNumber: cph_number,
+      endDate: end_date.split('T')[0],
+      parish,
+      species,
+      startDate: start_date.split('T')[0],
+      xCoordinate: x,
+      yCoordinate: y
+    }))
+}

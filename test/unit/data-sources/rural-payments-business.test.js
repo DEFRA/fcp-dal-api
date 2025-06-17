@@ -156,40 +156,14 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('getOrganisationCPHCollectionByOrganisationId', () => {
-    test('should return CPH collection', async () => {
-      const mockResponse = { data: ['CPH1', 'CPH2'] }
+  describe('getCountyParishHoldingsBySBI', () => {
+    test('should return county parish holdings list', async () => {
+      const mockResponse = { data: 'mockData' }
       httpGet.mockImplementationOnce(async () => mockResponse)
 
-      const result = await ruralPaymentsBusiness.getOrganisationCPHCollectionByOrganisationId(123)
+      const result = await ruralPaymentsBusiness.getCountyParishHoldingsBySBI('mockSbi')
       expect(result).toEqual(mockResponse.data)
-      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cph/organisation/123/cph-numbers')
-    })
-  })
-
-  describe('getOrganisationCPHInfoByOrganisationIdAndCPHNumber', () => {
-    test('should return CPH info', async () => {
-      const mockResponse = { data: { cph: 'CPH1', status: 'active' } }
-      httpGet.mockImplementationOnce(async () => mockResponse)
-
-      const result = await ruralPaymentsBusiness.getOrganisationCPHInfoByOrganisationIdAndCPHNumber(
-        123,
-        'CPH1'
-      )
-      expect(result).toEqual(mockResponse.data)
-      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cph/organisation/123/cph-numbers/CPH1')
-    })
-
-    test('should handle encoded CPH numbers', async () => {
-      const mockResponse = { data: { cph: 'CPH/1', status: 'active' } }
-      httpGet.mockImplementationOnce(async () => mockResponse)
-
-      const result = await ruralPaymentsBusiness.getOrganisationCPHInfoByOrganisationIdAndCPHNumber(
-        123,
-        'CPH/1'
-      )
-      expect(result).toEqual(mockResponse.data)
-      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cph/organisation/123/cph-numbers/CPH%2F1')
+      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/cphByBusiness/sbi/mockSbi/list')
     })
   })
 })
