@@ -34,6 +34,7 @@ type CountyParishHolding {
   species: String
   xCoordinate: Int
   yCoordinate: Int
+  address: String
 }
 
 type BusinessCustomerPartial {

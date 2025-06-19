@@ -50,4 +50,9 @@ type CountyParishHolding {
   Y Coordinate of the CPH.
   """
   yCoordinate: Int @on
+
+  """
+  Address
+  """
+  address: String @on
 }
