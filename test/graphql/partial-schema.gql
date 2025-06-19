@@ -20,6 +20,7 @@ type BusinessCustomer {
 type Business {
   organisationId: ID
   sbi: ID!
+  info: BusinessInfo
   land: BusinessLand
   customers: [BusinessCustomerPartial]
   customer(crn: ID!): BusinessCustomer
@@ -43,6 +44,18 @@ type BusinessCustomerPartial {
   lastName: String
   crn: String
   role: String
+}
+
+type BusinessInfo {
+  name: String
+  address: String
+  email: String
+  legalStatus: BusinessType
+  phone: String
+  traderNumber: String
+  type: BusinessType
+  vat: String
+  vendorNumber: String
 }
 
 type BusinessLandParcel {
@@ -84,6 +97,12 @@ type BusinessLandParcelPartial {
   parcelId: String
   area: Float
   pendingDigitisation: Boolean
+}
+
+# eslint-disable-next-line @graphql-eslint/naming-convention
+type BusinessType {
+  code: Int
+  type: String
 }
 
 type CustomerInfo {
