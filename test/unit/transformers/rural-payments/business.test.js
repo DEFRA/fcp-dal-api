@@ -1,6 +1,7 @@
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformCountyParishHoldings,
   transformOrganisationCustomers
 } from '../../../../app/transformers/rural-payments/business.js'
 import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
@@ -79,5 +80,141 @@ describe('Business transformer', () => {
     })
 
     expect(transformedPermissionGroups).toEqual(expectedPermissions)
+  })
+
+  test('#transformCountyParishHoldings sorts CPH numbers numerically by county, parish, and holding', () => {
+    const mockData = [
+      {
+        cph_number: '02/100/00001',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2020-03-20T00:00:00:000Z',
+        end_date: '2021-03-20T00:00:00:000Z',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cph_number: '01/234/56789',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2018-03-20T00:00:00:000Z',
+        end_date: '2019-03-20T00:00:00:000Z',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cph_number: '01/234/12345',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2019-04-15T00:00:00:000Z',
+        end_date: '2020-04-15T00:00:00:000Z',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cph_number: '01/100/99999',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2021-04-15T00:00:00:000Z',
+        end_date: '2022-04-15T00:00:00:000Z',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      }
+    ]
+
+    expect(transformCountyParishHoldings(mockData)).toEqual([
+      {
+        cphNumber: '01/100/99999',
+        endDate: '2022-04-15',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2021-04-15',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cphNumber: '01/234/12345',
+        endDate: '2020-04-15',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2019-04-15',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cphNumber: '01/234/56789',
+        endDate: '2019-03-20',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2018-03-20',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cphNumber: '02/100/00001',
+        endDate: '2021-03-20',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2020-03-20',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      }
+    ])
+  })
+
+  test('#transformCountyParishHoldings sorts by start_date descending', () => {
+    const mockData = [
+      {
+        cph_number: '02/100/00001',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2020-01-01T00:00:00.000Z',
+        end_date: '2020-12-31T00:00:00.000Z',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cph_number: '02/100/00001',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2021-01-01T00:00:00.000Z',
+        end_date: '2021-12-31T00:00:00.000Z',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      }
+    ]
+
+    expect(transformCountyParishHoldings(mockData)).toEqual([
+      {
+        cphNumber: '02/100/00001',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2021-01-01',
+        endDate: '2021-12-31',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cphNumber: '02/100/00001',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2020-01-01',
+        endDate: '2020-12-31',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      }
+    ])
   })
 })

@@ -1,19 +1,4 @@
 """
-X and Y co-ordinates for a CPH.
-"""
-type CPHCoordinate {
-  """
-  X value of the coordinate.
-  """
-  x: Int
-
-  """
-  Y value of the coordinate.
-  """
-  y: Int
-}
-
-"""
 County Parish Holding (CPH) number. It's a unique 9-digit identified for land
 or buildings used to keep livestock and is used for tracking and managing
 livestock movements to help prevent and control disease.
@@ -25,42 +10,49 @@ While RPA issues the CPH number to the customer, APHA is interested in CPH
 for disease control, therefore they may have more up-to-date and granular
 information on species, for example.
 """
-type CPH {
+type CountyParishHolding {
   """
-  CPH number. Consists of the county, the parish and the holding numbers, for example '10/327/0023'
+  CPH number. Consists of the county, the parish and the holding numbers.
+  For example '10/327/0023'
   """
-  number: String
-
-  """
-  Parcel numbers associated with the CPH.  This isn't always up-to-date.
-  """
-  parcelNumbers: [String]
+  cphNumber: ID @on
 
   """
   Parish associated with the CPH.
   """
-  parish: String @excludeFromList
+  parish: String @on
 
   """
   Start date of the CPH.
   """
-  startDate: Date @excludeFromList
+  startDate: Date @on
 
   """
-  Expiry (end) date of the CPH.
+  End date of the CPH.
   """
-  expiryDate: Date @excludeFromList
+  endDate: Date @on
 
   """
-  A list of species associated with the CPH. For example, 'Cattle', Pigs'.
+  A comma-separated list of species associated with the CPH.
+  For example, 'Cattle, Pigs'.
 
   Animal Plant and Health Agency (APHA) also have CPH data. APHA tend to hold more
   up-to-date information regarding species.
   """
-  species: [String] @excludeFromList
+  species: String @on
 
   """
-  Coordinates of the CPH.
+  X Coordinate of the CPH.
   """
-  coordinate: CPHCoordinate @excludeFromList
+  xCoordinate: Int @on
+
+  """
+  Y Coordinate of the CPH.
+  """
+  yCoordinate: Int @on
+
+  """
+  Address
+  """
+  address: String @on
 }

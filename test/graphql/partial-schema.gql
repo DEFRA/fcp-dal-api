@@ -23,6 +23,18 @@ type Business {
   land: BusinessLand
   customers: [BusinessCustomerPartial]
   customer(crn: ID!): BusinessCustomer
+  countyParishHoldings: [CountyParishHolding]
+}
+
+type CountyParishHolding {
+  cphNumber: ID
+  parish: String
+  startDate: Date
+  endDate: Date
+  species: String
+  xCoordinate: Int
+  yCoordinate: Int
+  address: String
 }
 
 type BusinessCustomerPartial {

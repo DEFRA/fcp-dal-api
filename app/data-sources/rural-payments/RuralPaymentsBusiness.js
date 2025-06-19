@@ -108,17 +108,8 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`lms/organisation/${organisationId}/covers-summary/historic/${formattedDate}`)
   }
 
-  async getOrganisationCPHCollectionByOrganisationId(organisationId) {
-    const response = await this.get(`SitiAgriApi/cph/organisation/${organisationId}/cph-numbers`)
-
-    return response.data
-  }
-
-  async getOrganisationCPHInfoByOrganisationIdAndCPHNumber(organisationId, cphNumber) {
-    const response = await this.get(
-      `SitiAgriApi/cph/organisation/${organisationId}/cph-numbers/${encodeURIComponent(cphNumber)}`
-    )
-
+  async getCountyParishHoldingsBySBI(sbi) {
+    const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`)
     return response.data
   }
 }

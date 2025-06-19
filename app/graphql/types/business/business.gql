@@ -157,14 +157,9 @@ type Business {
   land: BusinessLand @on
 
   """
-  County Parish Holding (CPH) numbers of the business.
+  County Parish Holdings (CPH) of the business.
   """
-  cphs: [CPH]
-
-  """
-  County Parish Holding (CPH) number of the business.
-  """
-  cph(number: String!): CPH
+  countyParishHoldings: [CountyParishHolding] @on
 
   """
   Customers associated with the business.

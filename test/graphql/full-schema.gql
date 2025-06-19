@@ -73,15 +73,20 @@ type Business {
   sbi: ID!
   info: BusinessInfo
   land: BusinessLand
-  cphs: [CPHPartial]
-  cph(number: String!): CPH
   customers: [BusinessCustomerPartial]
   customer(crn: ID!): BusinessCustomer
+  countyParishHoldings: [CountyParishHolding]
 }
 
-type CPHPartial {
-  number: String
-  parcelNumbers: [String]
+type CountyParishHolding {
+  cphNumber: ID
+  parish: String
+  startDate: Date
+  endDate: Date
+  species: String
+  xCoordinate: Int
+  yCoordinate: Int
+  address: String
 }
 
 type BusinessCustomerPartial {
@@ -90,21 +95,6 @@ type BusinessCustomerPartial {
   lastName: String
   crn: String
   role: String
-}
-
-type CPHCoordinate {
-  x: Int
-  y: Int
-}
-
-type CPH {
-  number: String
-  parcelNumbers: [String]
-  parish: String
-  startDate: Date
-  expiryDate: Date
-  species: [String]
-  coordinate: CPHCoordinate
 }
 
 type BusinessLandParcel {
