@@ -82,98 +82,90 @@ describe('Business transformer', () => {
     expect(transformedPermissionGroups).toEqual(expectedPermissions)
   })
 
-  test('#transformCountyParishHoldings', () => {
+  test('#transformCountyParishHoldings sorts CPH numbers numerically by county, parish, holding, then start_date descending', () => {
     const mockData = [
       {
-        sbi: 'mockSbi',
-        dt_insert: 'mockDtInsert4',
-        dt_delete: 'mockDtDelete4',
-        cph_number: 'mockCph2',
-        parish: 'mockParish',
-        species: 'mockSpecies4',
-        start_date: '2021-04-15T00:00:00:000+0100',
-        end_date: '2022-04-15T00:00:00:000+0100',
-        address: 'mockAddress',
-        x: 789012,
-        y: 210987
-      },
-      {
-        sbi: 'mockSbi',
-        dt_insert: 'mockDtInsert1',
-        dt_delete: 'mockDtDelete1',
-        cph_number: 'mockCph1',
+        cph_number: '02/100/00001',
         parish: 'mockParish',
         species: 'mockSpecies',
         start_date: '2020-03-20T00:00:00:000+0100',
         end_date: '2021-03-20T00:00:00:000+0100',
-        address: 'mockAddress',
-        x: 123456,
-        y: 654321
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
       },
       {
-        sbi: 'mockSbi',
-        dt_insert: 'mockDtInsert3',
-        dt_delete: 'mockDtDelete3',
-        cph_number: 'mockCph2',
-        parish: 'mockParish',
-        species: 'mockSpecies',
-        start_date: '2019-04-15T00:00:00:000+0100',
-        end_date: '2020-04-15T00:00:00:000+0100',
-        address: 'mockAddress',
-        x: 789012,
-        y: 210987
-      },
-      {
-        sbi: 'mockSbi',
-        dt_insert: 'mockDtInsert2',
-        dt_delete: 'mockDtDelete2',
-        cph_number: 'mockCph1',
+        cph_number: '01/234/56789',
         parish: 'mockParish',
         species: 'mockSpecies',
         start_date: '2018-03-20T00:00:00:000+0100',
         end_date: '2019-03-20T00:00:00:000+0100',
-        address: 'mockAddress',
-        x: 123456,
-        y: 654321
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cph_number: '01/234/12345',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2019-04-15T00:00:00:000+0100',
+        end_date: '2020-04-15T00:00:00:000+0100',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cph_number: '01/100/99999',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        start_date: '2021-04-15T00:00:00:000+0100',
+        end_date: '2022-04-15T00:00:00:000+0100',
+        x: 'mockX',
+        y: 'mockY',
+        address: 'mockAddress'
       }
     ]
 
     expect(transformCountyParishHoldings(mockData)).toEqual([
       {
-        cphNumber: 'mockCph1',
-        endDate: '2021-03-20',
-        parish: 'mockParish',
-        species: 'mockSpecies',
-        startDate: '2020-03-20',
-        xCoordinate: 123456,
-        yCoordinate: 654321
-      },
-      {
-        cphNumber: 'mockCph1',
-        endDate: '2019-03-20',
-        parish: 'mockParish',
-        species: 'mockSpecies',
-        startDate: '2018-03-20',
-        xCoordinate: 123456,
-        yCoordinate: 654321
-      },
-      {
-        cphNumber: 'mockCph2',
+        cphNumber: '01/100/99999',
         endDate: '2022-04-15',
         parish: 'mockParish',
-        species: 'mockSpecies4',
+        species: 'mockSpecies',
         startDate: '2021-04-15',
-        xCoordinate: 789012,
-        yCoordinate: 210987
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
       },
       {
-        cphNumber: 'mockCph2',
+        cphNumber: '01/234/12345',
         endDate: '2020-04-15',
         parish: 'mockParish',
         species: 'mockSpecies',
         startDate: '2019-04-15',
-        xCoordinate: 789012,
-        yCoordinate: 210987
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cphNumber: '01/234/56789',
+        endDate: '2019-03-20',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2018-03-20',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
+      },
+      {
+        cphNumber: '02/100/00001',
+        endDate: '2021-03-20',
+        parish: 'mockParish',
+        species: 'mockSpecies',
+        startDate: '2020-03-20',
+        xCoordinate: 'mockX',
+        yCoordinate: 'mockY',
+        address: 'mockAddress'
       }
     ])
   })

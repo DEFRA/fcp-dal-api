@@ -89,6 +89,7 @@ describe('Business', () => {
       })
     ).toEqual([
       {
+        address: 'mockAddress',
         cphNumber: 'mockCph1',
         endDate: '2021-03-20',
         parish: 'mockParish',
