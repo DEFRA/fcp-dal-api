@@ -92,17 +92,10 @@ export const transformOrganisationToBusiness = (data) => {
 
 export function transformCountyParishHoldings(data) {
   return [...data]
-    .sort((a, b) => {
-      if (a.cph_number < b.cph_number) {
-        return -1
-      }
-
-      if (a.cph_number > b.cph_number) {
-        return 1
-      }
-
-      return new Date(b.start_date) - new Date(a.start_date)
-    })
+    .sort(
+      (a, b) =>
+        a.cph_number.localeCompare(b.cph_number) || new Date(b.start_date) - new Date(a.start_date)
+    )
     .map(({ cph_number, end_date, parish, species, start_date, x, y }) => ({
       cphNumber: cph_number,
       endDate: end_date.split('T')[0],
