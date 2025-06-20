@@ -5,10 +5,10 @@ type BusinessInfo {
   """
   Name of the business.
   """
-  name: String
+  name: String @on
 
   """
-  Firm Refererence Number (FRN) of the business.
+  Firm Reference Number (FRN) of the business.
 
   A unique 10-digit number that is known to the customer, for example, 1234567890.
   However a customer is more likely to be familiar with their Single Business Identified
@@ -20,42 +20,42 @@ type BusinessInfo {
   """
   VAT number of the business.
   """
-  vat: String
+  vat: String @on
 
   """
   Trader number of the business.
   """
-  traderNumber: String
+  traderNumber: String @on
 
   """
   Vendor number of the business.
   """
-  vendorNumber: String
+  vendorNumber: String @on
 
   """
   Address of the business.
   """
-  address: Address
+  address: Address @on
 
   """
   Telephone number of the business.
   """
-  phone: Phone
+  phone: Phone @on
 
   """
   Email address of the business.
   """
-  email: Email
+  email: Email @on
 
   """
   Legal status of the business. For example, Sole Proprietorship.
   """
-  legalStatus: BusinessType
+  legalStatus: BusinessType @on
 
   """
   Type of the business.
   """
-  type: BusinessType
+  type: BusinessType @on
 
   """
   Various registration numbers for the business. For example, Companies House number.
@@ -85,12 +85,12 @@ type BusinessType {
   """
   Code of the business type.
   """
-  code: Int
+  code: Int @on
 
   """
   Description of the business type.
   """
-  type: String
+  type: String @on
 }
 
 """
@@ -98,7 +98,7 @@ Customers/contacts of the business.
 """
 type BusinessCustomer {
   """
-  Interal SitiAgri/Portal unique identifier of the customer.
+  Internal SitiAgri/Portal unique identifier of the customer.
   """
   personId: ID @on
 
@@ -137,7 +137,7 @@ type Business {
   """
   Internal SitiAgri/Portal unique identifier for the business.
   """
-  organisationId: ID @on #eslint-disable-line @graphql-eslint/no-typename-prefix
+  organisationId: ID @on
   """
   Single Business Identifier (SBI) of the business.
 
@@ -149,7 +149,7 @@ type Business {
   """
   Information of the business.
   """
-  info: BusinessInfo
+  info: BusinessInfo @on
 
   """
   Land for the business.
