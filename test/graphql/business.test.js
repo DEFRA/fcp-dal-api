@@ -4,7 +4,7 @@ import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
-beforeAll(() => {
+const setupNock = () => {
   nock.disableNetConnect()
 
   const v1 = nock(config.get('kits.gatewayUrl'))
@@ -27,6 +27,40 @@ beforeAll(() => {
       id: 'organisationId',
       sbi: 'sbi',
       name: 'name',
+      email: 'email address',
+      address: {
+        address1: 'line1',
+        address2: 'line2',
+        address3: 'line3',
+        address4: 'line4',
+        address5: 'line5',
+        pafOrganisationName: 'paf organisation name',
+        buildingNumberRange: 'building number range',
+        buildingName: 'building name',
+        flatName: 'flat name',
+        street: 'street',
+        city: 'city',
+        county: 'county',
+        postalCode: 'postal code',
+        country: 'country',
+        uprn: 'uprn',
+        dependentLocality: 'dependent locality',
+        doubleDependentLocality: 'double dependent locality',
+        addressTypeId: 'address type'
+      },
+      legalStatus: {
+        id: 101,
+        type: 'legal type'
+      },
+      landline: 'landline number',
+      mobile: 'mobile number',
+      traderNumber: 'trader number',
+      businessType: {
+        id: 101,
+        type: 'business type'
+      },
+      taxRegistrationNumber: 'vat number',
+      vendorNumber: 'vendor number',
       businessReference: 'businessReference'
     }
   })
@@ -102,12 +136,7 @@ beforeAll(() => {
       }
     ]
   })
-})
-
-afterAll(() => {
-  nock.cleanAll()
-  nock.enableNetConnect()
-})
+}
 
 describe('Query.business', () => {
   const query = `#graphql
@@ -115,6 +144,47 @@ describe('Query.business', () => {
       business(sbi: "sbi") {
         organisationId
         sbi
+        info {
+          name
+          address {
+            pafOrganisationName
+            line1
+            line2
+            line3
+            line4
+            line5
+            buildingNumberRange
+            buildingName
+            flatName
+            street
+            city
+            county
+            postalCode
+            country
+            uprn
+            dependentLocality
+            doubleDependentLocality
+            typeId
+          }
+          email {
+            address
+          }
+          legalStatus {
+            code
+            type
+          }
+          phone {
+            mobile
+            landline
+          }
+          traderNumber
+          type {
+            code
+            type
+          }
+          vat
+          vendorNumber
+        }
         land {
           parcels(date: "2025-05-04") {
             id
@@ -179,6 +249,13 @@ describe('Query.business', () => {
     }
   `
 
+  beforeAll(setupNock)
+
+  afterAll(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
   test('authenticated', async () => {
     const result = await makeTestQuery(query)
 
@@ -187,6 +264,36 @@ describe('Query.business', () => {
         business: {
           organisationId: 'organisationId',
           sbi: 'sbi',
+          info: {
+            name: 'name',
+            address: {
+              pafOrganisationName: 'paf organisation name',
+              line1: 'line1',
+              line2: 'line2',
+              line3: 'line3',
+              line4: 'line4',
+              line5: 'line5',
+              buildingNumberRange: 'building number range',
+              buildingName: 'building name',
+              flatName: 'flat name',
+              street: 'street',
+              city: 'city',
+              county: 'county',
+              postalCode: 'postal code',
+              country: 'country',
+              uprn: 'uprn',
+              dependentLocality: 'dependent locality',
+              doubleDependentLocality: 'double dependent locality',
+              typeId: 'address type'
+            },
+            email: { address: 'email address' },
+            legalStatus: { code: 101, type: 'legal type' },
+            phone: { mobile: 'mobile number', landline: 'landline number' },
+            traderNumber: 'trader number',
+            type: { code: 101, type: 'business type' },
+            vat: 'vat number',
+            vendorNumber: 'vendor number'
+          },
           land: {
             parcels: [
               {

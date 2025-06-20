@@ -48,10 +48,10 @@ type BusinessCustomerPartial {
 
 type BusinessInfo {
   name: String
-  address: String
-  email: String
+  address: Address
+  email: Email
   legalStatus: BusinessType
-  phone: String
+  phone: Phone
   traderNumber: String
   type: BusinessType
   vat: String
@@ -160,13 +160,10 @@ type CustomerBusinessMessage {
   deleted: Boolean
 }
 
-enum PermissionLevel {
-  NO_ACCESS
-  VIEW
-  AMEND
-  SUBMIT
-  MAKE_LEGAL_CHANGES
-  FULL_PERMISSION
+type ActivePermissionGroup {
+  id: PermissionGroupId!
+  level: PermissionLevel
+  functions: [String]
 }
 
 enum PermissionGroupId {
@@ -179,8 +176,44 @@ enum PermissionGroupId {
   LAND_DETAILS
 }
 
-type ActivePermissionGroup {
-  id: PermissionGroupId!
-  level: PermissionLevel
-  functions: [String]
+enum PermissionLevel {
+  NO_ACCESS
+  VIEW
+  AMEND
+  SUBMIT
+  MAKE_LEGAL_CHANGES
+  FULL_PERMISSION
+}
+
+type Address {
+  pafOrganisationName: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String
+  county: String
+  postalCode: String
+  country: String
+  uprn: String
+  dependentLocality: String
+  doubleDependentLocality: String
+  typeId: String
+}
+
+type Email {
+  address: String
+  validated: Boolean
+  doNotContact: Boolean
+}
+
+type Phone {
+  mobile: String
+  landline: String
+  fax: String
 }

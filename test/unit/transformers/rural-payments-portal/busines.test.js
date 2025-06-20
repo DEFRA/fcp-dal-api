@@ -9,6 +9,11 @@ describe('Business transformer', () => {
       organisationId: '5565448',
       info: {
         address: {
+          line1: '76 Robinswood Road',
+          line2: 'UPPER CHUTE',
+          line3: 'Child Okeford',
+          line4: null,
+          line5: null,
           buildingName: 'STOCKWELL HALL',
           buildingNumberRange: '7',
           city: 'DARLINGTON',
@@ -49,6 +54,11 @@ describe('Business transformer', () => {
       organisationId: '5625145',
       info: {
         address: {
+          line1: 'Estate Office',
+          line2: 'Crawley',
+          line3: null,
+          line4: null,
+          line5: null,
           buildingName: 'LADYWOOD LODGE FARM',
           buildingNumberRange: null,
           city: 'ALNWICK',

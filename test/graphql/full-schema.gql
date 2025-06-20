@@ -20,6 +20,11 @@ type Email {
 
 type Address {
   pafOrganisationName: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
   buildingNumberRange: String
   buildingName: String
   flatName: String

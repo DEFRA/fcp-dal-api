@@ -3,12 +3,12 @@ type Phone {
   """
   Mobile number of the customer or business
   """
-  mobile: String
+  mobile: String @on
 
   """
   Landline number of the customer or business
   """
-  landline: String
+  landline: String @on
 
   """
   Fax number of the customer or business
@@ -21,7 +21,7 @@ type Email {
   """
   Email address of the customer or business
   """
-  address: String
+  address: String @on
 
   """
   Validated status of the email address
@@ -39,67 +39,92 @@ type Address {
   """
   PAF organisation name
   """
-  pafOrganisationName: String
+  pafOrganisationName: String @on
+
+  """
+  First line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line1: String @on
+
+  """
+  Second line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line2: String @on
+
+  """
+  Third line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line3: String @on
+
+  """
+  Fourth line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line4: String @on
+
+  """
+  Fifth line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line5: String @on
 
   """
   Building number range of the address
   """
-  buildingNumberRange: String
+  buildingNumberRange: String @on
 
   """
   Building name of the address
   """
-  buildingName: String
+  buildingName: String @on
 
   """
   Flat name of the address
   """
-  flatName: String
+  flatName: String @on
 
   """
   Street of the address
   """
-  street: String
+  street: String @on
 
   """
   Locality of the address
   """
-  city: String
+  city: String @on
 
   """
   County of the address
   """
-  county: String
+  county: String @on
 
   """
   Postal code of the address
   """
-  postalCode: String
+  postalCode: String @on
 
   """
   Country of the address
   """
-  country: String
+  country: String @on
 
   """
   UPRN of the address
   """
-  uprn: String
+  uprn: String @on
 
   """
   Dependant locality of the address
   """
-  dependentLocality: String
+  dependentLocality: String @on
 
   """
   Double dependant locality of the address
   """
-  doubleDependentLocality: String
+  doubleDependentLocality: String @on
 
   """
   Type ID of the address
   """
-  typeId: String
+  typeId: String @on
 }
 
 "Represents data about a pagination details for a list of items"
