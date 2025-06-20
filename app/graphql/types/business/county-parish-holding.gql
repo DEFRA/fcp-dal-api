@@ -1,14 +1,9 @@
 """
-County Parish Holding (CPH) number. A 9-digit identifier for
-land or buildings used to keep livestock or places that
-use animal by-products. Used for tracking and managing
-livestock movements to help prevent and control disease.
+County Parish Holding (CPH).  Customers need a CPH for land or buildings
+used to keep livestock or if the business uses animal by products. Used for
+tracking and managing livestock movements to help prevent and control disease.
 
-The last 4-digits (e.g. 12/34/xxxx) will indicate the type: 0001-4999 are
-standard CPHs. 7000-7999 are temporary. 8000-8999 are for non-agricultural
-holdings (e.g. livestock markets, meat product plants, seaports).
-
-A business can have zero, one or more CPH numbers.
+A business can have more than one CPH.
 
 Data Source: SitiAgri
 
@@ -19,8 +14,12 @@ information on species, for example.
 """
 type CountyParishHolding {
   """
-  CPH number. 9-digit number, consisting of the county (2-digits), the parish
+  CPH number. A 9-digit number, consisting of the county (2-digits), the parish
   (3-digits) and the holding (4-digits).  For example '12/345/6789'.
+
+  The last 4-digits (e.g. 12/34/xxxx) indicate the type: 0001-4999 are
+  standard CPHs. 7000-7999 are temporary. 8000-8999 are for non-agricultural
+  holdings (e.g. livestock markets, meat product plants, seaports).
   """
   cphNumber: ID @on
 
