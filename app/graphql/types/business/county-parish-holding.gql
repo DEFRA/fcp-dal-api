@@ -1,7 +1,9 @@
 """
-County Parish Holding (CPH) number. It's a unique 9-digit identified for land
-or buildings used to keep livestock and is used for tracking and managing
-livestock movements to help prevent and control disease.
+County Parish Holding (CPH).  Customers need a CPH for land or buildings
+used to keep livestock or if the business uses animal by products. Used for
+tracking and managing livestock movements to help prevent and control disease.
+
+A business can have more than one CPH.
 
 Data Source: SitiAgri
 
@@ -12,8 +14,12 @@ information on species, for example.
 """
 type CountyParishHolding {
   """
-  CPH number. Consists of the county, the parish and the holding numbers.
-  For example '10/327/0023'
+  CPH number. A 9-digit number, consisting of the county (2-digits), the parish
+  (3-digits) and the holding (4-digits).  For example '12/345/6789'.
+
+  The last 4-digits (e.g. 12/34/xxxx) indicate the type: 0001-4999 are
+  standard CPHs. 7000-7999 are temporary. 8000-8999 are for non-agricultural
+  holdings (e.g. livestock markets, meat product plants, seaports).
   """
   cphNumber: ID @on
 
@@ -28,7 +34,8 @@ type CountyParishHolding {
   startDate: Date @on
 
   """
-  End date of the CPH.
+  End date of the CPH. If CPH is active, the date will be open ended. It will also be
+  set for temporary CPHs.
   """
   endDate: Date @on
 
@@ -42,17 +49,18 @@ type CountyParishHolding {
   species: String @on
 
   """
-  X Coordinate of the CPH.
+  X Coordinate (Easting) of the centre of the CPH using the National Grid OSG836 datum.
   """
   xCoordinate: Int @on
 
   """
-  Y Coordinate of the CPH.
+  Y Coordinate (Northing) of the centre of the CPH using the National Grid OSG836 datum.
   """
   yCoordinate: Int @on
 
   """
-  Address
+  Address of the land or correspondence address if issuing a temporary CPH. For
+  common land, it should begin with 'CL @' followed by the common name and address.
   """
   address: String @on
 }
