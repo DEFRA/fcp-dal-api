@@ -128,7 +128,7 @@ type BusinessLand {
   parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover] @on
 
   """
-  Summary of the land for a particular date for a business. 
+  Summary of the land for a particular date for a business.
   The earliest date is 01/01/2015.
   """
   summary(date: Date): BusinessLandSummary @on
