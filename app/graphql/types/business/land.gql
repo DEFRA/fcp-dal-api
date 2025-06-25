@@ -1,9 +1,10 @@
 """
-A land parcel for a business
+A land parcel for a business.
+When a change happens to a land parcel a new verion is created.
 """
 type BusinessLandParcel {
   """
-  Unique identifier of the land parcel.
+  Unique internal identifier of the land parcel.
   """
   id: ID! @on
 
@@ -23,20 +24,19 @@ type BusinessLandParcel {
   area: Float @on
 
   """
-  Indicates if a parcel has a pending Customer Notified Change (CNC). CNC changes could be a boundary change, parcel merge, split etc.
+  Indicates if a parcel has a pending Customer Notified Change (CNC).
+  CNC could be a boundary change, parcel merge, split etc.
   """
   pendingDigitisation: Boolean @on
 
   """
-  Effective to date of the land parcel. Each change to a land parcel is versioned.
-  This date indicates the day before the next change occurred.
+  Date when this version of the land parcel finished.
+  A date of 31/12/9999 indicates that this is the latest version of the parcel.
   """
   effectiveToDate: Date @on @excludeFromList
 
   """
-  Effective from date of the land parcel. Each change to a land parcel is versioned.
-  This date indicates the date when the change came into effect. A date of 31/12/9999
-  indicates that this is the latest version of the parcel.
+  Date when this version of the land parcel came into effect.
   """
   effectiveFromDate: Date @on @excludeFromList
 }
@@ -76,7 +76,7 @@ Land cover of a parcel for a business.
 """
 type BusinessLandCover {
   """
-  Unique identifier of the land cover.
+  Unique internal identifier of the land cover.
   """
   id: ID! @on
 
@@ -91,12 +91,12 @@ type BusinessLandCover {
   area: Float @on
 
   """
-  Code of the land cover. For example, '110' is the code for 'Arable Land'.
+  Internal code of the land cover. For example, '110' is the code for 'Arable Land'.
   """
   code: String @on
 
   """
-  Whether the land cover is Basic Payment Scheme (BPS) eligible.
+  Indicates whether the land cover is Basic Payment Scheme (BPS) eligible.
   """
   isBpsEligible: Boolean @on
 }
@@ -108,23 +108,28 @@ Data Source: Land Management System (LMS)
 """
 type BusinessLand {
   """
-  Parcels of the business land for a particular date in time for a business. The earliest date is 01/01/2015.
+  Parcels of the business land for a particular date for a business.
+  The earliest date is 01/01/2015.
   """
   parcels(date: Date): [BusinessLandParcel] @on
 
   """
-  A single parcel of the business land based on its SheetId and ParcelId for a particular date
-  for a business. The earliest date is 01/01/2015.
+  A single parcel of the business land based on its SheetId and ParcelId for a
+  particular date for a business.
+  The earliest date is 01/01/2015.
   """
   parcel(date: Date, sheetId: ID!, parcelId: ID!): BusinessLandParcel @on
 
   """
-  Covers of a single parcel based on its SheetId and ParcelId for a particular date for a busines.
+  Land covers of a single parcel based on its SheetId and ParcelId for a particular
+  date for a busines.
+  The earliest date is 01/01/2015.
   """
   parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover] @on
 
   """
-  Summary of the land for a business.
+  Summary of the land for a particular date for a business.
+  The earliest date is 01/01/2015.
   """
   summary(date: Date): BusinessLandSummary @on
 }
