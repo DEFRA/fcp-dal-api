@@ -16,3 +16,7 @@
 npm-debug.log
 coverage
 node_modules
+*.cer
+*.key
+*.csr
+*.crt

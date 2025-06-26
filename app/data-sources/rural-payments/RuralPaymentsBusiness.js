@@ -17,7 +17,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
-  async getOrganisationBySBI(sbi) {
+  async lookupOrganisationBySBI(sbi) {
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,
@@ -41,6 +41,12 @@ export class RuralPaymentsBusiness extends RuralPayments {
     }
 
     const response = organisationResponse?._data?.pop() || {}
+
+    return organisationResponse?._data?.pop() || {}
+  }
+
+  async getOrganisationBySBI(sbi) {
+    const response = this.lookupOrganisationBySBI(sbi)
 
     return response?.id ? this.getOrganisationById(response.id) : null
   }
@@ -111,5 +117,20 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async getCountyParishHoldingsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`)
     return response.data
+  }
+
+  async updateOrganisationDetails(organisationId, business) {
+    const body = business
+    this.put(`/organisation/${organisationId}/business-details`, {
+      body,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  }
+
+  async updateOrganisationBySBI(sbi, business) {
+    const { orgId } = this.lookupOrganisationBySBI(sbi)
+    return updateOrganisationDetails(orgId, business)
   }
 }
