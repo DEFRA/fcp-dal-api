@@ -166,4 +166,15 @@ describe('Rural Payments Business', () => {
       expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/cphByBusiness/sbi/mockSbi/list')
     })
   })
+
+  describe('getAgreementsBySBI', () => {
+    test('should return agreements list', async () => {
+      const mockResponse = { data: 'mockData' }
+      httpGet.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.getAgreementsBySBI('mockSbi')
+      expect(result).toEqual(mockResponse.data)
+      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/agreementsByBusiness/sbi/mockSbi/list')
+    })
+  })
 })

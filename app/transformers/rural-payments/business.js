@@ -119,3 +119,38 @@ export function transformCountyParishHoldings(data) {
       yCoordinate: y
     }))
 }
+
+export function transformAgreements(agreements) {
+  return agreements.map(transformAgreement)
+}
+
+function transformAgreement(agreement) {
+  return {
+    contractId: agreement.contract_id,
+    name: agreement.agreement_name,
+    status: agreement.status,
+    contractType: agreement.contract_type,
+    schemeYear: agreement.scheme_year,
+    startDate: agreement.start_date,
+    endDate: agreement.end_date,
+    paymentSchedules: agreement.payment_schedules.map(transformPaymentSchedule)
+  }
+}
+
+function transformPaymentSchedule(paymentSchedule) {
+  return {
+    optionCode: paymentSchedule.option_code,
+    optionDescription: paymentSchedule.option_description,
+    commitmentGroupStartDate: paymentSchedule.commitment_group_start_date,
+    commitmentGroupEndDate: paymentSchedule.commitment_group_end_date,
+    year: paymentSchedule.year,
+    sheetName: paymentSchedule.sheet_name,
+    parcelName: paymentSchedule.parcel_name,
+    actionArea: paymentSchedule.action_area,
+    actionMTL: paymentSchedule.action_mtl,
+    actionUnits: paymentSchedule.action_units,
+    parcelTotalArea: paymentSchedule.parcel_total_area,
+    startDate: paymentSchedule.payment_schedule_start_date,
+    endDate: paymentSchedule.payment_schedule_end_date
+  }
+}
