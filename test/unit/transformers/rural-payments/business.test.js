@@ -1,5 +1,6 @@
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
+  transformAgreements,
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformCountyParishHoldings,
   transformOrganisationCustomers
@@ -214,6 +215,66 @@ describe('Business transformer', () => {
         xCoordinate: 'mockX',
         yCoordinate: 'mockY',
         address: 'mockAddress'
+      }
+    ])
+  })
+
+  test('#transformAgreements', () => {
+    const mockData = [
+      {
+        contract_id: '123',
+        agreement_name: 'mockAgreement',
+        status: 'mockStatus',
+        contract_type: 'mockContractType',
+        scheme_year: 'mockSchemeYear',
+        start_date: '2020-01-01T00:00:00.000Z',
+        end_date: '2020-12-31T00:00:00.000Z',
+        payment_schedules: [
+          {
+            option_code: 'mockOptionCode',
+            option_description: 'mockOptionDescription',
+            commitment_group_start_date: '2020-01-01T00:00:00.000Z',
+            commitment_group_end_date: '2020-12-31T00:00:00.000Z',
+            year: '2020',
+            sheet_name: 'mockSheetName',
+            parcel_name: 'mockParcelName',
+            action_area: 'mockActionArea',
+            action_mtl: 'mockActionMTL',
+            action_units: 'mockActionUnits',
+            parcel_total_area: 'mockParcelTotalArea',
+            payment_schedule_start_date: '2020-01-01T00:00:00.000Z',
+            payment_schedule_end_date: '2020-12-31T00:00:00.000Z'
+          }
+        ]
+      }
+    ]
+
+    expect(transformAgreements(mockData)).toEqual([
+      {
+        contractId: '123',
+        name: 'mockAgreement',
+        status: 'mockStatus',
+        contractType: 'mockContractType',
+        schemeYear: 'mockSchemeYear',
+        startDate: '2020-01-01T00:00:00.000Z',
+        endDate: '2020-12-31T00:00:00.000Z',
+        paymentSchedules: [
+          {
+            optionCode: 'mockOptionCode',
+            optionDescription: 'mockOptionDescription',
+            commitmentGroupStartDate: '2020-01-01T00:00:00.000Z',
+            commitmentGroupEndDate: '2020-12-31T00:00:00.000Z',
+            year: '2020',
+            sheetName: 'mockSheetName',
+            parcelName: 'mockParcelName',
+            actionArea: 'mockActionArea',
+            actionMTL: 'mockActionMTL',
+            actionUnits: 'mockActionUnits',
+            parcelTotalArea: 'mockParcelTotalArea',
+            startDate: '2020-01-01T00:00:00.000Z',
+            endDate: '2020-12-31T00:00:00.000Z'
+          }
+        ]
       }
     ])
   })
