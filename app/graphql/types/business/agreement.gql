@@ -83,24 +83,24 @@ type PaymentSchedule {
   parcelName: String @on
 
   """
-  Action area for the payment schedule.
+  Action area - Area (in hectares) of the action.
   """
-  actionArea: Float @on
+  actionArea: Int @on
 
   """
-  Action MTL for the payment schedule.
+  Action MTL - Length (in metres) of the action.
   """
-  actionMTL: Float @on
+  actionMTL: Int @on
 
   """
-  Action units for the payment schedule.
+  Action units - Number of units of the action.
   """
-  actionUnits: Float @on
+  actionUnits: Int @on
 
   """
-  Parcel total area for the payment schedule.
+  Parcel total area - Total area (in hectares) of the parcel.
   """
-  parcelTotalArea: Float @on
+  parcelTotalArea: Int @on
 
   """
   Payment schedule start date for the payment schedule.

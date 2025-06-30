@@ -81,10 +81,10 @@ type PaymentSchedule {
   year: Int
   sheetName: String
   parcelName: String
-  actionArea: Float
-  actionMTL: Float
-  actionUnits: Float
-  parcelTotalArea: Float
+  actionArea: Int
+  actionMTL: Int
+  actionUnits: Int
+  parcelTotalArea: Int
   startDate: Date
   endDate: Date
 }

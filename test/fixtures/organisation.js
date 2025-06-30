@@ -21,7 +21,3 @@ export const organisationApplicationsByOrgId = (orgId) => {
 export const organisationPersonSummary = (attributes = {}) => {
   return getJSON(`./personId/${attributes.id}/organisationSummary.json`)
 }
-
-export const organisationAgreementsBySbi = (sbi) => {
-  return getJSON(`./sbi/${sbi}/organisation-agreements.json`)
-}
