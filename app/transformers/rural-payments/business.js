@@ -67,15 +67,46 @@ export const transformOrganisationToBusiness = (data) => {
         doubleDependentLocality: data?.address?.doubleDependentLocality,
         typeId: data?.address?.addressTypeId
       },
+      correspondenceAddress:
+        (data?.correspondenceAddress && {
+          line1: data.correspondenceAddress.address1,
+          line2: data.correspondenceAddress.address2,
+          line3: data.correspondenceAddress.address3,
+          line4: data.correspondenceAddress.address4,
+          line5: data.correspondenceAddress.address5,
+          pafOrganisationName: data.correspondenceAddress.pafOrganisationName,
+          buildingNumberRange: data.correspondenceAddress.buildingNumberRange,
+          buildingName: data.correspondenceAddress.buildingName,
+          flatName: data.correspondenceAddress.flatName,
+          street: data.correspondenceAddress.street,
+          city: data.correspondenceAddress.city,
+          county: data.correspondenceAddress.county,
+          postalCode: data.correspondenceAddress.postalCode,
+          country: data.correspondenceAddress.country,
+          uprn: data.correspondenceAddress.uprn,
+          dependentLocality: data.correspondenceAddress.dependentLocality,
+          doubleDependentLocality: data.correspondenceAddress.doubleDependentLocality,
+          typeId: data.correspondenceAddress.addressTypeId
+        }) ||
+        null,
       phone: {
         mobile: data?.mobile,
         landline: data?.landline,
         fax: data?.fax
       },
+      correspondencePhone: {
+        mobile: data?.correspondenceMobile,
+        landline: data?.correspondenceLandline,
+        fax: data?.correspondenceFax
+      },
       email: {
         address: data?.email,
         validated: data?.emailValidated,
         doNotContact: data?.doNotContact || false
+      },
+      correspondenceEmail: {
+        address: data?.correspondenceEmail,
+        validated: data?.correspondenceEmailValidated || false
       },
       legalStatus: {
         code: data?.legalStatus?.id,
@@ -88,7 +119,24 @@ export const transformOrganisationToBusiness = (data) => {
       registrationNumbers: {
         companiesHouse: data?.companiesHouseRegistrationNumber,
         charityCommission: data?.charityCommissionRegistrationNumber
-      }
+      },
+      additionalSbis: data?.additionalSbiIds || [],
+      confirmed: data?.confirmed || false,
+      isAccountablePeopleDeclarationCompleted:
+        data?.isAccountablePeopleDeclarationCompleted || false,
+      dateStartedFarming: data?.dateStartedFarming ? new Date(data.dateStartedFarming) : null,
+      lastUpdated: data?.lastUpdatedOn ? new Date(data.lastUpdatedOn) : null,
+      landConfirmed: data?.landConfirmed || false,
+      deactivated: data?.deactivated || false,
+      locked: data?.locked || false,
+      isFinancialToBusinessAddress: data?.isFinancialToBusinessAddr || false,
+      isCorrespondenceAsBusinessAddress: data?.isCorrespondenceAsBusinessAddr || false,
+      hasLandInNorthernIreland: data?.hasLandInNorthernIreland || false,
+      hasLandInScotland: data?.hasLandInScotland || false,
+      hasLandInWales: data?.hasLandInWales || false,
+      hasAdditionalBusinessActivities: data?.hasAdditionalBusinessActivities || false,
+      additionalBusinessActivities:
+        data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || []
     },
     organisationId: `${data?.id}`,
     sbi: `${data?.sbi}`

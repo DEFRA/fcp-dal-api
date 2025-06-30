@@ -1,94 +1,180 @@
 import { transformOrganisationToBusiness } from '../../../../app/transformers/rural-payments/business.js'
-import { organisationByOrgId } from '../../../fixtures/organisation.js'
+
+const organisation = {
+  id: 11111,
+  name: 'org name',
+  sbi: 11111111,
+  additionalSbiIds: [11111112],
+  confirmed: true,
+  lastUpdatedOn: 1622119577305,
+  landConfirmed: true,
+  deactivated: true,
+  locked: true,
+  address: {
+    address1: 'line1',
+    address2: 'line2',
+    address3: 'line3',
+    address4: 'line4',
+    address5: 'line5',
+    pafOrganisationName: 'paf org name',
+    flatName: 'flat name',
+    buildingNumberRange: 'building number range',
+    buildingName: 'building name',
+    street: 'street',
+    city: 'city',
+    county: 'county',
+    postalCode: 'post code',
+    country: 'country',
+    uprn: 'uprn',
+    dependentLocality: 'dependentLocality',
+    doubleDependentLocality: 'doubleDependentLocality',
+    addressTypeId: null
+  },
+  correspondenceAddress: {
+    address1: 'correspondence line1',
+    address2: 'correspondence line2',
+    address3: 'correspondence line3',
+    address4: 'correspondence line4',
+    address5: 'correspondence line5',
+    pafOrganisationName: 'correspondence paf org name',
+    flatName: 'correspondence flat name',
+    buildingNumberRange: 'correspondence building number range',
+    buildingName: 'correspondence building name',
+    street: 'correspondence street',
+    city: 'correspondence city',
+    county: 'correspondence county',
+    postalCode: 'correspondence post code',
+    country: 'correspondence country',
+    uprn: 'correspondence uprn',
+    dependentLocality: 'correspondence dependentLocality',
+    doubleDependentLocality: 'correspondence doubleDependentLocality',
+    addressTypeId: null
+  },
+  isFinancialToBusinessAddr: true,
+  isCorrespondenceAsBusinessAddr: true,
+  email: 'email address',
+  emailValidated: true,
+  doNotContact: true,
+  landline: 'landline',
+  mobile: 'mobile',
+  fax: 'fax',
+  correspondenceEmail: 'correspondence email address',
+  correspondenceEmailValidated: true,
+  correspondenceLandline: 'correspondence landline',
+  correspondenceMobile: 'correspondence mobile',
+  correspondenceFax: 'correspondence fax',
+  taxRegistrationNumber: 'vat taxRegistrationNumber',
+  businessType: {
+    id: 101404,
+    type: 'businessType type'
+  },
+  businessReference: 'businessReference',
+  legalStatus: {
+    id: 101404,
+    type: 'legalStatus type'
+  },
+  dateStartedFarming: 1622119577305,
+  companiesHouseRegistrationNumber: 'companiesHouseRegistrationNumber',
+  charityCommissionRegistrationNumber: 'charityCommissionRegistrationNumber',
+  persons: [],
+  hasLandInNorthernIreland: true,
+  hasLandInScotland: true,
+  hasLandInWales: true,
+  hasAdditionalBusinessActivities: true,
+  vendorNumber: 'vendorNumber',
+  traderNumber: 'traderNumber',
+  isAccountablePeopleDeclarationCompleted: true,
+  additionalBusinessActivities: [{ id: 101404, type: 'additionalBusinessActivities type' }]
+}
 
 describe('Business transformer', () => {
   test('transformOrganisationToBusiness', () => {
-    const { _data: organisation } = organisationByOrgId(5565448)
-
     expect(transformOrganisationToBusiness(organisation)).toEqual({
-      organisationId: '5565448',
+      organisationId: '11111',
       info: {
+        additionalBusinessActivities: [{ code: 101404, type: 'additionalBusinessActivities type' }],
+        additionalSbis: [11111112],
+        confirmed: true,
+        lastUpdated: new Date('2021-05-27T12:46:17.305Z'),
+        landConfirmed: true,
+        deactivated: true,
+        locked: true,
         address: {
-          line1: '76 Robinswood Road',
-          line2: 'UPPER CHUTE',
-          line3: 'Child Okeford',
-          line4: null,
-          line5: null,
-          buildingName: 'STOCKWELL HALL',
-          buildingNumberRange: '7',
-          city: 'DARLINGTON',
-          country: 'United Kingdom',
-          county: 'Dorset',
-          dependentLocality: 'ELLICOMBE',
-          doubleDependentLocality: 'WOODTHORPE',
-          flatName: 'THE COACH HOUSE',
-          pafOrganisationName: 'FORTESCUE ESTATES',
-          postalCode: 'CO9 3LS',
-          street: 'HAREWOOD AVENUE',
-          typeId: null,
-          uprn: '10008695234'
+          line1: 'line1',
+          line2: 'line2',
+          line3: 'line3',
+          line4: 'line4',
+          line5: 'line5',
+          pafOrganisationName: 'paf org name',
+          flatName: 'flat name',
+          buildingNumberRange: 'building number range',
+          buildingName: 'building name',
+          street: 'street',
+          city: 'city',
+          county: 'county',
+          postalCode: 'post code',
+          country: 'country',
+          uprn: 'uprn',
+          dependentLocality: 'dependentLocality',
+          doubleDependentLocality: 'doubleDependentLocality',
+          typeId: null
         },
+        correspondenceAddress: {
+          line1: 'correspondence line1',
+          line2: 'correspondence line2',
+          line3: 'correspondence line3',
+          line4: 'correspondence line4',
+          line5: 'correspondence line5',
+          pafOrganisationName: 'correspondence paf org name',
+          flatName: 'correspondence flat name',
+          buildingNumberRange: 'correspondence building number range',
+          buildingName: 'correspondence building name',
+          street: 'correspondence street',
+          city: 'correspondence city',
+          county: 'correspondence county',
+          postalCode: 'correspondence post code',
+          country: 'correspondence country',
+          uprn: 'correspondence uprn',
+          dependentLocality: 'correspondence dependentLocality',
+          doubleDependentLocality: 'correspondence doubleDependentLocality',
+          typeId: null
+        },
+        dateStartedFarming: new Date('2021-05-27T12:46:17.305Z'),
         email: {
-          address: 'henleyrej@eryelnehk.com.test',
-          doNotContact: false,
+          address: 'email address',
+          doNotContact: true,
           validated: true
         },
-        legalStatus: { code: 102111, type: 'Sole Proprietorship' },
-        name: 'HENLEY, RE',
-        phone: { fax: null, landline: '01234031859', mobile: null },
-        reference: '1102179604',
-        registrationNumbers: { charityCommission: null, companiesHouse: null },
-        traderNumber: '010203040506070880980',
-        type: { code: 101443, type: 'Not Specified' },
-        vat: 'GB123456789',
-        vendorNumber: '694523'
-      },
-      sbi: '107183280'
-    })
-  })
-
-  test('transformOrganisationToBusiness', () => {
-    const { _data: organisation } = organisationByOrgId(5625145)
-
-    expect(transformOrganisationToBusiness(organisation)).toEqual({
-      organisationId: '5625145',
-      info: {
-        address: {
-          line1: 'Estate Office',
-          line2: 'Crawley',
-          line3: null,
-          line4: null,
-          line5: null,
-          buildingName: 'LADYWOOD LODGE FARM',
-          buildingNumberRange: null,
-          city: 'ALNWICK',
-          country: 'United Kingdom',
-          county: null,
-          dependentLocality: 'LAVANT',
-          doubleDependentLocality: null,
-          flatName: null,
-          pafOrganisationName: null,
-          postalCode: 'BD5 9NR',
-          street: 'BARTINDALE ROAD',
-          typeId: null,
-          uprn: '100010079050'
-        },
-        email: {
-          address: 'cliffspencetasabbeyfarmf@mrafyebbasatecnepsffilcm.com.test',
-          doNotContact: false,
+        correspondenceEmail: {
+          address: 'correspondence email address',
           validated: true
         },
-        legalStatus: { code: 102108, type: 'Partnership' },
-        name: "Cliff Spence Teritorial Army's Abbey Farm, Hop-Worthering on the Naze a.k.a. the Donkey Sanctuary",
-        phone: { fax: null, landline: null, mobile: '01234031670' },
-        reference: '1102698830',
-        registrationNumbers: { charityCommission: null, companiesHouse: null },
-        traderNumber: null,
-        type: { code: 101422, type: 'Land Manager' },
-        vat: null,
-        vendorNumber: '284495G'
+        hasAdditionalBusinessActivities: true,
+        hasLandInNorthernIreland: true,
+        hasLandInScotland: true,
+        hasLandInWales: true,
+        isAccountablePeopleDeclarationCompleted: true,
+        isCorrespondenceAsBusinessAddress: true,
+        isFinancialToBusinessAddress: true,
+        legalStatus: { code: 101404, type: 'legalStatus type' },
+        name: 'org name',
+        phone: { fax: 'fax', landline: 'landline', mobile: 'mobile' },
+        correspondencePhone: {
+          mobile: 'correspondence mobile',
+          landline: 'correspondence landline',
+          fax: 'correspondence fax'
+        },
+        reference: 'businessReference',
+        registrationNumbers: {
+          charityCommission: 'charityCommissionRegistrationNumber',
+          companiesHouse: 'companiesHouseRegistrationNumber'
+        },
+        traderNumber: 'traderNumber',
+        type: { code: 101404, type: 'businessType type' },
+        vat: 'vat taxRegistrationNumber',
+        vendorNumber: 'vendorNumber'
       },
-      sbi: '107591843'
+      sbi: '11111111'
     })
   })
 })
