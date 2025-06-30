@@ -20,28 +20,19 @@ describe('schema', () => {
     config.set('allSchemaOn', null)
     const { schema } = await import(`../../app/graphql/server.js?test=${Math.random()}`)
 
-    expect(
-      findBreakingChanges(
-        schema,
-        buildSchema(
-          await readFile(
-            join(dirname(fileURLToPath(import.meta.url)), 'partial-schema.gql'),
-            'utf-8'
-          )
-        )
-      )
-    ).toHaveLength(0)
+    const partialSchema = await readFile(
+      join(dirname(fileURLToPath(import.meta.url)), 'partial-schema.gql'),
+      'utf-8'
+    )
+    expect(findBreakingChanges(schema, buildSchema(partialSchema))).toHaveLength(0)
   })
 
   it('should contain all fields if process.env.ALL_SCHEMA is set', async () => {
     const { schema } = await import(`../../app/graphql/server.js?test=${Math.random()}`)
-    expect(
-      findBreakingChanges(
-        schema,
-        buildSchema(
-          await readFile(join(dirname(fileURLToPath(import.meta.url)), 'full-schema.gql'), 'utf-8')
-        )
-      )
-    ).toHaveLength(0)
+    const fullSchema = await readFile(
+      join(dirname(fileURLToPath(import.meta.url)), 'full-schema.gql'),
+      'utf-8'
+    )
+    expect(findBreakingChanges(schema, buildSchema(fullSchema))).toHaveLength(0)
   })
 })

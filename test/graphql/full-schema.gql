@@ -46,11 +46,29 @@ type BusinessInfo {
   traderNumber: String
   vendorNumber: String
   address: Address
-  phone: Phone
+  correspondenceAddress: Address
   email: Email
+  correspondenceEmail: CorrespondenceEmail
+  phone: Phone
+  correspondencePhone: Phone
+  lastUpdated: Date
+  dateStartedFarming: Date
+  confirmed: Boolean
+  deactivated: Boolean
+  locked: Boolean
+  hasAdditionalBusinessActivities: Boolean
+  additionalBusinessActivities: [BusinessType]
+  hasLandInNorthernIreland: Boolean
+  hasLandInScotland: Boolean
+  hasLandInWales: Boolean
+  landConfirmed: Boolean
+  additionalSbis: [ID]
   legalStatus: BusinessType
   type: BusinessType
   registrationNumbers: BusinessRegistrationNumbers
+  isAccountablePeopleDeclarationComplete: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
+  isFinancialToBusinessAddress: Boolean
 }
 
 type BusinessRegistrationNumbers {
@@ -109,6 +127,11 @@ type Business {
   customer(crn: ID!): BusinessCustomer
   countyParishHoldings: [CountyParishHolding]
   agreements: [Agreement]
+}
+
+type CorrespondenceEmail {
+  address: String
+  validated: Boolean
 }
 
 type CountyParishHolding {
