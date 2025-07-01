@@ -17,7 +17,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
-  async lookupOrganisationBySBI(sbi) {
+  async getOrganisationIdBySBI(sbi) {
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,
@@ -46,8 +46,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async getOrganisationBySBI(sbi) {
-    const orgId = await this.lookupOrganisationBySBI(sbi)
-
+    const orgId = await this.getOrganisationIdBySBI(sbi)
     return orgId ? this.getOrganisationById(orgId) : null
   }
 
@@ -136,19 +135,8 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response.data
   }
 
-  async updateOrganisationAdditionalDetails(organisationId, businessAdditionalDetails) {
-    const body = businessAdditionalDetails
-    const response = this.put(`organisation/${organisationId}/additional-details`, {
-      body,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    return response
-  }
-
   async updateBusinessDetailsBySBI(sbi, businessDetails) {
-    const orgId = await this.lookupOrganisationBySBI(sbi)
+    const orgId = await this.getOrganisationIdBySBI(sbi)
     return this.updateOrganisationDetails(orgId, businessDetails)
   }
 }

@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals'
 import { RuralPaymentsBusiness } from '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../app/errors/graphql.js'
+import { transformBusinessDetailsToOrgDetails } from '../../../app/transformers/rural-payments/business.js'
 
 describe('Rural Payments Business', () => {
   const logger = {
@@ -11,6 +12,7 @@ describe('Rural Payments Business', () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness({ logger })
   const httpGet = jest.spyOn(ruralPaymentsBusiness, 'get')
   const httpPost = jest.spyOn(ruralPaymentsBusiness, 'post')
+  const httpPut = jest.spyOn(ruralPaymentsBusiness, 'put')
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -60,11 +62,32 @@ describe('Rural Payments Business', () => {
         }
       })
     })
+  })
+
+  describe('getOrganisationIdBySBI', () => {
+    test('should return organisation ID when found by SBI', async () => {
+      const mockSearchResponse = { _data: [{ id: 123 }] }
+      httpPost.mockImplementationOnce(async () => mockSearchResponse)
+
+      const result = await ruralPaymentsBusiness.getOrganisationIdBySBI('123456789')
+      expect(result).toEqual(123)
+      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
+        body: JSON.stringify({
+          searchFieldType: 'SBI',
+          primarySearchPhrase: '123456789',
+          offset: 0,
+          limit: 1
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
 
     test('should throw NotFound when organisation not found by SBI', async () => {
       httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
-      await expect(ruralPaymentsBusiness.getOrganisationBySBI('123456789')).rejects.toEqual(
+      await expect(ruralPaymentsBusiness.getOrganisationIdBySBI('123456789')).rejects.toEqual(
         new NotFound('Rural payments organisation not found')
       )
       expect(logger.warn).toHaveBeenCalledWith(
@@ -175,6 +198,72 @@ describe('Rural Payments Business', () => {
       const result = await ruralPaymentsBusiness.getAgreementsBySBI('mockSbi')
       expect(result).toEqual(mockResponse.data)
       expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/agreementsByBusiness/sbi/mockSbi/list')
+    })
+  })
+
+  describe('getAgreementsBySBI', () => {
+    test('should return agreements list', async () => {
+      const mockResponse = {}
+      httpPut.mockImplementationOnce(async () => mockResponse)
+
+      const updateDetails = {
+        name: 'HADLEY FARMS LTD',
+        reference: '12345678',
+        vat: 'GB123456789',
+        traderNumber: 'TRADER001',
+        vendorNumber: 'VENDOR001',
+        address: {
+          pafOrganisationName: null,
+          line1: 'Bowling Green Cottage',
+          line2: 'HAMPSTEAD NORREYS',
+          line3: null,
+          line4: null,
+          line5: null,
+          buildingNumberRange: null,
+          buildingName: 'COLSHAW HALL',
+          flatName: null,
+          street: 'SPINNING WHEEL MEAD',
+          city: 'BRAINTREE',
+          county: null,
+          postalCode: 'LL53 8NT',
+          country: 'United Kingdom',
+          uprn: '10008042952',
+          dependentLocality: 'HIGH HAWSKER',
+          doubleDependentLocality: null,
+          typeId: null
+        },
+        phone: {
+          mobile: '01234042273',
+          landline: '01234613020',
+          fax: null
+        },
+        email: {
+          address: 'hadleyfarmsltdp@defra.com.test',
+          validated: false,
+          doNotContact: false
+        },
+        type: {
+          code: 101443,
+          type: 'Not Specified'
+        },
+        correspondenceEmail: {
+          address: null
+        },
+        correspondencePhone: {
+          mobile: null,
+          landline: null,
+          fax: null
+        },
+        isCorrespondenceAsBusinessAddr: null
+      }
+
+      const result = await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
+      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
+        body: transformBusinessDetailsToOrgDetails(updateDetails),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
     })
   })
 })
