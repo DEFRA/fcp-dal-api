@@ -2,6 +2,7 @@ import { NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
 import {
+  transformAgreements,
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformCountyParishHoldings,
   transformOrganisationCustomer,
@@ -47,6 +48,12 @@ export const Business = {
     }
 
     return transformOrganisationCustomer(customer)
+  },
+
+  async agreements({ sbi }, _, { dataSources }) {
+    const agreements = await dataSources.ruralPaymentsBusiness.getAgreementsBySBI(sbi)
+
+    return transformAgreements(agreements)
   }
 }
 

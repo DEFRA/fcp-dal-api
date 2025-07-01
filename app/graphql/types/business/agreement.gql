@@ -1,0 +1,114 @@
+"""
+Business Agreement.
+"""
+type Agreement {
+  """
+  Internal SitiAgri/Portal unique identifier for the agreement.
+  """
+  contractId: ID @on
+
+  """
+  Name of the agreement.
+  """
+  name: String @on
+
+  """
+  Status of the agreement.
+  """
+  status: String @on
+
+  """
+  Type of the agreement.
+  """
+  contractType: String @on
+
+  """
+  Year of the agreement.
+  """
+  schemeYear: Int @on
+
+  """
+  Start date of the agreement.
+  """
+  startDate: Date @on
+
+  """
+  End date of the agreement.
+  """
+  endDate: Date @on
+
+  """
+  Payment schedules for the agreement.
+  """
+  paymentSchedules: [PaymentSchedule] @on
+}
+
+"""
+Payment schedule for an agreement.
+"""
+type PaymentSchedule {
+  """
+  Option code for the payment schedule.
+  """
+  optionCode: String @on
+
+  """
+  Option description for the payment schedule.
+  """
+  optionDescription: String @on
+
+  """
+  Commitment group start date for the payment schedule.
+  """
+  commitmentGroupStartDate: Date @on
+
+  """
+  Commitment group end date for the payment schedule.
+  """
+  commitmentGroupEndDate: Date @on
+
+  """
+  Year of the payment schedule.
+  """
+  year: Int @on
+
+  """
+  Sheet name for the payment schedule.
+  """
+  sheetName: String @on
+
+  """
+  Parcel name for the payment schedule.
+  """
+  parcelName: String @on
+
+  """
+  Action area - Area (in hectares) of the action.
+  """
+  actionArea: Int @on
+
+  """
+  Action MTL - Length (in metres) of the action.
+  """
+  actionMTL: Int @on
+
+  """
+  Action units - Number of units of the action.
+  """
+  actionUnits: Int @on
+
+  """
+  Parcel total area - Total area (in hectares) of the parcel.
+  """
+  parcelTotalArea: Int @on
+
+  """
+  Payment schedule start date for the payment schedule.
+  """
+  startDate: Date @on
+
+  """
+  Payment schedule end date for the payment schedule.
+  """
+  endDate: Date @on
+}
