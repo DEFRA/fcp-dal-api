@@ -1,6 +1,18 @@
+input UpdateBusinessDetailsInput {
+  """
+  SBI (Single Business Identifier) of the business that is being updated.
+  """
+  sbi: ID!
+
+  """
+  Business details to be updated.
+  """
+  details: InputBusinessDetails!
+}
+
 input InputBusinessDetails {
   """
-  3d4e5f  Name of the business.
+  Name of the business.
   """
   name: String!
 
@@ -75,46 +87,4 @@ input InputBusinessType {
   Description of the business type.
   """
   type: String
-}
-
-type BusinessDetails {
-  """
-  3d4e5f  Name of the business.
-  """
-  name: String! @on
-
-  """
-  Firm Reference Number (FRN) of the business.
-  """
-  reference: String! @on
-
-  """
-  VAT number of the business.
-  """
-  vat: String! @on
-
-  """
-  Trader number of the business.
-  """
-  traderNumber: String @on
-
-  """
-  Vendor number of the business.
-  """
-  vendorNumber: String @on
-
-  """
-  Address of the business.
-  """
-  address: Address! @on
-
-  """
-  Telephone number of the business.
-  """
-  phone: Phone! @on
-
-  """
-  Email address of the business.
-  """
-  email: Email! @on
 }

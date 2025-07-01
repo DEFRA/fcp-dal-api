@@ -1,6 +1,7 @@
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformBusinessDetailsToOrgDetails,
   transformCountyParishHoldings,
   transformOrganisationCustomers
 } from '../../../../app/transformers/rural-payments/business.js'
@@ -216,5 +217,87 @@ describe('Business transformer', () => {
         address: 'mockAddress'
       }
     ])
+  })
+
+  test('#transformBusinessDetailsToOrgDetails', () => {
+    const mockData = {
+      name: 'HADLEY FARMS LTD',
+      reference: '12345678',
+      vat: 'GB123456789',
+      traderNumber: 'TRADER001',
+      vendorNumber: 'VENDOR001',
+      address: {
+        pafOrganisationName: null,
+        line1: 'Bowling Green Cottage',
+        line2: 'HAMPSTEAD NORREYS',
+        line3: null,
+        line4: null,
+        line5: null,
+        buildingNumberRange: null,
+        buildingName: 'COLSHAW HALL',
+        flatName: null,
+        street: 'SPINNING WHEEL MEAD',
+        city: 'BRAINTREE',
+        county: null,
+        postalCode: 'LL53 8NT',
+        country: 'United Kingdom',
+        uprn: '10008042952',
+        dependentLocality: 'HIGH HAWSKER',
+        doubleDependentLocality: null,
+        typeId: null
+      },
+      phone: {
+        mobile: '01234042273',
+        landline: '01234613020',
+        fax: null
+      },
+      email: {
+        address: 'hadleyfarmsltdp@defra.com.test',
+        validated: false,
+        doNotContact: false
+      },
+      type: {
+        code: 101443,
+        type: 'Not Specified'
+      }
+    }
+
+    expect(transformBusinessDetailsToOrgDetails(mockData)).toEqual({
+      name: 'HADLEY FARMS LTD',
+      address: {
+        address1: 'Bowling Green Cottage',
+        address2: 'HAMPSTEAD NORREYS',
+        address3: null,
+        address4: null,
+        address5: null,
+        pafOrganisationName: null,
+        flatName: null,
+        buildingNumberRange: null,
+        buildingName: 'COLSHAW HALL',
+        street: 'SPINNING WHEEL MEAD',
+        city: 'BRAINTREE',
+        county: null,
+        postalCode: 'LL53 8NT',
+        country: 'United Kingdom',
+        uprn: '10008042952',
+        dependentLocality: 'HIGH HAWSKER',
+        doubleDependentLocality: null,
+        addressTypeId: null
+      },
+      correspondenceAddress: null,
+      isCorrespondenceAsBusinessAddr: null,
+      email: 'hadleyfarmsltdp@defra.com.test',
+      landline: '01234613020',
+      mobile: '01234042273',
+      fax: null,
+      correspondenceEmail: null,
+      correspondenceLandline: null,
+      correspondenceMobile: null,
+      correspondenceFax: null,
+      businessType: {
+        id: 101443,
+        type: 'Not Specified'
+      }
+    })
   })
 })
