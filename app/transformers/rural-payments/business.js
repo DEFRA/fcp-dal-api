@@ -96,6 +96,7 @@ export const transformOrganisationToBusiness = (data) => {
 }
 
 export const transformBusinessDetailsToOrgDetails = (data) => {
+  // Note: Version1/KITS API treats omission the same as null so we allow undefined values.
   return {
     name: data.name,
     address: {

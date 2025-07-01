@@ -1,4 +1,4 @@
-"Represents data about a customers or business address details"
+"Represents data about a customers or business address details, note the Version 1 api does not require any of these fields so neither do we."
 input InputAddress {
   """
   PAF organisation name

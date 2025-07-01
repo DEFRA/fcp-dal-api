@@ -217,3 +217,66 @@ type Phone {
   landline: String
   fax: String
 }
+
+type Mutation {
+  updateBusinessDetails(input: UpdateBusinessDetailsInput!): Boolean
+}
+
+input InputAddress {
+  pafOrganisationName: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String
+  county: String
+  postalCode: String!
+  country: String!
+  uprn: String
+  dependentLocality: String
+  doubleDependentLocality: String
+  typeId: String
+}
+
+input InputPhone {
+  mobile: String
+  landline: String
+  fax: String
+}
+
+input InputEmail {
+  address: String
+  validated: Boolean
+  doNotContact: Boolean
+}
+
+input UpdateBusinessDetailsInput {
+  sbi: ID!
+  details: InputBusinessDetails!
+}
+
+input InputBusinessDetails {
+  name: String!
+  reference: String
+  vat: String
+  traderNumber: String
+  vendorNumber: String
+  address: InputAddress!
+  correspondenceAddress: InputAddress
+  isCorrespondenceAsBusinessAddr: Boolean
+  phone: InputPhone
+  correspondencePhone: InputPhone
+  email: InputEmail
+  correspondenceEmail: InputEmail
+  type: InputBusinessType!
+}
+
+input InputBusinessType {
+  code: Int!
+  type: String!
+}

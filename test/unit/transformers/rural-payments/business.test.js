@@ -218,51 +218,54 @@ describe('Business transformer', () => {
       }
     ])
   })
+})
 
-  test('#transformBusinessDetailsToOrgDetails', () => {
-    const mockData = {
-      name: 'HADLEY FARMS LTD',
-      reference: '12345678',
-      vat: 'GB123456789',
-      traderNumber: 'TRADER001',
-      vendorNumber: 'VENDOR001',
-      address: {
-        pafOrganisationName: null,
-        line1: 'Bowling Green Cottage',
-        line2: 'HAMPSTEAD NORREYS',
-        line3: null,
-        line4: null,
-        line5: null,
-        buildingNumberRange: null,
-        buildingName: 'COLSHAW HALL',
-        flatName: null,
-        street: 'SPINNING WHEEL MEAD',
-        city: 'BRAINTREE',
-        county: null,
-        postalCode: 'LL53 8NT',
-        country: 'United Kingdom',
-        uprn: '10008042952',
-        dependentLocality: 'HIGH HAWSKER',
-        doubleDependentLocality: null,
-        typeId: null
-      },
-      phone: {
-        mobile: '01234042273',
-        landline: '01234613020',
-        fax: null
-      },
-      email: {
-        address: 'hadleyfarmsltdp@defra.com.test',
-        validated: false,
-        doNotContact: false
-      },
-      type: {
-        code: 101443,
-        type: 'Not Specified'
-      }
+describe('#transformBusinessDetailsToOrgDetails', () => {
+  const baseInput = {
+    name: 'HADLEY FARMS LTD',
+    reference: '12345678',
+    vat: 'GB123456789',
+    traderNumber: 'TRADER001',
+    vendorNumber: 'VENDOR001',
+    address: {
+      pafOrganisationName: null,
+      line1: 'Bowling Green Cottage',
+      line2: 'HAMPSTEAD NORREYS',
+      line3: null,
+      line4: null,
+      line5: null,
+      buildingNumberRange: null,
+      buildingName: 'COLSHAW HALL',
+      flatName: null,
+      street: 'SPINNING WHEEL MEAD',
+      city: 'BRAINTREE',
+      county: null,
+      postalCode: 'LL53 8NT',
+      country: 'United Kingdom',
+      uprn: '10008042952',
+      dependentLocality: 'HIGH HAWSKER',
+      doubleDependentLocality: null,
+      typeId: null
+    },
+    phone: {
+      mobile: '01234042273',
+      landline: '01234613020',
+      fax: null
+    },
+    email: {
+      address: 'hadleyfarmsltdp@defra.com.test',
+      validated: false,
+      doNotContact: false
+    },
+    type: {
+      code: 101443,
+      type: 'Not Specified'
     }
+  }
 
-    expect(transformBusinessDetailsToOrgDetails(mockData)).toEqual({
+  it('transforms base input correctly', () => {
+    const result = transformBusinessDetailsToOrgDetails(baseInput)
+    expect(result).toEqual({
       name: 'HADLEY FARMS LTD',
       address: {
         address1: 'Bowling Green Cottage',
@@ -282,22 +285,93 @@ describe('Business transformer', () => {
         uprn: '10008042952',
         dependentLocality: 'HIGH HAWSKER',
         doubleDependentLocality: null,
-        addressTypeId: null
+        addressTypeId: undefined
       },
-      correspondenceAddress: null,
-      isCorrespondenceAsBusinessAddr: null,
+      correspondenceAddress: undefined,
+      isCorrespondenceAsBusinessAddr: undefined,
       email: 'hadleyfarmsltdp@defra.com.test',
       landline: '01234613020',
       mobile: '01234042273',
       fax: null,
-      correspondenceEmail: null,
-      correspondenceLandline: null,
-      correspondenceMobile: null,
-      correspondenceFax: null,
+      correspondenceEmail: undefined,
+      correspondenceLandline: undefined,
+      correspondenceMobile: undefined,
+      correspondenceFax: undefined,
       businessType: {
         id: 101443,
         type: 'Not Specified'
       }
     })
+  })
+
+  it('handles undefined and null in nested correspondence fields', () => {
+    const input = {
+      ...baseInput,
+      correspondenceAddress: null,
+      isCorrespondenceAsBusinessAddr: false,
+      correspondenceEmail: { address: null },
+      correspondenceLandline: { landline: undefined },
+      correspondenceMobile: { mobile: null },
+      correspondenceFax: { fax: undefined }
+    }
+    const result = transformBusinessDetailsToOrgDetails(input)
+    expect(result.correspondenceAddress).toBeNull()
+    expect(result.isCorrespondenceAsBusinessAddr).toBe(false)
+    expect(result.correspondenceEmail).toBeNull()
+    expect(result.correspondenceLandline).toBeUndefined()
+    expect(result.correspondenceMobile).toBeNull()
+    expect(result.correspondenceFax).toBeUndefined()
+  })
+
+  it('handles missing optional fields gracefully', () => {
+    const input = {
+      ...baseInput,
+      correspondenceEmail: undefined,
+      correspondenceLandline: undefined,
+      correspondenceMobile: undefined,
+      correspondenceFax: undefined,
+      correspondenceAddress: undefined,
+      isCorrespondenceAsBusinessAddr: undefined
+    }
+    const result = transformBusinessDetailsToOrgDetails(input)
+    expect(result.correspondenceEmail).toBeUndefined()
+    expect(result.correspondenceLandline).toBeUndefined()
+    expect(result.correspondenceMobile).toBeUndefined()
+    expect(result.correspondenceFax).toBeUndefined()
+    expect(result.correspondenceAddress).toBeUndefined()
+    expect(result.isCorrespondenceAsBusinessAddr).toBeUndefined()
+  })
+
+  it('handles missing address nested fields', () => {
+    const input = {
+      ...baseInput,
+      address: {
+        ...baseInput.address,
+        line3: undefined,
+        line4: undefined,
+        pafOrganisationName: undefined,
+        typeId: undefined
+      }
+    }
+    const result = transformBusinessDetailsToOrgDetails(input)
+    expect(result.address.address3).toBeUndefined()
+    expect(result.address.address4).toBeUndefined()
+    expect(result.address.pafOrganisationName).toBeUndefined()
+    expect(result.address.addressTypeId).toBeUndefined()
+  })
+
+  it('handles missing phone nested fields', () => {
+    const input = {
+      ...baseInput,
+      phone: {
+        mobile: undefined,
+        landline: undefined,
+        fax: undefined
+      }
+    }
+    const result = transformBusinessDetailsToOrgDetails(input)
+    expect(result.mobile).toBeUndefined()
+    expect(result.landline).toBeUndefined()
+    expect(result.fax).toBeUndefined()
   })
 })

@@ -53,7 +53,7 @@ input InputBusinessDetails {
   """
   Telephone number of the business.
   """
-  phone: InputPhone!
+  phone: InputPhone
 
   """
   Correspondence telephone number of the business.
@@ -63,7 +63,7 @@ input InputBusinessDetails {
   """
   Email address of the business.
   """
-  email: InputEmail!
+  email: InputEmail
   """
   Correspondence email address of the business.
   """
@@ -81,10 +81,10 @@ input InputBusinessType {
   """
   Code of the business type.
   """
-  code: Int
+  code: Int!
 
   """
   Description of the business type.
   """
-  type: String
+  type: String!
 }
