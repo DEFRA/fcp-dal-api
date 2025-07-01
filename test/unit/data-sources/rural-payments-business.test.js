@@ -257,7 +257,7 @@ describe('Rural Payments Business', () => {
         isCorrespondenceAsBusinessAddr: null
       }
 
-      const result = await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
+      await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
         body: transformBusinessDetailsToOrgDetails(updateDetails),
         headers: {
