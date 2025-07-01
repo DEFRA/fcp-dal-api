@@ -95,6 +95,46 @@ export const transformOrganisationToBusiness = (data) => {
   }
 }
 
+export const transformBusinessDetailsToOrgDetails = (data) => {
+  return {
+    name: data.name,
+    address: {
+      address1: data.address.line1,
+      address2: data.address.line2,
+      address3: data.address.line3,
+      address4: data.address.line4,
+      address5: data.address.line5,
+      pafOrganisationName: data.address.pafOrganisationName,
+      flatName: data.address.flatName,
+      buildingNumberRange: data.address.buildingNumberRange,
+      buildingName: data.address.buildingName,
+      street: data.address.street,
+      city: data.address.city,
+      county: data.address.county,
+      postalCode: data.address.postalCode,
+      country: data.address.country,
+      uprn: data.address.uprn,
+      dependentLocality: data.address.dependentLocality,
+      doubleDependentLocality: data.address.doubleDependentLocality,
+      addressTypeId: data.address.addressTypeId
+    },
+    correspondenceAddress: data.correspondenceAddress,
+    isCorrespondenceAsBusinessAddr: data.isCorrespondenceAsBusinessAddr,
+    email: data.email.address,
+    landline: data.phone.landline,
+    mobile: data.phone.mobile,
+    fax: data.phone.fax,
+    correspondenceEmail: data?.correspondenceEmail?.address,
+    correspondenceLandline: data?.correspondenceLandline?.landline,
+    correspondenceMobile: data?.correspondenceMobile?.mobile,
+    correspondenceFax: data?.correspondenceFax?.fax,
+    businessType: {
+      id: data.type.code,
+      type: data.type.type
+    }
+  }
+}
+
 export function transformCountyParishHoldings(data) {
   return [...data]
     .sort((a, b) => {

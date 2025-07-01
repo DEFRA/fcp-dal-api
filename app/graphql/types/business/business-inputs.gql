@@ -1,7 +1,3 @@
-input InputBusiness {
-  details: InputBusinessDetails
-}
-
 input InputBusinessDetails {
   """
   3d4e5f  Name of the business.
@@ -11,22 +7,22 @@ input InputBusinessDetails {
   """
   Firm Reference Number (FRN) of the business.
   """
-  reference: String!
+  reference: String
 
   """
   VAT number of the business.
   """
-  vat: String!
+  vat: String
 
   """
   Trader number of the business.
   """
-  traderNumber: String!
+  traderNumber: String
 
   """
   Vendor number of the business.
   """
-  vendorNumber: String!
+  vendorNumber: String
 
   """
   Address of the business.
@@ -34,12 +30,91 @@ input InputBusinessDetails {
   address: InputAddress!
 
   """
+  Correspondence Address of the business.
+  """
+  correspondenceAddress: InputAddress
+
+  """
+  Indicates whether the correspondence address is the same as the business address.
+  """
+  isCorrespondenceAsBusinessAddr: Boolean
+  """
   Telephone number of the business.
   """
   phone: InputPhone!
 
   """
+  Correspondence telephone number of the business.
+  """
+  correspondencePhone: InputPhone
+
+  """
   Email address of the business.
   """
   email: InputEmail!
+  """
+  Correspondence email address of the business.
+  """
+  correspondenceEmail: InputEmail
+  """
+  Type of the business represented by a code/description pair. For example, used for business type and legal status.
+  """
+  type: InputBusinessType!
+}
+
+"""
+Input type for the business represented by a code/description pair. For example, used for business type and legal status.
+""" # eslint-disable-next-line @graphql-eslint/naming-convention
+input InputBusinessType {
+  """
+  Code of the business type.
+  """
+  code: Int
+
+  """
+  Description of the business type.
+  """
+  type: String
+}
+
+type BusinessDetails {
+  """
+  3d4e5f  Name of the business.
+  """
+  name: String! @on
+
+  """
+  Firm Reference Number (FRN) of the business.
+  """
+  reference: String! @on
+
+  """
+  VAT number of the business.
+  """
+  vat: String! @on
+
+  """
+  Trader number of the business.
+  """
+  traderNumber: String @on
+
+  """
+  Vendor number of the business.
+  """
+  vendorNumber: String @on
+
+  """
+  Address of the business.
+  """
+  address: Address! @on
+
+  """
+  Telephone number of the business.
+  """
+  phone: Phone! @on
+
+  """
+  Email address of the business.
+  """
+  email: Email! @on
 }

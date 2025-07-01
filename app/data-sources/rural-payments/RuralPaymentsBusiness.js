@@ -1,7 +1,7 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import { transformBusinessDetailsToOrgDetails } from '../../transformers/rural-payments/business.js'
 import { RuralPayments } from './RuralPayments.js'
-
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById(organisationId) {
     const organisationResponse = await this.get(`organisation/${organisationId}`)
@@ -120,11 +120,8 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async updateOrganisationDetails(organisationId, businessDetails) {
-    const body = {
-      ...(businessDetails.name && { name: businessDetails.name }),
-      ...(businessDetails.address && { address: businessDetails.address })
-    }
-    const response = this.put(`/organisation/${organisationId}/business-details`, {
+    const body = transformBusinessDetailsToOrgDetails(businessDetails)
+    const response = this.put(`organisation/${organisationId}/business-details`, {
       body,
       headers: {
         'Content-Type': 'application/json'
@@ -136,7 +133,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
   async updateOrganisationAdditionalDetails(organisationId, businessAdditionalDetails) {
     const body = businessAdditionalDetails
-    const response = this.put(`/organisation/${organisationId}/additional-details`, {
+    const response = this.put(`organisation/${organisationId}/additional-details`, {
       body,
       headers: {
         'Content-Type': 'application/json'
@@ -145,8 +142,8 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response
   }
 
-  async updateOrganisationBySBI(sbi, business) {
+  async updateBusinessDetailsBySBI(sbi, businessDetails) {
     const orgId = await this.lookupOrganisationBySBI(sbi)
-    return this.updateOrganisationDetails(orgId, business)
+    return this.updateOrganisationDetails(orgId, businessDetails)
   }
 }

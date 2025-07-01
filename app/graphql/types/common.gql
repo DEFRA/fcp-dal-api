@@ -127,19 +127,6 @@ type Address {
   typeId: String @on
 }
 
-"Represents data about a pagination details for a list of items"
-input Pagination {
-  """
-  Number of items per page
-  """
-  perPage: Int!
-
-  """
-  Page number
-  """
-  page: Int!
-}
-
 enum AuthRole {
   ADMIN
 }
