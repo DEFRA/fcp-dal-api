@@ -1,3 +1,4 @@
 extend type Mutation {
-  updateBusiness(sbi: ID!, business: InputBusiness): InputBusiness @on
+  updateBusinessDetails(sbi: ID!, businessDetails: InputBusinessDetails): Business @on
+  updateBusinessAdditionalDetails(sbi: ID!, businessDetails: InputBusinessDetails): Business @on
 }

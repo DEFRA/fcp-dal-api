@@ -42,13 +42,13 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
     const response = organisationResponse?._data?.pop() || {}
 
-    return organisationResponse?._data?.pop() || {}
+    return response?.id || null
   }
 
   async getOrganisationBySBI(sbi) {
-    const response = this.lookupOrganisationBySBI(sbi)
+    const orgId = await this.lookupOrganisationBySBI(sbi)
 
-    return response?.id ? this.getOrganisationById(response.id) : null
+    return orgId ? this.getOrganisationById(orgId) : null
   }
 
   async getOrganisationCustomersByOrganisationId(organisationId) {
@@ -119,18 +119,34 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response.data
   }
 
-  async updateOrganisationDetails(organisationId, business) {
-    const body = business
-    this.put(`/organisation/${organisationId}/business-details`, {
+  async updateOrganisationDetails(organisationId, businessDetails) {
+    const body = {
+      ...(businessDetails.name && { name: businessDetails.name }),
+      ...(businessDetails.address && { address: businessDetails.address })
+    }
+    const response = this.put(`/organisation/${organisationId}/business-details`, {
       body,
       headers: {
         'Content-Type': 'application/json'
       }
     })
+
+    return response
+  }
+
+  async updateOrganisationAdditionalDetails(organisationId, businessAdditionalDetails) {
+    const body = businessAdditionalDetails
+    const response = this.put(`/organisation/${organisationId}/additional-details`, {
+      body,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    return response
   }
 
   async updateOrganisationBySBI(sbi, business) {
-    const { orgId } = this.lookupOrganisationBySBI(sbi)
-    return updateOrganisationDetails(orgId, business)
+    const orgId = await this.lookupOrganisationBySBI(sbi)
+    return this.updateOrganisationDetails(orgId, business)
   }
 }

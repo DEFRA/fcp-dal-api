@@ -1,0 +1,45 @@
+input InputBusiness {
+  details: InputBusinessDetails
+}
+
+input InputBusinessDetails {
+  """
+  3d4e5f  Name of the business.
+  """
+  name: String!
+
+  """
+  Firm Reference Number (FRN) of the business.
+  """
+  reference: String!
+
+  """
+  VAT number of the business.
+  """
+  vat: String!
+
+  """
+  Trader number of the business.
+  """
+  traderNumber: String!
+
+  """
+  Vendor number of the business.
+  """
+  vendorNumber: String!
+
+  """
+  Address of the business.
+  """
+  address: InputAddress!
+
+  """
+  Telephone number of the business.
+  """
+  phone: InputPhone!
+
+  """
+  Email address of the business.
+  """
+  email: InputEmail!
+}

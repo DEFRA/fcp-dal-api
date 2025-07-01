@@ -3,7 +3,7 @@ import { DAL_RESOLVERS_BUSINESS_001 } from '../../../logger/codes.js'
 import { transformOrganisationToBusiness } from '../../../transformers/rural-payments/business.js'
 
 export const Mutation = {
-  async updateBusiness(__, { sbi }, { dataSources, logger }) {
+  async updateBusinessDetails(__, { sbi }, { dataSources, logger }) {
     const response = await dataSources.ruralPaymentsBusiness.updateOrganisationBySBI(sbi)
 
     if (!response) {
