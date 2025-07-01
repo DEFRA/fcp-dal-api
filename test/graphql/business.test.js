@@ -251,10 +251,9 @@ describe('business', () => {
       }
     }
   `
+  beforeEach(setupNock)
 
-  beforeAll(setupNock)
-
-  afterAll(() => {
+  afterEach(() => {
     nock.cleanAll()
     nock.enableNetConnect()
   })
