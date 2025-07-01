@@ -1,7 +1,10 @@
 import { jest } from '@jest/globals'
 import { RuralPaymentsBusiness } from '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../app/errors/graphql.js'
-import { transformBusinessDetailsToOrgDetails } from '../../../app/transformers/rural-payments/business.js'
+import {
+  businessDetailsUpdatePayload,
+  orgDetailsUpdatePayload
+} from '../../fixtures/organisation.js'
 
 describe('Rural Payments Business', () => {
   const logger = {
@@ -206,60 +209,11 @@ describe('Rural Payments Business', () => {
       const mockResponse = {}
       httpPut.mockImplementationOnce(async () => mockResponse)
 
-      const updateDetails = {
-        name: 'HADLEY FARMS LTD',
-        reference: '12345678',
-        vat: 'GB123456789',
-        traderNumber: 'TRADER001',
-        vendorNumber: 'VENDOR001',
-        address: {
-          pafOrganisationName: null,
-          line1: 'Bowling Green Cottage',
-          line2: 'HAMPSTEAD NORREYS',
-          line3: null,
-          line4: null,
-          line5: null,
-          buildingNumberRange: null,
-          buildingName: 'COLSHAW HALL',
-          flatName: null,
-          street: 'SPINNING WHEEL MEAD',
-          city: 'BRAINTREE',
-          county: null,
-          postalCode: 'LL53 8NT',
-          country: 'United Kingdom',
-          uprn: '10008042952',
-          dependentLocality: 'HIGH HAWSKER',
-          doubleDependentLocality: null,
-          typeId: null
-        },
-        phone: {
-          mobile: '01234042273',
-          landline: '01234613020',
-          fax: null
-        },
-        email: {
-          address: 'hadleyfarmsltdp@defra.com.test',
-          validated: false,
-          doNotContact: false
-        },
-        type: {
-          code: 101443,
-          type: 'Not Specified'
-        },
-        correspondenceEmail: {
-          address: null
-        },
-        correspondencePhone: {
-          mobile: null,
-          landline: null,
-          fax: null
-        },
-        isCorrespondenceAsBusinessAddr: null
-      }
+      const updateDetails = businessDetailsUpdatePayload
 
       await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
-        body: transformBusinessDetailsToOrgDetails(updateDetails),
+        body: orgDetailsUpdatePayload,
         headers: {
           'Content-Type': 'application/json'
         }
