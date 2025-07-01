@@ -73,6 +73,33 @@ type BusinessCustomer {
   permissionGroups: [ActivePermissionGroup]
 }
 
+type PaymentSchedule {
+  optionCode: String
+  optionDescription: String
+  commitmentGroupStartDate: Date
+  commitmentGroupEndDate: Date
+  year: Int
+  sheetName: String
+  parcelName: String
+  actionArea: Int
+  actionMTL: Int
+  actionUnits: Int
+  parcelTotalArea: Int
+  startDate: Date
+  endDate: Date
+}
+
+type Agreement {
+  contractId: ID
+  name: String
+  status: String
+  contractType: String
+  schemeYear: Int
+  startDate: Date
+  endDate: Date
+  paymentSchedules: [PaymentSchedule]
+}
+
 type Business {
   organisationId: ID
   sbi: ID!
@@ -81,6 +108,7 @@ type Business {
   customers: [BusinessCustomerPartial]
   customer(crn: ID!): BusinessCustomer
   countyParishHoldings: [CountyParishHolding]
+  agreements: [Agreement]
 }
 
 type CountyParishHolding {
