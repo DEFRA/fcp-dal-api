@@ -204,8 +204,38 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('getAgreementsBySBI', () => {
-    test('should return agreements list', async () => {
+  describe('updateBusinessDetailsBySBI', () => {
+    test('should update organisation details', async () => {
+      const mockResponse = {}
+      const mockSearchResponse = { _data: [{ id: 123 }] }
+      httpPost.mockImplementationOnce(async () => mockSearchResponse)
+      httpPut.mockImplementationOnce(async () => mockResponse)
+
+      const updateDetails = businessDetailsUpdatePayload
+
+      await ruralPaymentsBusiness.updateBusinessDetailsBySBI('123456789', updateDetails)
+      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
+        body: JSON.stringify({
+          searchFieldType: 'SBI',
+          primarySearchPhrase: '123456789',
+          offset: 0,
+          limit: 1
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
+        body: orgDetailsUpdatePayload,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+  })
+
+  describe('updateOrganisationDetails', () => {
+    test('should update organisation details', async () => {
       const mockResponse = {}
       httpPut.mockImplementationOnce(async () => mockResponse)
 
