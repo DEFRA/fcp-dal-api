@@ -1,3 +1,7 @@
 extend type Mutation {
-  updateBusinessDetails(input: UpdateBusinessDetailsInput!): Boolean @on
+  updateBusinessDetails(input: UpdateBusinessDetailsInput!): UpdateBusinessDetailsResponse @on
+}
+
+type UpdateBusinessDetailsResponse {
+  success: Boolean @on
 }

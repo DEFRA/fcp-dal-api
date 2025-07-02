@@ -247,7 +247,11 @@ type Phone {
 }
 
 type Mutation {
-  updateBusinessDetails(input: UpdateBusinessDetailsInput!): Boolean
+  updateBusinessDetails(input: UpdateBusinessDetailsInput!): UpdateBusinessDetailsResponse
+}
+
+type UpdateBusinessDetailsResponse {
+  success: Boolean
 }
 
 input InputAddress {

@@ -387,9 +387,11 @@ describe('business', () => {
 
   test('update business details', async () => {
     const query = `
-        mutation Mutation($input: UpdateBusinessDetailsInput!) {
-          updateBusinessDetails(input: $input)
+      mutation Mutation($input: UpdateBusinessDetailsInput!) {
+        updateBusinessDetails(input: $input) {
+          success
         }
+      }
     `
     const result = await makeTestQuery(query, true, {
       input: {
@@ -400,7 +402,9 @@ describe('business', () => {
 
     expect(result).toEqual({
       data: {
-        updateBusinessDetails: true
+        updateBusinessDetails: {
+          success: true
+        }
       }
     })
   })

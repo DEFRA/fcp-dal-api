@@ -16,6 +16,8 @@ export const Mutation = {
       throw new NotFound('Business not found')
     }
 
-    return true
+    return {
+      success: true
+    }
   }
 }

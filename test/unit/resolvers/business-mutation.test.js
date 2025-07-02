@@ -30,7 +30,7 @@ describe('Mutation.updateBusinessDetails', () => {
       '123',
       { name: 'Test' }
     )
-    expect(result).toBe(true)
+    expect(result).toEqual({ success: true })
     expect(logger.warn).not.toHaveBeenCalled()
   })
 
