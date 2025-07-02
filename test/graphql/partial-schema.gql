@@ -290,10 +290,6 @@ input UpdateBusinessDetailsInput {
 
 input InputBusinessDetails {
   name: String!
-  reference: String
-  vat: String
-  traderNumber: String
-  vendorNumber: String
   address: InputAddress!
   correspondenceAddress: InputAddress
   isCorrespondenceAsBusinessAddr: Boolean

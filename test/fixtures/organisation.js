@@ -25,10 +25,6 @@ export const organisationPersonSummary = (attributes = {}) => {
 
 export const businessDetailsUpdatePayload = {
   name: 'HADLEY FARMS LTD',
-  reference: '12345678',
-  vat: 'GB123456789',
-  traderNumber: 'TRADER001',
-  vendorNumber: 'VENDOR001',
   address: {
     pafOrganisationName: null,
     line1: 'Bowling Green Cottage',
