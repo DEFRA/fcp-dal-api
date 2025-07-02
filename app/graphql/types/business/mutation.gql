@@ -4,4 +4,5 @@ extend type Mutation {
 
 type UpdateBusinessDetailsResponse {
   success: Boolean @on
+  business: Business @on
 }
