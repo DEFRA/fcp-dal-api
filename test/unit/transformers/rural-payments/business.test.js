@@ -2,7 +2,7 @@ import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   transformAgreements,
   transformBusinessCustomerPrivilegesToPermissionGroups,
-  transformBusinessDetailsToOrgDetails,
+  transformBusinessDetailsToOrgDetailsUpdate,
   transformCountyParishHoldings,
   transformOrganisationCustomers
 } from '../../../../app/transformers/rural-payments/business.js'
@@ -284,46 +284,61 @@ describe('Business transformer', () => {
   })
 })
 
-describe('#transformBusinessDetailsToOrgDetails', () => {
+describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
   const baseInput = businessDetailsUpdatePayload
 
   it('transforms base input correctly', () => {
-    const result = transformBusinessDetailsToOrgDetails(baseInput)
+    const result = transformBusinessDetailsToOrgDetailsUpdate(baseInput)
     expect(result).toEqual({
-      name: 'HADLEY FARMS LTD',
+      name: 'HADLEY FARMS LTD 2',
       address: {
-        address1: 'Bowling Green Cottage',
-        address2: 'HAMPSTEAD NORREYS',
-        address3: null,
-        address4: null,
-        address5: null,
-        pafOrganisationName: null,
+        address1: 'line1',
+        address2: 'line2',
+        address3: 'line3',
+        address4: 'line4',
+        address5: 'line5',
+        pafOrganisationName: 'pafOrganisationName',
         flatName: null,
-        buildingNumberRange: null,
+        buildingNumberRange: 'buildingNumberRange',
         buildingName: 'COLSHAW HALL',
-        street: 'SPINNING WHEEL MEAD',
+        street: 'street',
         city: 'BRAINTREE',
         county: null,
-        postalCode: 'LL53 8NT',
+        postalCode: '12312312',
         country: 'United Kingdom',
-        uprn: '10008042952',
+        uprn: '123123123',
         dependentLocality: 'HIGH HAWSKER',
         doubleDependentLocality: null,
         addressTypeId: undefined
       },
-      correspondenceAddress: undefined,
-      isCorrespondenceAsBusinessAddr: null,
+      correspondenceAddress: {
+        buildingName: 'buildingName',
+        buildingNumberRange: 'buildingNumberRange',
+        city: 'city',
+        country: 'USA',
+        county: 'county',
+        dependentLocality: 'HIGH HAWSKER',
+        doubleDependentLocality: 'doubleDependentLocality',
+        flatName: 'flatName',
+        line1: 'c line1',
+        line2: 'c line2',
+        line3: 'c line3',
+        line4: 'c line4',
+        line5: 'c line5',
+        pafOrganisationName: 'c pafOrganisationName',
+        postalCode: '1231231',
+        street: 'street',
+        uprn: '10008042952'
+      },
+      isCorrespondenceAsBusinessAddr: false,
       email: 'hadleyfarmsltdp@defra.com.test',
       landline: '01234613020',
       mobile: '01234042273',
-      fax: null,
-      correspondenceEmail: null,
-      correspondenceLandline: undefined,
-      correspondenceMobile: undefined,
-      correspondenceFax: undefined,
+      correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
+      correspondenceLandline: '01225111222',
+      correspondenceMobile: '07111222333',
       businessType: {
-        id: 101443,
-        type: 'Not Specified'
+        id: 0
       }
     })
   })
@@ -334,36 +349,14 @@ describe('#transformBusinessDetailsToOrgDetails', () => {
       correspondenceAddress: null,
       isCorrespondenceAsBusinessAddr: false,
       correspondenceEmail: { address: null },
-      correspondenceLandline: { landline: undefined },
-      correspondenceMobile: { mobile: null },
-      correspondenceFax: { fax: undefined }
+      correspondencePhone: { mobile: null, landline: undefined }
     }
-    const result = transformBusinessDetailsToOrgDetails(input)
+    const result = transformBusinessDetailsToOrgDetailsUpdate(input)
     expect(result.correspondenceAddress).toBeNull()
     expect(result.isCorrespondenceAsBusinessAddr).toBe(false)
     expect(result.correspondenceEmail).toBeNull()
     expect(result.correspondenceLandline).toBeUndefined()
     expect(result.correspondenceMobile).toBeNull()
-    expect(result.correspondenceFax).toBeUndefined()
-  })
-
-  it('handles missing optional fields gracefully', () => {
-    const input = {
-      ...baseInput,
-      correspondenceEmail: undefined,
-      correspondenceLandline: undefined,
-      correspondenceMobile: undefined,
-      correspondenceFax: undefined,
-      correspondenceAddress: undefined,
-      isCorrespondenceAsBusinessAddr: undefined
-    }
-    const result = transformBusinessDetailsToOrgDetails(input)
-    expect(result.correspondenceEmail).toBeUndefined()
-    expect(result.correspondenceLandline).toBeUndefined()
-    expect(result.correspondenceMobile).toBeUndefined()
-    expect(result.correspondenceFax).toBeUndefined()
-    expect(result.correspondenceAddress).toBeUndefined()
-    expect(result.isCorrespondenceAsBusinessAddr).toBeUndefined()
   })
 
   it('handles missing address nested fields', () => {
@@ -377,7 +370,7 @@ describe('#transformBusinessDetailsToOrgDetails', () => {
         typeId: undefined
       }
     }
-    const result = transformBusinessDetailsToOrgDetails(input)
+    const result = transformBusinessDetailsToOrgDetailsUpdate(input)
     expect(result.address.address3).toBeUndefined()
     expect(result.address.address4).toBeUndefined()
     expect(result.address.pafOrganisationName).toBeUndefined()
@@ -389,13 +382,11 @@ describe('#transformBusinessDetailsToOrgDetails', () => {
       ...baseInput,
       phone: {
         mobile: undefined,
-        landline: undefined,
-        fax: undefined
+        landline: undefined
       }
     }
-    const result = transformBusinessDetailsToOrgDetails(input)
+    const result = transformBusinessDetailsToOrgDetailsUpdate(input)
     expect(result.mobile).toBeUndefined()
     expect(result.landline).toBeUndefined()
-    expect(result.fax).toBeUndefined()
   })
 })

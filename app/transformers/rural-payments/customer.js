@@ -63,8 +63,7 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
     dateOfBirth: data.dateOfBirth,
     phone: {
       mobile: data.mobile,
-      landline: data.landline,
-      fax: data.fax
+      landline: data.landline
     },
     email: {
       address: data.email,

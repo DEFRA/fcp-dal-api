@@ -5,7 +5,7 @@ export const retrieveAccessToken = async () => {
   const body = qs.stringify({
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
-    scope: `api://${process.env.CLIENT_ID}/.default`,
+    scope: `${process.env.CLIENT_ID}/.default`,
     grant_type: 'client_credentials'
   })
 

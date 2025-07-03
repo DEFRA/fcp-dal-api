@@ -28,20 +28,48 @@ describe('Business transformer', () => {
           typeId: null,
           uprn: '10008695234'
         },
+        correspondenceAddress: {
+          buildingName: undefined,
+          buildingNumberRange: undefined,
+          city: undefined,
+          country: undefined,
+          county: undefined,
+          dependentLocality: undefined,
+          doubleDependentLocality: undefined,
+          flatName: undefined,
+          line1: undefined,
+          line2: undefined,
+          line3: undefined,
+          line4: undefined,
+          line5: undefined,
+          pafOrganisationName: undefined,
+          postalCode: undefined,
+          street: undefined,
+          typeId: undefined,
+          uprn: undefined
+        },
         email: {
           address: 'henleyrej@eryelnehk.com.test',
-          doNotContact: false,
           validated: true
+        },
+        correspondenceEmail: {
+          address: null,
+          validated: false
         },
         legalStatus: { code: 102111, type: 'Sole Proprietorship' },
         name: 'HENLEY, RE',
-        phone: { fax: null, landline: '01234031859', mobile: null },
+        phone: { landline: '01234031859', mobile: null },
+        correspondencePhone: {
+          landline: null,
+          mobile: null
+        },
         reference: '1102179604',
         registrationNumbers: { charityCommission: null, companiesHouse: null },
         traderNumber: '010203040506070880980',
         type: { code: 101443, type: 'Not Specified' },
         vat: 'GB123456789',
-        vendorNumber: '694523'
+        vendorNumber: '694523',
+        isCorrespondenceAsBusinessAddr: null
       },
       sbi: '107183280'
     })
@@ -73,20 +101,48 @@ describe('Business transformer', () => {
           typeId: null,
           uprn: '100010079050'
         },
+        correspondenceAddress: {
+          buildingName: undefined,
+          buildingNumberRange: undefined,
+          city: undefined,
+          country: undefined,
+          county: undefined,
+          dependentLocality: undefined,
+          doubleDependentLocality: undefined,
+          flatName: undefined,
+          line1: undefined,
+          line2: undefined,
+          line3: undefined,
+          line4: undefined,
+          line5: undefined,
+          pafOrganisationName: undefined,
+          postalCode: undefined,
+          street: undefined,
+          typeId: undefined,
+          uprn: undefined
+        },
         email: {
           address: 'cliffspencetasabbeyfarmf@mrafyebbasatecnepsffilcm.com.test',
-          doNotContact: false,
           validated: true
+        },
+        correspondenceEmail: {
+          address: null,
+          validated: false
         },
         legalStatus: { code: 102108, type: 'Partnership' },
         name: "Cliff Spence Teritorial Army's Abbey Farm, Hop-Worthering on the Naze a.k.a. the Donkey Sanctuary",
-        phone: { fax: null, landline: null, mobile: '01234031670' },
+        phone: { landline: null, mobile: '01234031670' },
+        correspondencePhone: {
+          landline: null,
+          mobile: null
+        },
         reference: '1102698830',
         registrationNumbers: { charityCommission: null, companiesHouse: null },
         traderNumber: null,
         type: { code: 101422, type: 'Land Manager' },
         vat: null,
-        vendorNumber: '284495G'
+        vendorNumber: '284495G',
+        isCorrespondenceAsBusinessAddr: null
       },
       sbi: '107591843'
     })

@@ -59,11 +59,10 @@ describe('Customer', () => {
         last: 'Paul'
       },
       dateOfBirth: '1947-10-30T03:41:25.385Z',
-      phone: { mobile: '1849164778', landline: null, fax: null },
+      phone: { mobile: '1849164778', landline: null },
       email: {
         address: 'Selena_Kub@hotmail.com',
-        validated: false,
-        doNotContact: false
+        validated: false
       },
       address: {
         pafOrganisationName: null,
@@ -80,7 +79,8 @@ describe('Customer', () => {
         doubleDependentLocality: null,
         typeId: null
       },
-      status: { locked: false, confirmed: null, deactivated: false }
+      status: { locked: false, confirmed: null, deactivated: false },
+      doNotContact: false
     })
   })
 

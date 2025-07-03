@@ -9,7 +9,6 @@ type Query {
 type Phone {
   mobile: String
   landline: String
-  fax: String
 }
 
 type Email {
@@ -45,11 +44,15 @@ type BusinessInfo {
   traderNumber: String
   vendorNumber: String
   address: Address
+  correspondenceAddress: Address
   phone: Phone
+  correspondencePhone: Phone
   email: Email
+  correspondenceEmail: Email
   legalStatus: BusinessType
   type: BusinessType
   registrationNumbers: BusinessRegistrationNumbers
+  isCorrespondenceAsBusinessAddr: Boolean
 }
 
 type BusinessRegistrationNumbers {
@@ -177,7 +180,7 @@ type CustomerInfo {
   email: Email
   status: CustomerStatus
   address: Address
-  doNotContact: boolean
+  doNotContact: Boolean
 }
 
 type CustomerName {
@@ -279,6 +282,7 @@ type Mutation {
 
 type UpdateBusinessDetailsResponse {
   success: Boolean
+  business: Business
 }
 
 input InputAddress {
@@ -330,9 +334,4 @@ input InputBusinessDetails {
   correspondencePhone: InputPhone
   email: InputEmail
   correspondenceEmail: InputEmail
-  type: InputBusinessType!
-}
-
-input InputBusinessType {
-  code: Int
 }

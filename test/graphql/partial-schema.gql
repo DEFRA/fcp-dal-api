@@ -77,13 +77,17 @@ type BusinessCustomerPartial {
 type BusinessInfo {
   name: String
   address: Address
+  correspondenceAddress: Address
   email: Email
+  correspondenceEmail: Email
   legalStatus: BusinessType
   phone: Phone
+  correspondencePhone: Phone
   traderNumber: String
   type: BusinessType
   vat: String
   vendorNumber: String
+  isCorrespondenceAsBusinessAddr: Boolean
 }
 
 type BusinessLandParcel {
@@ -242,7 +246,6 @@ type Email {
 type Phone {
   mobile: String
   landline: String
-  fax: String
 }
 
 type Mutation {
@@ -251,6 +254,7 @@ type Mutation {
 
 type UpdateBusinessDetailsResponse {
   success: Boolean
+  business: Business
 }
 
 input InputAddress {
@@ -266,8 +270,8 @@ input InputAddress {
   street: String
   city: String
   county: String
-  postalCode: String!
-  country: String!
+  postalCode: String
+  country: String
   uprn: String
   dependentLocality: String
   doubleDependentLocality: String
@@ -291,18 +295,12 @@ input UpdateBusinessDetailsInput {
 }
 
 input InputBusinessDetails {
-  name: String!
-  address: InputAddress!
+  name: String
+  address: InputAddress
   correspondenceAddress: InputAddress
   isCorrespondenceAsBusinessAddr: Boolean
   phone: InputPhone
   correspondencePhone: InputPhone
   email: InputEmail
   correspondenceEmail: InputEmail
-  type: InputBusinessType!
-}
-
-input InputBusinessType {
-  code: Int!
-  type: String!
 }

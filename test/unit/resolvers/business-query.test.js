@@ -55,13 +55,42 @@ describe('Business Query Resolver', () => {
           doubleDependentLocality: undefined,
           typeId: undefined
         },
-        phone: { mobile: undefined, landline: undefined, fax: undefined },
-        email: { address: undefined, validated: undefined, doNotContact: false },
+        correspondenceAddress: {
+          buildingName: undefined,
+          buildingNumberRange: undefined,
+          city: undefined,
+          country: undefined,
+          county: undefined,
+          dependentLocality: undefined,
+          doubleDependentLocality: undefined,
+          flatName: undefined,
+          line1: undefined,
+          line2: undefined,
+          line3: undefined,
+          line4: undefined,
+          line5: undefined,
+          pafOrganisationName: undefined,
+          postalCode: undefined,
+          street: undefined,
+          typeId: undefined,
+          uprn: undefined
+        },
+        correspondenceEmail: {
+          address: undefined,
+          validated: undefined
+        },
+        correspondencePhone: {
+          landline: undefined,
+          mobile: undefined
+        },
+        phone: { mobile: undefined, landline: undefined },
+        email: { address: undefined, validated: undefined },
         legalStatus: { code: undefined, type: undefined },
         type: { code: undefined, type: undefined },
         registrationNumbers: { companiesHouse: undefined, charityCommission: undefined }
       },
-      organisationId: '1'
+      organisationId: '1',
+      isCorrespondenceAsBusinessAddr: undefined
     })
   })
 

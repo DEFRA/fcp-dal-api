@@ -86,7 +86,7 @@ input InputAddress {
   doubleDependentLocality: String
 }
 
-"Represents data about a customers or business phone/fax details"
+"Represents data about a customers or business mobile/landline details"
 input InputPhone {
   """
   Mobile number of the customer or business

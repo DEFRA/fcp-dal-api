@@ -103,11 +103,6 @@ export const transformOrganisationToBusiness = (data) => {
         address: data?.correspondenceEmail,
         validated: data?.correspondenceEmailValidated
       },
-      email: {
-        address: data?.email,
-        validated: data?.emailValidated,
-        doNotContact: data?.doNotContact || false
-      },
       legalStatus: {
         code: data?.legalStatus?.id,
         type: data?.legalStatus?.type
@@ -154,13 +149,12 @@ const orgDetailsUpdateMapping = {
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,
   mobile: (data) => data.phone?.mobile,
-  fax: (data) => data.phone?.fax,
   correspondenceEmail: (data) => data.correspondenceEmail?.address,
   correspondenceLandline: (data) => data.correspondencePhone?.landline,
   correspondenceMobile: (data) => data.correspondencePhone?.mobile,
   // Oddly this is required but cannot actually be changed.
   businessType: {
-    id: (_) => 0
+    id: () => 0
   }
 }
 
