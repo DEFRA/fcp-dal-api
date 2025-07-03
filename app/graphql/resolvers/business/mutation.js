@@ -1,4 +1,5 @@
-import { Query } from './query.js'
+import { getFiles } from '../../schema.js'
+const Query = await getFiles('./query.js')
 
 export const Mutation = {
   async updateBusinessDetails(__, { input }, { dataSources }) {

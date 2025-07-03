@@ -9,7 +9,7 @@ import { config } from '../config.js'
 import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
 import { onDirectiveTransformer } from './directives/onDirectiveTransformer.js'
 
-async function getFiles(path) {
+export async function getFiles(path) {
   return loadFiles(join(dirname(fileURLToPath(import.meta.url)), path), {
     recursive: true,
     requireMethod: async (filePath) => import(pathToFileURL(filePath))
