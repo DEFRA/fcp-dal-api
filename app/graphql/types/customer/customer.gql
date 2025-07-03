@@ -31,6 +31,11 @@ type CustomerInfo {
   Address of the customer.
   """
   address: Address
+
+  """
+  Do not contact status of the customer
+  """
+  doNotContact: Boolean
 }
 
 """

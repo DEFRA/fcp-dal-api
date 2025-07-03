@@ -237,7 +237,6 @@ type Address {
 type Email {
   address: String
   validated: Boolean
-  doNotContact: Boolean
 }
 
 type Phone {
@@ -284,7 +283,6 @@ input InputPhone {
 input InputEmail {
   address: String
   validated: Boolean
-  doNotContact: Boolean
 }
 
 input UpdateBusinessDetailsInput {

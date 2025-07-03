@@ -38,14 +38,29 @@ type BusinessInfo {
   address: Address @on
 
   """
+  Correspondence Address of the business.
+  """
+  correspondenceAddress: Address @on
+
+  """
   Telephone number of the business.
   """
   phone: Phone @on
 
   """
+  Correspondence telephone number of the business.
+  """
+  correspondencePhone: Phone @on
+
+  """
   Email address of the business.
   """
   email: Email @on
+
+  """
+  Correspondence email address of the business.
+  """
+  correspondenceEmail: Email @on
 
   """
   Legal status of the business. For example, Sole Proprietorship.
@@ -61,6 +76,10 @@ type BusinessInfo {
   Various registration numbers for the business. For example, Companies House number.
   """
   registrationNumbers: BusinessRegistrationNumbers
+  """
+  Flag for wherther the correspondence is for a business address
+  """
+  isCorrespondenceAsBusinessAddr: Boolean @on
 }
 
 """

@@ -15,7 +15,6 @@ type Phone {
 type Email {
   address: String
   validated: Boolean
-  doNotContact: Boolean
 }
 
 type Address {
@@ -178,6 +177,7 @@ type CustomerInfo {
   email: Email
   status: CustomerStatus
   address: Address
+  doNotContact: boolean
 }
 
 type CustomerName {
@@ -294,8 +294,8 @@ input InputAddress {
   street: String
   city: String
   county: String
-  postalCode: String!
-  country: String!
+  postalCode: String
+  country: String
   uprn: String
   dependentLocality: String
   doubleDependentLocality: String
@@ -305,13 +305,11 @@ input InputAddress {
 input InputPhone {
   mobile: String
   landline: String
-  fax: String
 }
 
 input InputEmail {
   address: String
   validated: Boolean
-  doNotContact: Boolean
 }
 
 input UpdateBusinessDetailsInput {
@@ -320,12 +318,12 @@ input UpdateBusinessDetailsInput {
 }
 
 input InputBusinessDetails {
-  name: String!
+  name: String
   reference: String
   vat: String
   traderNumber: String
   vendorNumber: String
-  address: InputAddress!
+  address: InputAddress
   correspondenceAddress: InputAddress
   isCorrespondenceAsBusinessAddr: Boolean
   phone: InputPhone
@@ -336,6 +334,5 @@ input InputBusinessDetails {
 }
 
 input InputBusinessType {
-  code: Int!
-  type: String!
+  code: Int
 }

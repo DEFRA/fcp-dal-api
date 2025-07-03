@@ -27,11 +27,6 @@ type Email {
   Validated status of the email address
   """
   validated: Boolean
-
-  """
-  Do not contact status of the email address
-  """
-  doNotContact: Boolean
 }
 
 "Represents data about a customers or business address details"

@@ -1,5 +1,6 @@
 import { NotFound } from '../../../errors/graphql.js'
 import { DAL_RESOLVERS_BUSINESS_001 } from '../../../logger/codes.js'
+import { Query } from './query.js'
 
 export const Mutation = {
   async updateBusinessDetails(__, { input }, { dataSources, logger }) {
@@ -17,7 +18,16 @@ export const Mutation = {
     }
 
     return {
-      success: true
+      success: true,
+      business: {
+        sbi: input.sbi
+      }
     }
+  }
+}
+
+export const UpdateBusinessDetailsResponse = {
+  business({ business: { sbi } }, _, context) {
+    return Query.business({}, { sbi }, context)
   }
 }

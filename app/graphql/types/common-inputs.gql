@@ -63,12 +63,12 @@ input InputAddress {
   """
   Postal code of the address
   """
-  postalCode: String!
+  postalCode: String
 
   """
   Country of the address
   """
-  country: String!
+  country: String
 
   """
   UPRN of the address
@@ -84,11 +84,6 @@ input InputAddress {
   Double dependant locality of the address
   """
   doubleDependentLocality: String
-
-  """
-  Type ID of the address
-  """
-  typeId: String
 }
 
 "Represents data about a customers or business phone/fax details"
@@ -102,11 +97,6 @@ input InputPhone {
   Landline number of the customer or business
   """
   landline: String
-
-  """
-  Fax number of the customer or business
-  """
-  fax: String
 }
 
 "Represents data about a customers or business email details"
@@ -115,14 +105,4 @@ input InputEmail {
   Email address of the customer or business
   """
   address: String
-
-  """
-  Validated status of the email address
-  """
-  validated: Boolean
-
-  """
-  Do not contact status of the email address
-  """
-  doNotContact: Boolean
 }

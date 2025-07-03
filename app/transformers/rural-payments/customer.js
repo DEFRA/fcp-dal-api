@@ -68,8 +68,7 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
     },
     email: {
       address: data.email,
-      validated: data.emailValidated,
-      doNotContact: data.doNotContact
+      validated: data.emailValidated
     },
     address: {
       pafOrganisationName: data.address.pafOrganisationName,
@@ -90,7 +89,8 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       locked: data.locked,
       confirmed: data.confirmed,
       deactivated: data.deactivated
-    }
+    },
+    doNotContact: data.doNotContact
   }
 }
 

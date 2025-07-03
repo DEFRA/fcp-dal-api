@@ -14,12 +14,12 @@ input InputBusinessDetails {
   """
   Name of the business.
   """
-  name: String!
+  name: String
 
   """
   Address of the business.
   """
-  address: InputAddress!
+  address: InputAddress
 
   """
   Correspondence Address of the business.
@@ -48,23 +48,4 @@ input InputBusinessDetails {
   Correspondence email address of the business.
   """
   correspondenceEmail: InputEmail
-  """
-  Type of the business represented by a code/description pair. For example, used for business type and legal status.
-  """
-  type: InputBusinessType!
-}
-
-"""
-Input type for the business represented by a code/description pair. For example, used for business type and legal status.
-""" # eslint-disable-next-line @graphql-eslint/naming-convention
-input InputBusinessType {
-  """
-  Code of the business type.
-  """
-  code: Int!
-
-  """
-  Description of the business type.
-  """
-  type: String!
 }
