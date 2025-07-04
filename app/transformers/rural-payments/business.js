@@ -1,3 +1,5 @@
+import { checkUndefinedInMapping, transformMapping } from '../../utils/mapping.js'
+
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
 }
@@ -159,33 +161,11 @@ const orgDetailsUpdateMapping = {
 }
 
 export const transformBusinessDetailsToOrgDetailsUpdate = (data) => {
-  const transform = (mapping) => {
-    if (typeof mapping === 'function') return mapping(data)
-    if (typeof mapping === 'object') {
-      return Object.entries(mapping).reduce((acc, [key, val]) => {
-        acc[key] = transform(val)
-        return acc
-      }, {})
-    }
-    return undefined
-  }
-
-  return transform(orgDetailsUpdateMapping)
+  return transformMapping(orgDetailsUpdateMapping, data)
 }
 
 export const hasUndefinedFieldsInOrgDetailsUpdate = (data) => {
-  const checkUndefined = (mapping) => {
-    if (typeof mapping === 'function') {
-      const val = mapping(data)
-      return val === undefined
-    }
-    if (typeof mapping === 'object') {
-      return Object.values(mapping).some(checkUndefined)
-    }
-    return false
-  }
-
-  return checkUndefined(orgDetailsUpdateMapping)
+  return checkUndefinedInMapping(orgDetailsUpdateMapping, data)
 }
 
 export function transformCountyParishHoldings(data) {
