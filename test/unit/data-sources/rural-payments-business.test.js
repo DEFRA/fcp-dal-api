@@ -235,7 +235,7 @@ describe('Rural Payments Business', () => {
   })
 
   describe('updateOrganisationDetails', () => {
-    test('should update organisation details', async () => {
+    test('should update organisation details with full payload', async () => {
       const mockResponse = {}
       httpPut.mockImplementationOnce(async () => mockResponse)
 
@@ -244,6 +244,26 @@ describe('Rural Payments Business', () => {
       await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
         body: orgDetailsUpdatePayload,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+    test('should update organisation details with partial payload & request org details for remainder', async () => {
+      const mockResponse = {}
+      const mockOrgDetailsResponse = { _data: { id: 123, name: 'Existing Name' } }
+      httpPut.mockImplementationOnce(async () => mockResponse)
+      httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
+
+      const updateDetails = businessDetailsUpdatePayload
+      delete updateDetails.name
+
+      await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
+      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
+        body: {
+          ...orgDetailsUpdatePayload,
+          name: 'Existing Name'
+        },
         headers: {
           'Content-Type': 'application/json'
         }
