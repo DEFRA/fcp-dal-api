@@ -40,7 +40,7 @@ export const dalAddressToKitsAddress = (address) => {
     uprn: address?.uprn,
     dependentLocality: address?.dependentLocality,
     doubleDependentLocality: address?.doubleDependentLocality,
-    typeId: address?.addressTypeId
+    addressTypeId: address?.typeId
   }
 }
 
