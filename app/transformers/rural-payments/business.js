@@ -96,6 +96,10 @@ export const transformOrganisationToBusiness = (data) => {
 }
 
 export function transformCountyParishHoldings(data) {
+  if (!Array.isArray(data)) {
+    return null
+  }
+
   return [...data]
     .sort((a, b) => {
       const [aCounty, aParish, aHolding] = a.cph_number.split('/').map(Number)
@@ -111,10 +115,10 @@ export function transformCountyParishHoldings(data) {
     .map(({ cph_number, end_date, parish, species, start_date, x, y, address }) => ({
       address,
       cphNumber: cph_number,
-      endDate: end_date.split('T')[0],
+      endDate: end_date?.split('T')[0] || null,
       parish,
       species,
-      startDate: start_date.split('T')[0],
+      startDate: start_date?.split('T')[0] || null,
       xCoordinate: x,
       yCoordinate: y
     }))
