@@ -1,3 +1,5 @@
+import { transformAddress } from '../../utils/common.js'
+
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
 }
@@ -39,109 +41,71 @@ export function transformBusinessCustomerPrivilegesToPermissionGroups(
   return customerPermissionGroups
 }
 
-export const transformOrganisationToBusiness = (data) => {
-  return {
-    info: {
-      name: data?.name,
-      reference: data?.businessReference,
-      vat: data?.taxRegistrationNumber,
-      traderNumber: data?.traderNumber,
-      vendorNumber: data?.vendorNumber,
-      address: {
-        line1: data?.address?.address1,
-        line2: data?.address?.address2,
-        line3: data?.address?.address3,
-        line4: data?.address?.address4,
-        line5: data?.address?.address5,
-        pafOrganisationName: data?.address?.pafOrganisationName,
-        buildingNumberRange: data?.address?.buildingNumberRange,
-        buildingName: data?.address?.buildingName,
-        flatName: data?.address?.flatName,
-        street: data?.address?.street,
-        city: data?.address?.city,
-        county: data?.address?.county,
-        postalCode: data?.address?.postalCode,
-        country: data?.address?.country,
-        uprn: data?.address?.uprn,
-        dependentLocality: data?.address?.dependentLocality,
-        doubleDependentLocality: data?.address?.doubleDependentLocality,
-        typeId: data?.address?.addressTypeId
-      },
-      correspondenceAddress:
-        (data?.correspondenceAddress && {
-          line1: data.correspondenceAddress.address1,
-          line2: data.correspondenceAddress.address2,
-          line3: data.correspondenceAddress.address3,
-          line4: data.correspondenceAddress.address4,
-          line5: data.correspondenceAddress.address5,
-          pafOrganisationName: data.correspondenceAddress.pafOrganisationName,
-          buildingNumberRange: data.correspondenceAddress.buildingNumberRange,
-          buildingName: data.correspondenceAddress.buildingName,
-          flatName: data.correspondenceAddress.flatName,
-          street: data.correspondenceAddress.street,
-          city: data.correspondenceAddress.city,
-          county: data.correspondenceAddress.county,
-          postalCode: data.correspondenceAddress.postalCode,
-          country: data.correspondenceAddress.country,
-          uprn: data.correspondenceAddress.uprn,
-          dependentLocality: data.correspondenceAddress.dependentLocality,
-          doubleDependentLocality: data.correspondenceAddress.doubleDependentLocality,
-          typeId: data.correspondenceAddress.addressTypeId
-        }) ||
-        null,
-      phone: {
-        mobile: data?.mobile,
-        landline: data?.landline,
-        fax: data?.fax
-      },
-      correspondencePhone: {
-        mobile: data?.correspondenceMobile,
-        landline: data?.correspondenceLandline,
-        fax: data?.correspondenceFax
-      },
-      email: {
-        address: data?.email,
-        validated: data?.emailValidated,
-        doNotContact: data?.doNotContact || false
-      },
-      correspondenceEmail: {
-        address: data?.correspondenceEmail,
-        validated: data?.correspondenceEmailValidated || false
-      },
-      legalStatus: {
-        code: data?.legalStatus?.id,
-        type: data?.legalStatus?.type
-      },
-      type: {
-        code: data?.businessType?.id,
-        type: data?.businessType?.type
-      },
-      registrationNumbers: {
-        companiesHouse: data?.companiesHouseRegistrationNumber,
-        charityCommission: data?.charityCommissionRegistrationNumber
-      },
-      additionalSbis: data?.additionalSbiIds || [],
-      confirmed: data?.confirmed || false,
-      isAccountablePeopleDeclarationCompleted:
-        data?.isAccountablePeopleDeclarationCompleted || false,
-      dateStartedFarming: data?.dateStartedFarming ? new Date(data.dateStartedFarming) : null,
-      lastUpdated: data?.lastUpdatedOn ? new Date(data.lastUpdatedOn) : null,
-      landConfirmed: data?.landConfirmed || false,
-      deactivated: data?.deactivated || false,
-      locked: data?.locked || false,
-      isFinancialToBusinessAddress: data?.isFinancialToBusinessAddr || false,
-      isCorrespondenceAsBusinessAddress: data?.isCorrespondenceAsBusinessAddr || false,
-      hasLandInNorthernIreland: data?.hasLandInNorthernIreland || false,
-      hasLandInScotland: data?.hasLandInScotland || false,
-      hasLandInWales: data?.hasLandInWales || false,
-      hasAdditionalBusinessActivities: data?.hasAdditionalBusinessActivities || false,
-      additionalBusinessActivities:
-        data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || []
+const booleanise = (value) => !!value
+
+export const transformOrganisationToBusiness = (data) => ({
+  info: {
+    name: data?.name,
+    reference: data?.businessReference,
+    vat: data?.taxRegistrationNumber,
+    traderNumber: data?.traderNumber,
+    vendorNumber: data?.vendorNumber,
+    address: transformAddress(data?.address),
+    correspondenceAddress:
+      (data?.correspondenceAddress && transformAddress(data.correspondenceAddress)) || null,
+    phone: {
+      mobile: data?.mobile,
+      landline: data?.landline,
+      fax: data?.fax
     },
-    organisationId: `${data?.id}`,
-    sbi: `${data?.sbi}`
-  }
-}
+    correspondencePhone: {
+      mobile: data?.correspondenceMobile,
+      landline: data?.correspondenceLandline,
+      fax: data?.correspondenceFax
+    },
+    email: {
+      address: data?.email,
+      validated: data?.emailValidated,
+      doNotContact: booleanise(data?.doNotContact)
+    },
+    correspondenceEmail: {
+      address: data?.correspondenceEmail,
+      validated: booleanise(data?.correspondenceEmailValidated)
+    },
+    legalStatus: {
+      code: data?.legalStatus?.id,
+      type: data?.legalStatus?.type
+    },
+    type: {
+      code: data?.businessType?.id,
+      type: data?.businessType?.type
+    },
+    registrationNumbers: {
+      companiesHouse: data?.companiesHouseRegistrationNumber,
+      charityCommission: data?.charityCommissionRegistrationNumber
+    },
+    additionalSbis: data?.additionalSbiIds || [],
+    confirmed: booleanise(data?.confirmed),
+    isAccountablePeopleDeclarationCompleted: booleanise(
+      data?.isAccountablePeopleDeclarationCompleted
+    ),
+    dateStartedFarming: data?.dateStartedFarming ? new Date(data.dateStartedFarming) : null,
+    lastUpdated: data?.lastUpdatedOn ? new Date(data.lastUpdatedOn) : null,
+    landConfirmed: booleanise(data?.landConfirmed),
+    deactivated: booleanise(data?.deactivated),
+    locked: booleanise(data?.locked),
+    isFinancialToBusinessAddress: booleanise(data?.isFinancialToBusinessAddr),
+    isCorrespondenceAsBusinessAddress: booleanise(data?.isCorrespondenceAsBusinessAddr),
+    hasLandInNorthernIreland: booleanise(data?.hasLandInNorthernIreland),
+    hasLandInScotland: booleanise(data?.hasLandInScotland),
+    hasLandInWales: booleanise(data?.hasLandInWales),
+    hasAdditionalBusinessActivities: booleanise(data?.hasAdditionalBusinessActivities),
+    additionalBusinessActivities:
+      data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || []
+  },
+  organisationId: `${data?.id}`,
+  sbi: `${data?.sbi}`
+})
 
 export function transformCountyParishHoldings(data) {
   return [...data]

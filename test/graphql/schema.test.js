@@ -8,6 +8,7 @@ import { config } from '../../app/config.js'
 describe('schema', () => {
   beforeEach(() => {
     config.set('allSchemaOn', true)
+    // loadFiles(join(dirname(fileURLToPath(import.meta.url)), path)
   })
 
   it('should not include custom directive in final schema output', async () => {

@@ -1,3 +1,4 @@
+import { transformAddress } from '../../utils/common.js'
 import { validateDate } from '../../utils/date.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
@@ -24,7 +25,7 @@ export function transformBusinessCustomerToCustomerPermissionGroups(
   }
 
   return permissionGroups.map(({ id, permissions }) => {
-    const customerPermisson = permissions.reduce(
+    const customerPermission = permissions.reduce(
       (permission, currentPermission) =>
         currentPermission.privilegeNames.some((privilegeName) =>
           customerPrivileges.includes(privilegeName.toLowerCase())
@@ -33,7 +34,7 @@ export function transformBusinessCustomerToCustomerPermissionGroups(
           : permission,
       permissions[0]
     )
-    return { id, level: customerPermisson.level, functions: customerPermisson.functions }
+    return { id, level: customerPermission.level, functions: customerPermission.functions }
   })
 }
 
@@ -71,21 +72,7 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       validated: data.emailValidated,
       doNotContact: data.doNotContact
     },
-    address: {
-      pafOrganisationName: data.address.pafOrganisationName,
-      buildingNumberRange: data.address.buildingNumberRange,
-      buildingName: data.address.buildingName,
-      flatName: data.address.flatName,
-      street: data.address.street,
-      city: data.address.city,
-      county: data.address.county,
-      postalCode: data.address.postalCode,
-      country: data.address.country,
-      uprn: data.address.uprn,
-      dependentLocality: data.address.dependentLocality,
-      doubleDependentLocality: data.address.doubleDependentLocality,
-      typeId: data.address.addressTypeId
-    },
+    address: transformAddress(data.address),
     status: {
       locked: data.locked,
       confirmed: data.confirmed,
