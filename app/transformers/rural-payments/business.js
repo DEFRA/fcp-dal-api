@@ -1,4 +1,10 @@
-import { booleanise, transformAddress, transformEntityStatus } from '../common.js'
+import { checkUndefinedInMapping, transformMapping } from '../../utils/mapping.js'
+import {
+  booleanise,
+  dalAddressToKitsAddress,
+  kitsAddressToDalAddress,
+  transformEntityStatus
+} from '../common.js'
 
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
@@ -48,9 +54,9 @@ export const transformOrganisationToBusiness = (data) => ({
     vat: data?.taxRegistrationNumber,
     traderNumber: data?.traderNumber,
     vendorNumber: data?.vendorNumber,
-    address: transformAddress(data?.address),
+    address: kitsAddressToDalAddress(data?.address),
     correspondenceAddress:
-      (data?.correspondenceAddress && transformAddress(data.correspondenceAddress)) || null,
+      (data?.correspondenceAddress && kitsAddressToDalAddress(data.correspondenceAddress)) || null,
     phone: {
       mobile: data?.mobile,
       landline: data?.landline,
@@ -101,6 +107,35 @@ export const transformOrganisationToBusiness = (data) => ({
   organisationId: `${data?.id}`,
   sbi: `${data?.sbi}`
 })
+
+const orgDetailsUpdateMapping = {
+  name: (data) => data.name,
+  address: (data) => dalAddressToKitsAddress(data.address),
+  // fallback to null here as the API does not allow unsetting correspondonce address.
+  correspondenceAddress: (data) =>
+    data.correspondenceAddress === null
+      ? null
+      : dalAddressToKitsAddress(data.correspondenceAddress),
+  isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
+  email: (data) => data.email?.address,
+  landline: (data) => data.phone?.landline,
+  mobile: (data) => data.phone?.mobile,
+  correspondenceEmail: (data) => data.correspondenceEmail?.address,
+  correspondenceLandline: (data) => data.correspondencePhone?.landline,
+  correspondenceMobile: (data) => data.correspondencePhone?.mobile,
+  // Oddly this is required but cannot actually be changed.
+  businessType: {
+    id: () => 0
+  }
+}
+
+export const transformBusinessDetailsToOrgDetailsUpdate = (data) => {
+  return transformMapping(orgDetailsUpdateMapping, data)
+}
+
+export const hasUndefinedFieldsInOrgDetailsUpdate = (data) => {
+  return checkUndefinedInMapping(orgDetailsUpdateMapping, data)
+}
 
 export function transformCountyParishHoldings(data) {
   return [...data]

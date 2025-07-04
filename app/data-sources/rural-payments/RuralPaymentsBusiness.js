@@ -1,7 +1,10 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import {
+  hasUndefinedFieldsInOrgDetailsUpdate,
+  transformBusinessDetailsToOrgDetailsUpdate
+} from '../../transformers/rural-payments/business.js'
 import { RuralPayments } from './RuralPayments.js'
-
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById(organisationId) {
     const organisationResponse = await this.get(`organisation/${organisationId}`)
@@ -17,7 +20,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
-  async getOrganisationBySBI(sbi) {
+  async getOrganisationIdBySBI(sbi) {
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,
@@ -42,7 +45,12 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
     const response = organisationResponse?._data?.pop() || {}
 
-    return response?.id ? this.getOrganisationById(response.id) : null
+    return response?.id || null
+  }
+
+  async getOrganisationBySBI(sbi) {
+    const orgId = await this.getOrganisationIdBySBI(sbi)
+    return orgId ? this.getOrganisationById(orgId) : null
   }
 
   async getOrganisationCustomersByOrganisationId(organisationId) {
@@ -113,8 +121,34 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response.data
   }
 
+  async updateOrganisationDetails(organisationId, businessDetails) {
+    // Only retrieve org details when all fields are not provided.
+    let orgDetails
+    if (hasUndefinedFieldsInOrgDetailsUpdate(businessDetails)) {
+      const currentOrgDetails = await this.getOrganisationById(organisationId)
+      orgDetails = { ...currentOrgDetails, ...businessDetails }
+    } else {
+      orgDetails = businessDetails
+    }
+    const body = transformBusinessDetailsToOrgDetailsUpdate(orgDetails)
+
+    const response = this.put(`organisation/${organisationId}/business-details`, {
+      body,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    return response
+  }
+
   async getAgreementsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/agreementsByBusiness/sbi/${sbi}/list`)
     return response.data
+  }
+
+  async updateBusinessDetailsBySBI(sbi, businessDetails) {
+    const orgId = await this.getOrganisationIdBySBI(sbi)
+    return this.updateOrganisationDetails(orgId, businessDetails)
   }
 }

@@ -1,5 +1,4 @@
 import { validateDate } from '../../utils/date.js'
-import { transformAddress, transformEntityStatus } from '../common.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
@@ -64,16 +63,33 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
     dateOfBirth: data.dateOfBirth,
     phone: {
       mobile: data.mobile,
-      landline: data.landline,
-      fax: data.fax
+      landline: data.landline
     },
     email: {
       address: data.email,
       validated: data.emailValidated
     },
-    doNotContact: data.doNotContact,
-    address: transformAddress(data.address),
-    status: transformEntityStatus(data)
+    address: {
+      pafOrganisationName: data.address.pafOrganisationName,
+      buildingNumberRange: data.address.buildingNumberRange,
+      buildingName: data.address.buildingName,
+      flatName: data.address.flatName,
+      street: data.address.street,
+      city: data.address.city,
+      county: data.address.county,
+      postalCode: data.address.postalCode,
+      country: data.address.country,
+      uprn: data.address.uprn,
+      dependentLocality: data.address.dependentLocality,
+      doubleDependentLocality: data.address.doubleDependentLocality,
+      typeId: data.address.addressTypeId
+    },
+    status: {
+      locked: data.locked,
+      confirmed: data.confirmed,
+      deactivated: data.deactivated
+    },
+    doNotContact: data.doNotContact
   }
 }
 

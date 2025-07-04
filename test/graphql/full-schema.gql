@@ -9,7 +9,6 @@ type Query {
 type Phone {
   mobile: String
   landline: String
-  fax: String
 }
 
 type Email {
@@ -52,7 +51,6 @@ type BusinessInfo {
   correspondencePhone: Phone
   lastUpdated: Date
   dateStartedFarming: Date
-
   hasAdditionalBusinessActivities: Boolean
   additionalBusinessActivities: [BusinessType]
   hasLandInNorthernIreland: Boolean
@@ -288,4 +286,64 @@ type Permission {
   level: PermissionLevel
   functions: [String]
   active(crn: ID!, sbi: ID!): Boolean
+}
+
+type Mutation {
+  updateBusinessDetails(input: UpdateBusinessDetailsInput!): UpdateBusinessDetailsResponse
+}
+
+type UpdateBusinessDetailsResponse {
+  success: Boolean
+  business: Business
+}
+
+input InputAddress {
+  pafOrganisationName: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String
+  county: String
+  postalCode: String
+  country: String
+  uprn: String
+  dependentLocality: String
+  doubleDependentLocality: String
+  typeId: String
+}
+
+input InputPhone {
+  mobile: String
+  landline: String
+}
+
+input InputEmail {
+  address: String
+  validated: Boolean
+}
+
+input UpdateBusinessDetailsInput {
+  sbi: ID!
+  details: InputBusinessDetails!
+}
+
+input InputBusinessDetails {
+  name: String
+  reference: String
+  vat: String
+  traderNumber: String
+  vendorNumber: String
+  address: InputAddress
+  correspondenceAddress: InputAddress
+  isCorrespondenceAsBusinessAddress: Boolean
+  phone: InputPhone
+  correspondencePhone: InputPhone
+  email: InputEmail
+  correspondenceEmail: InputEmail
 }

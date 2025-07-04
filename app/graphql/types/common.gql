@@ -1,4 +1,4 @@
-"Represents data about the phone/fax details of a customer or business"
+"Represents data about a customers or business mobile/landline details"
 type Phone {
   """
   Mobile number of the customer or business
@@ -9,11 +9,6 @@ type Phone {
   Landline number of the customer or business
   """
   landline: String @on
-
-  """
-  Fax number of the customer or business
-  """
-  fax: String @on
 }
 
 "Represents data about the email address of a customer or business"
@@ -26,7 +21,7 @@ type Email {
   """
   Validated status of the email address
   """
-  validated: Boolean @on
+  validated: Boolean
 }
 
 "Represents data about the address details of a customer or business"

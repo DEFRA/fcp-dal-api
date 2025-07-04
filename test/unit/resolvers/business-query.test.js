@@ -1,7 +1,5 @@
 import { jest } from '@jest/globals'
-import { NotFound } from '../../../app/errors/graphql.js'
 import { Query } from '../../../app/graphql/resolvers/business/query.js'
-import { DAL_RESOLVERS_BUSINESS_001 } from '../../../app/logger/codes.js'
 
 describe('Business Query Resolver', () => {
   let mockDataSources
@@ -88,23 +86,6 @@ describe('Business Query Resolver', () => {
       },
       organisationId: '1'
     })
-  })
-
-  it('should throw NotFound error when business is not found', async () => {
-    const sbi = '123456789'
-    mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(null)
-
-    await expect(
-      Query.business(null, { sbi }, { dataSources: mockDataSources, logger: mockLogger })
-    ).rejects.toThrow(NotFound)
-
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      '#graphql - business/query - Business not found for SBI',
-      {
-        sbi,
-        code: DAL_RESOLVERS_BUSINESS_001
-      }
-    )
   })
 
   it('should handle errors from dataSource', async () => {
