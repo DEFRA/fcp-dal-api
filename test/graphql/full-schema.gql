@@ -15,7 +15,6 @@ type Phone {
 type Email {
   address: String
   validated: Boolean
-  doNotContact: Boolean
 }
 
 type Address {
@@ -46,11 +45,28 @@ type BusinessInfo {
   traderNumber: String
   vendorNumber: String
   address: Address
-  phone: Phone
+  correspondenceAddress: Address
   email: Email
+  correspondenceEmail: Email
+  phone: Phone
+  correspondencePhone: Phone
+  lastUpdated: Date
+  dateStartedFarming: Date
+
+  hasAdditionalBusinessActivities: Boolean
+  additionalBusinessActivities: [BusinessType]
+  hasLandInNorthernIreland: Boolean
+  hasLandInScotland: Boolean
+  hasLandInWales: Boolean
+  landConfirmed: Boolean
+  additionalSbis: [ID]
   legalStatus: BusinessType
   type: BusinessType
   registrationNumbers: BusinessRegistrationNumbers
+  isAccountablePeopleDeclarationComplete: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
+  isFinancialToBusinessAddress: Boolean
+  status: EntityStatus
 }
 
 type BusinessRegistrationNumbers {
@@ -176,8 +192,9 @@ type CustomerInfo {
   dateOfBirth: String
   phone: Phone
   email: Email
-  status: CustomerStatus
+  status: EntityStatus
   address: Address
+  doNotContact: Boolean
 }
 
 type CustomerName {
@@ -188,7 +205,7 @@ type CustomerName {
   last: String
 }
 
-type CustomerStatus {
+type EntityStatus {
   locked: Boolean
   confirmed: Boolean
   deactivated: Boolean

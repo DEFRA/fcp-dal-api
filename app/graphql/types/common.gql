@@ -1,4 +1,4 @@
-"Represents data about a customers or business phone/fax details"
+"Represents data about the phone/fax details of a customer or business"
 type Phone {
   """
   Mobile number of the customer or business
@@ -13,10 +13,10 @@ type Phone {
   """
   Fax number of the customer or business
   """
-  fax: String
+  fax: String @on
 }
 
-"Represents data about a customers or business email details"
+"Represents data about the email address of a customer or business"
 type Email {
   """
   Email address of the customer or business
@@ -26,15 +26,10 @@ type Email {
   """
   Validated status of the email address
   """
-  validated: Boolean
-
-  """
-  Do not contact status of the email address
-  """
-  doNotContact: Boolean
+  validated: Boolean @on
 }
 
-"Represents data about a customers or business address details"
+"Represents data about the address details of a customer or business"
 type Address {
   """
   PAF organisation name
@@ -125,6 +120,26 @@ type Address {
   Type ID of the address
   """
   typeId: String @on
+}
+
+"""
+Status of a customer or business record/account.
+"""
+type EntityStatus {
+  """
+  Indicates whether the customer or business account is locked.
+  """
+  locked: Boolean
+
+  """
+  Indicates whether the customer or business account has been confirmed.
+  """
+  confirmed: Boolean
+
+  """
+  Indicates whether the customer or business account has been deactivated.
+  """
+  deactivated: Boolean
 }
 
 "Represents data about a pagination details for a list of items"

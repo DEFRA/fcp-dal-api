@@ -76,14 +76,32 @@ type BusinessCustomerPartial {
 
 type BusinessInfo {
   name: String
-  address: Address
-  email: Email
-  legalStatus: BusinessType
-  phone: Phone
-  traderNumber: String
-  type: BusinessType
+  reference: String
   vat: String
+  traderNumber: String
   vendorNumber: String
+  address: Address
+  correspondenceAddress: Address
+  email: Email
+  correspondenceEmail: Email
+  phone: Phone
+  correspondencePhone: Phone
+  lastUpdated: Date
+  dateStartedFarming: Date
+  hasAdditionalBusinessActivities: Boolean
+  additionalBusinessActivities: [BusinessType]
+  hasLandInNorthernIreland: Boolean
+  hasLandInScotland: Boolean
+  hasLandInWales: Boolean
+  landConfirmed: Boolean
+  additionalSbis: [ID]
+  legalStatus: BusinessType
+  type: BusinessType
+  registrationNumbers: BusinessRegistrationNumbers
+  isAccountablePeopleDeclarationComplete: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
+  isFinancialToBusinessAddress: Boolean
+  status: EntityStatus
 }
 
 type BusinessLandParcel {
@@ -127,6 +145,11 @@ type BusinessLandParcelPartial {
   pendingDigitisation: Boolean
 }
 
+type BusinessRegistrationNumbers {
+  companiesHouse: String
+  charityCommission: String
+}
+
 # eslint-disable-next-line @graphql-eslint/naming-convention
 type BusinessType {
   code: Int
@@ -136,6 +159,7 @@ type BusinessType {
 type CustomerInfo {
   name: CustomerName
   dateOfBirth: String
+  doNotContact: Boolean
 }
 
 type CustomerName {
@@ -237,7 +261,12 @@ type Address {
 type Email {
   address: String
   validated: Boolean
-  doNotContact: Boolean
+}
+
+type EntityStatus {
+  locked: Boolean
+  confirmed: Boolean
+  deactivated: Boolean
 }
 
 type Phone {

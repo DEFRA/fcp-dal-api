@@ -1,3 +1,5 @@
+import { booleanise, transformAddress, transformEntityStatus } from '../common.js'
+
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
 }
@@ -39,61 +41,66 @@ export function transformBusinessCustomerPrivilegesToPermissionGroups(
   return customerPermissionGroups
 }
 
-export const transformOrganisationToBusiness = (data) => {
-  return {
-    info: {
-      name: data?.name,
-      reference: data?.businessReference,
-      vat: data?.taxRegistrationNumber,
-      traderNumber: data?.traderNumber,
-      vendorNumber: data?.vendorNumber,
-      address: {
-        line1: data?.address?.address1,
-        line2: data?.address?.address2,
-        line3: data?.address?.address3,
-        line4: data?.address?.address4,
-        line5: data?.address?.address5,
-        pafOrganisationName: data?.address?.pafOrganisationName,
-        buildingNumberRange: data?.address?.buildingNumberRange,
-        buildingName: data?.address?.buildingName,
-        flatName: data?.address?.flatName,
-        street: data?.address?.street,
-        city: data?.address?.city,
-        county: data?.address?.county,
-        postalCode: data?.address?.postalCode,
-        country: data?.address?.country,
-        uprn: data?.address?.uprn,
-        dependentLocality: data?.address?.dependentLocality,
-        doubleDependentLocality: data?.address?.doubleDependentLocality,
-        typeId: data?.address?.addressTypeId
-      },
-      phone: {
-        mobile: data?.mobile,
-        landline: data?.landline,
-        fax: data?.fax
-      },
-      email: {
-        address: data?.email,
-        validated: data?.emailValidated,
-        doNotContact: data?.doNotContact || false
-      },
-      legalStatus: {
-        code: data?.legalStatus?.id,
-        type: data?.legalStatus?.type
-      },
-      type: {
-        code: data?.businessType?.id,
-        type: data?.businessType?.type
-      },
-      registrationNumbers: {
-        companiesHouse: data?.companiesHouseRegistrationNumber,
-        charityCommission: data?.charityCommissionRegistrationNumber
-      }
+export const transformOrganisationToBusiness = (data) => ({
+  info: {
+    name: data?.name,
+    reference: data?.businessReference,
+    vat: data?.taxRegistrationNumber,
+    traderNumber: data?.traderNumber,
+    vendorNumber: data?.vendorNumber,
+    address: transformAddress(data?.address),
+    correspondenceAddress:
+      (data?.correspondenceAddress && transformAddress(data.correspondenceAddress)) || null,
+    phone: {
+      mobile: data?.mobile,
+      landline: data?.landline,
+      fax: data?.fax
     },
-    organisationId: `${data?.id}`,
-    sbi: `${data?.sbi}`
-  }
-}
+    correspondencePhone: {
+      mobile: data?.correspondenceMobile,
+      landline: data?.correspondenceLandline,
+      fax: data?.correspondenceFax
+    },
+    email: {
+      address: data?.email,
+      validated: data?.emailValidated
+    },
+    correspondenceEmail: {
+      address: data?.correspondenceEmail,
+      validated: booleanise(data?.correspondenceEmailValidated)
+    },
+    legalStatus: {
+      code: data?.legalStatus?.id,
+      type: data?.legalStatus?.type
+    },
+    type: {
+      code: data?.businessType?.id,
+      type: data?.businessType?.type
+    },
+    registrationNumbers: {
+      companiesHouse: data?.companiesHouseRegistrationNumber,
+      charityCommission: data?.charityCommissionRegistrationNumber
+    },
+    additionalSbis: data?.additionalSbiIds || [],
+    isAccountablePeopleDeclarationCompleted: booleanise(
+      data?.isAccountablePeopleDeclarationCompleted
+    ),
+    dateStartedFarming: data?.dateStartedFarming ? new Date(data.dateStartedFarming) : null,
+    lastUpdated: data?.lastUpdatedOn ? new Date(data.lastUpdatedOn) : null,
+    landConfirmed: booleanise(data?.landConfirmed),
+    isFinancialToBusinessAddress: booleanise(data?.isFinancialToBusinessAddr),
+    isCorrespondenceAsBusinessAddress: booleanise(data?.isCorrespondenceAsBusinessAddr),
+    hasLandInNorthernIreland: booleanise(data?.hasLandInNorthernIreland),
+    hasLandInScotland: booleanise(data?.hasLandInScotland),
+    hasLandInWales: booleanise(data?.hasLandInWales),
+    hasAdditionalBusinessActivities: booleanise(data?.hasAdditionalBusinessActivities),
+    additionalBusinessActivities:
+      data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || [],
+    status: transformEntityStatus(data)
+  },
+  organisationId: `${data?.id}`,
+  sbi: `${data?.sbi}`
+})
 
 export function transformCountyParishHoldings(data) {
   return [...data]

@@ -15,10 +15,10 @@ type BusinessInfo {
   (SBI). FRN is commonly used in RPA's payment systems. The format is the same as the
   Customer Reference Number (CRN), which is also a 10-digit number.
   """
-  reference: String
+  reference: String @on
 
   """
-  VAT number of the business.
+  VAT number of the business. (a.k.a. `taxRegistrationNumber`)
   """
   vat: String @on
 
@@ -38,14 +38,34 @@ type BusinessInfo {
   address: Address @on
 
   """
-  Telephone number of the business.
+  Correspondence address of the business.
   """
-  phone: Phone @on
+  correspondenceAddress: Address @on
+
+  """
+  States the correspondence address should be used as the business address.
+  """
+  isCorrespondenceAsBusinessAddress: Boolean @on
 
   """
   Email address of the business.
   """
   email: Email @on
+
+  """
+  Correspondence email of the business.
+  """
+  correspondenceEmail: Email @on
+
+  """
+  Telephone numbers of the business.
+  """
+  phone: Phone @on
+
+  """
+  Correspondence telephone numbers of the business.
+  """
+  correspondencePhone: Phone @on
 
   """
   Legal status of the business. For example, Sole Proprietorship.
@@ -61,6 +81,66 @@ type BusinessInfo {
   Various registration numbers for the business. For example, Companies House number.
   """
   registrationNumbers: BusinessRegistrationNumbers
+
+  """
+  Other SBIs by which the business is known.
+  """
+  additionalSbis: [ID] @on
+
+  """
+  The date the business info was last updated.
+  """
+  lastUpdated: Date @on
+
+  """
+  States the business address is also the financial address.
+  """
+  isFinancialToBusinessAddress: Boolean @on
+
+  """
+  States the business has land in Northern Ireland.
+  """
+  hasLandInNorthernIreland: Boolean @on
+
+  """
+  States the business has land in Scotland.
+  """
+  hasLandInScotland: Boolean @on
+
+  """
+  States the business has land in Wales.
+  """
+  hasLandInWales: Boolean @on
+
+  """
+  Whether the land for the business has been confirmed.
+  """
+  landConfirmed: Boolean @on
+
+  """
+  Whether the business has additional business activities.
+  """
+  hasAdditionalBusinessActivities: Boolean @on
+
+  """
+  The additional business activities for this business.
+  """
+  additionalBusinessActivities: [BusinessType] @on
+
+  """
+  Whether the "accountable people declaration" is complete.
+  """
+  isAccountablePeopleDeclarationComplete: Boolean @on
+
+  """
+  The date the business started farming.
+  """
+  dateStartedFarming: Date @on
+
+  """
+  The status of the business.
+  """
+  status: EntityStatus @on
 }
 
 """
@@ -70,12 +150,12 @@ type BusinessRegistrationNumbers {
   """
   Companies House number of the business.
   """
-  companiesHouse: String
+  companiesHouse: String @on
 
   """
   Charity Commission number of the business.
   """
-  charityCommission: String
+  charityCommission: String @on
 }
 
 """
