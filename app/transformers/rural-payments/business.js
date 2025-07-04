@@ -1,5 +1,10 @@
 import { checkUndefinedInMapping, transformMapping } from '../../utils/mapping.js'
-import { booleanise, transformEntityStatus } from '../common.js'
+import {
+  booleanise,
+  dalAddressToKitsAddress,
+  kitsAddressToDalAddress,
+  transformEntityStatus
+} from '../common.js'
 
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
@@ -42,52 +47,6 @@ export function transformBusinessCustomerPrivilegesToPermissionGroups(
   return customerPermissionGroups
 }
 
-function orgAddressToBusinessAddress(address) {
-  return {
-    line1: address?.address1,
-    line2: address?.address2,
-    line3: address?.address3,
-    line4: address?.address4,
-    line5: address?.address5,
-    pafOrganisationName: address?.pafOrganisationName,
-    buildingNumberRange: address?.buildingNumberRange,
-    buildingName: address?.buildingName,
-    flatName: address?.flatName,
-    street: address?.street,
-    city: address?.city,
-    county: address?.county,
-    postalCode: address?.postalCode,
-    country: address?.country,
-    uprn: address?.uprn,
-    dependentLocality: address?.dependentLocality,
-    doubleDependentLocality: address?.doubleDependentLocality,
-    typeId: address?.addressTypeId
-  }
-}
-
-function businessAddressToOrgAddress(address) {
-  return {
-    address1: address?.line1,
-    address2: address?.line2,
-    address3: address?.line3,
-    address4: address?.line4,
-    address5: address?.line5,
-    pafOrganisationName: address?.pafOrganisationName,
-    buildingNumberRange: address?.buildingNumberRange,
-    buildingName: address?.buildingName,
-    flatName: address?.flatName,
-    street: address?.street,
-    city: address?.city,
-    county: address?.county,
-    postalCode: address?.postalCode,
-    country: address?.country,
-    uprn: address?.uprn,
-    dependentLocality: address?.dependentLocality,
-    doubleDependentLocality: address?.doubleDependentLocality,
-    typeId: address?.addressTypeId
-  }
-}
-
 export const transformOrganisationToBusiness = (data) => ({
   info: {
     name: data?.name,
@@ -95,10 +54,9 @@ export const transformOrganisationToBusiness = (data) => ({
     vat: data?.taxRegistrationNumber,
     traderNumber: data?.traderNumber,
     vendorNumber: data?.vendorNumber,
-    address: orgAddressToBusinessAddress(data?.address),
+    address: kitsAddressToDalAddress(data?.address),
     correspondenceAddress:
-      (data?.correspondenceAddress && orgAddressToBusinessAddress(data.correspondenceAddress)) ||
-      null,
+      (data?.correspondenceAddress && kitsAddressToDalAddress(data.correspondenceAddress)) || null,
     phone: {
       mobile: data?.mobile,
       landline: data?.landline,
@@ -152,12 +110,12 @@ export const transformOrganisationToBusiness = (data) => ({
 
 const orgDetailsUpdateMapping = {
   name: (data) => data.name,
-  address: (data) => businessAddressToOrgAddress(data.address),
+  address: (data) => dalAddressToKitsAddress(data.address),
   // fallback to null here as the API does not allow unsetting correspondonce address.
   correspondenceAddress: (data) =>
     data.correspondenceAddress === null
       ? null
-      : businessAddressToOrgAddress(data.correspondenceAddress),
+      : dalAddressToKitsAddress(data.correspondenceAddress),
   isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,

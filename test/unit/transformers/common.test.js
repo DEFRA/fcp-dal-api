@@ -1,6 +1,6 @@
 import {
   booleanise,
-  transformAddress,
+  kitsAddressToDalAddress,
   transformEntityStatus
 } from '../../../app/transformers/common.js'
 
@@ -28,7 +28,7 @@ describe('Common transformers', () => {
     }
 
     it('should fill address with supplied fields', () => {
-      expect(transformAddress(address)).toEqual({
+      expect(kitsAddressToDalAddress(address)).toEqual({
         line1: 'line1',
         line2: 'line2',
         line3: 'line3',
