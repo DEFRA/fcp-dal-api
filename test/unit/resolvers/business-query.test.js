@@ -65,10 +65,8 @@ describe('Business Query Resolver', () => {
         correspondenceAddress: null,
         correspondencePhone: { mobile: undefined, landline: undefined, fax: undefined },
         phone: { mobile: undefined, landline: undefined, fax: undefined },
-        confirmed: false,
         dateStartedFarming: null,
-        deactivated: false,
-        email: { address: undefined, validated: undefined, doNotContact: false },
+        email: { address: undefined, validated: undefined },
         correspondenceEmail: { address: undefined, validated: false },
         hasAdditionalBusinessActivities: false,
         hasLandInNorthernIreland: false,
@@ -80,9 +78,13 @@ describe('Business Query Resolver', () => {
         landConfirmed: false,
         lastUpdated: null,
         legalStatus: { code: undefined, type: undefined },
-        locked: false,
         type: { code: undefined, type: undefined },
-        registrationNumbers: { companiesHouse: undefined, charityCommission: undefined }
+        registrationNumbers: { companiesHouse: undefined, charityCommission: undefined },
+        status: {
+          locked: false,
+          deactivated: false,
+          confirmed: false
+        }
       },
       organisationId: '1'
     })

@@ -62,9 +62,9 @@ describe('Customer', () => {
       phone: { mobile: '1849164778', landline: null, fax: null },
       email: {
         address: 'Selena_Kub@hotmail.com',
-        validated: false,
-        doNotContact: false
+        validated: false
       },
+      doNotContact: false,
       address: {
         pafOrganisationName: null,
         buildingNumberRange: null,
@@ -80,7 +80,7 @@ describe('Customer', () => {
         doubleDependentLocality: null,
         typeId: null
       },
-      status: { locked: false, confirmed: null, deactivated: false }
+      status: { locked: false, confirmed: false, deactivated: false }
     })
   })
 

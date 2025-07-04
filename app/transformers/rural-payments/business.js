@@ -1,4 +1,4 @@
-import { transformAddress } from '../../utils/common.js'
+import { transformAddress, transformEntityStatus } from '../../utils/common.js'
 
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
@@ -65,8 +65,7 @@ export const transformOrganisationToBusiness = (data) => ({
     },
     email: {
       address: data?.email,
-      validated: data?.emailValidated,
-      doNotContact: booleanise(data?.doNotContact)
+      validated: data?.emailValidated
     },
     correspondenceEmail: {
       address: data?.correspondenceEmail,
@@ -85,15 +84,12 @@ export const transformOrganisationToBusiness = (data) => ({
       charityCommission: data?.charityCommissionRegistrationNumber
     },
     additionalSbis: data?.additionalSbiIds || [],
-    confirmed: booleanise(data?.confirmed),
     isAccountablePeopleDeclarationCompleted: booleanise(
       data?.isAccountablePeopleDeclarationCompleted
     ),
     dateStartedFarming: data?.dateStartedFarming ? new Date(data.dateStartedFarming) : null,
     lastUpdated: data?.lastUpdatedOn ? new Date(data.lastUpdatedOn) : null,
     landConfirmed: booleanise(data?.landConfirmed),
-    deactivated: booleanise(data?.deactivated),
-    locked: booleanise(data?.locked),
     isFinancialToBusinessAddress: booleanise(data?.isFinancialToBusinessAddr),
     isCorrespondenceAsBusinessAddress: booleanise(data?.isCorrespondenceAsBusinessAddr),
     hasLandInNorthernIreland: booleanise(data?.hasLandInNorthernIreland),
@@ -101,7 +97,8 @@ export const transformOrganisationToBusiness = (data) => ({
     hasLandInWales: booleanise(data?.hasLandInWales),
     hasAdditionalBusinessActivities: booleanise(data?.hasAdditionalBusinessActivities),
     additionalBusinessActivities:
-      data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || []
+      data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || [],
+    status: transformEntityStatus(data)
   },
   organisationId: `${data?.id}`,
   sbi: `${data?.sbi}`

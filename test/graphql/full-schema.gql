@@ -15,7 +15,6 @@ type Phone {
 type Email {
   address: String
   validated: Boolean
-  doNotContact: Boolean
 }
 
 type Address {
@@ -48,14 +47,12 @@ type BusinessInfo {
   address: Address
   correspondenceAddress: Address
   email: Email
-  correspondenceEmail: CorrespondenceEmail
+  correspondenceEmail: Email
   phone: Phone
   correspondencePhone: Phone
   lastUpdated: Date
   dateStartedFarming: Date
-  confirmed: Boolean
-  deactivated: Boolean
-  locked: Boolean
+
   hasAdditionalBusinessActivities: Boolean
   additionalBusinessActivities: [BusinessType]
   hasLandInNorthernIreland: Boolean
@@ -69,6 +66,7 @@ type BusinessInfo {
   isAccountablePeopleDeclarationComplete: Boolean
   isCorrespondenceAsBusinessAddress: Boolean
   isFinancialToBusinessAddress: Boolean
+  status: EntityStatus
 }
 
 type BusinessRegistrationNumbers {
@@ -127,11 +125,6 @@ type Business {
   customer(crn: ID!): BusinessCustomer
   countyParishHoldings: [CountyParishHolding]
   agreements: [Agreement]
-}
-
-type CorrespondenceEmail {
-  address: String
-  validated: Boolean
 }
 
 type CountyParishHolding {
@@ -199,8 +192,9 @@ type CustomerInfo {
   dateOfBirth: String
   phone: Phone
   email: Email
-  status: CustomerStatus
+  status: EntityStatus
   address: Address
+  doNotContact: Boolean
 }
 
 type CustomerName {
@@ -211,7 +205,7 @@ type CustomerName {
   last: String
 }
 
-type CustomerStatus {
+type EntityStatus {
   locked: Boolean
   confirmed: Boolean
   deactivated: Boolean

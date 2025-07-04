@@ -55,7 +55,7 @@ type BusinessInfo {
   """
   Correspondence email of the business.
   """
-  correspondenceEmail: CorrespondenceEmail @on
+  correspondenceEmail: Email @on
 
   """
   Telephone numbers of the business.
@@ -88,24 +88,9 @@ type BusinessInfo {
   additionalSbis: [ID] @on
 
   """
-  Whether the business has been confirmed.
-  """
-  confirmed: Boolean @on
-
-  """
   The date the business info was last updated.
   """
   lastUpdated: Date @on
-
-  """
-  Whether the business is deactivated.
-  """
-  deactivated: Boolean @on
-
-  """
-  Whether the business is locked.
-  """
-  locked: Boolean @on
 
   """
   States the business address is also the financial address.
@@ -151,6 +136,11 @@ type BusinessInfo {
   The date the business started farming.
   """
   dateStartedFarming: Date @on
+
+  """
+  The status of the business.
+  """
+  status: EntityStatus @on
 }
 
 """

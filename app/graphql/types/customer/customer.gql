@@ -25,12 +25,17 @@ type CustomerInfo {
   """
   Status of the customer record/account.
   """
-  status: CustomerStatus
+  status: EntityStatus
 
   """
   Address of the customer.
   """
   address: Address
+
+  """
+  Do not contact status of the customer email address.
+  """
+  doNotContact: Boolean @on
 }
 
 """
@@ -61,26 +66,6 @@ type CustomerName {
   Last name of the customer.
   """
   last: String @on
-}
-
-"""
-Status of a customer record/account.
-"""
-type CustomerStatus {
-  """
-  Indicates whether the customer account is locked.
-  """
-  locked: Boolean
-
-  """
-  Indicates whether the customer account has been confirmed.
-  """
-  confirmed: Boolean
-
-  """
-  Indicates whether the customer account has been deactivated.
-  """
-  deactivated: Boolean
 }
 
 """

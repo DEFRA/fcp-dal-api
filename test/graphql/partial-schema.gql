@@ -83,14 +83,11 @@ type BusinessInfo {
   address: Address
   correspondenceAddress: Address
   email: Email
-  correspondenceEmail: CorrespondenceEmail
+  correspondenceEmail: Email
   phone: Phone
   correspondencePhone: Phone
   lastUpdated: Date
   dateStartedFarming: Date
-  confirmed: Boolean
-  deactivated: Boolean
-  locked: Boolean
   hasAdditionalBusinessActivities: Boolean
   additionalBusinessActivities: [BusinessType]
   hasLandInNorthernIreland: Boolean
@@ -104,6 +101,7 @@ type BusinessInfo {
   isAccountablePeopleDeclarationComplete: Boolean
   isCorrespondenceAsBusinessAddress: Boolean
   isFinancialToBusinessAddress: Boolean
+  status: EntityStatus
 }
 
 type BusinessLandParcel {
@@ -158,14 +156,10 @@ type BusinessType {
   type: String
 }
 
-type CorrespondenceEmail {
-  address: String
-  validated: Boolean
-}
-
 type CustomerInfo {
   name: CustomerName
   dateOfBirth: String
+  doNotContact: Boolean
 }
 
 type CustomerName {
@@ -267,7 +261,12 @@ type Address {
 type Email {
   address: String
   validated: Boolean
-  doNotContact: Boolean
+}
+
+type EntityStatus {
+  locked: Boolean
+  confirmed: Boolean
+  deactivated: Boolean
 }
 
 type Phone {

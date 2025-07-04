@@ -94,11 +94,7 @@ describe('Business transformer', () => {
       info: {
         additionalBusinessActivities: [{ code: 101404, type: 'additionalBusinessActivities type' }],
         additionalSbis: [11111112],
-        confirmed: true,
         lastUpdated: new Date('2021-05-27T12:46:17.305Z'),
-        landConfirmed: true,
-        deactivated: true,
-        locked: true,
         address: {
           line1: 'line1',
           line2: 'line2',
@@ -142,7 +138,6 @@ describe('Business transformer', () => {
         dateStartedFarming: new Date('2021-05-27T12:46:17.305Z'),
         email: {
           address: 'email address',
-          doNotContact: true,
           validated: true
         },
         correspondenceEmail: {
@@ -156,6 +151,7 @@ describe('Business transformer', () => {
         isAccountablePeopleDeclarationCompleted: true,
         isCorrespondenceAsBusinessAddress: true,
         isFinancialToBusinessAddress: true,
+        landConfirmed: true,
         legalStatus: { code: 101404, type: 'legalStatus type' },
         name: 'org name',
         phone: { fax: 'fax', landline: 'landline', mobile: 'mobile' },
@@ -172,7 +168,12 @@ describe('Business transformer', () => {
         traderNumber: 'traderNumber',
         type: { code: 101404, type: 'businessType type' },
         vat: 'vat taxRegistrationNumber',
-        vendorNumber: 'vendorNumber'
+        vendorNumber: 'vendorNumber',
+        status: {
+          deactivated: true,
+          confirmed: true,
+          locked: true
+        }
       },
       sbi: '11111111'
     })

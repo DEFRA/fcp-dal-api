@@ -1,4 +1,4 @@
-import { transformAddress } from '../../utils/common.js'
+import { transformAddress, transformEntityStatus } from '../../utils/common.js'
 import { validateDate } from '../../utils/date.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
@@ -69,15 +69,11 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
     },
     email: {
       address: data.email,
-      validated: data.emailValidated,
-      doNotContact: data.doNotContact
+      validated: data.emailValidated
     },
+    doNotContact: data.doNotContact,
     address: transformAddress(data.address),
-    status: {
-      locked: data.locked,
-      confirmed: data.confirmed,
-      deactivated: data.deactivated
-    }
+    status: transformEntityStatus(data)
   }
 }
 
