@@ -11,6 +11,7 @@ import { onDirectiveTransformer } from './directives/onDirectiveTransformer.js'
 
 import * as BusinessLand from './resolvers/business/business-land.js'
 import * as Business from './resolvers/business/business.js'
+import * as BusinessMutation from './resolvers/business/mutation.js'
 import * as BusinessQuery from './resolvers/business/query.js'
 import * as Customer from './resolvers/customer/customer.js'
 import * as CustomerQuery from './resolvers/customer/query.js'
@@ -30,6 +31,7 @@ export async function createSchema() {
       BusinessQuery,
       Business,
       BusinessLand,
+      BusinessMutation,
       CustomerQuery,
       Customer,
       PermissionsQuery
