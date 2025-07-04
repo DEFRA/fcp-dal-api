@@ -84,8 +84,7 @@ describe('Business Query Resolver', () => {
           confirmed: false
         }
       },
-      organisationId: '1',
-      isCorrespondenceAsBusinessAddr: undefined
+      organisationId: '1'
     })
   })
 

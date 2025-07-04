@@ -14,7 +14,9 @@ export const transformMapping = (mapping, data) => {
 export const checkUndefinedInMapping = (mapping, data) => {
   if (typeof mapping === 'function') {
     const val = mapping(data)
-    return val === undefined
+    if (val === undefined) {
+      return true
+    }
   }
   if (typeof mapping === 'object') {
     return Object.values(mapping).some((val) => checkUndefinedInMapping(val, data))

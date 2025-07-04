@@ -63,7 +63,7 @@ const businessDetailsUpdatePayload = {
     mobile: '07111222333',
     landline: '01225111222'
   },
-  isCorrespondenceAsBusinessAddr: false
+  isCorrespondenceAsBusinessAddress: false
 }
 
 describe('Business transformer', () => {

@@ -88,45 +88,21 @@ function businessAddressToOrgAddress(address) {
   }
 }
 
-export const transformOrganisationToBusiness = (data) => {
-  return {
-    info: {
-      name: data?.name,
-      reference: data?.businessReference,
-      vat: data?.taxRegistrationNumber,
-      traderNumber: data?.traderNumber,
-      vendorNumber: data?.vendorNumber,
-      address: orgAddressToBusinessAddress(data?.address),
-      correspondenceAddress: orgAddressToBusinessAddress(data?.correspondenceAddress),
-      phone: {
-        mobile: data?.mobile,
-        landline: data?.landline
-      },
-      correspondencePhone: {
-        mobile: data?.correspondenceMobile,
-        landline: data?.correspondenceLandline
-      },
-      email: {
-        address: data?.email,
-        validated: data?.emailValidated
-      },
-      correspondenceEmail: {
-        address: data?.correspondenceEmail,
-        validated: data?.correspondenceEmailValidated
-      },
-      legalStatus: {
-        code: data?.legalStatus?.id,
-        type: data?.legalStatus?.type
-      },
-      type: {
-        code: data?.businessType?.id,
-        type: data?.businessType?.type
-      },
-      registrationNumbers: {
-        companiesHouse: data?.companiesHouseRegistrationNumber,
-        charityCommission: data?.charityCommissionRegistrationNumber
-      },
-      isCorrespondenceAsBusinessAddr: data?.isCorrespondenceAsBusinessAddr
+export const transformOrganisationToBusiness = (data) => ({
+  info: {
+    name: data?.name,
+    reference: data?.businessReference,
+    vat: data?.taxRegistrationNumber,
+    traderNumber: data?.traderNumber,
+    vendorNumber: data?.vendorNumber,
+    address: orgAddressToBusinessAddress(data?.address),
+    correspondenceAddress:
+      (data?.correspondenceAddress && orgAddressToBusinessAddress(data.correspondenceAddress)) ||
+      null,
+    phone: {
+      mobile: data?.mobile,
+      landline: data?.landline,
+      fax: data?.fax
     },
     correspondencePhone: {
       mobile: data?.correspondenceMobile,
@@ -168,11 +144,11 @@ export const transformOrganisationToBusiness = (data) => {
     hasAdditionalBusinessActivities: booleanise(data?.hasAdditionalBusinessActivities),
     additionalBusinessActivities:
       data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || [],
-    status: transformEntityStatus(data),
-    organisationId: `${data?.id}`,
-    sbi: `${data?.sbi}`
-  }
-}
+    status: transformEntityStatus(data)
+  },
+  organisationId: `${data?.id}`,
+  sbi: `${data?.sbi}`
+})
 
 const orgDetailsUpdateMapping = {
   name: (data) => data.name,
@@ -182,7 +158,7 @@ const orgDetailsUpdateMapping = {
     data.correspondenceAddress === null
       ? null
       : businessAddressToOrgAddress(data.correspondenceAddress),
-  isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddr,
+  isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,
   mobile: (data) => data.phone?.mobile,

@@ -48,11 +48,6 @@ type BusinessInfo {
   isCorrespondenceAsBusinessAddress: Boolean @on
 
   """
-  Correspondence telephone number of the business.
-  """
-  correspondencePhone: Phone @on
-
-  """
   Email address of the business.
   """
   email: Email @on

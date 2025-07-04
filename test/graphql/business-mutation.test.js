@@ -57,7 +57,7 @@ const businessDetailsUpdatePayload = {
     mobile: '07111222333',
     landline: '01225111222'
   },
-  isCorrespondenceAsBusinessAddr: false
+  isCorrespondenceAsBusinessAddress: false
 }
 
 const orgDetailsUpdatePayload = {
@@ -213,7 +213,7 @@ describe('business', () => {
               email {
                 address
               }
-              isCorrespondenceAsBusinessAddr
+              isCorrespondenceAsBusinessAddress
               name
               phone {
                 landline
@@ -473,7 +473,7 @@ describe('business', () => {
               email {
                 address
               }
-              isCorrespondenceAsBusinessAddr
+              isCorrespondenceAsBusinessAddress
               legalStatus {
                 code
                 type
@@ -556,7 +556,7 @@ describe('business', () => {
               email: {
                 address: 'email address'
               },
-              isCorrespondenceAsBusinessAddr: false,
+              isCorrespondenceAsBusinessAddress: false,
               legalStatus: {
                 code: 101,
                 type: 'legal type'

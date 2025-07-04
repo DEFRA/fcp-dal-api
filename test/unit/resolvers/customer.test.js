@@ -80,8 +80,7 @@ describe('Customer', () => {
         doubleDependentLocality: null,
         typeId: null
       },
-      status: { locked: false, confirmed: null, deactivated: false },
-      doNotContact: false
+      status: { locked: false, confirmed: null, deactivated: false }
     })
   })
 

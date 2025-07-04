@@ -29,7 +29,7 @@ input InputBusinessDetails {
   """
   Indicates whether the correspondence address is the same as the business address.
   """
-  isCorrespondenceAsBusinessAddr: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
   """
   Telephone number of the business.
   """

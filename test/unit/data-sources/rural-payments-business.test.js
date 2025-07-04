@@ -56,7 +56,7 @@ const businessDetailsUpdatePayload = {
     mobile: '07111222333',
     landline: '01225111222'
   },
-  isCorrespondenceAsBusinessAddr: false
+  isCorrespondenceAsBusinessAddress: false
 }
 
 const orgDetailsUpdatePayload = {
@@ -78,7 +78,8 @@ const orgDetailsUpdatePayload = {
     country: 'United Kingdom',
     uprn: '123123123',
     dependentLocality: 'HIGH HAWSKER',
-    doubleDependentLocality: null
+    doubleDependentLocality: null,
+    typeId: undefined
   },
   correspondenceAddress: {
     address1: 'c line1',

@@ -341,7 +341,7 @@ input InputBusinessDetails {
   vendorNumber: String
   address: InputAddress
   correspondenceAddress: InputAddress
-  isCorrespondenceAsBusinessAddr: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
   phone: InputPhone
   correspondencePhone: InputPhone
   email: InputEmail

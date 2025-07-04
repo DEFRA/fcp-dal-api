@@ -22,7 +22,7 @@ const orgDetailsUpdateMapping = {
     doubleDependentLocality: (data) => data.address?.doubleDependentLocality
   },
   correspondenceAddress: (data) => data.correspondenceAddress || null,
-  isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddr,
+  isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,
   mobile: (data) => data.phone?.mobile,
@@ -88,7 +88,7 @@ const businessDetailsUpdatePayload = {
     mobile: '07111222333',
     landline: '01225111222'
   },
-  isCorrespondenceAsBusinessAddr: false
+  isCorrespondenceAsBusinessAddress: false
 }
 
 describe('transformMapping', () => {
