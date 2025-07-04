@@ -1,10 +1,114 @@
 import { jest } from '@jest/globals'
 import { RuralPaymentsBusiness } from '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../app/errors/graphql.js'
-import {
-  businessDetailsUpdatePayload,
-  orgDetailsUpdatePayload
-} from '../../fixtures/organisation.js'
+
+const businessDetailsUpdatePayload = {
+  name: 'HADLEY FARMS LTD 2',
+  address: {
+    pafOrganisationName: 'pafOrganisationName',
+    line1: 'line1',
+    line2: 'line2',
+    line3: 'line3',
+    line4: 'line4',
+    line5: 'line5',
+    buildingNumberRange: 'buildingNumberRange',
+    buildingName: 'COLSHAW HALL',
+    flatName: null,
+    street: 'street',
+    city: 'BRAINTREE',
+    county: null,
+    postalCode: '12312312',
+    country: 'United Kingdom',
+    uprn: '123123123',
+    dependentLocality: 'HIGH HAWSKER',
+    doubleDependentLocality: null
+  },
+  correspondenceAddress: {
+    pafOrganisationName: 'c pafOrganisationName',
+    line1: 'c line1',
+    line2: 'c line2',
+    line3: 'c line3',
+    line4: 'c line4',
+    line5: 'c line5',
+    buildingNumberRange: 'buildingNumberRange',
+    buildingName: 'buildingName',
+    flatName: 'flatName',
+    street: 'street',
+    city: 'city',
+    county: 'county',
+    postalCode: '1231231',
+    country: 'USA',
+    uprn: '10008042952',
+    dependentLocality: 'HIGH HAWSKER',
+    doubleDependentLocality: 'doubleDependentLocality'
+  },
+  phone: {
+    mobile: '01234042273',
+    landline: '01234613020'
+  },
+  email: {
+    address: 'hadleyfarmsltdp@defra.com.test'
+  },
+  correspondenceEmail: {
+    address: 'hadleyfarmsltdp@defra.com.123'
+  },
+  correspondencePhone: {
+    mobile: '07111222333',
+    landline: '01225111222'
+  },
+  isCorrespondenceAsBusinessAddr: false
+}
+
+const orgDetailsUpdatePayload = {
+  name: 'HADLEY FARMS LTD 2',
+  address: {
+    address1: 'line1',
+    address2: 'line2',
+    address3: 'line3',
+    address4: 'line4',
+    address5: 'line5',
+    pafOrganisationName: 'pafOrganisationName',
+    flatName: null,
+    buildingNumberRange: 'buildingNumberRange',
+    buildingName: 'COLSHAW HALL',
+    street: 'street',
+    city: 'BRAINTREE',
+    county: null,
+    postalCode: '12312312',
+    country: 'United Kingdom',
+    uprn: '123123123',
+    dependentLocality: 'HIGH HAWSKER',
+    doubleDependentLocality: null
+  },
+  correspondenceAddress: {
+    address1: 'c line1',
+    address2: 'c line2',
+    address3: 'c line3',
+    address4: 'c line4',
+    address5: 'c line5',
+    dependentLocality: 'HIGH HAWSKER',
+    pafOrganisationName: 'c pafOrganisationName',
+    doubleDependentLocality: 'doubleDependentLocality',
+    buildingName: 'buildingName',
+    buildingNumberRange: 'buildingNumberRange',
+    city: 'city',
+    country: 'USA',
+    county: 'county',
+    flatName: 'flatName',
+    postalCode: '1231231',
+    street: 'street',
+    uprn: '10008042952',
+    typeId: undefined
+  },
+  isCorrespondenceAsBusinessAddr: false,
+  email: 'hadleyfarmsltdp@defra.com.test',
+  landline: '01234613020',
+  mobile: '01234042273',
+  correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
+  correspondenceLandline: '01225111222',
+  correspondenceMobile: '07111222333',
+  businessType: { id: 0 }
+}
 
 describe('Rural Payments Business', () => {
   const logger = {

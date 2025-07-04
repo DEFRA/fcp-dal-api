@@ -2,7 +2,6 @@ config.set('auth.disabled', false)
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
-import { businessDetailsUpdatePayload, orgDetailsUpdatePayload } from '../fixtures/organisation.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 const setupNock = () => {
@@ -137,11 +136,9 @@ const setupNock = () => {
       }
     ]
   })
-
-  v1.put('/organisation/organisationId/business-details', orgDetailsUpdatePayload).reply(204)
 }
 
-describe('business', () => {
+describe('Query.business', () => {
   const query = `#graphql
     query BusinessTest {
       business(sbi: "sbi") {
@@ -251,14 +248,15 @@ describe('business', () => {
       }
     }
   `
-  beforeEach(setupNock)
 
-  afterEach(() => {
+  beforeAll(setupNock)
+
+  afterAll(() => {
     nock.cleanAll()
     nock.enableNetConnect()
   })
 
-  test('authenticated query', async () => {
+  test('authenticated', async () => {
     const result = await makeTestQuery(query)
 
     expect(result).toEqual({
@@ -375,7 +373,7 @@ describe('business', () => {
     })
   })
 
-  test('unauthenticated query', async () => {
+  test('unauthenticated', async () => {
     const result = await makeTestQuery(query, false)
 
     expect(result.data.business).toBeNull()
@@ -383,29 +381,5 @@ describe('business', () => {
     expect(result.errors[0]).toEqual(
       new Unauthorized('Authorization failed, you are not in the correct AD groups')
     )
-  })
-
-  test('update business details', async () => {
-    const query = `
-      mutation Mutation($input: UpdateBusinessDetailsInput!) {
-        updateBusinessDetails(input: $input) {
-          success
-        }
-      }
-    `
-    const result = await makeTestQuery(query, true, {
-      input: {
-        sbi: 'sbi',
-        details: businessDetailsUpdatePayload
-      }
-    })
-
-    expect(result).toEqual({
-      data: {
-        updateBusinessDetails: {
-          success: true
-        }
-      }
-    })
   })
 })

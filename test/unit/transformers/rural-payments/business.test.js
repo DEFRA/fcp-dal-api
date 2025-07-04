@@ -6,11 +6,65 @@ import {
   transformCountyParishHoldings,
   transformOrganisationCustomers
 } from '../../../../app/transformers/rural-payments/business.js'
-import {
-  businessDetailsUpdatePayload,
-  organisationPeopleByOrgId
-} from '../../../fixtures/organisation.js'
+import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
 import { buildPermissionsFromIdsAndLevels } from '../../../test-helpers/permissions.js'
+
+const businessDetailsUpdatePayload = {
+  name: 'HADLEY FARMS LTD 2',
+  address: {
+    pafOrganisationName: 'pafOrganisationName',
+    line1: 'line1',
+    line2: 'line2',
+    line3: 'line3',
+    line4: 'line4',
+    line5: 'line5',
+    buildingNumberRange: 'buildingNumberRange',
+    buildingName: 'COLSHAW HALL',
+    flatName: null,
+    street: 'street',
+    city: 'BRAINTREE',
+    county: null,
+    postalCode: '12312312',
+    country: 'United Kingdom',
+    uprn: '123123123',
+    dependentLocality: 'HIGH HAWSKER',
+    doubleDependentLocality: null
+  },
+  correspondenceAddress: {
+    pafOrganisationName: 'c pafOrganisationName',
+    line1: 'c line1',
+    line2: 'c line2',
+    line3: 'c line3',
+    line4: 'c line4',
+    line5: 'c line5',
+    buildingNumberRange: 'buildingNumberRange',
+    buildingName: 'buildingName',
+    flatName: 'flatName',
+    street: 'street',
+    city: 'city',
+    county: 'county',
+    postalCode: '1231231',
+    country: 'USA',
+    uprn: '10008042952',
+    dependentLocality: 'HIGH HAWSKER',
+    doubleDependentLocality: 'doubleDependentLocality'
+  },
+  phone: {
+    mobile: '01234042273',
+    landline: '01234613020'
+  },
+  email: {
+    address: 'hadleyfarmsltdp@defra.com.test'
+  },
+  correspondenceEmail: {
+    address: 'hadleyfarmsltdp@defra.com.123'
+  },
+  correspondencePhone: {
+    mobile: '07111222333',
+    landline: '01225111222'
+  },
+  isCorrespondenceAsBusinessAddr: false
+}
 
 describe('Business transformer', () => {
   test('#transformOrganisationCustomers', () => {
@@ -309,26 +363,27 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         uprn: '123123123',
         dependentLocality: 'HIGH HAWSKER',
         doubleDependentLocality: null,
-        addressTypeId: undefined
+        typeId: undefined
       },
       correspondenceAddress: {
+        address1: 'c line1',
+        address2: 'c line2',
+        address3: 'c line3',
+        address4: 'c line4',
+        address5: 'c line5',
+        dependentLocality: 'HIGH HAWSKER',
+        pafOrganisationName: 'c pafOrganisationName',
+        doubleDependentLocality: 'doubleDependentLocality',
         buildingName: 'buildingName',
         buildingNumberRange: 'buildingNumberRange',
         city: 'city',
         country: 'USA',
         county: 'county',
-        dependentLocality: 'HIGH HAWSKER',
-        doubleDependentLocality: 'doubleDependentLocality',
         flatName: 'flatName',
-        line1: 'c line1',
-        line2: 'c line2',
-        line3: 'c line3',
-        line4: 'c line4',
-        line5: 'c line5',
-        pafOrganisationName: 'c pafOrganisationName',
         postalCode: '1231231',
         street: 'street',
-        uprn: '10008042952'
+        uprn: '10008042952',
+        typeId: undefined
       },
       isCorrespondenceAsBusinessAddr: false,
       email: 'hadleyfarmsltdp@defra.com.test',
