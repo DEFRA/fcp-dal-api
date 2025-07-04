@@ -19,8 +19,10 @@ export const transformAddress = (address) => ({
   typeId: address?.addressTypeId
 })
 
+export const booleanise = (value) => !!value
+
 export const transformEntityStatus = (entity) => ({
-  locked: !!entity?.locked,
-  deactivated: !!entity?.deactivated,
-  confirmed: !!entity?.confirmed
+  locked: booleanise(entity?.locked),
+  deactivated: booleanise(entity?.deactivated),
+  confirmed: booleanise(entity?.confirmed)
 })
