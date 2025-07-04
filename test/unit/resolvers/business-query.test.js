@@ -38,7 +38,14 @@ describe('Business Query Resolver', () => {
         vat: undefined,
         traderNumber: undefined,
         vendorNumber: undefined,
+        additionalBusinessActivities: [],
+        additionalSbis: [],
         address: {
+          line1: undefined,
+          line2: undefined,
+          line3: undefined,
+          line4: undefined,
+          line5: undefined,
           pafOrganisationName: undefined,
           buildingNumberRange: undefined,
           buildingName: undefined,
@@ -53,39 +60,29 @@ describe('Business Query Resolver', () => {
           doubleDependentLocality: undefined,
           typeId: undefined
         },
-        correspondenceAddress: {
-          buildingName: undefined,
-          buildingNumberRange: undefined,
-          city: undefined,
-          country: undefined,
-          county: undefined,
-          dependentLocality: undefined,
-          doubleDependentLocality: undefined,
-          flatName: undefined,
-          line1: undefined,
-          line2: undefined,
-          line3: undefined,
-          line4: undefined,
-          line5: undefined,
-          pafOrganisationName: undefined,
-          postalCode: undefined,
-          street: undefined,
-          typeId: undefined,
-          uprn: undefined
-        },
-        correspondenceEmail: {
-          address: undefined,
-          validated: undefined
-        },
-        correspondencePhone: {
-          landline: undefined,
-          mobile: undefined
-        },
-        phone: { mobile: undefined, landline: undefined },
+        correspondenceAddress: null,
+        correspondencePhone: { mobile: undefined, landline: undefined, fax: undefined },
+        phone: { mobile: undefined, landline: undefined, fax: undefined },
+        dateStartedFarming: null,
         email: { address: undefined, validated: undefined },
+        correspondenceEmail: { address: undefined, validated: false },
+        hasAdditionalBusinessActivities: false,
+        hasLandInNorthernIreland: false,
+        hasLandInScotland: false,
+        hasLandInWales: false,
+        isAccountablePeopleDeclarationCompleted: false,
+        isCorrespondenceAsBusinessAddress: false,
+        isFinancialToBusinessAddress: false,
+        landConfirmed: false,
+        lastUpdated: null,
         legalStatus: { code: undefined, type: undefined },
         type: { code: undefined, type: undefined },
-        registrationNumbers: { companiesHouse: undefined, charityCommission: undefined }
+        registrationNumbers: { companiesHouse: undefined, charityCommission: undefined },
+        status: {
+          locked: false,
+          deactivated: false,
+          confirmed: false
+        }
       },
       organisationId: '1',
       isCorrespondenceAsBusinessAddr: undefined

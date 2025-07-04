@@ -64,6 +64,7 @@ describe('Customer', () => {
         address: 'Selena_Kub@hotmail.com',
         validated: false
       },
+      doNotContact: false,
       address: {
         pafOrganisationName: null,
         buildingNumberRange: null,

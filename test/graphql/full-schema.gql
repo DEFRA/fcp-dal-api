@@ -45,14 +45,26 @@ type BusinessInfo {
   vendorNumber: String
   address: Address
   correspondenceAddress: Address
-  phone: Phone
-  correspondencePhone: Phone
   email: Email
   correspondenceEmail: Email
+  phone: Phone
+  correspondencePhone: Phone
+  lastUpdated: Date
+  dateStartedFarming: Date
+  hasAdditionalBusinessActivities: Boolean
+  additionalBusinessActivities: [BusinessType]
+  hasLandInNorthernIreland: Boolean
+  hasLandInScotland: Boolean
+  hasLandInWales: Boolean
+  landConfirmed: Boolean
+  additionalSbis: [ID]
   legalStatus: BusinessType
   type: BusinessType
   registrationNumbers: BusinessRegistrationNumbers
-  isCorrespondenceAsBusinessAddr: Boolean
+  isAccountablePeopleDeclarationComplete: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
+  isFinancialToBusinessAddress: Boolean
+  status: EntityStatus
 }
 
 type BusinessRegistrationNumbers {
@@ -178,7 +190,7 @@ type CustomerInfo {
   dateOfBirth: String
   phone: Phone
   email: Email
-  status: CustomerStatus
+  status: EntityStatus
   address: Address
   doNotContact: Boolean
 }
@@ -191,7 +203,7 @@ type CustomerName {
   last: String
 }
 
-type CustomerStatus {
+type EntityStatus {
   locked: Boolean
   confirmed: Boolean
   deactivated: Boolean

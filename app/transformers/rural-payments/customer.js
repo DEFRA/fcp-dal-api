@@ -24,7 +24,7 @@ export function transformBusinessCustomerToCustomerPermissionGroups(
   }
 
   return permissionGroups.map(({ id, permissions }) => {
-    const customerPermisson = permissions.reduce(
+    const customerPermission = permissions.reduce(
       (permission, currentPermission) =>
         currentPermission.privilegeNames.some((privilegeName) =>
           customerPrivileges.includes(privilegeName.toLowerCase())
@@ -33,7 +33,7 @@ export function transformBusinessCustomerToCustomerPermissionGroups(
           : permission,
       permissions[0]
     )
-    return { id, level: customerPermisson.level, functions: customerPermisson.functions }
+    return { id, level: customerPermission.level, functions: customerPermission.functions }
   })
 }
 

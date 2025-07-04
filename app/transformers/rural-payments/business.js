@@ -1,4 +1,5 @@
 import { checkUndefinedInMapping, transformMapping } from '../../utils/mapping.js'
+import { booleanise, transformEntityStatus } from '../common.js'
 
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
@@ -127,6 +128,47 @@ export const transformOrganisationToBusiness = (data) => {
       },
       isCorrespondenceAsBusinessAddr: data?.isCorrespondenceAsBusinessAddr
     },
+    correspondencePhone: {
+      mobile: data?.correspondenceMobile,
+      landline: data?.correspondenceLandline,
+      fax: data?.correspondenceFax
+    },
+    email: {
+      address: data?.email,
+      validated: data?.emailValidated
+    },
+    correspondenceEmail: {
+      address: data?.correspondenceEmail,
+      validated: booleanise(data?.correspondenceEmailValidated)
+    },
+    legalStatus: {
+      code: data?.legalStatus?.id,
+      type: data?.legalStatus?.type
+    },
+    type: {
+      code: data?.businessType?.id,
+      type: data?.businessType?.type
+    },
+    registrationNumbers: {
+      companiesHouse: data?.companiesHouseRegistrationNumber,
+      charityCommission: data?.charityCommissionRegistrationNumber
+    },
+    additionalSbis: data?.additionalSbiIds || [],
+    isAccountablePeopleDeclarationCompleted: booleanise(
+      data?.isAccountablePeopleDeclarationCompleted
+    ),
+    dateStartedFarming: data?.dateStartedFarming ? new Date(data.dateStartedFarming) : null,
+    lastUpdated: data?.lastUpdatedOn ? new Date(data.lastUpdatedOn) : null,
+    landConfirmed: booleanise(data?.landConfirmed),
+    isFinancialToBusinessAddress: booleanise(data?.isFinancialToBusinessAddr),
+    isCorrespondenceAsBusinessAddress: booleanise(data?.isCorrespondenceAsBusinessAddr),
+    hasLandInNorthernIreland: booleanise(data?.hasLandInNorthernIreland),
+    hasLandInScotland: booleanise(data?.hasLandInScotland),
+    hasLandInWales: booleanise(data?.hasLandInWales),
+    hasAdditionalBusinessActivities: booleanise(data?.hasAdditionalBusinessActivities),
+    additionalBusinessActivities:
+      data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || [],
+    status: transformEntityStatus(data),
     organisationId: `${data?.id}`,
     sbi: `${data?.sbi}`
   }

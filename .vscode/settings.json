@@ -17,14 +17,17 @@
   "editor.formatOnSave": true,
   "cSpell.words": [
     "autoprefixer",
+    "booleanise",
     "defra",
     "defradigital",
     "nationalarchives",
     "nodemon",
     "pino",
+    "sbis",
     "sitiagri",
     "sonarcloud",
-    "TRUSTSTORE"
+    "TRUSTSTORE",
+    "uprn"
   ],
   "cSpell.ignorePaths": [
     ".git",
