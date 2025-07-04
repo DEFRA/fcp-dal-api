@@ -1,4 +1,8 @@
-import { booleanise, transformAddress, transformEntityStatus } from '../../../app/utils/common.js'
+import {
+  booleanise,
+  transformAddress,
+  transformEntityStatus
+} from '../../../app/transformers/common.js'
 
 describe('Common transformers', () => {
   describe('Address transformer', () => {

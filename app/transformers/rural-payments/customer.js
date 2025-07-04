@@ -1,5 +1,5 @@
-import { transformAddress, transformEntityStatus } from '../../utils/common.js'
 import { validateDate } from '../../utils/date.js'
+import { transformAddress, transformEntityStatus } from '../common.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)

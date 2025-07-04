@@ -1,4 +1,4 @@
-import { booleanise, transformAddress, transformEntityStatus } from '../../utils/common.js'
+import { booleanise, transformAddress, transformEntityStatus } from '../common.js'
 
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
