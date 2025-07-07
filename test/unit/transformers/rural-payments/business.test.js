@@ -380,10 +380,8 @@ describe('Business transformer', () => {
 })
 
 describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
-  const baseInput = businessDetailsUpdatePayload
-
   it('transforms base input correctly', () => {
-    const result = transformBusinessDetailsToOrgDetailsUpdate(baseInput)
+    const result = transformBusinessDetailsToOrgDetailsUpdate(businessDetailsUpdatePayload)
     expect(result).toEqual({
       name: 'HADLEY FARMS LTD 2',
       address: {
