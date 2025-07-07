@@ -21,7 +21,7 @@ type Email {
   """
   Validated status of the email address
   """
-  validated: Boolean
+  validated: Boolean @on
 }
 
 "Represents data about the address details of a customer or business"

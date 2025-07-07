@@ -9,7 +9,7 @@ import {
 import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
 import { buildPermissionsFromIdsAndLevels } from '../../../test-helpers/permissions.js'
 
-const businessDetailsUpdatePayload = {
+const baseInput = {
   name: 'HADLEY FARMS LTD 2',
   address: {
     pafOrganisationName: 'pafOrganisationName',
@@ -381,7 +381,7 @@ describe('Business transformer', () => {
 
 describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
   it('transforms base input correctly', () => {
-    const result = transformBusinessDetailsToOrgDetailsUpdate(businessDetailsUpdatePayload)
+    const result = transformBusinessDetailsToOrgDetailsUpdate(baseInput)
     expect(result).toEqual({
       name: 'HADLEY FARMS LTD 2',
       address: {
