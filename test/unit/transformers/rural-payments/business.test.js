@@ -219,6 +219,47 @@ describe('Business transformer', () => {
     ])
   })
 
+  test('#transformCountyParishHoldings returns `null` if not array', () => {
+    expect(transformCountyParishHoldings('')).toEqual(null)
+    expect(transformCountyParishHoldings()).toEqual(null)
+    expect(transformCountyParishHoldings({})).toEqual(null)
+    expect(transformCountyParishHoldings(1)).toEqual(null)
+    expect(transformCountyParishHoldings(null)).toEqual(null)
+    expect(transformCountyParishHoldings(undefined)).toEqual(null)
+  })
+
+  test('#transformCountyParishHoldings returns empty array', () => {
+    expect(transformCountyParishHoldings([])).toEqual([])
+  })
+
+  test('#transformCountyParishHoldings handles null values', () => {
+    expect(
+      transformCountyParishHoldings([
+        {
+          cph_number: null,
+          parish: null,
+          species: null,
+          start_date: null,
+          end_date: null,
+          x: null,
+          y: null,
+          address: null
+        }
+      ])
+    ).toEqual([
+      {
+        address: null,
+        cphNumber: null,
+        endDate: null,
+        parish: null,
+        species: null,
+        startDate: null,
+        xCoordinate: null,
+        yCoordinate: null
+      }
+    ])
+  })
+
   test('#transformAgreements', () => {
     const mockData = [
       {
