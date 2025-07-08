@@ -8,8 +8,8 @@
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
+    "lint:test": "npm run lint && npm t",
     "prepare": "[ -d '.git' ] && husky || echo 'skipping husky'",
-    "pretest": "npm run lint",
     "dev": "nodemon --ext js,gql --watch app/ -x 'node -r dotenv/config app/index.js | jq .'",
     "start": "node -r dotenv/config app/index.js | jq .",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",

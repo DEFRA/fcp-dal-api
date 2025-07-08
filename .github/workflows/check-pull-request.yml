@@ -30,6 +30,9 @@ jobs:
           npm audit --omit=dev
           npm ci
 
+      - name: Lint code
+        run: npm run lint
+
       - name: Jest Coverage Comment
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
