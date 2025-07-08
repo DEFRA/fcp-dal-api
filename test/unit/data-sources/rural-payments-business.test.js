@@ -353,6 +353,7 @@ describe('Rural Payments Business', () => {
         }
       })
     })
+
     test('should update organisation details with partial payload & request org details for remainder', async () => {
       const mockResponse = {}
       const mockOrgDetailsResponse = { _data: { id: 123, name: 'Existing Name' } }
@@ -368,6 +369,21 @@ describe('Rural Payments Business', () => {
           ...orgDetailsUpdatePayload,
           name: 'Existing Name'
         },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    test('should fail if error is thrown by put request', async () => {
+      const mockError = new Error('fetch error')
+      httpPut.mockRejectedValueOnce(mockError)
+
+      await expect(
+        ruralPaymentsBusiness.updateOrganisationDetails('123', businessDetailsUpdatePayload)
+      ).rejects.toThrow(mockError)
+      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
+        body: orgDetailsUpdatePayload,
         headers: {
           'Content-Type': 'application/json'
         }

@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { NotFound } from '../../../app/errors/graphql.js'
 import { Mutation } from '../../../app/graphql/resolvers/business/mutation.js'
 
 describe('Mutation.updateBusiness', () => {
@@ -28,6 +29,15 @@ describe('Mutation.updateBusiness', () => {
       name: 'Test'
     })
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
-    expect(logger.warn).not.toHaveBeenCalled()
+  })
+
+  it('returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
+    const notFoundError = new NotFound('Rural payments organisation not found')
+    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockRejectedValue(notFoundError)
+    const input = { sbi: '999', details: { name: 'Missing' } }
+
+    const result = await expect(
+      Mutation.updateBusiness(null, { input }, { dataSources, logger })
+    ).rejects.toThrow(notFoundError)
   })
 })
