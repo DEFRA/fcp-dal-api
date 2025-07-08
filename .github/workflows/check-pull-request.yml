@@ -30,6 +30,9 @@ jobs:
           npm audit --omit=dev
           npm ci
 
+      - name: Lint code
+        run: npm run lint
+
       - name: Jest Coverage Comment
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
@@ -39,7 +42,7 @@ jobs:
         env:
           NODE_OPTIONS: --experimental-vm-modules
         run: |
-          docker compose up --quiet-pull -d
+          docker compose up --quiet-pull --build -d
           set +e
           npm i graphql-request
           curl -s --max-time 10 --retry 5 --retry-delay 1 --retry-all-errors http://localhost:3000/health

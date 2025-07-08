@@ -12,6 +12,7 @@ services:
       - cdp-tenant
 
   fcp-dal-api:
+    image: defradigital/fcp-dal-api
     build:
       context: .
     ports:
