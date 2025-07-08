@@ -316,10 +316,7 @@ describe('Rural Payments Business', () => {
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
       httpPut.mockImplementationOnce(async () => mockResponse)
 
-      await ruralPaymentsBusiness.updateBusinessDetailsBySBI(
-        '123456789',
-        businessDetailsUpdatePayload
-      )
+      await ruralPaymentsBusiness.updateBusinessBySBI('123456789', businessDetailsUpdatePayload)
       expect(httpPost).toHaveBeenCalledWith('organisation/search', {
         body: JSON.stringify({
           searchFieldType: 'SBI',
