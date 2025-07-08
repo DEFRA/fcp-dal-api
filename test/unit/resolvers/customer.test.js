@@ -66,6 +66,11 @@ describe('Customer', () => {
       },
       doNotContact: false,
       address: {
+        line1: undefined,
+        line2: undefined,
+        line3: undefined,
+        line4: undefined,
+        line5: undefined,
         pafOrganisationName: null,
         buildingNumberRange: null,
         buildingName: '853',
@@ -80,7 +85,7 @@ describe('Customer', () => {
         doubleDependentLocality: null,
         typeId: null
       },
-      status: { locked: false, confirmed: null, deactivated: false }
+      status: { locked: false, confirmed: false, deactivated: false }
     })
   })
 

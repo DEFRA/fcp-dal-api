@@ -309,7 +309,7 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('updateBusinessDetailsBySBI', () => {
+  describe('updateBusinessBySBI', () => {
     test('should update organisation details', async () => {
       const mockResponse = {}
       const mockSearchResponse = { _data: [{ id: 123 }] }
@@ -318,7 +318,7 @@ describe('Rural Payments Business', () => {
 
       const updateDetails = businessDetailsUpdatePayload
 
-      await ruralPaymentsBusiness.updateBusinessDetailsBySBI('123456789', updateDetails)
+      await ruralPaymentsBusiness.updateBusinessBySBI('123456789', updateDetails)
       expect(httpPost).toHaveBeenCalledWith('organisation/search', {
         body: JSON.stringify({
           searchFieldType: 'SBI',

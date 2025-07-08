@@ -147,7 +147,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response.data
   }
 
-  async updateBusinessDetailsBySBI(sbi, businessDetails) {
+  async updateBusinessBySBI(sbi, businessDetails) {
     const orgId = await this.getOrganisationIdBySBI(sbi)
     return this.updateOrganisationDetails(orgId, businessDetails)
   }

@@ -2,7 +2,7 @@ import { readFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 
-import { buildSchema, findBreakingChanges, getIntrospectionQuery, graphql } from 'graphql'
+import { buildSchema, findDangerousChanges, getIntrospectionQuery, graphql } from 'graphql'
 import { config } from '../../app/config.js'
 
 describe('schema', () => {
@@ -24,7 +24,7 @@ describe('schema', () => {
       join(dirname(fileURLToPath(import.meta.url)), 'partial-schema.gql'),
       'utf-8'
     )
-    expect(findBreakingChanges(schema, buildSchema(partialSchema))).toHaveLength(0)
+    expect(findDangerousChanges(schema, buildSchema(partialSchema))).toHaveLength(0)
   })
 
   it('should contain all fields if process.env.ALL_SCHEMA is set', async () => {
@@ -33,6 +33,6 @@ describe('schema', () => {
       join(dirname(fileURLToPath(import.meta.url)), 'full-schema.gql'),
       'utf-8'
     )
-    expect(findBreakingChanges(schema, buildSchema(fullSchema))).toHaveLength(0)
+    expect(findDangerousChanges(schema, buildSchema(fullSchema))).toHaveLength(0)
   })
 })

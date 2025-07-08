@@ -289,10 +289,10 @@ type Permission {
 }
 
 type Mutation {
-  updateBusinessDetails(input: UpdateBusinessDetailsInput!): UpdateBusinessDetailsResponse
+  updateBusiness(input: UpdateBusinessInput!): UpdateBusinessResponse
 }
 
-type UpdateBusinessDetailsResponse {
+type UpdateBusinessResponse {
   success: Boolean
   business: Business
 }
@@ -315,7 +315,6 @@ input InputAddress {
   uprn: String
   dependentLocality: String
   doubleDependentLocality: String
-  typeId: String
 }
 
 input InputPhone {
@@ -325,20 +324,15 @@ input InputPhone {
 
 input InputEmail {
   address: String
-  validated: Boolean
 }
 
-input UpdateBusinessDetailsInput {
+input UpdateBusinessInput {
   sbi: ID!
   details: InputBusinessDetails!
 }
 
 input InputBusinessDetails {
   name: String
-  reference: String
-  vat: String
-  traderNumber: String
-  vendorNumber: String
   address: InputAddress
   correspondenceAddress: InputAddress
   isCorrespondenceAsBusinessAddress: Boolean

@@ -1,4 +1,4 @@
-input UpdateBusinessDetailsInput {
+input UpdateBusinessInput {
   """
   SBI (Single Business Identifier) of the business that is being updated.
   """

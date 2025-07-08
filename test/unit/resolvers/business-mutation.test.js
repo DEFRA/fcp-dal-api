@@ -1,14 +1,14 @@
 import { jest } from '@jest/globals'
 import { Mutation } from '../../../app/graphql/resolvers/business/mutation.js'
 
-describe('Mutation.updateBusinessDetails', () => {
+describe('Mutation.updateBusiness', () => {
   let dataSources
   let logger
 
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        updateBusinessDetailsBySBI: jest.fn()
+        updateBusinessBySBI: jest.fn()
       }
     }
     logger = {
@@ -16,18 +16,17 @@ describe('Mutation.updateBusinessDetails', () => {
     }
   })
 
-  it('returns true when updateBusinessDetailsBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.updateBusinessDetailsBySBI.mockResolvedValue({
+  it('returns true when updateBusinessBySBI returns a response', async () => {
+    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockResolvedValue({
       some: 'response'
     })
     const input = { sbi: '123', details: { name: 'Test' } }
 
-    const result = await Mutation.updateBusinessDetails(null, { input }, { dataSources, logger })
+    const result = await Mutation.updateBusiness(null, { input }, { dataSources, logger })
 
-    expect(dataSources.ruralPaymentsBusiness.updateBusinessDetailsBySBI).toHaveBeenCalledWith(
-      '123',
-      { name: 'Test' }
-    )
+    expect(dataSources.ruralPaymentsBusiness.updateBusinessBySBI).toHaveBeenCalledWith('123', {
+      name: 'Test'
+    })
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
     expect(logger.warn).not.toHaveBeenCalled()
   })

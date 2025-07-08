@@ -163,8 +163,8 @@ describe('business', () => {
     })
 
     const query = `
-      mutation Mutation($input: UpdateBusinessDetailsInput!) {
-        updateBusinessDetails(input: $input) { 
+      mutation Mutation($input: UpdateBusinessInput!) {
+        updateBusiness(input: $input) { 
           success
           business {
             info {
@@ -236,7 +236,7 @@ describe('business', () => {
 
     expect(result).toEqual({
       data: {
-        updateBusinessDetails: {
+        updateBusiness: {
           success: true,
           business: {
             info: {
@@ -421,8 +421,8 @@ describe('business', () => {
     })
 
     const query = `
-      mutation Mutation($input: UpdateBusinessDetailsInput!) {
-        updateBusinessDetails(input: $input) { 
+      mutation Mutation($input: UpdateBusinessInput!) {
+        updateBusiness(input: $input) { 
           success
           business {
             info {
@@ -504,7 +504,7 @@ describe('business', () => {
 
     expect(result).toEqual({
       data: {
-        updateBusinessDetails: {
+        updateBusiness: {
           success: true,
           business: {
             info: {
