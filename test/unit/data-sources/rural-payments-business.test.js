@@ -345,9 +345,7 @@ describe('Rural Payments Business', () => {
       const mockResponse = {}
       httpPut.mockImplementationOnce(async () => mockResponse)
 
-      const updateDetails = businessDetailsUpdatePayload
-
-      await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
+      await ruralPaymentsBusiness.updateOrganisationDetails('123', businessDetailsUpdatePayload)
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
         body: orgDetailsUpdatePayload,
         headers: {
@@ -361,7 +359,7 @@ describe('Rural Payments Business', () => {
       httpPut.mockImplementationOnce(async () => mockResponse)
       httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
 
-      const updateDetails = businessDetailsUpdatePayload
+      const updateDetails = { ...businessDetailsUpdatePayload }
       delete updateDetails.name
 
       await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
