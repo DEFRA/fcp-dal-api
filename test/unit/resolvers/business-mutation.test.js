@@ -36,8 +36,8 @@ describe('Mutation.updateBusiness', () => {
     dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockRejectedValue(notFoundError)
     const input = { sbi: '999', details: { name: 'Missing' } }
 
-    const result = await expect(
-      Mutation.updateBusiness(null, { input }, { dataSources, logger })
-    ).rejects.toThrow(notFoundError)
+    await expect(Mutation.updateBusiness(null, { input }, { dataSources, logger })).rejects.toThrow(
+      notFoundError
+    )
   })
 })
