@@ -1,25 +1,21 @@
 export const transformMapping = (mapping, data) => {
   if (typeof mapping === 'function') {
-    return mapping(data)
+    const result = mapping(data)
+    return result === undefined ? undefined : result
   }
+
   if (typeof mapping === 'object') {
-    return Object.entries(mapping).reduce((acc, [key, val]) => {
-      acc[key] = transformMapping(val, data)
+    const transformed = Object.entries(mapping).reduce((acc, [key, val]) => {
+      const result = transformMapping(val, data)
+      if (result !== undefined) {
+        acc[key] = result
+      }
       return acc
     }, {})
-  }
-  return undefined
-}
 
-export const checkUndefinedInMapping = (mapping, data) => {
-  if (typeof mapping === 'function') {
-    const val = mapping(data)
-    if (val === undefined) {
-      return true
-    }
+    // Return undefined if all keys were removed
+    return Object.keys(transformed).length > 0 ? transformed : undefined
   }
-  if (typeof mapping === 'object') {
-    return Object.values(mapping).some((val) => checkUndefinedInMapping(val, data))
-  }
-  return false
+
+  return undefined
 }

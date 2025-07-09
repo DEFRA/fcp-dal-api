@@ -1,16 +1,21 @@
 import { Query } from './query.js'
 
-export const Mutation = {
-  async updateBusiness(__, { input }, { dataSources }) {
-    await dataSources.ruralPaymentsBusiness.updateBusinessBySBI(input.sbi, input.details)
+const businessDetailsResolver = async (__, { sbi, input }, { dataSources }) => {
+  await dataSources.ruralPaymentsBusiness.updateBusinessBySBI(sbi, input)
 
-    return {
-      success: true,
-      business: {
-        sbi: input.sbi
-      }
+  return {
+    success: true,
+    business: {
+      sbi: sbi
     }
   }
+}
+
+export const Mutation = {
+  updateBusinessName: businessDetailsResolver,
+  updateBusinessPhone: businessDetailsResolver,
+  updateBusinessEmail: businessDetailsResolver,
+  updateBusinessAddress: businessDetailsResolver
 }
 
 export const UpdateBusinessResponse = {

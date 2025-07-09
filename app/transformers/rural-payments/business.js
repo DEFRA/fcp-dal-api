@@ -1,4 +1,4 @@
-import { checkUndefinedInMapping, transformMapping } from '../../utils/mapping.js'
+import { transformMapping } from '../../utils/mapping.js'
 import {
   booleanise,
   dalAddressToKitsAddress,
@@ -110,31 +110,20 @@ export const transformOrganisationToBusiness = (data) => ({
 
 const orgDetailsUpdateMapping = {
   name: (data) => data.name,
-  address: (data) => dalAddressToKitsAddress(data.address),
-  // fallback to null here as the API does not allow unsetting correspondonce address.
+  address: (data) => (data.address ? dalAddressToKitsAddress(data.address) : undefined),
   correspondenceAddress: (data) =>
-    data.correspondenceAddress === null
-      ? null
-      : dalAddressToKitsAddress(data.correspondenceAddress),
+    data.correspondenceAddress ? dalAddressToKitsAddress(data.correspondenceAddress) : undefined,
   isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,
   mobile: (data) => data.phone?.mobile,
   correspondenceEmail: (data) => data.correspondenceEmail?.address,
   correspondenceLandline: (data) => data.correspondencePhone?.landline,
-  correspondenceMobile: (data) => data.correspondencePhone?.mobile,
-  // Oddly this is required but cannot actually be changed.
-  businessType: {
-    id: () => 0
-  }
+  correspondenceMobile: (data) => data.correspondencePhone?.mobile
 }
 
 export const transformBusinessDetailsToOrgDetailsUpdate = (data) => {
   return transformMapping(orgDetailsUpdateMapping, data)
-}
-
-export const hasUndefinedFieldsInOrgDetailsUpdate = (data) => {
-  return checkUndefinedInMapping(orgDetailsUpdateMapping, data)
 }
 
 export function transformCountyParishHoldings(data) {

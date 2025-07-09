@@ -1,5 +1,43 @@
 extend type Mutation {
-  updateBusiness(input: UpdateBusinessInput!): UpdateBusinessResponse @on
+  updateBusinessName(sbi: ID!, input: UpdateBusinessName!): UpdateBusinessResponse @on
+  updateBusinessEmail(sbi: ID!, input: updateBusinessEmail!): UpdateBusinessResponse @on
+  updateBusinessPhone(sbi: ID!, input: UpdateBusinessPhone!): UpdateBusinessResponse @on
+  updateBusinessAddress(sbi: ID!, input: UpdateBusinessAddress!): UpdateBusinessResponse @on
+}
+
+input UpdateBusinessName {
+  name: String
+}
+
+input UpdateBusinessPhone {
+  """
+  Telephone number of the business.
+  """
+  phone: InputPhone
+  """
+  Correspondence telephone number of the business.
+  """
+  correspondencePhone: InputPhone
+}
+
+input updateBusinessEmail {
+  """
+  Email address of the business.
+  """
+  email: InputEmail
+  """
+  Correspondence email address of the business.
+  """
+  correspondenceEmail: InputEmail
+}
+
+input UpdateBusinessAddress {
+  """
+  Address of the business.
+  """
+  address: InputAddress
+  correspondenceAddress: InputAddress
+  isCorrespondenceAsBusinessAddress: Boolean
 }
 
 type UpdateBusinessResponse {

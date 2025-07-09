@@ -1,9 +1,6 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
-import {
-  hasUndefinedFieldsInOrgDetailsUpdate,
-  transformBusinessDetailsToOrgDetailsUpdate
-} from '../../transformers/rural-payments/business.js'
+import { transformBusinessDetailsToOrgDetailsUpdate } from '../../transformers/rural-payments/business.js'
 import { RuralPayments } from './RuralPayments.js'
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById(organisationId) {
@@ -122,18 +119,12 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async updateOrganisationDetails(organisationId, businessDetails) {
-    // Only retrieve org details when all fields are not provided.
-    let orgDetails
-    if (hasUndefinedFieldsInOrgDetailsUpdate(businessDetails)) {
-      const currentOrgDetails = await this.getOrganisationById(organisationId)
-      orgDetails = { ...currentOrgDetails, ...businessDetails }
-    } else {
-      orgDetails = businessDetails
-    }
-    const body = transformBusinessDetailsToOrgDetailsUpdate(orgDetails)
+    const currentOrgDetails = await this.getOrganisationById(organisationId)
+    const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(businessDetails)
+    const orgDetails = { ...currentOrgDetails, ...newOrgDetails }
 
     const response = this.put(`organisation/${organisationId}/business-details`, {
-      body,
+      body: orgDetails,
       headers: {
         'Content-Type': 'application/json'
       }
