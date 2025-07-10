@@ -152,7 +152,6 @@ describe('Business Mutation UpdateBusinessResponse', () => {
     dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
       some: 'response'
     })
-    const input = { sbi: '123', name: 'Test' }
 
     const result = await UpdateBusinessResponse.business(
       { business: { sbi: '123' } },
