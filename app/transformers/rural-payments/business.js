@@ -1,3 +1,4 @@
+import { validateDate } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
 import {
   booleanise,
@@ -166,8 +167,8 @@ function transformAgreement(agreement) {
     status: agreement.status,
     contractType: agreement.contract_type,
     schemeYear: agreement.scheme_year,
-    startDate: agreement.start_date,
-    endDate: agreement.end_date,
+    startDate: validateDate(agreement.start_date?.split('T')[0]).toISOString(),
+    endDate: validateDate(agreement.end_date?.split('T')[0]).toISOString(),
     paymentSchedules: agreement.payment_schedules.map(transformPaymentSchedule)
   }
 }
@@ -176,8 +177,12 @@ function transformPaymentSchedule(paymentSchedule) {
   return {
     optionCode: paymentSchedule.option_code,
     optionDescription: paymentSchedule.option_description,
-    commitmentGroupStartDate: paymentSchedule.commitment_group_start_date,
-    commitmentGroupEndDate: paymentSchedule.commitment_group_end_date,
+    commitmentGroupStartDate: validateDate(
+      paymentSchedule.commitment_group_start_date?.split('T')[0]
+    ).toISOString(),
+    commitmentGroupEndDate: validateDate(
+      paymentSchedule.commitment_group_end_date?.split('T')[0]
+    ).toISOString(),
     year: paymentSchedule.year,
     sheetName: paymentSchedule.sheet_name,
     parcelName: paymentSchedule.parcel_name,
@@ -185,7 +190,9 @@ function transformPaymentSchedule(paymentSchedule) {
     actionMTL: paymentSchedule.action_mtl,
     actionUnits: paymentSchedule.action_units,
     parcelTotalArea: paymentSchedule.parcel_total_area,
-    startDate: paymentSchedule.payment_schedule_start_date,
-    endDate: paymentSchedule.payment_schedule_end_date
+    startDate: validateDate(
+      paymentSchedule.payment_schedule_start_date?.split('T')[0]
+    ).toISOString(),
+    endDate: validateDate(paymentSchedule.payment_schedule_end_date?.split('T')[0]).toISOString()
   }
 }
