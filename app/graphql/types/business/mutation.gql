@@ -1,15 +1,32 @@
 extend type Mutation {
-  updateBusinessName(sbi: ID!, input: UpdateBusinessName!): UpdateBusinessResponse @on
-  updateBusinessEmail(sbi: ID!, input: updateBusinessEmail!): UpdateBusinessResponse @on
-  updateBusinessPhone(sbi: ID!, input: UpdateBusinessPhone!): UpdateBusinessResponse @on
-  updateBusinessAddress(sbi: ID!, input: UpdateBusinessAddress!): UpdateBusinessResponse @on
+  updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse @on
+  updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse @on
+  updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse @on
+  updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse @on
 }
 
-input UpdateBusinessName {
+input UpdateBusinessNameInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+  """
+  Name of the business.
+  """
   name: String
 }
 
-input UpdateBusinessPhone {
+input UpdateBusinessPhoneInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
   """
   Telephone number of the business.
   """
@@ -20,7 +37,14 @@ input UpdateBusinessPhone {
   correspondencePhone: InputPhone
 }
 
-input updateBusinessEmail {
+input UpdateBusinessEmailInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
   """
   Email address of the business.
   """
@@ -31,7 +55,14 @@ input updateBusinessEmail {
   correspondenceEmail: InputEmail
 }
 
-input UpdateBusinessAddress {
+input UpdateBusinessAddressInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
   """
   Address of the business.
   """

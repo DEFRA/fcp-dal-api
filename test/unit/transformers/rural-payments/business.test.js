@@ -402,7 +402,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         uprn: '123123123',
         dependentLocality: 'HIGH HAWSKER',
         doubleDependentLocality: null,
-        typeId: undefined
+        addressTypeId: undefined
       },
       correspondenceAddress: {
         address1: 'c line1',
@@ -422,7 +422,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         postalCode: '1231231',
         street: 'street',
         uprn: '10008042952',
-        typeId: undefined
+        addressTypeId: undefined
       },
       isCorrespondenceAsBusinessAddr: false,
       email: 'hadleyfarmsltdp@defra.com.test',
@@ -430,10 +430,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
       mobile: '01234042273',
       correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
       correspondenceLandline: '01225111222',
-      correspondenceMobile: '07111222333',
-      businessType: {
-        id: 0
-      }
+      correspondenceMobile: '07111222333'
     })
   })
 
@@ -446,7 +443,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
       correspondencePhone: { mobile: null, landline: undefined }
     }
     const result = transformBusinessDetailsToOrgDetailsUpdate(input)
-    expect(result.correspondenceAddress).toBeNull()
+    expect(result.correspondenceAddress).toBeUndefined()
     expect(result.isCorrespondenceAsBusinessAddr).toBe(false)
     expect(result.correspondenceEmail).toBeNull()
     expect(result.correspondenceLandline).toBeUndefined()

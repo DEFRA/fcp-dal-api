@@ -1,12 +1,12 @@
 import { Query } from './query.js'
 
-const businessDetailsResolver = async (__, { sbi, input }, { dataSources }) => {
-  await dataSources.ruralPaymentsBusiness.updateBusinessBySBI(sbi, input)
+const businessDetailsResolver = async (__, { input }, { dataSources }) => {
+  await dataSources.ruralPaymentsBusiness.updateBusinessBySBI(input.sbi, input)
 
   return {
     success: true,
     business: {
-      sbi: sbi
+      sbi: input.sbi
     }
   }
 }

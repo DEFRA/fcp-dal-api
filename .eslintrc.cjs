@@ -7,6 +7,15 @@ module.exports = {
     node: true,
     es2021: true
   },
+  rules: {
+    'no-unused-vars': [
+      'error',
+      {
+        varsIgnorePattern: '^_',
+        argsIgnorePattern: '^_'
+      }
+    ]
+  },
   extends: ['eslint:recommended'],
   overrides: [
     {

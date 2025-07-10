@@ -1,66 +1,13 @@
 config.set('auth.disabled', false)
 import nock from 'nock'
 import { config } from '../../app/config.js'
+import { transformBusinessDetailsToOrgDetailsUpdate } from '../../app/transformers/rural-payments/business.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
-const businessDetailsUpdatePayload = {
-  name: 'HADLEY FARMS LTD 2',
-  address: {
-    pafOrganisationName: 'pafOrganisationName',
-    line1: 'line1',
-    line2: 'line2',
-    line3: 'line3',
-    line4: 'line4',
-    line5: 'line5',
-    buildingNumberRange: 'buildingNumberRange',
-    buildingName: 'COLSHAW HALL',
-    flatName: null,
-    street: 'street',
-    city: 'BRAINTREE',
-    county: null,
-    postalCode: '12312312',
-    country: 'United Kingdom',
-    uprn: '123123123',
-    dependentLocality: 'HIGH HAWSKER',
-    doubleDependentLocality: null
-  },
-  correspondenceAddress: {
-    pafOrganisationName: 'c pafOrganisationName',
-    line1: 'c line1',
-    line2: 'c line2',
-    line3: 'c line3',
-    line4: 'c line4',
-    line5: 'c line5',
-    buildingNumberRange: 'buildingNumberRange',
-    buildingName: 'buildingName',
-    flatName: 'flatName',
-    street: 'street',
-    city: 'city',
-    county: 'county',
-    postalCode: '1231231',
-    country: 'USA',
-    uprn: '10008042952',
-    dependentLocality: 'HIGH HAWSKER',
-    doubleDependentLocality: 'doubleDependentLocality'
-  },
-  phone: {
-    mobile: '01234042273',
-    landline: '01234613020'
-  },
-  email: {
-    address: 'hadleyfarmsltdp@defra.com.test'
-  },
-  correspondenceEmail: {
-    address: 'hadleyfarmsltdp@defra.com.123'
-  },
-  correspondencePhone: {
-    mobile: '07111222333',
-    landline: '01225111222'
-  },
-  isCorrespondenceAsBusinessAddress: false
-}
+const v1 = nock(config.get('kits.gatewayUrl'))
 
 const orgDetailsUpdatePayload = {
+  id: 'organisationId',
   name: 'HADLEY FARMS LTD 2',
   address: {
     address1: 'line1',
@@ -110,6 +57,27 @@ const orgDetailsUpdatePayload = {
   businessType: { id: 0 }
 }
 
+const setupNock = () => {
+  nock.disableNetConnect()
+
+  v1.post('/organisation/search', {
+    searchFieldType: 'SBI',
+    primarySearchPhrase: 'sbi',
+    offset: 0,
+    limit: 1
+  }).reply(200, {
+    _data: [
+      {
+        id: 'organisationId'
+      }
+    ]
+  })
+
+  v1.get('/organisation/organisationId').reply(200, {
+    _data: orgDetailsUpdatePayload
+  })
+}
+
 //  Nock is setup separately in each test to ensure the order and number of requests is as expected
 describe('business', () => {
   afterEach(() => {
@@ -117,10 +85,27 @@ describe('business', () => {
     nock.enableNetConnect()
   })
 
-  test('update business details full payload', async () => {
-    nock.disableNetConnect()
+  beforeEach(setupNock)
 
-    const v1 = nock(config.get('kits.gatewayUrl'))
+  test('update business name', async () => {
+    const input = {
+      sbi: 'sbi',
+      name: 'new name'
+    }
+
+    const transformedInput = transformBusinessDetailsToOrgDetailsUpdate(input)
+    const { sbi: _, ...queryReturn } = input
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      ...transformedInput
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', ...transformedInput }
+    })
 
     v1.post('/organisation/search', {
       searchFieldType: 'SBI',
@@ -135,7 +120,50 @@ describe('business', () => {
       ]
     })
 
-    v1.put('/organisation/organisationId/business-details', orgDetailsUpdatePayload).reply(204)
+    const query = `
+      mutation Mutation($input: UpdateBusinessNameInput!) {
+        updateBusinessName(input: $input) {
+          success
+            business {
+            info {
+              name
+            }
+          }
+        }
+      }
+    `
+    const result = await makeTestQuery(query, true, {
+      input
+    })
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessName: {
+          success: true,
+          business: {
+            info: queryReturn
+          }
+        }
+      }
+    })
+  })
+
+  test('update business email', async () => {
+    const input = {
+      sbi: 'sbi',
+      email: {
+        address: 'newemail@test.com'
+      }
+    }
+    const transformedInput = transformBusinessDetailsToOrgDetailsUpdate(input)
+    const { sbi: _, ...queryReturn } = input
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      ...transformedInput
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
 
     v1.post('/organisation/search', {
       searchFieldType: 'SBI',
@@ -151,42 +179,115 @@ describe('business', () => {
     })
 
     v1.get('/organisation/organisationId').reply(200, {
-      _data: {
-        id: 'organisationId',
-        sbi: 'sbi',
-        legalStatus: {
-          code: 101,
-          type: 'legal type'
-        },
-        ...orgDetailsUpdatePayload
-      }
+      _data: { id: 'organisationId', ...transformedInput }
     })
 
     const query = `
-      mutation Mutation($input: UpdateBusinessInput!) {
-        updateBusiness(input: $input) { 
-          success
+      mutation UpdateBusinessEmail($input: UpdateBusinessEmailInput!) {
+        updateBusinessEmail(input: $input) {
           business {
             info {
-              address {
-                buildingName
-                buildingNumberRange
-                city
-                country
-                county
-                dependentLocality
-                doubleDependentLocality
-                flatName
-                line1
-                line2
-                line3
-                line4
-                line5
-                pafOrganisationName
-                postalCode
-                street
-                uprn
+              email {
+                address
               }
+            }
+          }
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, true, {
+      input
+    })
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessEmail: {
+          success: true,
+          business: {
+            info: queryReturn
+          }
+        }
+      }
+    })
+  })
+
+  test('update business address', async () => {
+    const input = {
+      sbi: 'sbi',
+      address: {
+        buildingName: 'new buildingName',
+        buildingNumberRange: 'new buildingNumberRange',
+        city: 'new city',
+        country: 'new country',
+        county: 'new county',
+        dependentLocality: 'new dependentLocality',
+        doubleDependentLocality: 'new doubleDependentLocality',
+        flatName: 'new flatName',
+        line1: 'new line1',
+        line2: 'new line2',
+        line3: 'new line3',
+        line4: 'new line4',
+        line5: 'new line5',
+        pafOrganisationName: 'new pafOrganisationName',
+        postalCode: 'new postalCode',
+        street: 'new street',
+        uprn: 'new uprn'
+      },
+      correspondenceAddress: {
+        buildingName: 'new buildingName',
+        buildingNumberRange: 'new buildingNumberRange',
+        city: 'new city',
+        country: 'new country',
+        county: 'new county',
+        dependentLocality: 'new dependentLocality',
+        doubleDependentLocality: 'new doubleDependentLocality',
+        flatName: 'new flatName',
+        line1: 'new line1',
+        line2: 'new line2',
+        line3: 'new line3',
+        line4: 'new line4',
+        line5: 'new line5',
+        pafOrganisationName: 'new pafOrganisationName',
+        postalCode: 'new postalCode',
+        street: 'new street',
+        uprn: 'new uprn'
+      },
+      isCorrespondenceAsBusinessAddress: true
+    }
+
+    const transformedInput = transformBusinessDetailsToOrgDetailsUpdate(input)
+    const { sbi: _, ...queryReturn } = input
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      ...transformedInput
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
+
+    v1.post('/organisation/search', {
+      searchFieldType: 'SBI',
+      primarySearchPhrase: 'sbi',
+      offset: 0,
+      limit: 1
+    }).reply(200, {
+      _data: [
+        {
+          id: 'organisationId'
+        }
+      ]
+    })
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', ...transformedInput }
+    })
+
+    const query = `
+      mutation UpdateBusinessAddress($input: UpdateBusinessAddressInput!) {
+        updateBusinessAddress(input: $input) {
+          business {
+            info {
               correspondenceAddress {
                 buildingName
                 buildingNumberRange
@@ -206,41 +307,43 @@ describe('business', () => {
                 street
                 uprn
               }
-              correspondencePhone {
-                landline
-                mobile
-              }
-              email {
-                address
+              address {
+                buildingName
+                buildingNumberRange
+                city
+                country
+                county
+                dependentLocality
+                doubleDependentLocality
+                flatName
+                line1
+                line2
+                line3
+                line4
+                line5
+                pafOrganisationName
+                postalCode
+                street
+                uprn
               }
               isCorrespondenceAsBusinessAddress
-              name
-              phone {
-                landline
-                mobile
-              }
-              correspondenceEmail {
-                address
-              }
             }
           }
+          success
         }
       }
     `
     const result = await makeTestQuery(query, true, {
-      input: {
-        sbi: 'sbi',
-        details: businessDetailsUpdatePayload
-      }
+      input
     })
 
     expect(result).toEqual({
       data: {
-        updateBusiness: {
+        updateBusinessAddress: {
           success: true,
           business: {
             info: {
-              ...businessDetailsUpdatePayload
+              ...queryReturn
             }
           }
         }
@@ -248,96 +351,27 @@ describe('business', () => {
     })
   })
 
-  test('update business details partial payload', async () => {
-    nock.disableNetConnect()
-
-    const v1 = nock(config.get('kits.gatewayUrl'))
-
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
-
-    v1.get('/organisation/organisationId').reply(200, {
-      _data: {
-        id: 'organisationId',
-        sbi: 'sbi',
-        name: 'EXISTING BUSINESS NAME',
-        email: 'email address',
-        address: {
-          address1: 'line1',
-          address2: 'line2',
-          address3: 'line3',
-          address4: 'line4',
-          address5: 'line5',
-          pafOrganisationName: 'paf organisation name',
-          buildingNumberRange: 'building number range',
-          buildingName: 'building name',
-          flatName: 'flat name',
-          street: 'street',
-          city: 'city',
-          county: 'county',
-          postalCode: 'postal code',
-          country: 'country',
-          uprn: 'uprn',
-          dependentLocality: 'dependent locality',
-          doubleDependentLocality: 'double dependent locality',
-          addressTypeId: 'address type'
-        },
-        correspondenceAddress: {
-          address1: null,
-          address2: null,
-          address3: null,
-          address4: null,
-          address5: null,
-          pafOrganisationName: 'c pafOrganisationName',
-          flatName: 'flatName',
-          buildingNumberRange: 'buildingNumberRange',
-          buildingName: 'buildingName',
-          street: 'street',
-          city: 'city',
-          county: 'county',
-          postalCode: '1231231',
-          country: 'USA',
-          uprn: '10008042952',
-          dependentLocality: 'HIGH HAWSKER',
-          doubleDependentLocality: 'doubleDependentLocality',
-          addressTypeId: null
-        },
-        legalStatus: {
-          id: 101,
-          type: 'legal type'
-        },
-        landline: 'landline number',
-        mobile: 'mobile number',
-        traderNumber: 'trader number',
-        businessType: {
-          id: 101,
-          type: 'business type'
-        },
-        taxRegistrationNumber: 'vat number',
-        vendorNumber: 'vendor number',
-        businessReference: 'businessReference',
-        isCorrespondenceAsBusinessAddr: false,
-        correspondenceEmail: 'hadleyfarmsltdp@defra.com.test',
-        correspondenceEmailValidated: false,
-        correspondenceLandline: 'corr landline',
-        correspondenceMobile: 'corr mobile'
+  test('update business phone', async () => {
+    const input = {
+      sbi: 'sbi',
+      phone: {
+        landline: 'new phone',
+        mobile: 'new mobile'
+      },
+      correspondencePhone: {
+        landline: 'new correspondence phone',
+        mobile: 'new correspondence mobile'
       }
-    })
+    }
+    const transformedInput = transformBusinessDetailsToOrgDetailsUpdate(input)
+    const { sbi: _, ...queryReturn } = input
 
-    v1.put('/organisation/organisationId/business-details', {
+    const expectedPutPayload = {
       ...orgDetailsUpdatePayload,
-      name: 'EXISTING BUSINESS NAME'
-    }).reply(204)
+      ...transformedInput
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
 
     v1.post('/organisation/search', {
       searchFieldType: 'SBI',
@@ -353,222 +387,38 @@ describe('business', () => {
     })
 
     v1.get('/organisation/organisationId').reply(200, {
-      _data: {
-        id: 'organisationId',
-        sbi: 'sbi',
-        name: 'EXISTING BUSINESS NAME',
-        email: 'email address',
-        address: {
-          address1: 'line1',
-          address2: 'line2',
-          address3: 'line3',
-          address4: 'line4',
-          address5: 'line5',
-          pafOrganisationName: 'paf organisation name',
-          buildingNumberRange: 'building number range',
-          buildingName: 'building name',
-          flatName: 'flat name',
-          street: 'street',
-          city: 'city',
-          county: 'county',
-          postalCode: 'postal code',
-          country: 'country',
-          uprn: 'uprn',
-          dependentLocality: 'dependent locality',
-          doubleDependentLocality: 'double dependent locality',
-          addressTypeId: 'address type'
-        },
-        correspondenceAddress: {
-          address1: null,
-          address2: null,
-          address3: null,
-          address4: null,
-          address5: null,
-          pafOrganisationName: 'c pafOrganisationName',
-          flatName: 'flatName',
-          buildingNumberRange: 'buildingNumberRange',
-          buildingName: 'buildingName',
-          street: 'street',
-          city: 'city',
-          county: 'county',
-          postalCode: '1231231',
-          country: 'USA',
-          uprn: '10008042952',
-          dependentLocality: 'HIGH HAWSKER',
-          doubleDependentLocality: 'doubleDependentLocality',
-          addressTypeId: null
-        },
-        legalStatus: {
-          id: 101,
-          type: 'legal type'
-        },
-        landline: 'landline number',
-        mobile: 'mobile number',
-        traderNumber: 'trader number',
-        businessType: {
-          id: 101,
-          type: 'business type'
-        },
-        taxRegistrationNumber: 'vat number',
-        vendorNumber: 'vendor number',
-        businessReference: 'businessReference',
-        isCorrespondenceAsBusinessAddr: false,
-        correspondenceEmail: 'hadleyfarmsltdp@defra.com.test',
-        correspondenceEmailValidated: false,
-        correspondenceLandline: 'corr landline',
-        correspondenceMobile: 'corr mobile'
-      }
+      _data: { id: 'organisationId', ...transformedInput }
     })
 
     const query = `
-      mutation Mutation($input: UpdateBusinessInput!) {
-        updateBusiness(input: $input) { 
-          success
+      mutation UpdateBusinessPhone($input: UpdateBusinessPhoneInput!) {
+        updateBusinessPhone(input: $input) {
           business {
             info {
-              address {
-                buildingName
-                buildingNumberRange
-                city
-                country
-                county
-                dependentLocality
-                doubleDependentLocality
-                flatName
-                line1
-                line2
-                line3
-                line4
-                line5
-                pafOrganisationName
-                postalCode
-                street
-                typeId
-                uprn
-              }
-              correspondenceAddress {
-                buildingName
-                buildingNumberRange
-                city
-                country
-                county
-                dependentLocality
-                doubleDependentLocality
-                flatName
-                line1
-                line2
-                line3
-                line4
-                line5
-                pafOrganisationName
-                postalCode
-                street
-                typeId
-                uprn
+              phone {
+                landline
+                mobile
               }
               correspondencePhone {
                 landline
                 mobile
               }
-              email {
-                address
-              }
-              isCorrespondenceAsBusinessAddress
-              legalStatus {
-                code
-                type
-              }
-              name
-              phone {
-                landline
-                mobile
-              }
-              correspondenceEmail {
-                address
-              }
             }
           }
+          success
         }
       }
     `
-
-    // delete name to trigger getting org details to determine value
-    delete businessDetailsUpdatePayload.name
-
     const result = await makeTestQuery(query, true, {
-      input: {
-        sbi: 'sbi',
-        details: businessDetailsUpdatePayload
-      }
+      input
     })
 
     expect(result).toEqual({
       data: {
-        updateBusiness: {
+        updateBusinessPhone: {
           success: true,
           business: {
-            info: {
-              name: 'EXISTING BUSINESS NAME',
-              address: {
-                line1: 'line1',
-                line2: 'line2',
-                line3: 'line3',
-                line4: 'line4',
-                line5: 'line5',
-                pafOrganisationName: 'paf organisation name',
-                buildingNumberRange: 'building number range',
-                buildingName: 'building name',
-                flatName: 'flat name',
-                street: 'street',
-                city: 'city',
-                county: 'county',
-                postalCode: 'postal code',
-                country: 'country',
-                uprn: 'uprn',
-                dependentLocality: 'dependent locality',
-                doubleDependentLocality: 'double dependent locality',
-                typeId: 'address type'
-              },
-              correspondenceAddress: {
-                line1: null,
-                line2: null,
-                line3: null,
-                line4: null,
-                line5: null,
-                pafOrganisationName: 'c pafOrganisationName',
-                flatName: 'flatName',
-                buildingNumberRange: 'buildingNumberRange',
-                buildingName: 'buildingName',
-                street: 'street',
-                city: 'city',
-                county: 'county',
-                postalCode: '1231231',
-                country: 'USA',
-                uprn: '10008042952',
-                dependentLocality: 'HIGH HAWSKER',
-                doubleDependentLocality: 'doubleDependentLocality',
-                typeId: null
-              },
-              correspondencePhone: {
-                landline: 'corr landline',
-                mobile: 'corr mobile'
-              },
-              email: {
-                address: 'email address'
-              },
-              isCorrespondenceAsBusinessAddress: false,
-              legalStatus: {
-                code: 101,
-                type: 'legal type'
-              },
-              phone: {
-                landline: 'landline number',
-                mobile: 'mobile number'
-              },
-              correspondenceEmail: {
-                address: 'hadleyfarmsltdp@defra.com.test'
-              }
-            }
+            info: queryReturn
           }
         }
       }

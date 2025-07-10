@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals'
 import { RuralPaymentsBusiness } from '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../app/errors/graphql.js'
+import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
 
 const businessDetailsUpdatePayload = {
   name: 'HADLEY FARMS LTD 2',
@@ -59,57 +60,9 @@ const businessDetailsUpdatePayload = {
   isCorrespondenceAsBusinessAddress: false
 }
 
-const orgDetailsUpdatePayload = {
-  name: 'HADLEY FARMS LTD 2',
-  address: {
-    address1: 'line1',
-    address2: 'line2',
-    address3: 'line3',
-    address4: 'line4',
-    address5: 'line5',
-    pafOrganisationName: 'pafOrganisationName',
-    flatName: null,
-    buildingNumberRange: 'buildingNumberRange',
-    buildingName: 'COLSHAW HALL',
-    street: 'street',
-    city: 'BRAINTREE',
-    county: null,
-    postalCode: '12312312',
-    country: 'United Kingdom',
-    uprn: '123123123',
-    dependentLocality: 'HIGH HAWSKER',
-    doubleDependentLocality: null,
-    typeId: undefined
-  },
-  correspondenceAddress: {
-    address1: 'c line1',
-    address2: 'c line2',
-    address3: 'c line3',
-    address4: 'c line4',
-    address5: 'c line5',
-    dependentLocality: 'HIGH HAWSKER',
-    pafOrganisationName: 'c pafOrganisationName',
-    doubleDependentLocality: 'doubleDependentLocality',
-    buildingName: 'buildingName',
-    buildingNumberRange: 'buildingNumberRange',
-    city: 'city',
-    country: 'USA',
-    county: 'county',
-    flatName: 'flatName',
-    postalCode: '1231231',
-    street: 'street',
-    uprn: '10008042952',
-    typeId: undefined
-  },
-  isCorrespondenceAsBusinessAddr: false,
-  email: 'hadleyfarmsltdp@defra.com.test',
-  landline: '01234613020',
-  mobile: '01234042273',
-  correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
-  correspondenceLandline: '01225111222',
-  correspondenceMobile: '07111222333',
-  businessType: { id: 0 }
-}
+const orgDetailsUpdatePayload = transformBusinessDetailsToOrgDetailsUpdate(
+  businessDetailsUpdatePayload
+)
 
 describe('Rural Payments Business', () => {
   const logger = {
@@ -311,10 +264,13 @@ describe('Rural Payments Business', () => {
 
   describe('updateBusinessBySBI', () => {
     test('should update organisation details', async () => {
-      const mockResponse = {}
       const mockSearchResponse = { _data: [{ id: 123 }] }
+      const mockOrgDetailsResponse = {
+        _data: { id: 123, name: 'Existing Name', businessType: { id: 0 } }
+      }
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
-      httpPut.mockImplementationOnce(async () => mockResponse)
+      httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
+      httpPut.mockImplementationOnce(async () => {})
 
       await ruralPaymentsBusiness.updateBusinessBySBI('123456789', businessDetailsUpdatePayload)
       expect(httpPost).toHaveBeenCalledWith('organisation/search', {
@@ -329,7 +285,10 @@ describe('Rural Payments Business', () => {
         }
       })
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
-        body: orgDetailsUpdatePayload,
+        body: {
+          ...mockOrgDetailsResponse._data,
+          ...orgDetailsUpdatePayload
+        },
         headers: {
           'Content-Type': 'application/json'
         }
@@ -338,33 +297,36 @@ describe('Rural Payments Business', () => {
   })
 
   describe('updateOrganisationDetails', () => {
-    test('should update organisation details with full payload', async () => {
-      const mockResponse = {}
-      httpPut.mockImplementationOnce(async () => mockResponse)
-
-      await ruralPaymentsBusiness.updateOrganisationDetails('123', businessDetailsUpdatePayload)
-      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
-        body: orgDetailsUpdatePayload,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-    })
-
     test('should update organisation details with partial payload & request org details for remainder', async () => {
-      const mockResponse = {}
-      const mockOrgDetailsResponse = { _data: { id: 123, name: 'Existing Name' } }
-      httpPut.mockImplementationOnce(async () => mockResponse)
+      const orgDetailOverrides = {
+        name: 'Existing Name',
+        email: 'existing email',
+        mobile: 'existing mobile'
+      }
+      const mockOrgDetailsResponse = {
+        _data: {
+          id: 123,
+          businessType: { id: 0 },
+          // We can use the update payload as a the org response for eas
+          ...orgDetailsUpdatePayload,
+          ...orgDetailOverrides
+        }
+      }
+      httpPut.mockImplementationOnce(async () => {})
       httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
 
-      const updateDetails = { ...businessDetailsUpdatePayload }
+      // deep copy to avoid deletion of keys from parent object
+      const updateDetails = JSON.parse(JSON.stringify(businessDetailsUpdatePayload))
       delete updateDetails.name
+      delete updateDetails.email.address
+      delete updateDetails.phone.mobile
 
       await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
         body: {
           ...orgDetailsUpdatePayload,
-          name: 'Existing Name'
+          ...mockOrgDetailsResponse._data,
+          ...orgDetailOverrides
         },
         headers: {
           'Content-Type': 'application/json'
@@ -374,13 +336,20 @@ describe('Rural Payments Business', () => {
 
     test('should fail if error is thrown by put request', async () => {
       const mockError = new Error('fetch error')
+      const mockOrgDetailsResponse = {
+        _data: { id: 123, name: 'Existing Name', businessType: { id: 0 } }
+      }
       httpPut.mockRejectedValueOnce(mockError)
+      httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
 
       await expect(
         ruralPaymentsBusiness.updateOrganisationDetails('123', businessDetailsUpdatePayload)
       ).rejects.toThrow(mockError)
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
-        body: orgDetailsUpdatePayload,
+        body: {
+          ...mockOrgDetailsResponse._data,
+          ...orgDetailsUpdatePayload
+        },
         headers: {
           'Content-Type': 'application/json'
         }

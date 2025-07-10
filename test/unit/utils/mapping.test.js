@@ -1,37 +1,18 @@
-import { checkUndefinedInMapping, transformMapping } from '../../../app/utils/mapping.js'
+import { dalAddressToKitsAddress } from '../../../app/transformers/common.js'
+import { transformMapping } from '../../../app/utils/mapping.js'
 
 const orgDetailsUpdateMapping = {
   name: (data) => data.name,
-  address: {
-    address1: (data) => data.address?.line1,
-    address2: (data) => data.address?.line2,
-    address3: (data) => data.address?.line3,
-    address4: (data) => data.address?.line4,
-    address5: (data) => data.address?.line5,
-    pafOrganisationName: (data) => data.address?.pafOrganisationName,
-    flatName: (data) => data.address?.flatName,
-    buildingNumberRange: (data) => data.address?.buildingNumberRange,
-    buildingName: (data) => data.address?.buildingName,
-    street: (data) => data.address?.street,
-    city: (data) => data.address?.city,
-    county: (data) => data.address?.county,
-    postalCode: (data) => data.address?.postalCode,
-    country: (data) => data.address?.country,
-    uprn: (data) => data.address?.uprn,
-    dependentLocality: (data) => data.address?.dependentLocality,
-    doubleDependentLocality: (data) => data.address?.doubleDependentLocality
-  },
-  correspondenceAddress: (data) => data.correspondenceAddress || null,
+  address: (data) => (data.address ? dalAddressToKitsAddress(data.address) : undefined),
+  correspondenceAddress: (data) =>
+    data.correspondenceAddress ? dalAddressToKitsAddress(data.correspondenceAddress) : undefined,
   isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,
   mobile: (data) => data.phone?.mobile,
   correspondenceEmail: (data) => data.correspondenceEmail?.address,
   correspondenceLandline: (data) => data.correspondencePhone?.landline,
-  correspondenceMobile: (data) => data.correspondencePhone?.mobile,
-  businessType: {
-    id: () => 0
-  }
+  correspondenceMobile: (data) => data.correspondencePhone?.mobile
 }
 
 const businessDetailsUpdatePayload = {
@@ -96,45 +77,23 @@ describe('transformMapping', () => {
     const result = transformMapping(orgDetailsUpdateMapping, businessDetailsUpdatePayload)
 
     expect(result.name).toBe('HADLEY FARMS LTD 2')
-    expect(result.address.address1).toBe('line1')
-    expect(result.address.address5).toBe('line5')
-    expect(result.address.pafOrganisationName).toBe('pafOrganisationName')
-    expect(result.address.flatName).toBeNull()
-    expect(result.address.county).toBeNull()
-    expect(result.correspondenceAddress).toEqual(businessDetailsUpdatePayload.correspondenceAddress)
+    expect(result.address).toEqual(dalAddressToKitsAddress(businessDetailsUpdatePayload.address))
+    expect(result.correspondenceAddress).toEqual(
+      dalAddressToKitsAddress(businessDetailsUpdatePayload.correspondenceAddress)
+    )
     expect(result.email).toBe('hadleyfarmsltdp@defra.com.test')
     expect(result.landline).toBe('01234613020')
     expect(result.mobile).toBe('01234042273')
-    expect(result.businessType.id).toBe(0)
-  })
-})
-
-describe('checkUndefinedInMapping', () => {
-  it('should return false when no mapped values are undefined (nulls are OK)', () => {
-    const result = checkUndefinedInMapping(orgDetailsUpdateMapping, businessDetailsUpdatePayload)
-    expect(result).toBe(false)
   })
 
-  it('should return true if any mapped function returns undefined', () => {
-    const mappingWithUndefined = {
-      name: (data) => data.unknownField,
-      nested: {
-        valid: (data) => data.name,
-        invalid: (data) => data.notFound
-      }
-    }
+  it('should only return keys that are not undefined orgDetailsUpdateMapping', () => {
+    const result = transformMapping(orgDetailsUpdateMapping, { name: 'keep this' })
 
-    const result = checkUndefinedInMapping(mappingWithUndefined, businessDetailsUpdatePayload)
-    expect(result).toBe(true)
-  })
-
-  it('should return false if all mapped fields exist even if values are null', () => {
-    const mappingWithNulls = {
-      flatName: (data) => data.address?.flatName,
-      county: (data) => data.address?.county
-    }
-
-    const result = checkUndefinedInMapping(mappingWithNulls, businessDetailsUpdatePayload)
-    expect(result).toBe(false)
+    expect(result.name).toBe('keep this')
+    expect(result.address).toBeUndefined()
+    expect(result.correspondenceAddress).toBeUndefined()
+    expect(result.email).toBeUndefined()
+    expect(result.landline).toBeUndefined()
+    expect(result.mobile).toBeUndefined()
   })
 })
