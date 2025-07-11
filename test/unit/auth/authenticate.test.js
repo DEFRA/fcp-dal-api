@@ -162,20 +162,20 @@ describe('getAuth', () => {
 })
 
 describe('checkAuthGroup', () => {
-  const adminGroupId = config.get('auth.groups.admin')
+  const adminGroupId = config.get('auth.groups.ADMIN')
 
   it('checkAuthGroup should not throw an error for admins with correct group', () => {
-    expect(() => checkAuthGroup([adminGroupId], adminGroupId)).not.toThrow()
+    expect(() => checkAuthGroup([adminGroupId], [adminGroupId])).not.toThrow()
   })
 
   it('checkAuthGroup should throw Unauthorized when user is not in AD groups', () => {
     const testGroup = 'ADMIN'
-    expect(() => checkAuthGroup([], testGroup)).toThrow(Unauthorized)
+    expect(() => checkAuthGroup([], [testGroup])).toThrow(Unauthorized)
   })
 
   it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
     const testGroup = 'NON_EXISTENT_GROUP'
-    expect(() => checkAuthGroup([testGroup], adminGroupId)).toThrow(Unauthorized)
+    expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
   })
 })
 

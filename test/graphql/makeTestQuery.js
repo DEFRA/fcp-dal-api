@@ -9,7 +9,7 @@ export async function makeTestQuery(source, isAuthenticated = true) {
     schema: await createSchema(),
     contextValue: {
       ...(await context({ request: { headers: { email: 'test@defra.gov.uk' } } })),
-      auth: isAuthenticated ? { groups: [config.get('auth.groups.admin')] } : {}
+      auth: isAuthenticated ? { groups: [config.get('auth.groups.ADMIN')] } : {}
     }
   })
 }
