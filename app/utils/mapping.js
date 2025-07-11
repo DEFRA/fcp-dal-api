@@ -13,9 +13,6 @@ export const transformMapping = (mapping, data) => {
       return acc
     }, {})
 
-    // Return undefined if all keys were removed
-    return Object.keys(transformed).length > 0 ? transformed : undefined
+    return transformed
   }
-
-  return undefined
 }

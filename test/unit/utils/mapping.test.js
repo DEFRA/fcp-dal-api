@@ -74,7 +74,7 @@ const businessDetailsUpdatePayload = {
 }
 
 describe('transformMapping', () => {
-  it('should correctly transform businessDetailsUpdatePayload based on orgDetailsUpdateMapping', () => {
+  test('should correctly transform businessDetailsUpdatePayload based on orgDetailsUpdateMapping', () => {
     const result = transformMapping(orgDetailsUpdateMapping, businessDetailsUpdatePayload)
 
     expect(result.name).toBe('HADLEY FARMS LTD 2')
@@ -87,7 +87,7 @@ describe('transformMapping', () => {
     expect(result.mobile).toBe('01234042273')
   })
 
-  it('should only return keys that are not undefined orgDetailsUpdateMapping', () => {
+  test('should only return keys that are not undefined orgDetailsUpdateMapping', () => {
     const result = transformMapping(orgDetailsUpdateMapping, { name: 'keep this' })
 
     expect(result.name).toBe('keep this')
@@ -98,7 +98,7 @@ describe('transformMapping', () => {
     expect(result.mobile).toBeUndefined()
   })
 
-  it('should handle nested object mappings (object values in mapping)', () => {
+  test('should handle nested object mappings (object values in mapping)', () => {
     const nestedMapping = {
       group: {
         name: (data) => data.name,
