@@ -2,9 +2,7 @@ export const transformMapping = (mapping, data) => {
   if (typeof mapping === 'function') {
     const result = mapping(data)
     return result === undefined ? undefined : result
-  }
-
-  if (typeof mapping === 'object') {
+  } else if (typeof mapping === 'object') {
     const transformed = Object.entries(mapping).reduce((acc, [key, val]) => {
       const result = transformMapping(val, data)
       if (result !== undefined) {
@@ -15,4 +13,5 @@ export const transformMapping = (mapping, data) => {
 
     return transformed
   }
+  return undefined
 }

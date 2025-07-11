@@ -126,4 +126,18 @@ describe('transformMapping', () => {
       }
     })
   })
+
+  test('should return undefined if incorrect mapping passed', () => {
+    // this test is just so sonar qube doesn't complain
+    const nestedMapping = ''
+
+    const nestedPayload = {
+      name: 'Test Co.',
+      email: { address: 'test@example.com' },
+      phone: { mobile: '123456789' }
+    }
+    const result = transformMapping(nestedMapping, nestedPayload)
+
+    expect(result).toBeUndefined()
+  })
 })
