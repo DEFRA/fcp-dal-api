@@ -60,7 +60,7 @@ const mockProxyAgentModule = {
   HttpsProxyAgent: mockHttpsProxyAgent
 }
 jest.unstable_mockModule('https-proxy-agent', () => mockProxyAgentModule)
-const { authDirectiveTransformer, checkAuthGroup, getAuth } = await import(
+const { authDirectiveTransformer, checkAuthGroup, getAuth, authGroups } = await import(
   '../../../app/auth/authenticate.js'
 )
 
@@ -176,6 +176,14 @@ describe('checkAuthGroup', () => {
   it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
     const testGroup = 'NON_EXISTENT_GROUP'
     expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
+  })
+
+  it('expect authGroups to match .env.test setup', () => {
+    expect(authGroups).toEqual({
+      ADMIN: 'some-ad-group-id',
+      CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
+      SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id'
+    })
   })
 })
 

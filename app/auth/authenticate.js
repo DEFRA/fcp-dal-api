@@ -10,7 +10,7 @@ import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
 
-const authGroups = config.get('auth.groups')
+export const authGroups = config.get('auth.groups')
 
 export async function getJwtPublicKey(kid) {
   const clientConfig = {
