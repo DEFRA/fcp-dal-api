@@ -76,13 +76,13 @@ export class RuralPayments extends RESTDataSource {
     const extensions = {
       ...options,
       response: {
-        status: options.response.status,
-        headers: options.response.headers,
+        status: options.response?.status,
+        headers: options.response?.headers,
         body: options.parsedBody
       }
     }
 
-    throw new HttpError(options.response.status, {
+    throw new HttpError(options.response?.status, {
       extensions
     })
   }
