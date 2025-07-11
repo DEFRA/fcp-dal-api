@@ -40,9 +40,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       throw new NotFound('Rural payments organisation not found')
     }
 
-    const response = organisationResponse?._data?.pop()
-
-    return response.id
+    return organisationResponse._data[0].id
   }
 
   async getOrganisationBySBI(sbi) {
