@@ -12,6 +12,7 @@ export const transformMapping = (mapping, data) => {
     }, {})
 
     return transformed
+  } else {
+    return undefined
   }
-  return undefined
 }
