@@ -1,7 +1,8 @@
 import {
   booleanise,
   transformAddress,
-  transformEntityStatus
+  transformEntityStatus,
+  transformToISODate
 } from '../../../app/transformers/common.js'
 
 describe('Common transformers', () => {
@@ -79,6 +80,27 @@ describe('Common transformers', () => {
       expect(booleanise(0)).toBe(false)
       expect(booleanise(null)).toBe(false)
       expect(booleanise(undefined)).toBe(false)
+    })
+  })
+
+  describe('transformToISODate', () => {
+    it('should return iso string for valid values', () => {
+      expect(transformToISODate('1752246672000')).toBe('2025-07-11T15:11:12.000Z')
+      expect(transformToISODate('2025-07-11T15:11:12.000Z')).toBe('2025-07-11T15:11:12.000Z')
+      expect(transformToISODate(1752246672000)).toBe('2025-07-11T15:11:12.000Z')
+    })
+
+    it('should null for invalid values', () => {
+      expect(transformToISODate('')).toBe(null)
+      expect(transformToISODate('2025-13-45T00:00:00.000Z')).toBe(null)
+      expect(transformToISODate('abc')).toBe(null)
+      expect(transformToISODate([])).toBe(null)
+      expect(transformToISODate({})).toBe(null)
+      expect(transformToISODate(false)).toBe(null)
+      expect(transformToISODate(NaN)).toBe(null)
+      expect(transformToISODate(null)).toBe(null)
+      expect(transformToISODate(true)).toBe(null)
+      expect(transformToISODate(undefined)).toBe(null)
     })
   })
 })
