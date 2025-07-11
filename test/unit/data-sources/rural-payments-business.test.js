@@ -157,13 +157,26 @@ describe('Rural Payments Business', () => {
   })
 
   describe('getCountyParishHoldingsBySBI', () => {
+    beforeAll(() => {
+      jest.useFakeTimers()
+    })
+
+    afterAll(() => {
+      jest.useRealTimers()
+    })
+
     test('should return county parish holdings list', async () => {
+      jest.setSystemTime(new Date('2025-01-01T13:35'))
+
       const mockResponse = { data: 'mockData' }
       httpGet.mockImplementationOnce(async () => mockResponse)
 
       const result = await ruralPaymentsBusiness.getCountyParishHoldingsBySBI('mockSbi')
       expect(result).toEqual(mockResponse.data)
-      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/cphByBusiness/sbi/mockSbi/list')
+
+      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/cphByBusiness/sbi/mockSbi/list', {
+        params: { pointInTime: '2025-01-01 13:35' }
+      })
     })
   })
 
