@@ -40,14 +40,14 @@ export class RuralPaymentsBusiness extends RuralPayments {
       throw new NotFound('Rural payments organisation not found')
     }
 
-    const response = organisationResponse?._data?.pop() || {}
+    const response = organisationResponse?._data?.pop()
 
-    return response?.id || null
+    return response.id
   }
 
   async getOrganisationBySBI(sbi) {
     const orgId = await this.getOrganisationIdBySBI(sbi)
-    return orgId ? this.getOrganisationById(orgId) : null
+    return this.getOrganisationById(orgId)
   }
 
   async getOrganisationCustomersByOrganisationId(organisationId) {
