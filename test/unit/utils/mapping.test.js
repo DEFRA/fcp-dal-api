@@ -97,4 +97,33 @@ describe('transformMapping', () => {
     expect(result.landline).toBeUndefined()
     expect(result.mobile).toBeUndefined()
   })
+
+  it('should handle nested object mappings (object values in mapping)', () => {
+    const nestedMapping = {
+      group: {
+        name: (data) => data.name,
+        email: (data) => data.email?.address
+      },
+      phone: {
+        mobile: (data) => data.phone?.mobile
+      }
+    }
+
+    const nestedPayload = {
+      name: 'Test Co.',
+      email: { address: 'test@example.com' },
+      phone: { mobile: '123456789' }
+    }
+    const result = transformMapping(nestedMapping, nestedPayload)
+
+    expect(result).toEqual({
+      group: {
+        name: 'Test Co.',
+        email: 'test@example.com'
+      },
+      phone: {
+        mobile: '123456789'
+      }
+    })
+  })
 })
