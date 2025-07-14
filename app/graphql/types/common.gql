@@ -1,4 +1,4 @@
-"Represents data about a customers or business mobile/landline details"
+"Represents data about mobile/landline details of a customer or business"
 type Phone {
   """
   Mobile number of the customer or business
