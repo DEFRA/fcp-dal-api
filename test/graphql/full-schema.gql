@@ -297,7 +297,7 @@ type UpdateBusinessResponse {
   business: Business
 }
 
-input InputAddress {
+input AddressInput {
   pafOrganisationName: String
   line1: String
   line2: String
@@ -317,12 +317,12 @@ input InputAddress {
   doubleDependentLocality: String
 }
 
-input InputPhone {
+input PhoneInput {
   mobile: String
   landline: String
 }
 
-input InputEmail {
+input EmaiIInput {
   address: String
 }
 
@@ -333,11 +333,11 @@ input UpdateBusinessInput {
 
 input InputBusinessDetails {
   name: String
-  address: InputAddress
-  correspondenceAddress: InputAddress
+  address: AddressInput
+  correspondenceAddress: AddressInput
   isCorrespondenceAsBusinessAddress: Boolean
-  phone: InputPhone
-  correspondencePhone: InputPhone
-  email: InputEmail
-  correspondenceEmail: InputEmail
+  phone: PhoneInput
+  correspondencePhone: PhoneInput
+  email: EmaiIInput
+  correspondenceEmail: EmaiIInput
 }

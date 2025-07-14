@@ -1,5 +1,5 @@
 "Represents data about a customers or business address details, note the Version 1 api does not require any of these fields so neither do we."
-input InputAddress {
+input AddressInput {
   """
   PAF organisation name
   """
@@ -87,7 +87,7 @@ input InputAddress {
 }
 
 "Represents data about a customers or business mobile/landline details"
-input InputPhone {
+input PhoneInput {
   """
   Mobile number of the customer or business
   """
@@ -100,7 +100,7 @@ input InputPhone {
 }
 
 "Represents data about a customers or business email details"
-input InputEmail {
+input EmaiIInput {
   """
   Email address of the customer or business
   """

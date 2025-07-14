@@ -38,11 +38,11 @@ input UpdateBusinessPhoneInput {
   """
   Telephone number of the business.
   """
-  phone: InputPhone
+  phone: PhoneInput
   """
   Correspondence telephone number of the business.
   """
-  correspondencePhone: InputPhone
+  correspondencePhone: PhoneInput
 }
 
 input UpdateBusinessEmailInput {
@@ -56,11 +56,11 @@ input UpdateBusinessEmailInput {
   """
   Email address of the business.
   """
-  email: InputEmail
+  email: EmaiIInput
   """
   Correspondence email address of the business.
   """
-  correspondenceEmail: InputEmail
+  correspondenceEmail: EmaiIInput
 }
 
 input UpdateBusinessAddressInput {
@@ -74,8 +74,8 @@ input UpdateBusinessAddressInput {
   """
   Address of the business.
   """
-  address: InputAddress
-  correspondenceAddress: InputAddress
+  address: AddressInput
+  correspondenceAddress: AddressInput
   isCorrespondenceAsBusinessAddress: Boolean
 }
 
