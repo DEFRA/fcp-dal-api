@@ -1,0 +1,108 @@
+"Represents data about a customers or business address details, note the Version 1 api does not require any of these fields so neither do we."
+input AddressInput {
+  """
+  PAF organisation name
+  """
+  pafOrganisationName: String
+
+  """
+  First line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line1: String
+
+  """
+  Second line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line2: String
+
+  """
+  Third line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line3: String
+
+  """
+  Fourth line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line4: String
+
+  """
+  Fifth line of a non-PAF address (maybe duplicated in the named fields, but not always)
+  """
+  line5: String
+
+  """
+  Building number range of the address
+  """
+  buildingNumberRange: String
+
+  """
+  Building name of the address
+  """
+  buildingName: String
+
+  """
+  Flat name of the address
+  """
+  flatName: String
+
+  """
+  Street of the address
+  """
+  street: String
+
+  """
+  Locality of the address
+  """
+  city: String
+
+  """
+  County of the address
+  """
+  county: String
+
+  """
+  Postal code of the address
+  """
+  postalCode: String
+
+  """
+  Country of the address
+  """
+  country: String
+
+  """
+  UPRN of the address
+  """
+  uprn: String
+
+  """
+  Dependant locality of the address
+  """
+  dependentLocality: String
+
+  """
+  Double dependant locality of the address
+  """
+  doubleDependentLocality: String
+}
+
+"Represents data about a customers or business mobile/landline details"
+input PhoneInput {
+  """
+  Mobile number of the customer or business
+  """
+  mobile: String
+
+  """
+  Landline number of the customer or business
+  """
+  landline: String
+}
+
+"Represents data about a customers or business email details"
+input EmailInput {
+  """
+  Email address of the customer or business
+  """
+  address: String
+}

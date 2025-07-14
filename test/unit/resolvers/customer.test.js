@@ -59,7 +59,7 @@ describe('Customer', () => {
         last: 'Paul'
       },
       dateOfBirth: '1947-10-30T03:41:25.385Z',
-      phone: { mobile: '1849164778', landline: null, fax: null },
+      phone: { mobile: '1849164778', landline: null },
       email: {
         address: 'Selena_Kub@hotmail.com',
         validated: false

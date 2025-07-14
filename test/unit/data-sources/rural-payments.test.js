@@ -2,6 +2,7 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
 import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
+import { HttpError } from '../../../app/errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
 const logger = {
@@ -220,6 +221,32 @@ describe('RuralPayments', () => {
 
       expect(result).toBe(mockText)
       expect(response.text).toHaveBeenCalled()
+    })
+  })
+
+  describe('throwIfResponseIsError', () => {
+    test('returns NO_CONTENT status for 204 responses', () => {
+      const rp = new RuralPayments({ logger })
+      const options = {
+        response: {
+          ok: false,
+          status: StatusCodes.BAD_REQUEST
+        }
+      }
+
+      const extensions = {
+        ...options,
+        response: {
+          status: options.response?.status,
+          headers: options.response?.headers,
+          body: options.parsedBody
+        }
+      }
+      expect(rp.throwIfResponseIsError(options)).rejects.toEqual(
+        new HttpError(options.response?.status, {
+          extensions
+        })
+      )
     })
   })
 })

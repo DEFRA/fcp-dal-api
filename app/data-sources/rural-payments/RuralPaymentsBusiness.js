@@ -1,7 +1,6 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
-
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById(organisationId) {
     const organisationResponse = await this.get(`organisation/${organisationId}`)
@@ -17,7 +16,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
-  async getOrganisationBySBI(sbi) {
+  async getOrganisationIdBySBI(sbi) {
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,
@@ -40,9 +39,12 @@ export class RuralPaymentsBusiness extends RuralPayments {
       throw new NotFound('Rural payments organisation not found')
     }
 
-    const response = organisationResponse?._data?.pop() || {}
+    return organisationResponse._data[0].id
+  }
 
-    return response?.id ? this.getOrganisationById(response.id) : null
+  async getOrganisationBySBI(sbi) {
+    const orgId = await this.getOrganisationIdBySBI(sbi)
+    return this.getOrganisationById(orgId)
   }
 
   async getOrganisationCustomersByOrganisationId(organisationId) {
@@ -126,6 +128,17 @@ export class RuralPaymentsBusiness extends RuralPayments {
       }
     })
     return response.data
+  }
+
+  async updateOrganisationDetails(organisationId, orgDetails) {
+    const response = this.put(`organisation/${organisationId}/business-details`, {
+      body: orgDetails,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    return response
   }
 
   async getAgreementsBySBI(sbi) {

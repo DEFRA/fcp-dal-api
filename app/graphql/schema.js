@@ -11,6 +11,7 @@ import { onDirectiveTransformer } from './directives/onDirectiveTransformer.js'
 
 import * as BusinessLand from './resolvers/business/business-land.js'
 import * as Business from './resolvers/business/business.js'
+import * as BusinessMutation from './resolvers/business/mutation.js'
 import * as BusinessQuery from './resolvers/business/query.js'
 import * as Customer from './resolvers/customer/customer.js'
 import * as CustomerQuery from './resolvers/customer/query.js'
@@ -23,13 +24,14 @@ async function getFiles(path) {
   })
 }
 
-export async function createSchema() {
+export async function createSchema(filterDirectives = true) {
   let schema = makeExecutableSchema({
     typeDefs: await getFiles('types'),
     resolvers: mergeResolvers([
       BusinessQuery,
       Business,
       BusinessLand,
+      BusinessMutation,
       CustomerQuery,
       Customer,
       PermissionsQuery
@@ -50,7 +52,9 @@ export async function createSchema() {
 
   schema = excludeFromListTransformer(schema)
 
-  schema = filterSchema({ schema, directiveFilter: () => false })
+  if (filterDirectives) {
+    schema = filterSchema({ schema, directiveFilter: () => false })
+  }
 
   schema = pruneSchema(schema)
 

@@ -1,0 +1,85 @@
+extend type Mutation {
+  updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+  updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+  updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+  updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input UpdateBusinessNameInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+  """
+  Name of the business.
+  """
+  name: String
+}
+
+input UpdateBusinessPhoneInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+  """
+  Telephone number of the business.
+  """
+  phone: PhoneInput
+  """
+  Correspondence telephone number of the business.
+  """
+  correspondencePhone: PhoneInput
+}
+
+input UpdateBusinessEmailInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+  """
+  Email address of the business.
+  """
+  email: EmailInput
+  """
+  Correspondence email address of the business.
+  """
+  correspondenceEmail: EmailInput
+}
+
+input UpdateBusinessAddressInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+  """
+  Address of the business.
+  """
+  address: AddressInput
+  correspondenceAddress: AddressInput
+  isCorrespondenceAsBusinessAddress: Boolean
+}
+
+type UpdateBusinessResponse {
+  success: Boolean @on
+  business: Business @on
+}

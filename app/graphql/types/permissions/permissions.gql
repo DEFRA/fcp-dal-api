@@ -38,17 +38,17 @@ type PermissionGroup {
   """
   Permission group id.
   """
-  id: PermissionGroupId!
+  id: PermissionGroupId! @on
 
   """
   Permission group name.
   """
-  name: String!
+  name: String! @on
 
   """
   Permissions within the group.
   """
-  permissions: [Permission]
+  permissions: [Permission] @on
 }
 
 type Permission {

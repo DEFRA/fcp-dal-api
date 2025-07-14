@@ -1,6 +1,68 @@
 import { jest } from '@jest/globals'
 import { RuralPaymentsBusiness } from '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../app/errors/graphql.js'
+import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
+
+const businessDetailsUpdatePayload = {
+  name: 'HADLEY FARMS LTD 2',
+  address: {
+    pafOrganisationName: 'pafOrganisationName',
+    line1: 'line1',
+    line2: 'line2',
+    line3: 'line3',
+    line4: 'line4',
+    line5: 'line5',
+    buildingNumberRange: 'buildingNumberRange',
+    buildingName: 'COLSHAW HALL',
+    flatName: null,
+    street: 'street',
+    city: 'BRAINTREE',
+    county: null,
+    postalCode: '12312312',
+    country: 'United Kingdom',
+    uprn: '123123123',
+    dependentLocality: 'HIGH HAWSKER',
+    doubleDependentLocality: null
+  },
+  correspondenceAddress: {
+    pafOrganisationName: 'c pafOrganisationName',
+    line1: 'c line1',
+    line2: 'c line2',
+    line3: 'c line3',
+    line4: 'c line4',
+    line5: 'c line5',
+    buildingNumberRange: 'buildingNumberRange',
+    buildingName: 'buildingName',
+    flatName: 'flatName',
+    street: 'street',
+    city: 'city',
+    county: 'county',
+    postalCode: '1231231',
+    country: 'USA',
+    uprn: '10008042952',
+    dependentLocality: 'HIGH HAWSKER',
+    doubleDependentLocality: 'doubleDependentLocality'
+  },
+  phone: {
+    mobile: '01234042273',
+    landline: '01234613020'
+  },
+  email: {
+    address: 'hadleyfarmsltdp@defra.com.test'
+  },
+  correspondenceEmail: {
+    address: 'hadleyfarmsltdp@defra.com.123'
+  },
+  correspondencePhone: {
+    mobile: '07111222333',
+    landline: '01225111222'
+  },
+  isCorrespondenceAsBusinessAddress: false
+}
+
+const orgDetailsUpdatePayload = transformBusinessDetailsToOrgDetailsUpdate(
+  businessDetailsUpdatePayload
+)
 
 describe('Rural Payments Business', () => {
   const logger = {
@@ -11,6 +73,7 @@ describe('Rural Payments Business', () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness({ logger })
   const httpGet = jest.spyOn(ruralPaymentsBusiness, 'get')
   const httpPost = jest.spyOn(ruralPaymentsBusiness, 'post')
+  const httpPut = jest.spyOn(ruralPaymentsBusiness, 'put')
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -60,11 +123,32 @@ describe('Rural Payments Business', () => {
         }
       })
     })
+  })
+
+  describe('getOrganisationIdBySBI', () => {
+    test('should return organisation ID when found by SBI', async () => {
+      const mockSearchResponse = { _data: [{ id: 123 }] }
+      httpPost.mockImplementationOnce(async () => mockSearchResponse)
+
+      const result = await ruralPaymentsBusiness.getOrganisationIdBySBI('123456789')
+      expect(result).toEqual(123)
+      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
+        body: JSON.stringify({
+          searchFieldType: 'SBI',
+          primarySearchPhrase: '123456789',
+          offset: 0,
+          limit: 1
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
 
     test('should throw NotFound when organisation not found by SBI', async () => {
       httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
-      await expect(ruralPaymentsBusiness.getOrganisationBySBI('123456789')).rejects.toEqual(
+      await expect(ruralPaymentsBusiness.getOrganisationIdBySBI('123456789')).rejects.toEqual(
         new NotFound('Rural payments organisation not found')
       )
       expect(logger.warn).toHaveBeenCalledWith(
@@ -188,6 +272,42 @@ describe('Rural Payments Business', () => {
       const result = await ruralPaymentsBusiness.getAgreementsBySBI('mockSbi')
       expect(result).toEqual(mockResponse.data)
       expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/agreementsByBusiness/sbi/mockSbi/list')
+    })
+  })
+
+  describe('updateOrganisationDetails', () => {
+    test('should call put endpoint and return successful response', async () => {
+      const fakeResponse = {
+        response: 'success'
+      }
+      httpPut.mockImplementationOnce(async () => fakeResponse)
+
+      const response = await ruralPaymentsBusiness.updateOrganisationDetails(
+        'orgId',
+        orgDetailsUpdatePayload
+      )
+      expect(httpPut).toHaveBeenCalledWith('organisation/orgId/business-details', {
+        body: orgDetailsUpdatePayload,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      expect(response).toEqual(fakeResponse)
+    })
+
+    test('should fail if error is thrown by put request', async () => {
+      const mockError = new Error('fetch error')
+      httpPut.mockRejectedValueOnce(mockError)
+
+      await expect(
+        ruralPaymentsBusiness.updateOrganisationDetails('123', orgDetailsUpdatePayload)
+      ).rejects.toThrow(mockError)
+      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
+        body: orgDetailsUpdatePayload,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
     })
   })
 })
