@@ -56,11 +56,11 @@ input UpdateBusinessEmailInput {
   """
   Email address of the business.
   """
-  email: EmaiIInput
+  email: EmailInput
   """
   Correspondence email address of the business.
   """
-  correspondenceEmail: EmaiIInput
+  correspondenceEmail: EmailInput
 }
 
 input UpdateBusinessAddressInput {

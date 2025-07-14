@@ -100,7 +100,7 @@ input PhoneInput {
 }
 
 "Represents data about a customers or business email details"
-input EmaiIInput {
+input EmailInput {
   """
   Email address of the customer or business
   """

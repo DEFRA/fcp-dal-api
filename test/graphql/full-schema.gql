@@ -322,7 +322,7 @@ input PhoneInput {
   landline: String
 }
 
-input EmaiIInput {
+input EmailInput {
   address: String
 }
 
@@ -338,6 +338,6 @@ input InputBusinessDetails {
   isCorrespondenceAsBusinessAddress: Boolean
   phone: PhoneInput
   correspondencePhone: PhoneInput
-  email: EmaiIInput
-  correspondenceEmail: EmaiIInput
+  email: EmailInput
+  correspondenceEmail: EmailInput
 }
