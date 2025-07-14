@@ -262,94 +262,35 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('updateBusinessBySBI', () => {
-    test('should update organisation details', async () => {
-      const mockSearchResponse = { _data: [{ id: 123 }] }
-      const mockOrgDetailsResponse = {
-        _data: { id: 123, name: 'Existing Name', businessType: { id: 0 } }
-      }
-      httpPost.mockImplementationOnce(async () => mockSearchResponse)
-      httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
-      httpPut.mockImplementationOnce(async () => {})
-
-      await ruralPaymentsBusiness.updateBusinessBySBI('123456789', businessDetailsUpdatePayload)
-      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
-        body: JSON.stringify({
-          searchFieldType: 'SBI',
-          primarySearchPhrase: '123456789',
-          offset: 0,
-          limit: 1
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
-        body: {
-          ...mockOrgDetailsResponse._data,
-          ...orgDetailsUpdatePayload
-        },
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-    })
-  })
-
   describe('updateOrganisationDetails', () => {
-    test('should update organisation details with partial payload & request org details for remainder', async () => {
-      const orgDetailOverrides = {
-        name: 'Existing Name',
-        email: 'existing email',
-        mobile: 'existing mobile'
+    test('should call put endpoint and return successful response', async () => {
+      const fakeResponse = {
+        response: 'success'
       }
-      const mockOrgDetailsResponse = {
-        _data: {
-          id: 123,
-          businessType: { id: 0 },
-          // We can use the update payload as a the org response for eas
-          ...orgDetailsUpdatePayload,
-          ...orgDetailOverrides
-        }
-      }
-      httpPut.mockImplementationOnce(async () => {})
-      httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
+      httpPut.mockImplementationOnce(async () => fakeResponse)
 
-      // deep copy to avoid deletion of keys from parent object
-      const updateDetails = JSON.parse(JSON.stringify(businessDetailsUpdatePayload))
-      delete updateDetails.name
-      delete updateDetails.email.address
-      delete updateDetails.phone.mobile
-
-      await ruralPaymentsBusiness.updateOrganisationDetails('123', updateDetails)
-      expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
-        body: {
-          ...orgDetailsUpdatePayload,
-          ...mockOrgDetailsResponse._data,
-          ...orgDetailOverrides
-        },
+      const response = await ruralPaymentsBusiness.updateOrganisationDetails(
+        'orgId',
+        orgDetailsUpdatePayload
+      )
+      expect(httpPut).toHaveBeenCalledWith('organisation/orgId/business-details', {
+        body: orgDetailsUpdatePayload,
         headers: {
           'Content-Type': 'application/json'
         }
       })
+      expect(response).toEqual(fakeResponse)
     })
 
     test('should fail if error is thrown by put request', async () => {
       const mockError = new Error('fetch error')
-      const mockOrgDetailsResponse = {
-        _data: { id: 123, name: 'Existing Name', businessType: { id: 0 } }
-      }
       httpPut.mockRejectedValueOnce(mockError)
-      httpGet.mockImplementationOnce(async () => mockOrgDetailsResponse)
 
       await expect(
-        ruralPaymentsBusiness.updateOrganisationDetails('123', businessDetailsUpdatePayload)
+        ruralPaymentsBusiness.updateOrganisationDetails('123', orgDetailsUpdatePayload)
       ).rejects.toThrow(mockError)
       expect(httpPut).toHaveBeenCalledWith('organisation/123/business-details', {
-        body: {
-          ...mockOrgDetailsResponse._data,
-          ...orgDetailsUpdatePayload
-        },
+        body: orgDetailsUpdatePayload,
         headers: {
           'Content-Type': 'application/json'
         }

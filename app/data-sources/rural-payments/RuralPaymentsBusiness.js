@@ -1,6 +1,5 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
-import { transformBusinessDetailsToOrgDetailsUpdate } from '../../transformers/rural-payments/business.js'
 import { RuralPayments } from './RuralPayments.js'
 export class RuralPaymentsBusiness extends RuralPayments {
   async getOrganisationById(organisationId) {
@@ -116,11 +115,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response.data
   }
 
-  async updateOrganisationDetails(organisationId, businessDetails) {
-    const currentOrgDetails = await this.getOrganisationById(organisationId)
-    const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(businessDetails)
-    const orgDetails = { ...currentOrgDetails, ...newOrgDetails }
-
+  async updateOrganisationDetails(organisationId, orgDetails) {
     const response = this.put(`organisation/${organisationId}/business-details`, {
       body: orgDetails,
       headers: {
@@ -134,10 +129,5 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async getAgreementsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/agreementsByBusiness/sbi/${sbi}/list`)
     return response.data
-  }
-
-  async updateBusinessBySBI(sbi, businessDetails) {
-    const orgId = await this.getOrganisationIdBySBI(sbi)
-    return this.updateOrganisationDetails(orgId, businessDetails)
   }
 }

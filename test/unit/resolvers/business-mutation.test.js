@@ -1,134 +1,59 @@
 import { jest } from '@jest/globals'
-import { NotFound } from '../../../app/errors/graphql.js'
-import { businessDetailsUpdateResolver } from '../../../app/graphql/resolvers/business/common.js'
-import {
-  Mutation,
-  UpdateBusinessResponse
-} from '../../../app/graphql/resolvers/business/mutation.js'
 
-describe('Business Mutations', () => {
-  let dataSources
-  let logger
+const mockSchemaModule = {
+  businessDetailsUpdateResolver: jest.fn()
+}
+jest.unstable_mockModule(
+  '../../../app/graphql/resolvers/business/common.js',
+  () => mockSchemaModule
+)
+const { Mutation, UpdateBusinessResponse } = await import(
+  '../../../app/graphql/resolvers/business/mutation.js'
+)
 
-  beforeEach(() => {
-    dataSources = {
-      ruralPaymentsBusiness: {
-        updateBusinessBySBI: jest.fn()
-      }
-    }
-    logger = {
-      warn: jest.fn()
-    }
+describe('Business Mutation resolvers', () => {
+  const mockArgs = { input: { name: 'Test Business' } }
+  const mockContext = { user: { id: 'user1' } }
+  const mockInfo = {}
+
+  it('updateBusinessName calls businessDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessName({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
   })
 
-  it('businessDetailsUpdateResolver returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockResolvedValue({
-      some: 'response'
-    })
-    const input = { sbi: '123', name: 'Test' }
-
-    const result = await businessDetailsUpdateResolver(null, { input }, { dataSources, logger })
-
-    expect(dataSources.ruralPaymentsBusiness.updateBusinessBySBI).toHaveBeenCalledWith('123', input)
-    expect(result).toEqual({ success: true, business: { sbi: '123' } })
+  it('updateBusinessPhone calls businessDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessPhone({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
   })
 
-  it('updateBusinessName returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockResolvedValue({
-      some: 'response'
-    })
-    const input = { sbi: '123', name: 'Test' }
-
-    const result = await Mutation.updateBusinessName(null, { input }, { dataSources, logger })
-
-    expect(dataSources.ruralPaymentsBusiness.updateBusinessBySBI).toHaveBeenCalledWith('123', input)
-    expect(result).toEqual({ success: true, business: { sbi: '123' } })
+  it('updateBusinessEmail calls businessDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessEmail({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
   })
 
-  it('updateBusinessAddress returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockResolvedValue({
-      some: 'response'
-    })
-    const input = { sbi: '123', name: 'Test' }
-
-    const result = await Mutation.updateBusinessAddress(null, { input }, { dataSources, logger })
-
-    expect(dataSources.ruralPaymentsBusiness.updateBusinessBySBI).toHaveBeenCalledWith('123', input)
-    expect(result).toEqual({ success: true, business: { sbi: '123' } })
-  })
-
-  it('updateBusinessPhone returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockResolvedValue({
-      some: 'response'
-    })
-    const input = { sbi: '123', name: 'Test' }
-
-    const result = await Mutation.updateBusinessPhone(null, { input }, { dataSources, logger })
-
-    expect(dataSources.ruralPaymentsBusiness.updateBusinessBySBI).toHaveBeenCalledWith('123', input)
-    expect(result).toEqual({ success: true, business: { sbi: '123' } })
-  })
-
-  it('updateBusinessEmail returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockResolvedValue({
-      some: 'response'
-    })
-    const input = { sbi: '123', name: 'Test' }
-
-    const result = await Mutation.updateBusinessEmail(null, { input }, { dataSources, logger })
-
-    expect(dataSources.ruralPaymentsBusiness.updateBusinessBySBI).toHaveBeenCalledWith('123', input)
-    expect(result).toEqual({ success: true, business: { sbi: '123' } })
-  })
-
-  it('businessDetailsUpdateResolver, returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
-    const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockRejectedValue(notFoundError)
-    const input = { sbi: '999', details: { name: 'Missing' } }
-
-    await expect(
-      businessDetailsUpdateResolver(null, { input }, { dataSources, logger })
-    ).rejects.toThrow(notFoundError)
-  })
-
-  it('updateBusinessName, returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
-    const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockRejectedValue(notFoundError)
-    const input = { sbi: '999', details: { name: 'Missing' } }
-
-    await expect(
-      Mutation.updateBusinessName(null, { input }, { dataSources, logger })
-    ).rejects.toThrow(notFoundError)
-  })
-
-  it('updateBusinessAddress, returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
-    const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockRejectedValue(notFoundError)
-    const input = { sbi: '999', details: { name: 'Missing' } }
-
-    await expect(
-      Mutation.updateBusinessAddress(null, { input }, { dataSources, logger })
-    ).rejects.toThrow(notFoundError)
-  })
-
-  it('updateBusinessPhone, returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
-    const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockRejectedValue(notFoundError)
-    const input = { sbi: '999', details: { name: 'Missing' } }
-
-    await expect(
-      Mutation.updateBusinessPhone(null, { input }, { dataSources, logger })
-    ).rejects.toThrow(notFoundError)
-  })
-
-  it('updateBusinessEmail, returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
-    const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.updateBusinessBySBI.mockRejectedValue(notFoundError)
-    const input = { sbi: '999', details: { name: 'Missing' } }
-
-    await expect(
-      Mutation.updateBusinessEmail(null, { input }, { dataSources, logger })
-    ).rejects.toThrow(notFoundError)
+  it('updateBusinessAddress calls businessDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessAddress({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
   })
 })
 
