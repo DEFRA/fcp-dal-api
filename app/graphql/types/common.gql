@@ -150,6 +150,7 @@ input Pagination {
   page: Int!
 }
 
-enum AuthRole {
-  ADMIN
+enum AuthGroup {
+  CONSOLIDATED_VIEW
+  SINGLE_FRONT_DOOR
 }

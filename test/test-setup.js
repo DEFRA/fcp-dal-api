@@ -9,5 +9,5 @@ const contextObject = await context({ request })
 
 export const fakeContext = {
   ...contextObject,
-  auth: { groups: [config.get('auth.groups.admin')] }
+  auth: { groups: [config.get('auth.groups.ADMIN')] }
 }

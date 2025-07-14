@@ -85,11 +85,26 @@ export const config = convict({
   },
   auth: {
     groups: {
-      admin: {
-        doc: 'AD group ID for admin users',
+      // Note must correspond to AuthGroup Enum except admin which has access to everything
+      ADMIN: {
+        doc: 'AD group ID for DAL Admins',
         format: String,
         default: null,
         env: 'ADMIN_AD_GROUP_ID',
+        nullable: true
+      },
+      CONSOLIDATED_VIEW: {
+        doc: 'AD group ID for Consolidated View',
+        format: String,
+        default: null,
+        env: 'CONSOLIDATED_VIEW_AD_GROUP_ID',
+        nullable: true
+      },
+      SINGLE_FRONT_DOOR: {
+        doc: 'AD group ID for SFD',
+        format: String,
+        default: null,
+        env: 'SINGLE_FRONT_DOOR_AD_GROUP_ID',
         nullable: true
       }
     },
