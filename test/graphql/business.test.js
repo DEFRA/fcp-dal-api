@@ -119,23 +119,25 @@ const setupNock = () => {
     { name: 'Permanent Crops', area: 1 }
   ])
 
-  v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list').reply(200, {
-    data: [
-      {
-        sbi: 'mockSbi',
-        dt_insert: 'mockDtInsert1',
-        dt_delete: 'mockDtDelete1',
-        cph_number: 'mockCph1',
-        parish: 'mockParish',
-        species: 'mockSpecies',
-        start_date: '2020-03-20T00:00:00:000+0100',
-        end_date: '2021-03-20T00:00:00:000+0100',
-        address: 'mockAddress',
-        x: 123456,
-        y: 654321
-      }
-    ]
-  })
+  v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
+    .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(pointInTime))
+    .reply(200, {
+      data: [
+        {
+          sbi: 'mockSbi',
+          dt_insert: 'mockDtInsert1',
+          dt_delete: 'mockDtDelete1',
+          cph_number: 'mockCph1',
+          parish: 'mockParish',
+          species: 'mockSpecies',
+          start_date: '2020-03-20T00:00:00:000+0100',
+          end_date: '2021-03-20T00:00:00:000+0100',
+          address: 'mockAddress',
+          x: 123456,
+          y: 654321
+        }
+      ]
+    })
 }
 
 describe('Query.business', () => {
