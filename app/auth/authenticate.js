@@ -10,6 +10,8 @@ import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
 
+export const authGroups = config.get('auth.groups')
+
 export async function getJwtPublicKey(kid) {
   const clientConfig = {
     jwksUri: config.get('oidc.jwksURI'),
@@ -82,9 +84,15 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
   }
 }
 
-export function checkAuthGroup(userGroups, groupId) {
-  if (!userGroups.includes(groupId)) {
-    throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
+export function checkAuthGroup(requesterGroups, allowedGroups) {
+  const isAdmin = requesterGroups.includes(authGroups.ADMIN)
+  if (isAdmin) {
+    return
+  } else {
+    const hasAccess = allowedGroups.some((group) => requesterGroups.includes(authGroups[group]))
+    if (!hasAccess) {
+      throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
+    }
   }
 }
 
@@ -102,11 +110,12 @@ export function authDirectiveTransformer(schema) {
     [MapperKind.OBJECT_FIELD](fieldConfig, _fieldName, typeName) {
       const authDirective =
         getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
-      const requires = authDirective ? authDirective.requires : config.get('auth.groups.admin')
       const { resolve = defaultFieldResolver } = fieldConfig
-      fieldConfig.resolve = function (source, args, context, info) {
-        checkAuthGroup(context.auth.groups || [], requires)
-        return resolve(source, args, context, info)
+      if (authDirective) {
+        fieldConfig.resolve = function (source, args, context, info) {
+          checkAuthGroup(context.auth.groups || [], authDirective.requires)
+          return resolve(source, args, context, info)
+        }
       }
       return fieldConfig
     }
