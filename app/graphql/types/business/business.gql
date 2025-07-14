@@ -80,7 +80,7 @@ type BusinessInfo {
   """
   Various registration numbers for the business. For example, Companies House number.
   """
-  registrationNumbers: BusinessRegistrationNumbers
+  registrationNumbers: BusinessRegistrationNumbers @on
 
   """
   Other SBIs by which the business is known.
@@ -150,12 +150,12 @@ type BusinessRegistrationNumbers {
   """
   Companies House number of the business.
   """
-  companiesHouse: String @on
+  companiesHouse: Int @on
 
   """
   Charity Commission number of the business.
   """
-  charityCommission: String @on
+  charityCommission: Int @on
 }
 
 """

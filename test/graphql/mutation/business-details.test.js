@@ -1,8 +1,8 @@
 config.set('auth.disabled', false)
 import nock from 'nock'
-import { config } from '../../app/config.js'
-import { transformBusinessDetailsToOrgDetailsUpdate } from '../../app/transformers/rural-payments/business.js'
-import { makeTestQuery } from './makeTestQuery.js'
+import { config } from '../../../app/config.js'
+import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
+import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.gatewayUrl'))
 
