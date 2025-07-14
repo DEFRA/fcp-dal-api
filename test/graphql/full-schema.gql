@@ -187,7 +187,7 @@ type BusinessLandParcelPartial {
 
 type CustomerInfo {
   name: CustomerName
-  dateOfBirth: String
+  dateOfBirth: Date
   phone: Phone
   email: Email
   status: EntityStatus

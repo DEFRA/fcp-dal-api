@@ -158,7 +158,7 @@ type BusinessType {
 
 type CustomerInfo {
   name: CustomerName
-  dateOfBirth: String
+  dateOfBirth: Date
   doNotContact: Boolean
 }
 
