@@ -10,7 +10,7 @@ type CustomerInfo {
   """
   Date of birth of the customer.
   """
-  dateOfBirth: String @on
+  dateOfBirth: Date @on
 
   """
   Telephone number of the customer.

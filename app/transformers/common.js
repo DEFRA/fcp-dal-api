@@ -26,3 +26,12 @@ export const transformEntityStatus = (entity) => ({
   deactivated: booleanise(entity?.deactivated),
   confirmed: booleanise(entity?.confirmed)
 })
+
+export function transformToISODate(timestamp) {
+  if (!timestamp || typeof timestamp === 'boolean' || typeof timestamp === 'object') {
+    return null
+  }
+
+  const date = new Date(Number.isNaN(+timestamp) ? timestamp : +timestamp)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
+}

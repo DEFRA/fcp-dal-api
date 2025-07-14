@@ -1,5 +1,5 @@
 import { validateDate } from '../../utils/date.js'
-import { transformAddress, transformEntityStatus } from '../common.js'
+import { transformAddress, transformEntityStatus, transformToISODate } from '../common.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
@@ -61,7 +61,7 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       middle: data.middleName,
       last: data.lastName
     },
-    dateOfBirth: data.dateOfBirth,
+    dateOfBirth: transformToISODate(data.dateOfBirth),
     phone: {
       mobile: data.mobile,
       landline: data.landline,
