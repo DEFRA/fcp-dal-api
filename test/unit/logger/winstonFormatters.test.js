@@ -103,6 +103,9 @@ describe('winstonFormatters', () => {
             status_code: 200,
             response_time: 100
           }
+        },
+        url: {
+          query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}'
         }
       })
     })

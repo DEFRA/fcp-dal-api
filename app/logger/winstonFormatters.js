@@ -46,7 +46,8 @@ export const cdpSchemaTranslator = format((info) => {
           ...(response?.statusCode && { outcome: response?.statusCode }), // Outcome of the event.
           ...(request?.path && { reference: request?.path }) // A reference ID or URL tied to the event.
         }
-      }
+      },
+      request?.body && { url: { query: request.body } }
     ]
   )
 })
