@@ -2,15 +2,15 @@ import { format } from 'winston'
 import { sampleResponse } from './utils.js'
 
 const buildHttpDetails = (request, response, requestTimeMs) => {
-  const http = {}
+  if (!request && !response && !requestTimeMs) return {}
 
+  const http = {}
   if (request)
     http.request = {
       ...(request?.id && { id: request.id }),
       ...(request?.method && { method: request.method }),
       ...(request?.headers && { headers: request.headers })
     }
-
   if (response || requestTimeMs)
     http.response = {
       ...(response?.statusCode && { status_code: response.statusCode }),
@@ -32,23 +32,25 @@ const buildError = ({ name, message, stack }, code) =>
     }
   }
 
-const buildEvent = (kind, category, type, created, duration, outcome, reference) => ({
-  event: {
-    ...(kind && { kind }),
-    ...(category && { category }),
-    ...(type && { type }), // Specific action taken or observed (e.g., user_login).
-    ...(created && { created }), // Time the event was created in the system.
-    ...(duration && { duration: duration * 1000000 }), // Total time of the event in nanoseconds.
-    ...(outcome && { outcome }), // Outcome of the event.
-    ...(reference && { reference }) // A reference ID or URL tied to the event.
+const buildEvent = (kind, category, type, created, duration, outcome, reference) =>
+  (kind || category || type || created || duration || outcome || reference) && {
+    event: {
+      ...(kind && { kind }),
+      ...(category && { category }),
+      ...(type && { type }), // Specific action taken or observed (e.g., user_login).
+      ...(created && { created }), // Time the event was created in the system.
+      ...(duration && { duration: duration * 1000000 }), // Total time of the event in nanoseconds.
+      ...(outcome && { outcome }), // Outcome of the event.
+      ...(reference && { reference }) // A reference ID or URL tied to the event.
+    }
   }
-})
 
-const buildUrl = (request) =>
-  request && {
+const buildUrl = ({ body, path }) =>
+  body &&
+  path && {
     url: {
-      full: request.path,
-      ...(request.body && { query: new URLSearchParams(request.body).toString() })
+      full: path,
+      ...(body && { query: new URLSearchParams(body).toString() })
     }
   }
 
@@ -63,7 +65,7 @@ export const cdpSchemaTranslator = format((info) => {
     ...[
       transactionId && { 'transaction.id': transactionId },
       traceId && { 'span.id': traceId, 'trace.id': traceId },
-      buildError(error, code),
+      buildError(error || {}, code),
       buildHttpDetails(request, response, requestTimeMs),
       buildEvent(
         info.type,
@@ -74,7 +76,7 @@ export const cdpSchemaTranslator = format((info) => {
         response?.statusCode,
         request?.path
       ),
-      buildUrl(request)
+      buildUrl(request || {})
     ]
   )
 })
