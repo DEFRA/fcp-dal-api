@@ -337,19 +337,14 @@ input EmailInput {
   address: String
 }
 
-input BusinessTypeInput {
-  code: Int
-  type: String
-}
-
 input UpdateBusinessLegalStatusInput {
   sbi: ID!
-  legalStatus: BusinessTypeInput!
+  legalStatusCode: Int!
 }
 
 input UpdateBusinessTypeInput {
   sbi: ID!
-  type: BusinessTypeInput!
+  typeCode: Int!
 }
 
 input UpdateBusinessDateStartedFarmingInput {

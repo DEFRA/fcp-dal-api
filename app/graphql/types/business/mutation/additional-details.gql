@@ -40,7 +40,7 @@ input UpdateBusinessLegalStatusInput {
   """
   Legal status object to update business with.
   """
-  legalStatus: BusinessTypeInput!
+  legalStatusCode: Int!
 }
 
 input UpdateBusinessTypeInput {
@@ -53,9 +53,9 @@ input UpdateBusinessTypeInput {
   sbi: ID!
 
   """
-  business type object to update business with.
+  business type code/id to update business with.
   """
-  type: BusinessTypeInput!
+  typeCode: Int!
 }
 
 input UpdateBusinessDateStartedFarmingInput {

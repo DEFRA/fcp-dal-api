@@ -106,15 +106,3 @@ input EmailInput {
   """
   address: String
 }
-
-input BusinessTypeInput {
-  """
-  Code of the business type.
-  """
-  code: Int
-
-  """
-  Description of the business type.
-  """
-  type: String
-}

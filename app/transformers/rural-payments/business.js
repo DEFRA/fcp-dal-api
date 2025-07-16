@@ -133,10 +133,9 @@ const orgAdditionalDetailsMapping = {
   charityCommissionRegistrationNumber: (data) =>
     data.registrationNumbers ? data.registrationNumbers?.charityCommission : undefined,
   businessType: (data) =>
-    data.type
+    data.typeCode
       ? {
-          id: data.type.code,
-          type: data.type.type
+          id: data.typeCode
         }
       : undefined,
   dateStartedFarming: (data) =>

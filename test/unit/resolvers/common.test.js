@@ -98,7 +98,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
     expect(
       dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
-    ).toHaveBeenCalledWith('orgId', { dateStartedFarming: '01-01-2025' })
+    ).toHaveBeenCalledWith('orgId', { dateStartedFarming: '2025-01-01T00:00:00.000Z' })
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
   })

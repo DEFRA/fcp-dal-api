@@ -54,14 +54,10 @@ describe('business', () => {
   test('update business legal status', async () => {
     const input = {
       sbi: 'sbi',
-      legalStatus: {
-        code: 123,
-        type: 'legal status type'
-      }
+      legalStatusCode: 123
     }
 
     const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
-    const { sbi: _, ...queryReturn } = input
 
     const expectedPutPayload = {
       ...orgAdditionalDetailsUpdatePayload,
@@ -73,7 +69,10 @@ describe('business', () => {
     )
 
     v1.get('/organisation/organisationId').reply(200, {
-      _data: { id: 'organisationId', ...transformedInput }
+      _data: {
+        id: 'organisationId',
+        legalStatus: { id: 123, type: 'text corresponding to 123' }
+      }
     })
 
     v1.post('/organisation/search', {
@@ -113,7 +112,12 @@ describe('business', () => {
         updateBusinessLegalStatus: {
           success: true,
           business: {
-            info: queryReturn
+            info: {
+              legalStatus: {
+                code: 123,
+                type: 'text corresponding to 123'
+              }
+            }
           }
         }
       }
@@ -123,10 +127,7 @@ describe('business', () => {
   test('update business type', async () => {
     const input = {
       sbi: 'sbi',
-      type: {
-        code: 123,
-        type: 'business type'
-      }
+      typeCode: 123
     }
 
     const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
@@ -142,7 +143,13 @@ describe('business', () => {
     )
 
     v1.get('/organisation/organisationId').reply(200, {
-      _data: { id: 'organisationId', ...transformedInput }
+      _data: {
+        id: 'organisationId',
+        businessType: {
+          id: 123,
+          type: 'type corresponding to 123'
+        }
+      }
     })
 
     v1.post('/organisation/search', {
@@ -182,7 +189,12 @@ describe('business', () => {
         updateBusinessType: {
           success: true,
           business: {
-            info: queryReturn
+            info: {
+              type: {
+                code: 123,
+                type: 'type corresponding to 123'
+              }
+            }
           }
         }
       }
