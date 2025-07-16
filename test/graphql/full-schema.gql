@@ -68,8 +68,8 @@ type BusinessInfo {
 }
 
 type BusinessRegistrationNumbers {
-  companiesHouse: String
-  charityCommission: String
+  companiesHouse: Int
+  charityCommission: Int
 }
 
 # eslint-disable-next-line @graphql-eslint/naming-convention
@@ -289,7 +289,18 @@ type Permission {
 }
 
 type Mutation {
-  updateBusiness(input: UpdateBusinessInput!): UpdateBusinessResponse
+  updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
+  updateBusinessDateStartedFarming(
+    input: UpdateBusinessDateStartedFarmingInput!
+  ): UpdateBusinessResponse
+  updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
+  updateBusinessRegistrationNumbers(
+    input: UpdateBusinessRegistrationNumbersInput!
+  ): UpdateBusinessResponse
+  updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
+  updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
+  updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
+  updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
 }
 
 type UpdateBusinessResponse {
@@ -326,18 +337,61 @@ input EmailInput {
   address: String
 }
 
-input UpdateBusinessInput {
-  sbi: ID!
-  details: InputBusinessDetails!
+input BusinessTypeInput {
+  code: Int
+  type: String
 }
 
-input InputBusinessDetails {
+input UpdateBusinessLegalStatusInput {
+  sbi: ID!
+  legalStatus: BusinessTypeInput!
+}
+
+input UpdateBusinessTypeInput {
+  sbi: ID!
+  type: BusinessTypeInput!
+}
+
+input UpdateBusinessDateStartedFarmingInput {
+  sbi: ID!
+  dateStartedFarming: Date
+}
+
+input UpdateBusinessCharityCommissionRegistrationNumberInput {
+  sbi: ID!
+  charityCommissionRegistrationNumber: Int
+}
+
+input UpdateBusinessRegistrationNumbersInput {
+  sbi: ID!
+  registrationNumbers: BusinessRegistrationNumbersInput!
+}
+
+input BusinessRegistrationNumbersInput {
+  charityCommission: Int
+  companiesHouse: Int
+}
+
+input UpdateBusinessNameInput {
+  sbi: ID!
   name: String
+}
+
+input UpdateBusinessPhoneInput {
+  sbi: ID!
+  phone: PhoneInput
+  correspondencePhone: PhoneInput
+}
+
+input UpdateBusinessEmailInput {
+  sbi: ID!
+  email: EmailInput
+  correspondenceEmail: EmailInput
+}
+
+input UpdateBusinessAddressInput {
+  sbi: ID!
   address: AddressInput
   correspondenceAddress: AddressInput
   isCorrespondenceAsBusinessAddress: Boolean
-  phone: PhoneInput
-  correspondencePhone: PhoneInput
-  email: EmailInput
-  correspondenceEmail: EmailInput
 }

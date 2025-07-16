@@ -261,7 +261,8 @@ describe('business', () => {
   test('update business date started farming', async () => {
     const input = {
       sbi: 'sbi',
-      dateStartedFarming: '2021-05-27T12:46:17.305Z'
+      // Will get converted to ISO date
+      dateStartedFarming: '01-01-2020'
     }
 
     const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
@@ -314,7 +315,7 @@ describe('business', () => {
           success: true,
           business: {
             info: {
-              dateStartedFarming: new Date('2021-05-27T12:46:17.305Z')
+              dateStartedFarming: new Date('2020-01-01T00:00:00.000Z')
             }
           }
         }
