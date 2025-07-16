@@ -120,7 +120,7 @@ const setupNock = () => {
   ])
 
   v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
-    .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}/.test(pointInTime))
+    .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
       data: [
         {
