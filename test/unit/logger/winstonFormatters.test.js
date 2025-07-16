@@ -27,7 +27,7 @@ const fixture = {
   request: {
     id: 'power-apps-req-id',
     method: 'POST',
-    body: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}',
+    body: { searchFieldType: 'SBI', primarySearchPhrase: '107183280', offset: 0, limit: 1 },
     headers: {
       'content-type': 'application/json',
       Authorization: 'Bearer token',
@@ -90,7 +90,6 @@ describe('winstonFormatters', () => {
           request: {
             id: 'power-apps-req-id',
             method: 'POST',
-            url: 'http://localhost/path',
             headers: {
               'content-type': 'application/json',
               Authorization: 'Bearer token',
@@ -105,7 +104,8 @@ describe('winstonFormatters', () => {
           }
         },
         url: {
-          query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280","offset":0,"limit":1}'
+          full: 'http://localhost/path',
+          query: 'searchFieldType=SBI&primarySearchPhrase=107183280&offset=0&limit=1'
         }
       })
     })
