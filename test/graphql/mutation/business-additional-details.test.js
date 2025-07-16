@@ -131,8 +131,6 @@ describe('business', () => {
     }
 
     const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
-    const { sbi: _, ...queryReturn } = input
-
     const expectedPutPayload = {
       ...orgAdditionalDetailsUpdatePayload,
       ...transformedInput
