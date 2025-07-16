@@ -70,7 +70,7 @@ input UpdateBusinessDateStartedFarmingInput {
   """
   The date the business started farming to update to.
   """
-  dateStartedFarming: Date
+  dateStartedFarming: Date!
 }
 
 input UpdateBusinessCharityCommissionRegistrationNumberInput {
@@ -107,10 +107,10 @@ input BusinessRegistrationNumbersInput {
   """
   Charity comission registration number to set.
   """
-  charityCommission: Int
+  charityCommission: String
 
   """
   Charity comission registration number to set.
   """
-  companiesHouse: Int
+  companiesHouse: String
 }

@@ -68,8 +68,8 @@ type BusinessInfo {
 }
 
 type BusinessRegistrationNumbers {
-  companiesHouse: Int
-  charityCommission: Int
+  companiesHouse: String
+  charityCommission: String
 }
 
 # eslint-disable-next-line @graphql-eslint/naming-convention
@@ -334,7 +334,7 @@ input PhoneInput {
 }
 
 input EmailInput {
-  address: String
+  address: String!
 }
 
 input UpdateBusinessLegalStatusInput {
@@ -349,12 +349,12 @@ input UpdateBusinessTypeInput {
 
 input UpdateBusinessDateStartedFarmingInput {
   sbi: ID!
-  dateStartedFarming: Date
+  dateStartedFarming: Date!
 }
 
 input UpdateBusinessCharityCommissionRegistrationNumberInput {
   sbi: ID!
-  charityCommissionRegistrationNumber: Int
+  charityCommissionRegistrationNumber: Int!
 }
 
 input UpdateBusinessRegistrationNumbersInput {
@@ -363,8 +363,8 @@ input UpdateBusinessRegistrationNumbersInput {
 }
 
 input BusinessRegistrationNumbersInput {
-  charityCommission: Int
-  companiesHouse: Int
+  charityCommission: String
+  companiesHouse: String
 }
 
 input UpdateBusinessNameInput {

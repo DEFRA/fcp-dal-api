@@ -150,12 +150,12 @@ type BusinessRegistrationNumbers {
   """
   Companies House number of the business.
   """
-  companiesHouse: Int @on
+  companiesHouse: String @on
 
   """
   Charity Commission number of the business.
   """
-  charityCommission: Int @on
+  charityCommission: String @on
 }
 
 """

@@ -2,6 +2,7 @@ config.set('auth.disabled', false)
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { transformBusinesDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
+import { mockOrganisationSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.gatewayUrl'))
@@ -24,18 +25,7 @@ const orgAdditionalDetailsUpdatePayload = {
 const setupNock = () => {
   nock.disableNetConnect()
 
-  v1.post('/organisation/search', {
-    searchFieldType: 'SBI',
-    primarySearchPhrase: 'sbi',
-    offset: 0,
-    limit: 1
-  }).reply(200, {
-    _data: [
-      {
-        id: 'organisationId'
-      }
-    ]
-  })
+  mockOrganisationSearch(v1)
 
   v1.get('/organisation/organisationId').reply(200, {
     _data: orgAdditionalDetailsUpdatePayload
@@ -75,18 +65,7 @@ describe('business', () => {
       }
     })
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
@@ -150,18 +129,7 @@ describe('business', () => {
       }
     })
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessTypeInput!) {
@@ -203,8 +171,8 @@ describe('business', () => {
     const input = {
       sbi: 'sbi',
       registrationNumbers: {
-        charityCommission: 123,
-        companiesHouse: 456
+        charityCommission: '0123',
+        companiesHouse: '0456'
       }
     }
 
@@ -224,18 +192,7 @@ describe('business', () => {
       _data: { id: 'organisationId', ...transformedInput }
     })
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessRegistrationNumbersInput!) {
@@ -290,18 +247,7 @@ describe('business', () => {
       _data: { id: 'organisationId', ...transformedInput }
     })
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessDateStartedFarmingInput!) {

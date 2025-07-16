@@ -2,6 +2,7 @@ config.set('auth.disabled', false)
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
+import { mockOrganisationSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 const setupNock = () => {
@@ -9,18 +10,7 @@ const setupNock = () => {
 
   const v1 = nock(config.get('kits.gatewayUrl'))
 
-  v1.post('/organisation/search', {
-    searchFieldType: 'SBI',
-    primarySearchPhrase: 'sbi',
-    offset: 0,
-    limit: 1
-  }).reply(200, {
-    _data: [
-      {
-        id: 'organisationId'
-      }
-    ]
-  })
+  mockOrganisationSearch(v1)
 
   v1.get('/organisation/organisationId').reply(200, {
     _data: {
