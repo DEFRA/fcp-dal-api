@@ -113,7 +113,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async getCountyParishHoldingsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`, {
       params: {
-        // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm`
+        // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm:ss`
         pointInTime: new Date()
           .toLocaleString('en-GB', {
             timeZone: 'Europe/London',
@@ -122,9 +122,10 @@ export class RuralPaymentsBusiness extends RuralPayments {
             day: '2-digit',
             hour: '2-digit',
             minute: '2-digit',
+            second: '2-digit',
             hour12: false
           })
-          .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2})/, '$3-$2-$1 $4')
+          .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2}:\d{2})/, '$3-$2-$1 $4')
       }
     })
     return response.data
