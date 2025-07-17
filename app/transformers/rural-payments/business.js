@@ -1,5 +1,6 @@
 import { validateDate } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
+import { convertSquareMetersToHectares } from '../../utils/numbers.js'
 import {
   booleanise,
   dalAddressToKitsAddress,
@@ -212,7 +213,7 @@ function transformPaymentSchedule(paymentSchedule) {
     year: paymentSchedule.year,
     sheetName: paymentSchedule.sheet_name,
     parcelName: paymentSchedule.parcel_name,
-    actionArea: paymentSchedule.action_area,
+    actionArea: convertSquareMetersToHectares(paymentSchedule.action_area),
     actionMTL: paymentSchedule.action_mtl,
     actionUnits: paymentSchedule.action_units,
     parcelTotalArea: paymentSchedule.parcel_total_area,
