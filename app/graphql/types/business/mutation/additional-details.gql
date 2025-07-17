@@ -73,21 +73,6 @@ input UpdateBusinessDateStartedFarmingInput {
   dateStartedFarming: Date!
 }
 
-input UpdateBusinessCharityCommissionRegistrationNumberInput {
-  """
-  Single Business Identifier (SBI) of the business.
-
-  A unique 9-digit number that identifies the business. There is also the Firm Reference
-  Number (FRN), a unique 10-digit number, that is less well known to customers.
-  """
-  sbi: ID!
-
-  """
-  Charity comission registration number to set.
-  """
-  charityCommissionRegistrationNumber: Int
-}
-
 input UpdateBusinessRegistrationNumbersInput {
   """
   Single Business Identifier (SBI) of the business.

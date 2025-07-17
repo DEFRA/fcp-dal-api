@@ -352,11 +352,6 @@ input UpdateBusinessDateStartedFarmingInput {
   dateStartedFarming: Date!
 }
 
-input UpdateBusinessCharityCommissionRegistrationNumberInput {
-  sbi: ID!
-  charityCommissionRegistrationNumber: Int!
-}
-
 input UpdateBusinessRegistrationNumbersInput {
   sbi: ID!
   registrationNumbers: BusinessRegistrationNumbersInput!
