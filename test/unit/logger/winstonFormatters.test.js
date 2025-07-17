@@ -24,10 +24,11 @@ const fixture = {
     }
   },
   level: 'info',
+  '@timestamp': 1752678579327,
   request: {
     id: 'power-apps-req-id',
     method: 'POST',
-    body: '{"searchFieldType":"SBI","primarySearchPhrase":"890000001","offset":0,"limit":1}',
+    body: { searchFieldType: 'SBI', primarySearchPhrase: '890000001', offset: 0, limit: 1 },
     headers: {
       'content-type': 'application/json',
       Authorization: 'Bearer token',
@@ -83,6 +84,7 @@ describe('winstonFormatters', () => {
           outcome: 200,
           reference: 'http://localhost/path',
           type: 'POST',
+          created: 1752678579327,
           duration: 100000000,
           kind: 'http'
         },
@@ -90,7 +92,6 @@ describe('winstonFormatters', () => {
           request: {
             id: 'power-apps-req-id',
             method: 'POST',
-            url: 'http://localhost/path',
             headers: {
               'content-type': 'application/json',
               Authorization: 'Bearer token',
@@ -103,8 +104,39 @@ describe('winstonFormatters', () => {
             status_code: 200,
             response_time: 100
           }
+        },
+        url: {
+          full: 'http://localhost/path',
+          query: 'searchFieldType=SBI&primarySearchPhrase=890000001&offset=0&limit=1'
         }
       })
+    })
+  })
+
+  it('should return a reduced object when only partial info is provided', () => {
+    expect(cdpSchemaTranslator().transform({ level: 'info', message: 'msg' })).toEqual({
+      level: 'info',
+      message: 'msg'
+    })
+    expect(
+      cdpSchemaTranslator().transform({ level: 'info', message: 'msg', request: { id: 'req-id' } })
+    ).toEqual({
+      level: 'info',
+      message: 'msg',
+      http: { request: { id: 'req-id' } }
+    })
+    expect(
+      cdpSchemaTranslator().transform({ level: 'info', message: 'msg', requestTimeMs: 100 })
+    ).toEqual({
+      level: 'info',
+      message: 'msg',
+      event: { duration: 100000000 },
+      http: { response: { response_time: 100 } }
+    })
+    expect(cdpSchemaTranslator().transform({ '@timestamp': 100 })).toEqual({
+      event: { created: 100 },
+      level: undefined,
+      message: undefined
     })
   })
 

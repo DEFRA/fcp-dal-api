@@ -1,52 +1,82 @@
 import { format } from 'winston'
 import { sampleResponse } from './utils.js'
 
+const buildHttpDetails = (request, response, requestTimeMs) => {
+  if (!request && !response && !requestTimeMs) return {}
+
+  const http = {}
+  if (request)
+    http.request = {
+      ...(request?.id && { id: request.id }),
+      ...(request?.method && { method: request.method }),
+      ...(request?.headers && { headers: request.headers })
+    }
+  if (response || requestTimeMs)
+    http.response = {
+      ...(response?.statusCode && { status_code: response.statusCode }),
+      ...(requestTimeMs && { response_time: requestTimeMs })
+    }
+
+  return { http }
+}
+
+const buildError = ({ name, message, stack }, code) =>
+  name &&
+  message &&
+  stack && {
+    error: {
+      ...(name && { type: name }),
+      ...(message && { message }),
+      ...(stack && { stack_trace: stack }),
+      ...(code && { code })
+    }
+  }
+
+const buildEvent = (kind, category, type, created, duration, outcome, reference) =>
+  (kind || category || type || created || duration || outcome || reference) && {
+    event: {
+      ...(kind && { kind }),
+      ...(category && { category }),
+      ...(type && { type }), // Specific action taken or observed (e.g., user_login).
+      ...(created && { created }), // Time the event was created in the system.
+      ...(duration && { duration: duration * 1000000 }), // Total time of the event in nanoseconds.
+      ...(outcome && { outcome }), // Outcome of the event.
+      ...(reference && { reference }) // A reference ID or URL tied to the event.
+    }
+  }
+
+const buildUrl = ({ body, path }) =>
+  body &&
+  path && {
+    url: {
+      full: path,
+      ...(body && { query: new URLSearchParams(body).toString() })
+    }
+  }
+
 export const cdpSchemaTranslator = format((info) => {
-  const { error, code, type, level, request, response, requestTimeMs, transactionId, traceId } =
-    info
+  const { error, code, request, response, requestTimeMs, transactionId, traceId } = info
 
   return Object.assign(
     {
-      level,
+      level: info.level,
       message: info.message
     },
     ...[
       transactionId && { 'transaction.id': transactionId },
       traceId && { 'span.id': traceId, 'trace.id': traceId },
-      error && {
-        error: {
-          ...(error?.name && { type: error.name }),
-          ...(error?.message && { message: error.message }),
-          ...(error?.stack && { stack_trace: error.stack }),
-          ...(code && { code })
-        }
-      },
-      request && {
-        http: {
-          request: {
-            ...(request?.id && { id: request.id }),
-            ...(request?.method && { method: request.method }),
-            ...(request?.path && { url: request.path }),
-            ...(request?.remoteAddress && { url: request.remoteAddress }),
-            ...(request?.headers && { headers: request.headers })
-          },
-          response: {
-            ...(response?.statusCode && { status_code: response.statusCode }),
-            ...(requestTimeMs && { response_time: requestTimeMs })
-          }
-        }
-      },
-      {
-        event: {
-          ...(type && { kind: type }),
-          ...(code && { category: code }),
-          ...(request?.method && { type: request?.method }), // Specific action taken or observed (e.g., user_login).
-          ...(info['@timestamp'] && { created: info['@timestamp'] }), // Time the event was created in the system.
-          ...(requestTimeMs && { duration: requestTimeMs * 1000000 }), // Total time of the event in nanoseconds.
-          ...(response?.statusCode && { outcome: response?.statusCode }), // Outcome of the event.
-          ...(request?.path && { reference: request?.path }) // A reference ID or URL tied to the event.
-        }
-      }
+      buildError(error || {}, code),
+      buildHttpDetails(request, response, requestTimeMs),
+      buildEvent(
+        info.type,
+        code,
+        request?.method,
+        info['@timestamp'],
+        requestTimeMs,
+        response?.statusCode,
+        request?.path
+      ),
+      buildUrl(request || {})
     ]
   )
 })
