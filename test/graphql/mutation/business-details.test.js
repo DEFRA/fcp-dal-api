@@ -1,8 +1,9 @@
 config.set('auth.disabled', false)
 import nock from 'nock'
-import { config } from '../../app/config.js'
-import { transformBusinessDetailsToOrgDetailsUpdate } from '../../app/transformers/rural-payments/business.js'
-import { makeTestQuery } from './makeTestQuery.js'
+import { config } from '../../../app/config.js'
+import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
+import { mockOrganisationSearch } from '../helpers.js'
+import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.gatewayUrl'))
 
@@ -60,18 +61,7 @@ const orgDetailsUpdatePayload = {
 const setupNock = () => {
   nock.disableNetConnect()
 
-  v1.post('/organisation/search', {
-    searchFieldType: 'SBI',
-    primarySearchPhrase: 'sbi',
-    offset: 0,
-    limit: 1
-  }).reply(200, {
-    _data: [
-      {
-        id: 'organisationId'
-      }
-    ]
-  })
+  mockOrganisationSearch(v1)
 
   v1.get('/organisation/organisationId').reply(200, {
     _data: orgDetailsUpdatePayload
@@ -107,18 +97,7 @@ describe('business', () => {
       _data: { id: 'organisationId', ...transformedInput }
     })
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessNameInput!) {
@@ -165,18 +144,7 @@ describe('business', () => {
 
     v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     v1.get('/organisation/organisationId').reply(200, {
       _data: { id: 'organisationId', ...transformedInput }
@@ -266,18 +234,7 @@ describe('business', () => {
 
     v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     v1.get('/organisation/organisationId').reply(200, {
       _data: { id: 'organisationId', ...transformedInput }
@@ -373,18 +330,7 @@ describe('business', () => {
 
     v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
 
-    v1.post('/organisation/search', {
-      searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
-      offset: 0,
-      limit: 1
-    }).reply(200, {
-      _data: [
-        {
-          id: 'organisationId'
-        }
-      ]
-    })
+    mockOrganisationSearch(v1)
 
     v1.get('/organisation/organisationId').reply(200, {
       _data: { id: 'organisationId', ...transformedInput }

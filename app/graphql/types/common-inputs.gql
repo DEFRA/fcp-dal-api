@@ -104,5 +104,5 @@ input EmailInput {
   """
   Email address of the customer or business
   """
-  address: String
+  address: String!
 }

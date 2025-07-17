@@ -1,7 +1,8 @@
 import { jest } from '@jest/globals'
 
 const mockSchemaModule = {
-  businessDetailsUpdateResolver: jest.fn()
+  businessDetailsUpdateResolver: jest.fn(),
+  businessAdditionalDetailsUpdateResolver: jest.fn()
 }
 jest.unstable_mockModule(
   '../../../app/graphql/resolvers/business/common.js',
@@ -11,7 +12,7 @@ const { Mutation, UpdateBusinessResponse } = await import(
   '../../../app/graphql/resolvers/business/mutation.js'
 )
 
-describe('Business Mutation resolvers', () => {
+describe('Business Details Mutation resolvers', () => {
   const mockArgs = { input: { name: 'Test Business' } }
   const mockContext = { user: { id: 'user1' } }
   const mockInfo = {}
@@ -49,6 +50,52 @@ describe('Business Mutation resolvers', () => {
   it('updateBusinessAddress calls businessDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessAddress({}, mockArgs, mockContext, mockInfo)
     expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
+  })
+})
+
+describe('Business Additional Details Mutation resolvers', () => {
+  const mockArgs = { input: { name: 'Test Business' } }
+  const mockContext = { user: { id: 'user1' } }
+  const mockInfo = {}
+
+  it('updateBusinessLegalStatus calls businessAdditionalDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessLegalStatus({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
+  })
+
+  it('updateBusinessType calls businessAdditionalDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessType({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
+  })
+
+  it('updateBusinessDateStartedFarming calls businessAdditionalDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessDateStartedFarming({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
+  })
+
+  it('updateBusinessRegistrationNumbers calls businessAdditionalDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessRegistrationNumbers({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,

@@ -1,0 +1,101 @@
+extend type Mutation {
+  """
+  Used to update the business legal status.
+  """
+  updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Used to update the date the business started farming.
+  """
+  updateBusinessDateStartedFarming(
+    input: UpdateBusinessDateStartedFarmingInput!
+  ): UpdateBusinessResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Used to update the date the business type.
+  """
+  updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Used to update the date the business companies house number and/or charities commission number.
+  """
+  updateBusinessRegistrationNumbers(
+    input: UpdateBusinessRegistrationNumbersInput!
+  ): UpdateBusinessResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input UpdateBusinessLegalStatusInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+
+  """
+  Legal status object to update business with.
+  """
+  legalStatusCode: Int!
+}
+
+input UpdateBusinessTypeInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+
+  """
+  business type code/id to update business with.
+  """
+  typeCode: Int!
+}
+
+input UpdateBusinessDateStartedFarmingInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+
+  """
+  The date the business started farming to update to.
+  """
+  dateStartedFarming: Date!
+}
+
+input UpdateBusinessRegistrationNumbersInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+
+  """
+  Registration numbers object to update companies house or charities comission numbers.
+  """
+  registrationNumbers: BusinessRegistrationNumbersInput!
+}
+
+input BusinessRegistrationNumbersInput {
+  """
+  Charity comission registration number to set.
+  """
+  charityCommission: String
+
+  """
+  Charity comission registration number to set.
+  """
+  companiesHouse: String
+}

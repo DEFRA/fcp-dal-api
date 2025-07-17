@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 
 import {
   buildSchema,
+  findBreakingChanges,
   findDangerousChanges,
   getIntrospectionQuery,
   graphql,
@@ -61,6 +62,7 @@ describe('schema', () => {
       'utf-8'
     )
     expect(findDangerousChanges(schema, buildSchema(partialSchema))).toHaveLength(0)
+    expect(findBreakingChanges(schema, buildSchema(partialSchema))).toHaveLength(0)
   })
 
   it('should contain all fields if process.env.ALL_SCHEMA is set', async () => {
@@ -70,6 +72,7 @@ describe('schema', () => {
       'utf-8'
     )
     expect(findDangerousChanges(schema, buildSchema(fullSchema))).toHaveLength(0)
+    expect(findBreakingChanges(schema, buildSchema(fullSchema))).toHaveLength(0)
   })
 
   it('ensures all top-level fields have @auth directive', async () => {

@@ -1,11 +1,82 @@
-scalar Int
-scalar Float
+# TODO remove this as all fields are on so will assert the exact same as full-schema
 scalar Date
-scalar UUID
 
 type Query {
   business(sbi: ID!): Business
   customer(crn: ID!): Customer
+  permissionGroups: [PermissionGroup]
+}
+
+type Phone {
+  mobile: String
+  landline: String
+}
+
+type Email {
+  address: String
+  validated: Boolean
+}
+
+type Address {
+  pafOrganisationName: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String
+  county: String
+  postalCode: String
+  country: String
+  uprn: String
+  dependentLocality: String
+  doubleDependentLocality: String
+  typeId: String
+}
+
+type BusinessInfo {
+  name: String
+  reference: String
+  vat: String
+  traderNumber: String
+  vendorNumber: String
+  address: Address
+  correspondenceAddress: Address
+  email: Email
+  correspondenceEmail: Email
+  phone: Phone
+  correspondencePhone: Phone
+  lastUpdated: Date
+  dateStartedFarming: Date
+  hasAdditionalBusinessActivities: Boolean
+  additionalBusinessActivities: [BusinessType]
+  hasLandInNorthernIreland: Boolean
+  hasLandInScotland: Boolean
+  hasLandInWales: Boolean
+  landConfirmed: Boolean
+  additionalSbis: [ID]
+  legalStatus: BusinessType
+  type: BusinessType
+  registrationNumbers: BusinessRegistrationNumbers
+  isAccountablePeopleDeclarationComplete: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
+  isFinancialToBusinessAddress: Boolean
+  status: EntityStatus
+}
+
+type BusinessRegistrationNumbers {
+  companiesHouse: String
+  charityCommission: String
+}
+
+# eslint-disable-next-line @graphql-eslint/naming-convention
+type BusinessType {
+  code: Int
+  type: String
 }
 
 type BusinessCustomer {
@@ -74,36 +145,6 @@ type BusinessCustomerPartial {
   role: String
 }
 
-type BusinessInfo {
-  name: String
-  reference: String
-  vat: String
-  traderNumber: String
-  vendorNumber: String
-  address: Address
-  correspondenceAddress: Address
-  email: Email
-  correspondenceEmail: Email
-  phone: Phone
-  correspondencePhone: Phone
-  lastUpdated: Date
-  dateStartedFarming: Date
-  hasAdditionalBusinessActivities: Boolean
-  additionalBusinessActivities: [BusinessType]
-  hasLandInNorthernIreland: Boolean
-  hasLandInScotland: Boolean
-  hasLandInWales: Boolean
-  landConfirmed: Boolean
-  additionalSbis: [ID]
-  legalStatus: BusinessType
-  type: BusinessType
-  registrationNumbers: BusinessRegistrationNumbers
-  isAccountablePeopleDeclarationComplete: Boolean
-  isCorrespondenceAsBusinessAddress: Boolean
-  isFinancialToBusinessAddress: Boolean
-  status: EntityStatus
-}
-
 type BusinessLandParcel {
   id: ID!
   sheetId: String
@@ -145,20 +186,13 @@ type BusinessLandParcelPartial {
   pendingDigitisation: Boolean
 }
 
-type BusinessRegistrationNumbers {
-  companiesHouse: String
-  charityCommission: String
-}
-
-# eslint-disable-next-line @graphql-eslint/naming-convention
-type BusinessType {
-  code: Int
-  type: String
-}
-
 type CustomerInfo {
   name: CustomerName
   dateOfBirth: Date
+  phone: Phone
+  email: Email
+  status: EntityStatus
+  address: Address
   doNotContact: Boolean
 }
 
@@ -168,6 +202,12 @@ type CustomerName {
   first: String
   middle: String
   last: String
+}
+
+type EntityStatus {
+  locked: Boolean
+  confirmed: Boolean
+  deactivated: Boolean
 }
 
 type CustomerAuthenticationQuestions {
@@ -212,10 +252,13 @@ type CustomerBusinessMessage {
   deleted: Boolean
 }
 
-type ActivePermissionGroup {
-  id: PermissionGroupId!
-  level: PermissionLevel
-  functions: [String]
+enum PermissionLevel {
+  NO_ACCESS
+  VIEW
+  AMEND
+  SUBMIT
+  MAKE_LEGAL_CHANGES
+  FULL_PERMISSION
 }
 
 enum PermissionGroupId {
@@ -228,54 +271,37 @@ enum PermissionGroupId {
   LAND_DETAILS
 }
 
-enum PermissionLevel {
-  NO_ACCESS
-  VIEW
-  AMEND
-  SUBMIT
-  MAKE_LEGAL_CHANGES
-  FULL_PERMISSION
+type ActivePermissionGroup {
+  id: PermissionGroupId!
+  level: PermissionLevel
+  functions: [String]
 }
 
-type Address {
-  pafOrganisationName: String
-  line1: String
-  line2: String
-  line3: String
-  line4: String
-  line5: String
-  buildingNumberRange: String
-  buildingName: String
-  flatName: String
-  street: String
-  city: String
-  county: String
-  postalCode: String
-  country: String
-  uprn: String
-  dependentLocality: String
-  doubleDependentLocality: String
-  typeId: String
+type PermissionGroup {
+  id: PermissionGroupId!
+  name: String!
+  permissions: [Permission]
 }
 
-type Email {
-  address: String
-  validated: Boolean
-}
-
-type EntityStatus {
-  locked: Boolean
-  confirmed: Boolean
-  deactivated: Boolean
-}
-
-type Phone {
-  mobile: String
-  landline: String
+type Permission {
+  level: PermissionLevel
+  functions: [String]
+  active(crn: ID!, sbi: ID!): Boolean
 }
 
 type Mutation {
-  updateBusiness(input: UpdateBusinessInput!): UpdateBusinessResponse
+  updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
+  updateBusinessDateStartedFarming(
+    input: UpdateBusinessDateStartedFarmingInput!
+  ): UpdateBusinessResponse
+  updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
+  updateBusinessRegistrationNumbers(
+    input: UpdateBusinessRegistrationNumbersInput!
+  ): UpdateBusinessResponse
+  updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
+  updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
+  updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
+  updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
 }
 
 type UpdateBusinessResponse {
@@ -312,18 +338,51 @@ input EmailInput {
   address: String
 }
 
-input UpdateBusinessInput {
+input UpdateBusinessLegalStatusInput {
   sbi: ID!
-  details: InputBusinessDetails!
+  legalStatusCode: Int!
 }
 
-input InputBusinessDetails {
-  name: String
+input UpdateBusinessTypeInput {
+  sbi: ID!
+  typeCode: Int!
+}
+
+input UpdateBusinessDateStartedFarmingInput {
+  sbi: ID!
+  dateStartedFarming: Date!
+}
+
+input UpdateBusinessRegistrationNumbersInput {
+  sbi: ID!
+  registrationNumbers: BusinessRegistrationNumbersInput!
+}
+
+input BusinessRegistrationNumbersInput {
+  charityCommission: String
+  companiesHouse: String
+}
+
+input UpdateBusinessNameInput {
+  sbi: ID!
+  name: String!
+}
+
+input UpdateBusinessPhoneInput {
+  sbi: ID!
+  phone: PhoneInput
+  correspondencePhone: PhoneInput
+}
+
+input UpdateBusinessEmailInput {
+  sbi: ID!
+  email: EmailInput
+  correspondenceEmail: EmailInput
+}
+
+input UpdateBusinessAddressInput {
+  sbi: ID!
   address: AddressInput
   correspondenceAddress: AddressInput
   isCorrespondenceAsBusinessAddress: Boolean
-  phone: PhoneInput
-  correspondencePhone: PhoneInput
-  email: EmailInput
-  correspondenceEmail: EmailInput
 }

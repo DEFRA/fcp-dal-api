@@ -127,6 +127,32 @@ export const transformBusinessDetailsToOrgDetailsUpdate = (data) => {
   return transformMapping(orgDetailsUpdateMapping, data)
 }
 
+const orgAdditionalDetailsMapping = {
+  companiesHouseRegistrationNumber: (data) =>
+    data.registrationNumbers ? data.registrationNumbers.companiesHouse : undefined,
+  charityCommissionRegistrationNumber: (data) =>
+    data.registrationNumbers ? data.registrationNumbers?.charityCommission : undefined,
+  businessType: (data) =>
+    data.typeCode
+      ? {
+          id: data.typeCode
+        }
+      : undefined,
+  dateStartedFarming: (data) =>
+    data.dateStartedFarming ? new Date(data.dateStartedFarming).toISOString() : undefined,
+  legalStatus: (data) =>
+    data.legalStatus
+      ? {
+          id: data.legalStatus?.code,
+          type: data.legalStatus?.type
+        }
+      : undefined
+}
+
+export const transformBusinesDetailsToOrgAdditionalDetailsUpdate = (data) => {
+  return transformMapping(orgAdditionalDetailsMapping, data)
+}
+
 export function transformCountyParishHoldings(data) {
   if (!Array.isArray(data)) {
     return null

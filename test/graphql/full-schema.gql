@@ -289,7 +289,18 @@ type Permission {
 }
 
 type Mutation {
-  updateBusiness(input: UpdateBusinessInput!): UpdateBusinessResponse
+  updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
+  updateBusinessDateStartedFarming(
+    input: UpdateBusinessDateStartedFarmingInput!
+  ): UpdateBusinessResponse
+  updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
+  updateBusinessRegistrationNumbers(
+    input: UpdateBusinessRegistrationNumbersInput!
+  ): UpdateBusinessResponse
+  updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
+  updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
+  updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
+  updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
 }
 
 type UpdateBusinessResponse {
@@ -323,21 +334,54 @@ input PhoneInput {
 }
 
 input EmailInput {
-  address: String
+  address: String!
 }
 
-input UpdateBusinessInput {
+input UpdateBusinessLegalStatusInput {
   sbi: ID!
-  details: InputBusinessDetails!
+  legalStatusCode: Int!
 }
 
-input InputBusinessDetails {
-  name: String
+input UpdateBusinessTypeInput {
+  sbi: ID!
+  typeCode: Int!
+}
+
+input UpdateBusinessDateStartedFarmingInput {
+  sbi: ID!
+  dateStartedFarming: Date!
+}
+
+input UpdateBusinessRegistrationNumbersInput {
+  sbi: ID!
+  registrationNumbers: BusinessRegistrationNumbersInput!
+}
+
+input BusinessRegistrationNumbersInput {
+  charityCommission: String
+  companiesHouse: String
+}
+
+input UpdateBusinessNameInput {
+  sbi: ID!
+  name: String!
+}
+
+input UpdateBusinessPhoneInput {
+  sbi: ID!
+  phone: PhoneInput
+  correspondencePhone: PhoneInput
+}
+
+input UpdateBusinessEmailInput {
+  sbi: ID!
+  email: EmailInput
+  correspondenceEmail: EmailInput
+}
+
+input UpdateBusinessAddressInput {
+  sbi: ID!
   address: AddressInput
   correspondenceAddress: AddressInput
   isCorrespondenceAsBusinessAddress: Boolean
-  phone: PhoneInput
-  correspondencePhone: PhoneInput
-  email: EmailInput
-  correspondenceEmail: EmailInput
 }
