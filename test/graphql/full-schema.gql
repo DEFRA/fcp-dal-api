@@ -369,7 +369,7 @@ input BusinessRegistrationNumbersInput {
 
 input UpdateBusinessNameInput {
   sbi: ID!
-  name: String
+  name: String!
 }
 
 input UpdateBusinessPhoneInput {

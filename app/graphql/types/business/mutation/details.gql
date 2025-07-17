@@ -24,7 +24,7 @@ input UpdateBusinessNameInput {
   """
   Name of the business.
   """
-  name: String
+  name: String!
 }
 
 input UpdateBusinessPhoneInput {
