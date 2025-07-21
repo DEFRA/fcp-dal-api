@@ -216,7 +216,7 @@ function transformPaymentSchedule(paymentSchedule) {
     actionArea: convertSquareMetersToHectares(paymentSchedule.action_area),
     actionMTL: paymentSchedule.action_mtl,
     actionUnits: paymentSchedule.action_units,
-    parcelTotalArea: paymentSchedule.parcel_total_area,
+    parcelTotalArea: convertSquareMetersToHectares(paymentSchedule.parcel_total_area),
     startDate: validateDate(
       paymentSchedule.payment_schedule_start_date?.split('T')[0]
     ).toISOString(),
