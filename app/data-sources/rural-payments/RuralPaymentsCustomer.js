@@ -5,7 +5,7 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
-  async getCustomerByCRN(crn) {
+  async getPersonIdByCRN(crn) {
     const body = JSON.stringify({
       searchFieldType: 'CUSTOMER_REFERENCE',
       primarySearchPhrase: crn,
@@ -30,8 +30,12 @@ export class RuralPaymentsCustomer extends RuralPayments {
       })
       throw new NotFound('Rural payments customer not found')
     }
+    return response.id
+  }
 
-    return this.getPersonByPersonId(response.id)
+  async getCustomerByCRN(crn) {
+    const personId = await this.getPersonIdByCRN(crn)
+    return this.getPersonByPersonId(personId)
   }
 
   async getPersonByPersonId(personId) {

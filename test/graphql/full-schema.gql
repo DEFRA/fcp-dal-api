@@ -61,7 +61,7 @@ type BusinessInfo {
   legalStatus: BusinessType
   type: BusinessType
   registrationNumbers: BusinessRegistrationNumbers
-  isAccountablePeopleDeclarationComplete: Boolean
+  isAccountablePeopleDeclarationCompleted: Boolean
   isCorrespondenceAsBusinessAddress: Boolean
   isFinancialToBusinessAddress: Boolean
   status: EntityStatus
@@ -384,4 +384,34 @@ input UpdateBusinessAddressInput {
   address: AddressInput
   correspondenceAddress: AddressInput
   isCorrespondenceAsBusinessAddress: Boolean
+}
+
+extend type Mutation {
+  createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
+}
+
+input CreateBusinessInput {
+  crn: ID!
+  name: String
+  vat: String
+  traderNumber: String
+  vendorNumber: String
+  address: AddressInput
+  correspondenceAddress: AddressInput
+  isCorrespondenceAsBusinessAddress: Boolean
+  email: EmailInput
+  correspondenceEmail: EmailInput
+  phone: PhoneInput
+  correspondencePhone: PhoneInput
+  legalStatusCode: Int
+  typeCode: Int!
+  registrationNumbers: BusinessRegistrationNumbersInput
+  landConfirmed: Boolean
+  hasAdditionalBusinessActivities: Boolean
+  dateStartedFarming: Date
+}
+
+type CreateBusinessResponse {
+  success: Boolean
+  business: Business
 }

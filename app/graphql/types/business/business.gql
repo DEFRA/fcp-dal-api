@@ -130,7 +130,7 @@ type BusinessInfo {
   """
   Whether the "accountable people declaration" is complete.
   """
-  isAccountablePeopleDeclarationComplete: Boolean @on
+  isAccountablePeopleDeclarationCompleted: Boolean @on
 
   """
   The date the business started farming.

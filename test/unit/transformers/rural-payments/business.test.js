@@ -2,6 +2,7 @@ import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   transformAgreements,
   transformBusinessCustomerPrivilegesToPermissionGroups,
+  transformBusinessDetailsToOrgDetailsCreate,
   transformBusinessDetailsToOrgDetailsUpdate,
   transformCountyParishHoldings,
   transformOrganisationCustomers
@@ -479,5 +480,162 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
     const result = transformBusinessDetailsToOrgDetailsUpdate(input)
     expect(result.mobile).toBeUndefined()
     expect(result.landline).toBeUndefined()
+  })
+})
+
+describe('#transformBusinessDetailsToOrgDetailsCreate', () => {
+  const businessCreateInput = {
+    name: 'Acme Farms Ltd',
+    reference: undefined,
+    vat: 'GB123456789',
+    traderNumber: 'TR12345',
+    vendorNumber: 'VN67890',
+    address: {
+      line1: '1 Farm Lane',
+      line2: 'Rural Area',
+      line3: undefined,
+      line4: undefined,
+      line5: undefined,
+      pafOrganisationName: undefined,
+      buildingNumberRange: undefined,
+      buildingName: undefined,
+      flatName: undefined,
+      street: undefined,
+      city: 'Farmville',
+      county: undefined,
+      postalCode: 'FV1 2AB',
+      country: 'UK',
+      uprn: undefined,
+      dependentLocality: undefined,
+      doubleDependentLocality: undefined,
+      typeId: undefined
+    },
+    correspondenceAddress: {
+      line1: 'PO Box 123',
+      line2: undefined,
+      line3: undefined,
+      line4: undefined,
+      line5: undefined,
+      pafOrganisationName: undefined,
+      buildingNumberRange: undefined,
+      buildingName: undefined,
+      flatName: undefined,
+      street: undefined,
+      city: 'Farmville',
+      county: undefined,
+      postalCode: 'FV1 2AB',
+      country: 'UK',
+      uprn: undefined,
+      dependentLocality: undefined,
+      doubleDependentLocality: undefined,
+      typeId: undefined
+    },
+    phone: {
+      mobile: '+441234567891',
+      landline: '+441234567890',
+      fax: undefined
+    },
+    correspondencePhone: {
+      mobile: undefined,
+      landline: '+441234567892',
+      fax: undefined
+    },
+    email: {
+      address: 'info@acmefarms.co.uk',
+      validated: undefined
+    },
+    correspondenceEmail: {
+      address: 'correspondence@acmefarms.co.uk',
+      validated: false
+    },
+    legalStatus: {
+      code: 1,
+      type: undefined
+    },
+    type: {
+      code: 2,
+      type: undefined
+    },
+    registrationNumbers: {
+      companiesHouse: '12345678',
+      charityCommission: '87654321'
+    },
+    additionalSbis: [],
+    isAccountablePeopleDeclarationCompleted: false,
+    dateStartedFarming: new Date('2021-05-27T12:46:17.305Z'),
+    lastUpdated: null,
+    landConfirmed: true,
+    isFinancialToBusinessAddress: false,
+    isCorrespondenceAsBusinessAddress: false,
+    hasLandInNorthernIreland: false,
+    hasLandInScotland: false,
+    hasLandInWales: false,
+    hasAdditionalBusinessActivities: false,
+    additionalBusinessActivities: [],
+    status: {
+      locked: false,
+      deactivated: false,
+      confirmed: false
+    }
+  }
+
+  it('transforms base input correctly', () => {
+    const result = transformBusinessDetailsToOrgDetailsCreate(businessCreateInput)
+    expect(result).toEqual({
+      name: 'Acme Farms Ltd',
+      address: {
+        address1: '1 Farm Lane',
+        address2: 'Rural Area',
+        address3: undefined,
+        address4: undefined,
+        address5: undefined,
+        pafOrganisationName: undefined,
+        buildingNumberRange: undefined,
+        buildingName: undefined,
+        flatName: undefined,
+        street: undefined,
+        city: 'Farmville',
+        county: undefined,
+        postalCode: 'FV1 2AB',
+        country: 'UK',
+        uprn: undefined,
+        dependentLocality: undefined,
+        doubleDependentLocality: undefined,
+        addressTypeId: undefined
+      },
+      correspondenceAddress: {
+        address1: 'PO Box 123',
+        address2: undefined,
+        address3: undefined,
+        address4: undefined,
+        address5: undefined,
+        pafOrganisationName: undefined,
+        buildingNumberRange: undefined,
+        buildingName: undefined,
+        flatName: undefined,
+        street: undefined,
+        city: 'Farmville',
+        county: undefined,
+        postalCode: 'FV1 2AB',
+        country: 'UK',
+        uprn: undefined,
+        dependentLocality: undefined,
+        doubleDependentLocality: undefined,
+        addressTypeId: undefined
+      },
+      isCorrespondenceAsBusinessAddr: false,
+      email: 'info@acmefarms.co.uk',
+      landline: '+441234567890',
+      mobile: '+441234567891',
+      correspondenceEmail: 'correspondence@acmefarms.co.uk',
+      correspondenceLandline: '+441234567892',
+      companiesHouseRegistrationNumber: '12345678',
+      charityCommissionRegistrationNumber: '87654321',
+      dateStartedFarming: '2021-05-27T12:46:17.305Z',
+      landConfirmed: true,
+      traderNumber: 'TR12345',
+      vendorNumber: 'VN67890',
+      taxRegistrationNumber: 'GB123456789'
+    })
   })
 })

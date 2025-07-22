@@ -58,7 +58,8 @@ describe('schema', () => {
     const schema = await createSchema()
 
     const partialSchema = await readFile(
-      join(dirname(fileURLToPath(import.meta.url)), 'partial-schema.gql'),
+      // All fields are on now
+      join(dirname(fileURLToPath(import.meta.url)), 'full-schema.gql'),
       'utf-8'
     )
     expect(findDangerousChanges(schema, buildSchema(partialSchema))).toHaveLength(0)

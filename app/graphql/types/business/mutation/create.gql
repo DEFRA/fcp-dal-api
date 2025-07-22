@@ -1,0 +1,101 @@
+extend type Mutation {
+  createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input CreateBusinessInput {
+  """
+  The Customer Reference Number (CRN) of the person under which to create the business.
+  """
+  crn: ID!
+  """
+  Name of the business.
+  """
+  name: String
+
+  """
+  VAT number of the business. (a.k.a. `taxRegistrationNumber`)
+  """
+  vat: String
+
+  """
+  Trader number of the business.
+  """
+  traderNumber: String
+
+  """
+  Vendor number of the business.
+  """
+  vendorNumber: String
+
+  """
+  Address of the business.
+  """
+  address: AddressInput
+
+  """
+  Correspondence address of the business.
+  """
+  correspondenceAddress: AddressInput
+
+  """
+  States the correspondence address should be used as the business address.
+  """
+  isCorrespondenceAsBusinessAddress: Boolean
+
+  """
+  Email address of the business.
+  """
+  email: EmailInput
+
+  """
+  Correspondence email of the business.
+  """
+  correspondenceEmail: EmailInput
+
+  """
+  Telephone numbers of the business.
+  """
+  phone: PhoneInput
+
+  """
+  Correspondence telephone numbers of the business.
+  """
+  correspondencePhone: PhoneInput
+
+  """
+  Legal status of the business. For example, Sole Proprietorship.
+  """
+  legalStatusCode: Int
+
+  """
+  Type of the business.
+  """
+  typeCode: Int!
+
+  """
+  Various registration numbers for the business. For example, Companies House number.
+  """
+  registrationNumbers: BusinessRegistrationNumbersInput
+
+  """
+  Whether the land for the business has been confirmed.
+  """
+  landConfirmed: Boolean
+
+  """
+  Whether the business has additional business activities.
+  """
+  hasAdditionalBusinessActivities: Boolean
+
+  """
+  The date the business started farming.
+  """
+  dateStartedFarming: Date
+}
+
+type CreateBusinessResponse {
+  success: Boolean @on
+  business: Business @on
+}
