@@ -220,7 +220,6 @@ describe('Business Mutation UpdateBusinessResponse', () => {
 
 describe('Business Mutation createBusiness', () => {
   let dataSources
-  let logger
 
   beforeEach(() => {
     dataSources = {
@@ -230,9 +229,6 @@ describe('Business Mutation createBusiness', () => {
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn()
       }
-    }
-    logger = {
-      warn: jest.fn()
     }
   })
 
@@ -283,7 +279,7 @@ describe('Business Mutation createBusiness', () => {
       }
     }
     const mockInfo = {}
-    const { crn, ...businessDetails } = mockArgs.input
+    const { crn: _, ...businessDetails } = mockArgs.input
     const orgDetailsInput = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
     // Some additional values are returned beyoned the input
     const orgDetails = {

@@ -1,10 +1,7 @@
 config.set('auth.disabled', false)
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import {
-  transformBusinessDetailsToOrgDetailsCreate,
-  transformOrganisationToBusiness
-} from '../../../app/transformers/rural-payments/business.js'
+import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 import { mockPersonSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
@@ -69,7 +66,6 @@ describe('business', () => {
     }
 
     const orgDetails = transformBusinessDetailsToOrgDetailsCreate(input)
-    const businessDetails = transformOrganisationToBusiness(orgDetails)
 
     v1.post('/organisation/create/personId').reply(200, {
       _data: orgDetails
