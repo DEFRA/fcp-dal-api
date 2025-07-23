@@ -142,16 +142,28 @@ const orgAdditionalDetailsMapping = {
   dateStartedFarming: (data) =>
     data.dateStartedFarming ? new Date(data.dateStartedFarming).toISOString() : undefined,
   legalStatus: (data) =>
-    data.legalStatus
+    data.legalStatusCode
       ? {
-          id: data.legalStatus?.code,
-          type: data.legalStatus?.type
+          id: data.legalStatusCode
         }
       : undefined
 }
 
 export const transformBusinesDetailsToOrgAdditionalDetailsUpdate = (data) => {
   return transformMapping(orgAdditionalDetailsMapping, data)
+}
+
+const fullOrgDetailsMapping = {
+  ...orgDetailsUpdateMapping,
+  ...orgAdditionalDetailsMapping,
+  landConfirmed: (data) => data?.landConfirmed,
+  traderNumber: (data) => data?.traderNumber,
+  vendorNumber: (data) => data?.vendorNumber,
+  taxRegistrationNumber: (data) => data?.vat
+}
+
+export const transformBusinessDetailsToOrgDetailsCreate = (data) => {
+  return transformMapping(fullOrgDetailsMapping, data)
 }
 
 export function transformCountyParishHoldings(data) {

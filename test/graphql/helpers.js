@@ -14,3 +14,20 @@ export const mockOrganisationSearch = (nockInstance, orgId = 'organisationId') =
       ]
     })
 }
+
+export const mockPersonSearch = (nockInstance, crn = 'crn') => {
+  nockInstance
+    .post('/person/search', {
+      searchFieldType: 'CUSTOMER_REFERENCE',
+      primarySearchPhrase: crn,
+      offset: 0,
+      limit: 1
+    })
+    .reply(200, {
+      _data: [
+        {
+          id: 'personId'
+        }
+      ]
+    })
+}

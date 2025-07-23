@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 
 const mockSchemaModule = {
   businessDetailsUpdateResolver: jest.fn(),
@@ -213,6 +214,191 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       },
       organisationId: 'undefined',
       sbi: 'undefined'
+    })
+  })
+})
+
+describe('Business Mutation createBusiness', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        createOrganisationByPersonId: jest.fn()
+      },
+      ruralPaymentsCustomer: {
+        getPersonIdByCRN: jest.fn()
+      }
+    }
+  })
+
+  it('createBusiness returns business details and success', async () => {
+    const mockArgs = {
+      input: {
+        crn: '123',
+        name: 'Acme Farms Ltd',
+        vat: 'GB123456789',
+        traderNumber: 'TR12345',
+        vendorNumber: 'VN67890',
+        address: {
+          line1: '1 Farm Lane',
+          line2: 'Rural Area',
+          city: 'Farmville',
+          postalCode: 'FV1 2AB',
+          country: 'UK'
+        },
+        correspondenceAddress: {
+          line1: 'PO Box 123',
+          city: 'Farmville',
+          postalCode: 'FV1 2AB',
+          country: 'UK'
+        },
+        isCorrespondenceAsBusinessAddress: false,
+        email: {
+          address: 'info@acmefarms.co.uk'
+        },
+        correspondenceEmail: {
+          address: 'correspondence@acmefarms.co.uk'
+        },
+        phone: {
+          landline: '+441234567890',
+          mobile: '+441234567891'
+        },
+        correspondencePhone: {
+          landline: '+441234567892'
+        },
+        legalStatusCode: 1,
+        typeCode: 2,
+        registrationNumbers: {
+          companiesHouse: '12345678',
+          charityCommission: '87654321'
+        },
+        landConfirmed: true,
+        hasAdditionalBusinessActivities: false,
+        dateStartedFarming: new Date('2021-05-27T12:46:17.305Z')
+      }
+    }
+    const mockInfo = {}
+    const { crn: _, ...businessDetails } = mockArgs.input
+    const orgDetailsInput = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
+    // Some additional values are returned beyoned the input
+    const orgDetails = {
+      ...orgDetailsInput,
+      sbi: 'sbi',
+      id: 'orgId'
+    }
+
+    dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('personId')
+    dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockResolvedValue(orgDetails)
+
+    const response = await Mutation.createBusiness({}, mockArgs, { dataSources }, mockInfo)
+
+    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.createOrganisationByPersonId).toHaveBeenCalledWith(
+      'personId',
+      orgDetailsInput
+    )
+    expect(response).toEqual({
+      // Response is nearly identical to the input just with undefined in unprovided values and typeCode and legalStatusCode are mapped to return objects
+      success: true,
+      business: {
+        info: {
+          name: 'Acme Farms Ltd',
+          reference: undefined,
+          vat: 'GB123456789',
+          traderNumber: 'TR12345',
+          vendorNumber: 'VN67890',
+          address: {
+            line1: '1 Farm Lane',
+            line2: 'Rural Area',
+            line3: undefined,
+            line4: undefined,
+            line5: undefined,
+            pafOrganisationName: undefined,
+            buildingNumberRange: undefined,
+            buildingName: undefined,
+            flatName: undefined,
+            street: undefined,
+            city: 'Farmville',
+            county: undefined,
+            postalCode: 'FV1 2AB',
+            country: 'UK',
+            uprn: undefined,
+            dependentLocality: undefined,
+            doubleDependentLocality: undefined,
+            typeId: undefined
+          },
+          correspondenceAddress: {
+            line1: 'PO Box 123',
+            line2: undefined,
+            line3: undefined,
+            line4: undefined,
+            line5: undefined,
+            pafOrganisationName: undefined,
+            buildingNumberRange: undefined,
+            buildingName: undefined,
+            flatName: undefined,
+            street: undefined,
+            city: 'Farmville',
+            county: undefined,
+            postalCode: 'FV1 2AB',
+            country: 'UK',
+            uprn: undefined,
+            dependentLocality: undefined,
+            doubleDependentLocality: undefined,
+            typeId: undefined
+          },
+          phone: {
+            mobile: '+441234567891',
+            landline: '+441234567890',
+            fax: undefined
+          },
+          correspondencePhone: {
+            mobile: undefined,
+            landline: '+441234567892',
+            fax: undefined
+          },
+          email: {
+            address: 'info@acmefarms.co.uk',
+            validated: undefined
+          },
+          correspondenceEmail: {
+            address: 'correspondence@acmefarms.co.uk',
+            validated: false
+          },
+          legalStatus: {
+            code: 1,
+            type: undefined
+          },
+          type: {
+            code: 2,
+            type: undefined
+          },
+          registrationNumbers: {
+            companiesHouse: '12345678',
+            charityCommission: '87654321'
+          },
+          additionalSbis: [],
+          isAccountablePeopleDeclarationCompleted: false,
+          dateStartedFarming: new Date('2021-05-27T12:46:17.305Z'),
+          lastUpdated: null,
+          landConfirmed: true,
+          isFinancialToBusinessAddress: false,
+          isCorrespondenceAsBusinessAddress: false,
+          hasLandInNorthernIreland: false,
+          hasLandInScotland: false,
+          hasLandInWales: false,
+          hasAdditionalBusinessActivities: false,
+          additionalBusinessActivities: [],
+          status: {
+            locked: false,
+            deactivated: false,
+            confirmed: false
+          }
+        },
+        organisationId: 'orgId',
+        sbi: 'sbi'
+      }
     })
   })
 })

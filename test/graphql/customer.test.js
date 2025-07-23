@@ -1,25 +1,14 @@
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
+import { mockPersonSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 beforeAll(() => {
   nock.disableNetConnect()
 
   const v1 = nock(config.get('kits.gatewayUrl'))
-
-  v1.post('/person/search', {
-    searchFieldType: 'CUSTOMER_REFERENCE',
-    primarySearchPhrase: 'crn',
-    offset: 0,
-    limit: 1
-  }).reply(200, {
-    _data: [
-      {
-        id: 'personId'
-      }
-    ]
-  })
+  mockPersonSearch(v1)
 
   v1.get('/person/personId/summary').reply(200, {
     _data: {
