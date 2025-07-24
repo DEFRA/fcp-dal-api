@@ -55,7 +55,8 @@ const orgDetailsUpdatePayload = {
   correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
   correspondenceLandline: '01225111222',
   correspondenceMobile: '07111222333',
-  businessType: { id: 0 }
+  businessType: { id: 0 },
+  taxRegistrationNumber: '123456789'
 }
 
 const setupNock = () => {
@@ -362,6 +363,55 @@ describe('business', () => {
     expect(result).toEqual({
       data: {
         updateBusinessPhone: {
+          success: true,
+          business: {
+            info: queryReturn
+          }
+        }
+      }
+    })
+  })
+
+  test('update business vat', async () => {
+    const input = {
+      sbi: 'sbi',
+      vat: '123456789'
+    }
+    const transformedInput = transformBusinessDetailsToOrgDetailsUpdate(input)
+    const { sbi: _, ...queryReturn } = input
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      ...transformedInput
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
+
+    mockOrganisationSearch(v1)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', ...transformedInput }
+    })
+
+    const query = `
+      mutation UpdateBusinessVAT($input: UpdateBusinessVATInput!) {
+        updateBusinessVAT(input: $input) {
+          business {
+            info {
+              vat
+            }
+          }
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, true, {
+      input
+    })
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessVAT: {
           success: true,
           business: {
             info: queryReturn

@@ -57,6 +57,16 @@ describe('Business Details Mutation resolvers', () => {
       mockInfo
     )
   })
+
+  it('updateBusinessVAT calls businessAdditionalDetailsUpdateResolver', async () => {
+    await Mutation.updateBusinessVAT({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
+  })
 })
 
 describe('Business Additional Details Mutation resolvers', () => {
