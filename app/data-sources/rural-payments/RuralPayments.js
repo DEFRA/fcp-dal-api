@@ -10,7 +10,7 @@ import { sendMetric } from '../../logger/sendMetric.js'
 
 export const customFetch = async (url, options) => {
   const { headers } = options
-  let gatewayType = headers['Gateway-Type'] || 'internal'
+  let gatewayType = headers?.['Gateway-Type'] || 'internal'
 
   const kitsURL = new URL(appConfig.get(`kits.${gatewayType}.gatewayUrl`))
 
