@@ -67,7 +67,7 @@ const business = {
     hasLandInWales: false,
     hasAdditionalBusinessActivities: false,
     additionalBusinessActivities: [],
-    isAccountablePeopleDeclarationComplete: null,
+    isAccountablePeopleDeclarationCompleted: false,
     dateStartedFarming: null,
     landConfirmed: true,
     status: {
@@ -550,7 +550,7 @@ describe('Local mocked dev check', () => {
               code
               type
             }
-            isAccountablePeopleDeclarationComplete
+            isAccountablePeopleDeclarationCompleted
             dateStartedFarming
             landConfirmed
             status {
