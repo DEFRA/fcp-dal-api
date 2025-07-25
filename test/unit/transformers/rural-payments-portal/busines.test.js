@@ -54,7 +54,6 @@ const organisation = {
   isCorrespondenceAsBusinessAddr: true,
   email: 'email address',
   emailValidated: true,
-  doNotContact: true,
   landline: 'landline',
   mobile: 'mobile',
   fax: 'fax',
