@@ -125,10 +125,10 @@ describe('Business', () => {
             year: '2020',
             sheet_name: 'mockSheetName',
             parcel_name: 'mockParcelName',
-            action_area: 100000,
+            action_area: 1654,
             action_mtl: 'mockActionMTL',
             action_units: 'mockActionUnits',
-            parcel_total_area: 100000,
+            parcel_total_area: 9876,
             payment_schedule_start_date: '2020-01-01T00:00:00.000Z',
             payment_schedule_end_date: '2020-12-31T00:00:00.000Z'
           }
@@ -158,10 +158,10 @@ describe('Business', () => {
             year: '2020',
             sheetName: 'mockSheetName',
             parcelName: 'mockParcelName',
-            actionArea: 10,
+            actionArea: 0.1654,
             actionMTL: 'mockActionMTL',
             actionUnits: 'mockActionUnits',
-            parcelTotalArea: 10,
+            parcelTotalArea: 0.9876,
             startDate: '2020-01-01T00:00:00.000Z',
             endDate: '2020-12-31T00:00:00.000Z'
           }

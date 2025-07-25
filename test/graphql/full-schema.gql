@@ -95,10 +95,10 @@ type PaymentSchedule {
   year: Int
   sheetName: String
   parcelName: String
-  actionArea: Int
+  actionArea: Float
   actionMTL: Int
   actionUnits: Int
-  parcelTotalArea: Int
+  parcelTotalArea: Float
   startDate: Date
   endDate: Date
 }
@@ -193,6 +193,7 @@ type CustomerInfo {
   status: EntityStatus
   address: Address
   doNotContact: Boolean
+  personalIdentifiers: [String]
 }
 
 type CustomerName {
