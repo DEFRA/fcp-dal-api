@@ -278,10 +278,10 @@ const paymentSchedules = [
     year: 2017,
     sheetName: 'NY8366',
     parcelName: '2327',
-    actionArea: 17166,
+    actionArea: 1.7166,
     actionMTL: null,
     actionUnits: null,
-    parcelTotalArea: 17166,
+    parcelTotalArea: 1.7166,
     startDate: '2017-01-01T00:00:00.000Z',
     endDate: '2017-12-31T00:00:00.000Z'
   }
