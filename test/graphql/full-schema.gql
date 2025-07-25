@@ -390,7 +390,7 @@ input UpdateBusinessAddressInput {
 
 input UpdateBusinessVATInput {
   sbi: ID!
-  vat: String
+  vat: String!
 }
 
 input CreateBusinessInput {

@@ -93,7 +93,7 @@ input UpdateBusinessVATInput {
   """
   VAT number of the business. (a.k.a. `taxRegistrationNumber`)
   """
-  vat: String
+  vat: String!
 }
 
 type UpdateBusinessResponse {
