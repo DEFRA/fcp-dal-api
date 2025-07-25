@@ -193,6 +193,7 @@ type CustomerInfo {
   status: EntityStatus
   address: Address
   doNotContact: Boolean
+  personalIdentifiers: [String]
 }
 
 type CustomerName {
