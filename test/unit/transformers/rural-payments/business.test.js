@@ -64,7 +64,8 @@ const baseInput = {
     mobile: '07111222333',
     landline: '01225111222'
   },
-  isCorrespondenceAsBusinessAddress: false
+  isCorrespondenceAsBusinessAddress: false,
+  vat: '123456789'
 }
 
 describe('Business transformer', () => {
@@ -431,7 +432,8 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
       mobile: '01234042273',
       correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
       correspondenceLandline: '01225111222',
-      correspondenceMobile: '07111222333'
+      correspondenceMobile: '07111222333',
+      taxRegistrationNumber: '123456789'
     })
   })
 

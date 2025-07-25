@@ -121,7 +121,8 @@ const orgDetailsUpdateMapping = {
   mobile: (data) => data.phone?.mobile,
   correspondenceEmail: (data) => data.correspondenceEmail?.address,
   correspondenceLandline: (data) => data.correspondencePhone?.landline,
-  correspondenceMobile: (data) => data.correspondencePhone?.mobile
+  correspondenceMobile: (data) => data.correspondencePhone?.mobile,
+  taxRegistrationNumber: (data) => data.vat
 }
 
 export const transformBusinessDetailsToOrgDetailsUpdate = (data) => {
@@ -158,8 +159,7 @@ const fullOrgDetailsMapping = {
   ...orgAdditionalDetailsMapping,
   landConfirmed: (data) => data?.landConfirmed,
   traderNumber: (data) => data?.traderNumber,
-  vendorNumber: (data) => data?.vendorNumber,
-  taxRegistrationNumber: (data) => data?.vat
+  vendorNumber: (data) => data?.vendorNumber
 }
 
 export const transformBusinessDetailsToOrgDetailsCreate = (data) => {

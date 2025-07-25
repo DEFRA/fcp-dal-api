@@ -21,6 +21,7 @@ export const Mutation = {
   updateBusinessPhone: businessDetailsUpdateResolver,
   updateBusinessEmail: businessDetailsUpdateResolver,
   updateBusinessAddress: businessDetailsUpdateResolver,
+  updateBusinessVAT: businessDetailsUpdateResolver,
   updateBusinessLegalStatus: businessAdditionalDetailsUpdateResolver,
   updateBusinessType: businessAdditionalDetailsUpdateResolver,
   updateBusinessDateStartedFarming: businessAdditionalDetailsUpdateResolver,

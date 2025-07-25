@@ -297,10 +297,12 @@ type Mutation {
   updateBusinessRegistrationNumbers(
     input: UpdateBusinessRegistrationNumbersInput!
   ): UpdateBusinessResponse
+  updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
   updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
   updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
   updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
+  createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
 }
 
 type UpdateBusinessResponse {
@@ -386,8 +388,9 @@ input UpdateBusinessAddressInput {
   isCorrespondenceAsBusinessAddress: Boolean
 }
 
-extend type Mutation {
-  createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
+input UpdateBusinessVATInput {
+  sbi: ID!
+  vat: String!
 }
 
 input CreateBusinessInput {

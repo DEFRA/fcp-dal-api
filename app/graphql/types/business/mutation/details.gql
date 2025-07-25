@@ -11,6 +11,9 @@ extend type Mutation {
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
     @on
     @auth(requires: [SINGLE_FRONT_DOOR])
+  updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input UpdateBusinessNameInput {
@@ -77,6 +80,20 @@ input UpdateBusinessAddressInput {
   address: AddressInput
   correspondenceAddress: AddressInput
   isCorrespondenceAsBusinessAddress: Boolean
+}
+
+input UpdateBusinessVATInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+  """
+  VAT number of the business. (a.k.a. `taxRegistrationNumber`)
+  """
+  vat: String!
 }
 
 type UpdateBusinessResponse {

@@ -13,7 +13,8 @@ const orgDetailsUpdateMapping = {
   mobile: (data) => data.phone?.mobile,
   correspondenceEmail: (data) => data.correspondenceEmail?.address,
   correspondenceLandline: (data) => data.correspondencePhone?.landline,
-  correspondenceMobile: (data) => data.correspondencePhone?.mobile
+  correspondenceMobile: (data) => data.correspondencePhone?.mobile,
+  taxRegistrationNumber: (data) => data.vat
 }
 
 const businessDetailsUpdatePayload = {
@@ -70,7 +71,8 @@ const businessDetailsUpdatePayload = {
     mobile: '07111222333',
     landline: '01225111222'
   },
-  isCorrespondenceAsBusinessAddress: false
+  isCorrespondenceAsBusinessAddress: false,
+  vat: '123456789'
 }
 
 describe('transformMapping', () => {
@@ -85,6 +87,7 @@ describe('transformMapping', () => {
     expect(result.email).toBe('hadleyfarmsltdp@defra.com.test')
     expect(result.landline).toBe('01234613020')
     expect(result.mobile).toBe('01234042273')
+    expect(result.taxRegistrationNumber).toBe('123456789')
   })
 
   test('should only return keys that are not undefined orgDetailsUpdateMapping', () => {
