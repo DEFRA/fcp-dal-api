@@ -2,24 +2,70 @@ import { jest } from '@jest/globals'
 
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
 import { Customer, CustomerBusiness } from '../../../app/graphql/resolvers/customer/customer.js'
-import {
-  organisationPeopleByOrgId,
-  organisationPersonSummary
-} from '../../fixtures/organisation.js'
-import { personById } from '../../fixtures/person.js'
+import { organisationPeopleByOrgId } from '../../fixtures/organisation.js'
 import { buildPermissionsFromIdsAndLevels } from '../../test-helpers/permissions.js'
 
 const orgId = '5565448'
-const personId = '5007136'
-const personFixture = personById({ id: personId })
+const personFixture = {
+  id: 11111111,
+  title: 'Mrs.',
+  otherTitle: 'I',
+  firstName: 'Lauren',
+  middleName: 'Daryl',
+  lastName: 'Sanford',
+  dateOfBirth: 108901578380,
+  landline: '055 4582 4488',
+  mobile: '056 8967 5108',
+  email: 'lauren.sanford@immaculate-shark.info',
+  doNotContact: false,
+  emailValidated: false,
+  address: {
+    address1: '65',
+    address2: '1 McCullough Path',
+    address3: 'Newton Ratkedon',
+    address4: 'MS9 8BJ',
+    address5: 'North Macedonia',
+    pafOrganisationName: null,
+    flatName: null,
+    buildingNumberRange: null,
+    buildingName: null,
+    street: null,
+    city: 'Newton Bruen',
+    county: null,
+    postalCode: 'TC2 8KP',
+    country: 'Wales',
+    uprn: '790214962932',
+    dependentLocality: null,
+    doubleDependentLocality: null,
+    addressTypeId: null
+  },
+  locked: false,
+  confirmed: false,
+  customerReferenceNumber: 'crn-11111111',
+  personalIdentifiers: ['8568845789', '370030956', '7899566034'],
+  deactivated: false
+}
+const personBusinessesFixture = [
+  {
+    id: '5625145',
+    name: 'Cliff Spence T/As Abbey Farm',
+    sbi: 107591843,
+    additionalSbiIds: [],
+    confirmed: true,
+    lastUpdatedOn: null,
+    landConfirmed: null,
+    deactivated: false,
+    locked: false
+  }
+]
 
 const dataSources = {
   ruralPaymentsCustomer: {
     getCustomerByCRN() {
-      return personById({ id: personId })._data
+      return personFixture
     },
     getPersonBusinessesByPersonId() {
-      return organisationPersonSummary({ id: personId })._data
+      return personBusinessesFixture
     },
     getNotificationsByOrganisationIdAndPersonId: jest.fn(),
     getAuthenticateAnswersByCRN() {
@@ -45,48 +91,51 @@ describe('Customer', () => {
 
   test('Customer.info', async () => {
     const response = await Customer.info(
-      { crn: personFixture._data.customerReferenceNumber },
+      { crn: personFixture.customerReferenceNumber },
       undefined,
       { dataSources }
     )
 
     expect(response).toEqual({
       name: {
-        title: 'Dr.',
-        otherTitle: null,
-        first: 'David',
-        middle: 'Paul',
-        last: 'Paul'
+        title: 'Mrs.',
+        otherTitle: 'I',
+        first: 'Lauren',
+        middle: 'Daryl',
+        last: 'Sanford'
       },
-      dateOfBirth: '1947-10-30T03:41:25.385Z',
-      phone: { mobile: '1849164778', landline: null },
-      email: {
-        address: 'Selena_Kub@hotmail.com',
-        validated: false
-      },
+      dateOfBirth: '1973-06-14T10:26:18.380Z',
+      phone: { landline: '055 4582 4488', mobile: '056 8967 5108' },
+      email: { address: 'lauren.sanford@immaculate-shark.info', validated: false },
       doNotContact: false,
       address: {
+        line1: '65',
+        line2: '1 McCullough Path',
+        line3: 'Newton Ratkedon',
+        line4: 'MS9 8BJ',
+        line5: 'North Macedonia',
         pafOrganisationName: null,
-        buildingNumberRange: null,
-        buildingName: '853',
         flatName: null,
-        street: 'Zulauf Orchard',
-        city: 'St. Blanda Heath',
-        county: 'Cambridgeshire',
-        postalCode: 'YZ72 5MB',
-        country: 'United Kingdom',
-        uprn: null,
+        buildingNumberRange: null,
+        buildingName: null,
+        street: null,
+        city: 'Newton Bruen',
+        county: null,
+        postalCode: 'TC2 8KP',
+        country: 'Wales',
+        uprn: '790214962932',
         dependentLocality: null,
         doubleDependentLocality: null,
         typeId: null
       },
-      status: { locked: false, confirmed: false, deactivated: false }
+      status: { locked: false, confirmed: false, deactivated: false },
+      personalIdentifiers: ['8568845789', '370030956', '7899566034']
     })
   })
 
   test('Customer.business - returns null if no business', async () => {
     const response = await Customer.business(
-      { crn: personFixture._data.customerReferenceNumber },
+      { crn: personFixture.customerReferenceNumber },
       { sbi: 107183280 },
       { dataSources }
     )
@@ -95,14 +144,14 @@ describe('Customer', () => {
 
   test('Customer.business - returns business', async () => {
     const response = await Customer.business(
-      { crn: personFixture._data.customerReferenceNumber },
+      { crn: personFixture.customerReferenceNumber },
       { sbi: 107591843 },
       { dataSources }
     )
     expect(response).toEqual({
-      crn: '0866159801',
+      crn: 'crn-11111111',
       organisationId: '5625145',
-      personId: 5007136,
+      personId: 11111111,
       name: 'Cliff Spence T/As Abbey Farm',
       sbi: 107591843
     })
@@ -115,7 +164,7 @@ describe('Customer', () => {
         name: 'Cliff Spence T/As Abbey Farm',
         sbi: 107591843,
         organisationId: '5625145',
-        personId: 5007136,
+        personId: 11111111,
         crn: undefined
       }
     ])
