@@ -113,6 +113,39 @@ describe('winstonFormatters', () => {
     })
   })
 
+  it('should handle request body as a string', () => {
+    const result = cdpSchemaTranslator().transform({
+      level: 'info',
+      message: 'test message',
+      request: { ...fixture.request, body: JSON.stringify(fixture.request.body) }
+    })
+    expect(result).toEqual({
+      level: 'info',
+      message: 'test message',
+      event: {
+        reference: 'http://localhost/path',
+        type: 'POST'
+      },
+      http: {
+        request: {
+          id: 'power-apps-req-id',
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            Authorization: 'Bearer token',
+            email: 'probably.should@redacted.be',
+            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
+            'x-ms-client-request-id': 'power-apps-req-id'
+          }
+        }
+      },
+      url: {
+        full: 'http://localhost/path',
+        query: 'searchFieldType=SBI&primarySearchPhrase=107183280&offset=0&limit=1'
+      }
+    })
+  })
+
   it('should return a reduced object when only partial info is provided', () => {
     expect(cdpSchemaTranslator().transform({ level: 'info', message: 'msg' })).toEqual({
       level: 'info',
