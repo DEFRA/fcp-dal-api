@@ -146,7 +146,7 @@ export const config = convict({
   kits: {
     internal: {
       connectionCert: {
-        doc: 'Base64 encoded mTLS certificate for the KITS connection',
+        doc: 'Base64 encoded mTLS certificate for the KITS internal gateway connection',
         format: String,
         default: null,
         sensitive: true,
@@ -154,7 +154,7 @@ export const config = convict({
         env: 'KITS_INT_CONNECTION_CERT'
       },
       connectionKey: {
-        doc: 'Base64 encoded mTLS key for the KITS connection',
+        doc: 'Base64 encoded mTLS key for the KITS internal gateway connection',
         format: String,
         default: null,
         sensitive: true,
@@ -165,12 +165,12 @@ export const config = convict({
         doc: 'KITS gateway internal URL',
         format: String,
         default: null,
-        env: 'KITS_INT_GATEWAY_INTERNAL_URL'
+        env: 'KITS_INT_GATEWAY_URL'
       }
     },
     external: {
       connectionCert: {
-        doc: 'Base64 encoded mTLS certificate for the KITS connection',
+        doc: 'Base64 encoded mTLS certificate for the KITS external gateway connection',
         format: String,
         default: null,
         sensitive: true,
@@ -178,7 +178,7 @@ export const config = convict({
         env: 'KITS_EXT_CONNECTION_CERT'
       },
       connectionKey: {
-        doc: 'Base64 encoded mTLS key for the KITS connection',
+        doc: 'Base64 encoded mTLS key for the KITS external gateway connection',
         format: String,
         default: null,
         sensitive: true,
@@ -186,10 +186,10 @@ export const config = convict({
         env: 'KITS_EXT_CONNECTION_KEY'
       },
       gatewayUrl: {
-        doc: 'KITS gateway internal URL',
+        doc: 'KITS gateway external URL',
         format: String,
         default: null,
-        env: 'KITS_EXT_GATEWAY_INTERNAL_URL'
+        env: 'KITS_EXT_GATEWAY_URL'
       }
     },
     disableMTLS: {
