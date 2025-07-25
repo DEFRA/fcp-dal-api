@@ -7,7 +7,7 @@ import { makeTestQuery } from './makeTestQuery.js'
 beforeAll(() => {
   nock.disableNetConnect()
 
-  const v1 = nock(config.get('kits.gatewayUrl'))
+  const v1 = nock(config.get('kits.internal.gatewayUrl'))
   mockPersonSearch(v1)
 
   v1.get('/person/personId/summary').reply(200, {

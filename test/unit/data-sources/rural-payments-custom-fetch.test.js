@@ -3,13 +3,22 @@ import { config } from '../../../app/config.js'
 
 const fakeCert = 'KITS_CONNECTION_CERT'
 const fakeKey = 'KITS_CONNECTION_KEY'
-const fakeURL = 'https://rp_kits_gateway_internal_url/v1/'
 const timeout = 1500
+
+const fakeInternalURL = 'https://rp_kits_gateway_internal_url/v1/'
 config.set('kits.gatewayTimeoutMs', `${timeout}`)
-config.set('kits.connectionCert', Buffer.from(fakeCert).toString('base64'))
-config.set('kits.connectionKey', Buffer.from(fakeKey).toString('base64'))
-config.set('kits.gatewayUrl', fakeURL)
-const kitsURL = new URL(fakeURL)
+config.set('kits.internal.connectionCert', Buffer.from(fakeCert).toString('base64'))
+config.set('kits.internal.connectionKey', Buffer.from(fakeKey).toString('base64'))
+config.set('kits.internal.gatewayUrl', fakeInternalURL)
+
+const fakeExternalURL = 'https://rp_kits_gateway_external_url/v1/'
+
+config.set('kits.external.connectionCert', Buffer.from(fakeCert).toString('base64'))
+config.set('kits.external.connectionKey', Buffer.from(fakeKey).toString('base64'))
+config.set('kits.external.gatewayUrl', fakeExternalURL)
+
+const kitsInternalURL = new URL(fakeInternalURL)
+const kitsExternalURL = new URL(fakeExternalURL)
 
 const mockProxyAgent = jest.fn()
 const mockAgent = jest.fn()
@@ -46,7 +55,13 @@ describe('RuralPayments Custom Fetch', () => {
       '../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
-    const returnedCustomFetch = await customFetch('example-path', { method: 'GET' })
+    const returnedCustomFetch = await customFetch(
+      'example-path',
+      { method: 'GET' },
+      {
+        headers: { 'Gateway-Type': 'internal' }
+      }
+    )
 
     expect(mockCreateSecureContext).toHaveBeenCalledWith({
       key: fakeKey,
@@ -54,9 +69,9 @@ describe('RuralPayments Custom Fetch', () => {
     })
 
     const requestTls = {
-      host: kitsURL.hostname,
-      port: kitsURL.port,
-      servername: kitsURL.hostname,
+      host: kitsInternalURL.hostname,
+      port: kitsInternalURL.port,
+      servername: kitsInternalURL.hostname,
       secureContext: mockCreateSecureContext({
         key: fakeKey,
         cert: fakeCert
@@ -99,14 +114,65 @@ describe('RuralPayments Custom Fetch', () => {
       '../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
-    const returnedCustomFetch = await customFetch('example-path', { method: 'GET' })
+    const returnedCustomFetch = await customFetch('example-path', {
+      method: 'GET',
+      headers: { 'Gateway-Type': 'internal' }
+    })
 
     expect(mockCreateSecureContext).not.toHaveBeenCalled()
 
     const requestTls = {
-      host: kitsURL.hostname,
-      port: kitsURL.port,
-      servername: kitsURL.hostname
+      host: kitsInternalURL.hostname,
+      port: kitsInternalURL.port,
+      servername: kitsInternalURL.hostname
+    }
+
+    expect(mockAgent).toHaveBeenCalledWith({
+      requestTls
+    })
+
+    expect(mockAbortSignal).toHaveBeenCalledWith(timeout)
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+
+    expect(returnedCustomFetch).toMatchObject([
+      'example-path',
+      {
+        dispatcher: [
+          {
+            requestTls: requestTls
+          }
+        ],
+        method: 'GET',
+        signal: [timeout]
+      }
+    ])
+  })
+
+  it('should call external gateway when Gateway-Type header set to "external"', async () => {
+    mockAgent.mockImplementation((...args) => args)
+    mockCreateSecureContext.mockImplementation((...args) => args)
+    mockAbortSignal.mockImplementation((...args) => args)
+    mockFetch.mockImplementation((...args) => args)
+
+    config.set('disableProxy', true)
+    config.set('kits.disableMTLS', true)
+
+    const { customFetch } = await import(
+      '../../../app/data-sources/rural-payments/RuralPayments.js'
+    )
+
+    const returnedCustomFetch = await customFetch('example-path', {
+      method: 'GET',
+      headers: { 'Gateway-Type': 'external' }
+    })
+
+    expect(mockCreateSecureContext).not.toHaveBeenCalled()
+
+    const requestTls = {
+      host: kitsExternalURL.hostname,
+      port: kitsExternalURL.port,
+      servername: kitsExternalURL.hostname
     }
 
     expect(mockAgent).toHaveBeenCalledWith({

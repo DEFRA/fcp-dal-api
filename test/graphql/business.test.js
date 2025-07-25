@@ -8,7 +8,7 @@ import { makeTestQuery } from './makeTestQuery.js'
 const setupNock = () => {
   nock.disableNetConnect()
 
-  const v1 = nock(config.get('kits.gatewayUrl'))
+  const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
   mockOrganisationSearch(v1)
 
