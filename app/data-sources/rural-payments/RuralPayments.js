@@ -9,7 +9,10 @@ import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
 export const customFetch = async (url, options) => {
-  const kitsURL = new URL(appConfig.get('kits.gatewayUrl'))
+  const { headers } = options
+  let gatewayType = headers['Gateway-Type'] || 'internal'
+
+  const kitsURL = new URL(appConfig.get(`kits.${gatewayType}.gatewayUrl`))
 
   const requestTls = {
     host: kitsURL.hostname,
@@ -18,10 +21,10 @@ export const customFetch = async (url, options) => {
   }
 
   if (!appConfig.get('kits.disableMTLS')) {
-    const clientCert = Buffer.from(appConfig.get('kits.connectionCert'), 'base64')
+    const clientCert = Buffer.from(appConfig.get(`kits.${gatewayType}.connectionCert`), 'base64')
       .toString('utf-8')
       .trim()
-    const clientKey = Buffer.from(appConfig.get('kits.connectionKey'), 'base64')
+    const clientKey = Buffer.from(appConfig.get(`kits.${gatewayType}.connectionKey`), 'base64')
       .toString('utf-8')
       .trim()
     requestTls.secureContext = tls.createSecureContext({
@@ -47,7 +50,7 @@ export const customFetch = async (url, options) => {
   })
 }
 export class RuralPayments extends RESTDataSource {
-  baseURL = appConfig.get('kits.gatewayUrl')
+  baseURL = appConfig.get('kits.internal.gatewayUrl')
   request = null
 
   constructor(config, request) {
