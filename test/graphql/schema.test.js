@@ -13,6 +13,8 @@ import {
 import { config } from '../../app/config.js'
 import { createSchema } from '../../app/graphql/schema.js'
 
+const path = join(dirname(fileURLToPath(import.meta.url)))
+
 function isFieldProtected(field) {
   const astNode = field.astNode
   if (!astNode || !astNode.directives) return false
@@ -53,27 +55,26 @@ describe('schema', () => {
     expect(result.data.__schema.directives.find(({ name }) => name === 'on')).toBe(undefined)
   })
 
-  it('should only contain fields that have the directive', async () => {
-    config.set('allSchemaOn', null)
-    const schema = await createSchema()
+  it('should contain all fields if process.env.ALL_SCHEMA is set', async () => {
+    const schema = await createSchema(false)
+    const fullSchema = buildSchema(await readFile(join(path, 'full-schema.gql'), 'utf-8'))
 
-    const partialSchema = await readFile(
-      // All fields are on now
-      join(dirname(fileURLToPath(import.meta.url)), 'full-schema.gql'),
-      'utf-8'
-    )
-    expect(findDangerousChanges(schema, buildSchema(partialSchema))).toHaveLength(0)
-    expect(findBreakingChanges(schema, buildSchema(partialSchema))).toHaveLength(0)
+    expect(findDangerousChanges(fullSchema, schema)).toHaveLength(0)
+    expect(findBreakingChanges(fullSchema, schema)).toHaveLength(0)
+    expect(findDangerousChanges(schema, fullSchema)).toHaveLength(0)
+    expect(findBreakingChanges(schema, fullSchema)).toHaveLength(0)
   })
 
-  it('should contain all fields if process.env.ALL_SCHEMA is set', async () => {
-    const schema = await createSchema()
-    const fullSchema = await readFile(
-      join(dirname(fileURLToPath(import.meta.url)), 'full-schema.gql'),
-      'utf-8'
-    )
-    expect(findDangerousChanges(schema, buildSchema(fullSchema))).toHaveLength(0)
-    expect(findBreakingChanges(schema, buildSchema(fullSchema))).toHaveLength(0)
+  it('should only contain fields that have the directive', async () => {
+    config.set('allSchemaOn', null)
+    const schema = await createSchema(false)
+
+    const partialSchema = buildSchema(await readFile(join(path, 'partial-schema.gql'), 'utf-8'))
+
+    expect(findDangerousChanges(partialSchema, schema)).toHaveLength(0)
+    expect(findBreakingChanges(partialSchema, schema)).toHaveLength(0)
+    expect(findDangerousChanges(schema, partialSchema)).toHaveLength(0)
+    expect(findBreakingChanges(schema, partialSchema)).toHaveLength(0)
   })
 
   it('ensures all top-level fields have @auth directive', async () => {
