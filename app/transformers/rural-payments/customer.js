@@ -71,6 +71,7 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       validated: data.emailValidated
     },
     doNotContact: data.doNotContact,
+    personalIdentifiers: data.personalIdentifiers,
     address: kitsAddressToDalAddress(data.address),
     status: transformEntityStatus(data)
   }

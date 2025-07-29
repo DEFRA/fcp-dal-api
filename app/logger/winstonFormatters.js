@@ -46,11 +46,12 @@ const buildEvent = (kind, category, type, created, duration, outcome, reference)
   }
 
 const buildUrl = ({ body, path }) =>
-  body &&
-  path && {
+  (body || path) && {
     url: {
       full: path,
-      ...(body && { query: new URLSearchParams(body).toString() })
+      ...(body && {
+        query: new URLSearchParams(typeof body === 'string' ? JSON.parse(body) : body).toString()
+      })
     }
   }
 
