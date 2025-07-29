@@ -1,9 +1,53 @@
-scalar Date
-
 type Query {
   business(sbi: ID!): Business
   customer(crn: ID!): Customer
   permissionGroups: [PermissionGroup]
+}
+
+type Mutation {
+  updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
+  updateBusinessDateStartedFarming(
+    input: UpdateBusinessDateStartedFarmingInput!
+  ): UpdateBusinessResponse
+  updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
+  updateBusinessRegistrationNumbers(
+    input: UpdateBusinessRegistrationNumbersInput!
+  ): UpdateBusinessResponse
+  createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
+  updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
+  updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
+  updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
+  updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
+  updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
+}
+
+input AddressInput {
+  pafOrganisationName: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String
+  county: String
+  postalCode: String
+  country: String
+  uprn: String
+  dependentLocality: String
+  doubleDependentLocality: String
+}
+
+input PhoneInput {
+  mobile: String
+  landline: String
+}
+
+input EmailInput {
+  address: String!
 }
 
 type Phone {
@@ -37,6 +81,41 @@ type Address {
   typeId: String
 }
 
+type EntityStatus {
+  locked: Boolean
+  confirmed: Boolean
+  deactivated: Boolean
+}
+
+scalar Date
+
+type Agreement {
+  contractId: ID
+  name: String
+  status: String
+  contractType: String
+  schemeYear: Int
+  startDate: Date
+  endDate: Date
+  paymentSchedules: [PaymentSchedule]
+}
+
+type PaymentSchedule {
+  optionCode: String
+  optionDescription: String
+  commitmentGroupStartDate: Date
+  commitmentGroupEndDate: Date
+  year: Int
+  sheetName: String
+  parcelName: String
+  actionArea: Float
+  actionMTL: Int
+  actionUnits: Int
+  parcelTotalArea: Float
+  startDate: Date
+  endDate: Date
+}
+
 type BusinessInfo {
   name: String
   reference: String
@@ -45,25 +124,25 @@ type BusinessInfo {
   vendorNumber: String
   address: Address
   correspondenceAddress: Address
+  isCorrespondenceAsBusinessAddress: Boolean
   email: Email
   correspondenceEmail: Email
   phone: Phone
   correspondencePhone: Phone
+  legalStatus: BusinessType
+  type: BusinessType
+  registrationNumbers: BusinessRegistrationNumbers
+  additionalSbis: [ID]
   lastUpdated: Date
-  dateStartedFarming: Date
-  hasAdditionalBusinessActivities: Boolean
-  additionalBusinessActivities: [BusinessType]
+  isFinancialToBusinessAddress: Boolean
   hasLandInNorthernIreland: Boolean
   hasLandInScotland: Boolean
   hasLandInWales: Boolean
   landConfirmed: Boolean
-  additionalSbis: [ID]
-  legalStatus: BusinessType
-  type: BusinessType
-  registrationNumbers: BusinessRegistrationNumbers
+  hasAdditionalBusinessActivities: Boolean
+  additionalBusinessActivities: [BusinessType]
   isAccountablePeopleDeclarationCompleted: Boolean
-  isCorrespondenceAsBusinessAddress: Boolean
-  isFinancialToBusinessAddress: Boolean
+  dateStartedFarming: Date
   status: EntityStatus
 }
 
@@ -87,42 +166,23 @@ type BusinessCustomer {
   permissionGroups: [ActivePermissionGroup]
 }
 
-type PaymentSchedule {
-  optionCode: String
-  optionDescription: String
-  commitmentGroupStartDate: Date
-  commitmentGroupEndDate: Date
-  year: Int
-  sheetName: String
-  parcelName: String
-  actionArea: Float
-  actionMTL: Int
-  actionUnits: Int
-  parcelTotalArea: Float
-  startDate: Date
-  endDate: Date
-}
-
-type Agreement {
-  contractId: ID
-  name: String
-  status: String
-  contractType: String
-  schemeYear: Int
-  startDate: Date
-  endDate: Date
-  paymentSchedules: [PaymentSchedule]
-}
-
 type Business {
   organisationId: ID
   sbi: ID!
   info: BusinessInfo
   land: BusinessLand
+  countyParishHoldings: [CountyParishHolding]
   customers: [BusinessCustomerPartial]
   customer(crn: ID!): BusinessCustomer
-  countyParishHoldings: [CountyParishHolding]
   agreements: [Agreement]
+}
+
+type BusinessCustomerPartial {
+  personId: ID
+  firstName: String
+  lastName: String
+  crn: String
+  role: String
 }
 
 type CountyParishHolding {
@@ -134,14 +194,6 @@ type CountyParishHolding {
   xCoordinate: Int
   yCoordinate: Int
   address: String
-}
-
-type BusinessCustomerPartial {
-  personId: ID
-  firstName: String
-  lastName: String
-  crn: String
-  role: String
 }
 
 type BusinessLandParcel {
@@ -202,12 +254,6 @@ type CustomerName {
   first: String
   middle: String
   last: String
-}
-
-type EntityStatus {
-  locked: Boolean
-  confirmed: Boolean
-  deactivated: Boolean
 }
 
 type CustomerAuthenticationQuestions {
@@ -289,57 +335,6 @@ type Permission {
   active(crn: ID!, sbi: ID!): Boolean
 }
 
-type Mutation {
-  updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
-  updateBusinessDateStartedFarming(
-    input: UpdateBusinessDateStartedFarmingInput!
-  ): UpdateBusinessResponse
-  updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
-  updateBusinessRegistrationNumbers(
-    input: UpdateBusinessRegistrationNumbersInput!
-  ): UpdateBusinessResponse
-  updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
-  updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
-  updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
-  updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
-  updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
-  createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
-}
-
-type UpdateBusinessResponse {
-  success: Boolean
-  business: Business
-}
-
-input AddressInput {
-  pafOrganisationName: String
-  line1: String
-  line2: String
-  line3: String
-  line4: String
-  line5: String
-  buildingNumberRange: String
-  buildingName: String
-  flatName: String
-  street: String
-  city: String
-  county: String
-  postalCode: String
-  country: String
-  uprn: String
-  dependentLocality: String
-  doubleDependentLocality: String
-}
-
-input PhoneInput {
-  mobile: String
-  landline: String
-}
-
-input EmailInput {
-  address: String!
-}
-
 input UpdateBusinessLegalStatusInput {
   sbi: ID!
   legalStatusCode: Int!
@@ -363,6 +358,32 @@ input UpdateBusinessRegistrationNumbersInput {
 input BusinessRegistrationNumbersInput {
   charityCommission: String
   companiesHouse: String
+}
+
+input CreateBusinessInput {
+  crn: ID!
+  name: String
+  vat: String
+  traderNumber: String
+  vendorNumber: String
+  address: AddressInput
+  correspondenceAddress: AddressInput
+  isCorrespondenceAsBusinessAddress: Boolean
+  email: EmailInput
+  correspondenceEmail: EmailInput
+  phone: PhoneInput
+  correspondencePhone: PhoneInput
+  legalStatusCode: Int
+  typeCode: Int!
+  registrationNumbers: BusinessRegistrationNumbersInput
+  landConfirmed: Boolean
+  hasAdditionalBusinessActivities: Boolean
+  dateStartedFarming: Date
+}
+
+type CreateBusinessResponse {
+  success: Boolean
+  business: Business
 }
 
 input UpdateBusinessNameInput {
@@ -394,28 +415,7 @@ input UpdateBusinessVATInput {
   vat: String!
 }
 
-input CreateBusinessInput {
-  crn: ID!
-  name: String
-  vat: String
-  traderNumber: String
-  vendorNumber: String
-  address: AddressInput
-  correspondenceAddress: AddressInput
-  isCorrespondenceAsBusinessAddress: Boolean
-  email: EmailInput
-  correspondenceEmail: EmailInput
-  phone: PhoneInput
-  correspondencePhone: PhoneInput
-  legalStatusCode: Int
-  typeCode: Int!
-  registrationNumbers: BusinessRegistrationNumbersInput
-  landConfirmed: Boolean
-  hasAdditionalBusinessActivities: Boolean
-  dateStartedFarming: Date
-}
-
-type CreateBusinessResponse {
+type UpdateBusinessResponse {
   success: Boolean
   business: Business
 }

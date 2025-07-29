@@ -1,6 +1,5 @@
 extend type Mutation {
   createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
@@ -96,6 +95,6 @@ input CreateBusinessInput {
 }
 
 type CreateBusinessResponse {
-  success: Boolean @on
-  business: Business @on
+  success: Boolean
+  business: Business
 }
