@@ -105,6 +105,7 @@ type BusinessRegistrationNumbers {
   charityCommission: String
 }
 
+# eslint-disable-next-line @graphql-eslint/naming-convention
 type BusinessType {
   code: Int
   type: String
