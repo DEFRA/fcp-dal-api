@@ -24,7 +24,7 @@ async function getFiles(path) {
   })
 }
 
-export async function createSchema(filterDirectives = true) {
+export async function createSchema() {
   let schema = makeExecutableSchema({
     typeDefs: await getFiles('types'),
     resolvers: mergeResolvers([
@@ -52,9 +52,11 @@ export async function createSchema(filterDirectives = true) {
 
   schema = excludeFromListTransformer(schema)
 
-  if (filterDirectives) {
-    schema = filterSchema({ schema, directiveFilter: () => false })
-  }
+  schema = filterSchema({
+    schema,
+    directiveFilter: (name) =>
+      ['include', 'skip', 'deprecated', 'specifiedBy', 'oneOf'].includes(name)
+  })
 
   schema = pruneSchema(schema)
 
