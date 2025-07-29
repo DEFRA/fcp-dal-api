@@ -419,12 +419,3 @@ type UpdateBusinessResponse {
   success: Boolean
   business: Business
 }
-
-enum AuthGroup {
-  CONSOLIDATED_VIEW
-  SINGLE_FRONT_DOOR
-}
-
-directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
-directive @on on FIELD_DEFINITION
-directive @excludeFromList on FIELD_DEFINITION
