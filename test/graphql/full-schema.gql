@@ -19,6 +19,7 @@ type Mutation {
   updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
   updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
+  updateBusinessLock(input: UpdateBusinessLockInput!): UpdateBusinessResponse
 }
 
 input AddressInput {
@@ -413,6 +414,11 @@ input UpdateBusinessAddressInput {
 input UpdateBusinessVATInput {
   sbi: ID!
   vat: String!
+}
+
+input UpdateBusinessLockInput {
+  sbi: ID!
+  lock: Boolean!
 }
 
 type UpdateBusinessResponse {

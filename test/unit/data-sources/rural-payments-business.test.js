@@ -310,4 +310,28 @@ describe('Rural Payments Business', () => {
       })
     })
   })
+
+  describe('updateOrganisationLock', () => {
+    test('should call lock endpoint and return successful response when lock is true', async () => {
+      const fakeResponse = {
+        response: 'success'
+      }
+      httpPost.mockImplementationOnce(async () => fakeResponse)
+
+      const response = await ruralPaymentsBusiness.updateOrganisationLock('orgId', true)
+      expect(httpPost).toHaveBeenCalledWith('organisation/orgId/lock')
+      expect(response).toEqual(fakeResponse)
+    })
+
+    test('should call unlock endpoint and return successful response when lock is false', async () => {
+      const fakeResponse = {
+        response: 'success'
+      }
+      httpPost.mockImplementationOnce(async () => fakeResponse)
+
+      const response = await ruralPaymentsBusiness.updateOrganisationLock('orgId', false)
+      expect(httpPost).toHaveBeenCalledWith('organisation/orgId/unlock')
+      expect(response).toEqual(fakeResponse)
+    })
+  })
 })

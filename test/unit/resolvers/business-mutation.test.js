@@ -1,9 +1,10 @@
-import { jest } from '@jest/globals'
+import { describe, jest } from '@jest/globals'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 
 const mockSchemaModule = {
   businessDetailsUpdateResolver: jest.fn(),
-  businessAdditionalDetailsUpdateResolver: jest.fn()
+  businessAdditionalDetailsUpdateResolver: jest.fn(),
+  businessLockUnlockUpdateResolver: jest.fn()
 }
 jest.unstable_mockModule(
   '../../../app/graphql/resolvers/business/common.js',
@@ -410,5 +411,21 @@ describe('Business Mutation createBusiness', () => {
         sbi: 'sbi'
       }
     })
+  })
+})
+
+describe('Business Mutation updateBusinessLock', () => {
+  const mockArgs = { input: { sbi: '123', lock: true } }
+  const mockContext = { user: { id: 'user1' } }
+  const mockInfo = {}
+
+  it('lock/unlock a business', async () => {
+    await Mutation.updateBusinessLock({}, mockArgs, mockContext, mockInfo)
+    expect(mockSchemaModule.businessLockUnlockUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
   })
 })
