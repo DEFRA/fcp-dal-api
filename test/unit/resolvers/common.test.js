@@ -2,7 +2,8 @@ import { jest } from '@jest/globals'
 import { NotFound } from '../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
-  businessDetailsUpdateResolver
+  businessDetailsUpdateResolver,
+  businessLockUnlockUpdateResolver
 } from '../../../app/graphql/resolvers/business/common.js'
 
 describe('businessDetailsUpdateResolver', () => {
@@ -110,6 +111,52 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
 
     await expect(
       businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, logger })
+    ).rejects.toThrow(notFoundError)
+  })
+})
+
+describe('businessLockUnlockUpdateResolver', () => {
+  let dataSources
+  let logger
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn(),
+        updateOrganisationLock: jest.fn()
+      }
+    }
+    logger = {
+      warn: jest.fn()
+    }
+  })
+
+  it('businessLockUnlockUpdateResolver returns true when updateOrganisationLock returns a response', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.updateOrganisationLock.mockResolvedValue({
+      some: 'response',
+      email: 'businessemail@defra.com'
+    })
+
+    const input = { sbi: '123', lock: true }
+
+    const result = await businessLockUnlockUpdateResolver(null, { input }, { dataSources, logger })
+
+    expect(result).toEqual({ success: true, business: { sbi: '123' } })
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationLock).toHaveBeenCalledWith(
+      'orgId',
+      true
+    )
+  })
+
+  it('businessLockUnlockUpdateResolver, throws a NotFound error when getOrganisationIdBySBI throws a NotFound error', async () => {
+    const notFoundError = new NotFound('Rural payments organisation not found')
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
+    const input = { sbi: '999', details: { name: 'Missing' } }
+
+    await expect(
+      businessLockUnlockUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
   })
 })

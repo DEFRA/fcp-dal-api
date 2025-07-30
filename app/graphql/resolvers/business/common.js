@@ -37,3 +37,15 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
     }
   }
 }
+
+export const businessLockUnlockUpdateResolver = async (__, { input }, { dataSources }) => {
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(input.sbi)
+  await dataSources.ruralPaymentsBusiness.updateOrganisationLock(organisationId, input.lock)
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
