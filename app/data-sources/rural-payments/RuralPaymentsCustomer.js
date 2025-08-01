@@ -121,4 +121,13 @@ export class RuralPaymentsCustomer extends RuralPayments {
     }
     return response
   }
+
+  updatePersonDetails(personId, personDetails) {
+    return this.put(`person/${personId}`, {
+      body: personDetails,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  }
 }
