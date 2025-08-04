@@ -6,7 +6,7 @@ import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getPersonIdByCRN(crn) {
-    const gatewayType = this.request.headers['gateway-type'] || 'internal'
+    const gatewayType = this?.request?.headers['gateway-type'] || 'internal'
 
     if (gatewayType == 'external') {
       // This personId will will return details for the CRN provided for external users.

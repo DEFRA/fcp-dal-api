@@ -99,14 +99,44 @@ describe('RuralPayments', () => {
   })
 
   describe('willSendRequest', () => {
-    test('adds email header from request headers', () => {
-      const rp = new RuralPayments({ logger }, { headers: { email: 'test@example.com' } })
+    test('adds email & gateway type header from request headers & gateway type for internal requests', () => {
+      const rp = new RuralPayments(
+        { logger },
+        { headers: { email: 'test@example.com', 'gateway-type': 'internal' } }
+      )
       const request = { headers: {} }
       const path = 'test-path'
 
       rp.willSendRequest(path, request)
 
-      expect(request.headers).toEqual({ email: 'test@example.com' })
+      expect(request.headers).toEqual({ email: 'test@example.com', 'Gateway-Type': 'internal' })
+      expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
+        request: { ...request, path: 'test-path' },
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+
+    test('adds crn, Authorization & gateway type header from request headers for external requests', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          headers: {
+            'gateway-type': 'external',
+            'x-forwarded-authorization': 'token',
+            crn: 'test-crn'
+          }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      rp.willSendRequest(path, request)
+
+      expect(request.headers).toEqual({
+        'Gateway-Type': 'external',
+        Authorization: 'token',
+        crn: 'test-crn'
+      })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
         request: { ...request, path: 'test-path' },
         code: RURALPAYMENTS_API_REQUEST_001

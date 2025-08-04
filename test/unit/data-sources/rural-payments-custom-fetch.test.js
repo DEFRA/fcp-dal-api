@@ -56,7 +56,7 @@ describe('RuralPayments Custom Fetch', () => {
     )
 
     const returnedCustomFetch = await customFetch(
-      'example-path',
+      `${fakeInternalURL}example-path`,
       { method: 'GET' },
       {
         headers: { 'Gateway-Type': 'internal' }
@@ -88,7 +88,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1)
 
     expect(returnedCustomFetch).toMatchObject([
-      'example-path',
+      `${fakeInternalURL}example-path`,
       {
         dispatcher: [
           {
@@ -114,7 +114,7 @@ describe('RuralPayments Custom Fetch', () => {
       '../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
-    const returnedCustomFetch = await customFetch('example-path', {
+    const returnedCustomFetch = await customFetch(`${fakeInternalURL}example-path`, {
       method: 'GET',
       headers: { 'Gateway-Type': 'internal' }
     })
@@ -136,7 +136,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1)
 
     expect(returnedCustomFetch).toMatchObject([
-      'example-path',
+      `${fakeInternalURL}example-path`,
       {
         dispatcher: [
           {
@@ -162,7 +162,7 @@ describe('RuralPayments Custom Fetch', () => {
       '../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
-    const returnedCustomFetch = await customFetch('example-path', {
+    const returnedCustomFetch = await customFetch(`${fakeInternalURL}example-path`, {
       method: 'GET',
       headers: { 'Gateway-Type': 'external' }
     })
@@ -184,7 +184,8 @@ describe('RuralPayments Custom Fetch', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1)
 
     expect(returnedCustomFetch).toMatchObject([
-      'example-path',
+      // internal path overridden to external URL
+      'https://rp_kits_gateway_external_url/v1/example-path',
       {
         dispatcher: [
           {
