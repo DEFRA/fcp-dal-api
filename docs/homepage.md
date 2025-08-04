@@ -3,7 +3,7 @@
 ## Environments
 
 The DAL has the following environments:
-| Dal Env | URL | Azure Entra Tenant - Tenant ID | KITS/Version1/RP Portal Env |
+| DAL Env | URL | Azure Entra Tenant - Tenant ID | KITS/Version1/RP Portal Env |
 | ----------| ------------- | ----- | ------- |
 | Dev | https://fcp-dal-api.dev.cdp-int.defra.cloud/graphql | No Auth required | Upstream mock - dev |
 | Test | https://fcp-dal-api.test.cdp-int.defra.cloud/graphql | O365_DEFRADEV - 6f504113-6b64-43f2-ade9-242e05780007 | Upgrade |
