@@ -31,7 +31,7 @@ So if your service is looking to connect to the Test environment you will need a
 All DAL environments other than Dev require a valid Microsoft OIDC token containing Groups that have been mapped withing the DAL to the corresponding access.
 
 Your service will then need to generate a valid OIDC token containing the group claims,
-you can do this by makingthe following POST request:
+you can do this by making the following POST request:
 
 ```
 curl --location 'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token' \
