@@ -6,31 +6,38 @@ import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getPersonIdByCRN(crn) {
-    const body = JSON.stringify({
-      searchFieldType: 'CUSTOMER_REFERENCE',
-      primarySearchPhrase: crn,
-      offset: 0,
-      limit: 1
-    })
+    const gatewayType = this.request.headers['gateway-type'] || 'internal'
 
-    const customerResponse = await this.post('person/search', {
-      body,
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-
-    const response = customerResponse._data.pop() || {}
-
-    if (!response?.id) {
-      this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
-        crn,
-        code: RURALPAYMENTS_API_NOT_FOUND_001,
-        response: { body: customerResponse }
+    if (gatewayType == 'external') {
+      // This personId will will return details for the CRN provided for external users.
+      return 3337243
+    } else {
+      const body = JSON.stringify({
+        searchFieldType: 'CUSTOMER_REFERENCE',
+        primarySearchPhrase: crn,
+        offset: 0,
+        limit: 1
       })
-      throw new NotFound('Rural payments customer not found')
+
+      const customerResponse = await this.post('person/search', {
+        body,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+
+      const response = customerResponse._data.pop() || {}
+
+      if (!response?.id) {
+        this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
+          crn,
+          code: RURALPAYMENTS_API_NOT_FOUND_001,
+          response: { body: customerResponse }
+        })
+        throw new NotFound('Rural payments customer not found')
+      }
+      return response.id
     }
-    return response.id
   }
 
   async getCustomerByCRN(crn) {

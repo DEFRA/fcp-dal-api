@@ -11,8 +11,7 @@ import { validatePastDate } from '../../../utils/date.js'
 
 export const Customer = {
   async personId({ crn }, __, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    return personId
+    return await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
   },
 
   async info({ crn }, __, { dataSources }) {

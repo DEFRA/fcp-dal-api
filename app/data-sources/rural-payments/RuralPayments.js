@@ -11,9 +11,14 @@ import { sendMetric } from '../../logger/sendMetric.js'
 export const customFetch = async (url, options) => {
   const { headers } = options
   let gatewayType = headers?.['Gateway-Type'] || 'internal'
+  const currentUrl = new URL(url)
+  // We have two gateways and we need to override the hostname of the url to correspond to the gateway type from the request header.
+  const kitsGatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
+  const kitsURL = new URL(kitsGatewayUrl)
+  currentUrl.host = kitsURL.host
+  const overrideURL = currentUrl.toString()
 
-  const kitsURL = new URL(appConfig.get(`kits.${gatewayType}.gatewayUrl`))
-
+  options.headers['Gateway-Type'] = undefined
   const requestTls = {
     host: kitsURL.hostname,
     port: kitsURL.port,
@@ -44,12 +49,13 @@ export const customFetch = async (url, options) => {
     })
   }
 
-  return fetch(url, {
+  return fetch(overrideURL, {
     ...options,
     signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
   })
 }
 export class RuralPayments extends RESTDataSource {
+  // Note this gets overridden by the customFetch
   baseURL = appConfig.get('kits.internal.gatewayUrl')
   request = null
 
@@ -91,9 +97,27 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async willSendRequest(path, request) {
+    const headers = this.request.headers
+    const additionalHeaders = {}
+    const gatewayType = headers['gateway-type'] || 'internal'
+    if (gatewayType === 'internal' && headers.email) {
+      additionalHeaders.email = headers.email
+    } else if (gatewayType === 'external' && headers['x-forwarded-authorization'] && headers.crn) {
+      additionalHeaders.Authorization = headers['x-forwarded-authorization']
+      additionalHeaders.crn = headers['crn']
+    } else {
+      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+        extensions: {
+          message:
+            'Invalid request headers must either contain email for internal or X-Forwarded-Authorization and crn for external requests'
+        }
+      })
+    }
+
     request.headers = {
       ...request.headers,
-      email: this.request.headers.email
+      ...additionalHeaders,
+      'Gateway-Type': gatewayType
     }
 
     this.logger.debug('#datasource - Rural payments - request', {
