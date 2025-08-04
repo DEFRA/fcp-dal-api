@@ -33,10 +33,10 @@ All DAL environments other than Dev require a valid Microsoft OIDC token contain
 Your service will then need to generate a valid OIDC token containing the group claims,
 you can do this by making the following POST request:
 
-```
+```shell
 curl --location 'https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token' \
---form 'client_id="{client_id}"' \
---form 'scope="{client_id}/.default"' \
---form 'client_secret="{client_secret}"' \
---form 'grant_type="client_credentials"'
+  --form 'client_id="{client_id}"' \
+  --form 'scope="{client_id}/.default"' \
+  --form 'client_secret="{client_secret}"' \
+  --form 'grant_type="client_credentials"'
 ```
