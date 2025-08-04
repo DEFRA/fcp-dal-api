@@ -21,7 +21,8 @@ The DAL requires a few things:
 - A valid user email or Defra ID token for the user making the request for your service
   - **If Your service users do not have access to the RP Portal you will not be able to use the DAL currently**
 
-**Note:** you must also request the app reg be updated to expose the groups in the token.
+**Note:** you must also request the app reg be updated to expose the security groups in the token, this is done by setting the following in the manifest json:
+`"groupMembershipClaims": "SecurityGroup",`
 
 So if your service is looking to connect to the Test environment you will need an app reg and Entra group created in the O365_DEFRADEV Azure tenant.
 
