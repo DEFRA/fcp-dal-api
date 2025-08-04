@@ -9,16 +9,15 @@ import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
 export const customFetch = async (url, options) => {
-  const { headers } = options
-  let gatewayType = headers?.['Gateway-Type'] || 'internal'
-  const currentUrl = new URL(url)
   // We have two gateways and we need to override the hostname of the url to correspond to the gateway type from the request header.
+  let gatewayType = options.headers?.['Gateway-Type'] || 'internal'
+  const currentUrl = new URL(url)
   const kitsGatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
   const kitsURL = new URL(kitsGatewayUrl)
+
   currentUrl.host = kitsURL.host
   const overrideURL = currentUrl.toString()
 
-  options.headers['Gateway-Type'] = undefined
   const requestTls = {
     host: kitsURL.hostname,
     port: kitsURL.port,
