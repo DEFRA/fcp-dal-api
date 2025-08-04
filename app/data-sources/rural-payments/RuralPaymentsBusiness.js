@@ -167,4 +167,15 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
     return response
   }
+
+  async updateOrganisationLock(organisationId, lock) {
+    let endpoint = `organisation/${organisationId}/lock`
+    if (!lock) {
+      endpoint = `organisation/${organisationId}/unlock`
+    }
+
+    const response = this.post(endpoint)
+
+    return response
+  }
 }

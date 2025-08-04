@@ -26,6 +26,13 @@ extend type Mutation {
   updateBusinessRegistrationNumbers(
     input: UpdateBusinessRegistrationNumbersInput!
   ): UpdateBusinessResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Used to set lock or unlock the business.
+  """
+  updateBusinessLock(input: UpdateBusinessLockInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input UpdateBusinessLegalStatusInput {
@@ -98,4 +105,16 @@ input BusinessRegistrationNumbersInput {
   Charity comission registration number to set.
   """
   companiesHouse: String
+}
+
+input UpdateBusinessLockInput {
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID!
+
+  """
+  Lock or unlock the business.
+  """
+  lock: Boolean!
 }
