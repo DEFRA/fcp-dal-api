@@ -62,10 +62,10 @@ const personBusinessesFixture = [
 const dataSources = {
   ruralPaymentsCustomer: {
     getPersonIdByCRN() {
-      return parseInt(personId)
+      return personFixture.id
     },
     getExternalPersonByCRN() {
-      return personById({ id: personId })._data
+      return personFixture
     },
     getCustomerByCRN() {
       return personFixture
