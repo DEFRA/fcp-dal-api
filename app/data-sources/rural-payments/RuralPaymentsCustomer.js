@@ -5,12 +5,10 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
-  async getPersonIdByCRN(crn) {
-    const gatewayType = this?.request?.headers['gateway-type'] || 'internal'
-
+  async getPersonIdByCRN(crn, gatewayType) {
     if (gatewayType == 'external') {
-      // This personId will will return details for the CRN provided for external users.
-      return 3337243
+      const response = await this.getExternalPerson()
+      return response?.id
     } else {
       const body = JSON.stringify({
         searchFieldType: 'CUSTOMER_REFERENCE',
@@ -40,9 +38,18 @@ export class RuralPaymentsCustomer extends RuralPayments {
     }
   }
 
-  async getCustomerByCRN(crn) {
-    const personId = await this.getPersonIdByCRN(crn)
-    return this.getPersonByPersonId(personId)
+  async getCustomerByCRN(crn, gatewayType = 'internal') {
+    if (gatewayType == 'external') {
+      return this.getExternalPerson()
+    } else {
+      const personId = await this.getPersonIdByCRN(crn)
+      return this.getPersonByPersonId(personId)
+    }
+  }
+
+  async getExternalPerson() {
+    // This personId will will return details for the CRN provided for external users.
+    return this.getPersonByPersonId(3337243)
   }
 
   async getPersonByPersonId(personId) {

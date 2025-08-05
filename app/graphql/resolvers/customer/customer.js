@@ -10,17 +10,17 @@ import {
 import { validatePastDate } from '../../../utils/date.js'
 
 export const Customer = {
-  async personId({ crn }, __, { dataSources }) {
-    return await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
+  async personId({ crn }, __, { dataSources, kits }) {
+    return await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn, kits.gatewayType)
   },
 
-  async info({ crn }, __, { dataSources }) {
-    const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async info({ crn }, __, { dataSources, kits }) {
+    const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn, kits.gatewayType)
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business({ crn }, { sbi }, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async business({ crn }, { sbi }, { dataSources, kits }) {
+    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn, kits.gatewayType)
 
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
@@ -30,8 +30,8 @@ export const Customer = {
     )
   },
 
-  async businesses({ crn }, __, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async businesses({ crn }, __, { dataSources, kits }) {
+    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn, kits.gatewayType)
 
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 

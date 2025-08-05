@@ -1,8 +1,34 @@
+import jwt from 'jsonwebtoken'
 import { getAuth } from '../auth/authenticate.js'
 import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { Permissions } from '../data-sources/static/permissions.js'
+import { BadRequest } from '../errors/graphql.js'
 import { logger } from '../logger/logger.js'
+
+export const extractOrgIdFromDefraIdToken = (sbi, token) => {
+  const { payload } = jwt.decode(token, { complete: true })
+  if (payload?.relationships && Array.isArray(payload.relationships)) {
+    // Find relationship string that matches the given SBI
+    const relationship = payload.relationships.find((rel) => {
+      const [, tokenSBI] = rel.split(':')
+      return sbi === tokenSBI
+    })
+    if (relationship) {
+      const [orgId] = relationship.split(':')
+      return orgId
+    }
+  } else {
+    throw new BadRequest('Defra ID token is not valid for the provided SBI')
+  }
+}
+
+export const kitsContext = (request) => ({
+  gatewayType: request?.headers['gateway-type'] || 'internal',
+  token: request.headers['x-forwarded-authorization'],
+  extractOrgIdFromDefraIdToken: (sbi) =>
+    extractOrgIdFromDefraIdToken(sbi, request.headers['x-forwarded-authorization'])
+})
 
 export async function context({ request }) {
   const auth = await getAuth(request)
@@ -19,6 +45,7 @@ export async function context({ request }) {
       permissions: new Permissions({ logger: requestLogger }),
       ruralPaymentsBusiness: new RuralPaymentsBusiness({ logger: requestLogger }, request),
       ruralPaymentsCustomer: new RuralPaymentsCustomer({ logger: requestLogger }, request)
-    }
+    },
+    kits: kitsContext(request)
   }
 }

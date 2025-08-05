@@ -1,6 +1,7 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
+
 export class RuralPaymentsBusiness extends RuralPayments {
   async createOrganisationByPersonId(personId, orgDetails) {
     const response = await this.post(`organisation/create/${personId}`, {
