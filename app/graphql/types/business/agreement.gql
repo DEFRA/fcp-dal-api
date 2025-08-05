@@ -85,7 +85,7 @@ type PaymentSchedule {
   """
   Action area - Area (in hectares) of the action.
   """
-  actionArea: Int @on
+  actionArea: Float @on
 
   """
   Action MTL - Length (in metres) of the action.
@@ -100,7 +100,7 @@ type PaymentSchedule {
   """
   Parcel total area - Total area (in hectares) of the parcel.
   """
-  parcelTotalArea: Int @on
+  parcelTotalArea: Float @on
 
   """
   Payment schedule start date for the payment schedule.

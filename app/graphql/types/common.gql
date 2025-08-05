@@ -124,17 +124,17 @@ type EntityStatus {
   """
   Indicates whether the customer or business account is locked.
   """
-  locked: Boolean
+  locked: Boolean @on
 
   """
   Indicates whether the customer or business account has been confirmed.
   """
-  confirmed: Boolean
+  confirmed: Boolean @on
 
   """
   Indicates whether the customer or business account has been deactivated.
   """
-  deactivated: Boolean
+  deactivated: Boolean @on
 }
 
 "Represents data about a pagination details for a list of items"

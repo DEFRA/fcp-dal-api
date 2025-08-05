@@ -1,18 +1,13 @@
 extend type Mutation {
   updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
@@ -97,6 +92,6 @@ input UpdateBusinessVATInput {
 }
 
 type UpdateBusinessResponse {
-  success: Boolean @on
-  business: Business @on
+  success: Boolean
+  business: Business
 }

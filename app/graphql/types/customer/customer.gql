@@ -15,27 +15,32 @@ type CustomerInfo {
   """
   Telephone number of the customer.
   """
-  phone: Phone
+  phone: Phone @on
 
   """
   Email address of the customer.
   """
-  email: Email
+  email: Email @on
 
   """
   Status of the customer record/account.
   """
-  status: EntityStatus
+  status: EntityStatus @on
 
   """
   Address of the customer.
   """
-  address: Address
+  address: Address @on
 
   """
   Do not contact status of the customer email address.
   """
   doNotContact: Boolean @on
+
+  """
+  Other IDs for this customer.
+  """
+  personalIdentifiers: [String] @on
 }
 
 """
