@@ -15,6 +15,12 @@ const personFixture = personById({ id: personId })
 
 const dataSources = {
   ruralPaymentsCustomer: {
+    getPersonIdByCRN() {
+      return parseInt(personId)
+    },
+    getExternalPersonByCRN() {
+      return personById({ id: personId })._data
+    },
     getCustomerByCRN() {
       return personById({ id: personId })._data
     },
@@ -38,7 +44,7 @@ const dataSources = {
   permissions: new Permissions()
 }
 
-describe('Customer', () => {
+describe('Customer internal gateway', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
@@ -47,7 +53,7 @@ describe('Customer', () => {
     const response = await Customer.info(
       { crn: personFixture._data.customerReferenceNumber },
       undefined,
-      { dataSources }
+      { dataSources, kits: { gatewayType: 'internal' } }
     )
 
     expect(response).toEqual({
@@ -88,7 +94,7 @@ describe('Customer', () => {
     const response = await Customer.business(
       { crn: personFixture._data.customerReferenceNumber },
       { sbi: 107183280 },
-      { dataSources }
+      { dataSources, kits: { gatewayType: 'internal' } }
     )
     expect(response).toEqual(null)
   })
@@ -97,7 +103,7 @@ describe('Customer', () => {
     const response = await Customer.business(
       { crn: personFixture._data.customerReferenceNumber },
       { sbi: 107591843 },
-      { dataSources }
+      { dataSources, kits: { gatewayType: 'internal' } }
     )
     expect(response).toEqual({
       crn: '0866159801',
@@ -109,7 +115,10 @@ describe('Customer', () => {
   })
 
   test('Customer.businesses', async () => {
-    const response = await Customer.businesses({ personId: '5007136' }, undefined, { dataSources })
+    const response = await Customer.businesses({ personId: '5007136' }, undefined, {
+      dataSources,
+      kits: { gatewayType: 'internal' }
+    })
     expect(response).toEqual([
       {
         name: 'Cliff Spence T/As Abbey Farm',

@@ -123,7 +123,8 @@ describe('Business Mutation UpdateBusinessResponse', () => {
     dataSources = {
       ruralPaymentsBusiness: {
         updateBusinessBySBI: jest.fn(),
-        getOrganisationBySBI: jest.fn()
+        getOrganisationById: jest.fn(),
+        getOrganisationIdBySBI: jest.fn()
       }
     }
     logger = {
@@ -132,17 +133,18 @@ describe('Business Mutation UpdateBusinessResponse', () => {
   })
 
   it('updateBusinessName returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('123')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       some: 'response'
     })
 
     const result = await UpdateBusinessResponse.business(
       { business: { sbi: '123' } },
       {},
-      { dataSources, logger }
+      { dataSources, logger, kits: { gatewayType: 'internal' } }
     )
 
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
     expect(result).toEqual({
       info: {
         additionalBusinessActivities: [],
