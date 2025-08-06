@@ -61,15 +61,10 @@ const personBusinessesFixture = [
 
 const dataSources = {
   ruralPaymentsCustomer: {
-    getPersonIdByCRN() {
-      return personFixture.id
-    },
-    getExternalPersonByCRN() {
-      return personFixture
-    },
-    getCustomerByCRN() {
-      return personFixture
-    },
+    getPersonIdByCRN: jest.fn(),
+    getExternalPersonId: jest.fn(),
+    getExternalPerson: jest.fn(),
+    getCustomerByCRN: jest.fn(),
     getPersonBusinessesByPersonId() {
       return personBusinessesFixture
     },
@@ -90,18 +85,50 @@ const dataSources = {
   permissions: new Permissions()
 }
 
-describe('Customer internal gateway', () => {
+describe('Customer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  test('Customer.info', async () => {
+  test('Customer.personId internal gateway', async () => {
+    dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('internal person id')
+    const response = await Customer.personId(
+      { crn: personFixture.customerReferenceNumber },
+      undefined,
+      { dataSources, kits: { gatewayType: 'internal' } }
+    )
+
+    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith(
+      personFixture.customerReferenceNumber
+    )
+
+    expect(response).toEqual('internal person id')
+  })
+
+  test('Customer.personId external gateway', async () => {
+    dataSources.ruralPaymentsCustomer.getExternalPersonId.mockResolvedValue('external person id')
+    const response = await Customer.personId(
+      { crn: personFixture.customerReferenceNumber },
+      undefined,
+      { dataSources, kits: { gatewayType: 'external' } }
+    )
+
+    expect(dataSources.ruralPaymentsCustomer.getExternalPersonId).toHaveBeenCalledWith()
+
+    expect(response).toEqual('external person id')
+  })
+
+  test('Customer.info internal gateway', async () => {
+    dataSources.ruralPaymentsCustomer.getCustomerByCRN.mockResolvedValue(personFixture)
     const response = await Customer.info(
       { crn: personFixture.customerReferenceNumber },
       undefined,
       { dataSources, kits: { gatewayType: 'internal' } }
     )
 
+    expect(dataSources.ruralPaymentsCustomer.getCustomerByCRN).toHaveBeenCalledWith(
+      personFixture.customerReferenceNumber
+    )
     expect(response).toEqual({
       name: {
         title: 'Mrs.',
@@ -139,6 +166,52 @@ describe('Customer internal gateway', () => {
     })
   })
 
+  test('Customer.info external gateway', async () => {
+    dataSources.ruralPaymentsCustomer.getExternalPerson.mockResolvedValue(personFixture)
+    const response = await Customer.info(
+      { crn: personFixture.customerReferenceNumber },
+      undefined,
+      { dataSources, kits: { gatewayType: 'external' } }
+    )
+
+    expect(dataSources.ruralPaymentsCustomer.getExternalPerson).toHaveBeenCalledWith()
+
+    expect(response).toEqual({
+      name: {
+        title: 'Mrs.',
+        otherTitle: 'I',
+        first: 'Lauren',
+        middle: 'Daryl',
+        last: 'Sanford'
+      },
+      dateOfBirth: '1973-06-14T10:26:18.380Z',
+      phone: { landline: '055 4582 4488', mobile: '056 8967 5108' },
+      email: { address: 'lauren.sanford@immaculate-shark.info', validated: false },
+      doNotContact: false,
+      address: {
+        line1: '65',
+        line2: '1 McCullough Path',
+        line3: 'Newton Ratkedon',
+        line4: 'MS9 8BJ',
+        line5: 'North Macedonia',
+        pafOrganisationName: null,
+        flatName: null,
+        buildingNumberRange: null,
+        buildingName: null,
+        street: null,
+        city: 'Newton Bruen',
+        county: null,
+        postalCode: 'TC2 8KP',
+        country: 'Wales',
+        uprn: '790214962932',
+        dependentLocality: null,
+        doubleDependentLocality: null,
+        typeId: null
+      },
+      status: { locked: false, confirmed: false, deactivated: false },
+      personalIdentifiers: ['8568845789', '370030956', '7899566034']
+    })
+  })
   test('Customer.business - returns null if no business', async () => {
     const response = await Customer.business(
       { crn: personFixture.customerReferenceNumber },
@@ -149,10 +222,15 @@ describe('Customer internal gateway', () => {
   })
 
   test('Customer.business - returns business', async () => {
+    dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue(personFixture.id)
     const response = await Customer.business(
       { crn: personFixture.customerReferenceNumber },
       { sbi: 107591843 },
       { dataSources, kits: { gatewayType: 'internal' } }
+    )
+
+    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith(
+      personFixture.customerReferenceNumber
     )
     expect(response).toEqual({
       crn: 'crn-11111111',
@@ -164,17 +242,26 @@ describe('Customer internal gateway', () => {
   })
 
   test('Customer.businesses', async () => {
-    const response = await Customer.businesses({ personId: '5007136' }, undefined, {
-      dataSources,
-      kits: { gatewayType: 'internal' }
-    })
+    dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue(personFixture.id)
+    const response = await Customer.businesses(
+      { crn: personFixture.customerReferenceNumber },
+      undefined,
+      {
+        dataSources,
+        kits: { gatewayType: 'internal' }
+      }
+    )
+
+    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith(
+      personFixture.customerReferenceNumber
+    )
     expect(response).toEqual([
       {
         name: 'Cliff Spence T/As Abbey Farm',
         sbi: 107591843,
         organisationId: '5625145',
         personId: 11111111,
-        crn: undefined
+        crn: 'crn-11111111'
       }
     ])
   })

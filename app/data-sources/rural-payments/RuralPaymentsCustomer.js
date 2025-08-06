@@ -5,51 +5,47 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
-  async getPersonIdByCRN(crn, gatewayType) {
-    if (gatewayType == 'external') {
-      const response = await this.getExternalPerson()
-      return response?.id
-    } else {
-      const body = JSON.stringify({
-        searchFieldType: 'CUSTOMER_REFERENCE',
-        primarySearchPhrase: crn,
-        offset: 0,
-        limit: 1
-      })
+  async getPersonIdByCRN(crn) {
+    const body = JSON.stringify({
+      searchFieldType: 'CUSTOMER_REFERENCE',
+      primarySearchPhrase: crn,
+      offset: 0,
+      limit: 1
+    })
 
-      const customerResponse = await this.post('person/search', {
-        body,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-
-      const response = customerResponse._data.pop() || {}
-
-      if (!response?.id) {
-        this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
-          crn,
-          code: RURALPAYMENTS_API_NOT_FOUND_001,
-          response: { body: customerResponse }
-        })
-        throw new NotFound('Rural payments customer not found')
+    const customerResponse = await this.post('person/search', {
+      body,
+      headers: {
+        'Content-Type': 'application/json'
       }
-      return response.id
+    })
+
+    const response = customerResponse._data.pop() || {}
+
+    if (!response?.id) {
+      this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
+        crn,
+        code: RURALPAYMENTS_API_NOT_FOUND_001,
+        response: { body: customerResponse }
+      })
+      throw new NotFound('Rural payments customer not found')
     }
+    return response.id
   }
 
-  async getCustomerByCRN(crn, gatewayType = 'internal') {
-    if (gatewayType == 'external') {
-      return this.getExternalPerson()
-    } else {
-      const personId = await this.getPersonIdByCRN(crn)
-      return this.getPersonByPersonId(personId)
-    }
+  async getCustomerByCRN(crn) {
+    const personId = await this.getPersonIdByCRN(crn)
+    return this.getPersonByPersonId(personId)
   }
 
   async getExternalPerson() {
     // This personId will will return details for the CRN provided for external users.
     return this.getPersonByPersonId(3337243)
+  }
+
+  async getExternalPersonId() {
+    const response = await this.getExternalPerson()
+    return response?.id
   }
 
   async getPersonByPersonId(personId) {
