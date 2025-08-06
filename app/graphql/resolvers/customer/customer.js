@@ -32,7 +32,7 @@ export const Customer = {
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business({ crn }, { sbi }, { dataSources, kits }) {
+  async business({ crn }, { sbi }, { dataSources }) {
     const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
 
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
