@@ -18,9 +18,8 @@ export const extractOrgIdFromDefraIdToken = (sbi, token) => {
       const [orgId] = relationship.split(':')
       return orgId
     }
-  } else {
-    throw new BadRequest('Defra ID token is not valid for the provided SBI')
   }
+  throw new BadRequest('Defra ID token is not valid for the provided SBI')
 }
 
 export const kitsContext = (request) => ({
