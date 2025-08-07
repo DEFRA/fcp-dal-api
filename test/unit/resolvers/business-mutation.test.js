@@ -1,9 +1,11 @@
 import { jest } from '@jest/globals'
+import { getOrgId } from '../../../app/graphql/resolvers/business/common.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 
 const mockSchemaModule = {
   businessDetailsUpdateResolver: jest.fn(),
-  businessAdditionalDetailsUpdateResolver: jest.fn()
+  businessAdditionalDetailsUpdateResolver: jest.fn(),
+  getOrgId: getOrgId
 }
 jest.unstable_mockModule(
   '../../../app/graphql/resolvers/business/common.js',
@@ -303,7 +305,12 @@ describe('Business Mutation createBusiness', () => {
     dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('personId')
     dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockResolvedValue(orgDetails)
 
-    const response = await Mutation.createBusiness({}, mockArgs, { dataSources }, mockInfo)
+    const response = await Mutation.createBusiness(
+      {},
+      mockArgs,
+      { dataSources, kits: { gatewayType: 'internal' } },
+      mockInfo
+    )
 
     expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.createOrganisationByPersonId).toHaveBeenCalledWith(

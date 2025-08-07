@@ -1,13 +1,10 @@
 import { transformOrganisationToBusiness } from '../../../transformers/rural-payments/business.js'
+import { getOrgId } from '../business/common.js'
 
 export const Query = {
   async business(__, { sbi }, { dataSources, kits }) {
-    let orgId
-    if (kits.gatewayType === 'external') {
-      orgId = kits.extractOrgIdFromDefraIdToken(sbi)
-    } else {
-      orgId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-    }
+    const orgId = await getOrgId(dataSources, sbi, kits)
+
     const response = await dataSources.ruralPaymentsBusiness.getOrganisationById(orgId)
 
     const business = transformOrganisationToBusiness(response)

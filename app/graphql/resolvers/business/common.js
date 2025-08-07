@@ -3,8 +3,16 @@ import {
   transformBusinessDetailsToOrgDetailsUpdate
 } from '../../../transformers/rural-payments/business.js'
 
-export const businessDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(input.sbi)
+export const getOrgId = async (dataSources, sbi, kits) => {
+  if (kits.gatewayType === 'external') {
+    return kits.extractOrgIdFromDefraIdToken(sbi)
+  } else {
+    return dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  }
+}
+
+export const businessDetailsUpdateResolver = async (__, { input }, { dataSources, kits }) => {
+  const organisationId = await getOrgId(dataSources, input.sbi, kits)
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
@@ -19,8 +27,12 @@ export const businessDetailsUpdateResolver = async (__, { input }, { dataSources
   }
 }
 
-export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(input.sbi)
+export const businessAdditionalDetailsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, kits }
+) => {
+  const organisationId = await getOrgId(dataSources, input.sbi, kits)
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgAdditionalDetails = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
