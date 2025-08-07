@@ -4,76 +4,75 @@ import { Unauthorized } from '../../app/errors/graphql.js'
 import { mockPersonSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
-beforeAll(() => {
-  nock.disableNetConnect()
-
-  const v1 = nock(config.get('kits.internal.gatewayUrl'))
-  mockPersonSearch(v1)
-
-  v1.get('/person/personId/summary').reply(200, {
-    _data: {
-      id: 'personId'
-    }
-  })
-
-  v1.get('/external-auth/security-answers/crn').reply(200, {
-    memorableDate: 'memorableDate',
-    memorableEvent: 'memorableEvent',
-    memorableLocation: 'memorableLocation',
-    lastUpdatedOn: 'lastUpdatedOn'
-  })
-
-  v1.get('/organisation/person/personId/summary?search=&page-size=100').reply(200, {
-    _data: [
-      {
-        id: 'organisationId',
-        name: 'name',
-        sbi: 'sbi'
-      }
-    ]
-  })
-
-  v1.get('/authorisation/organisation/organisationId').reply(200, {
-    _data: [
-      {
-        id: 'personId',
-        firstName: 'firstName',
-        lastName: 'lastName',
-        role: 'role',
-        customerReference: 'crn',
-        privileges: []
-      }
-    ]
-  })
-
-  v1.get('/notifications?personId=personId&organisationId=organisationId&page=1').reply(200, {
-    notifications: [
-      {
-        id: 'id',
-        createdAt: 1735732800000,
-        title: 'title',
-        body: 'body'
-      }
-    ],
-    resultCount: 1,
-    readCount: 1,
-    unreadCount: 2
-  })
-
-  v1.get('/notifications?personId=personId&organisationId=organisationId&page=2').reply(200, {
-    notifications: [],
-    resultCount: 1,
-    readCount: 1,
-    unreadCount: 2
-  })
-})
-
-afterAll(() => {
-  nock.cleanAll()
-  nock.enableNetConnect()
-})
-
 describe('Query.customer', () => {
+  beforeAll(() => {
+    nock.disableNetConnect()
+
+    const v1 = nock(config.get('kits.internal.gatewayUrl'))
+    mockPersonSearch(v1)
+
+    v1.get('/person/personId/summary').reply(200, {
+      _data: {
+        id: 'personId'
+      }
+    })
+
+    v1.get('/external-auth/security-answers/crn').reply(200, {
+      memorableDate: 'memorableDate',
+      memorableEvent: 'memorableEvent',
+      memorableLocation: 'memorableLocation',
+      lastUpdatedOn: 'lastUpdatedOn'
+    })
+
+    v1.get('/organisation/person/personId/summary?search=&page-size=100').reply(200, {
+      _data: [
+        {
+          id: 'organisationId',
+          name: 'name',
+          sbi: 'sbi'
+        }
+      ]
+    })
+
+    v1.get('/authorisation/organisation/organisationId').reply(200, {
+      _data: [
+        {
+          id: 'personId',
+          firstName: 'firstName',
+          lastName: 'lastName',
+          role: 'role',
+          customerReference: 'crn',
+          privileges: []
+        }
+      ]
+    })
+
+    v1.get('/notifications?personId=personId&organisationId=organisationId&page=1').reply(200, {
+      notifications: [
+        {
+          id: 'id',
+          createdAt: 1735732800000,
+          title: 'title',
+          body: 'body'
+        }
+      ],
+      resultCount: 1,
+      readCount: 1,
+      unreadCount: 2
+    })
+
+    v1.get('/notifications?personId=personId&organisationId=organisationId&page=2').reply(200, {
+      notifications: [],
+      resultCount: 1,
+      readCount: 1,
+      unreadCount: 2
+    })
+  })
+
+  afterAll(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
   const query = `#graphql
     query CustomerTest {
       customer(crn: "crn") {
