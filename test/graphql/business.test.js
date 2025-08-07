@@ -6,6 +6,11 @@ import { mockOrganisationSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 describe('Query.business', () => {
+  afterAll(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
   const query = `#graphql
     query BusinessTest {
       business(sbi: "sbi") {
@@ -358,6 +363,7 @@ describe('Query.business', () => {
   })
 
   test('unauthenticated', async () => {
+    nock.disableNetConnect()
     const result = await makeTestQuery(query, false)
 
     expect(result.data.business).toBeNull()
