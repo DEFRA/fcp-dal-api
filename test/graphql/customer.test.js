@@ -170,7 +170,7 @@ describe('Query.customer', () => {
   test('authenticated external', async () => {
     const v1 = nock(config.get('kits.external.gatewayUrl'))
 
-    v1.get('/person/3337243/summary').reply(200, {
+    v1.get(`/person/${config.get('kits.external.personIdOverride')}/summary`).reply(200, {
       _data: {
         id: 'personId'
       }

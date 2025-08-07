@@ -17,7 +17,7 @@ export const Customer = {
 
   async info({ crn }, __, { dataSources, kits }) {
     let response
-    if (kits.gatewayType == 'internal') {
+    if (kits.gatewayType === 'internal') {
       response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
     } else {
       response = await dataSources.ruralPaymentsCustomer.getExternalPerson()

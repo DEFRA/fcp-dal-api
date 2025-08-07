@@ -190,6 +190,12 @@ export const config = convict({
         format: String,
         default: null,
         env: 'KITS_EXT_GATEWAY_URL'
+      },
+      personIdOverride: {
+        doc: 'This is the person ID that can be used in place of an actual personId for external users and will return the data corresponding to their crn',
+        format: 'int',
+        default: null,
+        env: 'KIT_EXT_PERSON_ID_OVERRIDE'
       }
     },
     disableMTLS: {
