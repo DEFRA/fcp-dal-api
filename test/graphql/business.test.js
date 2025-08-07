@@ -5,131 +5,6 @@ import { Unauthorized } from '../../app/errors/graphql.js'
 import { mockOrganisationSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
-const setupNock = () => {
-  nock.disableNetConnect()
-
-  const v1 = nock(config.get('kits.internal.gatewayUrl'))
-
-  mockOrganisationSearch(v1)
-
-  v1.get('/organisation/organisationId').reply(200, {
-    _data: {
-      id: 'organisationId',
-      sbi: 'sbi',
-      name: 'name',
-      email: 'email address',
-      address: {
-        address1: 'line1',
-        address2: 'line2',
-        address3: 'line3',
-        address4: 'line4',
-        address5: 'line5',
-        pafOrganisationName: 'paf organisation name',
-        buildingNumberRange: 'building number range',
-        buildingName: 'building name',
-        flatName: 'flat name',
-        street: 'street',
-        city: 'city',
-        county: 'county',
-        postalCode: 'postal code',
-        country: 'country',
-        uprn: 'uprn',
-        dependentLocality: 'dependent locality',
-        doubleDependentLocality: 'double dependent locality',
-        addressTypeId: 'address type'
-      },
-      legalStatus: {
-        id: 101,
-        type: 'legal type'
-      },
-      landline: 'landline number',
-      mobile: 'mobile number',
-      traderNumber: 'trader number',
-      businessType: {
-        id: 101,
-        type: 'business type'
-      },
-      taxRegistrationNumber: 'vat number',
-      vendorNumber: 'vendor number',
-      businessReference: 'businessReference'
-    }
-  })
-
-  v1.get('/authorisation/organisation/organisationId').reply(200, {
-    _data: [
-      {
-        id: 'personId',
-        firstName: 'firstName',
-        lastName: 'lastName',
-        role: 'role',
-        customerReference: 'customerReference',
-        privileges: ['Full permission - business']
-      }
-    ]
-  })
-
-  v1.get('/lms/organisation/organisationId/parcels/historic/04-May-25').reply(200, [
-    {
-      id: 'id',
-      sheetId: 'sheetId',
-      parcelId: 'parcelId',
-      area: 1,
-      pendingDigitisation: true
-    }
-  ])
-
-  v1.get('/lms/organisation/organisationId/parcel-details/historic/04-May-25').reply(200, [
-    {
-      sheetId: 'sheetId',
-      parcelId: 'parcelId',
-      validFrom: 1636934401682,
-      validTo: 1636934392140
-    }
-  ])
-
-  v1.get(
-    '/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/04-May-25/land-covers'
-  ).reply(200, {
-    features: [
-      {
-        id: 'id',
-        properties: {
-          area: 1,
-          code: 'code',
-          name: 'name',
-          isBpsEligible: true
-        }
-      }
-    ]
-  })
-
-  v1.get('/lms/organisation/organisationId/covers-summary/historic/04-May-25').reply(200, [
-    { name: 'Arable Land', area: 1 },
-    { name: 'Permanent Grassland', area: 1 },
-    { name: 'Permanent Crops', area: 1 }
-  ])
-
-  v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
-    .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
-    .reply(200, {
-      data: [
-        {
-          sbi: 'mockSbi',
-          dt_insert: 'mockDtInsert1',
-          dt_delete: 'mockDtDelete1',
-          cph_number: 'mockCph1',
-          parish: 'mockParish',
-          species: 'mockSpecies',
-          start_date: '2020-03-20T00:00:00:000+0100',
-          end_date: '2021-03-20T00:00:00:000+0100',
-          address: 'mockAddress',
-          x: 123456,
-          y: 654321
-        }
-      ]
-    })
-}
-
 describe('Query.business', () => {
   const query = `#graphql
     query BusinessTest {
@@ -241,14 +116,129 @@ describe('Query.business', () => {
     }
   `
 
-  beforeAll(setupNock)
-
-  afterAll(() => {
-    nock.cleanAll()
-    nock.enableNetConnect()
-  })
-
   test('authenticated', async () => {
+    nock.disableNetConnect()
+
+    const v1 = nock(config.get('kits.internal.gatewayUrl'))
+
+    mockOrganisationSearch(v1)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: {
+        id: 'organisationId',
+        sbi: 'sbi',
+        name: 'name',
+        email: 'email address',
+        address: {
+          address1: 'line1',
+          address2: 'line2',
+          address3: 'line3',
+          address4: 'line4',
+          address5: 'line5',
+          pafOrganisationName: 'paf organisation name',
+          buildingNumberRange: 'building number range',
+          buildingName: 'building name',
+          flatName: 'flat name',
+          street: 'street',
+          city: 'city',
+          county: 'county',
+          postalCode: 'postal code',
+          country: 'country',
+          uprn: 'uprn',
+          dependentLocality: 'dependent locality',
+          doubleDependentLocality: 'double dependent locality',
+          addressTypeId: 'address type'
+        },
+        legalStatus: {
+          id: 101,
+          type: 'legal type'
+        },
+        landline: 'landline number',
+        mobile: 'mobile number',
+        traderNumber: 'trader number',
+        businessType: {
+          id: 101,
+          type: 'business type'
+        },
+        taxRegistrationNumber: 'vat number',
+        vendorNumber: 'vendor number',
+        businessReference: 'businessReference'
+      }
+    })
+
+    v1.get('/authorisation/organisation/organisationId').reply(200, {
+      _data: [
+        {
+          id: 'personId',
+          firstName: 'firstName',
+          lastName: 'lastName',
+          role: 'role',
+          customerReference: 'customerReference',
+          privileges: ['Full permission - business']
+        }
+      ]
+    })
+
+    v1.get('/lms/organisation/organisationId/parcels/historic/04-May-25').reply(200, [
+      {
+        id: 'id',
+        sheetId: 'sheetId',
+        parcelId: 'parcelId',
+        area: 1,
+        pendingDigitisation: true
+      }
+    ])
+
+    v1.get('/lms/organisation/organisationId/parcel-details/historic/04-May-25').reply(200, [
+      {
+        sheetId: 'sheetId',
+        parcelId: 'parcelId',
+        validFrom: 1636934401682,
+        validTo: 1636934392140
+      }
+    ])
+
+    v1.get(
+      '/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/04-May-25/land-covers'
+    ).reply(200, {
+      features: [
+        {
+          id: 'id',
+          properties: {
+            area: 1,
+            code: 'code',
+            name: 'name',
+            isBpsEligible: true
+          }
+        }
+      ]
+    })
+
+    v1.get('/lms/organisation/organisationId/covers-summary/historic/04-May-25').reply(200, [
+      { name: 'Arable Land', area: 1 },
+      { name: 'Permanent Grassland', area: 1 },
+      { name: 'Permanent Crops', area: 1 }
+    ])
+
+    v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
+      .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
+      .reply(200, {
+        data: [
+          {
+            sbi: 'mockSbi',
+            dt_insert: 'mockDtInsert1',
+            dt_delete: 'mockDtDelete1',
+            cph_number: 'mockCph1',
+            parish: 'mockParish',
+            species: 'mockSpecies',
+            start_date: '2020-03-20T00:00:00:000+0100',
+            end_date: '2021-03-20T00:00:00:000+0100',
+            address: 'mockAddress',
+            x: 123456,
+            y: 654321
+          }
+        ]
+      })
     const result = await makeTestQuery(query)
 
     expect(result).toEqual({
@@ -363,6 +353,8 @@ describe('Query.business', () => {
         }
       }
     })
+
+    expect(nock.isDone()).toBe(true)
   })
 
   test('unauthenticated', async () => {
