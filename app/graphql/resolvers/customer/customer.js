@@ -11,15 +11,15 @@ import { validatePastDate } from '../../../utils/date.js'
 
 const getPersonId = async (dataSources, crn, gatewayType) => {
   if (gatewayType == 'internal') {
-    return await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
+    return dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
   } else {
-    return await dataSources.ruralPaymentsCustomer.getExternalPersonId()
+    return dataSources.ruralPaymentsCustomer.getExternalPersonId()
   }
 }
 
 export const Customer = {
   async personId({ crn }, __, { dataSources, kits }) {
-    getPersonId(dataSources, crn, kits.gatewayType)
+    return await getPersonId(dataSources, crn, kits.gatewayType)
   },
 
   async info({ crn }, __, { dataSources, kits }) {
