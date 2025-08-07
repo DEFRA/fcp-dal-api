@@ -142,6 +142,29 @@ describe('RuralPayments', () => {
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
+
+    test('throws error if external request headers are missing', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          headers: {
+            'gateway-type': 'external',
+            crn: 'test-crn'
+          }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).rejects.toEqual(
+        new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+          extensions: {
+            message:
+              'Invalid request headers must either contain email for internal or X-Forwarded-Authorization and crn for external requests'
+          }
+        })
+      )
+    })
   })
 
   describe('trace', () => {

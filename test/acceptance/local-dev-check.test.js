@@ -735,10 +735,14 @@ describe('Local mocked dev check', () => {
       }
     `
     const client = new GraphQLClient('http://localhost:3000/graphql')
-    const response = await client.request(query, {
-      sbi: '107591843',
-      crn: '0866159801'
-    })
+    const response = await client.request(
+      query,
+      {
+        sbi: '107591843',
+        crn: '0866159801'
+      },
+      { email: 'some-email', 'gateway-type': 'internal' }
+    )
 
     expect(response).not.toHaveProperty('errors')
     expect(response.customer).toEqual(customer)
