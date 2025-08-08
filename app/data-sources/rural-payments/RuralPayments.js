@@ -10,7 +10,7 @@ import { sendMetric } from '../../logger/sendMetric.js'
 
 export const customFetch = async (url, options) => {
   // We have two gateways and we need to override the hostname of the url to correspond to the gateway type from the request header.
-  let gatewayType = options.headers?.['Gateway-Type'] || 'internal'
+  const gatewayType = options.headers?.['Gateway-Type'] || 'internal'
   const currentUrl = new URL(url)
   const kitsGatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
   const kitsURL = new URL(kitsGatewayUrl)
