@@ -38,6 +38,16 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return this.getPersonByPersonId(personId)
   }
 
+  async getExternalPerson() {
+    // This personId will will return details for the CRN provided for external users.
+    return this.getPersonByPersonId(config.get('kits.external.personIdOverride'))
+  }
+
+  async getExternalPersonId() {
+    const response = await this.getExternalPerson()
+    return response?.id
+  }
+
   async getPersonByPersonId(personId) {
     const response = await this.get(`person/${personId}/summary`)
 

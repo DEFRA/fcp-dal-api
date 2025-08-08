@@ -12,6 +12,24 @@ describe('Rural Payments Customer', () => {
   const httpGet = jest.spyOn(ruralPaymentsCustomer, 'get')
   const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
 
+  test('should call getExternalPerson for external gateway', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: [] }))
+
+    await expect(ruralPaymentsCustomer.getCustomerByCRN('11111111')).rejects.toEqual(
+      new NotFound('Rural payments customer not found')
+    )
+
+    expect(httpPost).toHaveBeenCalledTimes(1)
+    expect(logger.warn).toHaveBeenCalledWith(
+      '#datasource - Rural payments - Customer not found for CRN: 11111111',
+      {
+        code: 'RURALPAYMENTS_API_NOT_FOUND_001',
+        crn: '11111111',
+        response: { body: { _data: [] } }
+      }
+    )
+  })
+
   test('should handle customer not found', async () => {
     httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 

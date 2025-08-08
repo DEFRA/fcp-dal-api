@@ -8,20 +8,25 @@ import {
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments/customer.js'
 import { validatePastDate } from '../../../utils/date.js'
+import { getPersonId } from './common.js'
 
 export const Customer = {
-  async personId({ crn }, __, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    return personId
+  async personId({ crn }, __, { dataSources, kits }) {
+    return await getPersonId(dataSources, crn, kits.gatewayType)
   },
 
-  async info({ crn }, __, { dataSources }) {
-    const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async info({ crn }, __, { dataSources, kits }) {
+    let response
+    if (kits.gatewayType === 'internal') {
+      response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+    } else {
+      response = await dataSources.ruralPaymentsCustomer.getExternalPerson()
+    }
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business({ crn }, { sbi }, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async business({ crn }, { sbi }, { dataSources, kits }) {
+    const personId = await getPersonId(dataSources, crn, kits.gatewayType)
 
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
@@ -31,8 +36,8 @@ export const Customer = {
     )
   },
 
-  async businesses({ crn }, __, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async businesses({ crn }, __, { dataSources, kits }) {
+    const personId = await getPersonId(dataSources, crn, kits.gatewayType)
 
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 

@@ -632,13 +632,17 @@ describe('Local mocked dev check', () => {
       }
     `
     const client = new GraphQLClient('http://localhost:3000/graphql')
-    const response = await client.request(query, {
-      sbi: '107183280',
-      crn: '9477368292',
-      date: '2020-01-01',
-      sheetId: 'SS6627',
-      parcelId: '8779'
-    })
+    const response = await client.request(
+      query,
+      {
+        sbi: '107183280',
+        crn: '9477368292',
+        date: '2020-01-01',
+        sheetId: 'SS6627',
+        parcelId: '8779'
+      },
+      { email: 'some-email', 'gateway-type': 'internal' }
+    )
 
     expect(response).not.toHaveProperty('errors')
     expect(response.business).toMatchObject({
@@ -735,10 +739,14 @@ describe('Local mocked dev check', () => {
       }
     `
     const client = new GraphQLClient('http://localhost:3000/graphql')
-    const response = await client.request(query, {
-      sbi: '107591843',
-      crn: '0866159801'
-    })
+    const response = await client.request(
+      query,
+      {
+        sbi: '107591843',
+        crn: '0866159801'
+      },
+      { email: 'some-email', 'gateway-type': 'internal' }
+    )
 
     expect(response).not.toHaveProperty('errors')
     expect(response.customer).toEqual(customer)

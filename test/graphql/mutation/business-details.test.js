@@ -4,7 +4,7 @@ import { config } from '../../../app/config.js'
 import { mockOrganisationSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
-const v1 = nock(config.get('kits.gatewayUrl'))
+const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const orgDetailsUpdatePayload = {
   id: 'organisationId',
