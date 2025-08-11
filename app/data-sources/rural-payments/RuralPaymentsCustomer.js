@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { config } from '../../config.js'
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import { postPutHeaders } from '../../utils/headers.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
@@ -23,9 +24,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
     const customerResponse = await this.post('person/search', {
       body,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: postPutHeaders
     })
 
     if (!customerResponse?._data?.length) {
@@ -125,9 +124,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
   updatePersonDetails(personId, personDetails) {
     return this.put(`person/${personId}`, {
       body: personDetails,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: postPutHeaders
     })
   }
 }

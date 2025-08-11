@@ -20,7 +20,7 @@ input UpdateCustomerAddressInput {
   """
   Address of the customer.
   """
-  address: AddressInput
+  address: AddressInput!
 }
 
 input UpdateCustomerDateOfBirthInput {
@@ -32,7 +32,7 @@ input UpdateCustomerDateOfBirthInput {
   """
   Date of birth of the customer.
   """
-  dateOfBirth: Date
+  dateOfBirth: Date!
 }
 
 input UpdateCustomerNameInput {
@@ -72,7 +72,7 @@ input UpdateCustomerEmailInput {
   """
   Email address of the customer.
   """
-  email: EmailInput
+  email: EmailInput!
 }
 
 input UpdateCustomerPhoneInput {
@@ -84,7 +84,7 @@ input UpdateCustomerPhoneInput {
   """
   Telephone number of the customer.
   """
-  phone: PhoneInput
+  phone: PhoneInput!
 }
 
 type UpdateCustomerResponse {

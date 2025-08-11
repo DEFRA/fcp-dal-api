@@ -28,17 +28,17 @@ type Mutation {
 
 input UpdateCustomerAddressInput {
   crn: ID!
-  address: AddressInput
+  address: AddressInput!
 }
 
 input UpdateCustomerDateOfBirthInput {
   crn: ID!
-  dateOfBirth: Date
+  dateOfBirth: Date!
 }
 
 input UpdateCustomerEmailInput {
   crn: ID!
-  email: EmailInput
+  email: EmailInput!
 }
 
 input UpdateCustomerNameInput {
@@ -52,7 +52,7 @@ input UpdateCustomerNameInput {
 
 input UpdateCustomerPhoneInput {
   crn: ID!
-  phone: PhoneInput
+  phone: PhoneInput!
 }
 
 type UpdateCustomerResponse {
