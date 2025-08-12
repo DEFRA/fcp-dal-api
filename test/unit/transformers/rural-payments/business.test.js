@@ -447,7 +447,7 @@ describe('Business transformer', () => {
           active: true,
           transitionId: 1,
           transitionName: 'Submitted',
-          agreementReferences: [42, 17, 111],
+          agreementReferences: ['42', '17', '111'],
           applicationHistory: [
             {
               transitionId: 1,
