@@ -307,6 +307,17 @@ describe('Rural Payments Business', () => {
     })
   })
 
+  describe('getApplicationsBySBI', () => {
+    test('should return applications list', async () => {
+      const mockResponse = { data: 'mockData' }
+      httpGet.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.getApplicationsBySBI('mockSbi')
+      expect(result).toEqual(mockResponse.data)
+      expect(httpGet).toHaveBeenCalledWith('SitiAgriApi/cv/appByBusiness/sbi/mockSbi/list')
+    })
+  })
+
   describe('updateOrganisationDetails', () => {
     test('should call put endpoint and return successful response', async () => {
       const fakeResponse = {

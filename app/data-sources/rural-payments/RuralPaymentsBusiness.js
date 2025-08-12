@@ -166,6 +166,11 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response.data
   }
 
+  async getApplicationsBySBI(sbi) {
+    const response = await this.get(`SitiAgriApi/cv/appByBusiness/sbi/${sbi}/list`)
+    return response.data
+  }
+
   async updateOrganisationAdditionalDetails(organisationId, orgAdditionalDetails) {
     const response = this.put(`organisation/${organisationId}/additional-business-details`, {
       body: orgAdditionalDetails,
