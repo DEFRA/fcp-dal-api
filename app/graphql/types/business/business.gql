@@ -255,4 +255,9 @@ type Business {
   Agreements associated with the business.
   """
   agreements: [Agreement] @on
+
+  """
+  Applications associated with the business.
+  """
+  applications: [Application] @on
 }

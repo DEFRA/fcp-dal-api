@@ -1,0 +1,124 @@
+"""
+Business Application.
+"""
+type Application {
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID! @on
+
+  """
+  The unique identifier for the application.
+  """
+  applicationId: ID! @on
+
+  """
+  The unique identifier for the subject of this application.
+  """
+  subjectId: Int @on
+
+  """
+  The year this application is for.
+  """
+  year: Int @on
+
+  """
+  The title of the application.
+  """
+  applicationName: String @on
+
+  """
+  The module code for the application.
+  """
+  moduleCode: String @on
+
+  """
+  The name of the scheme for the application.
+  """
+  scheme: String @on
+
+  """
+  The "Code P" status of the application.
+  """
+  statusCodeP: String @on
+
+  """
+  The "Code S" status of the application.
+  """
+  statusCodeS: String @on
+
+  """
+  The status of the application.
+  """
+  status: String @on
+
+  """
+  The date the application was submitted.
+  """
+  submissionDate: Date @on
+
+  """
+  The "P Status" of the application on the Portal.
+  """
+  portalStatusP: String @on
+
+  """
+  The "S Status" of the application on the Portal.
+  """
+  portalStatusS: String @on
+
+  """
+  The status of the application on the Portal.
+  """
+  portalStatus: String @on
+
+  """
+  Whether the application is active.
+  """
+  active: Boolean @on
+
+  """
+  The unique identifier for the latest transition (from the `applicationHistory`).
+  """
+  transitionId: ID @on
+
+  """
+  The name of the latest transition (from the `applicationHistory`).
+  """
+  transitionName: String @on
+
+  """
+  The unique identifiers for the agreements associated with this application.
+  """
+  agreementReferences: [ID] @on
+
+  """
+  The history of transitions for the application.
+  """
+  applicationHistory: [ApplicationHistory] @on
+}
+
+"""
+A single transition from the history of transitions for an application.
+"""
+type ApplicationHistory {
+  """
+  The unique identifier for the transition.
+  """
+  transitionId: ID @on
+
+  """
+  The name of the transition.
+  """
+  transitionName: String @on
+
+  """
+  The date and time of the transition.
+  """
+  timestamp: Date @on
+
+  """
+  The status of the application after the transition.
+  """
+  checkStatus: String @on
+}
