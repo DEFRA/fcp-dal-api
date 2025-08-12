@@ -60,3 +60,14 @@ export function transformToISODate(timestamp) {
   const date = new Date(Number.isNaN(+timestamp) ? timestamp : +timestamp)
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
+
+export const transformDateTimeToISO = (dateTime) => {
+  // ensure the input looks like a date-time string, with at least seconds, up to full timestamp
+  const parts = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}):?(.+)?$/.exec(dateTime)
+
+  if (parts?.length) {
+    return new Date(`${parts[1]}.${parts[2] || '000+0000'}`).toISOString()
+  }
+
+  return null
+}
