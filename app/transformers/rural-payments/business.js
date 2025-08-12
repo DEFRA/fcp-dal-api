@@ -257,8 +257,7 @@ const transformApplication = (application) => ({
   active: /^yes$/i.test(application.fg_active),
   transitionId: application.transition_id,
   transitionName: application.transition_name,
-  agreementReferences:
-    application.agreement_ref?.split(/, ?/).map((ref) => parseInt(ref, 10)) || [],
+  agreementReferences: application.agreement_ref?.split(/, ?/) || [],
   applicationHistory: (application.application_history || []).map(transformTransitions)
 })
 const transformTransitions = ({ transition_id, transition_name, dt_transition, check_status }) => ({
