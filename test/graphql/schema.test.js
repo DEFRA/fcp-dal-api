@@ -52,7 +52,6 @@ describe('schema', () => {
   it('should not include custom directives in final schema output', async () => {
     const schema = await createSchema()
     const result = await graphql({ schema, source: getIntrospectionQuery() })
-    console.log(result.data.__schema.directives)
     expect(result.data.__schema.directives).toEqual([
       {
         args: [
