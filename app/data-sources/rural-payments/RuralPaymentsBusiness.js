@@ -1,13 +1,12 @@
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import { postPutHeaders } from '../../utils/headers.js'
 import { RuralPayments } from './RuralPayments.js'
 export class RuralPaymentsBusiness extends RuralPayments {
   async createOrganisationByPersonId(personId, orgDetails) {
     const response = await this.post(`organisation/create/${personId}`, {
       body: orgDetails,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: postPutHeaders
     })
     return response._data
   }
@@ -36,9 +35,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
     const organisationResponse = await this.post('organisation/search', {
       body,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: postPutHeaders
     })
 
     if (!organisationResponse?._data?.length) {
@@ -144,9 +141,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async updateOrganisationDetails(organisationId, orgDetails) {
     const response = this.put(`organisation/${organisationId}/business-details`, {
       body: orgDetails,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: postPutHeaders
     })
 
     return response
@@ -160,9 +155,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async updateOrganisationAdditionalDetails(organisationId, orgAdditionalDetails) {
     const response = this.put(`organisation/${organisationId}/additional-business-details`, {
       body: orgAdditionalDetails,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: postPutHeaders
     })
 
     return response
