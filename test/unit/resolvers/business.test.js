@@ -212,10 +212,10 @@ describe('Business', () => {
       expect(applications).toEqual([
         {
           sbi: 'mock-sbi',
-          applicationId: 101,
+          id: 101,
           subjectId: 404,
           year: 2015,
-          applicationName: 'app name',
+          name: 'app name',
           moduleCode: 'module code',
           scheme: 'scheme',
           statusCodeP: 'code p',
@@ -229,10 +229,10 @@ describe('Business', () => {
           transitionId: 187,
           transitionName: 'transition name',
           agreementReferences: ['42', '17', '111'],
-          applicationHistory: [
+          transitionHistory: [
             {
-              transitionId: 187,
-              transitionName: 'transition name',
+              id: 187,
+              name: 'transition name',
               timestamp: new Date('2018-10-26T08:05:54.054+0100').toISOString(),
               checkStatus: 'check status'
             }

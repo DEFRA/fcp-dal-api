@@ -72,10 +72,10 @@ type PaymentSchedule {
 
 type Application {
   sbi: ID!
-  applicationId: ID!
+  id: ID!
   subjectId: Int
   year: Int
-  applicationName: String
+  name: String
   moduleCode: String
   scheme: String
   statusCodeP: String
@@ -89,12 +89,12 @@ type Application {
   transitionId: ID
   transitionName: String
   agreementReferences: [ID]
-  applicationHistory: [ApplicationHistory]
+  transitionHistory: [Transition]
 }
 
-type ApplicationHistory {
-  transitionId: ID
-  transitionName: String
+type Transition {
+  id: ID
+  name: String
   timestamp: Date
   checkStatus: String
 }

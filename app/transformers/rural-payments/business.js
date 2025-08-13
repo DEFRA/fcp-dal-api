@@ -241,10 +241,10 @@ export const transformApplications = (applications) => applications.map(transfor
 
 const transformApplication = (application) => ({
   sbi: application.sbi,
-  applicationId: application.application_id,
+  id: application.application_id,
   subjectId: application.subject_id,
   year: application.year,
-  applicationName: application.application_name,
+  name: application.application_name,
   moduleCode: application.module_code,
   scheme: application.scheme,
   statusCodeP: application.status_code_p,
@@ -258,11 +258,11 @@ const transformApplication = (application) => ({
   transitionId: application.transition_id,
   transitionName: application.transition_name,
   agreementReferences: application.agreement_ref?.split(/, ?/) || [],
-  applicationHistory: (application.application_history || []).map(transformTransitions)
+  transitionHistory: (application.application_history || []).map(transformTransitions)
 })
 const transformTransitions = ({ transition_id, transition_name, dt_transition, check_status }) => ({
-  transitionId: transition_id,
-  transitionName: transition_name,
+  id: transition_id,
+  name: transition_name,
   timestamp: transformDateTimeToISO(dt_transition),
   checkStatus: check_status
 })

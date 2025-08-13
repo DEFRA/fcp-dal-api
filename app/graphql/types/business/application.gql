@@ -10,7 +10,7 @@ type Application {
   """
   The unique identifier for the application.
   """
-  applicationId: ID! @on
+  id: ID! @on
 
   """
   The unique identifier for the subject of this application.
@@ -25,7 +25,7 @@ type Application {
   """
   The title of the application.
   """
-  applicationName: String @on
+  name: String @on
 
   """
   The module code for the application.
@@ -78,12 +78,12 @@ type Application {
   active: Boolean @on
 
   """
-  The unique identifier for the latest transition (from the `applicationHistory`).
+  The unique identifier for the latest transition (from the `transitionHistory`).
   """
   transitionId: ID @on
 
   """
-  The name of the latest transition (from the `applicationHistory`).
+  The name of the latest transition (from the `transitionHistory`).
   """
   transitionName: String @on
 
@@ -95,22 +95,22 @@ type Application {
   """
   The history of transitions for the application.
   """
-  applicationHistory: [ApplicationHistory] @on
+  transitionHistory: [Transition] @on
 }
 
 """
 A single transition from the history of transitions for an application.
 """
-type ApplicationHistory {
+type Transition {
   """
   The unique identifier for the transition.
   """
-  transitionId: ID @on
+  id: ID @on
 
   """
   The name of the transition.
   """
-  transitionName: String @on
+  name: String @on
 
   """
   The date and time of the transition.

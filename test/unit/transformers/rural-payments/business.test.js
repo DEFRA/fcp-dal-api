@@ -431,10 +431,10 @@ describe('Business transformer', () => {
       expect(transformApplications(mockApplications)).toEqual([
         {
           sbi: '12345',
-          applicationId: 'app123',
+          id: 'app123',
           subjectId: 'subj123',
           year: 2025,
-          applicationName: 'Test Application',
+          name: 'Test Application',
           moduleCode: 'module123',
           scheme: 'Test Scheme',
           statusCodeP: 'PENDING',
@@ -448,10 +448,10 @@ describe('Business transformer', () => {
           transitionId: 1,
           transitionName: 'Submitted',
           agreementReferences: ['42', '17', '111'],
-          applicationHistory: [
+          transitionHistory: [
             {
-              transitionId: 1,
-              transitionName: 'Submitted',
+              id: 1,
+              name: 'Submitted',
               timestamp: '2025-07-11T15:11:12.000Z',
               checkStatus: 'Checked'
             }
@@ -459,10 +459,10 @@ describe('Business transformer', () => {
         },
         {
           sbi: 12345,
-          applicationId: 123,
+          id: 123,
           subjectId: undefined,
           year: undefined,
-          applicationName: undefined,
+          name: undefined,
           moduleCode: undefined,
           scheme: undefined,
           statusCodeP: undefined,
@@ -476,14 +476,14 @@ describe('Business transformer', () => {
           transitionId: undefined,
           transitionName: undefined,
           agreementReferences: [],
-          applicationHistory: []
+          transitionHistory: []
         },
         {
           sbi: 12345,
-          applicationId: 1234,
+          id: 1234,
           subjectId: undefined,
           year: undefined,
-          applicationName: undefined,
+          name: undefined,
           moduleCode: undefined,
           scheme: undefined,
           statusCodeP: undefined,
@@ -497,7 +497,7 @@ describe('Business transformer', () => {
           transitionId: undefined,
           transitionName: undefined,
           agreementReferences: [],
-          applicationHistory: []
+          transitionHistory: []
         }
       ])
     })

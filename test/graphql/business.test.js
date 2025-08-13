@@ -272,10 +272,10 @@ describe('Query.business', () => {
         }
         applications {
           sbi
-          applicationId
+          id
           subjectId
           year
-          applicationName
+          name
           moduleCode
           scheme
           statusCodeP
@@ -289,9 +289,9 @@ describe('Query.business', () => {
           transitionId
           transitionName
           agreementReferences
-          applicationHistory {
-            transitionId
-            transitionName
+          transitionHistory {
+            id
+            name
             timestamp
             checkStatus
           }
@@ -422,10 +422,10 @@ describe('Query.business', () => {
           applications: [
             {
               sbi: 'sbi',
-              applicationId: 'app123',
+              id: 'app123',
               subjectId: 123,
               year: 2025,
-              applicationName: 'Application Name',
+              name: 'Application Name',
               moduleCode: 'Module Code',
               scheme: 'Scheme',
               statusCodeP: 'Status P',
@@ -439,10 +439,10 @@ describe('Query.business', () => {
               transitionId: '187',
               transitionName: 'transition name',
               agreementReferences: ['42', '17', '111'],
-              applicationHistory: [
+              transitionHistory: [
                 {
-                  transitionId: '187',
-                  transitionName: 'Transition Name',
+                  id: '187',
+                  name: 'Transition Name',
                   timestamp: '2025-05-04T01:00:00.123Z',
                   checkStatus: 'Check Status'
                 }
