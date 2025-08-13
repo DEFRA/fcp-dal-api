@@ -114,10 +114,10 @@ const query = `#graphql
         }
         applications {
           sbi
-          applicationId
+          id
           subjectId
           year
-          applicationName
+          name
           moduleCode
           scheme
           statusCodeP
@@ -131,9 +131,9 @@ const query = `#graphql
           transitionId
           transitionName
           agreementReferences
-          applicationHistory {
-            transitionId
-            transitionName
+          transitionHistory {
+            id
+            name
             timestamp
             checkStatus
           }
@@ -433,6 +433,36 @@ describe('Query.business internal', () => {
               xCoordinate: 123456,
               yCoordinate: 654321
             }
+          ],
+          applications: [
+            {
+              sbi: 'sbi',
+              id: 'app123',
+              subjectId: 123,
+              year: 2025,
+              name: 'Application Name',
+              moduleCode: 'Module Code',
+              scheme: 'Scheme',
+              statusCodeP: 'Status P',
+              statusCodeS: 'Status S',
+              status: 'Status',
+              submissionDate: '2025-05-04T01:00:00.123Z',
+              portalStatusP: 'Portal Status P',
+              portalStatusS: 'Portal Status S',
+              portalStatus: 'Portal Status',
+              active: true,
+              transitionId: '187',
+              transitionName: 'transition name',
+              agreementReferences: ['42', '17', '111'],
+              transitionHistory: [
+                {
+                  id: '187',
+                  name: 'Transition Name',
+                  timestamp: '2025-05-04T01:00:00.123Z',
+                  checkStatus: 'Check Status'
+                }
+              ]
+            }
           ]
         }
       }
@@ -560,10 +590,10 @@ describe('Query.business internal', () => {
           applications: [
             {
               sbi: 'sbi',
-              applicationId: 'app123',
+              id: 'app123',
               subjectId: 123,
               year: 2025,
-              applicationName: 'Application Name',
+              name: 'Application Name',
               moduleCode: 'Module Code',
               scheme: 'Scheme',
               statusCodeP: 'Status P',
@@ -577,10 +607,10 @@ describe('Query.business internal', () => {
               transitionId: '187',
               transitionName: 'transition name',
               agreementReferences: ['42', '17', '111'],
-              applicationHistory: [
+              transitionHistory: [
                 {
-                  transitionId: '187',
-                  transitionName: 'Transition Name',
+                  id: '187',
+                  name: 'Transition Name',
                   timestamp: '2025-05-04T01:00:00.123Z',
                   checkStatus: 'Check Status'
                 }
