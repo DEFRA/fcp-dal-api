@@ -7,7 +7,7 @@ import { RuralPayments } from './RuralPayments.js'
 export class RuralPaymentsCustomer extends RuralPayments {
   async getPersonIdByCRN(crn) {
     if (this.gatewayType === 'internal') {
-      const response = await this.personSerachByCRN(crn)
+      const response = await this.personSearchByCRN(crn)
       return response.id
     } else if (this.gatewayType === 'external') {
       const response = await this.getExternalPerson()
@@ -15,7 +15,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
     }
   }
 
-  async personSerachByCRN(crn) {
+  async personSearchByCRN(crn) {
     const body = JSON.stringify({
       searchFieldType: 'CUSTOMER_REFERENCE',
       primarySearchPhrase: crn,
@@ -29,8 +29,6 @@ export class RuralPaymentsCustomer extends RuralPayments {
         'Content-Type': 'application/json'
       }
     })
-
-    const response = customerResponse._data.pop() || {}
 
     if (!customerResponse?._data?.length) {
       this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
