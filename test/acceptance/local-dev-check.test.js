@@ -258,6 +258,36 @@ const business = {
       yCoordinate: null,
       address: null
     }
+  ],
+  applications: [
+    {
+      sbi: '107183280',
+      id: '4511299240',
+      subjectId: 407841902,
+      year: 2025,
+      name: 'COMMODO FACERE PARIATUR COGO CAREO VENTITO CONIECTO CUNABULA DEFETISCOR',
+      moduleCode: 'CENTUM_UBERRIME_2025',
+      scheme: 'APTO VESPER VENTUS IPSA',
+      statusCodeP: 'STADOM',
+      statusCodeS: '000031',
+      status: 'REJECTED',
+      submissionDate: '2025-08-14T02:35:29.767Z',
+      portalStatusP: 'DOMPRS',
+      portalStatusS: 'REJECT',
+      portalStatus: null,
+      active: true,
+      transitionId: '4371793806',
+      transitionName: 'REJECT',
+      agreementReferences: ['456927534'],
+      transitionHistory: [
+        {
+          id: '4371793806',
+          name: 'REJECT',
+          timestamp: '2025-08-13T10:07:11.622Z',
+          checkStatus: 'PASSED'
+        }
+      ]
+    }
   ]
 }
 const agreement = {
@@ -286,6 +316,7 @@ const paymentSchedules = [
     endDate: '2017-12-31T00:00:00.000Z'
   }
 ]
+
 const customer = {
   personId: '5007136',
   crn: '0866159801',
@@ -626,6 +657,32 @@ describe('Local mocked dev check', () => {
               parcelTotalArea
               startDate
               endDate
+            }
+          }
+          applications {
+            sbi
+            id
+            subjectId
+            year
+            name
+            moduleCode
+            scheme
+            statusCodeP
+            statusCodeS
+            status
+            submissionDate
+            portalStatusP
+            portalStatusS
+            portalStatus
+            active
+            transitionId
+            transitionName
+            agreementReferences
+            transitionHistory {
+              id
+              name
+              timestamp
+              checkStatus
             }
           }
         }
