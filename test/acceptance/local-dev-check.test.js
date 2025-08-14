@@ -259,6 +259,36 @@ const business = {
       yCoordinate: null,
       address: null
     }
+  ],
+  applications: [
+    {
+      sbi: '107183280',
+      id: '4511299240',
+      subjectId: 407841902,
+      year: 2022,
+      name: 'COMMODO FACERE PARIATUR COGO CAREO VENTITO CONIECTO CUNABULA DEFETISCOR',
+      moduleCode: 'CENTUM_UBERRIME_2022',
+      scheme: 'APTO VESPER VENTUS IPSA',
+      statusCodeP: 'STADOM',
+      statusCodeS: '000031',
+      status: 'REJECTED',
+      submissionDate: '2022-12-31T18:41:23.188Z',
+      portalStatusP: 'DOMPRS',
+      portalStatusS: 'REJECT',
+      portalStatus: null,
+      active: true,
+      transitionId: '4371793806',
+      transitionName: 'REJECT',
+      agreementReferences: ['456927534'],
+      transitionHistory: [
+        {
+          id: '4371793806',
+          name: 'REJECT',
+          timestamp: '2022-12-31T02:13:05.043Z',
+          checkStatus: 'PASSED'
+        }
+      ]
+    }
   ]
 }
 const agreement = {
@@ -287,6 +317,7 @@ const paymentSchedules = [
     endDate: '2017-12-31T00:00:00.000Z'
   }
 ]
+
 const customer = {
   personId: '5007136',
   crn: '0866159801',
@@ -627,6 +658,32 @@ const businessQuery = gql`
           endDate
         }
       }
+      applications {
+        sbi
+        id
+        subjectId
+        year
+        name
+        moduleCode
+        scheme
+        statusCodeP
+        statusCodeS
+        status
+        submissionDate
+        portalStatusP
+        portalStatusS
+        portalStatus
+        active
+        transitionId
+        transitionName
+        agreementReferences
+        transitionHistory {
+          id
+          name
+          timestamp
+          checkStatus
+        }
+      }
     }
   }
 `
@@ -785,7 +842,7 @@ describe('Local mocked dev check', () => {
     expect(response.customer).toEqual(customer)
   })
 
-  // TODO: COmmented out until mock can be swapped over to V2
+  // TODO: Commented out until mock can be swapped over to V2
 
   // it('should support full customer schema - external', async () => {
   //   const tokenValue = jwt.sign(
