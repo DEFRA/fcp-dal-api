@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken'
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
@@ -27,7 +28,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
-  async getOrganisationIdBySBI(sbi) {
+  async organisationSearchBySbi(sbi) {
     const body = JSON.stringify({
       searchFieldType: 'SBI',
       primarySearchPhrase: sbi,
@@ -50,7 +51,16 @@ export class RuralPaymentsBusiness extends RuralPayments {
       throw new NotFound('Rural payments organisation not found')
     }
 
-    return organisationResponse._data[0].id
+    return organisationResponse._data[0]
+  }
+
+  async getOrganisationIdBySBI(sbi) {
+    if (this.gatewayType === 'internal') {
+      const response = await this.organisationSearchBySbi(sbi)
+      return response.id
+    } else if (this.gatewayType === 'external') {
+      return this.extractOrgIdFromDefraIdToken(sbi)
+    }
   }
 
   async getOrganisationBySBI(sbi) {
@@ -167,5 +177,22 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
 
     return response
+  }
+
+  extractOrgIdFromDefraIdToken(sbi) {
+    const token = this.request.headers['x-forwarded-authorization']
+    const { payload } = jwt.decode(token, { complete: true })
+    if (payload?.relationships && Array.isArray(payload.relationships)) {
+      // Find relationship string that matches the given SBI
+      const relationship = payload.relationships.find((rel) => {
+        const [, tokenSBI] = rel.split(':')
+        return sbi === tokenSBI
+      })
+      if (relationship) {
+        const [orgId] = relationship.split(':')
+        return orgId
+      }
+    }
+    throw new BadRequest('Defra ID token is not valid for the provided SBI')
   }
 }

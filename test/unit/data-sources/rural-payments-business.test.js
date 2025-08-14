@@ -70,7 +70,13 @@ describe('Rural Payments Business', () => {
     warn: jest.fn(),
     silly: jest.fn()
   }
-  const ruralPaymentsBusiness = new RuralPaymentsBusiness({ logger })
+  const datasourceOptions = [
+    { logger },
+    {
+      gatewayType: 'internal'
+    }
+  ]
+  const ruralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
   const httpGet = jest.spyOn(ruralPaymentsBusiness, 'get')
   const httpPost = jest.spyOn(ruralPaymentsBusiness, 'post')
   const httpPut = jest.spyOn(ruralPaymentsBusiness, 'put')

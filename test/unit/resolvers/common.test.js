@@ -8,7 +8,6 @@ import {
 describe('businessDetailsUpdateResolver', () => {
   let dataSources
   let logger
-  let kits
 
   beforeEach(() => {
     dataSources = {
@@ -21,7 +20,6 @@ describe('businessDetailsUpdateResolver', () => {
     logger = {
       warn: jest.fn()
     }
-    kits = { gatewayType: 'internal' }
   })
 
   it('businessDetailsUpdateResolver returns true when updateOrganisationDetails returns a response', async () => {
@@ -37,11 +35,7 @@ describe('businessDetailsUpdateResolver', () => {
 
     const input = { sbi: '123', name: 'Test' }
 
-    const result = await businessDetailsUpdateResolver(
-      null,
-      { input },
-      { dataSources, logger, kits }
-    )
+    const result = await businessDetailsUpdateResolver(null, { input }, { dataSources, logger })
 
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
@@ -59,7 +53,7 @@ describe('businessDetailsUpdateResolver', () => {
     const input = { sbi: '999', details: { name: 'Missing' } }
 
     await expect(
-      businessDetailsUpdateResolver(null, { input }, { dataSources, logger, kits })
+      businessDetailsUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
   })
 })
@@ -99,7 +93,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     const result = await businessAdditionalDetailsUpdateResolver(
       null,
       { input },
-      { dataSources, logger, kits }
+      { dataSources, logger }
     )
 
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
@@ -117,7 +111,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     const input = { sbi: '999', details: { name: 'Missing' } }
 
     await expect(
-      businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, logger, kits })
+      businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
   })
 })

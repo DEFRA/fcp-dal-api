@@ -12,6 +12,19 @@ const logger = {
   info: jest.fn()
 }
 
+const datasourceOptions = [
+  { logger },
+  {
+    request: {
+      headers: {
+        'gateway-type': 'internal',
+        email: 'test@test.test'
+      }
+    },
+    gatewayType: 'internal'
+  }
+]
+
 describe('RuralPayments', () => {
   describe('fetch', () => {
     const mockFetch = jest.spyOn(RESTDataSource.prototype, 'fetch')
@@ -25,7 +38,7 @@ describe('RuralPayments', () => {
     })
 
     test('returns data from RPP', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
 
       mockFetch.mockResolvedValueOnce('data')
 
@@ -40,7 +53,7 @@ describe('RuralPayments', () => {
 
         mockFetch.mockRejectedValue(error)
 
-        const rp = new RuralPayments({ logger })
+        const rp = new RuralPayments(...datasourceOptions)
         try {
           await rp.fetch('path', dummyRequest)
         } catch (thrownError) {
@@ -55,7 +68,7 @@ describe('RuralPayments', () => {
       test('when the RPP service is totally unreachable', async () => {
         mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'))
 
-        const rp = new RuralPayments({ logger })
+        const rp = new RuralPayments(...datasourceOptions)
         await expect(rp.fetch('path', dummyRequest)).rejects.toThrow(new Error('ECONNREFUSED'))
         expect(mockFetch).toBeCalledTimes(1)
       })
@@ -64,7 +77,7 @@ describe('RuralPayments', () => {
 
   describe('didEncounterError', () => {
     test('handles RPP errors', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
 
       const error = new Error('test error')
       error.extensions = { response: { status: 400, headers: { get: () => 'text/html' } } }
@@ -81,7 +94,7 @@ describe('RuralPayments', () => {
       })
     })
     test('handles unknown RPP errors', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
 
       const error = undefined
       const request = {}
@@ -100,16 +113,13 @@ describe('RuralPayments', () => {
 
   describe('willSendRequest', () => {
     test('adds email & gateway type header from request headers & gateway type for internal requests', () => {
-      const rp = new RuralPayments(
-        { logger },
-        { headers: { email: 'test@example.com', 'gateway-type': 'internal' } }
-      )
-      const request = { headers: {} }
+      const rp = new RuralPayments(...datasourceOptions)
+      const request = { headers: { 'gateway-type': 'internal', email: 'test@test.test' } }
       const path = 'test-path'
 
       rp.willSendRequest(path, request)
 
-      expect(request.headers).toEqual({ email: 'test@example.com', 'Gateway-Type': 'internal' })
+      expect(request.headers).toEqual({ email: 'test@test.test', 'gateway-type': 'internal' })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
         request: { ...request, path: 'test-path' },
         code: RURALPAYMENTS_API_REQUEST_001
@@ -120,10 +130,13 @@ describe('RuralPayments', () => {
       const rp = new RuralPayments(
         { logger },
         {
-          headers: {
-            'gateway-type': 'external',
-            'x-forwarded-authorization': 'token',
-            crn: 'test-crn'
+          gatewayType: 'external',
+          request: {
+            headers: {
+              'gateway-type': 'external',
+              'x-forwarded-authorization': 'token',
+              crn: 'test-crn'
+            }
           }
         }
       )
@@ -133,7 +146,6 @@ describe('RuralPayments', () => {
       rp.willSendRequest(path, request)
 
       expect(request.headers).toEqual({
-        'Gateway-Type': 'external',
         Authorization: 'token',
         crn: 'test-crn'
       })
@@ -147,9 +159,9 @@ describe('RuralPayments', () => {
       const rp = new RuralPayments(
         { logger },
         {
-          headers: {
-            'gateway-type': 'external',
-            crn: 'test-crn'
+          gatewayType: 'external',
+          request: {
+            headers: {}
           }
         }
       )
@@ -169,7 +181,7 @@ describe('RuralPayments', () => {
 
   describe('trace', () => {
     test('logs request and response details', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const url = 'test-url'
       const request = { id: '123', method: 'GET', headers: {} }
       const mockResult = {
@@ -214,7 +226,7 @@ describe('RuralPayments', () => {
 
   describe('requestDeduplicationPolicyFor', () => {
     test('returns correct deduplication policy', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const url = 'test-url'
       const request = { id: '123', method: 'POST' }
 
@@ -229,7 +241,7 @@ describe('RuralPayments', () => {
 
   describe('parseBody', () => {
     test('returns NO_CONTENT status for 204 responses', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const response = {
         status: StatusCodes.NO_CONTENT,
         headers: new Headers()
@@ -241,7 +253,7 @@ describe('RuralPayments', () => {
     })
 
     test('parses JSON response when content type is application/json', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const mockJson = { data: 'test' }
       const response = {
         status: 200,
@@ -259,7 +271,7 @@ describe('RuralPayments', () => {
     })
 
     test('parses text response for non-JSON content', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const mockText = 'plain text response'
       const response = {
         status: 200,
@@ -279,7 +291,7 @@ describe('RuralPayments', () => {
 
   describe('throwIfResponseIsError', () => {
     test('returns NO_CONTENT status for 204 responses', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const options = {
         response: {
           ok: false,

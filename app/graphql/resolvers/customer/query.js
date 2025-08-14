@@ -1,5 +1,6 @@
 export const Query = {
-  async customer(__, { crn }) {
-    return { crn }
+  async customer({ crn }, __, { dataSources }) {
+    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
+    return { crn, personId }
   }
 }

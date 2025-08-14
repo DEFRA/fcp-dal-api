@@ -62,23 +62,5 @@ describe('context', () => {
     expect(result.dataSources.permissions.type).toBe('Permissions')
     expect(result.dataSources.ruralPaymentsBusiness.type).toBe('Business')
     expect(result.dataSources.ruralPaymentsCustomer.type).toBe('Customer')
-    expect(result.kits.gatewayType).toBe('external')
-    expect(result.kits.token).toBe('token123')
-    expect(typeof result.kits.extractOrgIdFromDefraIdToken).toBe('function')
-  })
-
-  test('should default gatewayType to internal if not provided', async () => {
-    const request = {
-      headers: {
-        'x-forwarded-authorization': 'token456'
-      },
-      transactionId: 'tx-2',
-      traceId: 'trace-2'
-    }
-
-    const result = await context({ request })
-
-    expect(result.kits.gatewayType).toBe('internal')
-    expect(result.kits.token).toBe('token456')
   })
 })

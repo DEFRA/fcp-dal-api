@@ -22,13 +22,6 @@ export const extractOrgIdFromDefraIdToken = (sbi, token) => {
   throw new BadRequest('Defra ID token is not valid for the provided SBI')
 }
 
-export const kitsContext = (request) => ({
-  gatewayType: request?.headers['gateway-type'] || 'internal',
-  token: request.headers['x-forwarded-authorization'],
-  extractOrgIdFromDefraIdToken: (sbi) =>
-    extractOrgIdFromDefraIdToken(sbi, request.headers['x-forwarded-authorization'])
-})
-
 export async function context({ request }) {
   const auth = await getAuth(request)
 
@@ -37,14 +30,21 @@ export async function context({ request }) {
     traceId: request.traceId
   })
 
+  const datasourceOptions = [
+    { logger: requestLogger },
+    {
+      request,
+      gatewayType: request.headers['gateway-type'] || 'internal'
+    }
+  ]
+
   return {
     auth,
     requestLogger,
     dataSources: {
       permissions: new Permissions({ logger: requestLogger }),
-      ruralPaymentsBusiness: new RuralPaymentsBusiness({ logger: requestLogger }, request),
-      ruralPaymentsCustomer: new RuralPaymentsCustomer({ logger: requestLogger }, request)
-    },
-    kits: kitsContext(request)
+      ruralPaymentsBusiness: new RuralPaymentsBusiness(...datasourceOptions),
+      ruralPaymentsCustomer: new RuralPaymentsCustomer(...datasourceOptions)
+    }
   }
 }

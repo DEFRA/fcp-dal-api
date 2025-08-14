@@ -8,16 +8,8 @@ import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
-export const customFetch = async (url, options) => {
-  // We have two gateways and we need to override the hostname of the url to correspond to the gateway type from the request header.
-  const gatewayType = options.headers?.['Gateway-Type'] || 'internal'
-  const currentUrl = new URL(url)
-  const kitsGatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
-  const kitsURL = new URL(kitsGatewayUrl)
-
-  currentUrl.host = kitsURL.host
-  const overrideURL = currentUrl.toString()
-
+export async function customFetch(connectionKey, connectionCert, url, options) {
+  const kitsURL = new URL(url)
   const requestTls = {
     host: kitsURL.hostname,
     port: kitsURL.port,
@@ -25,15 +17,9 @@ export const customFetch = async (url, options) => {
   }
 
   if (!appConfig.get('kits.disableMTLS')) {
-    const clientCert = Buffer.from(appConfig.get(`kits.${gatewayType}.connectionCert`), 'base64')
-      .toString('utf-8')
-      .trim()
-    const clientKey = Buffer.from(appConfig.get(`kits.${gatewayType}.connectionKey`), 'base64')
-      .toString('utf-8')
-      .trim()
     requestTls.secureContext = tls.createSecureContext({
-      key: clientKey,
-      cert: clientCert
+      key: connectionKey,
+      cert: connectionCert
     })
   }
 
@@ -48,21 +34,37 @@ export const customFetch = async (url, options) => {
     })
   }
 
-  return fetch(overrideURL, {
+  return fetch(url, {
     ...options,
     signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
   })
 }
+
 export class RuralPayments extends RESTDataSource {
   // Note this gets overridden by the customFetch
-  baseURL = appConfig.get('kits.internal.gatewayUrl')
   request = null
-
-  constructor(config, request) {
+  constructor(config, { request, gatewayType }) {
     super(config)
-
     this.request = request
-    this.httpCache.httpFetch = customFetch
+    this.gatewayType = gatewayType || 'internal'
+    this.baseURL = appConfig.get(`kits.${this.gatewayType}.gatewayUrl`)
+
+    const connectionCert = Buffer.from(
+      appConfig.get(`kits.${this.gatewayType}.connectionCert`),
+      'base64'
+    )
+      .toString('utf-8')
+      .trim()
+    const connectionKey = Buffer.from(
+      appConfig.get(`kits.${this.gatewayType}.connectionKey`),
+      'base64'
+    )
+      .toString('utf-8')
+      .trim()
+
+    this.httpCache.httpFetch = (url, options) => {
+      return customFetch(connectionKey, connectionCert, url, options)
+    }
   }
 
   didEncounterError(error, request, url) {
@@ -98,10 +100,13 @@ export class RuralPayments extends RESTDataSource {
   async willSendRequest(path, request) {
     const headers = this.request.headers
     const additionalHeaders = {}
-    const gatewayType = headers['gateway-type'] || 'internal'
-    if (gatewayType === 'internal' && headers.email) {
+    if (this.gatewayType === 'internal' && headers.email) {
       additionalHeaders.email = headers.email
-    } else if (gatewayType === 'external' && headers['x-forwarded-authorization'] && headers.crn) {
+    } else if (
+      this.gatewayType === 'external' &&
+      headers['x-forwarded-authorization'] &&
+      headers.crn
+    ) {
       additionalHeaders.Authorization = headers['x-forwarded-authorization']
       additionalHeaders.crn = headers['crn']
     } else {
@@ -115,8 +120,7 @@ export class RuralPayments extends RESTDataSource {
 
     request.headers = {
       ...request.headers,
-      ...additionalHeaders,
-      'Gateway-Type': gatewayType
+      ...additionalHeaders
     }
 
     this.logger.debug('#datasource - Rural payments - request', {

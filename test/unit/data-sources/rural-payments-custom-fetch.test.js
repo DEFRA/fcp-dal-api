@@ -56,6 +56,8 @@ describe('RuralPayments Custom Fetch', () => {
     )
 
     const returnedCustomFetch = await customFetch(
+      fakeKey,
+      fakeCert,
       `${fakeInternalURL}example-path`,
       { method: 'GET' },
       {
