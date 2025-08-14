@@ -1,5 +1,6 @@
-import { jest } from '@jest/globals'
+import { expect, jest } from '@jest/globals'
 import { createRequire } from 'node:module'
+import { describe } from 'node:test'
 import { NotFound } from '../../../app/errors/graphql.js'
 import { Business, BusinessCustomer } from '../../../app/graphql/resolvers/business/business.js'
 import {
@@ -27,7 +28,8 @@ const dataSources = {
       return organisationPeopleByOrgId('5565448')._data
     },
     getCountyParishHoldingsBySBI: jest.fn(),
-    getAgreementsBySBI: jest.fn()
+    getAgreementsBySBI: jest.fn(),
+    getApplicationsBySBI: jest.fn()
   },
   ruralPaymentsPortalApi: {
     getApplicationsCountrysideStewardship() {
@@ -168,6 +170,76 @@ describe('Business', () => {
         ]
       }
     ])
+  })
+
+  describe('applications', () => {
+    it('should return applications list for specified SBI', async () => {
+      dataSources.ruralPaymentsBusiness.getApplicationsBySBI.mockResolvedValueOnce([
+        {
+          sbi: 'mock-sbi',
+          subject_id: 404,
+          year: 2015,
+          application_name: 'app name',
+          module_code: 'module code',
+          scheme: 'scheme',
+          application_id: 101,
+          status_code_p: 'code p',
+          status_code_s: 'code s',
+          status: 'status',
+          submission_date: '2015-09-16T10:50:01:001+0100',
+          portal_status_p: 'status p',
+          portal_status_s: 'status s',
+          portal_status: 'portal status',
+          fg_active: 'Yes',
+          transition_id: 187,
+          transition_name: 'transition name',
+          agreement_ref: '42,17, 111',
+          application_history: [
+            {
+              transition_id: 187,
+              transition_name: 'transition name',
+              dt_transition: '2018-10-26T08:05:54:054+0100',
+              check_status: 'check status'
+            }
+          ]
+        }
+      ])
+
+      const applications = await Business.applications({ sbi: 'mock-sbi' }, undefined, {
+        dataSources
+      })
+
+      expect(applications).toEqual([
+        {
+          sbi: 'mock-sbi',
+          id: 101,
+          subjectId: 404,
+          year: 2015,
+          name: 'app name',
+          moduleCode: 'module code',
+          scheme: 'scheme',
+          statusCodeP: 'code p',
+          statusCodeS: 'code s',
+          status: 'status',
+          submissionDate: new Date('2015-09-16T10:50:01.001+0100').toISOString(),
+          portalStatusP: 'status p',
+          portalStatusS: 'status s',
+          portalStatus: 'portal status',
+          active: true,
+          transitionId: 187,
+          transitionName: 'transition name',
+          agreementReferences: ['42', '17', '111'],
+          transitionHistory: [
+            {
+              id: 187,
+              name: 'transition name',
+              timestamp: new Date('2018-10-26T08:05:54.054+0100').toISOString(),
+              checkStatus: 'check status'
+            }
+          ]
+        }
+      ])
+    })
   })
 })
 

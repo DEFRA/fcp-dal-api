@@ -5,6 +5,7 @@ import {
   booleanise,
   dalAddressToKitsAddress,
   kitsAddressToDalAddress,
+  transformDateTimeToISO,
   transformEntityStatus
 } from '../common.js'
 
@@ -235,3 +236,33 @@ function transformPaymentSchedule(paymentSchedule) {
     endDate: validateDate(paymentSchedule.payment_schedule_end_date?.split('T')[0]).toISOString()
   }
 }
+
+export const transformApplications = (applications) => applications.map(transformApplication)
+
+const transformApplication = (application) => ({
+  sbi: application.sbi,
+  id: application.application_id,
+  subjectId: application.subject_id,
+  year: application.year,
+  name: application.application_name,
+  moduleCode: application.module_code,
+  scheme: application.scheme,
+  statusCodeP: application.status_code_p,
+  statusCodeS: application.status_code_s,
+  status: application.status,
+  submissionDate: transformDateTimeToISO(application.submission_date),
+  portalStatusP: application.portal_status_p,
+  portalStatusS: application.portal_status_s,
+  portalStatus: application.portal_status,
+  active: /^yes$/i.test(application.fg_active),
+  transitionId: application.transition_id,
+  transitionName: application.transition_name,
+  agreementReferences: application.agreement_ref?.split(/, ?/) || [],
+  transitionHistory: (application.application_history || []).map(transformTransitions)
+})
+const transformTransitions = ({ transition_id, transition_name, dt_transition, check_status }) => ({
+  id: transition_id,
+  name: transition_name,
+  timestamp: transformDateTimeToISO(dt_transition),
+  checkStatus: check_status
+})

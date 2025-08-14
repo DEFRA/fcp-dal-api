@@ -116,6 +116,35 @@ type PaymentSchedule {
   endDate: Date
 }
 
+type Application {
+  sbi: ID!
+  id: ID!
+  subjectId: Int
+  year: Int
+  name: String
+  moduleCode: String
+  scheme: String
+  statusCodeP: String
+  statusCodeS: String
+  status: String
+  submissionDate: Date
+  portalStatusP: String
+  portalStatusS: String
+  portalStatus: String
+  active: Boolean
+  transitionId: ID
+  transitionName: String
+  agreementReferences: [ID]
+  transitionHistory: [Transition]
+}
+
+type Transition {
+  id: ID
+  name: String
+  timestamp: Date
+  checkStatus: String
+}
+
 type BusinessInfo {
   name: String
   reference: String
@@ -175,6 +204,7 @@ type Business {
   customers: [BusinessCustomerPartial]
   customer(crn: ID!): BusinessCustomer
   agreements: [Agreement]
+  applications: [Application]
 }
 
 type BusinessCustomerPartial {

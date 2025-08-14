@@ -1,6 +1,8 @@
+import { describe } from 'node:test'
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   transformAgreements,
+  transformApplications,
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformBusinessDetailsToOrgDetailsCreate,
   transformBusinessDetailsToOrgDetailsUpdate,
@@ -378,6 +380,127 @@ describe('Business transformer', () => {
         ]
       }
     ])
+  })
+
+  describe('#transformApplications', () => {
+    it('should transform application data correctly', () => {
+      const mockApplications = [
+        {
+          sbi: '12345',
+          application_id: 'app123',
+          subject_id: 'subj123',
+          year: 2025,
+          application_name: 'Test Application',
+          module_code: 'module123',
+          scheme: 'Test Scheme',
+          status_code_p: 'PENDING',
+          status_code_s: 'SUBMITTED',
+          status: 'IN_PROGRESS',
+          submission_date: '2025-07-11T15:11:12:000Z',
+          portal_status_p: 'ACTIVE',
+          portal_status_s: 'INACTIVE',
+          portal_status: 'ACTIVE',
+          fg_active: 'Yes',
+          transition_id: 1,
+          transition_name: 'Submitted',
+          agreement_ref: '42,17, 111',
+          application_history: [
+            {
+              transition_id: 1,
+              transition_name: 'Submitted',
+              dt_transition: '2025-07-11T15:11:12:000Z',
+              check_status: 'Checked'
+            }
+          ]
+        },
+        {
+          sbi: 12345,
+          application_id: 123,
+          submissionDate: null,
+          fg_active: null,
+          agreement_ref: null,
+          application_history: null
+        },
+        {
+          sbi: 12345,
+          application_id: 1234,
+          fg_active: 'no'
+        }
+      ]
+
+      expect(transformApplications(mockApplications)).toEqual([
+        {
+          sbi: '12345',
+          id: 'app123',
+          subjectId: 'subj123',
+          year: 2025,
+          name: 'Test Application',
+          moduleCode: 'module123',
+          scheme: 'Test Scheme',
+          statusCodeP: 'PENDING',
+          statusCodeS: 'SUBMITTED',
+          status: 'IN_PROGRESS',
+          submissionDate: '2025-07-11T15:11:12.000Z',
+          portalStatusP: 'ACTIVE',
+          portalStatusS: 'INACTIVE',
+          portalStatus: 'ACTIVE',
+          active: true,
+          transitionId: 1,
+          transitionName: 'Submitted',
+          agreementReferences: ['42', '17', '111'],
+          transitionHistory: [
+            {
+              id: 1,
+              name: 'Submitted',
+              timestamp: '2025-07-11T15:11:12.000Z',
+              checkStatus: 'Checked'
+            }
+          ]
+        },
+        {
+          sbi: 12345,
+          id: 123,
+          subjectId: undefined,
+          year: undefined,
+          name: undefined,
+          moduleCode: undefined,
+          scheme: undefined,
+          statusCodeP: undefined,
+          statusCodeS: undefined,
+          status: undefined,
+          submissionDate: null,
+          portalStatusP: undefined,
+          portalStatusS: undefined,
+          portalStatus: undefined,
+          active: false,
+          transitionId: undefined,
+          transitionName: undefined,
+          agreementReferences: [],
+          transitionHistory: []
+        },
+        {
+          sbi: 12345,
+          id: 1234,
+          subjectId: undefined,
+          year: undefined,
+          name: undefined,
+          moduleCode: undefined,
+          scheme: undefined,
+          statusCodeP: undefined,
+          statusCodeS: undefined,
+          status: undefined,
+          submissionDate: null,
+          portalStatusP: undefined,
+          portalStatusS: undefined,
+          portalStatus: undefined,
+          active: false,
+          transitionId: undefined,
+          transitionName: undefined,
+          agreementReferences: [],
+          transitionHistory: []
+        }
+      ])
+    })
   })
 })
 

@@ -3,6 +3,7 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
 import {
   transformAgreements,
+  transformApplications,
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformCountyParishHoldings,
   transformOrganisationCustomer,
@@ -54,6 +55,12 @@ export const Business = {
     const agreements = await dataSources.ruralPaymentsBusiness.getAgreementsBySBI(sbi)
 
     return transformAgreements(agreements)
+  },
+
+  async applications({ sbi }, _, { dataSources }) {
+    const applications = await dataSources.ruralPaymentsBusiness.getApplicationsBySBI(sbi)
+
+    return transformApplications(applications)
   }
 }
 
