@@ -93,8 +93,8 @@ describe('Customer', () => {
   test('Query.customer.personId', async () => {
     dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('internal person id')
     const response = await Query.customer(
-      { crn: personFixture.customerReferenceNumber },
       undefined,
+      { crn: personFixture.customerReferenceNumber },
       { dataSources }
     )
 
