@@ -17,9 +17,11 @@ export async function customFetch(url, options, connectionKey = '', connectionCe
   }
 
   if (!appConfig.get('kits.disableMTLS')) {
+    const decodedCert = Buffer.from(connectionCert, 'base64').toString('utf-8').trim()
+    const decodedKey = Buffer.from(connectionKey, 'base64').toString('utf-8').trim()
     requestTls.secureContext = tls.createSecureContext({
-      key: connectionKey,
-      cert: connectionCert
+      key: decodedKey,
+      cert: decodedCert
     })
   }
 
@@ -49,18 +51,8 @@ export class RuralPayments extends RESTDataSource {
     this.gatewayType = gatewayType || 'internal'
     this.baseURL = appConfig.get(`kits.${this.gatewayType}.gatewayUrl`)
 
-    const connectionCert = Buffer.from(
-      appConfig.get(`kits.${this.gatewayType}.connectionCert`),
-      'base64'
-    )
-      .toString('utf-8')
-      .trim()
-    const connectionKey = Buffer.from(
-      appConfig.get(`kits.${this.gatewayType}.connectionKey`),
-      'base64'
-    )
-      .toString('utf-8')
-      .trim()
+    const connectionCert = appConfig.get(`kits.${this.gatewayType}.connectionCert`)
+    const connectionKey = appConfig.get(`kits.${this.gatewayType}.connectionKey`)
 
     this.httpCache.httpFetch = (url, options) => {
       return customFetch(url, options, connectionKey, connectionCert)
