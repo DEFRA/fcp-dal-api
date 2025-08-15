@@ -131,6 +131,9 @@ describe('RuralPayments', () => {
     })
 
     test('adds crn, Authorization & gateway type header from request headers for external requests', () => {
+      const token = jwt.sign({ crn: 'test-crn' }, 'secret', {
+        expiresIn: '1h'
+      })
       const rp = new RuralPayments(
         { logger },
         {
@@ -138,8 +141,7 @@ describe('RuralPayments', () => {
           request: {
             headers: {
               'gateway-type': 'external',
-              'x-forwarded-authorization': 'token',
-              crn: 'test-crn'
+              'x-forwarded-authorization': token
             }
           }
         }
@@ -150,7 +152,7 @@ describe('RuralPayments', () => {
       rp.willSendRequest(path, request)
 
       expect(request.headers).toEqual({
-        Authorization: 'token',
+        Authorization: token,
         crn: 'test-crn'
       })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {

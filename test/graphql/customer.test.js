@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
@@ -233,8 +234,7 @@ describe('Query.customer', () => {
       {},
       {
         'gateway-type': 'external',
-        crn: '123',
-        'x-forwarded-authorization': 'token'
+        'x-forwarded-authorization': jwt.sign({ crn: '123' }, 'secret', { expiresIn: '1h' })
       }
     )
 

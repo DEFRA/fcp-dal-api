@@ -299,7 +299,8 @@ describe('business - external', () => {
   test('update business legal status', async () => {
     const tokenValue = jwt.sign(
       {
-        relationships: ['organisationId:sbi']
+        relationships: ['organisationId:sbi'],
+        crn: 'crn'
       },
       'test-secret'
     )
@@ -349,7 +350,7 @@ describe('business - external', () => {
       {
         input
       },
-      { crn: 'crn', 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
     )
 
     expect(result).toEqual({

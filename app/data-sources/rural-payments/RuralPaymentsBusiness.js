@@ -190,7 +190,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       })
       if (relationship) {
         const [orgId] = relationship.split(':')
-        return parseInt(orgId)
+        return orgId
       }
     }
     throw new BadRequest('Defra ID token is not valid for the provided SBI')

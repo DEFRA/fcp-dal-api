@@ -175,7 +175,7 @@ describe('Rural Payments Business', () => {
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
 
       const result = await ruralPaymentsBusinessExt.getOrganisationIdBySBI('123456789')
-      expect(result).toEqual(123)
+      expect(result).toEqual('123')
     })
 
     test('should throw NotFound when organisation not found by SBI', async () => {
