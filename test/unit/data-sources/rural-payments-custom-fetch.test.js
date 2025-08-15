@@ -3,18 +3,22 @@ import { config } from '../../../app/config.js'
 
 const fakeCert = 'KITS_CONNECTION_CERT'
 const fakeKey = 'KITS_CONNECTION_KEY'
+const b64fakeCert = Buffer.from(fakeCert).toString('base64')
+const b64fakeKey = Buffer.from(fakeKey).toString('base64')
+
 const timeout = 1500
 
 const fakeInternalURL = 'https://rp_kits_gateway_internal_url/v1/'
 config.set('kits.gatewayTimeoutMs', `${timeout}`)
-config.set('kits.internal.connectionCert', Buffer.from(fakeCert).toString('base64'))
-config.set('kits.internal.connectionKey', Buffer.from(fakeKey).toString('base64'))
+config.set('kits.internal.connectionCert', b64fakeCert)
+config.set('kits.internal.connectionKey', b64fakeKey)
 config.set('kits.internal.gatewayUrl', fakeInternalURL)
+config.set('kits.disableMTLS', false)
 
 const fakeExternalURL = 'https://rp_kits_gateway_external_url/v1/'
 
-config.set('kits.external.connectionCert', Buffer.from(fakeCert).toString('base64'))
-config.set('kits.external.connectionKey', Buffer.from(fakeKey).toString('base64'))
+config.set('kits.external.connectionCert', b64fakeCert)
+config.set('kits.external.connectionKey', b64fakeKey)
 config.set('kits.external.gatewayUrl', fakeExternalURL)
 
 const kitsInternalURL = new URL(fakeInternalURL)
@@ -57,8 +61,8 @@ describe('RuralPayments Custom Fetch', () => {
     const returnedCustomFetch = await customFetch(
       `${fakeInternalURL}example-path`,
       { method: 'GET', headers: { 'Gateway-Type': 'internal' } },
-      fakeKey,
-      fakeCert
+      b64fakeKey,
+      b64fakeCert
     )
 
     expect(mockCreateSecureContext).toHaveBeenCalledWith({
