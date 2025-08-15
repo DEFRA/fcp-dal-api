@@ -2,6 +2,7 @@ import { jest } from '@jest/globals'
 
 import { Permissions } from '../../../app/data-sources/static/permissions.js'
 import { Customer, CustomerBusiness } from '../../../app/graphql/resolvers/customer/customer.js'
+import { Query } from '../../../app/graphql/resolvers/customer/query.js'
 import { organisationPeopleByOrgId } from '../../fixtures/organisation.js'
 import { buildPermissionsFromIdsAndLevels } from '../../test-helpers/permissions.js'
 
@@ -61,12 +62,12 @@ const personBusinessesFixture = [
 
 const dataSources = {
   ruralPaymentsCustomer: {
-    getCustomerByCRN() {
-      return personFixture
-    },
-    getPersonBusinessesByPersonId() {
-      return personBusinessesFixture
-    },
+    getPersonIdByCRN: jest.fn(),
+    getExternalPersonId: jest.fn(),
+    getExternalPerson: jest.fn(),
+    getCustomerByCRN: jest.fn(),
+    getPersonByPersonId: jest.fn(),
+    getPersonBusinessesByPersonId: jest.fn(),
     getNotificationsByOrganisationIdAndPersonId: jest.fn(),
     getAuthenticateAnswersByCRN() {
       return {
@@ -89,13 +90,30 @@ describe('Customer', () => {
     jest.clearAllMocks()
   })
 
-  test('Customer.info', async () => {
-    const response = await Customer.info(
-      { crn: personFixture.customerReferenceNumber },
+  test('Query.customer.personId', async () => {
+    dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('internal person id')
+    const response = await Query.customer(
       undefined,
+      { crn: personFixture.customerReferenceNumber },
       { dataSources }
     )
 
+    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith(
+      personFixture.customerReferenceNumber
+    )
+
+    expect(response).toEqual({ crn: 'crn-11111111', personId: 'internal person id' })
+  })
+
+  test('Customer.info', async () => {
+    dataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(personFixture)
+    const response = await Customer.info({ personId: personFixture.id }, undefined, {
+      dataSources
+    })
+
+    expect(dataSources.ruralPaymentsCustomer.getPersonByPersonId).toHaveBeenCalledWith(
+      personFixture.id
+    )
     expect(response).toEqual({
       name: {
         title: 'Mrs.',
@@ -134,8 +152,11 @@ describe('Customer', () => {
   })
 
   test('Customer.business - returns null if no business', async () => {
+    dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+      personBusinessesFixture
+    )
     const response = await Customer.business(
-      { crn: personFixture.customerReferenceNumber },
+      { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
       { sbi: 107183280 },
       { dataSources }
     )
@@ -143,10 +164,17 @@ describe('Customer', () => {
   })
 
   test('Customer.business - returns business', async () => {
+    dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+      personBusinessesFixture
+    )
     const response = await Customer.business(
-      { crn: personFixture.customerReferenceNumber },
+      { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
       { sbi: 107591843 },
       { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId).toHaveBeenCalledWith(
+      personFixture.id
     )
     expect(response).toEqual({
       crn: 'crn-11111111',
@@ -158,14 +186,27 @@ describe('Customer', () => {
   })
 
   test('Customer.businesses', async () => {
-    const response = await Customer.businesses({ personId: '5007136' }, undefined, { dataSources })
+    dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+      personBusinessesFixture
+    )
+    const response = await Customer.businesses(
+      { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
+      undefined,
+      {
+        dataSources
+      }
+    )
+
+    expect(dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId).toHaveBeenCalledWith(
+      personFixture.id
+    )
     expect(response).toEqual([
       {
         name: 'Cliff Spence T/As Abbey Farm',
         sbi: 107591843,
         organisationId: '5625145',
         personId: 11111111,
-        crn: undefined
+        crn: 'crn-11111111'
       }
     ])
   })

@@ -1,10 +1,12 @@
 config.set('auth.disabled', false)
+import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { mockOrganisationSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
-const v1 = nock(config.get('kits.gatewayUrl'))
+const v1 = nock(config.get('kits.internal.gatewayUrl'))
+const v1_external = nock(config.get('kits.external.gatewayUrl'))
 
 const orgDetailsUpdatePayload = {
   id: 'organisationId',
@@ -464,6 +466,83 @@ describe('business', () => {
     expect(result).toEqual({
       data: {
         updateBusinessVAT: {
+          success: true,
+          business: {
+            info: queryReturn
+          }
+        }
+      }
+    })
+  })
+})
+
+describe('business - external gateway', () => {
+  const tokenValue = jwt.sign(
+    {
+      relationships: ['organisationId:sbi'],
+      crn: 'crn'
+    },
+    'test-secret'
+  )
+  afterEach(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
+  beforeEach(() => {
+    nock.disableNetConnect()
+
+    v1_external.get('/organisation/organisationId').reply(200, {
+      _data: orgDetailsUpdatePayload
+    })
+  })
+
+  test('update business name', async () => {
+    const input = {
+      sbi: 'sbi',
+      name: 'new name'
+    }
+
+    const putPayloadOverrides = {
+      name: 'new name'
+    }
+    const { sbi: _, ...queryReturn } = input
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      ...putPayloadOverrides
+    }
+
+    v1_external.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
+
+    v1_external.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', ...putPayloadOverrides }
+    })
+
+    const query = `
+      mutation Mutation($input: UpdateBusinessNameInput!) {
+        updateBusinessName(input: $input) {
+          success
+            business {
+            info {
+              name
+            }
+          }
+        }
+      }
+    `
+    const result = await makeTestQuery(
+      query,
+      true,
+      {
+        input
+      },
+      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+    )
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessName: {
           success: true,
           business: {
             info: queryReturn
