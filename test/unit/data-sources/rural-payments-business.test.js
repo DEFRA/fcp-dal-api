@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import jwt from 'jsonwebtoken'
 import { RuralPaymentsBusiness } from '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../app/errors/graphql.js'
 import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
@@ -77,6 +78,24 @@ describe('Rural Payments Business', () => {
     }
   ]
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
+
+  const tokenValue = jwt.sign(
+    {
+      relationships: ['123:123456789']
+    },
+    'test-secret'
+  )
+  const ruralPaymentsBusinessExt = new RuralPaymentsBusiness(
+    { logger },
+    {
+      gatewayType: 'external',
+      request: {
+        headers: {
+          'x-forwarded-authorization': tokenValue
+        }
+      }
+    }
+  )
   const httpGet = jest.spyOn(ruralPaymentsBusiness, 'get')
   const httpPost = jest.spyOn(ruralPaymentsBusiness, 'post')
   const httpPut = jest.spyOn(ruralPaymentsBusiness, 'put')
@@ -132,7 +151,7 @@ describe('Rural Payments Business', () => {
   })
 
   describe('getOrganisationIdBySBI', () => {
-    test('should return organisation ID when found by SBI', async () => {
+    test('should return organisation ID when found by SBI - internal', async () => {
       const mockSearchResponse = { _data: [{ id: 123 }] }
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
 
@@ -149,6 +168,14 @@ describe('Rural Payments Business', () => {
           'Content-Type': 'application/json'
         }
       })
+    })
+
+    test('should return organisation ID when found by SBI - external', async () => {
+      const mockSearchResponse = { _data: [{ id: 123 }] }
+      httpPost.mockImplementationOnce(async () => mockSearchResponse)
+
+      const result = await ruralPaymentsBusinessExt.getOrganisationIdBySBI('123456789')
+      expect(result).toEqual(123)
     })
 
     test('should throw NotFound when organisation not found by SBI', async () => {

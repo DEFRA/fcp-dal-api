@@ -6,12 +6,12 @@ import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getPersonIdByCRN(crn) {
-    if (this.gatewayType === 'internal') {
-      const response = await this.personSearchByCRN(crn)
-      return response.id
-    } else if (this.gatewayType === 'external') {
+    if (this.gatewayType === 'external') {
       const response = await this.getExternalPerson()
       return response?.id
+    } else {
+      const response = await this.personSearchByCRN(crn)
+      return response.id
     }
   }
 

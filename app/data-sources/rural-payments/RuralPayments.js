@@ -1,12 +1,22 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
+import jwt from 'jsonwebtoken'
 import tls from 'node:tls'
 import { Agent, ProxyAgent } from 'undici'
 import { config as appConfig } from '../../config.js'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
+
+export async function extractCrnFromDefraIdToken(token) {
+  const { payload } = jwt.decode(token, { complete: true })
+  if (payload?.crn) {
+    return payload.crn
+  } else {
+    throw new BadRequest('Defra ID token does not contain crn')
+  }
+}
 
 export async function customFetch(url, options, connectionKey = '', connectionCert = '') {
   const kitsURL = new URL(url)
@@ -94,13 +104,9 @@ export class RuralPayments extends RESTDataSource {
     const additionalHeaders = {}
     if (this.gatewayType === 'internal' && headers.email) {
       additionalHeaders.email = headers.email
-    } else if (
-      this.gatewayType === 'external' &&
-      headers['x-forwarded-authorization'] &&
-      headers.crn
-    ) {
+    } else if (this.gatewayType === 'external' && headers['x-forwarded-authorization']) {
       additionalHeaders.Authorization = headers['x-forwarded-authorization']
-      additionalHeaders.crn = headers['crn']
+      additionalHeaders.crn = extractCrnFromDefraIdToken(headers['x-forwarded-authorization'])
     } else {
       throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         extensions: {

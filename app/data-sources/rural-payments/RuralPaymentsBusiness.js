@@ -55,11 +55,11 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async getOrganisationIdBySBI(sbi) {
-    if (this.gatewayType === 'internal') {
+    if (this.gatewayType === 'external') {
+      return this.extractOrgIdFromDefraIdToken(sbi)
+    } else {
       const response = await this.organisationSearchBySbi(sbi)
       return response.id
-    } else if (this.gatewayType === 'external') {
-      return this.extractOrgIdFromDefraIdToken(sbi)
     }
   }
 
@@ -190,7 +190,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       })
       if (relationship) {
         const [orgId] = relationship.split(':')
-        return orgId
+        return parseInt(orgId)
       }
     }
     throw new BadRequest('Defra ID token is not valid for the provided SBI')

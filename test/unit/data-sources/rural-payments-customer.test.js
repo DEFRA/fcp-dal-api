@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import jwt from 'jsonwebtoken'
 import { RuralPaymentsCustomer } from '../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { NotFound } from '../../../app/errors/graphql.js'
 
@@ -6,7 +7,8 @@ describe('Rural Payments Customer', () => {
   const logger = {
     error: jest.fn(),
     warn: jest.fn(),
-    silly: jest.fn()
+    silly: jest.fn(),
+    debug: jest.fn()
   }
   const datasourceOptions = [
     { logger },
@@ -15,35 +17,40 @@ describe('Rural Payments Customer', () => {
     }
   ]
   const ruralPaymentsCustomer = new RuralPaymentsCustomer(...datasourceOptions)
+  const ruralPaymentsCustomerExt = new RuralPaymentsCustomer(
+    { logger },
+    {
+      gatewayType: 'external',
+      request: {
+        headers: {
+          'x-forwarded-authorization': jwt.sign({ crn: '11111111' }, 'secret', { expiresIn: '1h' })
+        }
+      }
+    }
+  )
   const httpGet = jest.spyOn(ruralPaymentsCustomer, 'get')
   const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
+  const httpGetExt = jest.spyOn(ruralPaymentsCustomerExt, 'get')
 
   test('should call getExternalPerson for external gateway', async () => {
-    httpPost.mockImplementationOnce(async () => ({ _data: [] }))
+    httpGetExt.mockImplementation(async () => ({ _data: { id: 123 } }))
+    const response = await ruralPaymentsCustomerExt.getCustomerByCRN('11111111')
 
-    await expect(ruralPaymentsCustomer.getCustomerByCRN('11111111')).rejects.toEqual(
-      new NotFound('Rural payments customer not found')
-    )
-
-    expect(httpPost).toHaveBeenCalledTimes(1)
-    expect(logger.warn).toHaveBeenCalledWith(
-      '#datasource - Rural payments - Customer not found for CRN: 11111111',
-      {
-        code: 'RURALPAYMENTS_API_NOT_FOUND_001',
-        crn: '11111111',
-        response: { body: { _data: [] } }
-      }
-    )
+    expect(httpGetExt.mock.calls).toEqual([['person/3337243/summary'], ['person/3337243/summary']])
+    expect(response).toEqual({ id: 123 })
   })
 
   test('should handle customer not found', async () => {
     httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
-    await expect(ruralPaymentsCustomer.getCustomerByCRN('11111111')).rejects.toEqual(
+    await expect(ruralPaymentsCustomer.personSearchByCRN('11111111')).rejects.toEqual(
       new NotFound('Rural payments customer not found')
     )
 
-    expect(httpPost).toHaveBeenCalledTimes(1)
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_REFERENCE","primarySearchPhrase":"11111111","offset":0,"limit":1}',
+      headers: { 'Content-Type': 'application/json' }
+    })
     expect(logger.warn).toHaveBeenCalledWith(
       '#datasource - Rural payments - Customer not found for CRN: 11111111',
       {
