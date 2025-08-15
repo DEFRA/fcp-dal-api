@@ -61,7 +61,6 @@ describe('businessDetailsUpdateResolver', () => {
 describe('businessAdditionalDetailsUpdateResolver', () => {
   let dataSources
   let logger
-  let kits
 
   beforeEach(() => {
     dataSources = {
@@ -74,7 +73,6 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     logger = {
       warn: jest.fn()
     }
-    kits = { gatewayType: 'internal' }
   })
 
   it('businessAdditionalDetailsUpdateResolver returns true when updateOrganisationDetails returns a response', async () => {

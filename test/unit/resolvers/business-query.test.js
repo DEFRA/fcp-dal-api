@@ -4,7 +4,6 @@ import { Query } from '../../../app/graphql/resolvers/business/query.js'
 describe('Business Query Resolver', () => {
   let mockDataSources
   let mockLogger
-  let mockKitsExternal
 
   beforeEach(() => {
     mockDataSources = {

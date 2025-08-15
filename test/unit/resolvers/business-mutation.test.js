@@ -117,7 +117,6 @@ describe('Business Additional Details Mutation resolvers', () => {
 
 describe('Business Mutation UpdateBusinessResponse', () => {
   let dataSources
-  let logger
 
   beforeEach(() => {
     dataSources = {
@@ -126,9 +125,6 @@ describe('Business Mutation UpdateBusinessResponse', () => {
         getOrganisationById: jest.fn(),
         getOrganisationIdBySBI: jest.fn()
       }
-    }
-    logger = {
-      warn: jest.fn()
     }
   })
 

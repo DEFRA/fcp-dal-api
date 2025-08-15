@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { NotFound } from '../../errors/graphql.js'
+import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { RuralPayments } from './RuralPayments.js'
 
