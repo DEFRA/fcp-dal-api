@@ -49,6 +49,7 @@ Also make sure to set the `KITS_INT_GATEWAY_URL` & `KITS_EXT_GATEWAY_URL` variab
 
 ```env
 KITS_INT_GATEWAY_URL=http://localhost:3100/v1
+KITS_EXT_GATEWAY_URL=http://localhost:3101/v1
 ```
 
 ### Development
