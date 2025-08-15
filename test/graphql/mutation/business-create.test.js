@@ -160,6 +160,8 @@ describe('business', () => {
     `
     const result = await makeTestQuery(query, true, { input })
 
+    expect(nock.isDone()).toBe(true)
+
     expect(result).toEqual({
       data: {
         createBusiness: {
