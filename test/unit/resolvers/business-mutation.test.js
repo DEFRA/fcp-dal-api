@@ -141,7 +141,7 @@ describe('Business Mutation UpdateBusinessResponse', () => {
     const result = await UpdateBusinessResponse.business(
       { business: { sbi: '123' } },
       {},
-      { dataSources, logger, kits: { gatewayType: 'internal' } }
+      { dataSources }
     )
 
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
@@ -303,12 +303,7 @@ describe('Business Mutation createBusiness', () => {
     dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('personId')
     dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockResolvedValue(orgDetails)
 
-    const response = await Mutation.createBusiness(
-      {},
-      mockArgs,
-      { dataSources, kits: { gatewayType: 'internal' } },
-      mockInfo
-    )
+    const response = await Mutation.createBusiness({}, mockArgs, { dataSources }, mockInfo)
 
     expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.createOrganisationByPersonId).toHaveBeenCalledWith(

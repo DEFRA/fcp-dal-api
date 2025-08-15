@@ -8,7 +8,7 @@ import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
-export async function customFetch(connectionKey, connectionCert, url, options) {
+export async function customFetch(url, options, connectionKey = '', connectionCert = '') {
   const kitsURL = new URL(url)
   const requestTls = {
     host: kitsURL.hostname,
@@ -63,7 +63,7 @@ export class RuralPayments extends RESTDataSource {
       .trim()
 
     this.httpCache.httpFetch = (url, options) => {
-      return customFetch(connectionKey, connectionCert, url, options)
+      return customFetch(url, options, connectionKey, connectionCert)
     }
   }
 

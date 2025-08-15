@@ -152,8 +152,11 @@ describe('Customer', () => {
   })
 
   test('Customer.business - returns null if no business', async () => {
+    dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+      personBusinessesFixture
+    )
     const response = await Customer.business(
-      { crn: personFixture.customerReferenceNumber },
+      { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
       { sbi: 107183280 },
       { dataSources }
     )

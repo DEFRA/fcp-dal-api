@@ -4,7 +4,7 @@ import {
 } from '../../../transformers/rural-payments/business.js'
 
 export const businessDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(input.sbi)
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
@@ -19,12 +19,8 @@ export const businessDetailsUpdateResolver = async (__, { input }, { dataSources
   }
 }
 
-export const businessAdditionalDetailsUpdateResolver = async (
-  __,
-  { input },
-  { dataSources, kits }
-) => {
-  const organisationId = await getOrgId(dataSources, input.sbi, kits)
+export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(input.sbi)
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgAdditionalDetails = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)

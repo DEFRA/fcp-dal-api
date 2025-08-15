@@ -18,7 +18,6 @@ config.set('kits.external.connectionKey', Buffer.from(fakeKey).toString('base64'
 config.set('kits.external.gatewayUrl', fakeExternalURL)
 
 const kitsInternalURL = new URL(fakeInternalURL)
-const kitsExternalURL = new URL(fakeExternalURL)
 
 const mockProxyAgent = jest.fn()
 const mockAgent = jest.fn()
@@ -56,13 +55,10 @@ describe('RuralPayments Custom Fetch', () => {
     )
 
     const returnedCustomFetch = await customFetch(
-      fakeKey,
-      fakeCert,
       `${fakeInternalURL}example-path`,
-      { method: 'GET' },
-      {
-        headers: { 'Gateway-Type': 'internal' }
-      }
+      { method: 'GET', headers: { 'Gateway-Type': 'internal' } },
+      fakeKey,
+      fakeCert
     )
 
     expect(mockCreateSecureContext).toHaveBeenCalledWith({
@@ -139,55 +135,6 @@ describe('RuralPayments Custom Fetch', () => {
 
     expect(returnedCustomFetch).toMatchObject([
       `${fakeInternalURL}example-path`,
-      {
-        dispatcher: [
-          {
-            requestTls: requestTls
-          }
-        ],
-        method: 'GET',
-        signal: [timeout]
-      }
-    ])
-  })
-
-  it('should call external gateway when Gateway-Type header set to "external"', async () => {
-    mockAgent.mockImplementation((...args) => args)
-    mockCreateSecureContext.mockImplementation((...args) => args)
-    mockAbortSignal.mockImplementation((...args) => args)
-    mockFetch.mockImplementation((...args) => args)
-
-    config.set('disableProxy', true)
-    config.set('kits.disableMTLS', true)
-
-    const { customFetch } = await import(
-      '../../../app/data-sources/rural-payments/RuralPayments.js'
-    )
-
-    const returnedCustomFetch = await customFetch(`${fakeInternalURL}example-path`, {
-      method: 'GET',
-      headers: { 'Gateway-Type': 'external' }
-    })
-
-    expect(mockCreateSecureContext).not.toHaveBeenCalled()
-
-    const requestTls = {
-      host: kitsExternalURL.hostname,
-      port: kitsExternalURL.port,
-      servername: kitsExternalURL.hostname
-    }
-
-    expect(mockAgent).toHaveBeenCalledWith({
-      requestTls
-    })
-
-    expect(mockAbortSignal).toHaveBeenCalledWith(timeout)
-
-    expect(mockFetch).toHaveBeenCalledTimes(1)
-
-    expect(returnedCustomFetch).toMatchObject([
-      // internal path overridden to external URL
-      'https://rp_kits_gateway_external_url/v1/example-path',
       {
         dispatcher: [
           {
