@@ -5,11 +5,11 @@ import jwt from 'jsonwebtoken'
 import tls from 'node:tls'
 import { Agent, ProxyAgent } from 'undici'
 import { config as appConfig } from '../../config.js'
-import { HttpError } from '../../errors/graphql.js'
+import { BadRequest, HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
-export async function extractCrnFromDefraIdToken(token) {
+export function extractCrnFromDefraIdToken(token) {
   const { payload } = jwt.decode(token, { complete: true })
   if (payload?.crn) {
     return payload.crn

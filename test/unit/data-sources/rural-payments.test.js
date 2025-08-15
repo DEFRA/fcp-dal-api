@@ -1,8 +1,12 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
-import { HttpError } from '../../../app/errors/graphql.js'
+import jwt from 'jsonwebtoken'
+import {
+  RuralPayments,
+  extractCrnFromDefraIdToken
+} from '../../../app/data-sources/rural-payments/RuralPayments.js'
+import { BadRequest, HttpError } from '../../../app/errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
 const logger = {
@@ -313,5 +317,20 @@ describe('RuralPayments', () => {
         })
       )
     })
+  })
+})
+
+describe('extractCrnFromDefraIdToken', () => {
+  test('extracts crn succesfully from valid token', async () => {
+    const response = extractCrnFromDefraIdToken(
+      jwt.sign({ crn: '11111111' }, 'secret', { expiresIn: '1h' })
+    )
+    expect(response).toEqual('11111111')
+  })
+  test('Throws error when provided an invalid token', async () => {
+    const invalidToken = jwt.sign({}, 'secret', { expiresIn: '1h' })
+    expect(() => extractCrnFromDefraIdToken(invalidToken)).toThrow(
+      new BadRequest('Defra ID token does not contain crn')
+    )
   })
 })
