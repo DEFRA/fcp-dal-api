@@ -14,4 +14,5 @@ The DAL requires multiple things to be provided to succesfully return a response
 
 ## External User requests
 
-- A Defra ID token that contains the relevant CRN and SBI (if requesting business data) for your query.
+- Set **gateway-type** header to "external"
+- A Defra ID token that contains the relevant CRN and SBI (if requesting business data) for your query sent through in the **x-forwarded-authorization** header
