@@ -7,7 +7,6 @@ describe('Rural Payments Customer', () => {
   const logger = {
     error: jest.fn(),
     warn: jest.fn(),
-    silly: jest.fn(),
     debug: jest.fn()
   }
   const datasourceOptions = [

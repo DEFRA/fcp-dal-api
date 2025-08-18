@@ -68,8 +68,7 @@ const orgDetailsUpdatePayload = transformBusinessDetailsToOrgDetailsUpdate(
 describe('Rural Payments Business', () => {
   const logger = {
     error: jest.fn(),
-    warn: jest.fn(),
-    silly: jest.fn()
+    warn: jest.fn()
   }
   const datasourceOptions = [
     { logger },
