@@ -9,6 +9,13 @@ import { BadRequest, HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
+const internalConnectionCert = appConfig.get(`kits.internal.connectionCert`)
+const internalConnectionKey = appConfig.get(`kits.internal.connectionKey`)
+const internalGatewayUrl = appConfig.get(`kits.internal.gatewayUrl`)
+const externalConnectionCert = appConfig.get(`kits.external.connectionCert`)
+const externalConnectionKey = appConfig.get(`kits.external.connectionKey`)
+const externalGatewayUrl = appConfig.get(`kits.external.gatewayUrl`)
+
 export function extractCrnFromDefraIdToken(token) {
   const { payload } = jwt.decode(token, { complete: true })
   if (payload?.crn) {
@@ -58,11 +65,19 @@ export class RuralPayments extends RESTDataSource {
   constructor(config, { request, gatewayType }) {
     super(config)
     this.request = request
-    this.gatewayType = gatewayType || 'internal'
-    this.baseURL = appConfig.get(`kits.${this.gatewayType}.gatewayUrl`)
 
-    const connectionCert = appConfig.get(`kits.${this.gatewayType}.connectionCert`)
-    const connectionKey = appConfig.get(`kits.${this.gatewayType}.connectionKey`)
+    this.gatewayType = gatewayType || 'internal'
+    if (!['internal', 'external'].includes(this.gatewayType)) {
+      throw new BadRequest(
+        `gateway-type header must be one of internal or external received: ${gatewayType}`
+      )
+    }
+
+    this.baseURL = 'external' ? externalGatewayUrl : internalGatewayUrl
+    const connectionCert =
+      this.gatewayType == 'external' ? externalConnectionCert : internalConnectionCert
+    const connectionKey =
+      this.gatewayType == 'external' ? externalConnectionKey : internalConnectionKey
 
     this.httpCache.httpFetch = (url, options) => {
       return customFetch(url, options, connectionKey, connectionCert)

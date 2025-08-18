@@ -183,6 +183,24 @@ describe('RuralPayments', () => {
         })
       )
     })
+
+    test('throws error if gatewaytype is not internal or external', () => {
+      const invalidDataSourceOptions = [
+        { logger },
+        {
+          gatewayType: 'unsupported',
+          request: {
+            headers: {}
+          }
+        }
+      ]
+
+      expect(() => new RuralPayments(...invalidDataSourceOptions)).toThrow(
+        new BadRequest(
+          'gateway-type header must be one of internal or external received: unsupported'
+        )
+      )
+    })
   })
 
   describe('trace', () => {
