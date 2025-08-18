@@ -1,4 +1,5 @@
 import { GraphQLClient, gql } from 'graphql-request'
+import jwt from 'jsonwebtoken'
 
 const business = {
   organisationId: '5565448',
@@ -457,183 +458,269 @@ const customer = {
   }
 }
 
-describe('Local mocked dev check', () => {
-  it('should support full business schema', async () => {
-    const query = gql`
-      query Business($sbi: ID!, $crn: ID!, $date: Date, $sheetId: ID!, $parcelId: ID!) {
-        business(sbi: $sbi) {
-          organisationId
-          sbi
-          info {
-            name
-            reference
-            vat
-            traderNumber
-            vendorNumber
-            address {
-              pafOrganisationName
-              line1
-              line2
-              line3
-              line4
-              line5
-              buildingNumberRange
-              buildingName
-              flatName
-              street
-              city
-              county
-              postalCode
-              country
-              uprn
-              dependentLocality
-              doubleDependentLocality
-              typeId
-            }
-            correspondenceAddress {
-              pafOrganisationName
-              line1
-              line2
-              line3
-              line4
-              line5
-              buildingNumberRange
-              buildingName
-              flatName
-              street
-              city
-              county
-              postalCode
-              country
-              uprn
-              dependentLocality
-              doubleDependentLocality
-              typeId
-            }
-            isCorrespondenceAsBusinessAddress
-            email {
-              address
-              validated
-            }
-            correspondenceEmail {
-              address
-              validated
-            }
-            phone {
-              mobile
-              landline
-            }
-            correspondencePhone {
-              mobile
-              landline
-            }
-            legalStatus {
-              code
-              type
-            }
-            type {
-              code
-              type
-            }
-            registrationNumbers {
-              companiesHouse
-              charityCommission
-            }
-            additionalSbis
-            lastUpdated
-            isFinancialToBusinessAddress
-            hasLandInNorthernIreland
-            hasLandInScotland
-            hasLandInWales
-            hasAdditionalBusinessActivities
-            additionalBusinessActivities {
-              code
-              type
-            }
-            isAccountablePeopleDeclarationCompleted
-            dateStartedFarming
-            landConfirmed
-            status {
-              locked
-              confirmed
-              deactivated
-            }
-          }
-          customers {
-            personId
-            firstName
-            lastName
-            crn
-            role
-          }
-          customer(crn: $crn) {
-            personId
-            firstName
-            lastName
-            crn
-            role
-            permissionGroups {
-              id
-              level
-              functions
-            }
-          }
-          land {
-            summary {
-              arableLandArea
-              permanentCropsArea
-              permanentGrasslandArea
-              totalArea
-              totalParcels
-            }
-            parcelCovers(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
-              id
-              name
-              area
-              code
-              isBpsEligible
-            }
-          }
-          countyParishHoldings {
-            cphNumber
-            parish
-            startDate
-            endDate
-            species
-            xCoordinate
-            yCoordinate
-            address
-          }
-          agreements {
-            contractId
-            name
-            status
-            contractType
-            schemeYear
-            startDate
-            endDate
-            paymentSchedules {
-              optionCode
-              optionDescription
-              commitmentGroupStartDate
-              commitmentGroupEndDate
-              year
-              sheetName
-              parcelName
-              actionArea
-              actionMTL
-              actionUnits
-              parcelTotalArea
-              startDate
-              endDate
-            }
-          }
+const businessQuery = gql`
+  query Business($sbi: ID!, $crn: ID!, $date: Date, $sheetId: ID!, $parcelId: ID!) {
+    business(sbi: $sbi) {
+      organisationId
+      sbi
+      info {
+        name
+        reference
+        vat
+        traderNumber
+        vendorNumber
+        address {
+          pafOrganisationName
+          line1
+          line2
+          line3
+          line4
+          line5
+          buildingNumberRange
+          buildingName
+          flatName
+          street
+          city
+          county
+          postalCode
+          country
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
+        }
+        correspondenceAddress {
+          pafOrganisationName
+          line1
+          line2
+          line3
+          line4
+          line5
+          buildingNumberRange
+          buildingName
+          flatName
+          street
+          city
+          county
+          postalCode
+          country
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
+        }
+        isCorrespondenceAsBusinessAddress
+        email {
+          address
+          validated
+        }
+        correspondenceEmail {
+          address
+          validated
+        }
+        phone {
+          mobile
+          landline
+        }
+        correspondencePhone {
+          mobile
+          landline
+        }
+        legalStatus {
+          code
+          type
+        }
+        type {
+          code
+          type
+        }
+        registrationNumbers {
+          companiesHouse
+          charityCommission
+        }
+        additionalSbis
+        lastUpdated
+        isFinancialToBusinessAddress
+        hasLandInNorthernIreland
+        hasLandInScotland
+        hasLandInWales
+        hasAdditionalBusinessActivities
+        additionalBusinessActivities {
+          code
+          type
+        }
+        isAccountablePeopleDeclarationCompleted
+        dateStartedFarming
+        landConfirmed
+        status {
+          locked
+          confirmed
+          deactivated
         }
       }
-    `
+      customers {
+        personId
+        firstName
+        lastName
+        crn
+        role
+      }
+      customer(crn: $crn) {
+        personId
+        firstName
+        lastName
+        crn
+        role
+        permissionGroups {
+          id
+          level
+          functions
+        }
+      }
+      land {
+        summary {
+          arableLandArea
+          permanentCropsArea
+          permanentGrasslandArea
+          totalArea
+          totalParcels
+        }
+        parcelCovers(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
+          id
+          name
+          area
+          code
+          isBpsEligible
+        }
+      }
+      countyParishHoldings {
+        cphNumber
+        parish
+        startDate
+        endDate
+        species
+        xCoordinate
+        yCoordinate
+        address
+      }
+      agreements {
+        contractId
+        name
+        status
+        contractType
+        schemeYear
+        startDate
+        endDate
+        paymentSchedules {
+          optionCode
+          optionDescription
+          commitmentGroupStartDate
+          commitmentGroupEndDate
+          year
+          sheetName
+          parcelName
+          actionArea
+          actionMTL
+          actionUnits
+          parcelTotalArea
+          startDate
+          endDate
+        }
+      }
+    }
+  }
+`
+
+const customerQuery = gql`
+  query Customer($crn: ID!, $sbi: ID!) {
+    customer(crn: $crn) {
+      personId
+      crn
+      info {
+        name {
+          title
+          otherTitle
+          first
+          middle
+          last
+        }
+        dateOfBirth
+        phone {
+          mobile
+          landline
+        }
+        email {
+          address
+          validated
+        }
+        status {
+          locked
+          confirmed
+          deactivated
+        }
+        address {
+          pafOrganisationName
+          line1
+          line2
+          line3
+          line4
+          line5
+          buildingNumberRange
+          buildingName
+          flatName
+          street
+          city
+          county
+          postalCode
+          country
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
+        }
+        doNotContact
+        personalIdentifiers
+      }
+      businesses {
+        name
+        organisationId
+        sbi
+      }
+      business(sbi: $sbi) {
+        organisationId
+        sbi
+        name
+        role
+        messages {
+          id
+          subject
+          date
+          body
+          read
+          deleted
+        }
+        permissionGroups {
+          id
+          level
+          functions
+        }
+      }
+      authenticationQuestions {
+        memorableDate
+        memorableEvent
+        memorableLocation
+        updatedAt
+        isFound
+      }
+    }
+  }
+`
+
+describe('Local mocked dev check', () => {
+  it('should support full business schema - internal', async () => {
     const client = new GraphQLClient('http://localhost:3000/graphql')
     const response = await client.request(
-      query,
+      businessQuery,
       {
         sbi: '107183280',
         crn: '9477368292',
@@ -653,99 +740,67 @@ describe('Local mocked dev check', () => {
     })
   })
 
-  it('should support full customer schema', async () => {
-    const query = gql`
-      query Customer($crn: ID!, $sbi: ID!) {
-        customer(crn: $crn) {
-          personId
-          crn
-          info {
-            name {
-              title
-              otherTitle
-              first
-              middle
-              last
-            }
-            dateOfBirth
-            phone {
-              mobile
-              landline
-            }
-            email {
-              address
-              validated
-            }
-            status {
-              locked
-              confirmed
-              deactivated
-            }
-            address {
-              pafOrganisationName
-              line1
-              line2
-              line3
-              line4
-              line5
-              buildingNumberRange
-              buildingName
-              flatName
-              street
-              city
-              county
-              postalCode
-              country
-              uprn
-              dependentLocality
-              doubleDependentLocality
-              typeId
-            }
-            doNotContact
-            personalIdentifiers
-          }
-          businesses {
-            name
-            organisationId
-            sbi
-          }
-          business(sbi: $sbi) {
-            organisationId
-            sbi
-            name
-            role
-            messages {
-              id
-              subject
-              date
-              body
-              read
-              deleted
-            }
-            permissionGroups {
-              id
-              level
-              functions
-            }
-          }
-          authenticationQuestions {
-            memorableDate
-            memorableEvent
-            memorableLocation
-            updatedAt
-            isFound
-          }
-        }
-      }
-    `
+  it('should support full business schema - external', async () => {
+    const tokenValue = jwt.sign(
+      {
+        crn: '9477368292',
+        relationships: ['5565448:107183280']
+      },
+      'test-secret'
+    )
     const client = new GraphQLClient('http://localhost:3000/graphql')
     const response = await client.request(
-      query,
+      businessQuery,
+      {
+        sbi: '107183280',
+        crn: '9477368292',
+        date: '2020-01-01',
+        sheetId: 'SS6627',
+        parcelId: '8779'
+      },
+      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.business).toMatchObject({
+      ...business,
+      agreements: expect.arrayContaining([
+        { ...agreement, paymentSchedules: expect.arrayContaining(paymentSchedules) }
+      ])
+    })
+  })
+
+  it('should support full customer schema - internal', async () => {
+    const client = new GraphQLClient('http://localhost:3000/graphql')
+    const response = await client.request(
+      customerQuery,
       {
         sbi: '107591843',
         crn: '0866159801'
       },
       { email: 'some-email', 'gateway-type': 'internal' }
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.customer).toEqual(customer)
+  })
+
+  it('should support full customer schema - external', async () => {
+    const tokenValue = jwt.sign(
+      {
+        crn: '0866159801',
+        relationships: ['5625145:107591843']
+      },
+      'test-secret'
+    )
+    const client = new GraphQLClient('http://localhost:3000/graphql')
+    const response = await client.request(
+      customerQuery,
+      {
+        sbi: '107591843',
+        crn: '0866159801'
+      },
+      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
     )
 
     expect(response).not.toHaveProperty('errors')
