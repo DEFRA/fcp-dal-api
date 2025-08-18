@@ -9,12 +9,31 @@ import { BadRequest, HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
-const internalConnectionCert = appConfig.get(`kits.internal.connectionCert`)
-const internalConnectionKey = appConfig.get(`kits.internal.connectionKey`)
-const internalGatewayUrl = appConfig.get(`kits.internal.gatewayUrl`)
-const externalConnectionCert = appConfig.get(`kits.external.connectionCert`)
-const externalConnectionKey = appConfig.get(`kits.external.connectionKey`)
-const externalGatewayUrl = appConfig.get(`kits.external.gatewayUrl`)
+const internalRequestTls = generateRequestTls('internal')
+const externalRequestTls = generateRequestTls('external')
+
+export function generateRequestTls(gatewayType) {
+  const gatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
+  const kitsURL = new URL(gatewayUrl)
+  const requestTls = {
+    host: kitsURL.hostname,
+    port: kitsURL.port,
+    servername: kitsURL.hostname
+  }
+
+  if (!appConfig.get('kits.disableMTLS')) {
+    const connectionCert = appConfig.get(`kits.${gatewayType}.connectionCert`)
+    const connectionKey = appConfig.get(`kits.${gatewayType}.connectionKey`)
+    const decodedCert = Buffer.from(connectionCert, 'base64').toString('utf-8').trim()
+    const decodedKey = Buffer.from(connectionKey, 'base64').toString('utf-8').trim()
+    requestTls.secureContext = tls.createSecureContext({
+      key: decodedKey,
+      cert: decodedCert
+    })
+  }
+
+  return requestTls
+}
 
 export function extractCrnFromDefraIdToken(token) {
   const { payload } = jwt.decode(token, { complete: true })
@@ -25,23 +44,7 @@ export function extractCrnFromDefraIdToken(token) {
   }
 }
 
-export async function customFetch(url, options, connectionKey = '', connectionCert = '') {
-  const kitsURL = new URL(url)
-  const requestTls = {
-    host: kitsURL.hostname,
-    port: kitsURL.port,
-    servername: kitsURL.hostname
-  }
-
-  if (!appConfig.get('kits.disableMTLS')) {
-    const decodedCert = Buffer.from(connectionCert, 'base64').toString('utf-8').trim()
-    const decodedKey = Buffer.from(connectionKey, 'base64').toString('utf-8').trim()
-    requestTls.secureContext = tls.createSecureContext({
-      key: decodedKey,
-      cert: decodedCert
-    })
-  }
-
+export async function customFetch(url, options, requestTls) {
   if (appConfig.get('disableProxy')) {
     options.dispatcher = new Agent({
       requestTls
@@ -74,13 +77,10 @@ export class RuralPayments extends RESTDataSource {
     }
 
     this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
-    const connectionCert =
-      this.gatewayType === 'external' ? externalConnectionCert : internalConnectionCert
-    const connectionKey =
-      this.gatewayType === 'external' ? externalConnectionKey : internalConnectionKey
+    const requestTls = this.gatewayType === 'external' ? externalRequestTls : internalRequestTls
 
     this.httpCache.httpFetch = (url, options) => {
-      return customFetch(url, options, connectionKey, connectionCert)
+      return customFetch(url, options, requestTls)
     }
   }
 
