@@ -73,11 +73,11 @@ export class RuralPayments extends RESTDataSource {
       )
     }
 
-    this.baseURL = 'external' ? externalGatewayUrl : internalGatewayUrl
+    this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
     const connectionCert =
-      this.gatewayType == 'external' ? externalConnectionCert : internalConnectionCert
+      this.gatewayType === 'external' ? externalConnectionCert : internalConnectionCert
     const connectionKey =
-      this.gatewayType == 'external' ? externalConnectionKey : internalConnectionKey
+      this.gatewayType === 'external' ? externalConnectionKey : internalConnectionKey
 
     this.httpCache.httpFetch = (url, options) => {
       return customFetch(url, options, connectionKey, connectionCert)
