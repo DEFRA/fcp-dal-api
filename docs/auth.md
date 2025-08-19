@@ -1,6 +1,6 @@
 # DAL Homepage
 
-The DAL requires multiple things to be provided to succesfully return a response.
+The DAL requires multiple things to be provided to successfully return a response.
 **Please note in Dev the DAL has auth disabled so will return a response to all requests**
 
 ## Required for all requests
