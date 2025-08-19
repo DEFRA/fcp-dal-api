@@ -1,11 +1,13 @@
 config.set('auth.disabled', false)
+import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { transformBusinesDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
 import { mockOrganisationSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
-const v1 = nock(config.get('kits.gatewayUrl'))
+const v1 = nock(config.get('kits.internal.gatewayUrl'))
+const v1_external = nock(config.get('kits.external.gatewayUrl'))
 
 const orgAdditionalDetailsUpdatePayload = {
   id: 'organisationId',
@@ -272,6 +274,95 @@ describe('business', () => {
           business: {
             info: {
               dateStartedFarming: new Date('2020-01-01T00:00:00.000Z')
+            }
+          }
+        }
+      }
+    })
+  })
+})
+
+describe('business - external', () => {
+  afterEach(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
+  beforeEach(() => {
+    nock.disableNetConnect()
+
+    v1_external.get('/organisation/organisationId').reply(200, {
+      _data: orgAdditionalDetailsUpdatePayload
+    })
+  })
+
+  test('update business legal status', async () => {
+    const tokenValue = jwt.sign(
+      {
+        relationships: ['organisationId:sbi'],
+        crn: 'crn'
+      },
+      'test-secret'
+    )
+    const input = {
+      sbi: 'sbi',
+      legalStatusCode: 123
+    }
+
+    const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
+
+    const expectedPutPayload = {
+      ...orgAdditionalDetailsUpdatePayload,
+      ...transformedInput
+    }
+
+    v1_external
+      .put('/organisation/organisationId/additional-business-details', expectedPutPayload)
+      .reply(204)
+
+    v1_external.get('/organisation/organisationId').reply(200, {
+      _data: {
+        id: 'organisationId',
+        legalStatus: { id: 123, type: 'text corresponding to 123' }
+      }
+    })
+
+    mockOrganisationSearch(v1)
+
+    const query = `
+      mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
+        updateBusinessLegalStatus(input: $input) {
+          success
+            business {
+            info {
+              legalStatus {
+                code
+                type
+              }
+            }
+          }
+        }
+      }
+    `
+    const result = await makeTestQuery(
+      query,
+      true,
+      {
+        input
+      },
+      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+    )
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessLegalStatus: {
+          success: true,
+          business: {
+            info: {
+              legalStatus: {
+                code: 123,
+                type: 'text corresponding to 123'
+              }
             }
           }
         }

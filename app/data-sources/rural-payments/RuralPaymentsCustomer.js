@@ -6,6 +6,14 @@ import { RuralPayments } from './RuralPayments.js'
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getPersonIdByCRN(crn) {
+    if (this.gatewayType === 'external') {
+      const response = await this.getExternalPerson()
+      return response?.id
+    }
+    return (await this.personSearchByCRN(crn)).id
+  }
+
+  async personSearchByCRN(crn) {
     const body = JSON.stringify({
       searchFieldType: 'CUSTOMER_REFERENCE',
       primarySearchPhrase: crn,
@@ -20,9 +28,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
       }
     })
 
-    const response = customerResponse._data.pop() || {}
-
-    if (!response?.id) {
+    if (!customerResponse?._data?.length) {
       this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
         crn,
         code: RURALPAYMENTS_API_NOT_FOUND_001,
@@ -30,7 +36,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
       })
       throw new NotFound('Rural payments customer not found')
     }
-    return response.id
+    return customerResponse._data[0]
   }
 
   async getCustomerByCRN(crn) {
@@ -38,9 +44,16 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return this.getPersonByPersonId(personId)
   }
 
-  async getPersonByPersonId(personId) {
-    const response = await this.get(`person/${personId}/summary`)
+  async getExternalPerson() {
+    // This personId will will return details for the CRN provided for external users.
+    return this.getPersonByPersonId(config.get('kits.external.personIdOverride'))
+  }
 
+  async getPersonByPersonId(personId) {
+    if (this.gatewayType === 'external') {
+      personId = config.get('kits.external.personIdOverride')
+    }
+    const response = await this.get(`person/${personId}/summary`)
     if (!response?._data?.id) {
       this.logger.warn('#datasource - Rural payments - Customer not found for Person ID', {
         personId,

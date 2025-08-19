@@ -1,8 +1,12 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import { RuralPayments } from '../../../app/data-sources/rural-payments/RuralPayments.js'
-import { HttpError } from '../../../app/errors/graphql.js'
+import jwt from 'jsonwebtoken'
+import {
+  RuralPayments,
+  extractCrnFromDefraIdToken
+} from '../../../app/data-sources/rural-payments/RuralPayments.js'
+import { BadRequest, HttpError } from '../../../app/errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
 
 const logger = {
@@ -11,6 +15,19 @@ const logger = {
   debug: jest.fn(),
   info: jest.fn()
 }
+
+const datasourceOptions = [
+  { logger },
+  {
+    request: {
+      headers: {
+        'gateway-type': 'internal',
+        email: 'test@test.test'
+      }
+    },
+    gatewayType: 'internal'
+  }
+]
 
 describe('RuralPayments', () => {
   describe('fetch', () => {
@@ -25,7 +42,7 @@ describe('RuralPayments', () => {
     })
 
     test('returns data from RPP', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
 
       mockFetch.mockResolvedValueOnce('data')
 
@@ -40,7 +57,7 @@ describe('RuralPayments', () => {
 
         mockFetch.mockRejectedValue(error)
 
-        const rp = new RuralPayments({ logger })
+        const rp = new RuralPayments(...datasourceOptions)
         try {
           await rp.fetch('path', dummyRequest)
         } catch (thrownError) {
@@ -55,7 +72,7 @@ describe('RuralPayments', () => {
       test('when the RPP service is totally unreachable', async () => {
         mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'))
 
-        const rp = new RuralPayments({ logger })
+        const rp = new RuralPayments(...datasourceOptions)
         await expect(rp.fetch('path', dummyRequest)).rejects.toThrow(new Error('ECONNREFUSED'))
         expect(mockFetch).toBeCalledTimes(1)
       })
@@ -64,7 +81,7 @@ describe('RuralPayments', () => {
 
   describe('didEncounterError', () => {
     test('handles RPP errors', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
 
       const error = new Error('test error')
       error.extensions = { response: { status: 400, headers: { get: () => 'text/html' } } }
@@ -81,7 +98,7 @@ describe('RuralPayments', () => {
       })
     })
     test('handles unknown RPP errors', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
 
       const error = undefined
       const request = {}
@@ -99,24 +116,96 @@ describe('RuralPayments', () => {
   })
 
   describe('willSendRequest', () => {
-    test('adds email header from request headers', () => {
-      const rp = new RuralPayments({ logger }, { headers: { email: 'test@example.com' } })
-      const request = { headers: {} }
+    test('adds email & gateway type header from request headers & gateway type for internal requests', () => {
+      const rp = new RuralPayments(...datasourceOptions)
+      const request = { headers: { 'gateway-type': 'internal', email: 'test@test.test' } }
       const path = 'test-path'
 
       rp.willSendRequest(path, request)
 
-      expect(request.headers).toEqual({ email: 'test@example.com' })
+      expect(request.headers).toEqual({ email: 'test@test.test', 'gateway-type': 'internal' })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
         request: { ...request, path: 'test-path' },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
+
+    test('adds crn, Authorization & gateway type header from request headers for external requests', () => {
+      const token = jwt.sign({ crn: 'test-crn' }, 'secret', {
+        expiresIn: '1h'
+      })
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'external',
+          request: {
+            headers: {
+              'gateway-type': 'external',
+              'x-forwarded-authorization': token
+            }
+          }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      rp.willSendRequest(path, request)
+
+      expect(request.headers).toEqual({
+        Authorization: token,
+        crn: 'test-crn'
+      })
+      expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
+        request: { ...request, path: 'test-path' },
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+
+    test('throws error if external request headers are missing', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'external',
+          request: {
+            headers: {}
+          }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).rejects.toEqual(
+        new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+          extensions: {
+            message:
+              'Invalid request headers must either contain email for internal or X-Forwarded-Authorization and crn for external requests'
+          }
+        })
+      )
+    })
+
+    test('throws error if gatewaytype is not internal or external', () => {
+      const invalidDataSourceOptions = [
+        { logger },
+        {
+          gatewayType: 'unsupported',
+          request: {
+            headers: {}
+          }
+        }
+      ]
+
+      expect(() => new RuralPayments(...invalidDataSourceOptions)).toThrow(
+        new BadRequest(
+          'gateway-type header must be one of internal or external received: unsupported'
+        )
+      )
+    })
   })
 
   describe('trace', () => {
     test('logs request and response details', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const url = 'test-url'
       const request = { id: '123', method: 'GET', headers: {} }
       const mockResult = {
@@ -161,7 +250,7 @@ describe('RuralPayments', () => {
 
   describe('requestDeduplicationPolicyFor', () => {
     test('returns correct deduplication policy', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const url = 'test-url'
       const request = { id: '123', method: 'POST' }
 
@@ -176,7 +265,7 @@ describe('RuralPayments', () => {
 
   describe('parseBody', () => {
     test('returns NO_CONTENT status for 204 responses', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const response = {
         status: StatusCodes.NO_CONTENT,
         headers: new Headers()
@@ -188,7 +277,7 @@ describe('RuralPayments', () => {
     })
 
     test('parses JSON response when content type is application/json', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const mockJson = { data: 'test' }
       const response = {
         status: 200,
@@ -206,7 +295,7 @@ describe('RuralPayments', () => {
     })
 
     test('parses text response for non-JSON content', async () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const mockText = 'plain text response'
       const response = {
         status: 200,
@@ -226,7 +315,7 @@ describe('RuralPayments', () => {
 
   describe('throwIfResponseIsError', () => {
     test('returns NO_CONTENT status for 204 responses', () => {
-      const rp = new RuralPayments({ logger })
+      const rp = new RuralPayments(...datasourceOptions)
       const options = {
         response: {
           ok: false,
@@ -248,5 +337,20 @@ describe('RuralPayments', () => {
         })
       )
     })
+  })
+})
+
+describe('extractCrnFromDefraIdToken', () => {
+  test('extracts crn succesfully from valid token', async () => {
+    const response = extractCrnFromDefraIdToken(
+      jwt.sign({ crn: '11111111' }, 'secret', { expiresIn: '1h' })
+    )
+    expect(response).toEqual('11111111')
+  })
+  test('Throws error when provided an invalid token', async () => {
+    const invalidToken = jwt.sign({}, 'secret', { expiresIn: '1h' })
+    expect(() => extractCrnFromDefraIdToken(invalidToken)).toThrow(
+      new BadRequest('Defra ID token does not contain crn')
+    )
   })
 })

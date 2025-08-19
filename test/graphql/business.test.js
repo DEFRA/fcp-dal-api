@@ -1,17 +1,122 @@
 config.set('auth.disabled', false)
+import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
 import { mockOrganisationSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
-const setupNock = () => {
-  nock.disableNetConnect()
+const query = `#graphql
+    query BusinessTest {
+      business(sbi: "sbi") {
+        organisationId
+        sbi
+        info {
+          name
+          address {
+            pafOrganisationName
+            line1
+            line2
+            line3
+            line4
+            line5
+            buildingNumberRange
+            buildingName
+            flatName
+            street
+            city
+            county
+            postalCode
+            country
+            uprn
+            dependentLocality
+            doubleDependentLocality
+            typeId
+          }
+          email {
+            address
+          }
+          legalStatus {
+            code
+            type
+          }
+          phone {
+            mobile
+            landline
+          }
+          traderNumber
+          type {
+            code
+            type
+          }
+          vat
+          vendorNumber
+        }
+        land {
+          parcels(date: "2025-05-04") {
+            id
+            sheetId
+            parcelId
+            area
+            pendingDigitisation
+          }
+          parcel(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
+            id
+            sheetId
+            parcelId
+            area
+            pendingDigitisation
+            effectiveToDate
+            effectiveFromDate
+          }
+          parcelCovers(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
+            id
+            name
+            area
+            code
+            isBpsEligible
+          }
+          summary(date: "2025-05-04") {
+            arableLandArea
+            permanentCropsArea
+            permanentGrasslandArea
+            totalArea
+            totalParcels
+          }
+        }
+        customers {
+          personId
+          firstName
+          lastName
+          crn
+          role
+        }
+        customer(crn: "customerReference") {
+          personId
+          firstName
+          lastName
+          crn
+          role
+          permissionGroups {
+            id
+            level
+            functions
+          }
+        }
+        countyParishHoldings {
+          cphNumber
+          parish
+          startDate
+          endDate
+          species
+          xCoordinate
+          yCoordinate
+        }
+      }
+    }
+  `
 
-  const v1 = nock(config.get('kits.gatewayUrl'))
-
-  mockOrganisationSearch(v1)
-
+const setupNock = (v1) => {
   v1.get('/organisation/organisationId').reply(200, {
     _data: {
       id: 'organisationId',
@@ -130,125 +235,158 @@ const setupNock = () => {
     })
 }
 
-describe('Query.business', () => {
-  const query = `#graphql
-    query BusinessTest {
-      business(sbi: "sbi") {
-        organisationId
-        sbi
-        info {
-          name
-          address {
-            pafOrganisationName
-            line1
-            line2
-            line3
-            line4
-            line5
-            buildingNumberRange
-            buildingName
-            flatName
-            street
-            city
-            county
-            postalCode
-            country
-            uprn
-            dependentLocality
-            doubleDependentLocality
-            typeId
-          }
-          email {
-            address
-          }
-          legalStatus {
-            code
-            type
-          }
-          phone {
-            mobile
-            landline
-          }
-          traderNumber
-          type {
-            code
-            type
-          }
-          vat
-          vendorNumber
-        }
-        land {
-          parcels(date: "2025-05-04") {
-            id
-            sheetId
-            parcelId
-            area
-            pendingDigitisation
-          }
-          parcel(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
-            id
-            sheetId
-            parcelId
-            area
-            pendingDigitisation
-            effectiveToDate
-            effectiveFromDate
-          }
-          parcelCovers(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
-            id
-            name
-            area
-            code
-            isBpsEligible
-          }
-          summary(date: "2025-05-04") {
-            arableLandArea
-            permanentCropsArea
-            permanentGrasslandArea
-            totalArea
-            totalParcels
-          }
-        }
-        customers {
-          personId
-          firstName
-          lastName
-          crn
-          role
-        }
-        customer(crn: "customerReference") {
-          personId
-          firstName
-          lastName
-          crn
-          role
-          permissionGroups {
-            id
-            level
-            functions
-          }
-        }
-        countyParishHoldings {
-          cphNumber
-          parish
-          startDate
-          endDate
-          species
-          xCoordinate
-          yCoordinate
-        }
-      }
-    }
-  `
-
-  beforeAll(setupNock)
-
+describe('Query.business internal', () => {
   afterAll(() => {
     nock.cleanAll()
     nock.enableNetConnect()
   })
 
-  test('authenticated', async () => {
+  test('authenticated external', async () => {
+    nock.disableNetConnect()
+    const v1 = nock(config.get('kits.external.gatewayUrl'))
+    setupNock(v1)
+
+    // For external requests we extract org id from token but don't verify.
+    // so any jwt with a valid relationships array works
+    const tokenValue = jwt.sign(
+      {
+        crn: '123',
+        relationships: ['organisationId:sbi']
+      },
+      'test-secret'
+    )
+
+    const result = await makeTestQuery(
+      query,
+      true,
+      {},
+      {
+        'gateway-type': 'external',
+        'x-forwarded-authorization': tokenValue
+      }
+    )
+
+    expect(result).toEqual({
+      data: {
+        business: {
+          organisationId: 'organisationId',
+          sbi: 'sbi',
+          info: {
+            name: 'name',
+            address: {
+              pafOrganisationName: 'paf organisation name',
+              line1: 'line1',
+              line2: 'line2',
+              line3: 'line3',
+              line4: 'line4',
+              line5: 'line5',
+              buildingNumberRange: 'building number range',
+              buildingName: 'building name',
+              flatName: 'flat name',
+              street: 'street',
+              city: 'city',
+              county: 'county',
+              postalCode: 'postal code',
+              country: 'country',
+              uprn: 'uprn',
+              dependentLocality: 'dependent locality',
+              doubleDependentLocality: 'double dependent locality',
+              typeId: 'address type'
+            },
+            email: { address: 'email address' },
+            legalStatus: { code: 101, type: 'legal type' },
+            phone: { mobile: 'mobile number', landline: 'landline number' },
+            traderNumber: 'trader number',
+            type: { code: 101, type: 'business type' },
+            vat: 'vat number',
+            vendorNumber: 'vendor number'
+          },
+          land: {
+            parcels: [
+              {
+                id: 'id',
+                sheetId: 'sheetId',
+                parcelId: 'parcelId',
+                area: 0.0001,
+                pendingDigitisation: true
+              }
+            ],
+            parcel: {
+              id: 'id',
+              sheetId: 'sheetId',
+              parcelId: 'parcelId',
+              area: 0.0001,
+              pendingDigitisation: true,
+              effectiveToDate: '2021-11-14T23:59:52.140Z',
+              effectiveFromDate: '2021-11-15T00:00:01.682Z'
+            },
+            parcelCovers: [
+              { id: 'id', name: 'name', area: 0.0001, code: 'code', isBpsEligible: false }
+            ],
+            summary: {
+              arableLandArea: 0.0001,
+              permanentCropsArea: 0.0001,
+              permanentGrasslandArea: 0.0001,
+              totalArea: 0.0001,
+              totalParcels: 1
+            }
+          },
+          customers: [
+            {
+              personId: 'personId',
+              firstName: 'firstName',
+              lastName: 'lastName',
+              crn: 'customerReference',
+              role: 'role'
+            }
+          ],
+          customer: {
+            personId: 'personId',
+            firstName: 'firstName',
+            lastName: 'lastName',
+            crn: 'customerReference',
+            role: 'role',
+            permissionGroups: [
+              {
+                id: 'BUSINESS_DETAILS',
+                level: 'FULL_PERMISSION',
+                functions: [
+                  'View business details',
+                  'View people associated with the business',
+                  'Amend business and correspondence contact details',
+                  'Amend controlled information, such as business name',
+                  'Confirm business details',
+                  'Amend bank account details',
+                  'Make young/new farmer declaration',
+                  'Add someone to the business',
+                  'Give permissions on business'
+                ]
+              }
+            ]
+          },
+          countyParishHoldings: [
+            {
+              cphNumber: 'mockCph1',
+              endDate: '2021-03-20',
+              parish: 'mockParish',
+              species: 'mockSpecies',
+              startDate: '2020-03-20',
+              xCoordinate: 123456,
+              yCoordinate: 654321
+            }
+          ]
+        }
+      }
+    })
+
+    expect(nock.isDone()).toBe(true)
+  })
+
+  test('authenticated internal', async () => {
+    const v1 = nock(config.get('kits.internal.gatewayUrl'))
+    mockOrganisationSearch(v1)
+    setupNock(v1)
+
     const result = await makeTestQuery(query)
 
     expect(result).toEqual({
@@ -363,9 +501,12 @@ describe('Query.business', () => {
         }
       }
     })
+
+    expect(nock.isDone()).toBe(true)
   })
 
   test('unauthenticated', async () => {
+    nock.disableNetConnect()
     const result = await makeTestQuery(query, false)
 
     expect(result.data.business).toBeNull()

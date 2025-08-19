@@ -5,7 +5,7 @@ import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transfo
 import { mockPersonSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
-const v1 = nock(config.get('kits.gatewayUrl'))
+const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const setupNock = () => {
   nock.disableNetConnect()
@@ -159,6 +159,8 @@ describe('business', () => {
     }
     `
     const result = await makeTestQuery(query, true, { input })
+
+    expect(nock.isDone()).toBe(true)
 
     expect(result).toEqual({
       data: {

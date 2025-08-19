@@ -10,19 +10,12 @@ import {
 import { validatePastDate } from '../../../utils/date.js'
 
 export const Customer = {
-  async personId({ crn }, __, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-    return personId
-  },
-
-  async info({ crn }, __, { dataSources }) {
-    const response = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
+  async info({ personId }, __, { dataSources }) {
+    const response = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business({ crn }, { sbi }, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-
+  async business({ personId, crn }, { sbi }, { dataSources }) {
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
     return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
@@ -31,9 +24,7 @@ export const Customer = {
     )
   },
 
-  async businesses({ crn }, __, { dataSources }) {
-    const { id: personId } = await dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn)
-
+  async businesses({ personId, crn }, __, { dataSources }) {
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
     return transformPersonSummaryToCustomerAuthorisedBusinesses({ personId, crn }, summary)

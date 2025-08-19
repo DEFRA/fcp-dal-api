@@ -27,10 +27,12 @@ services:
       DISABLE_PROXY: true
       GRAPHQL_DASHBOARD_ENABLED: true
       ADMIN_AD_GROUP_ID: unused
-      KITS_GATEWAY_INTERNAL_URL: http://kits-mock:3100/v1/
+      KITS_INT_GATEWAY_URL: http://kits-mock:3100/v1/
+      KITS_EXT_GATEWAY_URL: http://kits-mock:3100/v1/
       KITS_GATEWAY_TIMEOUT_MS: 3000
       KITS_DISABLE_MTLS: true
       DAL_REQUEST_TIMEOUT_MS: 3000
+      KIT_EXT_PERSON_ID_OVERRIDE: 3337243
 
     networks:
       - cdp-tenant

@@ -1,16 +1,22 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
+import jwt from 'jsonwebtoken'
 import tls from 'node:tls'
 import { Agent, ProxyAgent } from 'undici'
 import { config as appConfig } from '../../config.js'
-import { HttpError } from '../../errors/graphql.js'
+import { BadRequest, HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
-export const customFetch = async (url, options) => {
-  const kitsURL = new URL(appConfig.get('kits.gatewayUrl'))
+const internalRequestTls = generateRequestTls('internal')
+const externalRequestTls = generateRequestTls('external')
+const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
+const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
 
+export function generateRequestTls(gatewayType) {
+  const gatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
+  const kitsURL = new URL(gatewayUrl)
   const requestTls = {
     host: kitsURL.hostname,
     port: kitsURL.port,
@@ -18,18 +24,28 @@ export const customFetch = async (url, options) => {
   }
 
   if (!appConfig.get('kits.disableMTLS')) {
-    const clientCert = Buffer.from(appConfig.get('kits.connectionCert'), 'base64')
-      .toString('utf-8')
-      .trim()
-    const clientKey = Buffer.from(appConfig.get('kits.connectionKey'), 'base64')
-      .toString('utf-8')
-      .trim()
+    const connectionCert = appConfig.get(`kits.${gatewayType}.connectionCert`)
+    const connectionKey = appConfig.get(`kits.${gatewayType}.connectionKey`)
+    const decodedCert = Buffer.from(connectionCert, 'base64').toString('utf-8').trim()
+    const decodedKey = Buffer.from(connectionKey, 'base64').toString('utf-8').trim()
     requestTls.secureContext = tls.createSecureContext({
-      key: clientKey,
-      cert: clientCert
+      key: decodedKey,
+      cert: decodedCert
     })
   }
 
+  return requestTls
+}
+
+export function extractCrnFromDefraIdToken(token) {
+  const { payload } = jwt.decode(token, { complete: true })
+  if (payload?.crn) {
+    return payload.crn
+  }
+  throw new BadRequest('Defra ID token does not contain crn')
+}
+
+export async function customFetch(url, options, requestTls) {
   if (appConfig.get('disableProxy')) {
     options.dispatcher = new Agent({
       requestTls
@@ -46,15 +62,27 @@ export const customFetch = async (url, options) => {
     signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
   })
 }
+
 export class RuralPayments extends RESTDataSource {
-  baseURL = appConfig.get('kits.gatewayUrl')
+  // Note this gets overridden by the customFetch
   request = null
-
-  constructor(config, request) {
+  constructor(config, { request, gatewayType }) {
     super(config)
-
     this.request = request
-    this.httpCache.httpFetch = customFetch
+
+    this.gatewayType = gatewayType || 'internal'
+    if (!['internal', 'external'].includes(this.gatewayType)) {
+      throw new BadRequest(
+        `gateway-type header must be one of internal or external received: ${gatewayType}`
+      )
+    }
+
+    this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
+    const requestTls = this.gatewayType === 'external' ? externalRequestTls : internalRequestTls
+
+    this.httpCache.httpFetch = (url, options) => {
+      return customFetch(url, options, requestTls)
+    }
   }
 
   didEncounterError(error, request, url) {
@@ -88,9 +116,25 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async willSendRequest(path, request) {
+    const headers = this.request.headers
+    const additionalHeaders = {}
+    if (this.gatewayType === 'internal' && headers.email) {
+      additionalHeaders.email = headers.email
+    } else if (this.gatewayType === 'external' && headers['x-forwarded-authorization']) {
+      additionalHeaders.Authorization = headers['x-forwarded-authorization']
+      additionalHeaders.crn = extractCrnFromDefraIdToken(headers['x-forwarded-authorization'])
+    } else {
+      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+        extensions: {
+          message:
+            'Invalid request headers must either contain email for internal or X-Forwarded-Authorization and crn for external requests'
+        }
+      })
+    }
+
     request.headers = {
       ...request.headers,
-      email: this.request.headers.email
+      ...additionalHeaders
     }
 
     this.logger.debug('#datasource - Rural payments - request', {
