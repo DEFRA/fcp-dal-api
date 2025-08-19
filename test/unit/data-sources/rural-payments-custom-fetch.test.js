@@ -58,18 +58,6 @@ describe('RuralPayments Custom Fetch', () => {
       '../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
-    const returnedCustomFetch = await customFetch(
-      `${fakeInternalURL}example-path`,
-      { method: 'GET', headers: { 'Gateway-Type': 'internal' } },
-      b64fakeKey,
-      b64fakeCert
-    )
-
-    expect(mockCreateSecureContext).toHaveBeenCalledWith({
-      key: fakeKey,
-      cert: fakeCert
-    })
-
     const requestTls = {
       host: kitsInternalURL.hostname,
       port: kitsInternalURL.port,
@@ -79,6 +67,17 @@ describe('RuralPayments Custom Fetch', () => {
         cert: fakeCert
       })
     }
+
+    const returnedCustomFetch = await customFetch(
+      `${fakeInternalURL}example-path`,
+      { method: 'GET', headers: { 'Gateway-Type': 'internal' } },
+      requestTls
+    )
+
+    expect(mockCreateSecureContext).toHaveBeenCalledWith({
+      key: fakeKey,
+      cert: fakeCert
+    })
 
     expect(mockProxyAgent).toHaveBeenCalledWith({
       uri: config.get('cdp.httpsProxy'),
@@ -116,18 +115,22 @@ describe('RuralPayments Custom Fetch', () => {
       '../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
-    const returnedCustomFetch = await customFetch(`${fakeInternalURL}example-path`, {
-      method: 'GET',
-      headers: { 'Gateway-Type': 'internal' }
-    })
-
-    expect(mockCreateSecureContext).not.toHaveBeenCalled()
-
     const requestTls = {
       host: kitsInternalURL.hostname,
       port: kitsInternalURL.port,
       servername: kitsInternalURL.hostname
     }
+
+    const returnedCustomFetch = await customFetch(
+      `${fakeInternalURL}example-path`,
+      {
+        method: 'GET',
+        headers: { 'Gateway-Type': 'internal' }
+      },
+      requestTls
+    )
+
+    expect(mockCreateSecureContext).not.toHaveBeenCalled()
 
     expect(mockAgent).toHaveBeenCalledWith({
       requestTls
