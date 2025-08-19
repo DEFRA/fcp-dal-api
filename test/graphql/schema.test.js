@@ -17,7 +17,7 @@ const path = join(dirname(fileURLToPath(import.meta.url)))
 
 function isFieldProtected(field) {
   const astNode = field.astNode
-  if (!astNode || !astNode.directives) return false
+  if (!astNode?.directives) return false
 
   return astNode.directives.some((d) => d.name.value === 'auth')
 }
