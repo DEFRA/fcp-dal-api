@@ -300,7 +300,7 @@ describe('business - external', () => {
     const tokenValue = jwt.sign(
       {
         relationships: ['organisationId:sbi'],
-        crn: 'crn'
+        contactId: 'crn'
       },
       'test-secret'
     )

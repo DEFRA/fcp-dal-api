@@ -39,8 +39,8 @@ export function generateRequestTls(gatewayType) {
 
 export function extractCrnFromDefraIdToken(token) {
   const { payload } = jwt.decode(token, { complete: true })
-  if (payload?.crn) {
-    return payload.crn
+  if (payload?.contactId) {
+    return payload.contactId
   }
   throw new BadRequest('Defra ID token does not contain crn')
 }

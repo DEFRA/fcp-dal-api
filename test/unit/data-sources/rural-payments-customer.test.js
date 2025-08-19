@@ -22,7 +22,9 @@ describe('Rural Payments Customer', () => {
       gatewayType: 'external',
       request: {
         headers: {
-          'x-forwarded-authorization': jwt.sign({ crn: '11111111' }, 'secret', { expiresIn: '1h' })
+          'x-forwarded-authorization': jwt.sign({ contactId: '11111111' }, 'secret', {
+            expiresIn: '1h'
+          })
         }
       }
     }

@@ -743,7 +743,7 @@ describe('Local mocked dev check', () => {
   it('should support full business schema - external', async () => {
     const tokenValue = jwt.sign(
       {
-        crn: '9477368292',
+        contactId: '9477368292',
         relationships: ['5565448:107183280']
       },
       'test-secret'
@@ -790,7 +790,7 @@ describe('Local mocked dev check', () => {
   // it('should support full customer schema - external', async () => {
   //   const tokenValue = jwt.sign(
   //     {
-  //       crn: '0866159801',
+  //       contactId: '0866159801',
   //       relationships: ['5625145:107591843']
   //     },
   //     'test-secret'
