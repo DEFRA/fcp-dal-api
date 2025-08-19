@@ -39,9 +39,8 @@ export function extractCrnFromDefraIdToken(token) {
   const { payload } = jwt.decode(token, { complete: true })
   if (payload?.crn) {
     return payload.crn
-  } else {
-    throw new BadRequest('Defra ID token does not contain crn')
   }
+  throw new BadRequest('Defra ID token does not contain crn')
 }
 
 export async function customFetch(url, options, requestTls) {

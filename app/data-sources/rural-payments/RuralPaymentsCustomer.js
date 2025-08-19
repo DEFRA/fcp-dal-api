@@ -9,10 +9,8 @@ export class RuralPaymentsCustomer extends RuralPayments {
     if (this.gatewayType === 'external') {
       const response = await this.getExternalPerson()
       return response?.id
-    } else {
-      const response = await this.personSearchByCRN(crn)
-      return response.id
     }
+    return (await this.personSearchByCRN(crn)).id
   }
 
   async personSearchByCRN(crn) {
