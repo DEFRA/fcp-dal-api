@@ -11,6 +11,8 @@ import { sendMetric } from '../../logger/sendMetric.js'
 
 const internalRequestTls = generateRequestTls('internal')
 const externalRequestTls = generateRequestTls('external')
+const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
+const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
 
 export function generateRequestTls(gatewayType) {
   const gatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)

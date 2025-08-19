@@ -58,7 +58,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     if (this.gatewayType === 'external') {
       return this.extractOrgIdFromDefraIdToken(sbi)
     }
-    return (await this.organisationSearchBySbi(crn)).id
+    return (await this.organisationSearchBySbi(sbi)).id
   }
 
   async getOrganisationBySBI(sbi) {
