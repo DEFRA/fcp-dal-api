@@ -131,7 +131,7 @@ describe('RuralPayments', () => {
     })
 
     test('adds crn, Authorization & gateway type header from request headers for external requests', () => {
-      const token = jwt.sign({ crn: 'test-crn' }, 'secret', {
+      const token = jwt.sign({ contactId: 'test-crn' }, 'secret', {
         expiresIn: '1h'
       })
       const rp = new RuralPayments(
@@ -343,7 +343,7 @@ describe('RuralPayments', () => {
 describe('extractCrnFromDefraIdToken', () => {
   test('extracts crn succesfully from valid token', async () => {
     const response = extractCrnFromDefraIdToken(
-      jwt.sign({ crn: '11111111' }, 'secret', { expiresIn: '1h' })
+      jwt.sign({ contactId: '11111111' }, 'secret', { expiresIn: '1h' })
     )
     expect(response).toEqual('11111111')
   })

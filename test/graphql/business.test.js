@@ -250,7 +250,7 @@ describe('Query.business internal', () => {
     // so any jwt with a valid relationships array works
     const tokenValue = jwt.sign(
       {
-        crn: '123',
+        contactId: '123',
         relationships: ['organisationId:sbi']
       },
       'test-secret'

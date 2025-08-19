@@ -234,7 +234,7 @@ describe('Query.customer', () => {
       {},
       {
         'gateway-type': 'external',
-        'x-forwarded-authorization': jwt.sign({ crn: '123' }, 'secret', { expiresIn: '1h' })
+        'x-forwarded-authorization': jwt.sign({ contactId: '123' }, 'secret', { expiresIn: '1h' })
       }
     )
 
