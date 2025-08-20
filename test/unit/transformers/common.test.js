@@ -2,6 +2,7 @@ import {
   booleanise,
   dalAddressToKitsAddress,
   kitsAddressToDalAddress,
+  transformDateTimeToISO,
   transformEntityStatus,
   transformToISODate
 } from '../../../app/transformers/common.js'
@@ -108,6 +109,23 @@ describe('Common transformers', () => {
       expect(transformToISODate(null)).toBe(null)
       expect(transformToISODate(true)).toBe(null)
       expect(transformToISODate(undefined)).toBe(null)
+    })
+  })
+
+  describe('transformDateTimeToISO', () => {
+    it('should return ISO  string for valid date-time', () => {
+      const iso = new Date('2015-09-16T10:50:01.000+0100').toISOString()
+      expect(transformDateTimeToISO('2015-09-16T09:50:01:000+0000')).toEqual(iso)
+      expect(transformDateTimeToISO('2015-09-16T09:50:01:000Z')).toEqual(iso)
+    })
+
+    it('should default to UTC if no timezone is provided', () => {
+      const iso = new Date('2015-09-16T10:50:01.000Z').toISOString()
+      expect(transformDateTimeToISO('2015-09-16T10:50:01')).toEqual(iso)
+    })
+
+    it('should return null for invalid date', () => {
+      expect(transformDateTimeToISO(new Date('invalid'))).toBe(null)
     })
   })
 })

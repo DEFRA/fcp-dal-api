@@ -112,6 +112,32 @@ const query = `#graphql
           xCoordinate
           yCoordinate
         }
+        applications {
+          sbi
+          id
+          subjectId
+          year
+          name
+          moduleCode
+          scheme
+          statusCodeP
+          statusCodeS
+          status
+          submissionDate
+          portalStatusP
+          portalStatusS
+          portalStatus
+          active
+          transitionId
+          transitionName
+          agreementReferences
+          transitionHistory {
+            id
+            name
+            timestamp
+            checkStatus
+          }
+        }
       }
     }
   `
@@ -233,6 +259,39 @@ const setupNock = (v1) => {
         }
       ]
     })
+
+  v1.get('/SitiAgriApi/cv/appByBusiness/sbi/sbi/list').reply(200, {
+    data: [
+      {
+        sbi: 'sbi',
+        application_id: 'app123',
+        subject_id: '123',
+        year: 2025,
+        application_name: 'Application Name',
+        module_code: 'Module Code',
+        scheme: 'Scheme',
+        status_code_p: 'Status P',
+        status_code_s: 'Status S',
+        status: 'Status',
+        submission_date: '2025-05-04T02:00:00:123+0100',
+        portal_status_p: 'Portal Status P',
+        portal_status_s: 'Portal Status S',
+        portal_status: 'Portal Status',
+        fg_active: 'Yes',
+        transition_id: 187,
+        transition_name: 'transition name',
+        agreement_ref: '42, 17,111',
+        application_history: [
+          {
+            transition_id: 187,
+            transition_name: 'Transition Name',
+            dt_transition: '2025-05-04T02:00:00:123+0100',
+            check_status: 'Check Status'
+          }
+        ]
+      }
+    ]
+  })
 }
 
 describe('Query.business internal', () => {
@@ -374,6 +433,36 @@ describe('Query.business internal', () => {
               xCoordinate: 123456,
               yCoordinate: 654321
             }
+          ],
+          applications: [
+            {
+              sbi: 'sbi',
+              id: 'app123',
+              subjectId: 123,
+              year: 2025,
+              name: 'Application Name',
+              moduleCode: 'Module Code',
+              scheme: 'Scheme',
+              statusCodeP: 'Status P',
+              statusCodeS: 'Status S',
+              status: 'Status',
+              submissionDate: '2025-05-04T01:00:00.123Z',
+              portalStatusP: 'Portal Status P',
+              portalStatusS: 'Portal Status S',
+              portalStatus: 'Portal Status',
+              active: true,
+              transitionId: '187',
+              transitionName: 'transition name',
+              agreementReferences: ['42', '17', '111'],
+              transitionHistory: [
+                {
+                  id: '187',
+                  name: 'Transition Name',
+                  timestamp: '2025-05-04T01:00:00.123Z',
+                  checkStatus: 'Check Status'
+                }
+              ]
+            }
           ]
         }
       }
@@ -496,6 +585,36 @@ describe('Query.business internal', () => {
               startDate: '2020-03-20',
               xCoordinate: 123456,
               yCoordinate: 654321
+            }
+          ],
+          applications: [
+            {
+              sbi: 'sbi',
+              id: 'app123',
+              subjectId: 123,
+              year: 2025,
+              name: 'Application Name',
+              moduleCode: 'Module Code',
+              scheme: 'Scheme',
+              statusCodeP: 'Status P',
+              statusCodeS: 'Status S',
+              status: 'Status',
+              submissionDate: '2025-05-04T01:00:00.123Z',
+              portalStatusP: 'Portal Status P',
+              portalStatusS: 'Portal Status S',
+              portalStatus: 'Portal Status',
+              active: true,
+              transitionId: '187',
+              transitionName: 'transition name',
+              agreementReferences: ['42', '17', '111'],
+              transitionHistory: [
+                {
+                  id: '187',
+                  name: 'Transition Name',
+                  timestamp: '2025-05-04T01:00:00.123Z',
+                  checkStatus: 'Check Status'
+                }
+              ]
             }
           ]
         }
