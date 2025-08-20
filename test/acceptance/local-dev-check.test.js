@@ -264,7 +264,7 @@ const business = {
     {
       sbi: '107183280',
       id: '4511299240',
-      subjectId: 407841902,
+      subjectId: '407841902',
       year: 2022,
       name: 'COMMODO FACERE PARIATUR COGO CAREO VENTITO CONIECTO CUNABULA DEFETISCOR',
       moduleCode: 'CENTUM_UBERRIME_2022',

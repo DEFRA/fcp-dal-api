@@ -15,7 +15,7 @@ type Application {
   """
   The unique identifier for the subject of this application.
   """
-  subjectId: Int @on
+  subjectId: ID @on
 
   """
   The year this application is for.
