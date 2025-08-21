@@ -438,7 +438,7 @@ describe('Query.business internal', () => {
             {
               sbi: 'sbi',
               id: 'app123',
-              subjectId: 123,
+              subjectId: '123',
               year: 2025,
               name: 'Application Name',
               moduleCode: 'Module Code',
@@ -591,7 +591,7 @@ describe('Query.business internal', () => {
             {
               sbi: 'sbi',
               id: 'app123',
-              subjectId: 123,
+              subjectId: '123',
               year: 2025,
               name: 'Application Name',
               moduleCode: 'Module Code',

@@ -73,7 +73,7 @@ type PaymentSchedule {
 type Application {
   sbi: ID!
   id: ID!
-  subjectId: Int
+  subjectId: ID
   year: Int
   name: String
   moduleCode: String
