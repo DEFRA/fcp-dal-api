@@ -2,6 +2,7 @@ import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformer
 
 async function updateCustomerResolver(_, { input }, { dataSources }) {
   const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(input.crn)
+
   const person = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
 
   await dataSources.ruralPaymentsCustomer.updatePersonDetails(
@@ -11,7 +12,7 @@ async function updateCustomerResolver(_, { input }, { dataSources }) {
 
   return {
     success: true,
-    customer: { crn: input.crn }
+    customer: { personId }
   }
 }
 

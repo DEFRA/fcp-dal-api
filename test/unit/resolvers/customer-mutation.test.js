@@ -126,7 +126,7 @@ describe('Customer Mutations', () => {
 
       expect(result).toEqual({
         success: true,
-        customer: { crn: 'crn' }
+        customer: { personId: 'currentId' }
       })
     })
   })

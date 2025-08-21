@@ -2,17 +2,17 @@ import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
-beforeAll(() => {
+beforeEach(() => {
   nock.disableNetConnect()
 })
 
-afterAll(() => {
+afterEach(() => {
   nock.cleanAll()
   nock.enableNetConnect()
 })
 
 function setupNock(putRequestBody = {}) {
-  const kits = nock(config.get('kits.gatewayUrl'))
+  const kits = nock(config.get('kits.internal.gatewayUrl'))
 
   // Pre update
   kits
