@@ -11,7 +11,7 @@ afterEach(() => {
   nock.enableNetConnect()
 })
 
-function setupNock(putRequestBody = {}) {
+function setupNock(update = {}) {
   const kits = nock(config.get('kits.internal.gatewayUrl'))
 
   // Pre update
@@ -30,44 +30,55 @@ function setupNock(putRequestBody = {}) {
       ]
     })
 
-  kits.get('/person/personId/summary').reply(200, {
-    _data: {
-      id: 'personId',
-      title: 'currentTitle',
-      otherTitle: 'currentOtherTitle',
-      firstName: 'currentFirstName',
-      middleName: 'currentMiddleName',
-      lastName: 'currentLastName',
-      dateOfBirth: 'currentDateOfBirth',
-      landline: 'currentLandline',
-      mobile: 'currentMobile',
-      email: 'currentEmail',
-      doNotContact: 'currentDoNotContact',
-      address: {
-        address1: 'currentAddress1',
-        address2: 'currentAddress2',
-        address3: 'currentAddress3',
-        address4: 'currentAddress4',
-        address5: 'currentAddress5',
-        pafOrganisationName: 'currentPafOrganisationName',
-        flatName: 'currentFlatName',
-        buildingNumberRange: 'currentBuildingNumberRange',
-        buildingName: 'currentBuildingName',
-        street: 'currentStreet',
-        city: 'currentCity',
-        county: 'currentCounty',
-        postalCode: 'currentPostalCode',
-        country: 'currentCountry',
-        uprn: 'currentUprn',
-        dependentLocality: 'currentDependentLocality',
-        doubleDependentLocality: 'currentDoubleDependentLocality',
-        addressTypeId: 'currentAddressTypeId'
-      }
+  const person = {
+    id: 'personId',
+    title: 'currentTitle',
+    otherTitle: 'currentOtherTitle',
+    firstName: 'currentFirstName',
+    middleName: 'currentMiddleName',
+    lastName: 'currentLastName',
+    dateOfBirth: 'currentDateOfBirth',
+    landline: 'currentLandline',
+    mobile: 'currentMobile',
+    email: 'currentEmail',
+    doNotContact: 'currentDoNotContact',
+    address: {
+      address1: 'currentAddress1',
+      address2: 'currentAddress2',
+      address3: 'currentAddress3',
+      address4: 'currentAddress4',
+      address5: 'currentAddress5',
+      pafOrganisationName: 'currentPafOrganisationName',
+      flatName: 'currentFlatName',
+      buildingNumberRange: 'currentBuildingNumberRange',
+      buildingName: 'currentBuildingName',
+      street: 'currentStreet',
+      city: 'currentCity',
+      county: 'currentCounty',
+      postalCode: 'currentPostalCode',
+      country: 'currentCountry',
+      uprn: 'currentUprn',
+      dependentLocality: 'currentDependentLocality',
+      doubleDependentLocality: 'currentDoubleDependentLocality',
+      addressTypeId: 'currentAddressTypeId'
     }
+  }
+
+  kits.get('/person/personId/summary').reply(200, {
+    _data: person
   })
 
   // Update
-  kits.put('/person/personId', putRequestBody).reply(201)
+  const updatedPerson = {
+    ...person,
+    ...update,
+    address: {
+      ...person.address,
+      ...(update?.address || {})
+    }
+  }
+
+  kits.put('/person/personId', updatedPerson).reply(201)
 
   // Post update
   kits
@@ -86,27 +97,13 @@ function setupNock(putRequestBody = {}) {
     })
 
   kits.get('/person/personId/summary').reply(200, {
-    _data: {
-      id: 'personId',
-      ...putRequestBody
-    }
+    _data: updatedPerson
   })
 }
 
 describe('customer mutations', () => {
   test('updateCustomerAddress', async () => {
     setupNock({
-      id: 'personId',
-      title: 'currentTitle',
-      otherTitle: 'currentOtherTitle',
-      firstName: 'currentFirstName',
-      middleName: 'currentMiddleName',
-      lastName: 'currentLastName',
-      dateOfBirth: 'currentDateOfBirth',
-      landline: 'currentLandline',
-      mobile: 'currentMobile',
-      email: 'currentEmail',
-      doNotContact: 'currentDoNotContact',
       address: {
         address1: 'newLine1',
         address2: 'newLine2',
@@ -124,8 +121,7 @@ describe('customer mutations', () => {
         country: 'newCountry',
         uprn: 'newUprn',
         dependentLocality: 'newDependentLocality',
-        doubleDependentLocality: 'newDoubleDependentLocality',
-        addressTypeId: 'currentAddressTypeId'
+        doubleDependentLocality: 'newDoubleDependentLocality'
       }
     })
 
@@ -157,7 +153,27 @@ describe('customer mutations', () => {
         ) {
           success
           customer {
-            personId
+            info {
+              address {
+                pafOrganisationName
+                line1
+                line2
+                line3
+                line4
+                line5
+                buildingNumberRange
+                buildingName
+                flatName
+                street
+                city
+                county
+                postalCode
+                country
+                uprn
+                dependentLocality
+                doubleDependentLocality
+              }
+            }
           }
         }
       }
@@ -168,7 +184,27 @@ describe('customer mutations', () => {
         updateCustomerAddress: {
           success: true,
           customer: {
-            personId: 'personId'
+            info: {
+              address: {
+                pafOrganisationName: 'newPafOrganisationName',
+                line1: 'newLine1',
+                line2: 'newLine2',
+                line3: 'newLine3',
+                line4: 'newLine4',
+                line5: 'newLine5',
+                buildingNumberRange: 'newBuildingNumberRange',
+                buildingName: 'newBuildingName',
+                flatName: 'newFlatName',
+                street: 'newStreet',
+                city: 'newCity',
+                county: 'newCounty',
+                postalCode: 'newPostalCode',
+                country: 'newCountry',
+                uprn: 'newUprn',
+                dependentLocality: 'newDependentLocality',
+                doubleDependentLocality: 'newDoubleDependentLocality'
+              }
+            }
           }
         }
       }
@@ -177,37 +213,7 @@ describe('customer mutations', () => {
 
   test('updateCustomerDateOfBirth', async () => {
     setupNock({
-      id: 'personId',
-      title: 'currentTitle',
-      otherTitle: 'currentOtherTitle',
-      firstName: 'currentFirstName',
-      middleName: 'currentMiddleName',
-      lastName: 'currentLastName',
-      dateOfBirth: 1,
-      landline: 'currentLandline',
-      mobile: 'currentMobile',
-      email: 'currentEmail',
-      doNotContact: 'currentDoNotContact',
-      address: {
-        address1: 'currentAddress1',
-        address2: 'currentAddress2',
-        address3: 'currentAddress3',
-        address4: 'currentAddress4',
-        address5: 'currentAddress5',
-        pafOrganisationName: 'currentPafOrganisationName',
-        flatName: 'currentFlatName',
-        buildingNumberRange: 'currentBuildingNumberRange',
-        buildingName: 'currentBuildingName',
-        street: 'currentStreet',
-        city: 'currentCity',
-        county: 'currentCounty',
-        postalCode: 'currentPostalCode',
-        country: 'currentCountry',
-        uprn: 'currentUprn',
-        dependentLocality: 'currentDependentLocality',
-        doubleDependentLocality: 'currentDoubleDependentLocality',
-        addressTypeId: 'currentAddressTypeId'
-      }
+      dateOfBirth: 1
     })
 
     const result = await makeTestQuery(`#graphql
@@ -239,37 +245,7 @@ describe('customer mutations', () => {
 
   test('updateCustomerEmail', async () => {
     setupNock({
-      id: 'personId',
-      title: 'currentTitle',
-      otherTitle: 'currentOtherTitle',
-      firstName: 'currentFirstName',
-      middleName: 'currentMiddleName',
-      lastName: 'currentLastName',
-      dateOfBirth: 'currentDateOfBirth',
-      landline: 'currentLandline',
-      mobile: 'currentMobile',
-      email: 'newEmail',
-      doNotContact: 'currentDoNotContact',
-      address: {
-        address1: 'currentAddress1',
-        address2: 'currentAddress2',
-        address3: 'currentAddress3',
-        address4: 'currentAddress4',
-        address5: 'currentAddress5',
-        pafOrganisationName: 'currentPafOrganisationName',
-        flatName: 'currentFlatName',
-        buildingNumberRange: 'currentBuildingNumberRange',
-        buildingName: 'currentBuildingName',
-        street: 'currentStreet',
-        city: 'currentCity',
-        county: 'currentCounty',
-        postalCode: 'currentPostalCode',
-        country: 'currentCountry',
-        uprn: 'currentUprn',
-        dependentLocality: 'currentDependentLocality',
-        doubleDependentLocality: 'currentDoubleDependentLocality',
-        addressTypeId: 'currentAddressTypeId'
-      }
+      email: 'newEmail'
     })
 
     const result = await makeTestQuery(`#graphql
@@ -305,37 +281,11 @@ describe('customer mutations', () => {
 
   test('updateCustomerName', async () => {
     setupNock({
-      id: 'personId',
       title: 'newTitle',
       otherTitle: 'newOtherTitle',
       firstName: 'newFirst',
       middleName: 'newMiddle',
-      lastName: 'newLast',
-      dateOfBirth: 'currentDateOfBirth',
-      landline: 'currentLandline',
-      mobile: 'currentMobile',
-      email: 'currentEmail',
-      doNotContact: 'currentDoNotContact',
-      address: {
-        address1: 'currentAddress1',
-        address2: 'currentAddress2',
-        address3: 'currentAddress3',
-        address4: 'currentAddress4',
-        address5: 'currentAddress5',
-        pafOrganisationName: 'currentPafOrganisationName',
-        flatName: 'currentFlatName',
-        buildingNumberRange: 'currentBuildingNumberRange',
-        buildingName: 'currentBuildingName',
-        street: 'currentStreet',
-        city: 'currentCity',
-        county: 'currentCounty',
-        postalCode: 'currentPostalCode',
-        country: 'currentCountry',
-        uprn: 'currentUprn',
-        dependentLocality: 'currentDependentLocality',
-        doubleDependentLocality: 'currentDoubleDependentLocality',
-        addressTypeId: 'currentAddressTypeId'
-      }
+      lastName: 'newLast'
     })
 
     const result = await makeTestQuery(`#graphql
@@ -388,37 +338,8 @@ describe('customer mutations', () => {
 
   test('updateCustomerPhone', async () => {
     setupNock({
-      id: 'personId',
-      title: 'currentTitle',
-      otherTitle: 'currentOtherTitle',
-      firstName: 'currentFirstName',
-      middleName: 'currentMiddleName',
-      lastName: 'currentLastName',
-      dateOfBirth: 'currentDateOfBirth',
       landline: 'newLandline',
-      mobile: 'newMobile',
-      email: 'currentEmail',
-      doNotContact: 'currentDoNotContact',
-      address: {
-        address1: 'currentAddress1',
-        address2: 'currentAddress2',
-        address3: 'currentAddress3',
-        address4: 'currentAddress4',
-        address5: 'currentAddress5',
-        pafOrganisationName: 'currentPafOrganisationName',
-        flatName: 'currentFlatName',
-        buildingNumberRange: 'currentBuildingNumberRange',
-        buildingName: 'currentBuildingName',
-        street: 'currentStreet',
-        city: 'currentCity',
-        county: 'currentCounty',
-        postalCode: 'currentPostalCode',
-        country: 'currentCountry',
-        uprn: 'currentUprn',
-        dependentLocality: 'currentDependentLocality',
-        doubleDependentLocality: 'currentDoubleDependentLocality',
-        addressTypeId: 'currentAddressTypeId'
-      }
+      mobile: 'newMobile'
     })
 
     const result = await makeTestQuery(`#graphql
