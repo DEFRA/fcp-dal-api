@@ -252,7 +252,7 @@ describe('Customer transformer', () => {
   })
 
   describe('transformCustomerUpdateInputToPersonUpdate', () => {
-    const mockPerson = {
+    const currentPerson = {
       id: 'currentId',
       title: 'currentTitle',
       otherTitle: 'currentOtherTitle',
@@ -286,46 +286,8 @@ describe('Customer transformer', () => {
     }
 
     it('transforms full input correctly', () => {
-      const input = {
-        title: 'newTitle',
-        otherTitle: 'newOtherTitle',
-        first: 'newFirstName',
-        middle: 'newMiddleName',
-        last: 'newLastName',
-        dateOfBirth: 'newDateOfBirth',
-        phone: {
-          landline: 'newLandline',
-          mobile: 'newMobile'
-        },
-        email: {
-          address: 'newEmail'
-        },
-        address: {
-          line1: 'newAddress1',
-          line2: 'newAddress2',
-          line3: 'newAddress3',
-          line4: 'newAddress4',
-          line5: 'newAddress5',
-          pafOrganisationName: 'newPafOrganisationName',
-          flatName: 'newFlatName',
-          buildingNumberRange: 'newBuildingNumberRange',
-          buildingName: 'newBuildingName',
-          street: 'newStreet',
-          city: 'newCity',
-          county: 'newCounty',
-          postalCode: 'newPostalCode',
-          country: 'newCountry',
-          uprn: 'newUprn',
-          dependentLocality: 'newDependentLocality',
-          doubleDependentLocality: 'newDoubleDependentLocality',
-          addressTypeId: 'newAddressTypeId'
-        }
-      }
-
-      const result = transformCustomerUpdateInputToPersonUpdate(mockPerson, input)
-
-      expect(result).toEqual({
-        id: 'currentId',
+      const newPerson = {
+        id: currentPerson.id,
         title: 'newTitle',
         otherTitle: 'newOtherTitle',
         firstName: 'newFirstName',
@@ -355,7 +317,35 @@ describe('Customer transformer', () => {
           doubleDependentLocality: 'newDoubleDependentLocality',
           addressTypeId: 'newAddressTypeId'
         }
-      })
+      }
+
+      const input = {
+        title: newPerson.title,
+        otherTitle: newPerson.otherTitle,
+        first: newPerson.firstName,
+        middle: newPerson.middleName,
+        last: newPerson.lastName,
+        dateOfBirth: newPerson.dateOfBirth,
+        phone: {
+          landline: newPerson.landline,
+          mobile: newPerson.mobile
+        },
+        email: {
+          address: newPerson.email
+        },
+        address: {
+          line1: newPerson.address.address1,
+          line2: newPerson.address.address2,
+          line3: newPerson.address.address3,
+          line4: newPerson.address.address4,
+          line5: newPerson.address.address5,
+          ...newPerson.address
+        }
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual(newPerson)
     })
 
     it('handles partial input', () => {
@@ -367,38 +357,15 @@ describe('Customer transformer', () => {
         }
       }
 
-      const result = transformCustomerUpdateInputToPersonUpdate(mockPerson, input)
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
 
       expect(result).toEqual({
-        id: 'currentId',
-        title: 'currentTitle',
-        otherTitle: 'currentOtherTitle',
+        ...currentPerson,
         firstName: 'newFirstName',
-        middleName: 'currentMiddleName',
-        lastName: 'currentLastName',
-        dateOfBirth: 'currentDateOfBirth',
-        landline: 'currentLandline',
-        mobile: 'currentMobile',
-        email: 'currentEmail',
         address: {
+          ...currentPerson.address,
           address1: 'newAddress1',
-          address2: 'currentAddress2',
-          address3: 'currentAddress3',
-          address4: 'currentAddress4',
-          address5: 'currentAddress5',
-          pafOrganisationName: 'currentPafOrganisationName',
-          flatName: 'currentFlatName',
-          buildingNumberRange: 'currentBuildingNumberRange',
-          buildingName: 'currentBuildingName',
-          street: 'currentStreet',
-          city: 'newCity',
-          county: 'currentCounty',
-          postalCode: 'currentPostalCode',
-          country: 'currentCountry',
-          uprn: 'currentUprn',
-          dependentLocality: 'currentDependentLocality',
-          doubleDependentLocality: 'currentDoubleDependentLocality',
-          addressTypeId: 'currentAddressTypeId'
+          city: 'newCity'
         }
       })
     })
@@ -411,39 +378,11 @@ describe('Customer transformer', () => {
         address: {}
       }
 
-      const result = transformCustomerUpdateInputToPersonUpdate(mockPerson, input)
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
 
       expect(result).toEqual({
-        id: 'currentId',
-        title: 'currentTitle',
-        otherTitle: 'currentOtherTitle',
-        firstName: 'newFirstName',
-        middleName: 'currentMiddleName',
-        lastName: 'currentLastName',
-        dateOfBirth: 'currentDateOfBirth',
-        landline: 'currentLandline',
-        mobile: 'currentMobile',
-        email: 'currentEmail',
-        address: {
-          address1: 'currentAddress1',
-          address2: 'currentAddress2',
-          address3: 'currentAddress3',
-          address4: 'currentAddress4',
-          address5: 'currentAddress5',
-          pafOrganisationName: 'currentPafOrganisationName',
-          flatName: 'currentFlatName',
-          buildingNumberRange: 'currentBuildingNumberRange',
-          buildingName: 'currentBuildingName',
-          street: 'currentStreet',
-          city: 'currentCity',
-          county: 'currentCounty',
-          postalCode: 'currentPostalCode',
-          country: 'currentCountry',
-          uprn: 'currentUprn',
-          dependentLocality: 'currentDependentLocality',
-          doubleDependentLocality: 'currentDoubleDependentLocality',
-          addressTypeId: 'currentAddressTypeId'
-        }
+        ...currentPerson,
+        firstName: 'newFirstName'
       })
     })
 
@@ -452,79 +391,20 @@ describe('Customer transformer', () => {
         first: 'newFirstName'
       }
 
-      const result = transformCustomerUpdateInputToPersonUpdate(mockPerson, input)
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
 
       expect(result).toEqual({
-        id: 'currentId',
-        title: 'currentTitle',
-        otherTitle: 'currentOtherTitle',
-        firstName: 'newFirstName',
-        middleName: 'currentMiddleName',
-        lastName: 'currentLastName',
-        dateOfBirth: 'currentDateOfBirth',
-        landline: 'currentLandline',
-        mobile: 'currentMobile',
-        email: 'currentEmail',
-        address: {
-          address1: 'currentAddress1',
-          address2: 'currentAddress2',
-          address3: 'currentAddress3',
-          address4: 'currentAddress4',
-          address5: 'currentAddress5',
-          pafOrganisationName: 'currentPafOrganisationName',
-          flatName: 'currentFlatName',
-          buildingNumberRange: 'currentBuildingNumberRange',
-          buildingName: 'currentBuildingName',
-          street: 'currentStreet',
-          city: 'currentCity',
-          county: 'currentCounty',
-          postalCode: 'currentPostalCode',
-          country: 'currentCountry',
-          uprn: 'currentUprn',
-          dependentLocality: 'currentDependentLocality',
-          doubleDependentLocality: 'currentDoubleDependentLocality',
-          addressTypeId: 'currentAddressTypeId'
-        }
+        ...currentPerson,
+        firstName: 'newFirstName'
       })
     })
 
     it('handles empty input', () => {
       const input = {}
 
-      const result = transformCustomerUpdateInputToPersonUpdate(mockPerson, input)
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
 
-      expect(result).toEqual({
-        id: 'currentId',
-        title: 'currentTitle',
-        otherTitle: 'currentOtherTitle',
-        firstName: 'currentFirstName',
-        middleName: 'currentMiddleName',
-        lastName: 'currentLastName',
-        dateOfBirth: 'currentDateOfBirth',
-        landline: 'currentLandline',
-        mobile: 'currentMobile',
-        email: 'currentEmail',
-        address: {
-          address1: 'currentAddress1',
-          address2: 'currentAddress2',
-          address3: 'currentAddress3',
-          address4: 'currentAddress4',
-          address5: 'currentAddress5',
-          pafOrganisationName: 'currentPafOrganisationName',
-          flatName: 'currentFlatName',
-          buildingNumberRange: 'currentBuildingNumberRange',
-          buildingName: 'currentBuildingName',
-          street: 'currentStreet',
-          city: 'currentCity',
-          county: 'currentCounty',
-          postalCode: 'currentPostalCode',
-          country: 'currentCountry',
-          uprn: 'currentUprn',
-          dependentLocality: 'currentDependentLocality',
-          doubleDependentLocality: 'currentDoubleDependentLocality',
-          addressTypeId: 'currentAddressTypeId'
-        }
-      })
+      expect(result).toEqual(currentPerson)
     })
 
     it('handles null values in input', () => {
@@ -538,38 +418,17 @@ describe('Customer transformer', () => {
         }
       }
 
-      const result = transformCustomerUpdateInputToPersonUpdate(mockPerson, input)
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
 
       expect(result).toEqual({
-        id: 'currentId',
-        title: 'currentTitle',
-        otherTitle: 'currentOtherTitle',
+        ...currentPerson,
         firstName: 'newFirstName',
         middleName: null,
-        lastName: 'currentLastName',
-        dateOfBirth: 'currentDateOfBirth',
-        landline: 'currentLandline',
-        mobile: 'currentMobile',
-        email: 'currentEmail',
         address: {
+          ...currentPerson.address,
           address1: 'newAddress1',
           address2: null,
-          address3: 'currentAddress3',
-          address4: 'currentAddress4',
-          address5: 'currentAddress5',
-          pafOrganisationName: 'currentPafOrganisationName',
-          flatName: 'currentFlatName',
-          buildingNumberRange: 'currentBuildingNumberRange',
-          buildingName: 'currentBuildingName',
-          street: 'currentStreet',
-          city: 'newCity',
-          county: 'currentCounty',
-          postalCode: 'currentPostalCode',
-          country: 'currentCountry',
-          uprn: 'currentUprn',
-          dependentLocality: 'currentDependentLocality',
-          doubleDependentLocality: 'currentDoubleDependentLocality',
-          addressTypeId: 'currentAddressTypeId'
+          city: 'newCity'
         }
       })
     })
