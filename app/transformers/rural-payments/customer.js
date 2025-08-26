@@ -114,6 +114,7 @@ const customerUpdateInputMapping = {
   landline: (input) => input.phone?.landline,
   mobile: (input) => input.phone?.mobile,
   email: (input) => input.email?.address,
+  doNotContact: (input) => input.doNotContact,
   address: {
     address1: (input) => input.address?.line1,
     address2: (input) => input.address?.line2,
