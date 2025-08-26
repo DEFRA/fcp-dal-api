@@ -178,7 +178,7 @@ describe('RuralPayments', () => {
         new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
           extensions: {
             message:
-              'Invalid request headers must either contain email for internal or X-Forwarded-Authorization and crn for external requests'
+              'Invalid request headers, must either contain an "email" header for internal gateway requests or "X-Forwarded-Authorization" header with a defra id token for external gateway requests'
           }
         })
       )
