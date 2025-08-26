@@ -127,7 +127,7 @@ export class RuralPayments extends RESTDataSource {
       throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         extensions: {
           message:
-            'Invalid request headers, must either contain an "email" header for internal gateway requests or "X-Forwarded-Authorization" header with a defra id token for external gateway requests'
+            'Invalid request headers, must be either "email={valid user email}" or "X-Forwarded-Authorization={defra-id token}" & "gateway-type=external" headers'
         }
       })
     }
