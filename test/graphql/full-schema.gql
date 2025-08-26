@@ -24,6 +24,7 @@ type Mutation {
   updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
+  updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
 }
 
 input UpdateCustomerAddressInput {
@@ -53,6 +54,11 @@ input UpdateCustomerNameInput {
 input UpdateCustomerPhoneInput {
   crn: ID!
   phone: PhoneInput!
+}
+
+input UpdateCustomerDoNotContactInput {
+  crn: ID!
+  doNotContact: Boolean!
 }
 
 type UpdateCustomerResponse {

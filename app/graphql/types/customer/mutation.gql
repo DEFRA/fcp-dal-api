@@ -9,6 +9,8 @@ extend type Mutation {
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+  updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input UpdateCustomerAddressInput {
@@ -85,6 +87,18 @@ input UpdateCustomerPhoneInput {
   Telephone number of the customer.
   """
   phone: PhoneInput!
+}
+
+input UpdateCustomerDoNotContactInput {
+  """
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer.
+  """
+  crn: ID!
+  """
+  Do not contact status of the customer email address.
+  """
+  doNotContact: Boolean!
 }
 
 type UpdateCustomerResponse {
