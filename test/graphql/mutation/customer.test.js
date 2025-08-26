@@ -369,4 +369,34 @@ describe('customer mutations', () => {
       }
     })
   })
+
+  test('updateCustomerDoNotContact', async () => {
+    setupNock({
+      doNotContact: true
+    })
+
+    const result = await makeTestQuery(`#graphql
+      mutation {
+        updateCustomerDoNotContact(
+          input: { crn: "crn", doNotContact: true }
+        ) {
+          success
+          customer {
+            info {
+              doNotContact
+            }
+          }
+        }
+      }
+    `)
+
+    expect(result).toEqual({
+      data: {
+        updateCustomerDoNotContact: {
+          success: true,
+          customer: { info: { doNotContact: true } }
+        }
+      }
+    })
+  })
 })
