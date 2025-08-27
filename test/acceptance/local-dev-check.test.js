@@ -329,7 +329,7 @@ const customer = {
       middle: 'Ralph',
       last: 'Paul'
     },
-    dateOfBirth: '1947-10-30T03:41:25.385Z',
+    dateOfBirth: '1947-10-30',
     phone: {
       mobile: '1849164778',
       landline: null
