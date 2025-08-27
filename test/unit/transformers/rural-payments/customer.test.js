@@ -263,6 +263,7 @@ describe('Customer transformer', () => {
       landline: 'currentLandline',
       mobile: 'currentMobile',
       email: 'currentEmail',
+      doNotContact: 'currentDoNotContact',
       address: {
         address1: 'currentAddress1',
         address2: 'currentAddress2',
@@ -297,6 +298,7 @@ describe('Customer transformer', () => {
         landline: 'newLandline',
         mobile: 'newMobile',
         email: 'newEmail',
+        doNotContact: 'newDoNotContact',
         address: {
           address1: 'newAddress1',
           address2: 'newAddress2',
@@ -326,6 +328,7 @@ describe('Customer transformer', () => {
         middle: newPerson.middleName,
         last: newPerson.lastName,
         dateOfBirth: newPerson.dateOfBirth,
+        doNotContact: newPerson.doNotContact,
         phone: {
           landline: newPerson.landline,
           mobile: newPerson.mobile
