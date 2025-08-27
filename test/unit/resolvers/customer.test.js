@@ -122,7 +122,7 @@ describe('Customer', () => {
         middle: 'Daryl',
         last: 'Sanford'
       },
-      dateOfBirth: '1973-06-14T10:26:18.380Z',
+      dateOfBirth: '1973-06-14',
       phone: { landline: '055 4582 4488', mobile: '056 8967 5108' },
       email: { address: 'lauren.sanford@immaculate-shark.info', validated: false },
       doNotContact: false,

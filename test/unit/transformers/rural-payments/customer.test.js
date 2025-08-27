@@ -294,7 +294,7 @@ describe('Customer transformer', () => {
         firstName: 'newFirstName',
         middleName: 'newMiddleName',
         lastName: 'newLastName',
-        dateOfBirth: 'newDateOfBirth',
+        dateOfBirth: 1735689600,
         landline: 'newLandline',
         mobile: 'newMobile',
         email: 'newEmail',
@@ -408,6 +408,16 @@ describe('Customer transformer', () => {
       const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
 
       expect(result).toEqual(currentPerson)
+    })
+
+    it('handles date', () => {
+      const input = {
+        dateOfBirth: '2025-01-01'
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual({ ...currentPerson, dateOfBirth: 1735689600000 })
     })
 
     it('handles null values in input', () => {

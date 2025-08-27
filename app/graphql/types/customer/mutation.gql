@@ -32,7 +32,7 @@ input UpdateCustomerDateOfBirthInput {
   """
   crn: ID!
   """
-  Date of birth of the customer.
+  Date of birth of the customer (YYYY-MM-DD).
   """
   dateOfBirth: Date!
 }
