@@ -37,7 +37,7 @@ function setupNock(update = {}) {
     firstName: 'currentFirstName',
     middleName: 'currentMiddleName',
     lastName: 'currentLastName',
-    dateOfBirth: 'currentDateOfBirth',
+    dateOfBirth: 1735732800,
     landline: 'currentLandline',
     mobile: 'currentMobile',
     email: 'currentEmail',
@@ -213,12 +213,12 @@ describe('customer mutations', () => {
 
   test('updateCustomerDateOfBirth', async () => {
     setupNock({
-      dateOfBirth: 1
+      dateOfBirth: 1735689600000
     })
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerDateOfBirth(input: { crn: "crn", dateOfBirth: 1 }) {
+        updateCustomerDateOfBirth(input: { crn: "crn", dateOfBirth: "2025-01-01" }) {
           customer {
             info {
               dateOfBirth
@@ -235,7 +235,7 @@ describe('customer mutations', () => {
           success: true,
           customer: {
             info: {
-              dateOfBirth: '1970-01-01T00:00:00.001Z'
+              dateOfBirth: '2025-01-01'
             }
           }
         }
