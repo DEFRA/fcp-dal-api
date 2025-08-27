@@ -1,6 +1,6 @@
 import { validateDate } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
-import { kitsAddressToDalAddress, transformEntityStatus, transformToISODate } from '../common.js'
+import { kitsAddressToDalAddress, transformEntityStatus } from '../common.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
@@ -62,7 +62,7 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       middle: data.middleName,
       last: data.lastName
     },
-    dateOfBirth: transformToISODate(data.dateOfBirth),
+    dateOfBirth: new Date(data.dateOfBirth).toISOString().substring(0, 10),
     phone: {
       mobile: data.mobile,
       landline: data.landline
@@ -110,7 +110,8 @@ const customerUpdateInputMapping = {
   firstName: (input) => input.first,
   middleName: (input) => input.middle,
   lastName: (input) => input.last,
-  dateOfBirth: (input) => input.dateOfBirth,
+  dateOfBirth: (input) =>
+    input.dateOfBirth ? new Date(input.dateOfBirth).getTime() : input.dateOfBirth,
   landline: (input) => input.phone?.landline,
   mobile: (input) => input.phone?.mobile,
   email: (input) => input.email?.address,
