@@ -117,32 +117,30 @@ describe('Business Additional Details Mutation resolvers', () => {
 
 describe('Business Mutation UpdateBusinessResponse', () => {
   let dataSources
-  let logger
 
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
         updateBusinessBySBI: jest.fn(),
-        getOrganisationBySBI: jest.fn()
+        getOrganisationById: jest.fn(),
+        getOrganisationIdBySBI: jest.fn()
       }
-    }
-    logger = {
-      warn: jest.fn()
     }
   })
 
   it('updateBusinessName returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('123')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       some: 'response'
     })
 
     const result = await UpdateBusinessResponse.business(
       { business: { sbi: '123' } },
       {},
-      { dataSources, logger }
+      { dataSources }
     )
 
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
     expect(result).toEqual({
       info: {
         additionalBusinessActivities: [],

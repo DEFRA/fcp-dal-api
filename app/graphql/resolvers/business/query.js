@@ -2,7 +2,8 @@ import { transformOrganisationToBusiness } from '../../../transformers/rural-pay
 
 export const Query = {
   async business(__, { sbi }, { dataSources }) {
-    const response = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+    const orgId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+    const response = await dataSources.ruralPaymentsBusiness.getOrganisationById(orgId)
 
     const business = transformOrganisationToBusiness(response)
     return {

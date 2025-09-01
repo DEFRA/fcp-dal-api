@@ -1,4 +1,5 @@
 import { GraphQLClient, gql } from 'graphql-request'
+import jwt from 'jsonwebtoken'
 
 const business = {
   organisationId: '5565448',
@@ -258,6 +259,36 @@ const business = {
       yCoordinate: null,
       address: null
     }
+  ],
+  applications: [
+    {
+      sbi: '107183280',
+      id: '4511299240',
+      subjectId: '407841902',
+      year: 2022,
+      name: 'COMMODO FACERE PARIATUR COGO CAREO VENTITO CONIECTO CUNABULA DEFETISCOR',
+      moduleCode: 'CENTUM_UBERRIME_2022',
+      scheme: 'APTO VESPER VENTUS IPSA',
+      statusCodeP: 'STADOM',
+      statusCodeS: '000031',
+      status: 'REJECTED',
+      submissionDate: '2022-12-31T18:41:23.188Z',
+      portalStatusP: 'DOMPRS',
+      portalStatusS: 'REJECT',
+      portalStatus: null,
+      active: true,
+      transitionId: '4371793806',
+      transitionName: 'REJECT',
+      agreementReferences: ['456927534'],
+      transitionHistory: [
+        {
+          id: '4371793806',
+          name: 'REJECT',
+          timestamp: '2022-12-31T02:13:05.043Z',
+          checkStatus: 'PASSED'
+        }
+      ]
+    }
   ]
 }
 const agreement = {
@@ -286,6 +317,7 @@ const paymentSchedules = [
     endDate: '2017-12-31T00:00:00.000Z'
   }
 ]
+
 const customer = {
   personId: '5007136',
   crn: '0866159801',
@@ -457,188 +489,304 @@ const customer = {
   }
 }
 
-describe('Local mocked dev check', () => {
-  it('should support full business schema', async () => {
-    const query = gql`
-      query Business($sbi: ID!, $crn: ID!, $date: Date, $sheetId: ID!, $parcelId: ID!) {
-        business(sbi: $sbi) {
-          organisationId
-          sbi
-          info {
-            name
-            reference
-            vat
-            traderNumber
-            vendorNumber
-            address {
-              pafOrganisationName
-              line1
-              line2
-              line3
-              line4
-              line5
-              buildingNumberRange
-              buildingName
-              flatName
-              street
-              city
-              county
-              postalCode
-              country
-              uprn
-              dependentLocality
-              doubleDependentLocality
-              typeId
-            }
-            correspondenceAddress {
-              pafOrganisationName
-              line1
-              line2
-              line3
-              line4
-              line5
-              buildingNumberRange
-              buildingName
-              flatName
-              street
-              city
-              county
-              postalCode
-              country
-              uprn
-              dependentLocality
-              doubleDependentLocality
-              typeId
-            }
-            isCorrespondenceAsBusinessAddress
-            email {
-              address
-              validated
-            }
-            correspondenceEmail {
-              address
-              validated
-            }
-            phone {
-              mobile
-              landline
-            }
-            correspondencePhone {
-              mobile
-              landline
-            }
-            legalStatus {
-              code
-              type
-            }
-            type {
-              code
-              type
-            }
-            registrationNumbers {
-              companiesHouse
-              charityCommission
-            }
-            additionalSbis
-            lastUpdated
-            isFinancialToBusinessAddress
-            hasLandInNorthernIreland
-            hasLandInScotland
-            hasLandInWales
-            hasAdditionalBusinessActivities
-            additionalBusinessActivities {
-              code
-              type
-            }
-            isAccountablePeopleDeclarationCompleted
-            dateStartedFarming
-            landConfirmed
-            status {
-              locked
-              confirmed
-              deactivated
-            }
-          }
-          customers {
-            personId
-            firstName
-            lastName
-            crn
-            role
-          }
-          customer(crn: $crn) {
-            personId
-            firstName
-            lastName
-            crn
-            role
-            permissionGroups {
-              id
-              level
-              functions
-            }
-          }
-          land {
-            summary {
-              arableLandArea
-              permanentCropsArea
-              permanentGrasslandArea
-              totalArea
-              totalParcels
-            }
-            parcelCovers(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
-              id
-              name
-              area
-              code
-              isBpsEligible
-            }
-          }
-          countyParishHoldings {
-            cphNumber
-            parish
-            startDate
-            endDate
-            species
-            xCoordinate
-            yCoordinate
-            address
-          }
-          agreements {
-            contractId
-            name
-            status
-            contractType
-            schemeYear
-            startDate
-            endDate
-            paymentSchedules {
-              optionCode
-              optionDescription
-              commitmentGroupStartDate
-              commitmentGroupEndDate
-              year
-              sheetName
-              parcelName
-              actionArea
-              actionMTL
-              actionUnits
-              parcelTotalArea
-              startDate
-              endDate
-            }
-          }
+const businessQuery = gql`
+  query Business($sbi: ID!, $crn: ID!, $date: Date, $sheetId: ID!, $parcelId: ID!) {
+    business(sbi: $sbi) {
+      organisationId
+      sbi
+      info {
+        name
+        reference
+        vat
+        traderNumber
+        vendorNumber
+        address {
+          pafOrganisationName
+          line1
+          line2
+          line3
+          line4
+          line5
+          buildingNumberRange
+          buildingName
+          flatName
+          street
+          city
+          county
+          postalCode
+          country
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
+        }
+        correspondenceAddress {
+          pafOrganisationName
+          line1
+          line2
+          line3
+          line4
+          line5
+          buildingNumberRange
+          buildingName
+          flatName
+          street
+          city
+          county
+          postalCode
+          country
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
+        }
+        isCorrespondenceAsBusinessAddress
+        email {
+          address
+          validated
+        }
+        correspondenceEmail {
+          address
+          validated
+        }
+        phone {
+          mobile
+          landline
+        }
+        correspondencePhone {
+          mobile
+          landline
+        }
+        legalStatus {
+          code
+          type
+        }
+        type {
+          code
+          type
+        }
+        registrationNumbers {
+          companiesHouse
+          charityCommission
+        }
+        additionalSbis
+        lastUpdated
+        isFinancialToBusinessAddress
+        hasLandInNorthernIreland
+        hasLandInScotland
+        hasLandInWales
+        hasAdditionalBusinessActivities
+        additionalBusinessActivities {
+          code
+          type
+        }
+        isAccountablePeopleDeclarationCompleted
+        dateStartedFarming
+        landConfirmed
+        status {
+          locked
+          confirmed
+          deactivated
         }
       }
-    `
+      customers {
+        personId
+        firstName
+        lastName
+        crn
+        role
+      }
+      customer(crn: $crn) {
+        personId
+        firstName
+        lastName
+        crn
+        role
+        permissionGroups {
+          id
+          level
+          functions
+        }
+      }
+      land {
+        summary {
+          arableLandArea
+          permanentCropsArea
+          permanentGrasslandArea
+          totalArea
+          totalParcels
+        }
+        parcelCovers(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
+          id
+          name
+          area
+          code
+          isBpsEligible
+        }
+      }
+      countyParishHoldings {
+        cphNumber
+        parish
+        startDate
+        endDate
+        species
+        xCoordinate
+        yCoordinate
+        address
+      }
+      agreements {
+        contractId
+        name
+        status
+        contractType
+        schemeYear
+        startDate
+        endDate
+        paymentSchedules {
+          optionCode
+          optionDescription
+          commitmentGroupStartDate
+          commitmentGroupEndDate
+          year
+          sheetName
+          parcelName
+          actionArea
+          actionMTL
+          actionUnits
+          parcelTotalArea
+          startDate
+          endDate
+        }
+      }
+      applications {
+        sbi
+        id
+        subjectId
+        year
+        name
+        moduleCode
+        scheme
+        statusCodeP
+        statusCodeS
+        status
+        submissionDate
+        portalStatusP
+        portalStatusS
+        portalStatus
+        active
+        transitionId
+        transitionName
+        agreementReferences
+        transitionHistory {
+          id
+          name
+          timestamp
+          checkStatus
+        }
+      }
+    }
+  }
+`
+
+const customerQuery = gql`
+  query Customer($crn: ID!, $sbi: ID!) {
+    customer(crn: $crn) {
+      personId
+      crn
+      info {
+        name {
+          title
+          otherTitle
+          first
+          middle
+          last
+        }
+        dateOfBirth
+        phone {
+          mobile
+          landline
+        }
+        email {
+          address
+          validated
+        }
+        status {
+          locked
+          confirmed
+          deactivated
+        }
+        address {
+          pafOrganisationName
+          line1
+          line2
+          line3
+          line4
+          line5
+          buildingNumberRange
+          buildingName
+          flatName
+          street
+          city
+          county
+          postalCode
+          country
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
+        }
+        doNotContact
+        personalIdentifiers
+      }
+      businesses {
+        name
+        organisationId
+        sbi
+      }
+      business(sbi: $sbi) {
+        organisationId
+        sbi
+        name
+        role
+        messages {
+          id
+          subject
+          date
+          body
+          read
+          deleted
+        }
+        permissionGroups {
+          id
+          level
+          functions
+        }
+      }
+      authenticationQuestions {
+        memorableDate
+        memorableEvent
+        memorableLocation
+        updatedAt
+        isFound
+      }
+    }
+  }
+`
+
+describe('Local mocked dev check', () => {
+  it('should support full business schema - internal', async () => {
     const client = new GraphQLClient('http://localhost:3000/graphql')
-    const response = await client.request(query, {
-      sbi: '107183280',
-      crn: '9477368292',
-      date: '2020-01-01',
-      sheetId: 'SS6627',
-      parcelId: '8779'
-    })
+    const response = await client.request(
+      businessQuery,
+      {
+        sbi: '107183280',
+        crn: '9477368292',
+        date: '2020-01-01',
+        sheetId: 'SS6627',
+        parcelId: '8779'
+      },
+      { email: 'some-email', 'gateway-type': 'internal' }
+    )
 
     expect(response).not.toHaveProperty('errors')
     expect(response.business).toMatchObject({
@@ -649,98 +797,72 @@ describe('Local mocked dev check', () => {
     })
   })
 
-  it('should support full customer schema', async () => {
-    const query = gql`
-      query Customer($crn: ID!, $sbi: ID!) {
-        customer(crn: $crn) {
-          personId
-          crn
-          info {
-            name {
-              title
-              otherTitle
-              first
-              middle
-              last
-            }
-            dateOfBirth
-            phone {
-              mobile
-              landline
-            }
-            email {
-              address
-              validated
-            }
-            status {
-              locked
-              confirmed
-              deactivated
-            }
-            address {
-              pafOrganisationName
-              line1
-              line2
-              line3
-              line4
-              line5
-              buildingNumberRange
-              buildingName
-              flatName
-              street
-              city
-              county
-              postalCode
-              country
-              uprn
-              dependentLocality
-              doubleDependentLocality
-              typeId
-            }
-            doNotContact
-            personalIdentifiers
-          }
-          businesses {
-            name
-            organisationId
-            sbi
-          }
-          business(sbi: $sbi) {
-            organisationId
-            sbi
-            name
-            role
-            messages {
-              id
-              subject
-              date
-              body
-              read
-              deleted
-            }
-            permissionGroups {
-              id
-              level
-              functions
-            }
-          }
-          authenticationQuestions {
-            memorableDate
-            memorableEvent
-            memorableLocation
-            updatedAt
-            isFound
-          }
-        }
-      }
-    `
+  it('should support full business schema - external', async () => {
+    const tokenValue = jwt.sign(
+      {
+        contactId: '9477368292',
+        relationships: ['5565448:107183280']
+      },
+      'test-secret'
+    )
     const client = new GraphQLClient('http://localhost:3000/graphql')
-    const response = await client.request(query, {
-      sbi: '107591843',
-      crn: '0866159801'
+    const response = await client.request(
+      businessQuery,
+      {
+        sbi: '107183280',
+        crn: '9477368292',
+        date: '2020-01-01',
+        sheetId: 'SS6627',
+        parcelId: '8779'
+      },
+      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.business).toMatchObject({
+      ...business,
+      agreements: expect.arrayContaining([
+        { ...agreement, paymentSchedules: expect.arrayContaining(paymentSchedules) }
+      ])
     })
+  })
+
+  it('should support full customer schema - internal', async () => {
+    const client = new GraphQLClient('http://localhost:3000/graphql')
+    const response = await client.request(
+      customerQuery,
+      {
+        sbi: '107591843',
+        crn: '0866159801'
+      },
+      { email: 'some-email', 'gateway-type': 'internal' }
+    )
 
     expect(response).not.toHaveProperty('errors')
     expect(response.customer).toEqual(customer)
   })
+
+  // TODO: Commented out until mock can be swapped over to V2
+
+  // it('should support full customer schema - external', async () => {
+  //   const tokenValue = jwt.sign(
+  //     {
+  //       contactId: '0866159801',
+  //       relationships: ['5625145:107591843']
+  //     },
+  //     'test-secret'
+  //   )
+  //   const client = new GraphQLClient('http://localhost:3000/graphql')
+  //   const response = await client.request(
+  //     customerQuery,
+  //     {
+  //       sbi: '107591843',
+  //       crn: '0866159801'
+  //     },
+  //     { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+  //   )
+
+  //   expect(response).not.toHaveProperty('errors')
+  //   expect(response.customer).toEqual(customer)
+  // })
 })

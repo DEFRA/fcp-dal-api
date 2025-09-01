@@ -8,7 +8,9 @@ describe('Business Query Resolver', () => {
   beforeEach(() => {
     mockDataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationBySBI: jest.fn()
+        getOrganisationIdBySBI: jest.fn(),
+        getOrganisationById: jest.fn(),
+        extractOrgIdFromDefraIdToken: jest.fn()
       }
     }
     mockLogger = {
@@ -16,11 +18,14 @@ describe('Business Query Resolver', () => {
     }
   })
 
-  it('should return transformed business data when found', async () => {
+  it('internal gateway should return transformed business data when found', async () => {
     const sbi = '123456789'
     const mockOrganisation = { id: 1, name: 'Test Farm' }
 
-    mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+    mockDataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue(
+      mockOrganisation.id
+    )
+    mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
 
     const result = await Query.business(
       null,
@@ -28,7 +33,10 @@ describe('Business Query Resolver', () => {
       { dataSources: mockDataSources, logger: mockLogger }
     )
 
-    expect(mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI).toHaveBeenCalledWith(sbi)
+    expect(mockDataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(sbi)
+    expect(mockDataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+      mockOrganisation.id
+    )
     expect(result).toEqual({
       sbi: 'undefined',
       land: { sbi: '123456789' },
@@ -88,10 +96,11 @@ describe('Business Query Resolver', () => {
     })
   })
 
-  it('should handle errors from dataSource', async () => {
+  it('should handle errors from dataSource for internal gateway', async () => {
     const sbi = '123456789'
     const error = new Error('Database error')
-    mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(error)
+    mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue('orgId')
+    mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValue(error)
 
     await expect(
       Query.business(null, { sbi }, { dataSources: mockDataSources, logger: mockLogger })

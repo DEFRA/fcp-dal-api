@@ -45,10 +45,11 @@ Ensure the `.env` file exists. This can be copied from `.env.example`:
 cp .env.example .env
 ```
 
-Also make sure to set the `KITS_GATEWAY_INTERNAL_URL` variable to the desired data source, e.g. for local testing:
+Also make sure to set the `KITS_INT_GATEWAY_URL` & `KITS_EXT_GATEWAY_URL` variable to the desired data source, e.g. for local testing:
 
 ```env
-KITS_GATEWAY_INTERNAL_URL=http://localhost:3100/v1
+KITS_INT_GATEWAY_URL=http://localhost:3100/v1
+KITS_EXT_GATEWAY_URL=http://localhost:3101/v1
 ```
 
 ### Development
