@@ -353,4 +353,12 @@ describe('Rural Payments Business', () => {
       })
     })
   })
+
+  describe('formatDateDDMMMYY', () => {
+    test('should correctly format the date', async () => {
+      const date = new Date('2024-09-19')
+      const response = ruralPaymentsBusiness.formatDateDDMMMYY(date)
+      expect(response).toEqual('19-Sep-24')
+    })
+  })
 })
