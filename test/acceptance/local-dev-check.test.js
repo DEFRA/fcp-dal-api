@@ -275,11 +275,11 @@ const business = {
       submissionDate: '2022-12-31T18:41:23.188Z',
       portalStatusP: 'DOMPRS',
       portalStatusS: 'REJECT',
-      portalStatus: null,
+      portalStatus: 'Rejected',
       active: true,
       transitionId: '4371793806',
       transitionName: 'REJECT',
-      agreementReferences: ['456927534'],
+      agreementReferences: [],
       transitionHistory: [
         {
           id: '4371793806',
