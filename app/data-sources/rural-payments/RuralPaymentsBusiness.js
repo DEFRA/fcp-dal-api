@@ -76,40 +76,19 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   getParcelsByOrganisationIdAndDate(organisationId, date) {
-    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
-    const formattedDate = new Date(date)
-      .toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: '2-digit'
-      })
-      .replace(/ /g, '-')
+    const formattedDate = this.formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/parcels/historic/${formattedDate}`)
   }
 
   getParcelEffectiveDatesByOrganisationIdAndDate(organisationId, date) {
-    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
-    const formattedDate = new Date(date)
-      .toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: '2-digit'
-      })
-      .replace(/ /g, '-')
+    const formattedDate = this.formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/parcel-details/historic/${formattedDate}`)
   }
 
   getCoversByOrgSheetParcelIdDate(organisationId, sheetId, parcelId, date) {
-    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
-    const formattedDate = new Date(date)
-      .toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: '2-digit'
-      })
-      .replace(/ /g, '-')
+    const formattedDate = this.formatDateDDMMMYY(new Date(date))
 
     return this.get(
       `lms/organisation/${organisationId}/parcel/sheet-id/${sheetId}/parcel-id/${parcelId}/historic/${formattedDate}/land-covers`
@@ -117,14 +96,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   getCoversSummaryByOrganisationIdAndDate(organisationId, date) {
-    // Convert 'YYYY-MM-DD' to 'DD-MMM-YY, e.g. 19-Jul-20
-    const formattedDate = new Date(date)
-      .toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: '2-digit'
-      })
-      .replace(/ /g, '-')
+    const formattedDate = this.formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/covers-summary/historic/${formattedDate}`)
   }
@@ -180,6 +152,14 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
 
     return response
+  }
+
+  formatDateDDMMMYY(date) {
+    // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
+    const day = date.toLocaleString('en-US', { day: '2-digit' }) // 01
+    const month = date.toLocaleString('en-US', { month: 'short' }) // "Sep"
+    const year = date.toLocaleString('en-US', { year: '2-digit' }) // "25"
+    return `${day}-${month}-${year}`
   }
 
   extractOrgIdFromDefraIdToken(sbi) {
