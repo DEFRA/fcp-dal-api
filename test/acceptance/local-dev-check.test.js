@@ -319,104 +319,147 @@ const paymentSchedules = [
 ]
 
 const customer = {
-  personId: '5007136',
-  crn: '0866159801',
+  personId: '11111111',
+  crn: '1111111100',
   info: {
     name: {
-      title: 'Dr.',
-      otherTitle: null,
-      first: 'David',
-      middle: 'Ralph',
-      last: 'Paul'
+      title: 'Mr.',
+      otherTitle: 'MD',
+      first: 'Gerhard',
+      middle: 'Shayna',
+      last: 'Purdy'
     },
-    dateOfBirth: '1947-10-30T03:41:25.385Z',
+    dateOfBirth: '1955-04-23T21:02:16.561Z',
     phone: {
-      mobile: '1849164778',
-      landline: null
+      mobile: '01650 95852',
+      landline: '055 2317 9411'
     },
     email: {
-      address: 'Selena_Kub@hotmail.com',
-      validated: false
+      address: 'gerhard.purdy@uncommon-sideboard.org.uk',
+      validated: true
     },
     status: {
       locked: false,
-      confirmed: false,
+      confirmed: true,
       deactivated: false
     },
     address: {
       pafOrganisationName: null,
-      line1: null,
-      line2: null,
-      line3: null,
-      line4: null,
-      line5: null,
+      line1: '635',
+      line2: '72 Evert Green',
+      line3: 'Kessler-upon-Altenwerth',
+      line4: 'CO5 5GC',
+      line5: 'Uzbekistan',
       buildingNumberRange: null,
-      buildingName: '853',
+      buildingName: null,
       flatName: null,
-      street: 'Zulauf Orchard',
-      city: 'St. Blanda Heath',
-      county: 'Cambridgeshire',
-      postalCode: 'YZ72 5MB',
-      country: 'United Kingdom',
-      uprn: null,
+      street: null,
+      city: 'Crona-on-West',
+      county: null,
+      postalCode: 'SV14 7HI',
+      country: 'England',
+      uprn: '807723943667',
       dependentLocality: null,
       doubleDependentLocality: null,
       typeId: null
     },
     doNotContact: false,
-    personalIdentifiers: null
+    personalIdentifiers: ['2356939974', '2348412591']
   },
   businesses: [
     {
-      name: 'Cliff Spence T/As Abbey Farm',
-      organisationId: '5625145',
-      sbi: '107591843'
+      name: 'Maggio, Murray and Dicki',
+      organisationId: '1111111111',
+      sbi: '1111111111'
     }
   ],
   business: {
-    organisationId: '5625145',
-    sbi: '107591843',
-    name: 'Cliff Spence T/As Abbey Farm',
-    role: 'Employee',
+    organisationId: '1111111111',
+    sbi: '1111111111',
+    name: 'Maggio, Murray and Dicki',
+    role: 'Business Partner',
     messages: [
       {
-        id: '11401',
-        subject: 'Permission changed for David Paul',
-        date: '2160-06-21T08:49:57.254Z',
-        body: '<p>Your permission for David Paul was changed on Sun Jan 22 2023</p>',
+        id: '8776831',
+        subject: 'Accedo adfero comes avaritia ventosus argentum delectatio talus surculus fugit.',
+        date: '2026-10-18T11:40:02.125Z',
+        body: '<p>Strues cras triduana tempore stabilis vomica adsum culpo asporto atque.</p>',
         read: false,
         deleted: false
       },
       {
-        id: '7551987',
-        subject: 'Permission changed for David Paul',
-        date: '2233-11-22T14:41:39.790Z',
-        body: '<p>Your permission for David Paul was changed on Thu Aug 17 2023</p>',
-        read: true,
+        id: '5244065',
+        subject:
+          'Corrumpo adulatio coadunatio bene impedit creator molestias amicitia conculco cui.',
+        date: '2051-10-06T04:07:33.430Z',
+        body: '<p>Stips thymbra ciminatio valens deporto magni usque absque appono repellat.</p>',
+        read: false,
         deleted: false
       },
       {
-        id: '9315941',
-        subject: 'Permission changed for David Paul',
-        date: '2250-11-02T22:36:25.856Z',
-        body: '<p>Your permission for David Paul was changed on Thu Sep 07 2023</p>',
+        id: '8776831',
+        subject: 'Accedo adfero comes avaritia ventosus argentum delectatio talus surculus fugit.',
+        date: '2026-10-18T11:40:02.125Z',
+        body: '<p>Strues cras triduana tempore stabilis vomica adsum culpo asporto atque.</p>',
         read: false,
-        deleted: true
+        deleted: false
+      },
+      {
+        id: '5244065',
+        subject:
+          'Corrumpo adulatio coadunatio bene impedit creator molestias amicitia conculco cui.',
+        date: '2051-10-06T04:07:33.430Z',
+        body: '<p>Stips thymbra ciminatio valens deporto magni usque absque appono repellat.</p>',
+        read: false,
+        deleted: false
+      },
+      {
+        id: '8776831',
+        subject: 'Accedo adfero comes avaritia ventosus argentum delectatio talus surculus fugit.',
+        date: '2026-10-18T11:40:02.125Z',
+        body: '<p>Strues cras triduana tempore stabilis vomica adsum culpo asporto atque.</p>',
+        read: false,
+        deleted: false
+      },
+      {
+        id: '5244065',
+        subject:
+          'Corrumpo adulatio coadunatio bene impedit creator molestias amicitia conculco cui.',
+        date: '2051-10-06T04:07:33.430Z',
+        body: '<p>Stips thymbra ciminatio valens deporto magni usque absque appono repellat.</p>',
+        read: false,
+        deleted: false
       }
     ],
     permissionGroups: [
       {
         id: 'BASIC_PAYMENT_SCHEME',
-        level: 'NO_ACCESS',
-        functions: []
+        level: 'SUBMIT',
+        functions: [
+          'View business summary',
+          'View claims',
+          'View land, features and covers',
+          'Create and edit a claim',
+          'Amend a previously submitted claim',
+          'Amend land, features and covers',
+          'Submit a claim',
+          'Withdraw a claim',
+          'Receive warnings and notifications'
+        ]
       },
       {
         id: 'BUSINESS_DETAILS',
-        level: 'AMEND',
+        level: 'FULL_PERMISSION',
         functions: [
           'View business details',
           'View people associated with the business',
-          'Amend business and correspondence contact details'
+          'Amend business and correspondence contact details',
+          'Amend controlled information, such as business name',
+          'Confirm business details',
+          'Amend bank account details',
+          'Make young/new farmer declaration',
+          'Add someone to the business',
+          'Give permissions on business'
         ]
       },
       {
@@ -465,18 +508,36 @@ const customer = {
       },
       {
         id: 'ENTITLEMENTS',
-        level: 'NO_ACCESS',
-        functions: []
+        level: 'AMEND',
+        functions: ['View entitlements', 'Transfer entitlements', 'Apply for new entitlements']
       },
       {
         id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
-        level: 'NO_ACCESS',
-        functions: []
+        level: 'SUBMIT',
+        functions: [
+          'View Environmental Land Management scheme eligibility',
+          'View Environmental Land Management applications',
+          'View land, features and covers',
+          'View Environmental Land Management agreement offer',
+          'View Environmental Land Management agreements',
+          'Create and edit a Environmental Land Management application',
+          'Amend (but not resubmit) a previously submitted Environmental Land Management application',
+          'Amend land, features and covers',
+          'Submit Environmental Land Management application',
+          'Withdraw Environmental Land Management application',
+          'Submit acceptance of Environmental Land Management agreement offer',
+          'Submit rejection of Environmental Land Management agreement offer',
+          'Receive all application correspondence including all warnings and notifications'
+        ]
       },
       {
         id: 'LAND_DETAILS',
-        level: 'VIEW',
-        functions: ['View land, features and covers']
+        level: 'AMEND',
+        functions: [
+          'View land, features and covers',
+          'Amend land, features and covers',
+          'Transfer land'
+        ]
       }
     ]
   },
@@ -809,8 +870,8 @@ describe('Local mocked dev check', () => {
     const response = await client.request(
       businessQuery,
       {
-        sbi: '107183280',
-        crn: '9477368292',
+        sbi: '1111111111',
+        crn: '1111111100',
         date: '2020-01-01',
         sheetId: 'SS6627',
         parcelId: '8779'
@@ -832,8 +893,8 @@ describe('Local mocked dev check', () => {
     const response = await client.request(
       customerQuery,
       {
-        sbi: '107591843',
-        crn: '0866159801'
+        sbi: '1111111111',
+        crn: '1111111100'
       },
       { email: 'some-email', 'gateway-type': 'internal' }
     )
