@@ -699,202 +699,33 @@ const business = {
       }
     ]
   },
-  agreements: [
-    {
-      contractId: '1111111111',
-      name: 'ELS AGREEMENT',
-      status: 'SIGNED',
-      contractType: 'Countryside Stewardship (MT)',
-      schemeYear: 2024,
-      startDate: '2018-08-29T00:00:00.000Z',
-      endDate: '2029-11-06T00:00:00.000Z',
-      paymentSchedules: [
-        {
-          optionCode: 'KDG',
-          optionDescription: 'Demoror tempus vox currus.',
-          commitmentGroupStartDate: '2019-09-04T00:00:00.000Z',
-          commitmentGroupEndDate: '2028-01-17T00:00:00.000Z',
-          year: 2024,
-          sheetName: 'EVYBHN',
-          parcelName: '2760',
-          actionArea: 3.6163,
-          actionMTL: 58,
-          actionUnits: null,
-          parcelTotalArea: 3.1076,
-          startDate: '2022-07-23T00:00:00.000Z',
-          endDate: '2029-08-02T00:00:00.000Z'
-        },
-        {
-          optionCode: 'NAU',
-          optionDescription: 'Sollicito delego cometes cerno aptus audax depopulo delectatio.',
-          commitmentGroupStartDate: '2015-01-12T00:00:00.000Z',
-          commitmentGroupEndDate: '2027-08-03T00:00:00.000Z',
-          year: 2025,
-          sheetName: 'QXVWUY',
-          parcelName: '9116',
-          actionArea: 2.4829,
-          actionMTL: null,
-          actionUnits: null,
-          parcelTotalArea: 1.1758,
-          startDate: '2020-01-26T00:00:00.000Z',
-          endDate: '2026-10-06T00:00:00.000Z'
-        },
-        {
-          optionCode: 'JOZ',
-          optionDescription: 'Terreo admitto aeneus voro in clibanus.',
-          commitmentGroupStartDate: '2021-06-18T00:00:00.000Z',
-          commitmentGroupEndDate: '2026-07-18T00:00:00.000Z',
-          year: 2025,
-          sheetName: 'MTWAEU',
-          parcelName: '5215',
-          actionArea: 0.4161,
-          actionMTL: null,
-          actionUnits: null,
-          parcelTotalArea: 4.7183,
-          startDate: '2015-06-10T00:00:00.000Z',
-          endDate: '2029-02-14T00:00:00.000Z'
-        }
-      ]
-    },
-    {
-      contractId: '1111111112',
-      name: 'ELS AGREEMENT',
-      status: 'EXPIRED',
-      contractType: 'Entry Level Stewardship',
-      schemeYear: 2025,
-      startDate: '2022-03-15T00:00:00.000Z',
-      endDate: '2026-06-06T00:00:00.000Z',
-      paymentSchedules: [
-        {
-          optionCode: 'EQI',
-          optionDescription: 'Decimus comburo teneo carmen balbus.',
-          commitmentGroupStartDate: '2022-04-20T00:00:00.000Z',
-          commitmentGroupEndDate: '2026-04-29T00:00:00.000Z',
-          year: 2025,
-          sheetName: 'ERORWZ',
-          parcelName: '5305',
-          actionArea: 0.8723,
-          actionMTL: null,
-          actionUnits: 59,
-          parcelTotalArea: 1.4913,
-          startDate: '2023-07-08T00:00:00.000Z',
-          endDate: '2028-03-02T00:00:00.000Z'
-        },
-        {
-          optionCode: 'QJD',
-          optionDescription: 'Recusandae convoco dedico aliquid currus angustus votum.',
-          commitmentGroupStartDate: '2024-02-06T00:00:00.000Z',
-          commitmentGroupEndDate: '2027-05-23T00:00:00.000Z',
-          year: 2025,
-          sheetName: 'ESIVBL',
-          parcelName: '6735',
-          actionArea: 1.7284,
-          actionMTL: null,
-          actionUnits: 61,
-          parcelTotalArea: 2.8661,
-          startDate: '2018-04-23T00:00:00.000Z',
-          endDate: '2027-10-21T00:00:00.000Z'
-        },
-        {
-          optionCode: 'ARW',
-          optionDescription: 'Conturbo carus strues carcer.',
-          commitmentGroupStartDate: '2019-09-25T00:00:00.000Z',
-          commitmentGroupEndDate: '2029-04-17T00:00:00.000Z',
-          year: 2025,
-          sheetName: 'GMJGGD',
-          parcelName: '0272',
-          actionArea: 4.4409,
-          actionMTL: 57,
-          actionUnits: null,
-          parcelTotalArea: 4.3245,
-          startDate: '2024-02-20T00:00:00.000Z',
-          endDate: '2025-12-26T00:00:00.000Z'
-        }
-      ]
-    },
-    {
-      contractId: '1111111113',
-      name: 'ELS AGREEMENT',
-      status: 'WITHDRAWN',
-      contractType: 'Basic Payment Scheme',
-      schemeYear: 2024,
-      startDate: '2018-06-14T00:00:00.000Z',
-      endDate: '2028-09-21T00:00:00.000Z',
-      paymentSchedules: [
-        {
-          optionCode: 'SMO',
-          optionDescription: 'Vobis saepe curtus valeo.',
-          commitmentGroupStartDate: '2015-05-02T00:00:00.000Z',
-          commitmentGroupEndDate: '2026-05-04T00:00:00.000Z',
-          year: 2024,
-          sheetName: 'TGHMNW',
-          parcelName: '9823',
-          actionArea: 3.5792,
-          actionMTL: 88,
-          actionUnits: 100,
-          parcelTotalArea: 3.2433,
-          startDate: '2021-04-29T00:00:00.000Z',
-          endDate: '2025-05-21T00:00:00.000Z'
-        },
-        {
-          optionCode: 'ZZF',
-          optionDescription: 'Ut teres atrox vitiosus defero cibus.',
-          commitmentGroupStartDate: '2022-02-01T00:00:00.000Z',
-          commitmentGroupEndDate: '2028-01-01T00:00:00.000Z',
-          year: 2024,
-          sheetName: 'PCIPKI',
-          parcelName: '0136',
-          actionArea: 0.158,
-          actionMTL: null,
-          actionUnits: 26,
-          parcelTotalArea: 4.3472,
-          startDate: '2018-12-25T00:00:00.000Z',
-          endDate: '2028-12-28T00:00:00.000Z'
-        },
-        {
-          optionCode: 'TVM',
-          optionDescription: 'Textor veritas impedit nesciunt alienus victoria sonitus.',
-          commitmentGroupStartDate: '2015-08-31T00:00:00.000Z',
-          commitmentGroupEndDate: '2025-07-15T00:00:00.000Z',
-          year: 2024,
-          sheetName: 'FJMEJX',
-          parcelName: '3305',
-          actionArea: 3.3735,
-          actionMTL: 52,
-          actionUnits: null,
-          parcelTotalArea: 4.6523,
-          startDate: '2021-03-11T00:00:00.000Z',
-          endDate: '2026-09-03T00:00:00.000Z'
-        }
-      ]
-    }
-  ],
+  agreements: [],
   applications: []
 }
 const agreement = {
   contractId: '1111111111',
   name: 'ELS AGREEMENT',
-  status: 'SIGNED',
+  status: 'ACTIVE',
   contractType: 'Countryside Stewardship (MT)',
   schemeYear: 2024,
-  startDate: '2018-08-29T00:00:00.000Z',
-  endDate: '2029-11-06T00:00:00.000Z'
+  startDate: '2019-06-04T00:00:00.000Z',
+  endDate: '2026-07-30T00:00:00.000Z'
 }
 const paymentSchedules = [
   {
-    optionCode: 'KDG',
-    optionDescription: 'Demoror tempus vox currus.',
-    commitmentGroupStartDate: '2019-09-04T00:00:00.000Z',
-    commitmentGroupEndDate: '2028-01-17T00:00:00.000Z',
-    year: 2024,
-    sheetName: 'EVYBHN',
-    parcelName: '2760',
-    actionArea: 3.6163,
-    actionMTL: 58,
-    actionUnits: null,
-    parcelTotalArea: 3.1076,
-    startDate: '2022-07-23T00:00:00.000Z',
-    endDate: '2029-08-02T00:00:00.000Z'
+    optionCode: 'ZWY',
+    optionDescription: 'Cunabula agnitio cur demo acer sit.',
+    commitmentGroupStartDate: '2022-09-11T00:00:00.000Z',
+    commitmentGroupEndDate: '2026-06-12T00:00:00.000Z',
+    year: 2025,
+    sheetName: 'FBLUEA',
+    parcelName: '6797',
+    actionArea: 0.1128,
+    actionMTL: null,
+    actionUnits: 66,
+    parcelTotalArea: 2.3776,
+    startDate: '2018-03-07T00:00:00.000Z',
+    endDate: '2026-05-10T00:00:00.000Z'
   }
 ]
 
@@ -959,6 +790,23 @@ const customer = {
     name: 'Lowe - Wolf',
     role: 'Business Partner',
     messages: [
+      {
+        id: '8776831',
+        subject: 'Accedo adfero comes avaritia ventosus argentum delectatio talus surculus fugit.',
+        date: '2026-10-18T11:40:02.125Z',
+        body: '<p>Strues cras triduana tempore stabilis vomica adsum culpo asporto atque.</p>',
+        read: false,
+        deleted: false
+      },
+      {
+        id: '5244065',
+        subject:
+          'Corrumpo adulatio coadunatio bene impedit creator molestias amicitia conculco cui.',
+        date: '2051-10-06T04:07:33.430Z',
+        body: '<p>Stips thymbra ciminatio valens deporto magni usque absque appono repellat.</p>',
+        read: false,
+        deleted: false
+      },
       {
         id: '8776831',
         subject: 'Accedo adfero comes avaritia ventosus argentum delectatio talus surculus fugit.',
