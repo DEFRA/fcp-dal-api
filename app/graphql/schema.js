@@ -14,6 +14,7 @@ import * as Business from './resolvers/business/business.js'
 import * as BusinessMutation from './resolvers/business/mutation.js'
 import * as BusinessQuery from './resolvers/business/query.js'
 import * as Customer from './resolvers/customer/customer.js'
+import * as CustomerMutation from './resolvers/customer/mutation.js'
 import * as CustomerQuery from './resolvers/customer/query.js'
 import * as PermissionsQuery from './resolvers/permissions/query.js'
 
@@ -28,12 +29,13 @@ export async function createSchema() {
   let schema = makeExecutableSchema({
     typeDefs: await getFiles('types'),
     resolvers: mergeResolvers([
-      BusinessQuery,
       Business,
       BusinessLand,
       BusinessMutation,
-      CustomerQuery,
+      BusinessQuery,
       Customer,
+      CustomerMutation,
+      CustomerQuery,
       PermissionsQuery
     ])
   })

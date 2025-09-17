@@ -19,6 +19,51 @@ type Mutation {
   updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
   updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
+  updateCustomerAddress(input: UpdateCustomerAddressInput!): UpdateCustomerResponse
+  updateCustomerDateOfBirth(input: UpdateCustomerDateOfBirthInput!): UpdateCustomerResponse
+  updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
+  updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
+  updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
+  updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
+}
+
+input UpdateCustomerAddressInput {
+  crn: ID!
+  address: AddressInput!
+}
+
+input UpdateCustomerDateOfBirthInput {
+  crn: ID!
+  dateOfBirth: Date!
+}
+
+input UpdateCustomerEmailInput {
+  crn: ID!
+  email: EmailInput!
+}
+
+input UpdateCustomerNameInput {
+  crn: ID!
+  first: String
+  last: String
+  middle: String
+  otherTitle: String
+  title: String
+}
+
+input UpdateCustomerPhoneInput {
+  crn: ID!
+  phone: PhoneInput!
+}
+
+input UpdateCustomerDoNotContactInput {
+  crn: ID!
+  doNotContact: Boolean!
+}
+
+type UpdateCustomerResponse {
+  success: Boolean
+  customer: Customer
 }
 
 input AddressInput {

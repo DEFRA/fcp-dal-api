@@ -731,30 +731,172 @@ const business = {
     }
   ]
 }
-const agreement = {
-  contractId: '1111111111',
-  name: 'ELS AGREEMENT',
-  status: 'ACTIVE',
-  contractType: 'Countryside Stewardship (MT)',
-  schemeYear: 2024,
-  startDate: '2019-06-04T00:00:00.000Z',
-  endDate: '2026-07-30T00:00:00.000Z'
-}
+
+const agreement = [
+  {
+    contractId: '1111111111',
+    name: 'CS AGREEMENT',
+    status: 'SIGNED',
+    contractType: 'Higher Level Stewardship',
+    schemeYear: 2025,
+    startDate: '2020-06-10T00:00:00.000Z',
+    endDate: '2029-09-19T00:00:00.000Z'
+  },
+  {
+    contractId: '1111111112',
+    name: 'HLS AGREEMENT',
+    status: 'EXPIRED',
+    contractType: 'Higher Level Stewardship',
+    schemeYear: 2025,
+    startDate: '2017-11-16T00:00:00.000Z',
+    endDate: '2028-09-06T00:00:00.000Z'
+  },
+  {
+    contractId: '1111111113',
+    name: 'HLS AGREEMENT',
+    status: 'EXPIRED',
+    contractType: 'Entry Level Stewardship',
+    schemeYear: 2025,
+    startDate: '2019-08-06T00:00:00.000Z',
+    endDate: '2029-11-02T00:00:00.000Z'
+  }
+]
+
 const paymentSchedules = [
   {
-    optionCode: 'ZWY',
-    optionDescription: 'Cunabula agnitio cur demo acer sit.',
-    commitmentGroupStartDate: '2022-09-11T00:00:00.000Z',
-    commitmentGroupEndDate: '2026-06-12T00:00:00.000Z',
-    year: 2025,
-    sheetName: 'FBLUEA',
-    parcelName: '6797',
-    actionArea: 0.1128,
+    optionCode: 'CYZ',
+    optionDescription: 'Tabesco ulterius turpis terga corrumpo dedecor.',
+    commitmentGroupStartDate: '2016-11-08T00:00:00.000Z',
+    commitmentGroupEndDate: '2025-09-04T00:00:00.000Z',
+    year: 2024,
+    sheetName: 'PLABUR',
+    parcelName: '4368',
+    actionArea: 2.9824,
     actionMTL: null,
-    actionUnits: 66,
-    parcelTotalArea: 2.3776,
-    startDate: '2018-03-07T00:00:00.000Z',
-    endDate: '2026-05-10T00:00:00.000Z'
+    actionUnits: 14,
+    parcelTotalArea: 2.2449,
+    startDate: '2022-03-24T00:00:00.000Z',
+    endDate: '2028-05-15T00:00:00.000Z'
+  },
+  {
+    optionCode: 'FTF',
+    optionDescription: 'Victus cunabula campana voluptate suasoria nam vinco.',
+    commitmentGroupStartDate: '2024-06-08T00:00:00.000Z',
+    commitmentGroupEndDate: '2025-01-09T00:00:00.000Z',
+    year: 2024,
+    sheetName: 'VFFGBZ',
+    parcelName: '1855',
+    actionArea: 4.9701,
+    actionMTL: null,
+    actionUnits: 94,
+    parcelTotalArea: 2.2832,
+    startDate: '2021-06-05T00:00:00.000Z',
+    endDate: '2025-02-18T00:00:00.000Z'
+  },
+  {
+    optionCode: 'XZJ',
+    optionDescription: 'Spes decumbo delibero cohors canonicus.',
+    commitmentGroupStartDate: '2019-06-06T00:00:00.000Z',
+    commitmentGroupEndDate: '2029-12-05T00:00:00.000Z',
+    year: 2025,
+    sheetName: 'JAUWEQ',
+    parcelName: '3212',
+    actionArea: 4.8428,
+    actionMTL: 28,
+    actionUnits: 82,
+    parcelTotalArea: 4.5663,
+    startDate: '2016-08-31T00:00:00.000Z',
+    endDate: '2029-05-27T00:00:00.000Z'
+  },
+  {
+    optionCode: 'IXP',
+    optionDescription: 'Video adipisci communis xiphias cursim minus.',
+    commitmentGroupStartDate: '2017-06-13T00:00:00.000Z',
+    commitmentGroupEndDate: '2029-11-08T00:00:00.000Z',
+    year: 2024,
+    sheetName: 'BAOYHK',
+    parcelName: '7726',
+    actionArea: 1.0364,
+    actionMTL: 76,
+    actionUnits: 79,
+    parcelTotalArea: 3.8271,
+    startDate: '2016-02-27T00:00:00.000Z',
+    endDate: '2029-01-21T00:00:00.000Z'
+  },
+  {
+    optionCode: 'PRS',
+    optionDescription: 'Speciosus teres teres cervus tenus.',
+    commitmentGroupStartDate: '2021-12-08T00:00:00.000Z',
+    commitmentGroupEndDate: '2026-07-04T00:00:00.000Z',
+    year: 2024,
+    sheetName: 'IPXWZZ',
+    parcelName: '0977',
+    actionArea: 4.4436,
+    actionMTL: null,
+    actionUnits: 95,
+    parcelTotalArea: 2.9343,
+    startDate: '2016-10-10T00:00:00.000Z',
+    endDate: '2028-12-30T00:00:00.000Z'
+  },
+  {
+    optionCode: 'ZIY',
+    optionDescription: 'Pauper suppellex corpus valeo.',
+    commitmentGroupStartDate: '2020-01-13T00:00:00.000Z',
+    commitmentGroupEndDate: '2027-05-31T00:00:00.000Z',
+    year: 2024,
+    sheetName: 'UAPQGR',
+    parcelName: '0806',
+    actionArea: 2.5914,
+    actionMTL: null,
+    actionUnits: null,
+    parcelTotalArea: 2.6476,
+    startDate: '2019-03-20T00:00:00.000Z',
+    endDate: '2027-08-09T00:00:00.000Z'
+  },
+  {
+    optionCode: 'ODI',
+    optionDescription: 'Denego ara ambulo iusto tam contigo.',
+    commitmentGroupStartDate: '2020-12-24T00:00:00.000Z',
+    commitmentGroupEndDate: '2028-12-08T00:00:00.000Z',
+    year: 2025,
+    sheetName: 'MGSOJU',
+    parcelName: '1969',
+    actionArea: 3.5819,
+    actionMTL: null,
+    actionUnits: null,
+    parcelTotalArea: 1.3682,
+    startDate: '2021-11-15T00:00:00.000Z',
+    endDate: '2028-01-31T00:00:00.000Z'
+  },
+  {
+    optionCode: 'QXE',
+    optionDescription: 'Thymbra denego arcus.',
+    commitmentGroupStartDate: '2015-02-09T00:00:00.000Z',
+    commitmentGroupEndDate: '2028-05-22T00:00:00.000Z',
+    year: 2025,
+    sheetName: 'YRDOIV',
+    parcelName: '2342',
+    actionArea: 4.9081,
+    actionMTL: null,
+    actionUnits: null,
+    parcelTotalArea: 3.6608,
+    startDate: '2023-03-25T00:00:00.000Z',
+    endDate: '2025-04-25T00:00:00.000Z'
+  },
+  {
+    optionCode: 'EZV',
+    optionDescription: 'Tibi demo cedo suspendo aeternus.',
+    commitmentGroupStartDate: '2024-03-06T00:00:00.000Z',
+    commitmentGroupEndDate: '2029-07-24T00:00:00.000Z',
+    year: 2024,
+    sheetName: 'RZTGOE',
+    parcelName: '8594',
+    actionArea: 4.4455,
+    actionMTL: 81,
+    actionUnits: null,
+    parcelTotalArea: 4.4645,
+    startDate: '2024-03-03T00:00:00.000Z',
+    endDate: '2025-12-29T00:00:00.000Z'
   }
 ]
 
@@ -769,7 +911,7 @@ const customer = {
       middle: 'Shayna',
       last: 'Purdy'
     },
-    dateOfBirth: '1955-04-23T21:02:16.561Z',
+    dateOfBirth: '1955-04-23',
     phone: {
       mobile: '01650 95852',
       landline: '055 2317 9411'
@@ -1309,9 +1451,20 @@ describe('Local mocked dev check', () => {
     expect(response).not.toHaveProperty('errors')
     expect(response.business).toMatchObject({
       ...business,
-      agreements: expect.arrayContaining([
-        { ...agreement, paymentSchedules: expect.arrayContaining(paymentSchedules) }
-      ])
+      agreements: expect.arrayContaining(
+        agreement.map((agr) => ({
+          ...agr,
+          paymentSchedules: expect.arrayContaining(
+            paymentSchedules.filter((ps) =>
+              agr.contractId === '1111111111'
+                ? ['CYZ', 'FTF', 'XZJ'].includes(ps.optionCode)
+                : agr.contractId === '1111111112'
+                  ? ['IXP', 'PRS', 'ZIY'].includes(ps.optionCode)
+                  : ['ODI', 'QXE', 'EZV'].includes(ps.optionCode)
+            )
+          )
+        }))
+      )
     })
   })
 
@@ -1339,9 +1492,20 @@ describe('Local mocked dev check', () => {
     expect(response).not.toHaveProperty('errors')
     expect(response.business).toMatchObject({
       ...business,
-      agreements: expect.arrayContaining([
-        { ...agreement, paymentSchedules: expect.arrayContaining(paymentSchedules) }
-      ])
+      agreements: expect.arrayContaining(
+        agreement.map((agr) => ({
+          ...agr,
+          paymentSchedules: expect.arrayContaining(
+            paymentSchedules.filter((ps) =>
+              agr.contractId === '1111111111'
+                ? ['CYZ', 'FTF', 'XZJ'].includes(ps.optionCode)
+                : agr.contractId === '1111111112'
+                  ? ['IXP', 'PRS', 'ZIY'].includes(ps.optionCode)
+                  : ['ODI', 'QXE', 'EZV'].includes(ps.optionCode)
+            )
+          )
+        }))
+      )
     })
   })
 
