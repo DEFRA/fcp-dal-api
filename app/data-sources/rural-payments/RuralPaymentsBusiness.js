@@ -68,10 +68,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response._data
   }
 
-  getParcelsByOrganisationId(organisationId) {
-    return this.get(`lms/organisation/${organisationId}/parcels`)
-  }
-
   getParcelsByOrganisationIdAndDate(organisationId, date) {
     const formattedDate = this.formatDateDDMMMYY(new Date(date))
 
