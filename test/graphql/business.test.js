@@ -624,6 +624,141 @@ describe('Query.business internal', () => {
     expect(nock.isDone()).toBe(true)
   })
 
+  test('is able to query land parcels with no date', async () => {
+    const v1 = nock(config.get('kits.internal.gatewayUrl'))
+    mockOrganisationSearch(v1)
+    setupNock(v1)
+
+    const currentDate = new Date()
+    const day = currentDate.toLocaleString('en-US', { day: '2-digit' }) // 01
+    const month = currentDate.toLocaleString('en-US', { month: 'short' }) // "Sep"
+    const year = currentDate.toLocaleString('en-US', { year: '2-digit' }) // "25"
+    const formattedDate = `${day}-${month}-${year}`
+
+    v1.get(`/lms/organisation/organisationId/parcels/historic/${formattedDate}`).reply(200, [
+      {
+        id: 'id',
+        sheetId: 'sheetId',
+        parcelId: 'parcelId',
+        area: 1,
+        pendingDigitisation: true
+      }
+    ])
+
+    v1.get(`/lms/organisation/organisationId/parcel-details/historic/${formattedDate}`).reply(200, [
+      {
+        sheetId: 'sheetId',
+        parcelId: 'parcelId',
+        validFrom: 1636934401682,
+        validTo: 1636934392140
+      }
+    ])
+
+    v1.get(
+      `/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/${formattedDate}/land-covers`
+    ).reply(200, {
+      features: [
+        {
+          id: 'id',
+          properties: {
+            area: 1,
+            code: 'code',
+            name: 'name',
+            isBpsEligible: true
+          }
+        }
+      ]
+    })
+
+    v1.get(`/lms/organisation/organisationId/covers-summary/historic/${formattedDate}`).reply(200, [
+      { name: 'Arable Land', area: 1 },
+      { name: 'Permanent Grassland', area: 1 },
+      { name: 'Permanent Crops', area: 1 }
+    ])
+
+    const parcelsQuery = `#graphql
+      query BusinessTest {
+          business(sbi: "sbi") {
+            land {
+              parcels {
+                id
+                sheetId
+                parcelId
+                area
+                pendingDigitisation
+              }
+              parcel(sheetId: "sheetId", parcelId: "parcelId") {
+                id
+                sheetId
+                parcelId
+                area
+                pendingDigitisation
+                effectiveToDate
+                effectiveFromDate
+              }
+              parcelCovers(sheetId: "sheetId", parcelId: "parcelId") {
+                id
+                name
+                area
+                code
+                isBpsEligible
+              }
+              summary {
+                arableLandArea
+                permanentCropsArea
+                permanentGrasslandArea
+                totalArea
+                totalParcels
+              }
+            }
+          }
+        }
+      `
+    const result = await makeTestQuery(parcelsQuery)
+    expect(result).toEqual({
+      data: {
+        business: {
+          land: {
+            parcels: [
+              {
+                id: 'id',
+                sheetId: 'sheetId',
+                parcelId: 'parcelId',
+                area: 0.0001,
+                pendingDigitisation: true
+              }
+            ],
+            parcel: {
+              id: 'id',
+              sheetId: 'sheetId',
+              parcelId: 'parcelId',
+              area: 0.0001,
+              pendingDigitisation: true,
+              effectiveToDate: '2021-11-14T23:59:52.140Z',
+              effectiveFromDate: '2021-11-15T00:00:01.682Z'
+            },
+            parcelCovers: [
+              {
+                id: 'id',
+                name: 'name',
+                area: 0.0001,
+                code: 'code',
+                isBpsEligible: false
+              }
+            ],
+            summary: {
+              arableLandArea: 0.0001,
+              permanentCropsArea: 0.0001,
+              permanentGrasslandArea: 0.0001,
+              totalArea: 0.0001,
+              totalParcels: 1
+            }
+          }
+        }
+      }
+    })
+  })
+
   test('unauthenticated', async () => {
     nock.disableNetConnect()
     const result = await makeTestQuery(query, false)

@@ -14,7 +14,7 @@ export const BusinessLand = {
     return { organisationId, date }
   },
 
-  async parcel({ organisationId }, { date, parcelId, sheetId }, { dataSources }) {
+  async parcel({ organisationId }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
     validateDate(date)
 
     const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
@@ -30,7 +30,7 @@ export const BusinessLand = {
     }
   },
 
-  async parcels({ organisationId }, { date }, { dataSources }) {
+  async parcels({ organisationId }, { date = new Date() }, { dataSources }) {
     validateDate(date)
 
     return transformLandParcels(
@@ -41,7 +41,11 @@ export const BusinessLand = {
     )
   },
 
-  async parcelCovers({ organisationId }, { date, sheetId, parcelId }, { dataSources }) {
+  async parcelCovers(
+    { organisationId },
+    { date = new Date(), sheetId, parcelId },
+    { dataSources }
+  ) {
     validateDate(date)
 
     const parcel = await BusinessLand.parcel(
