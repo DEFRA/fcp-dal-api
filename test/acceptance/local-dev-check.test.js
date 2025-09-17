@@ -700,7 +700,36 @@ const business = {
     ]
   },
   agreements: [],
-  applications: []
+  applications: [
+    {
+      sbi: '1111111111',
+      id: '4957577517',
+      subjectId: '9888153412',
+      year: 2022,
+      name: 'ULTERIUS TURPIS TERGA CORRUMPO DEDECOR AUDACIA APPOSITUS DEPRECATOR',
+      moduleCode: 'ABUTOR_ADFICIO_CULPA_2022',
+      scheme: 'CONDUCO PROVIDENT VARIUS ODIO',
+      statusCodeP: 'STADOM',
+      statusCodeS: '000090',
+      status: 'PAID',
+      submissionDate: null,
+      portalStatusP: 'DOMPRS',
+      portalStatusS: 'PAYPRO',
+      portalStatus: 'Paid',
+      active: true,
+      transitionId: '9765470390',
+      transitionName: 'TO PAID',
+      agreementReferences: ['9346492622'],
+      transitionHistory: [
+        {
+          id: '9765470390',
+          name: 'TO PAID',
+          timestamp: '2022-12-31T09:48:46.540Z',
+          checkStatus: 'PASSED'
+        }
+      ]
+    }
+  ]
 }
 const agreement = {
   contractId: '1111111111',
