@@ -2,75 +2,88 @@ import { GraphQLClient, gql } from 'graphql-request'
 import jwt from 'jsonwebtoken'
 
 const business = {
-  organisationId: '5565448',
-  sbi: '107183280',
+  organisationId: '1111111111',
+  sbi: '1111111111',
   info: {
-    name: 'HENLEY, RE',
-    reference: '1102179604',
-    vat: 'GB123456789',
-    traderNumber: '010203040506070880980',
-    vendorNumber: '694523',
+    name: 'Lowe - Wolf',
+    reference: '2962772615',
+    vat: '9039452915',
+    traderNumber: null,
+    vendorNumber: null,
     address: {
-      pafOrganisationName: 'FORTESCUE ESTATES',
-      line1: '76 Robinswood Road',
-      line2: 'UPPER CHUTE',
-      line3: 'Child Okeford',
-      line4: null,
-      line5: null,
-      buildingNumberRange: '7',
-      buildingName: 'STOCKWELL HALL',
-      flatName: 'THE COACH HOUSE',
-      street: 'HAREWOOD AVENUE',
-      city: 'DARLINGTON',
-      county: 'Dorset',
-      postalCode: 'CO9 3LS',
-      country: 'United Kingdom',
-      uprn: '10008695234',
-      dependentLocality: 'ELLICOMBE',
-      doubleDependentLocality: 'WOODTHORPE',
+      pafOrganisationName: 'Lowe - Wolf',
+      line1: '51',
+      line2: '527 Alicia Bank',
+      line3: 'Kiehn-over-Mosciski',
+      line4: 'XP4 7DL',
+      line5: 'Puerto Rico',
+      buildingNumberRange: null,
+      buildingName: null,
+      flatName: null,
+      street: null,
+      city: 'Mooreingham',
+      county: null,
+      postalCode: 'UY42 9SO',
+      country: 'Wales',
+      uprn: '903411609185',
+      dependentLocality: null,
+      doubleDependentLocality: null,
       typeId: null
     },
     correspondenceAddress: null,
     isCorrespondenceAsBusinessAddress: false,
     email: {
-      address: 'henleyrej@eryelnehk.com.test',
+      address: 'Tremaine44@yahoo.com',
       validated: true
     },
     correspondenceEmail: {
-      address: null,
-      validated: false
+      address: 'Viviane81@gmail.com',
+      validated: true
     },
     phone: {
-      mobile: null,
-      landline: '01234031859'
+      mobile: '0151 390 3321',
+      landline: '055 6443 2495'
     },
     correspondencePhone: {
-      mobile: null,
-      landline: null
+      mobile: '0110 265 9147',
+      landline: '0500 403408'
     },
     legalStatus: {
-      code: 102111,
+      code: 768039,
       type: 'Sole Proprietorship'
     },
     type: {
-      code: 101443,
+      code: 567982,
       type: 'Not Specified'
     },
     registrationNumbers: {
-      companiesHouse: null,
-      charityCommission: null
+      companiesHouse: 'L7ONQluF',
+      charityCommission: 'MhLGirFN'
     },
-    additionalSbis: ['105179439'],
-    lastUpdated: '2023-07-18T15:38:20.448Z',
-    isFinancialToBusinessAddress: false,
+    additionalSbis: [],
+    lastUpdated: '2024-12-31T17:38:09.734Z',
+    isFinancialToBusinessAddress: true,
     hasLandInNorthernIreland: false,
-    hasLandInScotland: false,
+    hasLandInScotland: true,
     hasLandInWales: false,
-    hasAdditionalBusinessActivities: false,
-    additionalBusinessActivities: [],
-    isAccountablePeopleDeclarationCompleted: false,
-    dateStartedFarming: null,
-    landConfirmed: true,
+    hasAdditionalBusinessActivities: true,
+    additionalBusinessActivities: [
+      {
+        code: 801680,
+        type: 'Additional Business Activity 0'
+      },
+      {
+        code: 874107,
+        type: 'Additional Business Activity 1'
+      },
+      {
+        code: 525111,
+        type: 'Additional Business Activity 2'
+      }
+    ],
+    isAccountablePeopleDeclarationCompleted: true,
+    dateStartedFarming: '2024-08-20T08:22:59.257Z',
+    landConfirmed: false,
     status: {
       locked: false,
       confirmed: true,
@@ -79,56 +92,117 @@ const business = {
   },
   customers: [
     {
-      personId: '5007136',
-      firstName: 'David',
-      lastName: 'Paul',
-      crn: '0866159801',
-      role: 'Employee'
-    },
-    {
-      personId: '5263421',
-      firstName: 'Nicholas',
-      lastName: 'SANGSTER',
-      crn: '1638563942',
+      personId: '11111111',
+      firstName: 'Gerhard',
+      lastName: 'Purdy',
+      crn: '1111111100',
       role: 'Business Partner'
     },
     {
-      personId: '5302028',
-      firstName:
-        'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
-      lastName: 'Cook',
-      crn: '9477368292',
-      role: 'Agent'
+      personId: '11111112',
+      firstName: 'Odie',
+      lastName: 'Lueilwitz',
+      crn: '1111111200',
+      role: 'Business Partner'
     },
     {
-      personId: '5311964',
-      firstName: 'Trevor',
-      lastName: 'Graham',
-      crn: '2446747270',
-      role: 'Agent'
+      personId: '11111113',
+      firstName: 'Don',
+      lastName: 'Stracke',
+      crn: '1111111300',
+      role: 'Business Partner'
     },
     {
-      personId: '5331098',
-      firstName: 'Marcus',
-      lastName: 'Twigden',
-      crn: '4804081228',
-      role: 'Agent'
+      personId: '11111114',
+      firstName: 'Tatum',
+      lastName: 'McLaughlin',
+      crn: '1111111400',
+      role: 'Business Partner'
     },
     {
-      personId: '5778203',
-      firstName: 'Oliver',
-      lastName: 'Colwill',
-      crn: '6148241575',
-      role: 'Agent'
+      personId: '11111115',
+      firstName: 'Antwon',
+      lastName: 'Mann',
+      crn: '1111111500',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11111116',
+      firstName: 'Norris',
+      lastName: 'Waters',
+      crn: '1111111600',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11111117',
+      firstName: 'Marjorie',
+      lastName: 'Simonis',
+      crn: '1111111700',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11111118',
+      firstName: 'Cielo',
+      lastName: 'Kohler',
+      crn: '1111111800',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11111119',
+      firstName: 'Orlo',
+      lastName: 'Kozey',
+      crn: '1111111900',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11111122',
+      firstName: 'Richmond',
+      lastName: 'Adams',
+      crn: '1111112200',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11111222',
+      firstName: 'Oswaldo',
+      lastName: 'Ortiz',
+      crn: '1111122200',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11112222',
+      firstName: 'Anastasia',
+      lastName: 'McCullough',
+      crn: '1111222200',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11122222',
+      firstName: 'Forest',
+      lastName: 'Murray',
+      crn: '1112222200',
+      role: 'Business Partner'
+    },
+    {
+      personId: '11222222',
+      firstName: 'Travis',
+      lastName: 'Dooley',
+      crn: '1122222200',
+      role: 'Business Partner'
+    },
+    {
+      personId: '12222222',
+      firstName: 'Shad',
+      lastName: 'Rau',
+      crn: '1222222200',
+      role: 'Business Partner'
     }
   ],
   customer: {
-    personId: '5302028',
-    firstName:
-      'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
-    lastName: 'Cook',
-    crn: '9477368292',
-    role: 'Agent',
+    personId: '11111111',
+    firstName: 'Gerhard',
+    lastName: 'Purdy',
+    crn: '1111111100',
+    role: 'Business Partner',
     permissionGroups: [
       {
         id: 'BASIC_PAYMENT_SCHEME',
@@ -210,6 +284,25 @@ const business = {
         functions: ['View entitlements', 'Transfer entitlements', 'Apply for new entitlements']
       },
       {
+        id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS',
+        level: 'SUBMIT',
+        functions: [
+          'View Environmental Land Management scheme eligibility',
+          'View Environmental Land Management applications',
+          'View land, features and covers',
+          'View Environmental Land Management agreement offer',
+          'View Environmental Land Management agreements',
+          'Create and edit a Environmental Land Management application',
+          'Amend (but not resubmit) a previously submitted Environmental Land Management application',
+          'Amend land, features and covers',
+          'Submit Environmental Land Management application',
+          'Withdraw Environmental Land Management application',
+          'Submit acceptance of Environmental Land Management agreement offer',
+          'Submit rejection of Environmental Land Management agreement offer',
+          'Receive all application correspondence including all warnings and notifications'
+        ]
+      },
+      {
         id: 'LAND_DETAILS',
         level: 'AMEND',
         functions: [
@@ -222,69 +315,416 @@ const business = {
   },
   land: {
     summary: {
-      arableLandArea: 228.2947,
-      permanentCropsArea: 7.3368,
-      permanentGrasslandArea: 530.1988,
-      totalArea: 821.1645,
-      totalParcels: 302
+      arableLandArea: 22.8294,
+      permanentCropsArea: 0,
+      permanentGrasslandArea: 51.1508,
+      totalArea: 103.9607,
+      totalParcels: 47
+    },
+    parcels: [
+      {
+        id: '7514996',
+        sheetId: 'SS6828',
+        parcelId: '3818',
+        area: 0.8058,
+        pendingDigitisation: false
+      },
+      {
+        id: '6766326',
+        sheetId: 'SS7027',
+        parcelId: '0561',
+        area: 5.5053,
+        pendingDigitisation: false
+      },
+      {
+        id: '6572426',
+        sheetId: 'SS6728',
+        parcelId: '2061',
+        area: 0.0407,
+        pendingDigitisation: false
+      },
+      {
+        id: '7379882',
+        sheetId: 'SS6629',
+        parcelId: '3753',
+        area: 1.2094,
+        pendingDigitisation: false
+      },
+      {
+        id: '7386080',
+        sheetId: 'SS6829',
+        parcelId: '4510',
+        area: 7.5282,
+        pendingDigitisation: false
+      },
+      {
+        id: '6766315',
+        sheetId: 'SS6928',
+        parcelId: '2105',
+        area: 6.6682,
+        pendingDigitisation: false
+      },
+      {
+        id: '6766354',
+        sheetId: 'SS6928',
+        parcelId: '3826',
+        area: 6.5854,
+        pendingDigitisation: false
+      },
+      {
+        id: '6773871',
+        sheetId: 'SS6829',
+        parcelId: '5248',
+        area: 0.7974,
+        pendingDigitisation: false
+      },
+      {
+        id: '7477825',
+        sheetId: 'SS6529',
+        parcelId: '9767',
+        area: 2.5198,
+        pendingDigitisation: false
+      },
+      {
+        id: '6767667',
+        sheetId: 'SS6630',
+        parcelId: '3616',
+        area: 5.066,
+        pendingDigitisation: false
+      },
+      {
+        id: '7701145',
+        sheetId: 'SS6528',
+        parcelId: '6585',
+        area: 4.5051,
+        pendingDigitisation: false
+      },
+      {
+        id: '7540383',
+        sheetId: 'SS6629',
+        parcelId: '4510',
+        area: 0.3344,
+        pendingDigitisation: false
+      },
+      {
+        id: '6770615',
+        sheetId: 'SS6728',
+        parcelId: '6480',
+        area: 2.2063,
+        pendingDigitisation: false
+      },
+      {
+        id: '7700952',
+        sheetId: 'SS6830',
+        parcelId: '2554',
+        area: 2.2911,
+        pendingDigitisation: false
+      },
+      {
+        id: '6770634',
+        sheetId: 'SS6728',
+        parcelId: '8425',
+        area: 4.9526,
+        pendingDigitisation: false
+      },
+      {
+        id: '7700986',
+        sheetId: 'SS6728',
+        parcelId: '4989',
+        area: 0.5395,
+        pendingDigitisation: false
+      },
+      {
+        id: '6490796',
+        sheetId: 'SS6629',
+        parcelId: '7730',
+        area: 0.6309,
+        pendingDigitisation: false
+      },
+      {
+        id: '4106533',
+        sheetId: 'SS6830',
+        parcelId: '6845',
+        area: 0.2139,
+        pendingDigitisation: false
+      },
+      {
+        id: '7701111',
+        sheetId: 'SS6628',
+        parcelId: '0352',
+        area: 0.2124,
+        pendingDigitisation: false
+      },
+      {
+        id: '6766652',
+        sheetId: 'SS6529',
+        parcelId: '1654',
+        area: 0.2077,
+        pendingDigitisation: false
+      },
+      {
+        id: '7477824',
+        sheetId: 'SS6529',
+        parcelId: '9756',
+        area: 2.968,
+        pendingDigitisation: false
+      },
+      {
+        id: '6773631',
+        sheetId: 'SS6827',
+        parcelId: '2482',
+        area: 1.0287,
+        pendingDigitisation: false
+      },
+      {
+        id: '7386007',
+        sheetId: 'SS6828',
+        parcelId: '1733',
+        area: 0.7738,
+        pendingDigitisation: false
+      },
+      {
+        id: '7700960',
+        sheetId: 'SS6728',
+        parcelId: '3950',
+        area: 0.8069,
+        pendingDigitisation: false
+      },
+      {
+        id: '7701120',
+        sheetId: 'SS6628',
+        parcelId: '6705',
+        area: 0.6459,
+        pendingDigitisation: false
+      },
+      {
+        id: '6770629',
+        sheetId: 'SS6828',
+        parcelId: '2566',
+        area: 1.4368,
+        pendingDigitisation: false
+      },
+      {
+        id: '6695491',
+        sheetId: 'SS6630',
+        parcelId: '9113',
+        area: 4.5656,
+        pendingDigitisation: false
+      },
+      {
+        id: '5087080',
+        sheetId: 'SS6828',
+        parcelId: '6021',
+        area: 0.091,
+        pendingDigitisation: false
+      },
+      {
+        id: '7386521',
+        sheetId: 'SS6530',
+        parcelId: '2110',
+        area: 0.776,
+        pendingDigitisation: false
+      },
+      {
+        id: '5203389',
+        sheetId: 'SS6628',
+        parcelId: '1620',
+        area: 0.3325,
+        pendingDigitisation: false
+      },
+      {
+        id: '5180013',
+        sheetId: 'SS6828',
+        parcelId: '7342',
+        area: 0.2196,
+        pendingDigitisation: false
+      },
+      {
+        id: '5689762',
+        sheetId: 'SS6528',
+        parcelId: '7736',
+        area: 0.7448,
+        pendingDigitisation: false
+      },
+      {
+        id: '7727586',
+        sheetId: 'SS6629',
+        parcelId: '5536',
+        area: 2.8284,
+        pendingDigitisation: false
+      },
+      {
+        id: '6768147',
+        sheetId: 'SS6629',
+        parcelId: '6787',
+        area: 0.2575,
+        pendingDigitisation: false
+      },
+      {
+        id: '5441609',
+        sheetId: 'SS6828',
+        parcelId: '1695',
+        area: 1.5372,
+        pendingDigitisation: false
+      },
+      {
+        id: '6766307',
+        sheetId: 'SS6928',
+        parcelId: '7942',
+        area: 5.4773,
+        pendingDigitisation: false
+      },
+      {
+        id: '7700977',
+        sheetId: 'SS6829',
+        parcelId: '0385',
+        area: 4.9208,
+        pendingDigitisation: false
+      },
+      {
+        id: '7701110',
+        sheetId: 'SS6628',
+        parcelId: '0556',
+        area: 1.1216,
+        pendingDigitisation: false
+      },
+      {
+        id: '6766259',
+        sheetId: 'SS6627',
+        parcelId: '9997',
+        area: 1.4513,
+        pendingDigitisation: false
+      },
+      {
+        id: '7700957',
+        sheetId: 'SS6728',
+        parcelId: '5527',
+        area: 12.2432,
+        pendingDigitisation: false
+      },
+      {
+        id: '7701127',
+        sheetId: 'SS6628',
+        parcelId: '4434',
+        area: 2.9197,
+        pendingDigitisation: false
+      },
+      {
+        id: '6770596',
+        sheetId: 'SS6727',
+        parcelId: '3735',
+        area: 0.4109,
+        pendingDigitisation: false
+      },
+      {
+        id: '6739055',
+        sheetId: 'SS6828',
+        parcelId: '2933',
+        area: 0.9523,
+        pendingDigitisation: false
+      },
+      {
+        id: '5523156',
+        sheetId: 'SS6928',
+        parcelId: '5419',
+        area: 0.1964,
+        pendingDigitisation: false
+      },
+      {
+        id: '7540369',
+        sheetId: 'SS6728',
+        parcelId: '3427',
+        area: 0.041,
+        pendingDigitisation: false
+      },
+      {
+        id: '7540367',
+        sheetId: 'SS6728',
+        parcelId: '4558',
+        area: 0.4288,
+        pendingDigitisation: false
+      },
+      {
+        id: '5930807',
+        sheetId: 'SS6827',
+        parcelId: '7399',
+        area: 1.9644,
+        pendingDigitisation: false
+      }
+    ],
+    parcel: {
+      id: '7514996',
+      sheetId: 'SS6828',
+      parcelId: '3818',
+      area: 0.8058,
+      pendingDigitisation: false,
+      effectiveToDate: '2024-08-20T05:42:41.649Z',
+      effectiveFromDate: '2024-08-19T05:42:41.649Z'
     },
     parcelCovers: [
       {
-        id: '130',
-        name: 'Permanent Grassland',
-        area: 0.4829,
-        code: '130',
+        id: '12151270',
+        name: 'Structure',
+        area: 0.1811,
+        code: '525',
+        isBpsEligible: false
+      },
+      {
+        id: '12151271',
+        name: 'Farmyards',
+        area: 0.2927,
+        code: '379',
+        isBpsEligible: false
+      },
+      {
+        id: '12151272',
+        name: 'Woodland',
+        area: 0.2354,
+        code: '332',
+        isBpsEligible: false
+      },
+      {
+        id: '12151268',
+        name: 'Metalled track',
+        area: 0.0634,
+        code: '631',
+        isBpsEligible: false
+      },
+      {
+        id: '12151269',
+        name: 'Farmyards',
+        area: 0.0332,
+        code: '379',
         isBpsEligible: false
       }
     ]
   },
-  countyParishHoldings: [
-    {
-      cphNumber: '20/060/0001',
-      parish: 'WESTHAVEN',
-      startDate: '2020-03-20',
-      endDate: '2021-03-20',
-      species: 'CATTLE,MORE THAN FIFTY POULTRY',
-      xCoordinate: 572505,
-      yCoordinate: 152485,
-      address: 'Manor Farm, High Street, Westhaven, Devon, EX12 3AB'
-    },
-    {
-      cphNumber: '20/060/0002',
-      parish: null,
-      startDate: null,
-      endDate: null,
-      species: null,
-      xCoordinate: null,
-      yCoordinate: null,
-      address: null
-    }
-  ],
+  agreements: [],
   applications: [
     {
-      sbi: '107183280',
-      id: '4511299240',
-      subjectId: '407841902',
+      sbi: '1111111111',
+      id: '4957577517',
+      subjectId: '9888153412',
       year: 2022,
-      name: 'COMMODO FACERE PARIATUR COGO CAREO VENTITO CONIECTO CUNABULA DEFETISCOR',
-      moduleCode: 'CENTUM_UBERRIME_2022',
-      scheme: 'APTO VESPER VENTUS IPSA',
+      name: 'ULTERIUS TURPIS TERGA CORRUMPO DEDECOR AUDACIA APPOSITUS DEPRECATOR',
+      moduleCode: 'ABUTOR_ADFICIO_CULPA_2022',
+      scheme: 'CONDUCO PROVIDENT VARIUS ODIO',
       statusCodeP: 'STADOM',
-      statusCodeS: '000031',
-      status: 'REJECTED',
-      submissionDate: '2022-12-31T18:41:23.188Z',
+      statusCodeS: '000090',
+      status: 'PAID',
+      submissionDate: null,
       portalStatusP: 'DOMPRS',
-      portalStatusS: 'REJECT',
-      portalStatus: 'Rejected',
+      portalStatusS: 'PAYPRO',
+      portalStatus: 'Paid',
       active: true,
-      transitionId: '4371793806',
-      transitionName: 'REJECT',
-      agreementReferences: [],
+      transitionId: '9765470390',
+      transitionName: 'TO PAID',
+      agreementReferences: ['9346492622'],
       transitionHistory: [
         {
-          id: '4371793806',
-          name: 'REJECT',
-          timestamp: '2022-12-31T02:13:05.043Z',
+          id: '9765470390',
+          name: 'TO PAID',
+          timestamp: '2022-12-31T09:48:46.540Z',
           checkStatus: 'PASSED'
         }
       ]
@@ -292,29 +732,29 @@ const business = {
   ]
 }
 const agreement = {
-  contractId: '120809',
-  name: 'CS AGREEMENT',
-  status: 'SIGNED',
+  contractId: '1111111111',
+  name: 'ELS AGREEMENT',
+  status: 'ACTIVE',
   contractType: 'Countryside Stewardship (MT)',
-  schemeYear: 2016,
-  startDate: '2017-01-01T00:00:00.000Z',
-  endDate: '2026-12-31T00:00:00.000Z'
+  schemeYear: 2024,
+  startDate: '2019-06-04T00:00:00.000Z',
+  endDate: '2026-07-30T00:00:00.000Z'
 }
 const paymentSchedules = [
   {
-    optionCode: 'SW2',
-    optionDescription: 'SW2 - 4-6m buffer strip on intensive grassland',
-    commitmentGroupStartDate: '2017-01-01T00:00:00.000Z',
-    commitmentGroupEndDate: '2026-12-31T00:00:00.000Z',
-    year: 2017,
-    sheetName: 'NY8366',
-    parcelName: '2327',
-    actionArea: 1.7166,
+    optionCode: 'ZWY',
+    optionDescription: 'Cunabula agnitio cur demo acer sit.',
+    commitmentGroupStartDate: '2022-09-11T00:00:00.000Z',
+    commitmentGroupEndDate: '2026-06-12T00:00:00.000Z',
+    year: 2025,
+    sheetName: 'FBLUEA',
+    parcelName: '6797',
+    actionArea: 0.1128,
     actionMTL: null,
-    actionUnits: null,
-    parcelTotalArea: 1.7166,
-    startDate: '2017-01-01T00:00:00.000Z',
-    endDate: '2017-12-31T00:00:00.000Z'
+    actionUnits: 66,
+    parcelTotalArea: 2.3776,
+    startDate: '2018-03-07T00:00:00.000Z',
+    endDate: '2026-05-10T00:00:00.000Z'
   }
 ]
 
@@ -368,7 +808,7 @@ const customer = {
   },
   businesses: [
     {
-      name: 'Maggio, Murray and Dicki',
+      name: 'Lowe - Wolf',
       organisationId: '1111111111',
       sbi: '1111111111'
     }
@@ -376,7 +816,7 @@ const customer = {
   business: {
     organisationId: '1111111111',
     sbi: '1111111111',
-    name: 'Maggio, Murray and Dicki',
+    name: 'Lowe - Wolf',
     role: 'Business Partner',
     messages: [
       {
@@ -677,6 +1117,22 @@ const businessQuery = gql`
           totalArea
           totalParcels
         }
+        parcels(date: $date) {
+          id
+          sheetId
+          parcelId
+          area
+          pendingDigitisation
+        }
+        parcel(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
+          id
+          sheetId
+          parcelId
+          area
+          pendingDigitisation
+          effectiveToDate
+          effectiveFromDate
+        }
         parcelCovers(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
           id
           name
@@ -685,16 +1141,17 @@ const businessQuery = gql`
           isBpsEligible
         }
       }
-      countyParishHoldings {
-        cphNumber
-        parish
-        startDate
-        endDate
-        species
-        xCoordinate
-        yCoordinate
-        address
-      }
+      # Not yet supported in mock
+      # countyParishHoldings {
+      #   cphNumber
+      #   parish
+      #   startDate
+      #   endDate
+      #   species
+      #   xCoordinate
+      #   yCoordinate
+      #   address
+      # }
       agreements {
         contractId
         name
@@ -840,11 +1297,11 @@ describe('Local mocked dev check', () => {
     const response = await client.request(
       businessQuery,
       {
-        sbi: '107183280',
-        crn: '9477368292',
-        date: '2020-01-01',
-        sheetId: 'SS6627',
-        parcelId: '8779'
+        sbi: '1111111111',
+        crn: '1111111100',
+        date: '2025-05-04',
+        sheetId: 'SS6828',
+        parcelId: '3818'
       },
       { email: 'some-email', 'gateway-type': 'internal' }
     )
@@ -861,8 +1318,8 @@ describe('Local mocked dev check', () => {
   it('should support full business schema - external', async () => {
     const tokenValue = jwt.sign(
       {
-        contactId: '9477368292',
-        relationships: ['5565448:107183280']
+        contactId: '11111111',
+        relationships: ['1111111111:1111111111']
       },
       'test-secret'
     )
@@ -872,9 +1329,9 @@ describe('Local mocked dev check', () => {
       {
         sbi: '1111111111',
         crn: '1111111100',
-        date: '2020-01-01',
-        sheetId: 'SS6627',
-        parcelId: '8779'
+        date: '2025-05-04',
+        sheetId: 'SS6828',
+        parcelId: '3818'
       },
       { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
     )
