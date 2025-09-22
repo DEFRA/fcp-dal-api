@@ -106,6 +106,13 @@ export const config = convict({
         default: null,
         env: 'SINGLE_FRONT_DOOR_AD_GROUP_ID',
         nullable: true
+      },
+      SFI_REFORM: {
+        doc: 'AD group ID for Future grants team',
+        format: String,
+        default: null,
+        env: 'SFI_REFORM_AD_GROUP_ID',
+        nullable: true
       }
     },
     disabled: {
