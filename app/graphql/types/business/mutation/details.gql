@@ -72,8 +72,8 @@ input UpdateBusinessAddressInput {
   """
   Address of the business.
   """
-  address: AddressInput
-  correspondenceAddress: AddressInput
+  address: ValidAddressInput
+  correspondenceAddress: ValidAddressInput
   isCorrespondenceAsBusinessAddress: Boolean
 }
 

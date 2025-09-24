@@ -113,9 +113,14 @@ export const transformOrganisationToBusiness = (data) => ({
 
 const orgDetailsUpdateMapping = {
   name: (data) => data.name,
-  address: (data) => (data.address ? dalAddressToKitsAddress(data.address) : undefined),
-  correspondenceAddress: (data) =>
-    data.correspondenceAddress ? dalAddressToKitsAddress(data.correspondenceAddress) : undefined,
+  address: ({ address }) =>
+    address ? dalAddressToKitsAddress(address?.withUprn || address.withoutUprn) : undefined,
+  correspondenceAddress: ({ correspondenceAddress }) =>
+    correspondenceAddress
+      ? dalAddressToKitsAddress(
+          correspondenceAddress?.withUprn || correspondenceAddress.withoutUprn
+        )
+      : undefined,
   isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,

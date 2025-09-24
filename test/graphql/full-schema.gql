@@ -86,6 +86,51 @@ input AddressInput {
   doubleDependentLocality: String
 }
 
+input ValidAddressInput @oneOf {
+  withUprn: AddressInputWithUprn
+  withoutUprn: AddressInputWithoutUprn
+}
+
+input AddressInputWithoutUprn {
+  pafOrganisationName: String
+  line1: String!
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String!
+  county: String
+  postalCode: String!
+  country: String!
+  uprn: String
+  dependentLocality: String
+  doubleDependentLocality: String
+}
+
+input AddressInputWithUprn {
+  pafOrganisationName: String
+  line1: String
+  line2: String
+  line3: String
+  line4: String
+  line5: String
+  buildingNumberRange: String
+  buildingName: String
+  flatName: String
+  street: String
+  city: String
+  county: String
+  postalCode: String
+  country: String
+  uprn: String!
+  dependentLocality: String
+  doubleDependentLocality: String
+}
+
 input PhoneInput {
   mobile: String
   landline: String
@@ -441,8 +486,8 @@ input CreateBusinessInput {
   vat: String
   traderNumber: String
   vendorNumber: String
-  address: AddressInput
-  correspondenceAddress: AddressInput
+  address: ValidAddressInput
+  correspondenceAddress: ValidAddressInput
   isCorrespondenceAsBusinessAddress: Boolean
   email: EmailInput
   correspondenceEmail: EmailInput
@@ -480,8 +525,8 @@ input UpdateBusinessEmailInput {
 
 input UpdateBusinessAddressInput {
   sbi: ID!
-  address: AddressInput
-  correspondenceAddress: AddressInput
+  address: ValidAddressInput
+  correspondenceAddress: ValidAddressInput
   isCorrespondenceAsBusinessAddress: Boolean
 }
 

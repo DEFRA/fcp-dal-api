@@ -249,17 +249,21 @@ describe('Business Mutation createBusiness', () => {
         traderNumber: 'TR12345',
         vendorNumber: 'VN67890',
         address: {
-          line1: '1 Farm Lane',
-          line2: 'Rural Area',
-          city: 'Farmville',
-          postalCode: 'FV1 2AB',
-          country: 'UK'
+          withoutUprn: {
+            line1: '1 Farm Lane',
+            line2: 'Rural Area',
+            city: 'Farmville',
+            postalCode: 'FV1 2AB',
+            country: 'UK'
+          }
         },
         correspondenceAddress: {
-          line1: 'PO Box 123',
-          city: 'Farmville',
-          postalCode: 'FV1 2AB',
-          country: 'UK'
+          withoutUprn: {
+            line1: 'PO Box 123',
+            city: 'Farmville',
+            postalCode: 'FV1 2AB',
+            country: 'UK'
+          }
         },
         isCorrespondenceAsBusinessAddress: false,
         email: {

@@ -186,46 +186,50 @@ describe('business', () => {
     })
   })
 
-  test('update business address', async () => {
+  test('update business address - withUprn', async () => {
     const input = {
       sbi: 'sbi',
       address: {
-        buildingName: 'new buildingName',
-        buildingNumberRange: 'new buildingNumberRange',
-        city: 'new city',
-        country: 'new country',
-        county: 'new county',
-        dependentLocality: 'new dependentLocality',
-        doubleDependentLocality: 'new doubleDependentLocality',
-        flatName: 'new flatName',
-        line1: 'new line1',
-        line2: 'new line2',
-        line3: 'new line3',
-        line4: 'new line4',
-        line5: 'new line5',
-        pafOrganisationName: 'new pafOrganisationName',
-        postalCode: 'new postalCode',
-        street: 'new street',
-        uprn: 'new uprn'
+        withUprn: {
+          buildingName: 'new buildingName',
+          buildingNumberRange: 'new buildingNumberRange',
+          city: 'new city',
+          country: 'new country',
+          county: 'new county',
+          dependentLocality: 'new dependentLocality',
+          doubleDependentLocality: 'new doubleDependentLocality',
+          flatName: 'new flatName',
+          line1: 'new line1',
+          line2: 'new line2',
+          line3: 'new line3',
+          line4: 'new line4',
+          line5: 'new line5',
+          pafOrganisationName: 'new pafOrganisationName',
+          postalCode: 'new postalCode',
+          street: 'new street',
+          uprn: 'new uprn'
+        }
       },
       correspondenceAddress: {
-        buildingName: 'new buildingName',
-        buildingNumberRange: 'new buildingNumberRange',
-        city: 'new city',
-        country: 'new country',
-        county: 'new county',
-        dependentLocality: 'new dependentLocality',
-        doubleDependentLocality: 'new doubleDependentLocality',
-        flatName: 'new flatName',
-        line1: 'new line1',
-        line2: 'new line2',
-        line3: 'new line3',
-        line4: 'new line4',
-        line5: 'new line5',
-        pafOrganisationName: 'new pafOrganisationName',
-        postalCode: 'new postalCode',
-        street: 'new street',
-        uprn: 'new uprn'
+        withUprn: {
+          buildingName: 'new buildingName',
+          buildingNumberRange: 'new buildingNumberRange',
+          city: 'new city',
+          country: 'new country',
+          county: 'new county',
+          dependentLocality: 'new dependentLocality',
+          doubleDependentLocality: 'new doubleDependentLocality',
+          flatName: 'new flatName',
+          line1: 'new line1',
+          line2: 'new line2',
+          line3: 'new line3',
+          line4: 'new line4',
+          line5: 'new line5',
+          pafOrganisationName: 'new pafOrganisationName',
+          postalCode: 'new postalCode',
+          street: 'new street',
+          uprn: 'new uprn'
+        }
       },
       isCorrespondenceAsBusinessAddress: true
     }
@@ -273,7 +277,11 @@ describe('business', () => {
       },
       isCorrespondenceAsBusinessAddr: true
     }
-    const { sbi: _, ...queryReturn } = input
+    const { sbi: _, ...queryReturn } = {
+      ...input,
+      address: input.address.withUprn,
+      correspondenceAddress: input.correspondenceAddress.withUprn
+    }
 
     const expectedPutPayload = {
       ...orgDetailsUpdatePayload,
@@ -330,6 +338,178 @@ describe('business', () => {
                 postalCode
                 street
                 uprn
+              }
+              isCorrespondenceAsBusinessAddress
+            }
+          }
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, true, {
+      input
+    })
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessAddress: {
+          success: true,
+          business: {
+            info: {
+              ...queryReturn
+            }
+          }
+        }
+      }
+    })
+  })
+
+  test('update business address - withoutUprn', async () => {
+    const input = {
+      sbi: 'sbi',
+      address: {
+        withoutUprn: {
+          buildingName: 'new buildingName',
+          buildingNumberRange: 'new buildingNumberRange',
+          city: 'new city',
+          country: 'new country',
+          county: 'new county',
+          dependentLocality: 'new dependentLocality',
+          doubleDependentLocality: 'new doubleDependentLocality',
+          flatName: 'new flatName',
+          line1: 'new line1',
+          line2: 'new line2',
+          line3: 'new line3',
+          line4: 'new line4',
+          line5: 'new line5',
+          pafOrganisationName: 'new pafOrganisationName',
+          postalCode: 'new postalCode',
+          street: 'new street'
+        }
+      },
+      correspondenceAddress: {
+        withoutUprn: {
+          buildingName: 'new buildingName',
+          buildingNumberRange: 'new buildingNumberRange',
+          city: 'new city',
+          country: 'new country',
+          county: 'new county',
+          dependentLocality: 'new dependentLocality',
+          doubleDependentLocality: 'new doubleDependentLocality',
+          flatName: 'new flatName',
+          line1: 'new line1',
+          line2: 'new line2',
+          line3: 'new line3',
+          line4: 'new line4',
+          line5: 'new line5',
+          pafOrganisationName: 'new pafOrganisationName',
+          postalCode: 'new postalCode',
+          street: 'new street'
+        }
+      },
+      isCorrespondenceAsBusinessAddress: true
+    }
+
+    const putPayloadOverrides = {
+      address: {
+        address1: 'new line1',
+        address2: 'new line2',
+        address3: 'new line3',
+        address4: 'new line4',
+        address5: 'new line5',
+        pafOrganisationName: 'new pafOrganisationName',
+        buildingNumberRange: 'new buildingNumberRange',
+        buildingName: 'new buildingName',
+        flatName: 'new flatName',
+        street: 'new street',
+        city: 'new city',
+        county: 'new county',
+        postalCode: 'new postalCode',
+        country: 'new country',
+        dependentLocality: 'new dependentLocality',
+        doubleDependentLocality: 'new doubleDependentLocality',
+        addressTypeId: undefined
+      },
+      correspondenceAddress: {
+        address1: 'new line1',
+        address2: 'new line2',
+        address3: 'new line3',
+        address4: 'new line4',
+        address5: 'new line5',
+        pafOrganisationName: 'new pafOrganisationName',
+        buildingNumberRange: 'new buildingNumberRange',
+        buildingName: 'new buildingName',
+        flatName: 'new flatName',
+        street: 'new street',
+        city: 'new city',
+        county: 'new county',
+        postalCode: 'new postalCode',
+        country: 'new country',
+        dependentLocality: 'new dependentLocality',
+        doubleDependentLocality: 'new doubleDependentLocality',
+        addressTypeId: undefined
+      },
+      isCorrespondenceAsBusinessAddr: true
+    }
+    const { sbi: _, ...queryReturn } = {
+      ...input,
+      address: input.address.withoutUprn,
+      correspondenceAddress: input.correspondenceAddress.withoutUprn
+    }
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      ...putPayloadOverrides
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
+
+    mockOrganisationSearch(v1)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', ...putPayloadOverrides }
+    })
+
+    const query = `
+      mutation UpdateBusinessAddress($input: UpdateBusinessAddressInput!) {
+        updateBusinessAddress(input: $input) {
+          business {
+            info {
+              correspondenceAddress {
+                buildingName
+                buildingNumberRange
+                city
+                country
+                county
+                dependentLocality
+                doubleDependentLocality
+                flatName
+                line1
+                line2
+                line3
+                line4
+                line5
+                pafOrganisationName
+                postalCode
+                street
+              }
+              address {
+                buildingName
+                buildingNumberRange
+                city
+                country
+                county
+                dependentLocality
+                doubleDependentLocality
+                flatName
+                line1
+                line2
+                line3
+                line4
+                line5
+                pafOrganisationName
+                postalCode
+                street
               }
               isCorrespondenceAsBusinessAddress
             }
