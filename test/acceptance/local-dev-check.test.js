@@ -729,6 +729,18 @@ const business = {
         }
       ]
     }
+  ],
+  countyParishHoldings: [
+    {
+      address: 'ODIO DEPRECATOR TEXTUS FARM, HYMAN PARADE, MOOREINGHAM, UY42 9SO',
+      cphNumber: '95/788/7341',
+      endDate: '9999-12-31',
+      parish: 'Farlam',
+      species: 'GOAT(S),CAMELIDS,PIGEONS,POULTRY,DEER,OTHER,CATTLE',
+      startDate: '2020-09-17',
+      xCoordinate: 618853,
+      yCoordinate: 10837
+    }
   ]
 }
 
@@ -1283,17 +1295,16 @@ const businessQuery = gql`
           isBpsEligible
         }
       }
-      # Not yet supported in mock
-      # countyParishHoldings {
-      #   cphNumber
-      #   parish
-      #   startDate
-      #   endDate
-      #   species
-      #   xCoordinate
-      #   yCoordinate
-      #   address
-      # }
+      countyParishHoldings {
+        cphNumber
+        parish
+        startDate
+        endDate
+        species
+        xCoordinate
+        yCoordinate
+        address
+      }
       agreements {
         contractId
         name

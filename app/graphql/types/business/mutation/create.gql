@@ -31,12 +31,12 @@ input CreateBusinessInput {
   """
   Address of the business.
   """
-  address: AddressInput
+  address: ValidAddressInput
 
   """
   Correspondence address of the business.
   """
-  correspondenceAddress: AddressInput
+  correspondenceAddress: ValidAddressInput
 
   """
   States the correspondence address should be used as the business address.
