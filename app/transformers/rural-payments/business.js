@@ -111,16 +111,16 @@ export const transformOrganisationToBusiness = (data) => ({
   sbi: `${data?.sbi}`
 })
 
-const convertValidatedAddressToKitsAddress = (address) => {
-  const addr = address?.withUprn || address?.withoutUprn
-  return addr ? dalAddressToKitsAddress(addr) : undefined
-}
-
 const orgDetailsUpdateMapping = {
   name: (data) => data.name,
-  address: (data) => convertValidatedAddressToKitsAddress(data?.address),
-  correspondenceAddress: (data) =>
-    convertValidatedAddressToKitsAddress(data?.correspondenceAddress),
+  address: ({ address }) =>
+    address ? dalAddressToKitsAddress(address?.withUprn || address.withoutUprn) : undefined,
+  correspondenceAddress: ({ correspondenceAddress }) =>
+    correspondenceAddress
+      ? dalAddressToKitsAddress(
+          correspondenceAddress?.withUprn || correspondenceAddress.withoutUprn
+        )
+      : undefined,
   isCorrespondenceAsBusinessAddr: (data) => data.isCorrespondenceAsBusinessAddress,
   email: (data) => data.email?.address,
   landline: (data) => data.phone?.landline,

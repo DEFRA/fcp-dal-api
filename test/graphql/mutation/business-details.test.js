@@ -277,11 +277,11 @@ describe('business', () => {
       },
       isCorrespondenceAsBusinessAddr: true
     }
-    const { sbi: _, ...queryReturn } = input
-    queryReturn.address = queryReturn.address.withUprn
-    delete queryReturn.address.withUprn
-    queryReturn.correspondenceAddress = queryReturn.correspondenceAddress.withUprn
-    delete queryReturn.correspondenceAddress.withUprn
+    const { sbi: _, ...queryReturn } = {
+      ...input,
+      address: input.address.withUprn,
+      correspondenceAddress: input.correspondenceAddress.withUprn
+    }
 
     const expectedPutPayload = {
       ...orgDetailsUpdatePayload,
@@ -451,11 +451,11 @@ describe('business', () => {
       },
       isCorrespondenceAsBusinessAddr: true
     }
-    const { sbi: _, ...queryReturn } = input
-    queryReturn.address = queryReturn.address.withoutUprn
-    delete queryReturn.address.withoutUprn
-    queryReturn.correspondenceAddress = queryReturn.correspondenceAddress.withoutUprn
-    delete queryReturn.correspondenceAddress.withoutUprn
+    const { sbi: _, ...queryReturn } = {
+      ...input,
+      address: input.address.withoutUprn,
+      correspondenceAddress: input.correspondenceAddress.withoutUprn
+    }
 
     const expectedPutPayload = {
       ...orgDetailsUpdatePayload,

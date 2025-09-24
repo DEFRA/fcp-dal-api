@@ -257,9 +257,6 @@ describe('business', () => {
   })
 
   test('create a business - withUprn', async () => {
-    delete input.address.withoutUprn
-    delete input.correspondenceAddress.withoutUprn
-
     const inputWithUprn = {
       ...input,
       address: {
