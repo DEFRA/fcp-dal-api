@@ -8,29 +8,24 @@ updates:
 
     # Group packages into shared PR
     groups:
-      build:
-        patterns:
-          - 'autoprefixer'
-
       lint:
         patterns:
           - 'prettier'
-          - 'stylelint'
-          - 'stylelint-*'
+          - 'eslint'
+          - 'eslint-*'
 
       logging:
         patterns:
-          - '*-pino'
-          - '*-pino-format'
-          - 'pino'
-          - 'pino-*'
+          - '*-winston'
+          - '*-winston-format'
+          - 'winston'
+          - 'winston-*'
 
       tools:
         patterns:
           - 'husky'
           - 'jest'
           - 'nodemon'
-          - 'npm-run-all'
 
       types:
         patterns:
