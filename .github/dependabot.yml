@@ -8,7 +8,6 @@ updates:
 
     # Group packages into shared PR
     groups:
-
       lint:
         patterns:
           - 'prettier'
