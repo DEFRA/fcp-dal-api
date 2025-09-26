@@ -178,7 +178,7 @@ describe('RuralPayments', () => {
         new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
           extensions: {
             message:
-              'Invalid request headers, must be either "email={valid user email}" or "X-Forwarded-Authorization={defra-id token}" & "gateway-type=external" headers'
+              'Invalid request headers, must be either "email: {valid user email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
           }
         })
       )
