@@ -153,4 +153,5 @@ input Pagination {
 enum AuthGroup {
   CONSOLIDATED_VIEW
   SINGLE_FRONT_DOOR
+  SFI_REFORM
 }

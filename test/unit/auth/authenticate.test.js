@@ -182,7 +182,8 @@ describe('checkAuthGroup', () => {
     expect(authGroups).toEqual({
       ADMIN: 'some-ad-group-id',
       CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
-      SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id'
+      SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id',
+      SFI_REFORM: 'sfi-reform-ad-group-id'
     })
   })
 })

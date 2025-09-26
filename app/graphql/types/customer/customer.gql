@@ -5,7 +5,7 @@ type CustomerInfo {
   """
   Name of the customer.
   """
-  name: CustomerName @on
+  name: CustomerName @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 
   """
   Date of birth of the customer.

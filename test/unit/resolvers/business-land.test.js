@@ -13,9 +13,6 @@ const dataSources = {
     }
   },
   ruralPaymentsBusiness: {
-    getParcelsByOrganisationId() {
-      return [{ id: 'mockId', sheetId: 'mockSheetId', area: 1000 }]
-    },
     getParcelsByOrganisationIdAndDate() {
       return [
         {

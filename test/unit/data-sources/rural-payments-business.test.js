@@ -201,17 +201,6 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('getParcelsByOrganisationId', () => {
-    test('should return parcels for organisation', async () => {
-      const mockResponse = { parcels: [{ id: 1 }, { id: 2 }] }
-      httpGet.mockImplementationOnce(async () => mockResponse)
-
-      const result = await ruralPaymentsBusiness.getParcelsByOrganisationId(123)
-      expect(result).toEqual(mockResponse)
-      expect(httpGet).toHaveBeenCalledWith('lms/organisation/123/parcels')
-    })
-  })
-
   describe('getParcelsByOrganisationIdAndDate', () => {
     test('should return parcels for organisation and date', async () => {
       const mockResponse = { parcels: [{ id: 1 }, { id: 2 }] }

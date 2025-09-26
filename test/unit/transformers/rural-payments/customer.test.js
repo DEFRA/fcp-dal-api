@@ -2,6 +2,7 @@ import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   transformBusinessCustomerToCustomerPermissionGroups,
   transformBusinessCustomerToCustomerRole,
+  transformCustomerUpdateInputToPersonUpdate,
   transformPersonSummaryToCustomerAuthorisedBusinesses
 } from '../../../../app/transformers/rural-payments/customer.js'
 import {
@@ -247,6 +248,202 @@ describe('Customer transformer', () => {
         .flatMap(({ privilegeNames }) => privilegeNames)
       const privilegeNameCases = cases.map(([privilegeName]) => privilegeName)
       expect(privilegeNames).toEqual(privilegeNameCases)
+    })
+  })
+
+  describe('transformCustomerUpdateInputToPersonUpdate', () => {
+    const currentPerson = {
+      id: 'currentId',
+      title: 'currentTitle',
+      otherTitle: 'currentOtherTitle',
+      firstName: 'currentFirstName',
+      middleName: 'currentMiddleName',
+      lastName: 'currentLastName',
+      dateOfBirth: 'currentDateOfBirth',
+      landline: 'currentLandline',
+      mobile: 'currentMobile',
+      email: 'currentEmail',
+      doNotContact: 'currentDoNotContact',
+      address: {
+        address1: 'currentAddress1',
+        address2: 'currentAddress2',
+        address3: 'currentAddress3',
+        address4: 'currentAddress4',
+        address5: 'currentAddress5',
+        pafOrganisationName: 'currentPafOrganisationName',
+        flatName: 'currentFlatName',
+        buildingNumberRange: 'currentBuildingNumberRange',
+        buildingName: 'currentBuildingName',
+        street: 'currentStreet',
+        city: 'currentCity',
+        county: 'currentCounty',
+        postalCode: 'currentPostalCode',
+        country: 'currentCountry',
+        uprn: 'currentUprn',
+        dependentLocality: 'currentDependentLocality',
+        doubleDependentLocality: 'currentDoubleDependentLocality',
+        addressTypeId: 'currentAddressTypeId'
+      }
+    }
+
+    it('transforms full input correctly', () => {
+      const newPerson = {
+        id: currentPerson.id,
+        title: 'newTitle',
+        otherTitle: 'newOtherTitle',
+        firstName: 'newFirstName',
+        middleName: 'newMiddleName',
+        lastName: 'newLastName',
+        dateOfBirth: 1735689600,
+        landline: 'newLandline',
+        mobile: 'newMobile',
+        email: 'newEmail',
+        doNotContact: 'newDoNotContact',
+        address: {
+          address1: 'newAddress1',
+          address2: 'newAddress2',
+          address3: 'newAddress3',
+          address4: 'newAddress4',
+          address5: 'newAddress5',
+          pafOrganisationName: 'newPafOrganisationName',
+          flatName: 'newFlatName',
+          buildingNumberRange: 'newBuildingNumberRange',
+          buildingName: 'newBuildingName',
+          street: 'newStreet',
+          city: 'newCity',
+          county: 'newCounty',
+          postalCode: 'newPostalCode',
+          country: 'newCountry',
+          uprn: 'newUprn',
+          dependentLocality: 'newDependentLocality',
+          doubleDependentLocality: 'newDoubleDependentLocality',
+          addressTypeId: 'newAddressTypeId'
+        }
+      }
+
+      const input = {
+        title: newPerson.title,
+        otherTitle: newPerson.otherTitle,
+        first: newPerson.firstName,
+        middle: newPerson.middleName,
+        last: newPerson.lastName,
+        dateOfBirth: newPerson.dateOfBirth,
+        doNotContact: newPerson.doNotContact,
+        phone: {
+          landline: newPerson.landline,
+          mobile: newPerson.mobile
+        },
+        email: {
+          address: newPerson.email
+        },
+        address: {
+          line1: newPerson.address.address1,
+          line2: newPerson.address.address2,
+          line3: newPerson.address.address3,
+          line4: newPerson.address.address4,
+          line5: newPerson.address.address5,
+          ...newPerson.address
+        }
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual(newPerson)
+    })
+
+    it('handles partial input', () => {
+      const input = {
+        first: 'newFirstName',
+        address: {
+          line1: 'newAddress1',
+          city: 'newCity'
+        }
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual({
+        ...currentPerson,
+        firstName: 'newFirstName',
+        address: {
+          ...currentPerson.address,
+          address1: 'newAddress1',
+          city: 'newCity'
+        }
+      })
+    })
+
+    it('handles undefined nested fields', () => {
+      const input = {
+        first: 'newFirstName',
+        phone: {},
+        email: {},
+        address: {}
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual({
+        ...currentPerson,
+        firstName: 'newFirstName'
+      })
+    })
+
+    it('preserves original person fields not in input', () => {
+      const input = {
+        first: 'newFirstName'
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual({
+        ...currentPerson,
+        firstName: 'newFirstName'
+      })
+    })
+
+    it('handles empty input', () => {
+      const input = {}
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual(currentPerson)
+    })
+
+    it('handles date', () => {
+      const input = {
+        dateOfBirth: '2025-01-01'
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual({ ...currentPerson, dateOfBirth: 1735689600000 })
+    })
+
+    it('handles null values in input', () => {
+      const input = {
+        first: 'newFirstName',
+        middle: null,
+        address: {
+          line1: 'newAddress1',
+          line2: null,
+          city: 'newCity'
+        }
+      }
+
+      const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
+
+      expect(result).toEqual({
+        ...currentPerson,
+        firstName: 'newFirstName',
+        middleName: null,
+        address: {
+          ...currentPerson.address,
+          address1: 'newAddress1',
+          address2: null,
+          city: 'newCity'
+        }
+      })
     })
   })
 })

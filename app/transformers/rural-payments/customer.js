@@ -1,5 +1,6 @@
 import { validateDate } from '../../utils/date.js'
-import { kitsAddressToDalAddress, transformEntityStatus, transformToISODate } from '../common.js'
+import { transformMapping } from '../../utils/mapping.js'
+import { kitsAddressToDalAddress, transformEntityStatus } from '../common.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
@@ -61,7 +62,7 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       middle: data.middleName,
       last: data.lastName
     },
-    dateOfBirth: transformToISODate(data.dateOfBirth),
+    dateOfBirth: new Date(data.dateOfBirth).toISOString().substring(0, 10),
     phone: {
       mobile: data.mobile,
       landline: data.landline
@@ -100,5 +101,52 @@ export function transformPersonSummaryToCustomerAuthorisedFilteredBusiness(prope
     organisationId: filteredBusinessForCustomer.id,
     name: filteredBusinessForCustomer.name,
     ...properties
+  }
+}
+
+const customerUpdateInputMapping = {
+  title: (input) => input.title,
+  otherTitle: (input) => input.otherTitle,
+  firstName: (input) => input.first,
+  middleName: (input) => input.middle,
+  lastName: (input) => input.last,
+  dateOfBirth: (input) =>
+    input.dateOfBirth ? new Date(input.dateOfBirth).getTime() : input.dateOfBirth,
+  landline: (input) => input.phone?.landline,
+  mobile: (input) => input.phone?.mobile,
+  email: (input) => input.email?.address,
+  doNotContact: (input) => input.doNotContact,
+  address: {
+    address1: (input) => input.address?.line1,
+    address2: (input) => input.address?.line2,
+    address3: (input) => input.address?.line3,
+    address4: (input) => input.address?.line4,
+    address5: (input) => input.address?.line5,
+    pafOrganisationName: (input) => input.address?.pafOrganisationName,
+    flatName: (input) => input.address?.flatName,
+    buildingNumberRange: (input) => input.address?.buildingNumberRange,
+    buildingName: (input) => input.address?.buildingName,
+    street: (input) => input.address?.street,
+    city: (input) => input.address?.city,
+    county: (input) => input.address?.county,
+    postalCode: (input) => input.address?.postalCode,
+    country: (input) => input.address?.country,
+    uprn: (input) => input.address?.uprn,
+    dependentLocality: (input) => input.address?.dependentLocality,
+    doubleDependentLocality: (input) => input.address?.doubleDependentLocality,
+    addressTypeId: (input) => input.address?.addressTypeId
+  }
+}
+
+export function transformCustomerUpdateInputToPersonUpdate(person, input) {
+  const mappedInput = transformMapping(customerUpdateInputMapping, input)
+
+  return {
+    ...person,
+    ...mappedInput,
+    address: {
+      ...person.address,
+      ...mappedInput.address
+    }
   }
 }
