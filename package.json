@@ -18,6 +18,7 @@
     "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
+    "test:local-dev-check": "NODE_OPTIONS=--experimental-vm-modules jest --coverage false test/acceptance/local-dev-check.test.js",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config",
     "test:graphql": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/graphql --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config",
     "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern='test/(unit|graphql)' --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config"
@@ -27,7 +28,7 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@apollo/datasource-rest": "^6.4.1",
-    "@apollo/server": "^4.11.3",
+    "@apollo/server": "^5.0.0",
     "@as-integrations/hapi": "^2.0.2",
     "@elastic/ecs-winston-format": "^1.5.3",
     "@graphql-tools/load-files": "^7.0.1",
@@ -37,7 +38,7 @@
     "@hapi/hapi": "^21.3.12",
     "aws-embedded-metrics": "^4.2.0",
     "convict": "^6.2.4",
-    "graphql": "^16.10.0",
+    "graphql": "^16.11.0",
     "http-status-codes": "^2.3.0",
     "https-proxy-agent": "^7.0.6",
     "jsonwebtoken": "^9.0.2",
@@ -48,7 +49,6 @@
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^3.20.1",
-    "@mocks-server/core": "^4.0.2",
     "dotenv": "^17.2.2",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
