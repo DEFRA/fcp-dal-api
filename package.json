@@ -48,7 +48,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@graphql-eslint/eslint-plugin": "^3.20.1",
+    "@graphql-eslint/eslint-plugin": "^4.4.0",
     "dotenv": "^17.2.2",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
