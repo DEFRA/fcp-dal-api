@@ -1,12 +1,11 @@
 {% extends "layout.njk" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}
+  {{ title }}
+{% endblock %}
 
 {% block content %}
-    <h2>{{ title }}</h2>
-    <ul>
-        {% for item in items %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
+  <div class="loading-wrapper">
+    <div class="loading-spinner"></div>
+  </div>
 {% endblock %}

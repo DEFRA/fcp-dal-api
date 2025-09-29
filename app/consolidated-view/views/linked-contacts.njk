@@ -1,12 +1,72 @@
 {% extends "layout.njk" %}
 
-{% block title %}{{ title }}{% endblock %}
+{% block title %}
+  {{ title }}
+{% endblock %}
 
 {% block content %}
-    <h2>{{ title }}</h2>
-    <ul>
-        {% for item in items %}
-            <li>{{ item }}</li>
-        {% endfor %}
-    </ul>
+  <div class="container">
+    <div>
+      <table>
+        <thead>
+          <tr>
+            <th>CRN</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for customer in listResult.data.business.customers %}
+            <tr>
+              <td>{{ customer.crn }}</td>
+              <td>{{ customer.firstName }}</td>
+              <td>{{ customer.lastName }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3">No customers found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h1>{{selectedResult.data.customer.info.name.first}}
+        {{selectedResult.data.customer.info.name.last}}</h1>
+
+      <dl>
+        <dt>CRN:</dt>
+        <dd>{{selectedResult.data.customer.crn}}</dd>
+        <dt>Full Name:</dt>
+        <dd>{{selectedResult.data.customer.info.name.title}}
+          {{selectedResult.data.customer.info.name.first}}
+          {{selectedResult.data.customer.info.name.middle}}
+          {{selectedResult.data.customer.info.name.last}}</dd>
+        <dt>Role:</dt>
+        <dd>{{selectedResult.data.business.customer.role}}</dd>
+
+      </dl>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Permission</th>
+            <th>Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for permissionGroup in selectedResult.data.business.customer.permissionGroups %}
+            <tr>
+              <td>{{ permissionGroup.id }}</td>
+              <td>{{ permissionGroup.level }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3">No customers found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 {% endblock %}
