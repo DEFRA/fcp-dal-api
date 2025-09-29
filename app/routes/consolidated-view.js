@@ -1,4 +1,4 @@
-export const consolidatedViewRoutes = [
+export const consolidatedViewRoutes = (cssPath) => [
   {
     method: 'GET',
     path: '/consolidated-view/loading',
@@ -18,7 +18,7 @@ export const consolidatedViewRoutes = [
         title: 'Login',
         items: ['Item 1', 'Item 2', 'Item 3']
       }
-      return h.view('loading', context)
+      return h.view('login', context)
     }
   },
   {
@@ -29,7 +29,17 @@ export const consolidatedViewRoutes = [
         title: 'Linked Contacts',
         items: ['Item 1', 'Item 2', 'Item 3']
       }
-      return h.view('loading', context)
+      return h.view('linked-contacts', context)
+    }
+  },
+  {
+    method: 'GET',
+    path: '/consolidated-view/css/{param*}',
+    handler: {
+      directory: {
+        path: cssPath,
+        listing: true
+      }
     }
   }
 ]

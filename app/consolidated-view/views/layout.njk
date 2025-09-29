@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      {% block title %}My App{% endblock %}
+    </title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+
+    <main>
+      {% block content %}
+        <!-- Child templates will fill this block -->
+      {% endblock %}
+    </main>
+
+  </body>
+</html>

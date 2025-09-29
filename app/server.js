@@ -2,8 +2,11 @@ import hapi from '@hapi/hapi'
 import Vision from '@hapi/vision'
 import { Unit } from 'aws-embedded-metrics'
 import NunjucksHapi from 'nunjucks-hapi'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { v4 as uuidv4 } from 'uuid'
 
+import Inert from '@hapi/inert'
 import { config } from './config.js'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
@@ -20,18 +23,21 @@ server.ext('onPreStart', () => {
   server.listener.setTimeout(config.get('requestTimeoutMs'))
 })
 
-await server.register(Vision)
+await server.register([Vision, Inert])
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const viewsPath = path.join(__dirname, 'consolidated-view', 'views')
+const cssPath = path.join(__dirname, 'consolidated-view', 'css')
 
 server.views({
-  engines: {
-    njk: NunjucksHapi
-  },
-  relativeTo: new URL('.', import.meta.url).pathname,
-  path: 'consolidated-view',
-  isCached: process.env.NODE_ENV === 'production'
+  engines: { njk: NunjucksHapi },
+  relativeTo: __dirname, // Use explicit __dirname
+  path: viewsPath, // Use resolved views path
+  isCached: process.env.NODE_ENV === 'production',
+  defaultExtension: 'njk'
 })
 
-const routes = [].concat(...consolidatedViewRoutes, healthRoute, healthyRoute)
+const routes = [].concat(...consolidatedViewRoutes(cssPath), healthRoute, healthyRoute)
 server.route(routes)
 
 server.ext({

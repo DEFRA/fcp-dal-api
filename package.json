@@ -36,6 +36,7 @@
     "@graphql-tools/schema": "^10.0.16",
     "@graphql-tools/utils": "^10.7.2",
     "@hapi/hapi": "^21.4.3",
+    "@hapi/inert": "^7.1.0",
     "@hapi/vision": "^7.0.3",
     "aws-embedded-metrics": "^4.2.0",
     "convict": "^6.2.4",
