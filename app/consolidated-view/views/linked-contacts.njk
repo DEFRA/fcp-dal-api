@@ -22,10 +22,16 @@
         </thead>
         <tbody>
           {% for customer in listResult.data.business.customers %}
-            <tr>
-              <td>{{ customer.crn }}</td>
-              <td>{{ customer.firstName }}</td>
-              <td>{{ customer.lastName }}</td>
+            <tr class="{% if customer.crn === selectedCrn %}selected{% endif %}">
+              <td>
+                <a href="#">{{ customer.crn }}</a>
+              </td>
+              <td>
+                <a href="#">{{ customer.firstName }}</a>
+              </td>
+              <td>
+                <a href="#">{{ customer.lastName }}</a>
+              </td>
             </tr>
           {% else %}
             <tr>

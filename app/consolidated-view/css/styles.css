@@ -46,6 +46,10 @@ table.even-columns {
   table-layout: fixed;
 }
 
+table.even-columns td {
+  padding: 0.75rem;
+}
+
 th {
   background-color: #009e43;
   color: #fff;
@@ -54,13 +58,20 @@ th {
   text-align: left;
 }
 
-td {
+tr.selected {
+  background-color: rgba(204, 236, 217, 1);
+}
+
+table.clickable td a {
+  width: 100%;
+  display: block;
   padding: 0.75rem;
+  text-decoration: none;
+  color: inherit;
 }
 
 table.clickable tr:hover {
   background-color: #b3e2c7;
-  cursor: pointer;
 }
 
 table.small-first-column th:first-child,

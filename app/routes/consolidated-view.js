@@ -104,7 +104,8 @@ export const consolidatedViewRoutes = (cssPath) => [
         title: 'Linked Contacts',
         listResult,
         selectedResult,
-        searchValue: request.query.search || ''
+        searchValue: request.query.search || '',
+        selectedCrn: listResult.data.business.customers[0].crn
       })
     }
   },
