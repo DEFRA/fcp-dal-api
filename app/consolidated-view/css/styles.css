@@ -31,14 +31,19 @@ body {
 
 .container {
   display: grid;
-  grid-template-columns: 2fr 7fr;
+  grid-template-columns: 3fr 1px 7fr;
   gap: 1rem;
   height: 100%;
 }
 
 table {
-  width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
+  width: 100%;
+}
+
+table.even-columns {
+  table-layout: fixed;
 }
 
 th {
@@ -53,9 +58,14 @@ td {
   padding: 0.75rem;
 }
 
-tr:hover {
+table.clickable tr:hover {
   background-color: #b3e2c7;
   cursor: pointer;
+}
+
+table.small-first-column th:first-child,
+table.small-first-column td:first-child {
+  width: 0;
 }
 
 dd {
@@ -67,6 +77,7 @@ dl {
   display: grid;
   grid-template-columns: auto 1fr;
   column-gap: 1rem;
+  row-gap: 0.25rem;
 }
 
 dt {
@@ -77,4 +88,30 @@ h1 {
   margin: 0;
   padding: 0;
   font-size: 1.5rem;
+}
+
+.search-input {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  align-items: center;
+  padding-bottom: 1rem;
+}
+
+.search-input lable {
+  font-weight: 700;
+}
+
+.search-input input {
+  border-radius: 0;
+  border: 1px solid #d3d3d3;
+  border-radius: 0;
+  padding: 8px;
+}
+
+.search-input button {
+  display: none;
+}
+
+.divider {
+  background-color: #009e43;
 }

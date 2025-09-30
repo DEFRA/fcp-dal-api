@@ -103,7 +103,8 @@ export const consolidatedViewRoutes = (cssPath) => [
       return h.view('linked-contacts', {
         title: 'Linked Contacts',
         listResult,
-        selectedResult
+        selectedResult,
+        searchValue: request.query.search || ''
       })
     }
   },
