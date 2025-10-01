@@ -417,7 +417,7 @@ describe('Business Mutation createBusiness', () => {
   })
 })
 
-describe('Business Mutation lockBusiness', () => {
+describe('Business Mutation updateBusinessLockStatus', () => {
   const mockArgs = { input: { sbi: '123', reason: 'test' } }
 
   let dataSources
@@ -429,15 +429,15 @@ describe('Business Mutation lockBusiness', () => {
     }
   })
 
-  it('lockBusiness', async () => {
-    await Mutation.lockBusiness({}, mockArgs, { dataSources })
+  it('updateBusinessLock', async () => {
+    await Mutation.updateBusinessLock({}, mockArgs, { dataSources })
     expect(mockSchemaModule.businessLockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
   })
 })
 
-describe('Business Mutation unlockBusiness', () => {
+describe('Business Mutation updateBusinessUnlockStatus', () => {
   const mockArgs = { input: { sbi: '123', reason: 'test' } }
 
   let dataSources
@@ -449,8 +449,8 @@ describe('Business Mutation unlockBusiness', () => {
     }
   })
 
-  it('unlockBusiness', async () => {
-    await Mutation.unlockBusiness({}, mockArgs, { dataSources })
+  it('updateBusinessUnlock', async () => {
+    await Mutation.updateBusinessUnlock({}, mockArgs, { dataSources })
     expect(mockSchemaModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
