@@ -37,3 +37,47 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
     }
   }
 }
+
+const validateLockUnlockInput = (input) => {
+  if (!input.reason && !input.note) {
+    throw new Error('Reason or note are required')
+  }
+
+  if (input.reason && input.note) {
+    throw new Error('Only one of reason or note can be provided')
+  }
+}
+
+export const businessLockResolver = async (__, { input }, { dataSources }) => {
+  validateLockUnlockInput(input)
+
+  const { sbi, ...noteOrReason } = input
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, noteOrReason)
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
+export const businessUnlockResolver = async (__, { input }, { dataSources }) => {
+  validateLockUnlockInput(input)
+
+  const { sbi, ...noteOrReason } = input
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, noteOrReason)
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
