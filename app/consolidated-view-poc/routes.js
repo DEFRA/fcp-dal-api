@@ -2,7 +2,7 @@ import { graphql } from 'graphql'
 import { context } from '../graphql/context.js'
 import { schema } from '../graphql/server.js'
 
-export const consolidatedViewRoutes = (cssPath) => [
+export const consolidatedViewRoutes = (staticPath) => [
   {
     method: 'GET',
     path: '/consolidated-view/loading',
@@ -100,6 +100,9 @@ export const consolidatedViewRoutes = (cssPath) => [
         }
       })
 
+      console.log(JSON.stringify(listResult))
+      console.log(JSON.stringify(selectedResult))
+
       return h.view('linked-contacts', {
         title: 'Linked Contacts',
         listResult,
@@ -111,11 +114,11 @@ export const consolidatedViewRoutes = (cssPath) => [
   },
   {
     method: 'GET',
-    path: '/consolidated-view/css/{param*}',
+    path: '/consolidated-view/static/{param*}',
     handler: {
       directory: {
-        path: cssPath,
-        listing: true
+        path: staticPath,
+        listing: false
       }
     }
   }
