@@ -25,8 +25,8 @@ type Mutation {
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
-  lockBusiness(input: LockUnlockBusinessInput!): UpdateBusinessResponse
-  unlockBusiness(input: LockUnlockBusinessInput!): UpdateBusinessResponse
+  updateBusinessLock(input: UpdateBusinessLockInput!): UpdateBusinessResponse
+  updateBusinessUnlock(input: UpdateBusinessUnlockInput!): UpdateBusinessResponse
 }
 
 input UpdateCustomerAddressInput {
@@ -537,7 +537,13 @@ input UpdateBusinessVATInput {
   vat: String!
 }
 
-input LockUnlockBusinessInput {
+input UpdateBusinessLockInput {
+  sbi: ID!
+  reason: String
+  note: String
+}
+
+input UpdateBusinessUnlockInput {
   sbi: ID!
   reason: String
   note: String

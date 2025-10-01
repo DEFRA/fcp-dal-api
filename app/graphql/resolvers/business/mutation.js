@@ -31,8 +31,8 @@ export const Mutation = {
   updateBusinessType: businessAdditionalDetailsUpdateResolver,
   updateBusinessDateStartedFarming: businessAdditionalDetailsUpdateResolver,
   updateBusinessRegistrationNumbers: businessAdditionalDetailsUpdateResolver,
-  lockBusiness: businessLockResolver,
-  unlockBusiness: businessUnlockResolver
+  updateBusinessLock: businessLockResolver,
+  updateBusinessUnlock: businessUnlockResolver
 }
 
 export const UpdateBusinessResponse = {

@@ -41,8 +41,8 @@ describe('business lock and unlock', () => {
     })
 
     const query = `
-      mutation LockBusiness ($input: LockUnlockBusinessInput!) {
-          lockBusiness(input: $input) {
+      mutation LockBusiness ($input: UpdateBusinessLockInput!) {
+          updateBusinessLock(input: $input) {
               success
               business {
                   sbi
@@ -92,8 +92,8 @@ describe('business lock and unlock', () => {
     })
 
     const query = `
-      mutation UnlockBusiness ($input: LockUnlockBusinessInput!) {
-          unlockBusiness(input: $input) {
+      mutation UnlockBusiness ($input: UpdateBusinessUnlockInput!) {
+          updateBusinessUnlock(input: $input) {
               success
               business {
                   sbi
