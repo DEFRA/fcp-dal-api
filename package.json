@@ -36,6 +36,7 @@
     "@graphql-tools/schema": "^10.0.16",
     "@graphql-tools/utils": "^10.7.2",
     "@hapi/hapi": "^21.3.12",
+    "apollo-datasource-mongodb": "^0.6.0",
     "aws-embedded-metrics": "^4.2.0",
     "convict": "^6.2.4",
     "graphql": "^16.11.0",
@@ -43,6 +44,7 @@
     "https-proxy-agent": "^7.0.6",
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.1.0",
+    "mongodb": "^6.20.0",
     "undici": "^7.16.0",
     "uuid": "^13.0.0",
     "winston": "^3.17.0"

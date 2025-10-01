@@ -1,5 +1,9 @@
 import jwt from 'jsonwebtoken'
+import { MongoClient } from 'mongodb'
 import { getAuth } from '../auth/authenticate.js'
+import { config } from '../config.js'
+import { MongoBusinesses } from '../data-sources/mongo/Businesses.js'
+import { MongoCustomers } from '../data-sources/mongo/Customers.js'
 import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { Permissions } from '../data-sources/static/permissions.js'
@@ -25,6 +29,12 @@ export const extractOrgIdFromDefraIdToken = (sbi, token) => {
 export async function context({ request }) {
   const auth = await getAuth(request)
 
+  const client = new MongoClient(config.get('mongo.mongoUrl'), {
+    retryWrites: config.get('mongo.mongoOptions.retryWrites'),
+    readPreference: config.get('mongo.mongoOptions.readPreference')
+  })
+  client.connect()
+
   const requestLogger = logger.child({
     transactionId: request.transactionId,
     traceId: request.traceId
@@ -44,7 +54,13 @@ export async function context({ request }) {
     dataSources: {
       permissions: new Permissions({ logger: requestLogger }),
       ruralPaymentsBusiness: new RuralPaymentsBusiness(...datasourceOptions),
-      ruralPaymentsCustomer: new RuralPaymentsCustomer(...datasourceOptions)
+      ruralPaymentsCustomer: new RuralPaymentsCustomer(...datasourceOptions),
+      mongoCustomers: new MongoCustomers({
+        modelOrCollection: client.db(config.get('mongo.databaseName')).collection('customers')
+      }),
+      mongoBusinesses: new MongoBusinesses({
+        modelOrCollection: client.db(config.get('mongo.databaseName')).collection('businesses')
+      })
     }
   }
 }

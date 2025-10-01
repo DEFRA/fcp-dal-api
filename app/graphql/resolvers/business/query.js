@@ -1,15 +1,19 @@
-import { transformOrganisationToBusiness } from '../../../transformers/rural-payments/business.js'
+async function insertOrgIdBySbi(sbi, { mongoBusinesses, ruralPaymentsBusiness }) {
+  const orgId = await ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  await mongoBusinesses.insertOrgIdBySbi(sbi, orgId)
+  return orgId
+}
 
 export const Query = {
   async business(__, { sbi }, { dataSources }) {
-    const orgId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-    const response = await dataSources.ruralPaymentsBusiness.getOrganisationById(orgId)
+    const organisationId =
+      (await dataSources.mongoBusinesses.getOrgIdBySbi(sbi)) ??
+      (await insertOrgIdBySbi(sbi, dataSources))
 
-    const business = transformOrganisationToBusiness(response)
     return {
       sbi,
-      land: { sbi },
-      ...business
+      organisationId,
+      land: { sbi }
     }
   }
 }

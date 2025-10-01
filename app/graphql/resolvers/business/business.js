@@ -7,10 +7,16 @@ import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformCountyParishHoldings,
   transformOrganisationCustomer,
-  transformOrganisationCustomers
+  transformOrganisationCustomers,
+  transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
 
 export const Business = {
+  async info({ organisationId }, __, { dataSources }) {
+    const response = await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+    return transformOrganisationToBusiness(response).info
+  },
+
   land({ organisationId }) {
     return { organisationId }
   },
