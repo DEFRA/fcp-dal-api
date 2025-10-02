@@ -36,6 +36,11 @@ body {
   height: 100%;
 }
 
+.container > div:first-child {
+  height: 100vh;
+  overflow: scroll;
+}
+
 table {
   border-collapse: collapse;
   table-layout: auto;
@@ -62,7 +67,16 @@ tr.selected {
   background-color: rgba(204, 236, 217, 1);
 }
 
-table.clickable td a {
+.primary-table table {
+  position: relative;
+}
+
+.primary-table th {
+  position: sticky;
+  top: 0;
+}
+
+.primary-table td a {
   width: 100%;
   display: block;
   padding: -0.75rem;
@@ -70,17 +84,17 @@ table.clickable td a {
   color: inherit;
 }
 
-table.clickable td {
+.primary-table td {
   padding: 0.75rem;
   cursor: pointer;
 }
 
-table.clickable tr:hover {
+.primary-table tr:hover {
   background-color: #b3e2c7;
 }
 
-table.small-first-column th:first-child,
-table.small-first-column td:first-child {
+.primary-table th:first-child,
+.primary-table td:first-child {
   width: 0;
 }
 

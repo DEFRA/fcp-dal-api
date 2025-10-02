@@ -22,13 +22,14 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
     handler: async (request, h) => {
       try {
         // Get list of customer businesses
-        const listResult = await graphql({
+        const {
+          data: { business }
+        } = await graphql({
           source: `#graphql
               query LinkedContactsPage($sbi: ID!) {
                 business(sbi: $sbi) {
                   sbi
                   customers {
-                    personId
                     firstName
                     lastName
                     crn
@@ -41,8 +42,7 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           contextValue: await context({
             request: {
               headers: {
-                email: 'test@defra.gov.uk',
-                'gateway-type': 'internal'
+                email: 'test@defra.gov.uk'
               }
             }
           }),
@@ -50,51 +50,48 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
         })
 
         // Get first customer from the list
-        const selectedResult = await graphql({
+        const selectedCustomer = await graphql({
           source: `#graphql
-              query LinkedCustomerPermissions($sbi: ID!, $crn: ID!) {
-                business(sbi: $sbi) {
-                  customer(crn: $crn) {
-                    role
-                    permissionGroups {
-                      id
-                      level
-                      functions
-                    }
+            query SelectedCustomer($crn: ID!, $sbi: ID!) {
+              customer(crn: $crn) {
+                crn
+                info {
+                  name {
+                    title
+                    otherTitle
+                    first
+                    middle
+                    last
                   }
                 }
-                customer(crn: $crn) {
-                  crn
-                  info {
-                    name {
-                      title
-                      first
-                      middle
-                      last
-                    }
-                    dateOfBirth
+                business(sbi: $sbi) {
+                  sbi
+                  permissionGroups {
+                    id
+                    level
                   }
+                  role
                 }
               }
+            }
             `,
           schema,
           contextValue: await context({
             request: {
               headers: {
-                email: 'test@defra.gov.uk',
-                'gateway-type': 'internal'
+                email: 'test@defra.gov.uk'
               }
             }
           }),
           variableValues: {
             sbi: request.params.sbi,
-            crn: listResult.data.business.customers[0].crn
+            crn: business.customers[0].crn
           }
         })
 
         const props = {
-          selectedResult,
-          listResult
+          business,
+          initialSelectedCustomer: selectedCustomer.data.customer
         }
 
         return h
