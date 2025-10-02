@@ -1,6 +1,6 @@
 import { graphql } from 'graphql'
-import { context } from '../graphql/context.js'
-import { schema } from '../graphql/server.js'
+import { context } from '../../graphql/context.js'
+import { schema } from '../../graphql/server.js'
 
 export const consolidatedViewRoutes = (staticPath) => [
   {

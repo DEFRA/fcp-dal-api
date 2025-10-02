@@ -12,8 +12,8 @@ import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './log
 import { logger } from './logger/logger.js'
 import { sendMetric } from './logger/sendMetric.js'
 
-import { consolidatedViewReactRoutes } from './consolidated-view-poc/routes-react.js'
-import { consolidatedViewRoutes } from './consolidated-view-poc/routes.js'
+import { consolidatedViewRoutes } from './consolidated-view-poc/nunjucks/routes.js'
+import { consolidatedViewReactRoutes } from './consolidated-view-poc/react/routes.js'
 import { healthRoute } from './routes/health.js'
 import { healthyRoute } from './routes/healthy.js'
 
@@ -28,8 +28,9 @@ server.ext('onPreStart', () => {
 await server.register([Vision, Inert])
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const viewsPath = path.join(__dirname, 'consolidated-view-poc', 'views')
+const viewsPath = path.join(__dirname, 'consolidated-view-poc', 'nunjucks')
 const staticPath = path.join(__dirname, 'consolidated-view-poc', 'static')
+const reactAppPath = path.join(__dirname, 'consolidated-view-poc', 'react', 'app')
 
 server.views({
   engines: { njk: NunjucksHapi },
@@ -41,7 +42,7 @@ server.views({
 
 const routes = [].concat(
   ...consolidatedViewRoutes(staticPath),
-  ...consolidatedViewReactRoutes(staticPath),
+  ...consolidatedViewReactRoutes(reactAppPath),
   healthRoute,
   healthyRoute
 )
