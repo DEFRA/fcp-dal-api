@@ -82,6 +82,12 @@ const dataSources = {
       return organisationPeopleByOrgId(orgId)._data
     }
   },
+  mongoCustomer: {
+    getPersonIdByCRN: jest.fn()
+  },
+  mongoBusiness: {
+    getOrgIdBySbi: jest.fn()
+  },
   permissions: new Permissions()
 }
 
@@ -91,14 +97,14 @@ describe('Customer', () => {
   })
 
   test('Query.customer.personId', async () => {
-    dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('internal person id')
+    dataSources.mongoCustomer.getPersonIdByCRN.mockResolvedValue('internal person id')
     const response = await Query.customer(
       undefined,
       { crn: personFixture.customerReferenceNumber },
       { dataSources }
     )
 
-    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith(
+    expect(dataSources.mongoCustomer.getPersonIdByCRN).toHaveBeenCalledWith(
       personFixture.customerReferenceNumber
     )
 

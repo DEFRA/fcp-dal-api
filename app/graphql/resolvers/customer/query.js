@@ -1,13 +1,14 @@
-async function insertPersonIdByCRN(crn) {
+async function insertPersonIdByCRN(crn, { MongoCustomer, ruralPaymentsCustomer }) {
   const personId = await ruralPaymentsCustomer.getPersonIdByCRN(crn)
-  await mongoCustomers.insertPersonIdByCRN(crn, personId)
+  await MongoCustomer.insertPersonIdByCRN(crn, personId)
   return personId
 }
 
 export const Query = {
   async customer(__, { crn }, { dataSources }) {
     const personId =
-      (await dataSources.mongoCustomers.getPersonIdByCRN(crn)) ?? insertPersonIdByCRN(crn)
+      (await dataSources.mongoCustomer.getPersonIdByCRN(crn)) ??
+      insertPersonIdByCRN(crn, dataSources)
     return { crn, personId }
   }
 }

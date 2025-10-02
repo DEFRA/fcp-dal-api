@@ -124,12 +124,16 @@ describe('Business Mutation UpdateBusinessResponse', () => {
         updateBusinessBySBI: jest.fn(),
         getOrganisationById: jest.fn(),
         getOrganisationIdBySBI: jest.fn()
+      },
+      mongoBusiness: {
+        getOrgIdBySbi: jest.fn(),
+        insertOrgIdBySbi: jest.fn()
       }
     }
   })
 
   it('updateBusinessName returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('123')
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('123')
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       some: 'response'
     })
@@ -140,88 +144,13 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       { dataSources }
     )
 
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
     expect(result).toEqual({
-      info: {
-        additionalBusinessActivities: [],
-        additionalSbis: [],
-        address: {
-          buildingName: undefined,
-          buildingNumberRange: undefined,
-          city: undefined,
-          country: undefined,
-          county: undefined,
-          dependentLocality: undefined,
-          doubleDependentLocality: undefined,
-          flatName: undefined,
-          line1: undefined,
-          line2: undefined,
-          line3: undefined,
-          line4: undefined,
-          line5: undefined,
-          pafOrganisationName: undefined,
-          postalCode: undefined,
-          street: undefined,
-          typeId: undefined,
-          uprn: undefined
-        },
-        correspondenceAddress: null,
-        correspondenceEmail: {
-          address: undefined,
-          validated: false
-        },
-        correspondencePhone: {
-          fax: undefined,
-          landline: undefined,
-          mobile: undefined
-        },
-        dateStartedFarming: null,
-        email: {
-          address: undefined,
-          validated: undefined
-        },
-        hasAdditionalBusinessActivities: false,
-        hasLandInNorthernIreland: false,
-        hasLandInScotland: false,
-        hasLandInWales: false,
-        isAccountablePeopleDeclarationCompleted: false,
-        isCorrespondenceAsBusinessAddress: false,
-        isFinancialToBusinessAddress: false,
-        landConfirmed: false,
-        lastUpdated: null,
-        legalStatus: {
-          code: undefined,
-          type: undefined
-        },
-        name: undefined,
-        phone: {
-          fax: undefined,
-          landline: undefined,
-          mobile: undefined
-        },
-        reference: undefined,
-        registrationNumbers: {
-          charityCommission: undefined,
-          companiesHouse: undefined
-        },
-        status: {
-          confirmed: false,
-          deactivated: false,
-          locked: false
-        },
-        traderNumber: undefined,
-        type: {
-          code: undefined,
-          type: undefined
-        },
-        vat: undefined,
-        vendorNumber: undefined
-      },
       land: {
         sbi: '123'
       },
-      organisationId: 'undefined',
-      sbi: 'undefined'
+      organisationId: '123',
+      sbi: '123'
     })
   })
 })
@@ -236,6 +165,10 @@ describe('Business Mutation createBusiness', () => {
       },
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn()
+      },
+      mongoBusiness: {
+        getOrgIdBySbi: jest.fn(),
+        insertOrgIdBySbi: jest.fn()
       }
     }
   })

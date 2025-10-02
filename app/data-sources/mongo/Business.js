@@ -1,6 +1,6 @@
 import { MongoDataSource } from 'apollo-datasource-mongodb'
 
-export class MongoBusinesses extends MongoDataSource {
+export class MongoBusiness extends MongoDataSource {
   async getOrgIdBySbi(sbi) {
     const org = await this.findOneById(sbi)
     return org?.orgId

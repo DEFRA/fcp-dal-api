@@ -1,9 +1,7 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
-import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwt from 'jsonwebtoken'
-import jwksClient from 'jwks-rsa'
 import { config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
@@ -12,25 +10,7 @@ import { sendMetric } from '../logger/sendMetric.js'
 
 export const authGroups = config.get('auth.groups')
 
-export async function getJwtPublicKey(kid) {
-  const clientConfig = {
-    jwksUri: config.get('oidc.jwksURI'),
-    timeout: config.get('oidc.timeoutMs')
-  }
-
-  if (!config.get('disableProxy')) {
-    clientConfig.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
-  }
-
-  const client = jwksClient({
-    ...clientConfig
-  })
-
-  const key = await client.getSigningKey(kid)
-  return key.getPublicKey()
-}
-
-export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
+export async function getAuth(request, jwkDatasource) {
   try {
     const authHeader = request?.headers?.authorization
     if (!authHeader) {
@@ -46,7 +26,7 @@ export async function getAuth(request, getJwtPublicKeyFunc = getJwtPublicKey) {
     const decodedToken = jwt.decode(token, { complete: true })
     const header = decodedToken.header
     const requestStart = Date.now()
-    const signingKey = await getJwtPublicKeyFunc(header.kid)
+    const signingKey = await jwkDatasource.getPublicKey(header.kid)
     const requestTimeMs = Date.now() - requestStart
     const verified = jwt.verify(token, signingKey)
     sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
@@ -89,7 +69,10 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
   if (isAdmin) {
     return
   } else {
-    const hasAccess = allowedGroups.some((group) => requesterGroups.includes(authGroups[group]))
+    const hasAccess = allowedGroups.some((group) => {
+      const authGroupValue = authGroups[group]
+      return authGroupValue && requesterGroups.includes(authGroupValue)
+    })
     if (!hasAccess) {
       throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
     }
