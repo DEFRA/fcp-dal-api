@@ -25,7 +25,9 @@ type Mutation {
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
+  # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+  # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
 }
 

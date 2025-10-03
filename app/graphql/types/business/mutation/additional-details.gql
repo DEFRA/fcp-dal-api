@@ -30,6 +30,7 @@ extend type Mutation {
   """
   Update the business lock status.
   """
+  # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
     @on
     @auth(requires: [SINGLE_FRONT_DOOR])
@@ -37,6 +38,7 @@ extend type Mutation {
   """
   Update the business unlock status.
   """
+  # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
     @on
     @auth(requires: [SINGLE_FRONT_DOOR])
