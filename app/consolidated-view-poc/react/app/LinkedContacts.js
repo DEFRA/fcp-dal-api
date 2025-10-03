@@ -1,6 +1,6 @@
 import { html } from 'htm/react'
 import MiniSearch from 'minisearch'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 async function fetchCustomer(crn, sbi) {
   const response = await fetch('/graphql', {
@@ -27,6 +27,7 @@ async function fetchCustomer(crn, sbi) {
               permissionGroups {
                 id
                 level
+                functions
               }
               role
             }
@@ -43,12 +44,47 @@ async function fetchCustomer(crn, sbi) {
   return response.json()
 }
 
+async function fetchAuthenticateQuestions(crn) {
+  const response = await fetch('/graphql', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      email: 'test.user01@defra.gov.uk'
+    },
+    body: JSON.stringify({
+      query: `#graphql
+        query AuthenticateQuestions($crn: ID!) {
+          customer(crn: $crn) {
+            info {
+              dateOfBirth
+            }
+            authenticationQuestions {
+              isFound
+              memorableDate
+              memorableLocation
+              memorableEvent
+              updatedAt
+            }
+          }
+        }
+        `,
+      variables: {
+        crn
+      }
+    })
+  })
+
+  return response.json()
+}
+
 export function LinkedContacts({ business, indexedCustomers, initialSelectedCustomer }) {
+  // Select customer
   const [selectedCustomer, setSelectedCustomer] = useState(initialSelectedCustomer)
 
   const displayName = `${selectedCustomer.info.name.first} ${selectedCustomer.info.name.last}`
   const fullName = `${selectedCustomer.info.name.title} ${selectedCustomer.info.name.first} ${selectedCustomer.info.name.middle} ${selectedCustomer.info.name.last}`
 
+  // Search
   const [searchQuery, setSearchQuery] = useState('')
 
   const miniSearch = useMemo(
@@ -66,6 +102,14 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
     return found.length ? found : business.customers
   }, [miniSearch, searchQuery, business.customers])
 
+  // Select permission
+  const [selectedPermissionIndex, setSelectedPermissionIndex] = useState(0)
+  const rightColumnRef = useRef(null)
+
+  // Authentication question
+  const [showAuthenticationQuestions, setShowAuthenticationQuestions] = useState(false)
+  const [authenticationQuestions, setAuthenticationQuestions] = useState(false)
+
   return html`
     <div className="container">
       <div>
@@ -78,7 +122,7 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
             ...${{ autoComplete: 'off' }}
           />
         </div>
-        <div className="primary-table">
+        <div className="primary-table clickable">
           <table>
             <thead>
               <tr>
@@ -93,9 +137,11 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
                   key=${customer.crn}
                   className=${customer.crn === selectedCustomer.crn ? 'selected' : ''}
                   onClick=${async () => {
-                    setSelectedCustomer(
-                      (await fetchCustomer(customer.crn, business.sbi)).data.customer
-                    )
+                    const newCustomer = await fetchCustomer(customer.crn, business.sbi)
+                    setSelectedCustomer(newCustomer.data.customer)
+                    setSelectedPermissionIndex(0)
+                    rightColumnRef.current.scrollTop = 0
+                    setShowAuthenticationQuestions(false)
                   }}
                 >
                   <td>${customer.crn}</td>
@@ -108,36 +154,107 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
         </div>
       </div>
       <div className="divider"></div>
-      <div>
+      <div ref=${rightColumnRef} className="right-column">
         <h1>${displayName}</h1>
 
-        <dl>
-          <dt>CRN:</dt>
-          <dd>${selectedCustomer.crn}</dd>
-          <dt>Full Name:</dt>
-          <dd>${fullName}</dd>
-          <dt>Role:</dt>
-          <dd>${selectedCustomer.business.role}</dd>
-        </dl>
+        <div className="right-column-details-header">
+          <dl>
+            <dt>CRN:</dt>
+            <dd>${selectedCustomer.crn}</dd>
+            <dt>Full Name:</dt>
+            <dd>${fullName}</dd>
+            <dt>Role:</dt>
+            <dd>${selectedCustomer.business.role}</dd>
+          </dl>
 
-        <table className="even-columns">
-          <thead>
-            <tr>
-              <th>Permission</th>
-              <th>Level</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${selectedCustomer.business.permissionGroups.map(
-              (permissionGroup) => html`
-                <tr key=${permissionGroup.id}>
-                  <td>${permissionGroup.id}</td>
-                  <td>${permissionGroup.level}</td>
+          <button
+            className="link-button"
+            onClick=${async () => {
+              if (showAuthenticationQuestions) {
+                setShowAuthenticationQuestions(false)
+              } else {
+                const newAuthenticateQuestions = await fetchAuthenticateQuestions(
+                  selectedCustomer.crn
+                )
+                setAuthenticationQuestions(newAuthenticateQuestions.data.customer)
+                setShowAuthenticationQuestions(true)
+              }
+            }}
+          >
+            Show Authenticate Questions
+          </button>
+        </div>
+
+        ${showAuthenticationQuestions
+          ? html`<table className="even-columns">
+              <thead>
+                <tr>
+                  <th>Date of Birth</th>
+                  <th>Memorable Date</th>
+                  <th>Memorable Event</th>
+                  <th>Memorable Place</th>
+                  <th>Updated Date</th>
                 </tr>
-              `
-            )}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                <td>
+                  ${new Intl.DateTimeFormat('en-GB').format(
+                    new Date(authenticationQuestions.info.dateOfBirth)
+                  )}
+                </td>
+                <td>${authenticationQuestions.authenticationQuestions.memorableDate}</td>
+                <td>${authenticationQuestions.authenticationQuestions.memorableEvent}</td>
+                <td>${authenticationQuestions.authenticationQuestions.memorableLocation}</td>
+                <td>
+                  ${new Intl.DateTimeFormat('en-GB', {
+                    dateStyle: 'short',
+                    timeStyle: 'short'
+                  }).format(new Date(authenticationQuestions.authenticationQuestions.updatedAt))}
+                </td>
+              </tbody>
+            </table>`
+          : html`<table className="even-columns clickable">
+                <thead>
+                  <tr>
+                    <th>Permission</th>
+                    <th>Level</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${selectedCustomer.business.permissionGroups.map(
+                    (permissionGroup, index) => html`
+                      <tr
+                        key=${permissionGroup.id}
+                        className=${index === selectedPermissionIndex ? 'selected' : ''}
+                        onClick=${() => {
+                          setSelectedPermissionIndex(index)
+                        }}
+                      >
+                        <td>${permissionGroup.id}</td>
+                        <td>${permissionGroup.level}</td>
+                      </tr>
+                    `
+                  )}
+                </tbody>
+              </table>
+              <table className="even-columns">
+                <thead>
+                  <tr>
+                    <th>Permission Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${selectedCustomer.business.permissionGroups[
+                    selectedPermissionIndex
+                  ].functions.map(
+                    (permissionDescription) => html`
+                      <tr key=${permissionDescription}>
+                        <td>${permissionDescription}</td>
+                      </tr>
+                    `
+                  )}
+                </tbody>
+              </table>`}
       </div>
     </div>
   `

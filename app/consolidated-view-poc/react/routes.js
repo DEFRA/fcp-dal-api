@@ -70,6 +70,7 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
                   permissionGroups {
                     id
                     level
+                    functions
                   }
                   role
                 }
