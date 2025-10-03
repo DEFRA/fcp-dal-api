@@ -147,6 +147,22 @@ describe('businessLockResolver', () => {
     })
   })
 
+  it('returns correct response when lockOrganisation is successfully executed with note and reason', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
+
+    const input = { sbi: '123', reason: 'test', note: 'test' }
+
+    const result = await businessLockResolver(null, { input }, { dataSources, logger })
+
+    expect(result).toEqual({ success: true, business: { sbi: '123' } })
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.lockOrganisation).toHaveBeenCalledWith('orgId', {
+      reason: 'test',
+      note: 'test'
+    })
+  })
+
   it('returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
     const notFoundError = new NotFound('Rural payments organisation not found')
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
@@ -158,19 +174,11 @@ describe('businessLockResolver', () => {
     )
   })
 
-  it('returns error when reason and note are provided', async () => {
-    const input = { sbi: '123', reason: 'test', note: 'test' }
-
-    await expect(businessLockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
-      'Only one of reason or note can be provided'
-    )
-  })
-
   it('returns error when neither reason or note are provided', async () => {
     const input = { sbi: '123' }
 
     await expect(businessLockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
-      'Reason or note are required'
+      'Reason and/or note are required'
     )
   })
 })
@@ -206,6 +214,22 @@ describe('businessUnlockResolver', () => {
     })
   })
 
+  it('returns correct response when unlockOrganisation is successfully executed with note and reason', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
+
+    const input = { sbi: '123', reason: 'test', note: 'test' }
+
+    const result = await businessUnlockResolver(null, { input }, { dataSources, logger })
+
+    expect(result).toEqual({ success: true, business: { sbi: '123' } })
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.unlockOrganisation).toHaveBeenCalledWith('orgId', {
+      reason: 'test',
+      note: 'test'
+    })
+  })
+
   it('returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
     const notFoundError = new NotFound('Rural payments organisation not found')
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
@@ -217,19 +241,11 @@ describe('businessUnlockResolver', () => {
     )
   })
 
-  it('returns error when reason and note are provided', async () => {
-    const input = { sbi: '123', reason: 'test', note: 'test' }
-
-    await expect(businessUnlockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
-      'Only one of reason or note can be provided'
-    )
-  })
-
   it('returns error when neither reason or note are provided', async () => {
     const input = { sbi: '123' }
 
     await expect(businessUnlockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
-      'Reason or note are required'
+      'Reason and/or note are required'
     )
   })
 })
