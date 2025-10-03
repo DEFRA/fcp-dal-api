@@ -40,22 +40,18 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
 
 const validateLockUnlockInput = (input) => {
   if (!input.reason && !input.note) {
-    throw new Error('Reason or note are required')
-  }
-
-  if (input.reason && input.note) {
-    throw new Error('Only one of reason or note can be provided')
+    throw new Error('Reason and/or note are required')
   }
 }
 
 export const businessLockResolver = async (__, { input }, { dataSources }) => {
   validateLockUnlockInput(input)
 
-  const { sbi, ...noteOrReason } = input
+  const { sbi, ...lockBodyAttributes } = input
 
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
 
-  await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, noteOrReason)
+  await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
 
   return {
     success: true,
@@ -68,11 +64,11 @@ export const businessLockResolver = async (__, { input }, { dataSources }) => {
 export const businessUnlockResolver = async (__, { input }, { dataSources }) => {
   validateLockUnlockInput(input)
 
-  const { sbi, ...noteOrReason } = input
+  const { sbi, ...unlockBodyAttributes } = input
 
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
 
-  await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, noteOrReason)
+  await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, unlockBodyAttributes)
 
   return {
     success: true,

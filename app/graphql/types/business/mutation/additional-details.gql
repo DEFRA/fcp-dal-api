@@ -121,12 +121,12 @@ input UpdateBusinessLockInput {
   sbi: ID!
 
   """
-  Reason for locking the business. Reason cannot be provided together with note.
+  Reason for locking the business.
   """
   reason: String
 
   """
-  Note for locking the business. Note cannot be provided together with reason.
+  Note for locking the business.
   """
   note: String
 }
@@ -138,12 +138,12 @@ input UpdateBusinessUnlockInput {
   sbi: ID!
 
   """
-  Reason for unlocking the business. Reason cannot be provided together with note.
+  Reason for unlocking the business.
   """
   reason: String
 
   """
-  Note for unlocking the business. Note cannot be provided together with reason.
+  Note for unlocking the business.
   """
   note: String
 }
