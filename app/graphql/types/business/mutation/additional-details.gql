@@ -30,14 +30,14 @@ extend type Mutation {
   """
   Update the business lock status.
   """
-  updateBusinessLock(input: UpdateBusinessLockInput!): UpdateBusinessResponse
+  updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
     @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
   Update the business unlock status.
   """
-  updateBusinessUnlock(input: UpdateBusinessUnlockInput!): UpdateBusinessResponse
+  updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
     @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
@@ -114,7 +114,7 @@ input BusinessRegistrationNumbersInput {
   companiesHouse: String
 }
 
-input UpdateBusinessLockInput {
+input UpdateBusinessLockUnlockInput {
   """
   Single Business Identifier (SBI) of the business.
   """
@@ -127,23 +127,6 @@ input UpdateBusinessLockInput {
 
   """
   Note for locking the business.
-  """
-  note: String
-}
-
-input UpdateBusinessUnlockInput {
-  """
-  Single Business Identifier (SBI) of the business.
-  """
-  sbi: ID!
-
-  """
-  Reason for unlocking the business.
-  """
-  reason: String
-
-  """
-  Note for unlocking the business.
   """
   note: String
 }
