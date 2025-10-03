@@ -1,3 +1,4 @@
+import { logger } from '../../../logger/logger.js'
 import {
   transformBusinesDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
@@ -45,14 +46,20 @@ const validateLockUnlockInput = (input) => {
 }
 
 export const businessLockResolver = async (__, { input }, { dataSources }) => {
+  logger.info('businessLockResolver', { input })
   validateLockUnlockInput(input)
 
   const { sbi, ...lockBodyAttributes } = input
-
+  logger.info('businessLockResolver2', { sbi, lockBodyAttributes })
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-
+  logger.info('lockOrganisation', { organisationId, lockBodyAttributes })
   await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
-
+  logger.info('lockOrganisation', {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  })
   return {
     success: true,
     business: {

@@ -170,6 +170,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
   async lockOrganisation(organisationId, body) {
     try {
+      this.logger.info('locking organisation', { organisationId, body })
       const response = await this.post(`organisation/${organisationId}/lock`, {
         body: {
           partyNoteType: 'LockOrganisation',

@@ -57,6 +57,11 @@ describe('business lock and unlock', () => {
     `
     const result = await makeTestQuery(query, true, { input })
 
+    if (!nock.isDone()) {
+      console.error('pending mocks: %j', nock.pendingMocks())
+    }
+    expect(nock.isDone()).toBe(true)
+
     expect(result).toEqual({
       data: {
         updateBusinessLock: {
