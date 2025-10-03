@@ -15,6 +15,10 @@ describe('businessDetailsUpdateResolver', () => {
         getOrganisationIdBySBI: jest.fn(),
         getOrganisationById: jest.fn(),
         updateOrganisationDetails: jest.fn()
+      },
+      mongoBusiness: {
+        getOrgIdBySbi: jest.fn(),
+        insertOrgIdBySbi: jest.fn()
       }
     }
     logger = {
@@ -68,6 +72,10 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
         getOrganisationIdBySBI: jest.fn(),
         getOrganisationById: jest.fn(),
         updateOrganisationAdditionalDetails: jest.fn()
+      },
+      mongoBusiness: {
+        getOrgIdBySbi: jest.fn(),
+        insertOrgIdBySbi: jest.fn()
       }
     }
     logger = {

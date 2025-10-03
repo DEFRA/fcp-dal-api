@@ -1,14 +1,8 @@
-async function insertOrgIdBySbi(sbi, { MongoBusiness, ruralPaymentsBusiness }) {
-  const orgId = await ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-  await MongoBusiness.insertOrgIdBySbi(sbi, orgId)
-  return orgId
-}
+import { retrieveOrgIdBySbi } from './common.js'
 
 export const Query = {
   async business(__, { sbi }, { dataSources }) {
-    const organisationId =
-      (await dataSources.mongoBusiness.getOrgIdBySbi(sbi)) ??
-      (await insertOrgIdBySbi(sbi, dataSources))
+    const organisationId = await retrieveOrgIdBySbi(sbi, dataSources)
 
     return {
       sbi,

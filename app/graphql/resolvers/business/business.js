@@ -12,7 +12,10 @@ import {
 } from '../../../transformers/rural-payments/business.js'
 
 export const Business = {
-  async info({ organisationId }, __, { dataSources }) {
+  async info({ organisationId, info }, __, { dataSources }) {
+    if (info) {
+      return info
+    }
     const response = await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
     return transformOrganisationToBusiness(response).info
   },

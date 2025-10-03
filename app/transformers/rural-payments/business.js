@@ -107,8 +107,8 @@ export const transformOrganisationToBusiness = (data) => ({
       data?.additionalBusinessActivities?.map(({ id, type }) => ({ code: id, type })) || [],
     status: transformEntityStatus(data)
   },
-  organisationId: `${data?.id}`,
-  sbi: `${data?.sbi}`
+  organisationId: data?.id?.toString(),
+  sbi: data?.sbi?.toString()
 })
 
 const orgDetailsUpdateMapping = {

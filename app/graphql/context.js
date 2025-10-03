@@ -53,6 +53,7 @@ export async function context({ request }) {
   return {
     auth,
     requestLogger,
+    db,
     dataSources: {
       permissions: new Permissions({ logger: requestLogger }),
       ruralPaymentsBusiness: new RuralPaymentsBusiness(...datasourceOptions),

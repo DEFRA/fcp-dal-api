@@ -474,6 +474,7 @@ describe('Query.business internal', () => {
   test('authenticated internal', async () => {
     const v1 = nock(config.get('kits.internal.gatewayUrl'))
     setupNock(v1)
+    mockOrganisationSearch(v1)
 
     const result = await makeTestQuery(query)
 
