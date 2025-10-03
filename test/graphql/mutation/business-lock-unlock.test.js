@@ -6,16 +6,6 @@ import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
-const setupNock = () => {
-  nock.disableNetConnect()
-
-  // converting sbi to organisationId before lock/unlock
-  mockOrganisationSearch(v1)
-
-  // organisation details after lock/unlock
-  mockOrganisationSearch(v1)
-}
-
 //  Nock is setup separately in each test to ensure the order and number of requests is as expected
 describe('business lock and unlock', () => {
   afterEach(() => {
@@ -23,7 +13,18 @@ describe('business lock and unlock', () => {
     nock.enableNetConnect()
   })
 
-  beforeEach(setupNock)
+  beforeEach(() => {
+    nock.restore()
+    nock.activate()
+    nock.cleanAll()
+    nock.disableNetConnect()
+
+    // converting sbi to organisationId before lock/unlock
+    mockOrganisationSearch(v1)
+
+    // organisation details after lock/unlock
+    mockOrganisationSearch(v1)
+  })
 
   test('lock a business', async () => {
     const input = {
@@ -59,6 +60,7 @@ describe('business lock and unlock', () => {
 
     if (!nock.isDone()) {
       console.error('pending mocks: %j', nock.pendingMocks())
+      console.error('active mocks: %j', nock.activeMocks())
     }
     expect(nock.isDone()).toBe(true)
 
