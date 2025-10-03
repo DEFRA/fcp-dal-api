@@ -25,6 +25,10 @@ type Mutation {
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
+  # eslint-disable-next-line @graphql-eslint/input-name
+  updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+  # eslint-disable-next-line @graphql-eslint/input-name
+  updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
 }
 
 input UpdateCustomerAddressInput {
@@ -533,6 +537,12 @@ input UpdateBusinessAddressInput {
 input UpdateBusinessVATInput {
   sbi: ID!
   vat: String!
+}
+
+input UpdateBusinessLockUnlockInput {
+  sbi: ID!
+  reason: String
+  note: String
 }
 
 type UpdateBusinessResponse {

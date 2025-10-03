@@ -1,3 +1,4 @@
+import { logger } from '../../../logger/logger.js'
 import {
   transformBusinesDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
@@ -29,6 +30,52 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
     organisationId,
     orgAdditionalDetails
   )
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
+const validateLockUnlockInput = (input) => {
+  if (!input.reason && !input.note) {
+    throw new Error('Reason and/or note are required')
+  }
+}
+
+export const businessLockResolver = async (__, { input }, { dataSources }) => {
+  logger.info('businessLockResolver', { input })
+  validateLockUnlockInput(input)
+
+  const { sbi, ...lockBodyAttributes } = input
+  logger.info('businessLockResolver2', { sbi, lockBodyAttributes })
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  logger.info('lockOrganisation', { organisationId, lockBodyAttributes })
+  await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
+  logger.info('lockOrganisation', {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  })
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
+export const businessUnlockResolver = async (__, { input }, { dataSources }) => {
+  validateLockUnlockInput(input)
+
+  const { sbi, ...unlockBodyAttributes } = input
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, unlockBodyAttributes)
 
   return {
     success: true,

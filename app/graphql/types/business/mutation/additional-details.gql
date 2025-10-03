@@ -26,6 +26,22 @@ extend type Mutation {
   updateBusinessRegistrationNumbers(
     input: UpdateBusinessRegistrationNumbersInput!
   ): UpdateBusinessResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Update the business lock status.
+  """
+  # eslint-disable-next-line @graphql-eslint/input-name
+  updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Update the business unlock status.
+  """
+  # eslint-disable-next-line @graphql-eslint/input-name
+  updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input UpdateBusinessLegalStatusInput {
@@ -98,4 +114,21 @@ input BusinessRegistrationNumbersInput {
   Charity comission registration number to set.
   """
   companiesHouse: String
+}
+
+input UpdateBusinessLockUnlockInput {
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID!
+
+  """
+  Reason for locking the business.
+  """
+  reason: String
+
+  """
+  Note for locking the business.
+  """
+  note: String
 }

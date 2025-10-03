@@ -1,9 +1,11 @@
-import { jest } from '@jest/globals'
+import { describe, jest } from '@jest/globals'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 
 const mockSchemaModule = {
   businessDetailsUpdateResolver: jest.fn(),
-  businessAdditionalDetailsUpdateResolver: jest.fn()
+  businessAdditionalDetailsUpdateResolver: jest.fn(),
+  businessLockResolver: jest.fn(),
+  businessUnlockResolver: jest.fn()
 }
 jest.unstable_mockModule(
   '../../../app/graphql/resolvers/business/common.js',
@@ -411,6 +413,46 @@ describe('Business Mutation createBusiness', () => {
         organisationId: 'orgId',
         sbi: 'sbi'
       }
+    })
+  })
+})
+
+describe('Business Mutation updateBusinessLockStatus', () => {
+  const mockArgs = { input: { sbi: '123', reason: 'test' } }
+
+  let dataSources
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn().mockResolvedValue('123')
+      }
+    }
+  })
+
+  it('updateBusinessLock', async () => {
+    await Mutation.updateBusinessLock({}, mockArgs, { dataSources })
+    expect(mockSchemaModule.businessLockResolver).toHaveBeenCalledWith({}, mockArgs, {
+      dataSources
+    })
+  })
+})
+
+describe('Business Mutation updateBusinessUnlockStatus', () => {
+  const mockArgs = { input: { sbi: '123', reason: 'test' } }
+
+  let dataSources
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn().mockResolvedValue('123')
+      }
+    }
+  })
+
+  it('updateBusinessUnlock', async () => {
+    await Mutation.updateBusinessUnlock({}, mockArgs, { dataSources })
+    expect(mockSchemaModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
+      dataSources
     })
   })
 })

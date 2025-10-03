@@ -167,4 +167,48 @@ export class RuralPaymentsBusiness extends RuralPayments {
     }
     throw new BadRequest('Defra ID token is not valid for the provided SBI')
   }
+
+  async lockOrganisation(organisationId, body) {
+    try {
+      const response = await this.post(`organisation/${organisationId}/lock`, {
+        body: {
+          partyNoteType: 'LockOrganisation',
+          ...body
+        },
+        headers: postPutHeaders
+      })
+
+      return response
+    } catch (error) {
+      if (error?.extensions?.http?.status === 500) {
+        const organisation = await this.getOrganisationById(organisationId)
+        if (organisation.locked) {
+          throw new Error('Business is already locked')
+        }
+      }
+      throw error
+    }
+  }
+
+  async unlockOrganisation(organisationId, body) {
+    try {
+      const response = await this.post(`organisation/${organisationId}/unlock`, {
+        body: {
+          partyNoteType: 'UnlockOrganisation',
+          ...body
+        },
+        headers: postPutHeaders
+      })
+
+      return response
+    } catch (error) {
+      if (error?.extensions?.http?.status === 500) {
+        const organisation = await this.getOrganisationById(organisationId)
+        if (!organisation.locked) {
+          throw new Error('Business is already unlocked')
+        }
+      }
+      throw error
+    }
+  }
 }

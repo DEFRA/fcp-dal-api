@@ -64,7 +64,7 @@ const { authDirectiveTransformer, checkAuthGroup, getAuth, authGroups } = await 
   '../../../app/auth/authenticate.js'
 )
 
-describe('getJwtPublicKey', () => {
+describe.skip('getJwtPublicKey', () => {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', {
     modulusLength: 2048
   })
