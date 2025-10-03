@@ -78,6 +78,10 @@ async function fetchAuthenticateQuestions({ email, crn }) {
 }
 
 export function LinkedContacts({ email, business, indexedCustomers, initialSelectedCustomer }) {
+  // Loading
+  const [loadingCustomer, setLoadingCustomer] = useState(false)
+  const [loadingAuthenticateQuestions, setLoadingAuthenticateQuestions] = useState(false)
+
   // Select customer
   const [selectedCustomer, setSelectedCustomer] = useState(initialSelectedCustomer)
 
@@ -112,7 +116,7 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
 
   return html`
     <div className="container">
-      <div>
+      <div className="column">
         <div className="search-input">
           <label>Search</label>
           <input
@@ -137,6 +141,9 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
                   key=${customer.crn}
                   className=${customer.crn === selectedCustomer.crn ? 'selected' : ''}
                   onClick=${async () => {
+                    setLoadingAuthenticateQuestions(true)
+                    setShowAuthenticationQuestions(false)
+                    rightColumnRef.current.scrollTop = 0
                     const newCustomer = await fetchCustomer({
                       email,
                       crn: customer.crn,
@@ -144,8 +151,7 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
                     })
                     setSelectedCustomer(newCustomer.data.customer)
                     setSelectedPermissionIndex(0)
-                    rightColumnRef.current.scrollTop = 0
-                    setShowAuthenticationQuestions(false)
+                    setLoadingAuthenticateQuestions(false)
                   }}
                 >
                   <td>${customer.crn}</td>
@@ -158,40 +164,50 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
         </div>
       </div>
       <div className="divider"></div>
-      <div ref=${rightColumnRef} className="right-column">
-        <h1>${displayName}</h1>
+      <div
+        ref=${rightColumnRef}
+        className=${loadingAuthenticateQuestions
+          ? 'column right-column loading'
+          : 'column right-column'}
+      >
+        <h1>
+          <div className="loading-placeholder">${displayName}</div>
+        </h1>
 
         <div className="right-column-details-header">
           <dl>
             <dt>CRN:</dt>
-            <dd>${selectedCustomer.crn}</dd>
+            <dd className="loading-placeholder">${selectedCustomer.crn}</dd>
             <dt>Full Name:</dt>
-            <dd>${fullName}</dd>
+            <dd className="loading-placeholder">${fullName}</dd>
             <dt>Role:</dt>
-            <dd>${selectedCustomer.business.role}</dd>
+            <dd className="loading-placeholder">${selectedCustomer.business.role}</dd>
           </dl>
 
           <button
             className="link-button"
+            disabled=${loadingCustomer}
             onClick=${async () => {
               if (showAuthenticationQuestions) {
                 setShowAuthenticationQuestions(false)
               } else {
+                setShowAuthenticationQuestions(true)
+                setLoadingCustomer(true)
                 const newAuthenticateQuestions = await fetchAuthenticateQuestions({
                   email,
                   crn: selectedCustomer.crn
                 })
                 setAuthenticationQuestions(newAuthenticateQuestions.data.customer)
-                setShowAuthenticationQuestions(true)
+                setLoadingCustomer(false)
               }
             }}
           >
-            Show Authenticate Questions
+            ${showAuthenticationQuestions ? 'Show Permissions' : 'Show Authenticate Questions'}
           </button>
         </div>
 
         ${showAuthenticationQuestions
-          ? html`<div>
+          ? html`<div className=${loadingCustomer ? 'loading' : ''}>
               <table className="even-columns">
                 <thead>
                   <tr>
@@ -204,18 +220,41 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
                 </thead>
                 <tbody>
                   <td>
-                    ${new Intl.DateTimeFormat('en-GB').format(
-                      new Date(authenticationQuestions.info.dateOfBirth)
-                    )}
+                    <div className="loading-placeholder">
+                      ${authenticationQuestions?.info?.dateOfBirth
+                        ? new Intl.DateTimeFormat('en-GB').format(
+                            new Date(authenticationQuestions.info.dateOfBirth)
+                          )
+                        : ''}
+                    </div>
                   </td>
-                  <td>${authenticationQuestions.authenticationQuestions.memorableDate}</td>
-                  <td>${authenticationQuestions.authenticationQuestions.memorableEvent}</td>
-                  <td>${authenticationQuestions.authenticationQuestions.memorableLocation}</td>
                   <td>
-                    ${new Intl.DateTimeFormat('en-GB', {
-                      dateStyle: 'short',
-                      timeStyle: 'short'
-                    }).format(new Date(authenticationQuestions.authenticationQuestions.updatedAt))}
+                    <div className="loading-placeholder">
+                      ${authenticationQuestions?.authenticationQuestions?.memorableDate}
+                    </div>
+                  </td>
+
+                  <td>
+                    <div className="loading-placeholder">
+                      ${authenticationQuestions?.authenticationQuestions?.memorableEvent}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="loading-placeholder">
+                      ${authenticationQuestions?.authenticationQuestions?.memorableLocation}
+                    </div>
+                  </td>
+                  <td>
+                    <div className="loading-placeholder">
+                      ${authenticationQuestions?.authenticationQuestions?.updatedAt
+                        ? new Intl.DateTimeFormat('en-GB', {
+                            dateStyle: 'short',
+                            timeStyle: 'short'
+                          }).format(
+                            new Date(authenticationQuestions.authenticationQuestions.updatedAt)
+                          )
+                        : ''}
+                    </div>
                   </td>
                 </tbody>
               </table>
@@ -238,8 +277,8 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
                           setSelectedPermissionIndex(index)
                         }}
                       >
-                        <td>${permissionGroup.id}</td>
-                        <td>${permissionGroup.level}</td>
+                        <td><div className="loading-placeholder">${permissionGroup.id}</div></td>
+                        <td><div className="loading-placeholder">${permissionGroup.level}</div></td>
                       </tr>
                     `
                   )}
@@ -257,7 +296,7 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
                   ].functions.map(
                     (permissionDescription) => html`
                       <tr key=${permissionDescription}>
-                        <td>${permissionDescription}</td>
+                        <td><div className="loading-placeholder">${permissionDescription}</div></td>
                       </tr>
                     `
                   )}
