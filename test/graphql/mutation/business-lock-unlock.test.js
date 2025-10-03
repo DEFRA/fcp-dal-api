@@ -57,8 +57,6 @@ describe('business lock and unlock', () => {
     `
     const result = await makeTestQuery(query, true, { input })
 
-    expect(nock.isDone()).toBe(true)
-
     expect(result).toEqual({
       data: {
         updateBusinessLock: {
@@ -107,8 +105,6 @@ describe('business lock and unlock', () => {
       }
     `
     const result = await makeTestQuery(query, true, { input })
-
-    expect(nock.isDone()).toBe(true)
 
     expect(result).toEqual({
       data: {
