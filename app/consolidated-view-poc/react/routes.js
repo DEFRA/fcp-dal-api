@@ -1,4 +1,5 @@
 import { graphql } from 'graphql'
+import MiniSearch from 'minisearch'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { context } from '../../graphql/context.js'
@@ -89,8 +90,17 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           }
         })
 
+        const miniSearch = new MiniSearch({
+          idField: 'crn',
+          fields: ['firstName', 'lastName', 'crn'],
+          storeFields: ['firstName', 'lastName', 'crn']
+        })
+
+        miniSearch.addAll(business.customers)
+
         const props = {
           business,
+          indexedCustomers: JSON.stringify(miniSearch),
           initialSelectedCustomer: selectedCustomer.data.customer
         }
 

@@ -27,9 +27,10 @@ export function App(initialProps) {
         <script type="importmap">
           ${JSON.stringify({
             imports: {
-              react: 'https://esm.sh/react',
+              'htm/react': 'https://esm.sh/htm/react',
               'react-dom/client': 'https://esm.sh/react-dom/client',
-              'htm/react': 'https://esm.sh/htm/react'
+              minisearch: 'https://esm.sh/minisearch',
+              react: 'https://esm.sh/react'
             }
           })}
         </script>
