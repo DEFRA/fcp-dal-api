@@ -61,7 +61,7 @@ describe('business lock and unlock', () => {
 
     expect(result).toEqual({
       data: {
-        lockBusiness: {
+        updateBusinessLock: {
           success: true,
           business: {
             sbi: 'sbi',
@@ -112,7 +112,7 @@ describe('business lock and unlock', () => {
 
     expect(result).toEqual({
       data: {
-        unlockBusiness: {
+        updateBusinessUnlock: {
           success: true,
           business: {
             sbi: 'sbi',

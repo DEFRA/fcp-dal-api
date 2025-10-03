@@ -132,7 +132,7 @@ describe('businessLockResolver', () => {
     }
   })
 
-  it('returns correct response when lockOrganisation is successful executed', async () => {
+  it('returns correct response when lockOrganisation is successfully executed', async () => {
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
     dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
 
@@ -166,7 +166,7 @@ describe('businessLockResolver', () => {
     )
   })
 
-  it('returns error neither reason or note are provided', async () => {
+  it('returns error when neither reason or note are provided', async () => {
     const input = { sbi: '123' }
 
     await expect(businessLockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
@@ -191,7 +191,7 @@ describe('businessUnlockResolver', () => {
     }
   })
 
-  it('returns correct response when unlockOrganisation is successful executed', async () => {
+  it('returns correct response when unlockOrganisation is successfully executed', async () => {
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
     dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
 
@@ -225,7 +225,7 @@ describe('businessUnlockResolver', () => {
     )
   })
 
-  it('returns error neither reason or note are provided', async () => {
+  it('returns error when neither reason or note are provided', async () => {
     const input = { sbi: '123' }
 
     await expect(businessUnlockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
