@@ -21,6 +21,16 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
     method: 'GET',
     path: '/consolidated-view-react/linked-contacts/{sbi}',
     handler: async (request, h) => {
+      const email = request.query.email
+      if (!email) {
+        return h
+          .response({
+            error: 'Bad Request',
+            message: 'Email not provided'
+          })
+          .code(400)
+      }
+
       try {
         // Get list of customer businesses
         const {
@@ -43,7 +53,7 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           contextValue: await context({
             request: {
               headers: {
-                email: 'test@defra.gov.uk'
+                email
               }
             }
           }),
@@ -81,7 +91,7 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           contextValue: await context({
             request: {
               headers: {
-                email: 'test@defra.gov.uk'
+                email
               }
             }
           }),
@@ -100,6 +110,7 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
         miniSearch.addAll(business.customers)
 
         const props = {
+          email,
           business,
           indexedCustomers: JSON.stringify(miniSearch),
           initialSelectedCustomer: selectedCustomer.data.customer

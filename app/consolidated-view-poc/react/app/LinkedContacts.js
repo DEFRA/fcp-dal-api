@@ -2,12 +2,12 @@ import { html } from 'htm/react'
 import MiniSearch from 'minisearch'
 import { useMemo, useRef, useState } from 'react'
 
-async function fetchCustomer(crn, sbi) {
+async function fetchCustomer({ email, crn, sbi }) {
   const response = await fetch('/graphql', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      email: 'test.user01@defra.gov.uk'
+      email
     },
     body: JSON.stringify({
       query: `#graphql
@@ -44,12 +44,12 @@ async function fetchCustomer(crn, sbi) {
   return response.json()
 }
 
-async function fetchAuthenticateQuestions(crn) {
+async function fetchAuthenticateQuestions({ email, crn }) {
   const response = await fetch('/graphql', {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      email: 'test.user01@defra.gov.uk'
+      email
     },
     body: JSON.stringify({
       query: `#graphql
@@ -77,7 +77,7 @@ async function fetchAuthenticateQuestions(crn) {
   return response.json()
 }
 
-export function LinkedContacts({ business, indexedCustomers, initialSelectedCustomer }) {
+export function LinkedContacts({ email, business, indexedCustomers, initialSelectedCustomer }) {
   // Select customer
   const [selectedCustomer, setSelectedCustomer] = useState(initialSelectedCustomer)
 
@@ -137,7 +137,11 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
                   key=${customer.crn}
                   className=${customer.crn === selectedCustomer.crn ? 'selected' : ''}
                   onClick=${async () => {
-                    const newCustomer = await fetchCustomer(customer.crn, business.sbi)
+                    const newCustomer = await fetchCustomer({
+                      email,
+                      crn: customer.crn,
+                      sbi: business.sbi
+                    })
                     setSelectedCustomer(newCustomer.data.customer)
                     setSelectedPermissionIndex(0)
                     rightColumnRef.current.scrollTop = 0
@@ -173,9 +177,10 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
               if (showAuthenticationQuestions) {
                 setShowAuthenticationQuestions(false)
               } else {
-                const newAuthenticateQuestions = await fetchAuthenticateQuestions(
-                  selectedCustomer.crn
-                )
+                const newAuthenticateQuestions = await fetchAuthenticateQuestions({
+                  email,
+                  crn: selectedCustomer.crn
+                })
                 setAuthenticationQuestions(newAuthenticateQuestions.data.customer)
                 setShowAuthenticationQuestions(true)
               }
@@ -186,34 +191,37 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
         </div>
 
         ${showAuthenticationQuestions
-          ? html`<table className="even-columns">
-              <thead>
-                <tr>
-                  <th>Date of Birth</th>
-                  <th>Memorable Date</th>
-                  <th>Memorable Event</th>
-                  <th>Memorable Place</th>
-                  <th>Updated Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                <td>
-                  ${new Intl.DateTimeFormat('en-GB').format(
-                    new Date(authenticationQuestions.info.dateOfBirth)
-                  )}
-                </td>
-                <td>${authenticationQuestions.authenticationQuestions.memorableDate}</td>
-                <td>${authenticationQuestions.authenticationQuestions.memorableEvent}</td>
-                <td>${authenticationQuestions.authenticationQuestions.memorableLocation}</td>
-                <td>
-                  ${new Intl.DateTimeFormat('en-GB', {
-                    dateStyle: 'short',
-                    timeStyle: 'short'
-                  }).format(new Date(authenticationQuestions.authenticationQuestions.updatedAt))}
-                </td>
-              </tbody>
-            </table>`
-          : html`<table className="even-columns clickable">
+          ? html`<div>
+              <table className="even-columns">
+                <thead>
+                  <tr>
+                    <th>Date of Birth</th>
+                    <th>Memorable Date</th>
+                    <th>Memorable Event</th>
+                    <th>Memorable Place</th>
+                    <th>Updated Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <td>
+                    ${new Intl.DateTimeFormat('en-GB').format(
+                      new Date(authenticationQuestions.info.dateOfBirth)
+                    )}
+                  </td>
+                  <td>${authenticationQuestions.authenticationQuestions.memorableDate}</td>
+                  <td>${authenticationQuestions.authenticationQuestions.memorableEvent}</td>
+                  <td>${authenticationQuestions.authenticationQuestions.memorableLocation}</td>
+                  <td>
+                    ${new Intl.DateTimeFormat('en-GB', {
+                      dateStyle: 'short',
+                      timeStyle: 'short'
+                    }).format(new Date(authenticationQuestions.authenticationQuestions.updatedAt))}
+                  </td>
+                </tbody>
+              </table>
+            </div>`
+          : html`<div>
+              <table className="even-columns clickable">
                 <thead>
                   <tr>
                     <th>Permission</th>
@@ -254,7 +262,8 @@ export function LinkedContacts({ business, indexedCustomers, initialSelectedCust
                     `
                   )}
                 </tbody>
-              </table>`}
+              </table>
+            </div>`}
       </div>
     </div>
   `
