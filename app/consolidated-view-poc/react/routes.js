@@ -1,5 +1,4 @@
 import { graphql } from 'graphql'
-import MiniSearch from 'minisearch'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { context } from '../../graphql/context.js'
@@ -19,7 +18,37 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
   },
   {
     method: 'GET',
-    path: '/consolidated-view-react/linked-contacts/{sbi}',
+    path: '/consolidated-view-react-partial-ssr/linked-contacts/{sbi}',
+    handler: async (request, h) => {
+      const email = request.query.email
+      if (!email) {
+        return h
+          .response({
+            error: 'Bad Request',
+            message: 'Email not provided'
+          })
+          .code(400)
+      }
+
+      try {
+        const props = {
+          sbi: request.params.sbi,
+          email,
+          preloaded: {}
+        }
+
+        return h
+          .response(`<!DOCTYPE html>${renderToString(createElement(App, props))}`)
+          .type('text/html')
+      } catch (error) {
+        console.error('Server rendering error:', error)
+        return h.response('Error rendering page').code(500)
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/consolidated-view-react-full-ssr/linked-contacts/{sbi}',
     handler: async (request, h) => {
       const email = request.query.email
       if (!email) {
@@ -33,9 +62,7 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
 
       try {
         // Get list of customer businesses
-        const {
-          data: { business }
-        } = await graphql({
+        const businessCustomers = await graphql({
           source: `#graphql
               query LinkedContactsPage($sbi: ID!) {
                 business(sbi: $sbi) {
@@ -97,23 +124,25 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           }),
           variableValues: {
             sbi: request.params.sbi,
-            crn: business.customers[0].crn
+            crn: businessCustomers.data.business.customers[0].crn
           }
         })
 
-        const miniSearch = new MiniSearch({
-          idField: 'crn',
-          fields: ['firstName', 'lastName', 'crn'],
-          storeFields: ['firstName', 'lastName', 'crn']
-        })
+        // const miniSearch = new MiniSearch({
+        //   idField: 'crn',
+        //   fields: ['firstName', 'lastName', 'crn'],
+        //   storeFields: ['firstName', 'lastName', 'crn']
+        // })
 
-        miniSearch.addAll(business.customers)
+        // miniSearch.addAll(business.customers)
 
         const props = {
+          sbi: request.params.sbi,
           email,
-          business,
-          indexedCustomers: JSON.stringify(miniSearch),
-          initialSelectedCustomer: selectedCustomer.data.customer
+          preloaded: {
+            businessCustomers,
+            selectedCustomer
+          }
         }
 
         return h

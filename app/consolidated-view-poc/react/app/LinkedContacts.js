@@ -1,130 +1,128 @@
 import { html } from 'htm/react'
-import MiniSearch from 'minisearch'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useLazyQuery, useQuery } from './useQuery.js'
 
-async function fetchCustomer({ email, crn, sbi }) {
-  const response = await fetch('/graphql', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      email
-    },
-    body: JSON.stringify({
-      query: `#graphql
-        query SelectedCustomer($crn: ID!, $sbi: ID!) {
-          customer(crn: $crn) {
-            crn
-            info {
-              name {
-                title
-                otherTitle
-                first
-                middle
-                last
-              }
-            }
-            business(sbi: $sbi) {
-              permissionGroups {
-                id
-                level
-                functions
-              }
-              role
-            }
-          }
-        }
-        `,
-      variables: {
-        crn,
-        sbi
-      }
-    })
-  })
-
-  return response.json()
-}
-
-async function fetchAuthenticateQuestions({ email, crn }) {
-  const response = await fetch('/graphql', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      email
-    },
-    body: JSON.stringify({
-      query: `#graphql
-        query AuthenticateQuestions($crn: ID!) {
-          customer(crn: $crn) {
-            info {
-              dateOfBirth
-            }
-            authenticationQuestions {
-              isFound
-              memorableDate
-              memorableLocation
-              memorableEvent
-              updatedAt
-            }
-          }
-        }
-        `,
-      variables: {
+const GET_BUSINESS_CUSTOMERS = `#graphql
+  query BusinessCustomers($sbi: ID!) {
+    business(sbi: $sbi) {
+      sbi
+      customers {
+        firstName
+        lastName
         crn
+        role
       }
-    })
-  })
+    }
+  }
+`
 
-  return response.json()
-}
+const GET_CUSTOMER = `#graphql
+  query Customer($crn: ID!, $sbi: ID!) {
+    customer(crn: $crn) {
+      crn
+      info {
+        name {
+          title
+          otherTitle
+          first
+          middle
+          last
+        }
+      }
+      business(sbi: $sbi) {
+        permissionGroups {
+          id
+          level
+          functions
+        }
+        role
+      }
+    }
+  }
+`
 
-export function LinkedContacts({ email, business, indexedCustomers, initialSelectedCustomer }) {
-  // Loading
-  const [loadingCustomer, setLoadingCustomer] = useState(false)
-  const [loadingAuthenticateQuestions, setLoadingAuthenticateQuestions] = useState(false)
+const GET_AUTHENTICATE_QUESTIONS = `#graphql
+  query AuthenticationQuestions($crn: ID!) {
+    customer(crn: $crn) {
+      crn
+      info {
+        dateOfBirth
+      }
+      authenticationQuestions {
+        isFound
+        memorableDate
+        memorableLocation
+        memorableEvent
+        updatedAt
+      }
+    }
+  }
+`
 
-  // Select customer
-  const [selectedCustomer, setSelectedCustomer] = useState(initialSelectedCustomer)
-
-  const displayName = `${selectedCustomer.info.name.first} ${selectedCustomer.info.name.last}`
-  const fullName = `${selectedCustomer.info.name.title} ${selectedCustomer.info.name.first} ${selectedCustomer.info.name.middle} ${selectedCustomer.info.name.last}`
-
-  // Search
-  const [searchQuery, setSearchQuery] = useState('')
-
-  const miniSearch = useMemo(
-    () =>
-      MiniSearch.loadJSON(indexedCustomers, {
-        idField: 'crn',
-        fields: ['firstName', 'lastName', 'crn'],
-        storeFields: ['firstName', 'lastName', 'crn']
-      }),
-    [indexedCustomers]
+export function LinkedContacts({ sbi, email, preloaded }) {
+  // Load list of business customers
+  const { data: businessCustomers, loading: loadingBusinessCustomers } = useQuery(
+    GET_BUSINESS_CUSTOMERS,
+    {
+      variables: { sbi },
+      headers: { email },
+      preloaded: preloaded.businessCustomers
+    }
   )
 
-  const results = useMemo(() => {
-    const found = miniSearch.search(searchQuery, { prefix: true, fuzzy: 0.2 })
-    return found.length ? found : business.customers
-  }, [miniSearch, searchQuery, business.customers])
+  // Create `getCustomer` query
+  const [getCustomer, { data: selectedCustomer, loading: loadingSelectedCustomers }] = useLazyQuery(
+    GET_CUSTOMER,
+    {
+      headers: { email },
+      preloaded: preloaded.selectedCustomer
+    }
+  )
 
-  // Select permission
-  const [selectedPermissionIndex, setSelectedPermissionIndex] = useState(0)
-  const rightColumnRef = useRef(null)
+  // Execute `getCustomer` to get first customer in list
+  useEffect(() => {
+    if (businessCustomers?.data?.business?.customers[0].crn) {
+      getCustomer({ crn: businessCustomers?.data?.business?.customers[0].crn, sbi })
+    }
+  }, [businessCustomers])
 
-  // Authentication question
+  // Authenticate questions
+  const [
+    getAuthenticationQuestions,
+    { data: authenticationQuestions, loading: loadingAuthenticationQuestions }
+  ] = useLazyQuery(GET_AUTHENTICATE_QUESTIONS, {
+    headers: { email }
+  })
+
   const [showAuthenticationQuestions, setShowAuthenticationQuestions] = useState(false)
-  const [authenticationQuestions, setAuthenticationQuestions] = useState(false)
+
+  useEffect(() => {
+    if (
+      (showAuthenticationQuestions && !authenticationQuestions) ||
+      (showAuthenticationQuestions &&
+        authenticationQuestions?.data?.customer?.crn !== selectedCustomer?.data?.customer?.crn)
+    ) {
+      getAuthenticationQuestions({ crn: selectedCustomer?.data?.customer?.crn })
+    }
+  }, [showAuthenticationQuestions])
+
+  const [selectedPermissionIndex, setSelectedPermissionIndex] = useState(0)
+  const loadingLeftColumn = loadingBusinessCustomers
+  const loadingRightColumn = loadingLeftColumn || !selectedCustomer || loadingSelectedCustomers
+
+  // Reset right column scroll position when loading customer
+  const rightColumnRef = useRef(null)
+  useEffect(() => {
+    rightColumnRef.current.scrollTop = 0
+    setShowAuthenticationQuestions(false)
+  }, [loadingSelectedCustomers])
 
   return html`
     <div className="container">
       <div className="column">
         <div className="search-input">
           <label>Search</label>
-          <input
-            name="search"
-            placeholder="Enter search term"
-            onChange=${(e) => setSearchQuery(e.target.value)}
-            ...${{ autoComplete: 'off' }}
-          />
+          <input name="search" placeholder="Enter search term" ...${{ autoComplete: 'off' }} />
         </div>
         <div className="primary-table clickable">
           <table>
@@ -136,23 +134,14 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
               </tr>
             </thead>
             <tbody>
-              ${results.map((customer) => {
+              ${businessCustomers?.data?.business?.customers.map((customer) => {
                 return html`<tr
                   key=${customer.crn}
-                  className=${customer.crn === selectedCustomer.crn ? 'selected' : ''}
-                  onClick=${async () => {
-                    setLoadingAuthenticateQuestions(true)
-                    setShowAuthenticationQuestions(false)
-                    rightColumnRef.current.scrollTop = 0
-                    const newCustomer = await fetchCustomer({
-                      email,
-                      crn: customer.crn,
-                      sbi: business.sbi
-                    })
-                    setSelectedCustomer(newCustomer.data.customer)
-                    setSelectedPermissionIndex(0)
-                    setLoadingAuthenticateQuestions(false)
-                  }}
+                  className=${!loadingRightColumn &&
+                  customer.crn === selectedCustomer?.data?.customer?.crn
+                    ? 'selected'
+                    : ''}
+                  onClick=${() => getCustomer({ crn: customer.crn, sbi })}
                 >
                   <td>${customer.crn}</td>
                   <td>${customer.firstName}</td>
@@ -164,145 +153,141 @@ export function LinkedContacts({ email, business, indexedCustomers, initialSelec
         </div>
       </div>
       <div className="divider"></div>
+
       <div
         ref=${rightColumnRef}
-        className=${loadingAuthenticateQuestions
-          ? 'column right-column loading'
-          : 'column right-column'}
+        className=${loadingRightColumn ? 'column right-column loading' : 'column right-column'}
       >
         <h1>
-          <div className="loading-placeholder">${displayName}</div>
+          <div className="loading-placeholder">
+            ${`${selectedCustomer?.data?.customer?.info?.name?.first} ${selectedCustomer?.data?.customer?.info?.name?.last}`}
+          </div>
         </h1>
 
         <div className="right-column-details-header">
           <dl>
             <dt>CRN:</dt>
-            <dd className="loading-placeholder">${selectedCustomer.crn}</dd>
+            <dd className="loading-placeholder">${selectedCustomer?.data?.customer?.crn}</dd>
             <dt>Full Name:</dt>
-            <dd className="loading-placeholder">${fullName}</dd>
+            <dd className="loading-placeholder">
+              ${`${selectedCustomer?.data?.customer?.info?.name?.title} ${selectedCustomer?.data?.customer?.info?.name?.first} ${selectedCustomer?.data?.customer?.info?.name?.middle} ${selectedCustomer?.data?.customer?.info?.name?.last}`}
+            </dd>
             <dt>Role:</dt>
-            <dd className="loading-placeholder">${selectedCustomer.business.role}</dd>
+            <dd className="loading-placeholder">
+              ${selectedCustomer?.data?.customer?.business?.role}
+            </dd>
           </dl>
 
           <button
             className="link-button"
-            disabled=${loadingCustomer}
-            onClick=${async () => {
-              if (showAuthenticationQuestions) {
-                setShowAuthenticationQuestions(false)
-              } else {
-                setShowAuthenticationQuestions(true)
-                setLoadingCustomer(true)
-                const newAuthenticateQuestions = await fetchAuthenticateQuestions({
-                  email,
-                  crn: selectedCustomer.crn
-                })
-                setAuthenticationQuestions(newAuthenticateQuestions.data.customer)
-                setLoadingCustomer(false)
-              }
-            }}
+            onClick=${() => setShowAuthenticationQuestions(!showAuthenticationQuestions)}
           >
             ${showAuthenticationQuestions ? 'Show Permissions' : 'Show Authenticate Questions'}
           </button>
         </div>
 
-        ${showAuthenticationQuestions
-          ? html`<div className=${loadingCustomer ? 'loading' : ''}>
-              <table className="even-columns">
-                <thead>
-                  <tr>
-                    <th>Date of Birth</th>
-                    <th>Memorable Date</th>
-                    <th>Memorable Event</th>
-                    <th>Memorable Place</th>
-                    <th>Updated Date</th>
+        ${!showAuthenticationQuestions &&
+        html`<div>
+          <table className="even-columns clickable">
+            <thead>
+              <tr>
+                <th>Permission</th>
+                <th>Level</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedCustomer?.data?.customer?.business?.permissionGroups.map(
+                (permissionGroup, index) => html`
+                  <tr
+                    key=${permissionGroup.id}
+                    className=${index === selectedPermissionIndex ? 'selected' : ''}
+                    onClick=${() => {
+                      setSelectedPermissionIndex(index)
+                    }}
+                  >
+                    <td><div className="loading-placeholder">${permissionGroup.id}</div></td>
+                    <td><div className="loading-placeholder">${permissionGroup.level}</div></td>
                   </tr>
-                </thead>
-                <tbody>
-                  <td>
-                    <div className="loading-placeholder">
-                      ${authenticationQuestions?.info?.dateOfBirth
-                        ? new Intl.DateTimeFormat('en-GB').format(
-                            new Date(authenticationQuestions.info.dateOfBirth)
-                          )
-                        : ''}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="loading-placeholder">
-                      ${authenticationQuestions?.authenticationQuestions?.memorableDate}
-                    </div>
-                  </td>
+                `
+              )}
+            </tbody>
+          </table>
+          <table className="even-columns">
+            <thead>
+              <tr>
+                <th>Permission Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedCustomer?.data?.customer?.business?.permissionGroups[
+                selectedPermissionIndex
+              ].functions.map(
+                (permissionDescription) => html`
+                  <tr key=${permissionDescription}>
+                    <td><div className="loading-placeholder">${permissionDescription}</div></td>
+                  </tr>
+                `
+              )}
+            </tbody>
+          </table>
+        </div>`}
+        ${showAuthenticationQuestions &&
+        html`<div className=${loadingAuthenticationQuestions ? 'loading' : ''}>
+          <table className="even-columns">
+            <thead>
+              <tr>
+                <th>Date of Birth</th>
+                <th>Memorable Date</th>
+                <th>Memorable Event</th>
+                <th>Memorable Place</th>
+                <th>Updated Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <td>
+                <div className="loading-placeholder">
+                  ${authenticationQuestions?.data?.customer?.info?.dateOfBirth
+                    ? new Intl.DateTimeFormat('en-GB').format(
+                        new Date(authenticationQuestions?.data?.customer?.info?.dateOfBirth)
+                      )
+                    : ''}
+                </div>
+              </td>
+              <td>
+                <div className="loading-placeholder">
+                  ${authenticationQuestions?.data?.customer?.authenticationQuestions?.memorableDate}
+                </div>
+              </td>
 
-                  <td>
-                    <div className="loading-placeholder">
-                      ${authenticationQuestions?.authenticationQuestions?.memorableEvent}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="loading-placeholder">
-                      ${authenticationQuestions?.authenticationQuestions?.memorableLocation}
-                    </div>
-                  </td>
-                  <td>
-                    <div className="loading-placeholder">
-                      ${authenticationQuestions?.authenticationQuestions?.updatedAt
-                        ? new Intl.DateTimeFormat('en-GB', {
-                            dateStyle: 'short',
-                            timeStyle: 'short'
-                          }).format(
-                            new Date(authenticationQuestions.authenticationQuestions.updatedAt)
-                          )
-                        : ''}
-                    </div>
-                  </td>
-                </tbody>
-              </table>
-            </div>`
-          : html`<div>
-              <table className="even-columns clickable">
-                <thead>
-                  <tr>
-                    <th>Permission</th>
-                    <th>Level</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${selectedCustomer.business.permissionGroups.map(
-                    (permissionGroup, index) => html`
-                      <tr
-                        key=${permissionGroup.id}
-                        className=${index === selectedPermissionIndex ? 'selected' : ''}
-                        onClick=${() => {
-                          setSelectedPermissionIndex(index)
-                        }}
-                      >
-                        <td><div className="loading-placeholder">${permissionGroup.id}</div></td>
-                        <td><div className="loading-placeholder">${permissionGroup.level}</div></td>
-                      </tr>
-                    `
-                  )}
-                </tbody>
-              </table>
-              <table className="even-columns">
-                <thead>
-                  <tr>
-                    <th>Permission Description</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${selectedCustomer.business.permissionGroups[
-                    selectedPermissionIndex
-                  ].functions.map(
-                    (permissionDescription) => html`
-                      <tr key=${permissionDescription}>
-                        <td><div className="loading-placeholder">${permissionDescription}</div></td>
-                      </tr>
-                    `
-                  )}
-                </tbody>
-              </table>
-            </div>`}
+              <td>
+                <div className="loading-placeholder">
+                  ${authenticationQuestions?.data?.customer?.authenticationQuestions
+                    ?.memorableEvent}
+                </div>
+              </td>
+              <td>
+                <div className="loading-placeholder">
+                  ${authenticationQuestions?.data?.customer?.authenticationQuestions
+                    ?.memorableLocation}
+                </div>
+              </td>
+              <td>
+                <div className="loading-placeholder">
+                  ${authenticationQuestions?.data?.customer?.authenticationQuestions?.updatedAt
+                    ? new Intl.DateTimeFormat('en-GB', {
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      }).format(
+                        new Date(
+                          authenticationQuestions?.data?.customer?.authenticationQuestions?.updatedAt
+                        )
+                      )
+                    : ''}
+                </div>
+              </td>
+            </tbody>
+          </table>
+        </div>`}
       </div>
     </div>
   `
