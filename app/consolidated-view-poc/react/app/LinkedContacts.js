@@ -2,6 +2,7 @@ import { html } from 'htm/react'
 import { useEffect, useRef, useState } from 'react'
 import { GET_AUTHENTICATE_QUESTIONS, GET_BUSINESS_CUSTOMERS, GET_CUSTOMER } from './queries.js'
 import { useLazyQuery, useQuery } from './useQuery.js'
+import { useSearch } from './useSearch.js'
 
 export function LinkedContacts({ sbi, email, preloaded }) {
   // Load list of business customers
@@ -10,7 +11,21 @@ export function LinkedContacts({ sbi, email, preloaded }) {
     {
       variables: { sbi },
       headers: { email },
-      preloaded: preloaded.businessCustomers
+      preloaded: preloaded.businessCustomers,
+      search: {
+        idField: 'crn',
+        fields: ['firstName', 'lastName', 'crn'],
+        storeFields: ['firstName', 'lastName', 'crn']
+      }
+    }
+  )
+
+  const { search: searchBusinessCustomers, results: businessCustomersSearchResults } = useSearch(
+    businessCustomers?.data?.business?.customers,
+    {
+      idField: 'crn',
+      fields: ['firstName', 'lastName', 'crn'],
+      storeFields: ['firstName', 'lastName', 'crn']
     }
   )
 
@@ -66,7 +81,14 @@ export function LinkedContacts({ sbi, email, preloaded }) {
       <div className="column">
         <div className="search-input">
           <label>Search</label>
-          <input name="search" placeholder="Enter search term" ...${{ autoComplete: 'off' }} />
+          <input
+            name="search"
+            placeholder="Enter search term"
+            ...${{ autoComplete: 'off' }}
+            onChange=${(e) => {
+              searchBusinessCustomers(e.target.value)
+            }}
+          />
         </div>
         <div className="primary-table clickable">
           <table>
@@ -78,7 +100,7 @@ export function LinkedContacts({ sbi, email, preloaded }) {
               </tr>
             </thead>
             <tbody>
-              ${businessCustomers?.data?.business?.customers.map((customer) => {
+              ${businessCustomersSearchResults.map((customer) => {
                 return html`<tr
                   key=${customer.crn}
                   className=${!loadingRightColumn &&

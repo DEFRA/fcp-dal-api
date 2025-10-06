@@ -128,14 +128,6 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           }
         })
 
-        // const miniSearch = new MiniSearch({
-        //   idField: 'crn',
-        //   fields: ['firstName', 'lastName', 'crn'],
-        //   storeFields: ['firstName', 'lastName', 'crn']
-        // })
-
-        // miniSearch.addAll(business.customers)
-
         const props = {
           sbi: request.params.sbi,
           email,

@@ -63,6 +63,8 @@ export async function customFetch(url, options, requestTls) {
   })
 }
 
+export let requestCount = 0
+
 export class RuralPayments extends RESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
@@ -116,6 +118,9 @@ export class RuralPayments extends RESTDataSource {
   }
 
   async willSendRequest(path, request) {
+    requestCount++
+    console.log(JSON.stringify({ requestCount, url: path }))
+
     const headers = this.request.headers
     const additionalHeaders = {}
     if (this.gatewayType === 'internal' && headers.email) {
