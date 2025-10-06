@@ -4,7 +4,7 @@ The Data Access Layer (DAL) for the Farming and Countryside Programme (FCP) - a 
 
 ## Consumers' TL;DR
 
-This README was created for project contributors, as a consumer of the DAL API, you probably only care about the following quick start steps:
+This README was created for project contributors; as a potential consumer of the DAL API, you probably only care about the following quick start steps:
 
 ```bash
 curl https://raw.githubusercontent.com/DEFRA/fcp-dal-api/refs/heads/main/compose.yml -o dal-api-compose.yml
@@ -13,11 +13,12 @@ docker compose -f dal-api-compose.yml up
 
 The graphQL explorer should now be available, head to http://localhost:3000/graphql in your browser, and have a play!
 
-> NOTE: There are currently only 2 businesses in the mock, their SBIs are: `107183280` & `107591843`.
-> For composite queries (where a business and a customer reference are required), the CRNs `9477368292` & `0866159801` exist in both businesses.
+> NOTE: the IDs of the available customers and businesses can be found in the [mock code](https://github.com/DEFRA/fcp-dal-upstream-mock/blob/main/src/factories/id-lookups.js), along with their corresponding CRN or SBI (respectively), as well as the relationships between entities.
 
 > NOTE: The above is a simplified setup that is intended to aid consumer development.
 > For access to the live instances, [schema availability](#the-on-directive) and [authorisation](#security) would need to be carefully considered.
+
+More consumer focused documentation can be found on the project [Homepage...](https://defra.github.io/fcp-dal-api/homepage)
 
 ## Requirements
 
