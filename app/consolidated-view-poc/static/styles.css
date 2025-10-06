@@ -52,10 +52,6 @@ table.even-columns {
   table-layout: fixed;
 }
 
-table.even-columns td {
-  padding: 0.75rem;
-}
-
 th {
   background-color: #009e43;
   color: #fff;
@@ -86,12 +82,17 @@ tr.selected {
   top: 0;
 }
 
-.primary-table td a {
+td a {
   width: 100%;
   display: block;
   padding: -0.75rem;
   text-decoration: none;
   color: inherit;
+  padding: 0.75rem;
+}
+
+td.link {
+  padding: 0;
 }
 
 td {

@@ -1,63 +1,7 @@
 import { html } from 'htm/react'
 import { useEffect, useRef, useState } from 'react'
+import { GET_AUTHENTICATE_QUESTIONS, GET_BUSINESS_CUSTOMERS, GET_CUSTOMER } from './queries.js'
 import { useLazyQuery, useQuery } from './useQuery.js'
-
-const GET_BUSINESS_CUSTOMERS = `#graphql
-  query BusinessCustomers($sbi: ID!) {
-    business(sbi: $sbi) {
-      sbi
-      customers {
-        firstName
-        lastName
-        crn
-        role
-      }
-    }
-  }
-`
-
-const GET_CUSTOMER = `#graphql
-  query Customer($crn: ID!, $sbi: ID!) {
-    customer(crn: $crn) {
-      crn
-      info {
-        name {
-          title
-          otherTitle
-          first
-          middle
-          last
-        }
-      }
-      business(sbi: $sbi) {
-        permissionGroups {
-          id
-          level
-          functions
-        }
-        role
-      }
-    }
-  }
-`
-
-const GET_AUTHENTICATE_QUESTIONS = `#graphql
-  query AuthenticationQuestions($crn: ID!) {
-    customer(crn: $crn) {
-      crn
-      info {
-        dateOfBirth
-      }
-      authenticationQuestions {
-        isFound
-        memorableDate
-        memorableLocation
-        memorableEvent
-        updatedAt
-      }
-    }
-  }
-`
 
 export function LinkedContacts({ sbi, email, preloaded }) {
   // Load list of business customers
@@ -152,6 +96,7 @@ export function LinkedContacts({ sbi, email, preloaded }) {
           </table>
         </div>
       </div>
+
       <div className="divider"></div>
 
       <div
@@ -246,9 +191,9 @@ export function LinkedContacts({ sbi, email, preloaded }) {
             <tbody>
               <td>
                 <div className="loading-placeholder">
-                  ${authenticationQuestions?.data?.customer?.info?.dateOfBirth
+                  ${selectedCustomer?.data?.customer?.info?.dateOfBirth
                     ? new Intl.DateTimeFormat('en-GB').format(
-                        new Date(authenticationQuestions?.data?.customer?.info?.dateOfBirth)
+                        new Date(selectedCustomer?.data?.customer?.info?.dateOfBirth)
                       )
                     : ''}
                 </div>

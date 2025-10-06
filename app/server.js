@@ -2,6 +2,7 @@ import hapi from '@hapi/hapi'
 import Vision from '@hapi/vision'
 import { Unit } from 'aws-embedded-metrics'
 import NunjucksHapi from 'nunjucks-hapi'
+
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { v4 as uuidv4 } from 'uuid'

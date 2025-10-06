@@ -1,6 +1,12 @@
 import { graphql } from 'graphql'
+import MiniSearch from 'minisearch'
 import { context } from '../../graphql/context.js'
 import { schema } from '../../graphql/server.js'
+import {
+  GET_AUTHENTICATE_QUESTIONS,
+  GET_BUSINESS_CUSTOMERS,
+  GET_CUSTOMER
+} from '../react/app/queries.js'
 
 export const consolidatedViewRoutes = (staticPath) => [
   {
@@ -29,28 +35,24 @@ export const consolidatedViewRoutes = (staticPath) => [
     method: 'GET',
     path: '/consolidated-view/linked-contacts/{sbi}',
     handler: async (request, h) => {
+      const email = request.query.email
+      if (!email) {
+        return h
+          .response({
+            error: 'Bad Request',
+            message: 'Email not provided'
+          })
+          .code(400)
+      }
+
       // Get list of customer businesses
       const listResult = await graphql({
-        source: `#graphql
-          query LinkedContactsPage($sbi: ID!) {
-            business(sbi: $sbi) {
-              sbi
-              customers {
-                personId
-                firstName
-                lastName
-                crn
-                role
-              }
-            }
-          }
-        `,
+        source: GET_BUSINESS_CUSTOMERS,
         schema,
         contextValue: await context({
           request: {
             headers: {
-              email: 'test@defra.gov.uk',
-              'gateway-type': 'internal'
+              email
             }
           }
         }),
@@ -59,56 +61,64 @@ export const consolidatedViewRoutes = (staticPath) => [
 
       // Get first customer from the list
       const selectedResult = await graphql({
-        source: `#graphql
-          query LinkedCustomerPermissions($sbi: ID!, $crn: ID!) {
-            business(sbi: $sbi) {
-              customer(crn: $crn) {
-                role
-                permissionGroups {
-                  id
-                  level
-                  functions
-                }
-              }
-            }
-            customer(crn: $crn) {
-              crn
-              info {
-                name {
-                  title
-                  first
-                  middle
-                  last
-                }
-                dateOfBirth
-              }
-            }
-          }
-        `,
+        source: GET_CUSTOMER,
         schema,
         contextValue: await context({
           request: {
             headers: {
-              email: 'test@defra.gov.uk',
-              'gateway-type': 'internal'
+              email
             }
           }
         }),
         variableValues: {
           sbi: request.params.sbi,
-          crn: listResult.data.business.customers[0].crn
+          crn: request.query.selectedCrn || listResult.data.business.customers[0].crn
         }
       })
 
-      console.log(JSON.stringify(listResult))
-      console.log(JSON.stringify(selectedResult))
+      let businessCustomers = listResult.data.business.customers
+      if (request.query.search) {
+        const miniSearch = new MiniSearch({
+          idField: 'crn',
+          fields: ['firstName', 'lastName', 'crn'],
+          storeFields: ['firstName', 'lastName', 'crn']
+        })
+
+        miniSearch.addAll(businessCustomers)
+        const results = miniSearch.search(request.query.search, { prefix: true })
+
+        if (results.length) {
+          businessCustomers = results
+        }
+      }
+
+      // Authenticate questions view
+      let authenticationQuestions = null
+      if (request.query.showAuthentication) {
+        authenticationQuestions = await graphql({
+          source: GET_AUTHENTICATE_QUESTIONS,
+          schema,
+          contextValue: await context({
+            request: {
+              headers: {
+                email
+              }
+            }
+          }),
+          variableValues: { sbi: request.params.sbi, crn: request.query.selectedCrn }
+        })
+      }
 
       return h.view('linked-contacts', {
-        title: 'Linked Contacts',
-        listResult,
+        businessCustomers,
+        email,
+        search: request.query.search || '',
+        selectedCrn: request.query.selectedCrn || listResult.data.business.customers[0].crn,
         selectedResult,
-        searchValue: request.query.search || '',
-        selectedCrn: listResult.data.business.customers[0].crn
+        showAuthentication: request.query.showAuthentication,
+        title: 'Linked Contacts',
+        authenticationQuestions,
+        selectedPermissionIndex: request.query.selectedPermissionIndex
       })
     }
   },
