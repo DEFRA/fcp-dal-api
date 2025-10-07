@@ -1,6 +1,6 @@
 services:
   mongodb:
-    image: mongo:6.0.13
+    image: mongo:4.4.29
     networks:
       - cdp-tenant
     ports:
@@ -32,9 +32,9 @@ services:
       NODE_ENV: development
       PORT: 3000
       ENVIRONMENT: dev
-      DISABLE_AUTH: 'true'
-      DISABLE_PROXY: 'true'
-      GRAPHQL_DASHBOARD_ENABLED: 'true'
+      DISABLE_AUTH: true
+      DISABLE_PROXY: true
+      GRAPHQL_DASHBOARD_ENABLED: true
       ADMIN_AD_GROUP_ID: unused
       KITS_INT_GATEWAY_URL: http://kits-mock:3100/extapi/
       KITS_EXT_GATEWAY_URL: http://kits-mock:3100/extapi/
@@ -42,6 +42,7 @@ services:
       KITS_DISABLE_MTLS: true
       DAL_REQUEST_TIMEOUT_MS: 3000
       KIT_EXT_PERSON_ID_OVERRIDE: 3337243
+      MONGO_URI: mongodb://mongodb:27017
       MONGO_DATABASE: 'fcp-dal'
     networks:
       - cdp-tenant
