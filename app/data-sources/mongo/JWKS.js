@@ -1,7 +1,7 @@
 import { MongoDataSource } from 'apollo-datasource-mongodb'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwksClient from 'jwks-rsa'
-import { config } from '../../config'
+import { config } from '../../config.js'
 
 export class MongoJWKS extends MongoDataSource {
   async retrievePublicKeyByKid(kid) {
