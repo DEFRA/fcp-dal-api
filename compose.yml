@@ -22,7 +22,6 @@ services:
       - cdp-tenant
 
   fcp-dal-api:
-    image: defradigital/fcp-dal-api
     build:
       context: .
     ports:
@@ -33,9 +32,9 @@ services:
       NODE_ENV: development
       PORT: 3000
       ENVIRONMENT: dev
-      DISABLE_AUTH: true
-      DISABLE_PROXY: true
-      GRAPHQL_DASHBOARD_ENABLED: true
+      DISABLE_AUTH: 'true'
+      DISABLE_PROXY: 'true'
+      GRAPHQL_DASHBOARD_ENABLED: 'true'
       ADMIN_AD_GROUP_ID: unused
       KITS_INT_GATEWAY_URL: http://kits-mock:3100/extapi/
       KITS_EXT_GATEWAY_URL: http://kits-mock:3100/extapi/
