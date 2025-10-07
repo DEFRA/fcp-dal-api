@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
@@ -180,7 +181,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
       return response
     } catch (error) {
-      if (error?.extensions?.http?.status === 500) {
+      if (error?.extensions?.http?.status === StatusCodes.INTERNAL_SERVER_ERROR) {
         const organisation = await this.getOrganisationById(organisationId)
         if (organisation.locked) {
           throw new Error('Business is already locked')
@@ -202,7 +203,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
       return response
     } catch (error) {
-      if (error?.extensions?.http?.status === 500) {
+      if (error?.extensions?.http?.status === StatusCodes.INTERNAL_SERVER_ERROR) {
         const organisation = await this.getOrganisationById(organisationId)
         if (!organisation.locked) {
           throw new Error('Business is already unlocked')
