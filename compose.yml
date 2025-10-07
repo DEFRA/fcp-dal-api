@@ -6,7 +6,7 @@ services:
     ports:
       - '27017:27017'
     volumes:
-      - mongodb-data:/data
+      - mongodb-data:/data/db
     restart: always
 
   kits-mock:
@@ -43,7 +43,8 @@ services:
       KITS_DISABLE_MTLS: true
       DAL_REQUEST_TIMEOUT_MS: 3000
       KIT_EXT_PERSON_ID_OVERRIDE: 3337243
-
+      MONGO_URL: 'localhost:27017'
+      MONGO_DATABASE: 'fcp-dal'
     networks:
       - cdp-tenant
 
@@ -53,3 +54,6 @@ networks:
   cdp-tenant:
     driver: bridge
     name: cdp-tenant
+
+volumes:
+  mongodb-data:
