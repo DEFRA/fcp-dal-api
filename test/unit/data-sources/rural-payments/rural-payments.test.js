@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken'
 import {
   RuralPayments,
   extractCrnFromDefraIdToken
-} from '../../../app/data-sources/rural-payments/RuralPayments.js'
-import { BadRequest, HttpError } from '../../../app/errors/graphql.js'
-import { RURALPAYMENTS_API_REQUEST_001 } from '../../../app/logger/codes.js'
+} from '../../../../app/data-sources/rural-payments/RuralPayments.js'
+import { BadRequest, HttpError } from '../../../../app/errors/graphql.js'
+import { RURALPAYMENTS_API_REQUEST_001 } from '../../../../app/logger/codes.js'
 
 const logger = {
   error: jest.fn(),

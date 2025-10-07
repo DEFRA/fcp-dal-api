@@ -1,64 +1,84 @@
-// describe('getJwtPublicKey', () => {
-//   const { publicKey, privateKey } = generateKeyPairSync('rsa', {
-//     modulusLength: 2048
-//   })
+import { beforeAll, jest } from '@jest/globals'
+import { generateKeyPairSync } from 'crypto'
+import jwt from 'jsonwebtoken'
+import { MongoClient } from 'mongodb'
+import nock from 'nock'
+import { config } from '../../../../app/config.js'
 
-//   beforeAll(() => {
-//     nock.disableNetConnect()
-//   })
+const mockHttpsProxyAgent = jest.fn()
+const mockProxyAgentModule = {
+  HttpsProxyAgent: mockHttpsProxyAgent
+}
+jest.unstable_mockModule('https-proxy-agent', () => mockProxyAgentModule)
 
-//   beforeEach(() => {
-//     nock(config.get('oidc.jwksURI'))
-//       .get('/')
-//       .reply(200, {
-//         keys: [
-//           {
-//             kty: 'RSA',
-//             kid: 'mock-key-id-123',
-//             alg: 'RS256',
-//             use: 'sig',
-//             n: publicKey.export({ format: 'jwk' }).n,
-//             e: publicKey.export({ format: 'jwk' }).e
-//           }
-//         ]
-//       })
-//   })
+const client = new MongoClient(config.get('mongo.mongoUrl'))
+client.connect()
+const db = client.db(config.get('mongo.databaseName'))
+const { MongoJWKS } = await import('../../../../app/data-sources/mongo/JWKS.js')
 
-//   afterAll(() => {
-//     nock.cleanAll()
-//     nock.enableNetConnect()
-//   })
+describe('getJwtPublicKey', () => {
+  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+    modulusLength: 2048
+  })
 
-//   it('should return the public key and proxy called', async () => {
-//     const { getJwtPublicKey } = await import('../../../app/auth/authenticate.js')
-//     const mockTokenPayload = {
-//       iat: Math.floor(Date.now() / 1000)
-//     }
+  beforeAll(() => {
+    nock.disableNetConnect()
+  })
 
-//     const mockToken = jwt.sign(mockTokenPayload, privateKey, {
-//       algorithm: 'RS256'
-//     })
+  beforeEach(() => {
+    nock(config.get('oidc.jwksURI'))
+      .get('/')
+      .reply(200, {
+        keys: [
+          {
+            kty: 'RSA',
+            kid: 'mock-key-id-123',
+            alg: 'RS256',
+            use: 'sig',
+            n: publicKey.export({ format: 'jwk' }).n,
+            e: publicKey.export({ format: 'jwk' }).e
+          }
+        ]
+      })
+  })
 
-//     expect(jwt.verify(mockToken, await getJwtPublicKey('mock-key-id-123'))).toEqual(
-//       mockTokenPayload
-//     )
-//     expect(mockHttpsProxyAgent).toHaveBeenCalledWith(config.get('cdp.httpsProxy'))
-//   })
+  afterAll(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
 
-//   it('should return the public key without proxy', async () => {
-//     config.set('disableProxy', true)
-//     const { getJwtPublicKey } = await import('../../../app/auth/authenticate.js')
-//     const mockTokenPayload = {
-//       iat: Math.floor(Date.now() / 1000)
-//     }
+  it('should return the public key and proxy called', async () => {
+    const JWKS = new MongoJWKS({ modelOrCollection: db.collection('jwks') })
 
-//     const mockToken = jwt.sign(mockTokenPayload, privateKey, {
-//       algorithm: 'RS256'
-//     })
+    const mockTokenPayload = {
+      iat: Math.floor(Date.now() / 1000)
+    }
 
-//     expect(jwt.verify(mockToken, await getJwtPublicKey('mock-key-id-123'))).toEqual(
-//       mockTokenPayload
-//     )
-//     expect(mockHttpsProxyAgent).not.toHaveBeenCalled()
-//   })
-// })
+    const mockToken = jwt.sign(mockTokenPayload, privateKey, {
+      algorithm: 'RS256'
+    })
+
+    expect(jwt.verify(mockToken, await JWKS.getPublicKey('mock-key-id-123'))).toEqual(
+      mockTokenPayload
+    )
+    expect(mockHttpsProxyAgent).toHaveBeenCalledWith(config.get('cdp.httpsProxy'))
+  })
+
+  it('should return the public key without proxy', async () => {
+    const JWKS = new MongoJWKS({ modelOrCollection: db.collection('jwks') })
+
+    config.set('disableProxy', true)
+    const mockTokenPayload = {
+      iat: Math.floor(Date.now() / 1000)
+    }
+
+    const mockToken = jwt.sign(mockTokenPayload, privateKey, {
+      algorithm: 'RS256'
+    })
+
+    expect(jwt.verify(mockToken, await JWKS.getPublicKey('mock-key-id-123'))).toEqual(
+      mockTokenPayload
+    )
+    expect(mockHttpsProxyAgent).not.toHaveBeenCalled()
+  })
+})

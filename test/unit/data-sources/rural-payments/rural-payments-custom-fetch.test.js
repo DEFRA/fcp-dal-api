@@ -1,5 +1,5 @@
 import { describe, expect, jest } from '@jest/globals'
-import { config } from '../../../app/config.js'
+import { config } from '../../../../app/config.js'
 
 const fakeCert = 'KITS_CONNECTION_CERT'
 const fakeKey = 'KITS_CONNECTION_KEY'
@@ -55,7 +55,7 @@ describe('RuralPayments Custom Fetch', () => {
     mockFetch.mockImplementation((...args) => args)
 
     const { customFetch } = await import(
-      '../../../app/data-sources/rural-payments/RuralPayments.js'
+      '../../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
     const requestTls = {
@@ -112,7 +112,7 @@ describe('RuralPayments Custom Fetch', () => {
     config.set('kits.disableMTLS', true)
 
     const { customFetch } = await import(
-      '../../../app/data-sources/rural-payments/RuralPayments.js'
+      '../../../../app/data-sources/rural-payments/RuralPayments.js'
     )
 
     const requestTls = {
