@@ -21,7 +21,7 @@ export function LinkedContacts({ sbi, email, preloaded }) {
   )
 
   const { search: searchBusinessCustomers, results: businessCustomersSearchResults } = useSearch(
-    businessCustomers?.data?.business?.customers,
+    businessCustomers?.business?.customers,
     {
       idField: 'crn',
       fields: ['firstName', 'lastName', 'crn'],
@@ -40,8 +40,8 @@ export function LinkedContacts({ sbi, email, preloaded }) {
 
   // Execute `getCustomer` to get first customer in list
   useEffect(() => {
-    if (businessCustomers?.data?.business?.customers[0].crn) {
-      getCustomer({ crn: businessCustomers?.data?.business?.customers[0].crn, sbi })
+    if (businessCustomers?.business?.customers[0].crn) {
+      getCustomer({ crn: businessCustomers?.business?.customers[0].crn, sbi })
     }
   }, [businessCustomers])
 
@@ -59,9 +59,9 @@ export function LinkedContacts({ sbi, email, preloaded }) {
     if (
       (showAuthenticationQuestions && !authenticationQuestions) ||
       (showAuthenticationQuestions &&
-        authenticationQuestions?.data?.customer?.crn !== selectedCustomer?.data?.customer?.crn)
+        authenticationQuestions?.customer?.crn !== selectedCustomer?.customer?.crn)
     ) {
-      getAuthenticationQuestions({ crn: selectedCustomer?.data?.customer?.crn })
+      getAuthenticationQuestions({ crn: selectedCustomer?.customer?.crn })
     }
   }, [showAuthenticationQuestions])
 
@@ -90,7 +90,7 @@ export function LinkedContacts({ sbi, email, preloaded }) {
             }}
           />
         </div>
-        <div className="primary-table clickable">
+        <div className="primary-table">
           <table>
             <thead>
               <tr>
@@ -99,51 +99,87 @@ export function LinkedContacts({ sbi, email, preloaded }) {
                 <th>Last Name</th>
               </tr>
             </thead>
-            <tbody>
-              ${businessCustomersSearchResults.map((customer) => {
-                return html`<tr
-                  key=${customer.crn}
-                  className=${!loadingRightColumn &&
-                  customer.crn === selectedCustomer?.data?.customer?.crn
-                    ? 'selected'
-                    : ''}
-                  onClick=${() => getCustomer({ crn: customer.crn, sbi })}
-                >
-                  <td>${customer.crn}</td>
-                  <td>${customer.firstName}</td>
-                  <td>${customer.lastName}</td>
-                </tr>`
-              })}
-            </tbody>
+            ${businessCustomersSearchResults.length
+              ? html`<tbody className="clickable">
+                  ${businessCustomersSearchResults.map((customer) => {
+                    return html`<tr
+                      key=${customer.crn}
+                      className=${!loadingRightColumn &&
+                      customer.crn === selectedCustomer?.customer?.crn
+                        ? 'selected'
+                        : ''}
+                      onClick=${() => getCustomer({ crn: customer.crn, sbi })}
+                    >
+                      <td>${customer.crn}</td>
+                      <td>${customer.firstName}</td>
+                      <td>${customer.lastName}</td>
+                    </tr>`
+                  })}
+                </tbody>`
+              : html`<tbody>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXXXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXXXXXXXX</div></td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                  </tr>
+                </tbody>`}
           </table>
         </div>
       </div>
 
       <div className="divider"></div>
 
-      <div
-        ref=${rightColumnRef}
-        className=${loadingRightColumn ? 'column right-column loading' : 'column right-column'}
-      >
-        <h1>
-          <div className="loading-placeholder">
-            ${`${selectedCustomer?.data?.customer?.info?.name?.first} ${selectedCustomer?.data?.customer?.info?.name?.last}`}
-          </div>
-        </h1>
+      <div ref=${rightColumnRef} className="column right-column">
+        ${!loadingRightColumn
+          ? html`<h1>
+              <div>
+                ${`${selectedCustomer?.customer?.info?.name?.first} ${selectedCustomer?.customer?.info?.name?.last}`}
+              </div>
+            </h1>`
+          : html`<h1>
+              <div className="loading-placeholder">XXXXX XXXXXXXXX</div>
+            </h1>`}
 
         <div className="right-column-details-header">
-          <dl>
-            <dt>CRN:</dt>
-            <dd className="loading-placeholder">${selectedCustomer?.data?.customer?.crn}</dd>
-            <dt>Full Name:</dt>
-            <dd className="loading-placeholder">
-              ${`${selectedCustomer?.data?.customer?.info?.name?.title} ${selectedCustomer?.data?.customer?.info?.name?.first} ${selectedCustomer?.data?.customer?.info?.name?.middle} ${selectedCustomer?.data?.customer?.info?.name?.last}`}
-            </dd>
-            <dt>Role:</dt>
-            <dd className="loading-placeholder">
-              ${selectedCustomer?.data?.customer?.business?.role}
-            </dd>
-          </dl>
+          ${!loadingRightColumn
+            ? html`<dl>
+                <dt>CRN:</dt>
+                <dd>${selectedCustomer?.customer?.crn}</dd>
+                <dt>Full Name:</dt>
+                <dd>
+                  ${`${selectedCustomer?.customer?.info?.name?.title} ${selectedCustomer?.customer?.info?.name?.first} ${selectedCustomer?.customer?.info?.name?.middle} ${selectedCustomer?.customer?.info?.name?.last}`}
+                </dd>
+                <dt>Role:</dt>
+                <dd>${selectedCustomer?.customer?.business?.role}</dd>
+              </dl>`
+            : html`<dl>
+                <dt>CRN:</dt>
+                <dd className="loading-placeholder">XXXXXXXXX</dd>
+                <dt>Full Name:</dt>
+                <dd className="loading-placeholder">XXXXXXXXXXXXXXXXX</dd>
+                <dt>Role:</dt>
+                <dd className="loading-placeholder">XXXXXXXX</dd>
+              </dl>`}
 
           <button
             className="link-button"
@@ -155,29 +191,76 @@ export function LinkedContacts({ sbi, email, preloaded }) {
 
         ${!showAuthenticationQuestions &&
         html`<div>
-          <table className="even-columns clickable">
+          <table className="even-columns">
             <thead>
               <tr>
                 <th>Permission</th>
                 <th>Level</th>
               </tr>
             </thead>
-            <tbody>
-              ${selectedCustomer?.data?.customer?.business?.permissionGroups.map(
-                (permissionGroup, index) => html`
-                  <tr
-                    key=${permissionGroup.id}
-                    className=${index === selectedPermissionIndex ? 'selected' : ''}
-                    onClick=${() => {
-                      setSelectedPermissionIndex(index)
-                    }}
-                  >
-                    <td><div className="loading-placeholder">${permissionGroup.id}</div></td>
-                    <td><div className="loading-placeholder">${permissionGroup.level}</div></td>
+            ${!loadingRightColumn
+              ? html`<tbody className="clickable">
+                  ${selectedCustomer?.customer?.business?.permissionGroups.map(
+                    (permissionGroup, index) => html`
+                      <tr
+                        key=${permissionGroup.id}
+                        className=${index === selectedPermissionIndex ? 'selected' : ''}
+                        onClick=${() => {
+                          setSelectedPermissionIndex(index)
+                        }}
+                      >
+                        <td>${permissionGroup.id}</td>
+                        <td>${permissionGroup.level}</td>
+                      </tr>
+                    `
+                  )}
+                </tbody>`
+              : html`<tbody>
+                  <tr>
+                    <td>
+                      <div className="loading-placeholder">BASIC_PAYMENT_SCHEME</div>
+                    </td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
                   </tr>
-                `
-              )}
-            </tbody>
+                  <tr>
+                    <td>
+                      <div className="loading-placeholder">BUSINESS_DETAILS</div>
+                    </td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="loading-placeholder">COUNTRYSIDE_STEWARDSHIP_AGREEMENTS</div>
+                    </td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="loading-placeholder">
+                        COUNTRYSIDE_STEWARDSHIP_APPLICATIONS
+                      </div>
+                    </td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="loading-placeholder">ENTITLEMENTS</div>
+                    </td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div className="loading-placeholder">
+                        ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS
+                      </div>
+                    </td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td><div className="loading-placeholder">LAND_DETAILS</div></td>
+                    <td><div className="loading-placeholder">XXXXXX</div></td>
+                  </tr>
+                </tbody>`}
           </table>
           <table className="even-columns">
             <thead>
@@ -185,21 +268,33 @@ export function LinkedContacts({ sbi, email, preloaded }) {
                 <th>Permission Description</th>
               </tr>
             </thead>
-            <tbody>
-              ${selectedCustomer?.data?.customer?.business?.permissionGroups[
-                selectedPermissionIndex
-              ].functions.map(
-                (permissionDescription) => html`
-                  <tr key=${permissionDescription}>
-                    <td><div className="loading-placeholder">${permissionDescription}</div></td>
+            ${!loadingRightColumn
+              ? html`<tbody>
+                  ${selectedCustomer?.customer?.business?.permissionGroups[
+                    selectedPermissionIndex
+                  ].functions.map(
+                    (permissionDescription) => html`
+                      <tr key=${permissionDescription}>
+                        <td><div>${permissionDescription}</div></td>
+                      </tr>
+                    `
+                  )}
+                </tbody>`
+              : html`<tbody>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXXXXXXX</div></td>
                   </tr>
-                `
-              )}
-            </tbody>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXXXX</div></td>
+                  </tr>
+                  <tr>
+                    <td><div className="loading-placeholder">XXXXXXXXXXXXXXXXXXXXXXX</div></td>
+                  </tr>
+                </tbody>`}
           </table>
         </div>`}
         ${showAuthenticationQuestions &&
-        html`<div className=${loadingAuthenticationQuestions ? 'loading' : ''}>
+        html`<div>
           <table className="even-columns">
             <thead>
               <tr>
@@ -210,49 +305,66 @@ export function LinkedContacts({ sbi, email, preloaded }) {
                 <th>Updated Date</th>
               </tr>
             </thead>
-            <tbody>
-              <td>
-                <div className="loading-placeholder">
-                  ${selectedCustomer?.data?.customer?.info?.dateOfBirth
-                    ? new Intl.DateTimeFormat('en-GB').format(
-                        new Date(selectedCustomer?.data?.customer?.info?.dateOfBirth)
-                      )
-                    : ''}
-                </div>
-              </td>
-              <td>
-                <div className="loading-placeholder">
-                  ${authenticationQuestions?.data?.customer?.authenticationQuestions?.memorableDate}
-                </div>
-              </td>
+            ${!loadingAuthenticationQuestions
+              ? html`<tbody>
+                  <td>
+                    <div>
+                      ${selectedCustomer?.customer?.info?.dateOfBirth
+                        ? new Intl.DateTimeFormat('en-GB').format(
+                            new Date(selectedCustomer?.customer?.info?.dateOfBirth)
+                          )
+                        : ''}
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      ${authenticationQuestions?.customer?.authenticationQuestions?.memorableDate}
+                    </div>
+                  </td>
 
-              <td>
-                <div className="loading-placeholder">
-                  ${authenticationQuestions?.data?.customer?.authenticationQuestions
-                    ?.memorableEvent}
-                </div>
-              </td>
-              <td>
-                <div className="loading-placeholder">
-                  ${authenticationQuestions?.data?.customer?.authenticationQuestions
-                    ?.memorableLocation}
-                </div>
-              </td>
-              <td>
-                <div className="loading-placeholder">
-                  ${authenticationQuestions?.data?.customer?.authenticationQuestions?.updatedAt
-                    ? new Intl.DateTimeFormat('en-GB', {
-                        dateStyle: 'short',
-                        timeStyle: 'short'
-                      }).format(
-                        new Date(
-                          authenticationQuestions?.data?.customer?.authenticationQuestions?.updatedAt
-                        )
-                      )
-                    : ''}
-                </div>
-              </td>
-            </tbody>
+                  <td>
+                    <div>
+                      ${authenticationQuestions?.customer?.authenticationQuestions?.memorableEvent}
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      ${authenticationQuestions?.customer?.authenticationQuestions
+                        ?.memorableLocation}
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      ${authenticationQuestions?.customer?.authenticationQuestions?.updatedAt
+                        ? new Intl.DateTimeFormat('en-GB', {
+                            dateStyle: 'short',
+                            timeStyle: 'short'
+                          }).format(
+                            new Date(
+                              authenticationQuestions?.customer?.authenticationQuestions?.updatedAt
+                            )
+                          )
+                        : ''}
+                    </div>
+                  </td>
+                </tbody>`
+              : html`<tbody>
+                  <td>
+                    <div className="loading-placeholder">XXXXXXXXXX</div>
+                  </td>
+                  <td>
+                    <div className="loading-placeholder">XXXXXXXXXX</div>
+                  </td>
+                  <td>
+                    <div className="loading-placeholder">XXXXXXXXXX</div>
+                  </td>
+                  <td>
+                    <div className="loading-placeholder">XXXXXXXXXXXX</div>
+                  </td>
+                  <td>
+                    <div className="loading-placeholder">XXXXXXXXXX</div>
+                  </td>
+                </tbody> `}
           </table>
         </div>`}
       </div>

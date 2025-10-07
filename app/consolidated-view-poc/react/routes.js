@@ -132,8 +132,8 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           sbi: request.params.sbi,
           email,
           preloaded: {
-            businessCustomers,
-            selectedCustomer
+            businessCustomers: businessCustomers.data,
+            selectedCustomer: selectedCustomer.data
           }
         }
 

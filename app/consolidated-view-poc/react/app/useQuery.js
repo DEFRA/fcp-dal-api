@@ -21,7 +21,7 @@ export function useLazyQuery(query, { headers, preloaded = null }) {
         })
       })
         .then((response) => response.json())
-        .then((data) => {
+        .then(({ data }) => {
           setData(data)
           setLoading(false)
         })

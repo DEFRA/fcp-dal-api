@@ -99,7 +99,7 @@ td {
   padding: 0.75rem;
 }
 
-.clickable tbody tr:hover {
+.clickable tr:hover {
   background-color: #b3e2c7;
   cursor: pointer;
 }
@@ -201,7 +201,7 @@ button.link-button:disabled:hover {
   color: #b0b0b0;
 }
 
-.loading .loading-placeholder {
+.loading-placeholder {
   min-width: 10%;
   min-height: 1.2rem;
   width: max-content;
@@ -212,7 +212,7 @@ button.link-button:disabled:hover {
   color: transparent;
 }
 
-.loading .loading-placeholder::before {
+.loading-placeholder::before {
   content: '';
   position: absolute;
   top: 0;
