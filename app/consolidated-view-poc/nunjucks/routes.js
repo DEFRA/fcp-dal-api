@@ -122,7 +122,8 @@ export const consolidatedViewRoutes = (staticPath) => [
         showAuthentication: request.query.showAuthentication,
         title: 'Linked Contacts',
         authenticationQuestions,
-        selectedPermissionIndex: request.query.selectedPermissionIndex
+        selectedPermissionIndex: request.query.selectedPermissionIndex,
+        token
       })
     }
   },

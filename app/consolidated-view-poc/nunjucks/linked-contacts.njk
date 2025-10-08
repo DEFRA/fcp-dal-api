@@ -7,7 +7,7 @@
 {% block content %}
   <div class="container">
     <div class="column">
-      <form class="search-input" action="?email={{email}}&selectedCrn={{ customer.crn }}">
+      <form class="search-input" action="?token={{token}}&selectedCrn={{ customer.crn }}">
         <label>Search</label>
         <input name="search" autocomplete="off" value="{{search}}" placeholder="Enter search term"/>
         <input name="email" value="{{email}}" type="hidden"/>
@@ -28,13 +28,13 @@
             {% for customer in businessCustomers %}
               <tr class="{% if customer.crn === selectedCrn %}selected{% endif %}">
                 <td class="link">
-                  <a href="?email={{email}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.crn }}</a>
+                  <a href="?token={{token}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.crn }}</a>
                 </td>
                 <td class="link">
-                  <a href="?email={{email}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.firstName }}</a>
+                  <a href="?token={{token}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.firstName }}</a>
                 </td>
                 <td class="link">
-                  <a href="?email={{email}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.lastName }}</a>
+                  <a href="?token={{token}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.lastName }}</a>
                 </td>
               </tr>
             {% else %}
@@ -66,9 +66,9 @@
           <dd>{{selectedResult.data.customer.business.role}}</dd>
         </dl>
         {% if showAuthentication %}
-          <a href="?email={{email}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex=0">Show Permissions</a>
+          <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex=0">Show Permissions</a>
         {% else %}
-          <a href="?email={{email}}&selectedCrn={{ selectedCrn }}&showAuthentication=true&search={{ search }}&selectedPermissionIndex=0">Show Authenticate Questions</a>
+          <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&showAuthentication=true&search={{ search }}&selectedPermissionIndex=0">Show Authenticate Questions</a>
         {% endif %}
       </div>
 
@@ -114,12 +114,12 @@
             {% for permissionGroup in selectedResult.data.customer.business.permissionGroups %}
               <tr>
                 <td class="link">
-                  <a href="?email={{email}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex={{loop.index0}}">
+                  <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex={{loop.index0}}">
                     {{ permissionGroup.id }}
                   </a>
                 </td>
                 <td class="link">
-                  <a href="?email={{email}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex={{loop.index0}}">{{ permissionGroup.level }}</a>
+                  <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex={{loop.index0}}">{{ permissionGroup.level }}</a>
                 </td>
               </tr>
             {% else %}
