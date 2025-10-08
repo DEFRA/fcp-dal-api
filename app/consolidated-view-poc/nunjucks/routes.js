@@ -7,6 +7,7 @@ import {
   GET_BUSINESS_CUSTOMERS,
   GET_CUSTOMER
 } from '../react/app/queries.js'
+import { validateAzureADToken } from '../validateToken.js'
 
 export const consolidatedViewRoutes = (staticPath) => [
   {
@@ -35,15 +36,18 @@ export const consolidatedViewRoutes = (staticPath) => [
     method: 'GET',
     path: '/consolidated-view/linked-contacts/{sbi}',
     handler: async (request, h) => {
-      const email = request.query.email
-      if (!email) {
-        return h
-          .response({
-            error: 'Bad Request',
-            message: 'Email not provided'
-          })
-          .code(400)
+      const token = request.query.token
+      if (!token) {
+        return h.response().code(403)
       }
+
+      try {
+        const user = await validateAzureADToken(token)
+        console.log(JSON.stringify(user))
+      } catch (error) {
+        console.log(JSON.stringify(error))
+      }
+      const email = 'chris.salt-mountain@defra.gov.uk'
 
       // Get list of customer businesses
       const listResult = await graphql({

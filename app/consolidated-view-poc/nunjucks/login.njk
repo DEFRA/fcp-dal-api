@@ -7,5 +7,17 @@
 {% block content %}
   <div class="loading-wrapper">
     <div class="loading-spinner"></div>
+
   </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@azure/msal-browser": "https://esm.sh/@azure/msal-browser"
+      }
+    }
+  </script>
+  <script type="module" src="/consolidated-view/static/login.js"></script>
+  <button id="loginButton" style="display: none;" onclick="handleLogin()">Login with Microsoft</button>
+  <button id="logoutButton" style="display: none;" onclick="handleLogout()">Logout</button>
 {% endblock %}

@@ -119,7 +119,7 @@ export class RuralPayments extends RESTDataSource {
 
   async willSendRequest(path, request) {
     requestCount++
-    console.log(JSON.stringify({ requestCount, url: path }))
+    // console.log(JSON.stringify({ requestCount, url: path }))
 
     const headers = this.request.headers
     const additionalHeaders = {}
