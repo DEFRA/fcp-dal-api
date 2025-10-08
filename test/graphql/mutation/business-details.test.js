@@ -1,4 +1,3 @@
-config.set('auth.disabled', false)
 import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../../app/config.js'

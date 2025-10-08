@@ -1,4 +1,10 @@
+const existingEnvVars = process.env
+
 describe('config', () => {
+  afterAll(() => {
+    process.env = existingEnvVars
+  })
+
   const loadFreshConfig = async () => {
     return await import(`../../../app/config.js?update=${Date.now()}`)
   }

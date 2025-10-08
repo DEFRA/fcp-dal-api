@@ -3,9 +3,6 @@ import tls from 'node:tls'
 import undici from 'undici'
 import { config } from '../../../app/config.js'
 
-const defaultKitsSettings = config.get('kits')
-const defaultDisableProxy = config.get('disableProxy')
-
 const fakeCert = 'KITS_CONNECTION_CERT'
 const fakeKey = 'KITS_CONNECTION_KEY'
 const b64fakeCert = Buffer.from(fakeCert).toString('base64')
@@ -18,16 +15,22 @@ const fakeExternalURL = 'https://rp_kits_gateway_external_url/v1/'
 const kitsInternalURL = new URL(fakeInternalURL)
 
 describe('RuralPayments Custom Fetch', () => {
+  let configMockPath
   beforeEach(() => {
-    config.set('kits.gatewayTimeoutMs', `${timeout}`)
-    config.set('kits.internal.connectionCert', b64fakeCert)
-    config.set('kits.internal.connectionKey', b64fakeKey)
-    config.set('kits.internal.gatewayUrl', fakeInternalURL)
-    config.set('kits.disableMTLS', false)
-
-    config.set('kits.external.connectionCert', b64fakeCert)
-    config.set('kits.external.connectionKey', b64fakeKey)
-    config.set('kits.external.gatewayUrl', fakeExternalURL)
+    configMockPath = {
+      'kits.gatewayTimeoutMs': timeout,
+      'kits.internal.connectionCert': b64fakeCert,
+      'kits.internal.connectionKey': b64fakeKey,
+      'kits.internal.gatewayUrl': fakeInternalURL,
+      'kits.disableMTLS': false,
+      'kits.external.connectionCert': b64fakeCert,
+      'kits.external.connectionKey': b64fakeKey,
+      'kits.external.gatewayUrl': fakeExternalURL
+    }
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) => configMockPath[path] || originalConfig.get(path))
 
     jest.spyOn(global, 'fetch').mockImplementation((...args) => args)
     jest.spyOn(undici, 'ProxyAgent').mockImplementation((...args) => args)
@@ -38,13 +41,11 @@ describe('RuralPayments Custom Fetch', () => {
 
   afterEach(() => {
     jest.restoreAllMocks()
-    config.set('kits', defaultKitsSettings)
-    config.set('disableProxy', defaultDisableProxy)
   })
 
   it('should call fetch with an AbortSignal with timeout and proxy dispatcher', async () => {
     const { customFetch } = await import(
-      '../../../app/data-sources/rural-payments/RuralPayments.js'
+      `../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
 
     const requestTls = {
@@ -90,11 +91,11 @@ describe('RuralPayments Custom Fetch', () => {
   })
 
   it('should call fetch with an AbortSignal with timeout and proxy disabled without mTLS', async () => {
-    config.set('disableProxy', true)
-    config.set('kits.disableMTLS', true)
+    configMockPath.disableProxy = true
+    configMockPath['kits.disableMTLS'] = true
 
     const { customFetch } = await import(
-      '../../../app/data-sources/rural-payments/RuralPayments.js'
+      `../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
 
     const requestTls = {

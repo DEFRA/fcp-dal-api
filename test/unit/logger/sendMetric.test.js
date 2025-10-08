@@ -38,13 +38,30 @@ const mockLogger = {
 jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
 
 describe('sendMetric - with NODE_ENV=production', () => {
-  let sendMetric
-  beforeAll(async () => {
-    config.set('nodeEnv', 'production')
+  let configMockPath
+
+  beforeEach(async () => {
+    configMockPath = {
+      nodeEnv: 'production'
+    }
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] !== undefined ? configMockPath[path] : originalConfig.get(path)
+      )
+
     jest.unstable_mockModule('aws-embedded-metrics', () => mockawsEmbeddedReturnValue)
     const importedSendMetric = await import('../../../app/logger/sendMetric.js')
     sendMetric = importedSendMetric.sendMetric
   })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+  })
+
+  let sendMetric
+  beforeAll(async () => {})
 
   it('logs a metric with default values and no dimensions', async () => {
     mockCreateMetricsLogger.mockReturnValue(mockMetricsLoggerReturnValue)

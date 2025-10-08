@@ -1,4 +1,3 @@
-config.set('auth.disabled', false)
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { mockOrganisationSearch } from '../helpers.js'

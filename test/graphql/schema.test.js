@@ -45,8 +45,14 @@ function getUnprotectedFields(schema) {
 }
 
 describe('schema', () => {
+  const originalConfig = { ...config }
+  const configMockPath = {
+    allSchemaOn: true
+  }
   beforeEach(() => {
-    config.set('allSchemaOn', true)
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) => configMockPath[path] || originalConfig.get(path))
   })
 
   it('should not include custom directives in final schema output', async () => {
@@ -146,7 +152,7 @@ describe('schema', () => {
   })
 
   it('should only contain fields that have the directive', async () => {
-    config.set('allSchemaOn', null)
+    configMockPath.allSchemaOn = null
     const schema = await createSchema()
 
     const partialSchema = buildSchema(await readFile(join(path, 'partial-schema.gql'), 'utf-8'))
