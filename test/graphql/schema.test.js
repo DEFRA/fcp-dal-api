@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import { readFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
@@ -52,7 +53,9 @@ describe('schema', () => {
   beforeEach(() => {
     jest
       .spyOn(config, 'get')
-      .mockImplementation((path) => configMockPath[path] || originalConfig.get(path))
+      .mockImplementation((path) =>
+        configMockPath[path] !== undefined ? configMockPath[path] : originalConfig.get(path)
+      )
   })
 
   it('should not include custom directives in final schema output', async () => {
