@@ -5,8 +5,6 @@ services:
       - cdp-tenant
     ports:
       - '27017:27017'
-    volumes:
-      - mongodb-data:/data/db
     restart: always
 
   kits-mock:
@@ -54,6 +52,3 @@ networks:
   cdp-tenant:
     driver: bridge
     name: cdp-tenant
-
-volumes:
-  mongodb-data:
