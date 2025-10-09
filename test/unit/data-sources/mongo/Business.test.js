@@ -33,7 +33,7 @@ describe('MongoBusiness', () => {
   it('insertOrgIdBySbi', async () => {
     const dummyDate = new Date('2025-01-01')
     jest.useFakeTimers().setSystemTime(dummyDate)
-    mockCollection.insertOne.mockReturnValue({ acknowledged: true, _id: 'orgId' })
+    mockCollection.insertOne.mockResolvedValue({ acknowledged: true, _id: 'orgId' })
 
     const result = await mongoBusiness.insertOrgIdBySbi('1234567890', 'orgId')
     expect(result).toEqual({ acknowledged: true, _id: 'orgId' })
@@ -43,5 +43,6 @@ describe('MongoBusiness', () => {
       createdAt: dummyDate,
       updatedAt: dummyDate
     })
+    jest.useRealTimers()
   })
 })

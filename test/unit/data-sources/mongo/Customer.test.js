@@ -34,7 +34,7 @@ describe('MongoCustomer', () => {
   it('insertPersonIdByCRN', async () => {
     const dummyDate = new Date('2025-01-01')
     jest.useFakeTimers().setSystemTime(dummyDate)
-    mockCollection.insertOne.mockReturnValue({ acknowledged: true, _id: 'personId' })
+    mockCollection.insertOne.mockResolvedValue({ acknowledged: true, _id: 'personId' })
 
     const result = await mongoCustomer.insertPersonIdByCRN('1234567890', 'personId')
     expect(result).toEqual({ acknowledged: true, _id: 'personId' })
@@ -44,5 +44,6 @@ describe('MongoCustomer', () => {
       createdAt: dummyDate,
       updatedAt: dummyDate
     })
+    jest.useRealTimers()
   })
 })

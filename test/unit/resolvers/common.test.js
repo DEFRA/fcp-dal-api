@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { expect, jest } from '@jest/globals'
 import { NotFound } from '../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
@@ -47,6 +47,8 @@ describe('businessDetailsUpdateResolver', () => {
       'orgId',
       { name: 'Test' }
     )
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.insertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
   })
@@ -107,6 +109,9 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     expect(
       dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
     ).toHaveBeenCalledWith('orgId', { dateStartedFarming: '2025-01-01T00:00:00.000Z' })
+
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.insertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
   })
