@@ -6,46 +6,51 @@ export function useLazyQuery(query, { headers, preloaded = null }) {
   const [data, setData] = useState(preloaded)
   const [error, setError] = useState(null)
   const [preloadedReturned, setPreloadedReturned] = useState(!preloaded)
+  const { getToken } = useToken()
 
-  const execute = (variables) => {
-    if (preloadedReturned) {
-      setLoading(true)
-      fetch('/graphql', {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          ...headers
-        },
-        body: JSON.stringify({
-          query,
-          variables
-        })
-      })
-        .then((response) => response.json())
-        .then(({ data }) => {
+  return [
+    async (variables) => {
+      if (preloadedReturned) {
+        setLoading(true)
+        const token = await getToken()
+
+        try {
+          const response = await fetch('/graphql', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              Authorization: `Bearer ${token}`,
+              ...headers
+            },
+            body: JSON.stringify({
+              query,
+              variables
+            })
+          })
+          const { data } = await response.json()
           setData(data)
-          setLoading(false)
-        })
-        .catch((err) => {
+        } catch (err) {
           setError(err)
+        } finally {
           setLoading(false)
-        })
-    } else {
-      setPreloadedReturned(true)
-    }
-  }
-
-  return [execute, { loading, data, error }]
+        }
+      } else {
+        setPreloadedReturned(true)
+      }
+    },
+    { loading, data, error }
+  ]
 }
 
 export function useQuery(query, { variables, headers, preloaded }) {
   const [execute, { loading, data, error }] = useLazyQuery(query, { headers, preloaded })
-  const { getToken } = useToken()
+  const { isAuthenticated } = useToken()
 
   useEffect(() => {
-    getToken().then(console.log)
-    execute(variables)
-  }, [])
+    if (isAuthenticated) {
+      execute(variables)
+    }
+  }, [isAuthenticated])
 
   return { loading, data, error }
 }

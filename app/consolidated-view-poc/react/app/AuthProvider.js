@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import { PublicClientApplication } from '@azure/msal-browser'
 import { html } from 'htm/react'
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 const configuration = {
   auth: {
@@ -10,56 +10,49 @@ const configuration = {
     redirectUri: typeof window !== 'undefined' ? window.location.origin : ''
   },
   cache: {
-    storeAuthStateInCookie: true
+    cacheLocation: 'localStorage'
   }
 }
 
-const pca = new PublicClientApplication(configuration)
-await pca.initialize()
+const msalInstance = new PublicClientApplication(configuration)
+await msalInstance.initialize()
 
 const AuthContext = createContext({ token: null, getToken: async () => null })
 
 export function AuthProvider({ children }) {
-  const accounts = useMemo(() => pca.getAllAccounts(), [pca])
+  const [isAuthenticated, setIsAuthenticated] = useState(!!msalInstance.getActiveAccount())
 
-  // Handle authentication on mount
   useEffect(() => {
-    const authenticate = async () => {
-      try {
-        if (accounts.length === 0) {
-          await pca.ssoSilent({
-            scopes: ['User.Read']
-          })
-        }
-      } catch (error) {
-        console.error('Authentication failed:', error)
-      }
+    if (!isAuthenticated) {
+      msalInstance
+        .ssoSilent({ scopes: ['User.Read'] })
+        .then((account) => {
+          msalInstance.setActiveAccount(account)
+          setIsAuthenticated(true)
+        })
+        .catch((error) => {
+          console.error('Authentication failed:', error)
+        })
     }
-
-    authenticate()
   }, [])
 
-  // Context value
   const value = {
-    async getToken() {
-      if (accounts.length > 0) {
-        console.log('acquireTokenSilent')
-        return pca.acquireTokenSilent({
-          account: accounts[0],
+    getToken: useCallback(async () => {
+      if (isAuthenticated) {
+        const { accessToken } = await msalInstance.acquireTokenSilent({
           scopes: ['User.Read']
         })
+        return accessToken
       }
 
-      console.log('acquireTokenSilent')
-      return null
-    },
-    token: null
+      return ''
+    }, [isAuthenticated]),
+    isAuthenticated
   }
 
   return html`<${AuthContext.Provider} value=${value}>${children}<//>`
 }
 
-// Hook to use token
 export function useToken() {
   const context = useContext(AuthContext)
   if (!context) {
