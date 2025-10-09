@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!isAuthenticated) {
       msalInstance
-        .ssoSilent({ scopes: ['User.Read'] })
+        .ssoSilent({ scopes: ['openid', 'profile', 'email'] })
         .then((account) => {
           msalInstance.setActiveAccount(account)
           setIsAuthenticated(true)
@@ -39,10 +39,10 @@ export function AuthProvider({ children }) {
   const value = {
     getToken: useCallback(async () => {
       if (isAuthenticated) {
-        const { accessToken } = await msalInstance.acquireTokenSilent({
-          scopes: ['User.Read']
+        const { idToken } = await msalInstance.acquireTokenSilent({
+          scopes: ['openid', 'profile', 'email']
         })
-        return accessToken
+        return idToken
       }
 
       return ''

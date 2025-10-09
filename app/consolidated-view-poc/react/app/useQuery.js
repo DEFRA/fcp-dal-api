@@ -15,7 +15,7 @@ export function useLazyQuery(query, { headers, preloaded = null }) {
         const token = await getToken()
 
         try {
-          const response = await fetch('/graphql', {
+          const response = await fetch('/consolidated-view/graphql', {
             method: 'POST',
             headers: {
               'content-type': 'application/json',

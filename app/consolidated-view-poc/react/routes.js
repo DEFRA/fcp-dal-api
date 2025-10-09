@@ -1,11 +1,66 @@
 import { graphql } from 'graphql'
 import { createElement } from 'react'
 import { renderToString } from 'react-dom/server'
+import { RuralPaymentsBusiness } from '../../data-sources/rural-payments/RuralPaymentsBusiness.js'
+import { RuralPaymentsCustomer } from '../../data-sources/rural-payments/RuralPaymentsCustomer.js'
+import { Permissions } from '../../data-sources/static/permissions.js'
 import { context } from '../../graphql/context.js'
-import { schema } from '../../graphql/server.js'
+import { apolloServer, schema } from '../../graphql/server.js'
+import { logger } from '../../logger/logger.js'
+import { getEmailFromToken } from '../getEmailFromToken.js'
 import { App } from './app/App.js'
 
 export const consolidatedViewReactRoutes = (reactAppPath) => [
+  {
+    method: 'POST',
+    path: '/consolidated-view/graphql',
+    handler: async (request, h) => {
+      const authorizationHeader = request.headers.authorization
+      if (!authorizationHeader) {
+        return h.response({ code: 403, message: 'No authorization header' }).code(403)
+      }
+
+      const email = await getEmailFromToken(authorizationHeader.split('Bearer ')[1])
+      if (!email) {
+        return h.response({ code: 401, message: 'Invalid authorization header' }).code(401)
+      }
+
+      const headers = new Map()
+      headers.set('content-type', 'application/json')
+
+      const response = await apolloServer.executeHTTPGraphQLRequest({
+        httpGraphQLRequest: {
+          method: 'POST',
+          headers,
+          body: request.payload
+        },
+        context: async () => {
+          const requestLogger = logger.child({
+            transactionId: request.transactionId,
+            traceId: request.traceId
+          })
+
+          const datasourceOptions = [
+            { logger: requestLogger },
+            {
+              request,
+              gatewayType: 'internal'
+            }
+          ]
+
+          return {
+            dataSources: {
+              permissions: new Permissions({ logger: requestLogger }),
+              ruralPaymentsBusiness: new RuralPaymentsBusiness(...datasourceOptions),
+              ruralPaymentsCustomer: new RuralPaymentsCustomer(...datasourceOptions)
+            }
+          }
+        }
+      })
+
+      return h.response(response.body.string).type('application/json')
+    }
+  },
   {
     method: 'GET',
     path: '/consolidated-view-react/app/{param*}',
