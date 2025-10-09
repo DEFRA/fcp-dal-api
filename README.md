@@ -53,6 +53,12 @@ KITS_INT_GATEWAY_URL=http://localhost:3100/v1
 KITS_EXT_GATEWAY_URL=http://localhost:3101/v1
 ```
 
+Also you will need to run mongodb locally you can do this with the following command:
+
+```bash
+docker-compose up -d mongodb
+```
+
 ### Development
 
 To run the application in `development` mode run:

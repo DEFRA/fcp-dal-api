@@ -39,6 +39,6 @@ export class MongoJWKS extends MongoDataSource {
   }
 
   async getPublicKey(kid) {
-    return (await this.retrievePublicKeyByKid(kid)) ?? (await this.fetchPublicKey(kid))
+    return (await this.retrievePublicKeyByKid(kid)) ?? this.fetchPublicKey(kid)
   }
 }

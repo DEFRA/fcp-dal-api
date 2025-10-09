@@ -47,6 +47,6 @@ async function insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
 export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   return (
     (await mongoBusiness.getOrgIdBySbi(sbi)) ??
-    (await insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }))
+    insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
   )
 }

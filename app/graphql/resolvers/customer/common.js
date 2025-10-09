@@ -7,6 +7,6 @@ async function insertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCustomer }
 export const retrievePersonIdByCRN = async (crn, { mongoCustomer, ruralPaymentsCustomer }) => {
   return (
     (await mongoCustomer.getPersonIdByCRN(crn)) ??
-    (await insertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCustomer }))
+    insertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCustomer })
   )
 }
