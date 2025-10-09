@@ -358,9 +358,6 @@ describe('business', () => {
         }
       }
     })
-    if (!nock.isDone()) {
-      console.log('Pending mocks: %j', nock.pendingMocks())
-    }
-    expect(nock.isDone()).toBe(true)
+    expect(nock.pendingMocks()).toEqual([])
   })
 })
