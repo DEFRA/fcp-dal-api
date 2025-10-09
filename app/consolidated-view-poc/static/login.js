@@ -1,3 +1,4 @@
+/* eslint-env browser */
 // Import MSAL
 import { PublicClientApplication } from '@azure/msal-browser'
 
@@ -6,8 +7,7 @@ const msalConfig = {
   auth: {
     clientId: 'bfb6fb5c-9ec6-44f9-91d6-77378e41daa7', // From Azure AD app registration
     authority: 'https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/v2.0',
-    redirectUri: 'https://kjqlpgq8-3000.uks1.devtunnels.ms/',
-    postLogoutRedirectUri: 'https://kjqlpgq8-3000.uks1.devtunnels.ms/'
+    redirectUri: window.location.origin
   },
   cache: {
     cacheLocation: 'localStorage', // Persists across refreshes

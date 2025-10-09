@@ -1,6 +1,8 @@
 import { html } from 'htm/react'
 import { LinkedContacts } from './LinkedContacts.js'
 
+import { AuthProvider } from './AuthProvider.js'
+
 export function App(initialProps) {
   return html`
     <html lang="en">
@@ -17,7 +19,9 @@ export function App(initialProps) {
       </head>
       <body>
         <main>
-          <${LinkedContacts} ...${initialProps} />
+          <${AuthProvider}>
+            <${LinkedContacts} ...${initialProps} />
+          <//>
         </main>
 
         <script id="initial-props" type="application/json">
@@ -27,6 +31,8 @@ export function App(initialProps) {
         <script type="importmap">
           ${JSON.stringify({
             imports: {
+              '@azure/msal-browser': 'https://esm.sh/@azure/msal-browser',
+              '@azure/msal-react': 'https://esm.sh/@azure/msal-react',
               'htm/react': 'https://esm.sh/htm/react',
               'react-dom/client': 'https://esm.sh/react-dom/client',
               minisearch: 'https://esm.sh/minisearch',

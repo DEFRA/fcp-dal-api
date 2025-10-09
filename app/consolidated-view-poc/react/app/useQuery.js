@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useToken } from './AuthProvider.js'
 
 export function useLazyQuery(query, { headers, preloaded = null }) {
   const [loading, setLoading] = useState(false)
@@ -39,8 +40,10 @@ export function useLazyQuery(query, { headers, preloaded = null }) {
 
 export function useQuery(query, { variables, headers, preloaded }) {
   const [execute, { loading, data, error }] = useLazyQuery(query, { headers, preloaded })
+  const { getToken } = useToken()
 
   useEffect(() => {
+    getToken().then(console.log)
     execute(variables)
   }, [])
 
