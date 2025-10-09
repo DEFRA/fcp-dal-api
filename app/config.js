@@ -228,7 +228,7 @@ export const config = convict({
     mongoUrl: {
       doc: 'URL for mongodb',
       format: String,
-      default: 'mongodb://127.0.0.1:27017/?replicaSet=rs0',
+      default: 'mongodb://localhost:27017',
       env: 'MONGO_URI'
     },
     databaseName: {
