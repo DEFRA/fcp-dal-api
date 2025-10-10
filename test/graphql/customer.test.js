@@ -26,7 +26,7 @@ describe('Query.customer', () => {
     jest
       .spyOn(config, 'get')
       .mockImplementation((path) =>
-        configMockPath[path] !== undefined ? configMockPath[path] : originalConfig.get(path)
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
       )
   })
 

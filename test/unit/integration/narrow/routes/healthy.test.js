@@ -32,7 +32,7 @@ describe('Healthy test', () => {
     jest
       .spyOn(config, 'get')
       .mockImplementation((path) =>
-        configMockPath[path] !== undefined ? configMockPath[path] : originalConfig.get(path)
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
       )
 
     await server.start()

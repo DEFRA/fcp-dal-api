@@ -1,4 +1,4 @@
-import { beforeAll, jest } from '@jest/globals'
+import { jest } from '@jest/globals'
 import { config } from '../../../app/config.js'
 import { DAL_METRICS_ERROR_001 } from '../../../app/logger/codes.js'
 
@@ -39,6 +39,7 @@ jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
 
 describe('sendMetric - with NODE_ENV=production', () => {
   let configMockPath
+  let sendMetric
 
   beforeEach(async () => {
     configMockPath = {
@@ -48,7 +49,7 @@ describe('sendMetric - with NODE_ENV=production', () => {
     jest
       .spyOn(config, 'get')
       .mockImplementation((path) =>
-        configMockPath[path] !== undefined ? configMockPath[path] : originalConfig.get(path)
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
       )
 
     jest.unstable_mockModule('aws-embedded-metrics', () => mockawsEmbeddedReturnValue)
@@ -59,9 +60,6 @@ describe('sendMetric - with NODE_ENV=production', () => {
   afterEach(async () => {
     jest.restoreAllMocks()
   })
-
-  let sendMetric
-  beforeAll(async () => {})
 
   it('logs a metric with default values and no dimensions', async () => {
     mockCreateMetricsLogger.mockReturnValue(mockMetricsLoggerReturnValue)
