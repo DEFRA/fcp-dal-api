@@ -1,8 +1,12 @@
-import { beforeAll, jest } from '@jest/globals'
-import { generateKeyPairSync } from 'crypto'
+import { jest } from '@jest/globals'
 import { buildSchema, findBreakingChanges } from 'graphql'
 import jwt from 'jsonwebtoken'
-import nock from 'nock'
+import {
+  authDirectiveTransformer,
+  authGroups,
+  checkAuthGroup,
+  getAuth
+} from '../../../app/auth/authenticate.js'
 import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
@@ -54,90 +58,9 @@ const incorrectTokenReq = {
 }
 const decodedToken = jwt.decode(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
-
-const mockHttpsProxyAgent = jest.fn()
-const mockProxyAgentModule = {
-  HttpsProxyAgent: mockHttpsProxyAgent
+const mockJWKSDataSource = {
+  getPublicKey: mockPublicKeyFunc
 }
-jest.unstable_mockModule('https-proxy-agent', () => mockProxyAgentModule)
-const { authDirectiveTransformer, checkAuthGroup, getAuth, authGroups } = await import(
-  '../../../app/auth/authenticate.js'
-)
-
-describe('getJwtPublicKey', () => {
-  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
-    modulusLength: 2048
-  })
-
-  beforeAll(() => {
-    nock.disableNetConnect()
-  })
-
-  const originalConfig = { ...config }
-  const configMockPath = {
-    disableProxy: false
-  }
-  beforeEach(() => {
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
-
-    nock(config.get('oidc.jwksURI'))
-      .get('/')
-      .reply(200, {
-        keys: [
-          {
-            kty: 'RSA',
-            kid: 'mock-key-id-123',
-            alg: 'RS256',
-            use: 'sig',
-            n: publicKey.export({ format: 'jwk' }).n,
-            e: publicKey.export({ format: 'jwk' }).e
-          }
-        ]
-      })
-  })
-
-  afterAll(() => {
-    nock.cleanAll()
-    nock.enableNetConnect()
-  })
-
-  it('should return the public key and proxy called', async () => {
-    const { getJwtPublicKey } = await import('../../../app/auth/authenticate.js')
-    const mockTokenPayload = {
-      iat: Math.floor(Date.now() / 1000)
-    }
-
-    const mockToken = jwt.sign(mockTokenPayload, privateKey, {
-      algorithm: 'RS256'
-    })
-
-    expect(jwt.verify(mockToken, await getJwtPublicKey('mock-key-id-123'))).toEqual(
-      mockTokenPayload
-    )
-    expect(mockHttpsProxyAgent).toHaveBeenCalledWith(config.get('cdp.httpsProxy'))
-  })
-
-  it('should return the public key without proxy', async () => {
-    configMockPath.disableProxy = true
-    const { getJwtPublicKey } = await import('../../../app/auth/authenticate.js')
-    const mockTokenPayload = {
-      iat: Math.floor(Date.now() / 1000)
-    }
-
-    const mockToken = jwt.sign(mockTokenPayload, privateKey, {
-      algorithm: 'RS256'
-    })
-
-    expect(jwt.verify(mockToken, await getJwtPublicKey('mock-key-id-123'))).toEqual(
-      mockTokenPayload
-    )
-    expect(mockHttpsProxyAgent).not.toHaveBeenCalled()
-  })
-})
 
 describe('getAuth', () => {
   test('should return an empty object when no authHeader is provided', async () => {
@@ -146,17 +69,17 @@ describe('getAuth', () => {
 
   test('should return decoded token when token is valid', async () => {
     mockPublicKeyFunc.mockReturnValue('secret')
-    expect(await getAuth(mockRequest, mockPublicKeyFunc)).toEqual(decodedToken)
+    expect(await getAuth(mockRequest, mockJWKSDataSource)).toEqual(decodedToken)
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 
   test('should return an empty object when token cannot be decoded', async () => {
-    expect(await getAuth(incorrectTokenReq, mockPublicKeyFunc)).toEqual({})
+    expect(await getAuth(incorrectTokenReq, mockJWKSDataSource)).toEqual({})
     expect(mockPublicKeyFunc).not.toHaveBeenCalled()
   })
 
   test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
-    expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
+    expect(await getAuth(mockRequestWrongSign, mockJWKSDataSource)).toEqual({})
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 
@@ -166,7 +89,7 @@ describe('getAuth', () => {
     mockPublicKeyFunc.mockImplementation(() => {
       throw error
     })
-    expect(await getAuth(mockRequestWrongSign, mockPublicKeyFunc)).toEqual({})
+    expect(await getAuth(mockRequestWrongSign, mockJWKSDataSource)).toEqual({})
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 })
@@ -185,6 +108,11 @@ describe('checkAuthGroup', () => {
 
   it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
     const testGroup = 'NON_EXISTENT_GROUP'
+    expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
+  })
+
+  it('checkAuthGroup should throw Unauthorized when AD group is null in token', () => {
+    const testGroup = null
     expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
   })
 

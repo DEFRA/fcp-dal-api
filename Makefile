@@ -7,3 +7,5 @@ token:
 	-d "scope=${CLIENT_ID}/.default" \
 	-d "client_secret=${CLIENT_SECRET}" \
 	-X POST h"ttps://login.microsoftonline.com/${API_TENANT_ID}/oauth2/v2.0/token" | jq -r '.access_token' | clip
+mongodb:
+	docker-compose up -d mongodb

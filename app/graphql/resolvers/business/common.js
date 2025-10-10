@@ -4,7 +4,7 @@ import {
 } from '../../../transformers/rural-payments/business.js'
 
 export const businessDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(input.sbi)
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
@@ -20,7 +20,7 @@ export const businessDetailsUpdateResolver = async (__, { input }, { dataSources
 }
 
 export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(input.sbi)
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgAdditionalDetails = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
@@ -36,6 +36,19 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
       sbi: input.sbi
     }
   }
+}
+
+async function insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
+  const orgId = await ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  await mongoBusiness.insertOrgIdBySbi(sbi, orgId)
+  return orgId
+}
+
+export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
+  return (
+    (await mongoBusiness.getOrgIdBySbi(sbi)) ??
+    insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
+  )
 }
 
 const validateLockUnlockInput = (input) => {

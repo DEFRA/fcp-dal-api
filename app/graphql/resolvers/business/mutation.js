@@ -2,6 +2,7 @@ import {
   transformBusinessDetailsToOrgDetailsCreate,
   transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
+import { retrievePersonIdByCRN } from '../customer/common.js'
 import {
   businessAdditionalDetailsUpdateResolver,
   businessDetailsUpdateResolver,
@@ -13,14 +14,15 @@ import { Query } from './query.js'
 export const Mutation = {
   createBusiness: async (_, { input }, { dataSources }) => {
     const { crn, ...businessDetails } = input
-    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
+    const personId = await retrievePersonIdByCRN(crn, dataSources)
     const orgDetails = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
     const response = await dataSources.ruralPaymentsBusiness.createOrganisationByPersonId(
       personId,
       orgDetails
     )
     const business = transformOrganisationToBusiness(response)
-    return { success: true, business }
+    const result = { success: true, business }
+    return result
   },
   updateBusinessName: businessDetailsUpdateResolver,
   updateBusinessPhone: businessDetailsUpdateResolver,

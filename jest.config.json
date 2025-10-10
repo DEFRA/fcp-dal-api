@@ -14,5 +14,7 @@
       "lines": 90,
       "statements": 90
     }
-  }
+  },
+  "preset": "@shelf/jest-mongodb",
+  "setupFilesAfterEnv": ["<rootDir>/test/setup.js"]
 }

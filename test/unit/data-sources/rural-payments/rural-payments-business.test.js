@@ -1,8 +1,8 @@
 import { jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
-import { RuralPaymentsBusiness } from '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
-import { NotFound } from '../../../app/errors/graphql.js'
-import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
+import { RuralPaymentsBusiness } from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
+import { NotFound } from '../../../../app/errors/graphql.js'
+import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../../app/transformers/rural-payments/business.js'
 
 const businessDetailsUpdatePayload = {
   name: 'HADLEY FARMS LTD 2',

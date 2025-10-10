@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
-import { RuralPaymentsCustomer } from '../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
-import { NotFound } from '../../../app/errors/graphql.js'
+import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
+import { NotFound } from '../../../../app/errors/graphql.js'
 
 describe('Rural Payments Customer', () => {
   const logger = {

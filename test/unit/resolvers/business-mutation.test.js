@@ -1,15 +1,23 @@
 import { describe, jest } from '@jest/globals'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 
-const mockSchemaModule = {
+const mockBusinessCommonModule = {
   businessDetailsUpdateResolver: jest.fn(),
   businessAdditionalDetailsUpdateResolver: jest.fn(),
+  retrieveOrgIdBySbi: jest.fn(),
   businessLockResolver: jest.fn(),
   businessUnlockResolver: jest.fn()
 }
+const mockCustomerCommonModule = {
+  retrievePersonIdByCRN: jest.fn()
+}
 jest.unstable_mockModule(
   '../../../app/graphql/resolvers/business/common.js',
-  () => mockSchemaModule
+  () => mockBusinessCommonModule
+)
+jest.unstable_mockModule(
+  '../../../app/graphql/resolvers/customer/common.js',
+  () => mockCustomerCommonModule
 )
 const { Mutation, UpdateBusinessResponse } = await import(
   '../../../app/graphql/resolvers/business/mutation.js'
@@ -22,7 +30,7 @@ describe('Business Details Mutation resolvers', () => {
 
   it('updateBusinessName calls businessDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessName({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -32,7 +40,7 @@ describe('Business Details Mutation resolvers', () => {
 
   it('updateBusinessPhone calls businessDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessPhone({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -42,7 +50,7 @@ describe('Business Details Mutation resolvers', () => {
 
   it('updateBusinessEmail calls businessDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessEmail({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -52,7 +60,7 @@ describe('Business Details Mutation resolvers', () => {
 
   it('updateBusinessAddress calls businessDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessAddress({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -62,7 +70,7 @@ describe('Business Details Mutation resolvers', () => {
 
   it('updateBusinessVAT calls businessAdditionalDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessVAT({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -78,7 +86,7 @@ describe('Business Additional Details Mutation resolvers', () => {
 
   it('updateBusinessLegalStatus calls businessAdditionalDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessLegalStatus({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -88,7 +96,7 @@ describe('Business Additional Details Mutation resolvers', () => {
 
   it('updateBusinessType calls businessAdditionalDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessType({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -98,7 +106,7 @@ describe('Business Additional Details Mutation resolvers', () => {
 
   it('updateBusinessDateStartedFarming calls businessAdditionalDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessDateStartedFarming({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -108,7 +116,7 @@ describe('Business Additional Details Mutation resolvers', () => {
 
   it('updateBusinessRegistrationNumbers calls businessAdditionalDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessRegistrationNumbers({}, mockArgs, mockContext, mockInfo)
-    expect(mockSchemaModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,
@@ -126,12 +134,16 @@ describe('Business Mutation UpdateBusinessResponse', () => {
         updateBusinessBySBI: jest.fn(),
         getOrganisationById: jest.fn(),
         getOrganisationIdBySBI: jest.fn()
+      },
+      mongoBusiness: {
+        getOrgIdBySbi: jest.fn(),
+        insertOrgIdBySbi: jest.fn()
       }
     }
   })
 
   it('updateBusinessName returns true when updateBusinessBySBI returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('123')
+    mockBusinessCommonModule.retrieveOrgIdBySbi.mockResolvedValue('123')
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       some: 'response'
     })
@@ -142,88 +154,13 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       { dataSources }
     )
 
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('123', dataSources)
     expect(result).toEqual({
-      info: {
-        additionalBusinessActivities: [],
-        additionalSbis: [],
-        address: {
-          buildingName: undefined,
-          buildingNumberRange: undefined,
-          city: undefined,
-          country: undefined,
-          county: undefined,
-          dependentLocality: undefined,
-          doubleDependentLocality: undefined,
-          flatName: undefined,
-          line1: undefined,
-          line2: undefined,
-          line3: undefined,
-          line4: undefined,
-          line5: undefined,
-          pafOrganisationName: undefined,
-          postalCode: undefined,
-          street: undefined,
-          typeId: undefined,
-          uprn: undefined
-        },
-        correspondenceAddress: null,
-        correspondenceEmail: {
-          address: undefined,
-          validated: false
-        },
-        correspondencePhone: {
-          fax: undefined,
-          landline: undefined,
-          mobile: undefined
-        },
-        dateStartedFarming: null,
-        email: {
-          address: undefined,
-          validated: undefined
-        },
-        hasAdditionalBusinessActivities: false,
-        hasLandInNorthernIreland: false,
-        hasLandInScotland: false,
-        hasLandInWales: false,
-        isAccountablePeopleDeclarationCompleted: false,
-        isCorrespondenceAsBusinessAddress: false,
-        isFinancialToBusinessAddress: false,
-        landConfirmed: false,
-        lastUpdated: null,
-        legalStatus: {
-          code: undefined,
-          type: undefined
-        },
-        name: undefined,
-        phone: {
-          fax: undefined,
-          landline: undefined,
-          mobile: undefined
-        },
-        reference: undefined,
-        registrationNumbers: {
-          charityCommission: undefined,
-          companiesHouse: undefined
-        },
-        status: {
-          confirmed: false,
-          deactivated: false,
-          locked: false
-        },
-        traderNumber: undefined,
-        type: {
-          code: undefined,
-          type: undefined
-        },
-        vat: undefined,
-        vendorNumber: undefined
-      },
       land: {
         sbi: '123'
       },
-      organisationId: 'undefined',
-      sbi: 'undefined'
+      organisationId: '123',
+      sbi: '123'
     })
   })
 })
@@ -243,6 +180,7 @@ describe('Business Mutation createBusiness', () => {
   })
 
   it('createBusiness returns business details and success', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
     const mockArgs = {
       input: {
         crn: '123',
@@ -307,7 +245,7 @@ describe('Business Mutation createBusiness', () => {
 
     const response = await Mutation.createBusiness({}, mockArgs, { dataSources }, mockInfo)
 
-    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('123')
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith('123', dataSources)
     expect(dataSources.ruralPaymentsBusiness.createOrganisationByPersonId).toHaveBeenCalledWith(
       'personId',
       orgDetailsInput
@@ -431,7 +369,7 @@ describe('Business Mutation updateBusinessLockStatus', () => {
 
   it('updateBusinessLock', async () => {
     await Mutation.updateBusinessLock({}, mockArgs, { dataSources })
-    expect(mockSchemaModule.businessLockResolver).toHaveBeenCalledWith({}, mockArgs, {
+    expect(mockBusinessCommonModule.businessLockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
   })
@@ -451,7 +389,7 @@ describe('Business Mutation updateBusinessUnlockStatus', () => {
 
   it('updateBusinessUnlock', async () => {
     await Mutation.updateBusinessUnlock({}, mockArgs, { dataSources })
-    expect(mockSchemaModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
+    expect(mockBusinessCommonModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
   })

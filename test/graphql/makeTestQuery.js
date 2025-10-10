@@ -9,13 +9,16 @@ export async function makeTestQuery(
   variableValues = {},
   headers = { email: 'test@defra.gov.uk', 'gateway-type': 'internal' }
 ) {
-  return graphql({
+  const ctx = await context({ request: { headers } })
+  const response = await graphql({
     source,
     schema: await createSchema(),
     contextValue: {
-      ...(await context({ request: { headers } })),
+      ...ctx,
       auth: isAuthenticated ? { groups: [config.get('auth.groups.ADMIN')] } : {}
     },
     variableValues: variableValues
   })
+  await ctx.db.dropDatabase()
+  return response
 }

@@ -223,6 +223,34 @@ export const config = convict({
       default: 100,
       env: 'KITS_REQUEST_PAGE_SIZE'
     }
+  },
+  mongo: {
+    mongoUrl: {
+      doc: 'URL for mongodb',
+      format: String,
+      default: 'mongodb://localhost:27017',
+      env: 'MONGO_URI'
+    },
+    databaseName: {
+      doc: 'database for mongodb',
+      format: String,
+      default: 'cdp-user-service-backend',
+      env: 'MONGO_DATABASE'
+    },
+    mongoOptions: {
+      retryWrites: {
+        doc: 'enable mongo write retries',
+        format: Boolean,
+        default: true,
+        env: 'MONGO_RETRY_WRITES'
+      },
+      readPreference: {
+        doc: 'mongo read preference',
+        format: ['primary', 'primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'],
+        default: 'primary',
+        env: 'MONGO_READ_PREFERENCE'
+      }
+    }
   }
 })
 

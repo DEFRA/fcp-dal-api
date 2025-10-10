@@ -17,6 +17,10 @@ const permissionGroups = createRequire(import.meta.url)(
   '../../../app/data-sources/static/permission-groups.json'
 )
 
+const logger = {
+  warn: jest.fn()
+}
+
 const dataSources = {
   permissions: {
     getPermissionGroups() {
@@ -29,12 +33,17 @@ const dataSources = {
     },
     getCountyParishHoldingsBySBI: jest.fn(),
     getAgreementsBySBI: jest.fn(),
-    getApplicationsBySBI: jest.fn()
+    getApplicationsBySBI: jest.fn(),
+    getOrganisationById: jest.fn()
   },
   ruralPaymentsPortalApi: {
     getApplicationsCountrysideStewardship() {
       return organisationApplicationsByOrgId('5565448')
     }
+  },
+  mongoBusiness: {
+    getOrgIdBySbi: jest.fn(),
+    insertOrgIdBySbi: jest.fn()
   }
 }
 
@@ -170,6 +179,79 @@ describe('Business', () => {
         ]
       }
     ])
+  })
+
+  it('info - internal gateway should return transformed business data when found', async () => {
+    const organisationId = '1'
+    const mockOrganisation = { id: '1', name: 'Test Farm' }
+
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
+
+    const result = await Business.info({ organisationId }, undefined, { dataSources, logger })
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+      mockOrganisation.id
+    )
+    expect(result).toEqual({
+      name: 'Test Farm',
+      reference: undefined,
+      vat: undefined,
+      traderNumber: undefined,
+      vendorNumber: undefined,
+      additionalBusinessActivities: [],
+      additionalSbis: [],
+      address: {
+        line1: undefined,
+        line2: undefined,
+        line3: undefined,
+        line4: undefined,
+        line5: undefined,
+        pafOrganisationName: undefined,
+        buildingNumberRange: undefined,
+        buildingName: undefined,
+        flatName: undefined,
+        street: undefined,
+        city: undefined,
+        county: undefined,
+        postalCode: undefined,
+        country: undefined,
+        uprn: undefined,
+        dependentLocality: undefined,
+        doubleDependentLocality: undefined,
+        typeId: undefined
+      },
+      correspondenceAddress: null,
+      correspondencePhone: { mobile: undefined, landline: undefined, fax: undefined },
+      phone: { mobile: undefined, landline: undefined, fax: undefined },
+      dateStartedFarming: null,
+      email: { address: undefined, validated: undefined },
+      correspondenceEmail: { address: undefined, validated: false },
+      hasAdditionalBusinessActivities: false,
+      hasLandInNorthernIreland: false,
+      hasLandInScotland: false,
+      hasLandInWales: false,
+      isAccountablePeopleDeclarationCompleted: false,
+      isCorrespondenceAsBusinessAddress: false,
+      isFinancialToBusinessAddress: false,
+      landConfirmed: false,
+      lastUpdated: null,
+      legalStatus: { code: undefined, type: undefined },
+      type: { code: undefined, type: undefined },
+      registrationNumbers: { companiesHouse: undefined, charityCommission: undefined },
+      status: {
+        locked: false,
+        deactivated: false,
+        confirmed: false
+      }
+    })
+  })
+
+  it('should handle errors from dataSource for internal gateway', async () => {
+    const sbi = '123456789'
+    const error = new Error('Database error')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValue(error)
+
+    await expect(Business.info({ sbi }, undefined, { dataSources, logger })).rejects.toThrow(error)
   })
 
   describe('applications', () => {

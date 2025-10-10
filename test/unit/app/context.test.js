@@ -4,6 +4,9 @@ const getAuthMock = jest.fn()
 const PermissionsMock = jest.fn()
 const RuralPaymentsBusinessMock = jest.fn()
 const RuralPaymentsCustomerMock = jest.fn()
+const MongoCustomerMock = jest.fn()
+const MongoBusinessMock = jest.fn()
+const MongoJWKSMock = jest.fn()
 const loggerChild = jest.fn()
 const loggerMock = { child: loggerChild }
 
@@ -25,6 +28,15 @@ jest.unstable_mockModule(
     RuralPaymentsCustomer: RuralPaymentsCustomerMock
   })
 )
+jest.unstable_mockModule('../../../app/data-sources/mongo/Business.js', () => ({
+  MongoBusiness: MongoBusinessMock
+}))
+jest.unstable_mockModule('../../../app/data-sources/mongo/Customer.js', () => ({
+  MongoCustomer: MongoCustomerMock
+}))
+jest.unstable_mockModule('../../../app/data-sources/mongo/JWKS.js', () => ({
+  MongoJWKS: MongoJWKSMock
+}))
 jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
@@ -38,8 +50,7 @@ describe('context', () => {
   test('should build context with correct properties', async () => {
     getAuthMock.mockResolvedValue({ user: 'test-user' })
     PermissionsMock.mockImplementation(() => ({ type: 'Permissions' }))
-    RuralPaymentsBusinessMock.mockImplementation(() => ({ type: 'Business' }))
-    RuralPaymentsCustomerMock.mockImplementation(() => ({ type: 'Customer' }))
+    MongoJWKSMock.mockImplementation(() => ({}))
     loggerChild.mockReturnValue({ log: jest.fn() })
     const request = {
       headers: {
@@ -52,7 +63,7 @@ describe('context', () => {
 
     const result = await context({ request })
 
-    expect(getAuthMock).toHaveBeenCalledWith(request)
+    expect(getAuthMock).toHaveBeenCalledWith(request, MongoJWKSMock())
     expect(loggerMock.child).toHaveBeenCalledWith({
       transactionId: 'tx-1',
       traceId: 'trace-1'
@@ -60,7 +71,9 @@ describe('context', () => {
     expect(result.auth).toEqual({ user: 'test-user' })
     expect(result.requestLogger).toBeDefined()
     expect(result.dataSources.permissions.type).toBe('Permissions')
-    expect(result.dataSources.ruralPaymentsBusiness.type).toBe('Business')
-    expect(result.dataSources.ruralPaymentsCustomer.type).toBe('Customer')
+    expect(result.dataSources.ruralPaymentsBusiness).toEqual({})
+    expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
+    expect(result.dataSources.mongoBusiness).toEqual({})
+    expect(result.dataSources.mongoCustomer).toEqual({})
   })
 })

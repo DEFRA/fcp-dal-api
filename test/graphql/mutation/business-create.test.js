@@ -62,95 +62,95 @@ const input = {
   dateStartedFarming: new Date('2021-05-27T12:46:17.305Z')
 }
 
-const orgDetails = transformBusinessDetailsToOrgDetailsCreate(input)
+const orgDetails = { id: 'orgId', sbi: 'sbi', ...transformBusinessDetailsToOrgDetailsCreate(input) }
 
 const query = `
-        mutation CreateBusiness($input: CreateBusinessInput!) {
-        createBusiness(input: $input) {
-            success
-            business {
-            info {
-                address {
-                buildingName
-                buildingNumberRange
-                city
-                country
-                pafOrganisationName
-                line1
-                line2
-                line3
-                line4
-                line5
-                flatName
-                street
-                county
-                postalCode
-                uprn
-                dependentLocality
-                doubleDependentLocality
-                typeId
-                }
-                correspondenceAddress {
-                line1
-                line2
-                line3
-                line4
-                pafOrganisationName
-                line5
-                buildingNumberRange
-                buildingName
-                flatName
-                street
-                city
-                county
-                postalCode
-                country
-                uprn
-                dependentLocality
-                doubleDependentLocality
-                typeId
-                }
-                name
-                reference
-                vat
-                traderNumber
-                vendorNumber
-                isCorrespondenceAsBusinessAddress
-                email {
-                address
-                validated
-                }
-                correspondenceEmail {
-                address
-                validated
-                }
-                phone {
-                mobile
-                landline
-                }
-                correspondencePhone {
-                mobile
-                landline
-                }
-                legalStatus {
-                code
-                type
-                }
-                type {
-                code
-                type
-                }
-                registrationNumbers {
-                companiesHouse
-                charityCommission
-                }
-                landConfirmed
-                dateStartedFarming
-            }
-            }
+mutation CreateBusiness($input: CreateBusinessInput!) {
+  createBusiness(input: $input) {
+    success
+    business {
+      info {
+        address {
+          buildingName
+          buildingNumberRange
+          city
+          country
+          pafOrganisationName
+          line1
+          line2
+          line3
+          line4
+          line5
+          flatName
+          street
+          county
+          postalCode
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
         }
+        correspondenceAddress {
+          line1
+          line2
+          line3
+          line4
+          pafOrganisationName
+          line5
+          buildingNumberRange
+          buildingName
+          flatName
+          street
+          city
+          county
+          postalCode
+          country
+          uprn
+          dependentLocality
+          doubleDependentLocality
+          typeId
+        }
+        name
+        reference
+        vat
+        traderNumber
+        vendorNumber
+        isCorrespondenceAsBusinessAddress
+        email {
+          address
+          validated
+        }
+        correspondenceEmail {
+          address
+          validated
+        }
+        phone {
+          mobile
+          landline
+        }
+        correspondencePhone {
+          mobile
+          landline
+        }
+        legalStatus {
+          code
+          type
+        }
+        type {
+          code
+          type
+        }
+        registrationNumbers {
+          companiesHouse
+          charityCommission
+        }
+        landConfirmed
+        dateStartedFarming
+      }
     }
-    `
+  }
+}
+`
 
 //  Nock is setup separately in each test to ensure the order and number of requests is as expected
 describe('business', () => {
@@ -357,6 +357,6 @@ describe('business', () => {
         }
       }
     })
-    expect(nock.isDone()).toBe(true)
+    expect(nock.pendingMocks()).toEqual([])
   })
 })
