@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, jest } from '@jest/globals'
 import tls from 'node:tls'
 import undici from 'undici'
-import { config } from '../../../app/config.js'
+import { config } from '../../../../app/config.js'
 
 const fakeCert = 'KITS_CONNECTION_CERT'
 const fakeKey = 'KITS_CONNECTION_KEY'
@@ -47,7 +47,7 @@ describe('RuralPayments Custom Fetch', () => {
 
   it('should call fetch with an AbortSignal with timeout and proxy dispatcher', async () => {
     const { customFetch } = await import(
-      `../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
+      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
 
     const requestTls = {
@@ -97,7 +97,7 @@ describe('RuralPayments Custom Fetch', () => {
     configMockPath['kits.disableMTLS'] = true
 
     const { customFetch } = await import(
-      `../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
+      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
 
     const requestTls = {
