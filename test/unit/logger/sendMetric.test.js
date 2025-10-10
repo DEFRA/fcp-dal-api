@@ -48,7 +48,9 @@ describe('sendMetric - with NODE_ENV=production', () => {
     const originalConfig = { ...config }
     jest
       .spyOn(config, 'get')
-      .mockImplementation((path) => configMockPath[path] ?? originalConfig.get(path))
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
 
     jest.unstable_mockModule('aws-embedded-metrics', () => mockawsEmbeddedReturnValue)
     const importedSendMetric = await import('../../../app/logger/sendMetric.js')

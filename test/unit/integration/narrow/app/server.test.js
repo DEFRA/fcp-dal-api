@@ -41,7 +41,9 @@ describe('Server config and startup', () => {
     const originalConfig = { ...config }
     jest
       .spyOn(config, 'get')
-      .mockImplementation((path) => configMockPath[path] ?? originalConfig.get(path))
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
     const { server: _server } = await import(`../../../../../app/server.js?update=${Date.now()}`)
     server = _server
     await server.start()

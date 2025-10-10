@@ -80,7 +80,9 @@ describe('getJwtPublicKey', () => {
   beforeEach(() => {
     jest
       .spyOn(config, 'get')
-      .mockImplementation((path) => configMockPath[path] ?? originalConfig.get(path))
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
 
     nock(config.get('oidc.jwksURI'))
       .get('/')
@@ -229,7 +231,9 @@ describe('authDirectiveTransformer', () => {
   beforeEach(() => {
     jest
       .spyOn(config, 'get')
-      .mockImplementation((path) => configMockPath[path] ?? originalConfig.get(path))
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
   })
 
   it('authDirectiveTransformer should not impact output schema', async () => {
