@@ -83,15 +83,12 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
     method: 'GET',
     path: '/consolidated-view-react-full-ssr/linked-contacts/{sbi}',
     handler: async (request, h) => {
-      const email = request.query.email
-      if (!email) {
-        return h
-          .response({
-            error: 'Bad Request',
-            message: 'Email not provided'
-          })
-          .code(400)
+      const token = request.query.token
+      if (!token) {
+        return h.response().code(403)
       }
+
+      const email = 'chris.salt-mountain@defra.gov.uk'
 
       try {
         // Get list of customer businesses

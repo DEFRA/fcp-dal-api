@@ -10,12 +10,7 @@ const msalConfig = {
     redirectUri: window.location.origin
   },
   cache: {
-    cacheLocation: 'localStorage', // Persists across refreshes
-    storeAuthStateInCookie: false // Set to true for iframe/older browser compatibility
-  },
-  system: {
-    iframeHashTimeout: 10000,
-    allowRedirectInIframe: false
+    cacheLocation: 'localStorage' // Persists across refreshes
   }
 }
 

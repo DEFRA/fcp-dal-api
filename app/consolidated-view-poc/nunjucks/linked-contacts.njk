@@ -10,7 +10,7 @@
       <form class="search-input" action="?token={{token}}&selectedCrn={{ customer.crn }}">
         <label>Search</label>
         <input name="search" autocomplete="off" value="{{search}}" placeholder="Enter search term"/>
-        <input name="email" value="{{email}}" type="hidden"/>
+        <input name="token" value="{{token}}" type="hidden"/>
         <input name="selectedCrn" value="{{selectedCrn}}" type="hidden"/>
         <input name="selectedPermissionIndex" value="0" type="hidden"/>
         <button type="submit">Submit</button>
