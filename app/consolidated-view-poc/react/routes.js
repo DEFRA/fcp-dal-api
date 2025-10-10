@@ -7,7 +7,7 @@ import { Permissions } from '../../data-sources/static/permissions.js'
 import { context } from '../../graphql/context.js'
 import { apolloServer, schema } from '../../graphql/server.js'
 import { logger } from '../../logger/logger.js'
-import { getEmailFromToken } from '../getEmailFromToken.js'
+import { getEmailFromHeaders } from '../getEmailFromHeaders.js'
 import { App } from './app/App.js'
 
 export const consolidatedViewReactRoutes = (reactAppPath) => [
@@ -15,23 +15,12 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
     method: 'POST',
     path: '/consolidated-view/graphql',
     handler: async (request, h) => {
-      const authorizationHeader = request.headers.authorization
-      if (!authorizationHeader) {
-        return h.response({ code: 403, message: 'No authorization header' }).code(403)
-      }
-
-      const email = await getEmailFromToken(authorizationHeader.split('Bearer ')[1])
-      if (!email) {
-        return h.response({ code: 401, message: 'Invalid authorization header' }).code(401)
-      }
-
-      const headers = new Map()
-      headers.set('content-type', 'application/json')
+      const email = await getEmailFromHeaders(request.headers)
 
       const response = await apolloServer.executeHTTPGraphQLRequest({
         httpGraphQLRequest: {
           method: 'POST',
-          headers,
+          headers: new Map([['content-type', 'application/json']]),
           body: request.payload
         },
         context: async () => {
@@ -43,7 +32,7 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
           const datasourceOptions = [
             { logger: requestLogger },
             {
-              request,
+              request: { headers: { email } },
               gatewayType: 'internal'
             }
           ]
@@ -75,20 +64,9 @@ export const consolidatedViewReactRoutes = (reactAppPath) => [
     method: 'GET',
     path: '/consolidated-view-react-partial-ssr/linked-contacts/{sbi}',
     handler: async (request, h) => {
-      const email = request.query.email
-      if (!email) {
-        return h
-          .response({
-            error: 'Bad Request',
-            message: 'Email not provided'
-          })
-          .code(400)
-      }
-
       try {
         const props = {
           sbi: request.params.sbi,
-          email,
           preloaded: {}
         }
 

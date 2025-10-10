@@ -1,5 +1,5 @@
 /* eslint-env browser */
-import { PublicClientApplication } from '@azure/msal-browser'
+import { InteractionRequiredAuthError, PublicClientApplication } from '@azure/msal-browser'
 import { html } from 'htm/react'
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
@@ -19,29 +19,50 @@ await msalInstance.initialize()
 
 const AuthContext = createContext({ token: null, getToken: async () => null })
 
+const silentRequest = {
+  scopes: ['openid', 'profile', 'email']
+}
+
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(!!msalInstance.getActiveAccount())
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      msalInstance
-        .ssoSilent({ scopes: ['openid', 'profile', 'email'] })
-        .then((account) => {
-          msalInstance.setActiveAccount(account)
-          setIsAuthenticated(true)
-        })
-        .catch((error) => {
-          console.error('Authentication failed:', error)
-        })
+    const handlePopupAuth = async () => {
+      try {
+        const account = await msalInstance.loginPopup(silentRequest)
+        msalInstance.setActiveAccount(account)
+        setIsAuthenticated(true)
+      } catch (error) {
+        console.error('loginPopup Authentication failed:', error)
+      }
     }
+
+    const handleSilentAuth = async () => {
+      try {
+        const account = await msalInstance.ssoSilent(silentRequest)
+        msalInstance.setActiveAccount(account)
+        setIsAuthenticated(true)
+      } catch (error) {
+        if (error instanceof InteractionRequiredAuthError) {
+          await handlePopupAuth()
+        } else {
+          console.error('ssoSilent Authentication failed:', error)
+        }
+      }
+    }
+
+    const authenticate = async () => {
+      if (isAuthenticated) return
+      await handleSilentAuth()
+    }
+
+    authenticate()
   }, [])
 
   const value = {
     getToken: useCallback(async () => {
       if (isAuthenticated) {
-        const { idToken } = await msalInstance.acquireTokenSilent({
-          scopes: ['openid', 'profile', 'email']
-        })
+        const { idToken } = await msalInstance.acquireTokenSilent(silentRequest)
         return idToken
       }
 
