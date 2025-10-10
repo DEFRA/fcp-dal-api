@@ -1,4 +1,4 @@
-import { expect, jest } from '@jest/globals'
+import { afterAll, beforeAll, expect, jest } from '@jest/globals'
 import { MongoClient } from 'mongodb'
 import { config } from '../../../../app/config.js'
 import { MongoCustomer } from '../../../../app/data-sources/mongo/Customer.js'
@@ -15,6 +15,14 @@ const mockCollection = {
 const mongoCustomer = new MongoCustomer({ modelOrCollection: mockCollection })
 
 describe('MongoCustomer', () => {
+  beforeAll(() => {
+    jest.useFakeTimers()
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
+
   it('getPersonIdByCRN doesnt exist', async () => {
     const result = await mongoCustomer.getPersonIdByCRN('1234567890')
     expect(result).toBeUndefined()
@@ -44,6 +52,5 @@ describe('MongoCustomer', () => {
       createdAt: dummyDate,
       updatedAt: dummyDate
     })
-    jest.useRealTimers()
   })
 })

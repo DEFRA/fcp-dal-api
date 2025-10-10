@@ -1,4 +1,4 @@
-import { expect, jest } from '@jest/globals'
+import { afterAll, beforeAll, expect, jest } from '@jest/globals'
 import { MongoClient } from 'mongodb'
 import { config } from '../../../../app/config.js'
 import { MongoBusiness } from '../../../../app/data-sources/mongo/Business.js'
@@ -14,6 +14,14 @@ const mockCollection = {
 const mongoBusiness = new MongoBusiness({ modelOrCollection: mockCollection })
 
 describe('MongoBusiness', () => {
+  beforeAll(() => {
+    jest.useFakeTimers()
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
+
   it('getOrgIdBySbi sbi doesnt exist', async () => {
     const result = await mongoBusiness.getOrgIdBySbi('1234567890')
     expect(result).toBeUndefined()
@@ -43,6 +51,5 @@ describe('MongoBusiness', () => {
       createdAt: dummyDate,
       updatedAt: dummyDate
     })
-    jest.useRealTimers()
   })
 })
