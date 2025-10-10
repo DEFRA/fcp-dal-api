@@ -1,4 +1,4 @@
-config.set('auth.disabled', false)
+import { jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
@@ -295,13 +295,34 @@ const setupNock = (v1) => {
 }
 
 describe('Query.business internal', () => {
+  let configMockPath
+
+  beforeAll(() => {
+    nock.disableNetConnect()
+  })
+
   afterAll(() => {
     nock.cleanAll()
     nock.enableNetConnect()
   })
 
+  beforeEach(() => {
+    configMockPath = {
+      'auth.disabled': true
+    }
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   test('authenticated external', async () => {
-    nock.disableNetConnect()
     const v1 = nock(config.get('kits.external.gatewayUrl'))
     setupNock(v1)
 
@@ -760,7 +781,7 @@ describe('Query.business internal', () => {
   })
 
   test('unauthenticated', async () => {
-    nock.disableNetConnect()
+    configMockPath['auth.disabled'] = false
     const result = await makeTestQuery(query, false)
 
     expect(result.data.business).toBeNull()

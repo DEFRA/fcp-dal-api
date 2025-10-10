@@ -17,19 +17,30 @@ jest.unstable_mockModule('../../../../../app/utils/throttle.js', () => mockThrot
 const { server } = await import('../../../../../app/server.js')
 
 describe('Healthy test', () => {
-  const mockGetOrganisationById = jest.spyOn(RuralPaymentsBusiness.prototype, 'getOrganisationById')
+  let mockGetOrganisationById
+  let configMockPath
 
   beforeEach(async () => {
-    config.set('healthCheck.enabled', true)
-    config.set('healthCheck.ruralPaymentsInternalOrganisationId', 'test-org-id')
-    config.set('healthCheck.ruralPaymentsPortalEmail', 'test@example.com')
-    config.set('healthCheck.gatewayTimeoutMs', 1)
+    mockGetOrganisationById = jest.spyOn(RuralPaymentsBusiness.prototype, 'getOrganisationById')
+    configMockPath = {
+      'healthCheck.enabled': true,
+      'healthCheck.ruralPaymentsInternalOrganisationId': 'test-org-id',
+      'healthCheck.ruralPaymentsPortalEmail': 'test@example.com',
+      'healthCheck.gatewayTimeoutMs': 1
+    }
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
 
     await server.start()
   })
 
   afterEach(async () => {
     await server.stop()
+    jest.restoreAllMocks()
   })
 
   it('GET /healthy route returns 200 with services status when health check is enabled', async () => {
@@ -51,8 +62,8 @@ describe('Healthy test', () => {
   })
 
   it('GET /healthy route returns 200 with services status when health check is disabled', async () => {
-    config.set('healthCheck.enabled', false)
-    config.set('cdp.env', 'dev')
+    configMockPath['healthCheck.enabled'] = false
+    configMockPath['cdp.env'] = 'dev'
 
     const options = {
       method: 'GET',
@@ -67,8 +78,8 @@ describe('Healthy test', () => {
   })
 
   it('GET /healthy route returns 200 with services status when health check is disabled in production', async () => {
-    config.set('healthCheck.enabled', false)
-    config.set('cdp.env', 'prod')
+    configMockPath['healthCheck.enabled'] = false
+    configMockPath['cdp.env'] = 'prod'
 
     const options = {
       method: 'GET',
@@ -112,7 +123,7 @@ describe('Healthy test', () => {
   })
 
   it('GET /healthy route returns 200 with services status when health check disabled', async () => {
-    config.set('healthCheck.enabled', false)
+    configMockPath['healthCheck.enabled'] = false
 
     const options = {
       method: 'GET',

@@ -1,6 +1,14 @@
+import { v4 as uuidv4 } from 'uuid'
+
+const existingEnvVars = process.env
+
 describe('config', () => {
+  afterAll(() => {
+    process.env = existingEnvVars
+  })
+
   const loadFreshConfig = async () => {
-    return await import(`../../../app/config.js?update=${Date.now()}`)
+    return await import(`../../../app/config.js?update=${uuidv4()}`)
   }
 
   beforeEach(() => {

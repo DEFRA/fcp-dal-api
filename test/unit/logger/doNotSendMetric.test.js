@@ -11,8 +11,24 @@ const mockAwsEmbeddedReturnValue = {
 }
 
 describe('sendMetric - with NODE_ENV=production', () => {
+  let configMockPath
+
+  beforeEach(async () => {
+    configMockPath = {}
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+  })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+  })
+
   it('does not log a metric when NODE_ENV is not production', async () => {
-    config.set('nodeEnv', 'development')
+    configMockPath.nodeEnv = 'development'
     jest.unstable_mockModule('aws-embedded-metrics', () => mockAwsEmbeddedReturnValue)
     const { sendMetric } = await import('../../../app/logger/sendMetric.js')
 

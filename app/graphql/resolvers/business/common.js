@@ -37,3 +37,43 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
     }
   }
 }
+
+const validateLockUnlockInput = (input) => {
+  if (!input.reason && !input.note) {
+    throw new Error('Reason and/or note are required')
+  }
+}
+
+export const businessLockResolver = async (__, { input }, { dataSources }) => {
+  validateLockUnlockInput(input)
+
+  const { sbi, ...lockBodyAttributes } = input
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
+export const businessUnlockResolver = async (__, { input }, { dataSources }) => {
+  validateLockUnlockInput(input)
+
+  const { sbi, ...unlockBodyAttributes } = input
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, unlockBodyAttributes)
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}

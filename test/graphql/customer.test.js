@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
@@ -6,6 +7,8 @@ import { mockPersonSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 describe('Query.customer', () => {
+  let configMockPath
+
   beforeAll(() => {
     nock.disableNetConnect()
   })
@@ -13,6 +16,22 @@ describe('Query.customer', () => {
   afterAll(() => {
     nock.cleanAll()
     nock.enableNetConnect()
+  })
+
+  beforeEach(() => {
+    configMockPath = {
+      'auth.disabled': true
+    }
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   const query = `#graphql
@@ -288,6 +307,7 @@ describe('Query.customer', () => {
   })
 
   test('unauthenticated', async () => {
+    configMockPath['auth.disabled'] = false
     const result = await makeTestQuery(
       `#graphql
         query Customer {

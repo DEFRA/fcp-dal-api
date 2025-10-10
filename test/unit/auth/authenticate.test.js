@@ -73,7 +73,17 @@ describe('getJwtPublicKey', () => {
     nock.disableNetConnect()
   })
 
+  const originalConfig = { ...config }
+  const configMockPath = {
+    disableProxy: false
+  }
   beforeEach(() => {
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+
     nock(config.get('oidc.jwksURI'))
       .get('/')
       .reply(200, {
@@ -112,7 +122,7 @@ describe('getJwtPublicKey', () => {
   })
 
   it('should return the public key without proxy', async () => {
-    config.set('disableProxy', true)
+    configMockPath.disableProxy = true
     const { getJwtPublicKey } = await import('../../../app/auth/authenticate.js')
     const mockTokenPayload = {
       iat: Math.floor(Date.now() / 1000)
@@ -212,8 +222,21 @@ describe('authDirectiveTransformer', () => {
     directive @auth(requires: AuthRole = TEST) on OBJECT | FIELD_DEFINITION
 
   `)
+
+  const originalConfig = { ...config }
+  const configMockPath = {
+    'auth.disabled': true
+  }
+
+  beforeEach(() => {
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+  })
+
   it('authDirectiveTransformer should not impact output schema', async () => {
-    config.set('auth.disabled', true)
     const transformedSchema = authDirectiveTransformer(schema)
     expect(findBreakingChanges(schema, transformedSchema)).toHaveLength(0)
   })
