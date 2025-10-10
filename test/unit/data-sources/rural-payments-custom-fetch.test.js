@@ -30,9 +30,7 @@ describe('RuralPayments Custom Fetch', () => {
     const originalConfig = { ...config }
     jest
       .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+      .mockImplementation((path) => configMockPath[path] ?? originalConfig.get(path))
 
     jest.spyOn(global, 'fetch').mockImplementation((...args) => args)
     jest.spyOn(undici, 'ProxyAgent').mockImplementation((...args) => args)
