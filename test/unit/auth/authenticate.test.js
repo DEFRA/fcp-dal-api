@@ -150,8 +150,21 @@ describe('authDirectiveTransformer', () => {
     directive @auth(requires: AuthRole = TEST) on OBJECT | FIELD_DEFINITION
 
   `)
+
+  const originalConfig = { ...config }
+  const configMockPath = {
+    'auth.disabled': true
+  }
+
+  beforeEach(() => {
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+  })
+
   it('authDirectiveTransformer should not impact output schema', async () => {
-    config.set('auth.disabled', true)
     const transformedSchema = authDirectiveTransformer(schema)
     expect(findBreakingChanges(schema, transformedSchema)).toHaveLength(0)
   })

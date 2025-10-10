@@ -15,6 +15,10 @@ const client = new MongoClient(config.get('mongo.mongoUrl'))
 client.connect()
 const db = client.db(config.get('mongo.databaseName'))
 const { MongoJWKS } = await import('../../../../app/data-sources/mongo/JWKS.js')
+const originalConfig = { ...config }
+const configMockPath = {
+  disableProxy: false
+}
 
 describe('getJwtPublicKey', () => {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', {
@@ -26,6 +30,12 @@ describe('getJwtPublicKey', () => {
   })
 
   beforeEach(() => {
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+
     nock(config.get('oidc.jwksURI'))
       .get('/')
       .reply(200, {

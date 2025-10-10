@@ -3,6 +3,22 @@ import ConsoleTransportInstance from 'winston-transport'
 import { config } from '../../../app/config.js'
 
 describe('logger', () => {
+  let configMockPath
+
+  beforeEach(async () => {
+    configMockPath = {}
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+  })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+  })
+
   it('Single default log transport enabled', async () => {
     const { logger } = await import(`../../../app/logger/logger.js?version=${Date.now()}`)
     expect(logger.transports.length).toEqual(1)
@@ -10,13 +26,13 @@ describe('logger', () => {
   })
 
   it('should use ecsFormat in production environment', async () => {
-    config.set('nodeEnv', 'production')
+    configMockPath.nodeEnv = 'production'
     const { logger } = await import(`../../../app/logger/logger.js?version=${Date.now()}`)
     expect(logger.transports[0].format).toBeDefined()
   })
 
   it('should set the log level based on LOG_LEVEL environment variable', async () => {
-    config.set('logLevel', 'debug')
+    configMockPath.logLevel = 'debug'
     const { logger } = await import(`../../../app/logger/logger.js?version=${Date.now()}`)
     expect(logger.level).toEqual('debug')
   })

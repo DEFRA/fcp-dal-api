@@ -3,7 +3,12 @@ import {
   transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
 import { retrievePersonIdByCRN } from '../customer/common.js'
-import { businessAdditionalDetailsUpdateResolver, businessDetailsUpdateResolver } from './common.js'
+import {
+  businessAdditionalDetailsUpdateResolver,
+  businessDetailsUpdateResolver,
+  businessLockResolver,
+  businessUnlockResolver
+} from './common.js'
 import { Query } from './query.js'
 
 export const Mutation = {
@@ -27,7 +32,9 @@ export const Mutation = {
   updateBusinessLegalStatus: businessAdditionalDetailsUpdateResolver,
   updateBusinessType: businessAdditionalDetailsUpdateResolver,
   updateBusinessDateStartedFarming: businessAdditionalDetailsUpdateResolver,
-  updateBusinessRegistrationNumbers: businessAdditionalDetailsUpdateResolver
+  updateBusinessRegistrationNumbers: businessAdditionalDetailsUpdateResolver,
+  updateBusinessLock: businessLockResolver,
+  updateBusinessUnlock: businessUnlockResolver
 }
 
 export const UpdateBusinessResponse = {

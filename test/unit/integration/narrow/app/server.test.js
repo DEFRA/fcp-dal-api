@@ -30,27 +30,38 @@ const socketTimeoutTest = (socket, reject) => {
   }
 }
 
-config.set('PORT', '3000')
-config.set('requestTimeoutMs', `${timeout}`)
-const { server } = await import('../../../../../app/server.js')
-
 describe('Server config and startup', () => {
+  let server
+  let configMockPath
+  beforeEach(async () => {
+    configMockPath = {
+      PORT: '3000',
+      requestTimeoutMs: timeout
+    }
+    const originalConfig = { ...config }
+    jest
+      .spyOn(config, 'get')
+      .mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+    const { server: _server } = await import(`../../../../../app/server.js?update=${Date.now()}`)
+    server = _server
+    await server.start()
+  })
+
+  afterEach(async () => {
+    jest.restoreAllMocks()
+    await server.stop()
+  })
+
   describe('Server Initialization', () => {
-    beforeAll(async () => {
-      await server.start()
-    })
-
-    afterAll(async () => {
-      await server.stop()
-    })
-
     test('should set timeout from env var', () => {
       expect(server.listener.timeout).toBe(timeout)
     })
 
     test('idle socket should be closed by timeout', () => {
       return new Promise((resolve, reject) => {
-        const socket = net.connect({ port: config.get('port') })
+        const socket = net.connect({ port: config.get('PORT') })
         socket.on('connect', socketTimeoutTest(socket, reject))
         socket.on('close', resolve)
         socket.on('error', console.error)
