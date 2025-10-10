@@ -4,12 +4,12 @@ import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transfo
 const mockBusinessCommonModule = {
   businessDetailsUpdateResolver: jest.fn(),
   businessAdditionalDetailsUpdateResolver: jest.fn(),
-  retrieveOrgIdBySbi: jest.fn()
-}
-const mockCustomerCommonModule = {
-  retrievePersonIdByCRN: jest.fn(),
+  retrieveOrgIdBySbi: jest.fn(),
   businessLockResolver: jest.fn(),
   businessUnlockResolver: jest.fn()
+}
+const mockCustomerCommonModule = {
+  retrievePersonIdByCRN: jest.fn()
 }
 jest.unstable_mockModule(
   '../../../app/graphql/resolvers/business/common.js',
@@ -369,7 +369,7 @@ describe('Business Mutation updateBusinessLockStatus', () => {
 
   it('updateBusinessLock', async () => {
     await Mutation.updateBusinessLock({}, mockArgs, { dataSources })
-    expect(mockSchemaModule.businessLockResolver).toHaveBeenCalledWith({}, mockArgs, {
+    expect(mockBusinessCommonModule.businessLockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
   })
@@ -389,7 +389,7 @@ describe('Business Mutation updateBusinessUnlockStatus', () => {
 
   it('updateBusinessUnlock', async () => {
     await Mutation.updateBusinessUnlock({}, mockArgs, { dataSources })
-    expect(mockSchemaModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
+    expect(mockBusinessCommonModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
   })
