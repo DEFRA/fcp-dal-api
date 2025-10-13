@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken'
 import { MongoClient } from 'mongodb'
+import tls from 'node:tls'
 import { getAuth } from '../auth/authenticate.js'
 import { config } from '../config.js'
 import { MongoBusiness } from '../data-sources/mongo/Business.js'
 import { MongoCustomer } from '../data-sources/mongo/Customer.js'
 import { MongoJWKS } from '../data-sources/mongo/JWKS.js'
-
 import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { Permissions } from '../data-sources/static/permissions.js'
@@ -31,7 +31,8 @@ export const extractOrgIdFromDefraIdToken = (sbi, token) => {
 export async function context({ request }) {
   const client = new MongoClient(config.get('mongo.mongoUrl'), {
     retryWrites: config.get('mongo.mongoOptions.retryWrites'),
-    readPreference: config.get('mongo.mongoOptions.readPreference')
+    readPreference: config.get('mongo.mongoOptions.readPreference'),
+    secureContext: tls.createSecureContext()
   })
   client.connect()
   const db = client.db(config.get('mongo.databaseName'))
