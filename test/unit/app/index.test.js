@@ -1,4 +1,5 @@
 import hapiApollo from '@as-integrations/hapi'
+import { secureContext } from '@defra/hapi-secure-context'
 import { expect, jest } from '@jest/globals'
 import { apolloServer } from '../../../app/graphql/server.js'
 
@@ -35,14 +36,17 @@ describe('App initialization', () => {
     expect(apolloServer.start).toHaveBeenCalled()
 
     // Verify Hapi Apollo plugin was registered
-    expect(server.register).toHaveBeenCalledWith({
-      plugin: hapiApollo.default,
-      options: {
-        context: expect.any(Function),
-        apolloServer,
-        path: '/graphql'
+    expect(server.register).toHaveBeenCalledWith([
+      secureContext,
+      {
+        plugin: hapiApollo.default,
+        options: {
+          context: expect.any(Function),
+          apolloServer,
+          path: '/graphql'
+        }
       }
-    })
+    ])
 
     // Verify server was started
     expect(server.start).toHaveBeenCalled()
