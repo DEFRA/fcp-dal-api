@@ -1,5 +1,7 @@
 import hapiApollo from '@as-integrations/hapi'
 
+import { secureContext } from '@defra/hapi-secure-context'
+
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
 import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
@@ -9,14 +11,17 @@ import { server } from './server.js'
 const init = async () => {
   await apolloServer.start()
 
-  await server.register({
-    plugin: hapiApollo.default,
-    options: {
-      context,
-      apolloServer,
-      path: '/graphql'
+  await server.register([
+    secureContext,
+    {
+      plugin: hapiApollo.default,
+      options: {
+        context,
+        apolloServer,
+        path: '/graphql'
+      }
     }
-  })
+  ])
 
   await server.start()
 
