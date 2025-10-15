@@ -1,11 +1,20 @@
 import hapi from '@hapi/hapi'
-
+import Vision from '@hapi/vision'
 import { Unit } from 'aws-embedded-metrics'
+import NunjucksHapi from 'nunjucks-hapi'
+
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { v4 as uuidv4 } from 'uuid'
+
+import Inert from '@hapi/inert'
 import { config } from './config.js'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { sendMetric } from './logger/sendMetric.js'
+
+import { consolidatedViewRoutes } from './consolidated-view-poc/nunjucks/routes.js'
+import { consolidatedViewReactRoutes } from './consolidated-view-poc/react/routes.js'
 import { healthRoute } from './routes/health.js'
 import { healthyRoute } from './routes/healthy.js'
 
@@ -17,7 +26,27 @@ server.ext('onPreStart', () => {
   server.listener.setTimeout(config.get('requestTimeoutMs'))
 })
 
-const routes = [].concat(healthyRoute, healthRoute)
+await server.register([Vision, Inert])
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const viewsPath = path.join(__dirname, 'consolidated-view-poc', 'nunjucks')
+const staticPath = path.join(__dirname, 'consolidated-view-poc', 'static')
+const reactAppPath = path.join(__dirname, 'consolidated-view-poc', 'react', 'app')
+
+server.views({
+  engines: { njk: NunjucksHapi },
+  relativeTo: __dirname, // Use explicit __dirname
+  path: viewsPath, // Use resolved views path
+  isCached: process.env.NODE_ENV === 'production',
+  defaultExtension: 'njk'
+})
+
+const routes = [].concat(
+  ...consolidatedViewRoutes(staticPath),
+  ...consolidatedViewReactRoutes(reactAppPath),
+  healthRoute,
+  healthyRoute
+)
 server.route(routes)
 
 server.ext({

@@ -1,0 +1,261 @@
+html,
+body {
+  font-size: 14px;
+  font-family: 'Segoe UI', sans-serif;
+  line-height: 1.2rem;
+}
+
+.loading-wrapper {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 2rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #ccc;
+  border-top: 5px solid #009e43;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.login-button {
+  display: block;
+  margin: 0 auto;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid #6b7280; /* Neutral gray outline */
+  border-radius: 6px;
+  background-color: transparent; /* No background */
+  color: #6b7280; /* Neutral gray text */
+}
+
+.loading-text {
+  font-size: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 3fr 1px 7fr;
+  gap: 1rem;
+  height: 100%;
+}
+
+.container .column {
+  height: 100vh;
+  overflow-y: scroll;
+}
+
+table {
+  border-collapse: collapse;
+  table-layout: auto;
+  width: 100%;
+}
+
+table.even-columns {
+  table-layout: fixed;
+}
+
+th {
+  background-color: #009e43;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.loading tr.selected {
+  background-color: #fff;
+  pointer-events: none;
+}
+
+.loading tr {
+  pointer-events: none;
+}
+
+tr.selected {
+  background-color: rgba(204, 236, 217, 1);
+}
+
+.primary-table table {
+  position: relative;
+}
+
+.primary-table th {
+  position: sticky;
+  top: 0;
+}
+
+td a {
+  width: 100%;
+  display: block;
+  padding: -0.75rem;
+  text-decoration: none;
+  color: inherit;
+  padding: 0.75rem;
+}
+
+td.link {
+  padding: 0;
+}
+
+td {
+  padding: 0.75rem;
+}
+
+.clickable tr:hover {
+  background-color: #b3e2c7;
+  cursor: pointer;
+}
+
+.primary-table th:first-child,
+.primary-table td:first-child {
+  width: 0;
+}
+
+dd {
+  margin: 0;
+  padding: 0;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1rem;
+  row-gap: 0.25rem;
+  margin: 0;
+}
+
+dt {
+  font-weight: bold;
+}
+
+h1 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+.search-input {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  align-items: center;
+  padding-bottom: 1rem;
+}
+
+.search-input label {
+  font-weight: 700;
+}
+
+.search-input input {
+  border-radius: 0;
+  border: 1px solid #d3d3d3;
+  border-radius: 0;
+  padding: 8px;
+}
+
+.search-input button {
+  display: none;
+}
+
+.divider {
+  background-color: #009e43;
+}
+
+.right-column {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-auto-rows: min-content;
+  row-gap: 1rem;
+  position: relative;
+}
+
+.right-column-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+}
+
+button.link-button {
+  background: none;
+  border: none;
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+button.link-button:focus {
+  outline: none;
+}
+
+button.link-button:hover {
+  color: darkblue;
+}
+
+button.link-button:disabled {
+  color: #b0b0b0;
+  text-decoration: none;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button.link-button:disabled:hover {
+  color: #b0b0b0;
+}
+
+.loading-placeholder {
+  min-width: 10%;
+  min-height: 1.2rem;
+  width: max-content;
+  background: #f0f0f0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  color: transparent;
+}
+
+.loading-placeholder::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
