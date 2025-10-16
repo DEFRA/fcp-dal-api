@@ -12,8 +12,6 @@ import { server } from './server.js'
 const init = async () => {
   await apolloServer.start()
 
-  mongoClient.connect()
-
   await server.register([
     secureContext,
     {
@@ -25,6 +23,8 @@ const init = async () => {
       }
     }
   ])
+
+  mongoClient.connect()
 
   await server.start()
 
