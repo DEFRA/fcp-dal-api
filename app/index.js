@@ -1,6 +1,8 @@
 import hapiApollo from '@as-integrations/hapi'
 import tls from 'node:tls'
 
+import { secureContext } from '@defra/hapi-secure-context'
+
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
 import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
