@@ -1,6 +1,5 @@
 import hapiApollo from '@as-integrations/hapi'
-
-import { secureContext } from '@defra/hapi-secure-context'
+import tls from 'node:tls'
 
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
@@ -23,6 +22,8 @@ const init = async () => {
       }
     }
   ])
+
+  mongoClient.secureContext = tls.secureContext()
 
   mongoClient.connect()
 
