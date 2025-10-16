@@ -25,7 +25,7 @@ const init = async () => {
     }
   ])
 
-  mongoClient.secureContext = tls.secureContext()
+  mongoClient.secureContext = tls.createSecureContext()
 
   mongoClient.connect()
 

@@ -1,8 +1,5 @@
-import { secureContext } from '@defra/hapi-secure-context'
 import { MongoClient } from 'mongodb'
 import { config } from './config.js'
-
-secureContext
 
 export const mongoClient = new MongoClient(config.get('mongo.mongoUrl'), {
   retryWrites: config.get('mongo.mongoOptions.retryWrites'),
