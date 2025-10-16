@@ -6,10 +6,13 @@ import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
 import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
+import { mongoClient } from './mongo.js'
 import { server } from './server.js'
 
 const init = async () => {
   await apolloServer.start()
+
+  mongoClient.connect()
 
   await server.register([
     secureContext,
