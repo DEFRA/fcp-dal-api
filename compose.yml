@@ -41,7 +41,7 @@ services:
       DAL_REQUEST_TIMEOUT_MS: 3000
       KIT_EXT_PERSON_ID_OVERRIDE: 3337243
       MONGO_URI: mongodb://mongodb:27017
-      MONGO_DATABASE: 'fcp-dal'
+      MONGO_DATABASE: 'fcp-dal-api'
 
     networks:
       - cdp-tenant
