@@ -234,7 +234,7 @@ export const config = convict({
     databaseName: {
       doc: 'database for mongodb',
       format: String,
-      default: 'cdp-user-service-backend',
+      default: 'fcp-dal-api',
       env: 'MONGO_DATABASE'
     },
     mongoOptions: {
