@@ -12,34 +12,45 @@ export const authGroups = config.get('auth.groups')
 
 export async function getAuth(request, jwkDatasource) {
   try {
-    const authHeader = request?.headers?.authorization
-    if (!authHeader) {
+    const token = request?.headers?.authorization?.split(' ')[1]
+    if (!token) {
       return {}
     }
     logger.debug('#DAL - Request authentication - Check verification', {
       code: DAL_REQUEST_AUTHENTICATION_001,
-      request: {
-        remoteAddress: request?.info?.remoteAddress
-      }
+      request: { remoteAddress: request?.info?.remoteAddress }
     })
-    const token = authHeader.split(' ')[1]
     const decodedToken = jwt.decode(token, { complete: true })
-    const header = decodedToken.header
     const requestStart = Date.now()
-    const signingKey = await jwkDatasource.getPublicKey(header.kid)
+    const signingKey = await jwkDatasource.getPublicKey(decodedToken.header.kid)
     const requestTimeMs = Date.now() - requestStart
     const verified = jwt.verify(token, signingKey)
     sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: DAL_REQUEST_AUTHENTICATION_001
     })
 
+    const payload = decodedToken.payload?.payload ?? {}
     logger.info('#DAL Request authentication - JWT verified', {
       type: 'http',
       code: DAL_REQUEST_AUTHENTICATION_001,
       requestTimeMs,
       request: {
         remoteAddress: request?.info?.remoteAddress
-      }
+      },
+      tenantMessage: JSON.stringify({
+        aud: payload.aud,
+        serviceId: payload.serviceId,
+        correlationId: payload.correlationId,
+        currentRelationshipId: payload.currentRelationshipId,
+        sessionId: payload.sessionId,
+        sub: payload.sub,
+        email: payload.email?.split('@')[1],
+        contactId: payload.contactId,
+        relationships: payload.relationships,
+        groups: payload.groups,
+        roles: payload.roles,
+        azp: payload.azp
+      })
     })
     return verified
   } catch (error) {
@@ -47,17 +58,13 @@ export async function getAuth(request, jwkDatasource) {
       logger.warn('#DAL - request authentication - token expired', {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,
-        request: {
-          remoteAddress: request?.info?.remoteAddress
-        }
+        request: { remoteAddress: request?.info?.remoteAddress }
       })
     } else {
       logger.error('#DAL - request authentication - Error verifying jwt', {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,
-        request: {
-          remoteAddress: request?.info?.remoteAddress
-        }
+        request: { remoteAddress: request?.info?.remoteAddress }
       })
     }
     return {}

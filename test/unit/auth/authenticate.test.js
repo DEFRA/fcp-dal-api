@@ -1,14 +1,16 @@
-import { jest } from '@jest/globals'
+import { beforeEach, describe, expect, jest, test } from '@jest/globals'
 import { buildSchema, findBreakingChanges } from 'graphql'
 import jwt from 'jsonwebtoken'
-import {
-  authDirectiveTransformer,
-  authGroups,
-  checkAuthGroup,
-  getAuth
-} from '../../../app/auth/authenticate.js'
 import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
+
+const info = jest.fn()
+jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
+  logger: { info, debug: jest.fn(), warn: jest.fn(), error: jest.fn() }
+}))
+const { authDirectiveTransformer, authGroups, checkAuthGroup, getAuth } = await import(
+  '../../../app/auth/authenticate.js'
+)
 
 const tokenPayload = {
   header: {
@@ -33,53 +35,108 @@ const tokenPayload = {
     sub: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
     tid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
     uti: 'uti',
-    ver: '1.0'
+    ver: '1.0',
+    serviceId: 'service-id',
+    correlationId: 'correlation-id',
+    currentRelationshipId: 'relationship-id',
+    sessionId: 'session-id',
+    contactId: 'contact-id',
+    relationships: ['orgId:sbi:company name:'],
+    roles: ['role-id'],
+    azp: 'azp-id'
   },
   signature: 'signature'
 }
 
-const token = jwt.sign(tokenPayload, 'secret', { expiresIn: '1h' })
+const token = jwt.sign(
+  {
+    ...tokenPayload,
+    payload: { ...tokenPayload.payload, email: 'pii@defra.gov.uk' }
+  },
+  'secret',
+  {
+    expiresIn: '1h'
+  }
+)
 const tokenDiffSecret = jwt.sign(tokenPayload, 'secret2', { expiresIn: '1h' })
-const mockRequest = {
+const requestInfo = { remoteAddress: '0.0.0.0' }
+const mockRequest = (token) => ({
   headers: {
     authorization: `Bearer ${token}`
   },
-  info: { remoteAddress: '0.0.0.0' }
-}
-const mockRequestWrongSign = {
-  headers: {
-    authorization: `Bearer ${tokenDiffSecret}`
-  },
-  info: { remoteAddress: '0.0.0.0' }
-}
-const incorrectTokenReq = {
-  headers: { authorization: 'Bearer WRONG' },
-  info: { remoteAddress: '0.0.0.0' }
-}
+  info: requestInfo
+})
 const decodedToken = jwt.decode(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
-const mockJWKSDataSource = {
-  getPublicKey: mockPublicKeyFunc
-}
+const mockJWKSDataSource = { getPublicKey: mockPublicKeyFunc }
 
 describe('getAuth', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   test('should return an empty object when no authHeader is provided', async () => {
     expect(await getAuth({})).toEqual({})
   })
 
-  test('should return decoded token when token is valid', async () => {
-    mockPublicKeyFunc.mockReturnValue('secret')
-    expect(await getAuth(mockRequest, mockJWKSDataSource)).toEqual(decodedToken)
-    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+  describe('with a valid token', () => {
+    test('should return decoded token, and log payload details', async () => {
+      mockPublicKeyFunc.mockReturnValue('secret')
+      expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual(decodedToken)
+      expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+      expect(info).toHaveBeenCalledTimes(1)
+      expect(info.mock.calls[0]).toEqual([
+        '#DAL Request authentication - JWT verified',
+        {
+          type: 'http',
+          code: 'DAL_REQUEST_AUTHENTICATION_001',
+          requestTimeMs: expect.any(Number),
+          request: requestInfo,
+          tenantMessage:
+            '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+            '"serviceId":"service-id","correlationId":"correlation-id",' +
+            '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
+            '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
+            '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
+            '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+        }
+      ])
+    })
+
+    test('should return decoded token, and log payload details (no email check)', async () => {
+      mockPublicKeyFunc.mockReturnValue('secret')
+      const tokenNoEmail = jwt.sign(tokenPayload, 'secret', { expiresIn: '1h' })
+      expect(await getAuth(mockRequest(tokenNoEmail), mockJWKSDataSource)).toEqual(
+        jwt.decode(tokenNoEmail, 'secret')
+      )
+      expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+      expect(info).toHaveBeenCalledTimes(1)
+      expect(info.mock.calls[0]).toEqual([
+        '#DAL Request authentication - JWT verified',
+        {
+          type: 'http',
+          code: 'DAL_REQUEST_AUTHENTICATION_001',
+          requestTimeMs: expect.any(Number),
+          request: requestInfo,
+          tenantMessage:
+            '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+            '"serviceId":"service-id","correlationId":"correlation-id",' +
+            '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
+            '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+            '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
+            '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+        }
+      ])
+    })
   })
 
   test('should return an empty object when token cannot be decoded', async () => {
-    expect(await getAuth(incorrectTokenReq, mockJWKSDataSource)).toEqual({})
+    expect(await getAuth(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({})
     expect(mockPublicKeyFunc).not.toHaveBeenCalled()
   })
 
   test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
-    expect(await getAuth(mockRequestWrongSign, mockJWKSDataSource)).toEqual({})
+    expect(await getAuth(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual({})
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 
@@ -89,7 +146,7 @@ describe('getAuth', () => {
     mockPublicKeyFunc.mockImplementation(() => {
       throw error
     })
-    expect(await getAuth(mockRequestWrongSign, mockJWKSDataSource)).toEqual({})
+    expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual({})
     expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
   })
 })
