@@ -1,3 +1,5 @@
 extend type Query {
-  customer(crn: ID!): Customer @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR])
+  customer(crn: ID!): Customer
+    @on
+    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 }
