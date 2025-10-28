@@ -137,12 +137,12 @@ describe('SFI Query', () => {
 
     const result = await makeTestQuery(
       query,
-      false,
-      {},
       {
         'gateway-type': 'external',
         'x-forwarded-authorization': tokenValue
       },
+      false,
+      {},
       [config.get('auth.groups.SFI_REFORM')]
     )
 

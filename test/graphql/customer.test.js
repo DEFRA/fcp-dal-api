@@ -247,15 +247,10 @@ describe('Query.customer', () => {
       unreadCount: 2
     })
 
-    const result = await makeTestQuery(
-      query,
-      true,
-      {},
-      {
-        'gateway-type': 'external',
-        'x-forwarded-authorization': jwt.sign({ contactId: '123' }, 'secret', { expiresIn: '1h' })
-      }
-    )
+    const result = await makeTestQuery(query, {
+      'gateway-type': 'external',
+      'x-forwarded-authorization': jwt.sign({ contactId: '123' }, 'secret', { expiresIn: '1h' })
+    })
 
     expect(result).toEqual({
       data: {
@@ -316,6 +311,7 @@ describe('Query.customer', () => {
           }
         }
       `,
+      null,
       false
     )
 

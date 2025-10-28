@@ -336,15 +336,10 @@ describe('Query.business internal', () => {
       'test-secret'
     )
 
-    const result = await makeTestQuery(
-      query,
-      true,
-      {},
-      {
-        'gateway-type': 'external',
-        'x-forwarded-authorization': tokenValue
-      }
-    )
+    const result = await makeTestQuery(query, {
+      'gateway-type': 'external',
+      'x-forwarded-authorization': tokenValue
+    })
 
     expect(result).toEqual({
       data: {
@@ -782,7 +777,7 @@ describe('Query.business internal', () => {
 
   test('unauthenticated', async () => {
     configMockPath['auth.disabled'] = false
-    const result = await makeTestQuery(query, false)
+    const result = await makeTestQuery(query, null, false)
 
     expect(result.data.business).toBeNull()
     expect(result.errors).toHaveLength(1)

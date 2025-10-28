@@ -114,9 +114,7 @@ describe('business', () => {
         }
       }
     `
-    const result = await makeTestQuery(query, true, {
-      input
-    })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(result).toEqual({
       data: {
@@ -169,9 +167,7 @@ describe('business', () => {
         }
       }
     `
-    const result = await makeTestQuery(query, true, {
-      input
-    })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(result).toEqual({
       data: {
@@ -345,9 +341,7 @@ describe('business', () => {
         }
       }
     `
-    const result = await makeTestQuery(query, true, {
-      input
-    })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(result).toEqual({
       data: {
@@ -517,9 +511,7 @@ describe('business', () => {
         }
       }
     `
-    const result = await makeTestQuery(query, true, {
-      input
-    })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(result).toEqual({
       data: {
@@ -587,9 +579,7 @@ describe('business', () => {
         }
       }
     `
-    const result = await makeTestQuery(query, true, {
-      input
-    })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(result).toEqual({
       data: {
@@ -638,9 +628,7 @@ describe('business', () => {
         }
       }
     `
-    const result = await makeTestQuery(query, true, {
-      input
-    })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(result).toEqual({
       data: {
@@ -712,11 +700,9 @@ describe('business - external gateway', () => {
     `
     const result = await makeTestQuery(
       query,
+      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' },
       true,
-      {
-        input
-      },
-      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+      { input }
     )
 
     expect(result).toEqual({

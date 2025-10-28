@@ -54,7 +54,7 @@ describe('business lock and unlock', () => {
           }
       }
     `
-    const result = await makeTestQuery(query, true, { input })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(nock.isDone()).toBe(true)
 
@@ -105,7 +105,7 @@ describe('business lock and unlock', () => {
           }
       }
     `
-    const result = await makeTestQuery(query, true, { input })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(nock.isDone()).toBe(true)
 

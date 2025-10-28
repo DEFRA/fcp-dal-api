@@ -162,7 +162,7 @@ describe('business', () => {
   beforeEach(setupNock)
 
   test('create a business - withoutUprn', async () => {
-    const result = await makeTestQuery(query, true, { input })
+    const result = await makeTestQuery(query, null, true, { input })
 
     expect(nock.isDone()).toBe(true)
 
@@ -268,7 +268,7 @@ describe('business', () => {
         withUprn: { ...input.correspondenceAddress.withoutUprn, uprn: '123456789012' }
       }
     }
-    const result = await makeTestQuery(query, true, { input: inputWithUprn })
+    const result = await makeTestQuery(query, null, true, { input: inputWithUprn })
 
     expect(result).toEqual({
       data: {
