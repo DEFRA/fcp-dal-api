@@ -1,5 +1,5 @@
 import { describe, expect, jest } from '@jest/globals'
-import net from 'net'
+import net from 'node:net'
 import { setTimeout } from 'node:timers/promises'
 import { config } from '../../../../../app/config.js'
 
