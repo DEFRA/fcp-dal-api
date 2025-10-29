@@ -60,7 +60,7 @@ type BusinessInfo {
   """
   Telephone numbers of the business.
   """
-  phone: Phone @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  phone: Phone @on
 
   """
   Correspondence telephone numbers of the business.
