@@ -5,7 +5,7 @@ type BusinessInfo {
   """
   Name of the business.
   """
-  name: String @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  name: String @on
 
   """
   Firm Reference Number (FRN) of the business.
@@ -35,7 +35,7 @@ type BusinessInfo {
   """
   Address of the business.
   """
-  address: Address @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  address: Address @on
 
   """
   Correspondence address of the business.
@@ -50,7 +50,7 @@ type BusinessInfo {
   """
   Email address of the business.
   """
-  email: Email @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  email: Email @on
 
   """
   Correspondence email of the business.

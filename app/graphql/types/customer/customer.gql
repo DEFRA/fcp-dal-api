@@ -5,7 +5,7 @@ type CustomerInfo {
   """
   Name of the customer.
   """
-  name: CustomerName @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  name: CustomerName @on
 
   """
   Date of birth of the customer.
@@ -135,7 +135,9 @@ type Customer {
   """
   Security questions (memorable words) of the customer.
   """
-  authenticationQuestions: CustomerAuthenticationQuestions @on
+  authenticationQuestions: CustomerAuthenticationQuestions
+    @on
+    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR])
 
   """
   Businesses associated with the customer.

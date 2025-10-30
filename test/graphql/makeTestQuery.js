@@ -3,22 +3,29 @@ import { config } from '../../app/config.js'
 import { context } from '../../app/graphql/context.js'
 import { createSchema } from '../../app/graphql/schema.js'
 
-export async function makeTestQuery(
+const defaultHeaders = { email: 'test@defra.gov.uk', 'gateway-type': 'internal' }
+export const makeTestQuery = async (
   source,
+  headers,
   isAuthenticated = true,
   variableValues = {},
-  headers = { email: 'test@defra.gov.uk', 'gateway-type': 'internal' }
-) {
-  const ctx = await context({ request: { headers } })
-  const response = await graphql({
-    source,
-    schema: await createSchema(),
-    contextValue: {
-      ...ctx,
-      auth: isAuthenticated ? { groups: [config.get('auth.groups.ADMIN')] } : {}
-    },
-    variableValues: variableValues
-  })
-  await ctx.db.dropDatabase()
-  return response
+  authGroups = []
+) => {
+  const ctx = await context({ request: { headers: headers ?? defaultHeaders } })
+  try {
+    const response = await graphql({
+      source,
+      schema: await createSchema(),
+      contextValue: {
+        ...ctx,
+        auth: isAuthenticated
+          ? { groups: [config.get('auth.groups.ADMIN')] }
+          : { groups: authGroups }
+      },
+      variableValues
+    })
+    return response
+  } finally {
+    await ctx.db.dropDatabase()
+  }
 }
