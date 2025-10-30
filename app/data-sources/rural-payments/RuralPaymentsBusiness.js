@@ -212,4 +212,11 @@ export class RuralPaymentsBusiness extends RuralPayments {
       throw error
     }
   }
+
+  async getLandUseByBusinessParcel(sbi, sheetId, parcelId) {
+    const response = await this.get(
+      `SitiAgriApi/cv/landUseByBusinessParcel/sheet/${sheetId}/parcel/${parcelId}/sbi/${sbi}/list`
+    )
+    return response.data
+  }
 }

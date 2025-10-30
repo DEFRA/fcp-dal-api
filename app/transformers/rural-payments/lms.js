@@ -1,5 +1,6 @@
 import { validateDate } from '../../utils/date.js'
 import { convertSquareMetersToHectares } from '../../utils/numbers.js'
+import { transformDateTimeToISO } from '../common.js'
 
 export function transformLandCovers(landCover) {
   const items = landCover?.features || []
@@ -54,4 +55,18 @@ export function transformTotalParcels(landParcels) {
 export function transformTotalArea(landCovers) {
   const totalMeterageArea = landCovers.reduce((totalArea, { area }) => totalArea + area, 0)
   return convertSquareMetersToHectares(totalMeterageArea)
+}
+
+export function transformLandUses(landUses) {
+  return landUses.map((landUse) => ({
+    startDate: transformDateTimeToISO(landUse.start_date),
+    endDate: transformDateTimeToISO(landUse.end_date),
+    insertDate: transformDateTimeToISO(landUse.dt_insert),
+    deleteDate: transformDateTimeToISO(landUse.dt_delete),
+    campaign: landUse.campaign,
+    code: landUse.lu_code,
+    type: landUse.landuse,
+    area: landUse.area,
+    length: landUse.length
+  }))
 }
