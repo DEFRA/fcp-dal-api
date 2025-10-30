@@ -37,20 +37,22 @@ export async function getAuth(request, jwkDatasource) {
       request: {
         remoteAddress: request?.info?.remoteAddress
       },
-      tenantMessage: JSON.stringify({
-        aud: payload.aud,
-        serviceId: payload.serviceId,
-        correlationId: payload.correlationId,
-        currentRelationshipId: payload.currentRelationshipId,
-        sessionId: payload.sessionId,
-        sub: payload.sub,
-        email: payload.email?.split('@')[1],
-        contactId: payload.contactId,
-        relationships: payload.relationships,
-        groups: payload.groups,
-        roles: payload.roles,
-        azp: payload.azp
-      })
+      tenant: {
+        message: JSON.stringify({
+          aud: payload.aud,
+          serviceId: payload.serviceId,
+          correlationId: payload.correlationId,
+          currentRelationshipId: payload.currentRelationshipId,
+          sessionId: payload.sessionId,
+          sub: payload.sub,
+          email: payload.email?.split('@')[1],
+          contactId: payload.contactId,
+          relationships: payload.relationships,
+          groups: payload.groups,
+          roles: payload.roles,
+          azp: payload.azp
+        })
+      }
     })
     return verified
   } catch (error) {

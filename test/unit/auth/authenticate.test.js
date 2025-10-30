@@ -92,13 +92,15 @@ describe('getAuth', () => {
           code: 'DAL_REQUEST_AUTHENTICATION_001',
           requestTimeMs: expect.any(Number),
           request: requestInfo,
-          tenantMessage:
-            '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-            '"serviceId":"service-id","correlationId":"correlation-id",' +
-            '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-            '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
-            '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
-            '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+          tenant: {
+            message:
+              '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"serviceId":"service-id","correlationId":"correlation-id",' +
+              '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
+              '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
+              '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
+              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+          }
         }
       ])
     })
@@ -118,13 +120,15 @@ describe('getAuth', () => {
           code: 'DAL_REQUEST_AUTHENTICATION_001',
           requestTimeMs: expect.any(Number),
           request: requestInfo,
-          tenantMessage:
-            '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-            '"serviceId":"service-id","correlationId":"correlation-id",' +
-            '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-            '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-            '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
-            '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+          tenant: {
+            message:
+              '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"serviceId":"service-id","correlationId":"correlation-id",' +
+              '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
+              '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
+              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+          }
         }
       ])
     })
