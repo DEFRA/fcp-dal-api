@@ -69,6 +69,15 @@ const query = `#graphql
             effectiveToDate
             effectiveFromDate
           }
+          parcelLandUses(sheetId: "sheetId", parcelId: "parcelId") {
+            code
+            startDate
+            endDate
+            insertDate
+            deleteDate
+            area
+            length
+          }
           parcelCovers(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
             id
             name
@@ -240,6 +249,29 @@ const setupNock = (v1) => {
     { name: 'Permanent Crops', area: 1 }
   ])
 
+  v1.get(
+    `/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/sbi/list`
+  ).reply(200, {
+    data: [
+      {
+        sbi: 'sbi',
+        dt_insert: '2021-03-01T12:09:09:009+0000',
+        dt_delete: '9999-12-31T00:00:00:000+0000',
+        sheet_name: 'sheetId',
+        parcel_name: 'parcelId',
+        campaign: 2021,
+        lu_code: 'code',
+        landuse: 'SCRUB - UNGRAZEABLE',
+        start_date: '2021-01-01T00:00:00:000+0000',
+        end_date: '9999-12-31T00:00:00:000+0000',
+        area: 0,
+        length: null
+      }
+    ],
+    success: true,
+    errorString: null
+  })
+
   v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
     .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
@@ -403,6 +435,17 @@ describe('Query.business internal', () => {
             parcelCovers: [
               { id: 'id', name: 'name', area: 0.0001, code: 'code', isBpsEligible: false }
             ],
+            parcelLandUses: [
+              {
+                area: 0,
+                code: 'code',
+                deleteDate: '9999-12-31T00:00:00.000Z',
+                endDate: '9999-12-31T00:00:00.000Z',
+                insertDate: '2021-03-01T12:09:09.009Z',
+                length: null,
+                startDate: '2021-01-01T00:00:00.000Z'
+              }
+            ],
             summary: {
               arableLandArea: 0.0001,
               permanentCropsArea: 0.0001,
@@ -556,6 +599,17 @@ describe('Query.business internal', () => {
             parcelCovers: [
               { id: 'id', name: 'name', area: 0.0001, code: 'code', isBpsEligible: false }
             ],
+            parcelLandUses: [
+              {
+                area: 0,
+                code: 'code',
+                deleteDate: '9999-12-31T00:00:00.000Z',
+                endDate: '9999-12-31T00:00:00.000Z',
+                insertDate: '2021-03-01T12:09:09.009Z',
+                length: null,
+                startDate: '2021-01-01T00:00:00.000Z'
+              }
+            ],
             summary: {
               arableLandArea: 0.0001,
               permanentCropsArea: 0.0001,
@@ -697,6 +751,29 @@ describe('Query.business internal', () => {
       { name: 'Permanent Crops', area: 1 }
     ])
 
+    v1.get(
+      `/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/sbi/list`
+    ).reply(200, {
+      data: [
+        {
+          sbi: 'sbi',
+          dt_insert: '2021-03-01T12:09:09:009+0000',
+          dt_delete: '9999-12-31T00:00:00:000+0000',
+          sheet_name: 'sheetId',
+          parcel_name: 'parcelId',
+          campaign: 2021,
+          lu_code: 'code',
+          landuse: 'SCRUB - UNGRAZEABLE',
+          start_date: '2021-01-01T00:00:00:000+0000',
+          end_date: '9999-12-31T00:00:00:000+0000',
+          area: 0,
+          length: null
+        }
+      ],
+      success: true,
+      errorString: null
+    })
+
     const parcelsQuery = `#graphql
       query BusinessTest {
           business(sbi: "sbi") {
@@ -723,6 +800,15 @@ describe('Query.business internal', () => {
                 area
                 code
                 isBpsEligible
+              }
+              parcelLandUses(sheetId: "sheetId", parcelId: "parcelId") {
+                code
+                startDate
+                endDate
+                insertDate
+                deleteDate
+                area
+                length
               }
               summary {
                 arableLandArea
@@ -765,6 +851,17 @@ describe('Query.business internal', () => {
                 area: 0.0001,
                 code: 'code',
                 isBpsEligible: false
+              }
+            ],
+            parcelLandUses: [
+              {
+                area: 0,
+                code: 'code',
+                deleteDate: '9999-12-31T00:00:00.000Z',
+                endDate: '9999-12-31T00:00:00.000Z',
+                insertDate: '2021-03-01T12:09:09.009Z',
+                length: null,
+                startDate: '2021-01-01T00:00:00.000Z'
               }
             ],
             summary: {

@@ -20,8 +20,8 @@ export const Business = {
     return transformOrganisationToBusiness(response).info
   },
 
-  land({ organisationId }) {
-    return { organisationId }
+  land({ organisationId, sbi }) {
+    return { organisationId, sbi }
   },
 
   async countyParishHoldings({ sbi }, __, { dataSources }) {

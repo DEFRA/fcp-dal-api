@@ -350,7 +350,20 @@ type BusinessLand {
   parcels(date: Date): [BusinessLandParcelPartial]
   parcel(date: Date, sheetId: ID!, parcelId: ID!): BusinessLandParcel
   parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover]
+  parcelLandUses(sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses]
   summary(date: Date): BusinessLandSummary
+}
+
+type BusinessLandParcelUses {
+  code: String!
+  startDate: Date
+  endDate: Date
+  insertDate: Date
+  deleteDate: Date
+  area: Float
+  length: Float
+  type: String
+  campaign: Int
 }
 
 type BusinessLandParcelPartial {

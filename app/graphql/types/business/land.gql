@@ -130,8 +130,65 @@ type BusinessLand {
   parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover] @on
 
   """
+  Land uses of a single parcel based on its SheetId and ParcelId for a particular
+  date for a business.
+  The earliest date is 01/01/2015.
+  """
+  parcelLandUses(sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses] @on
+
+  """
   Summary of the land for a particular date for a business.
   The earliest date is 01/01/2015.
   """
   summary(date: Date): BusinessLandSummary @on
+}
+
+"""
+Land use of a parcel for a business.
+"""
+type BusinessLandParcelUses {
+  """
+  Code of the land use.
+  """
+  code: String! @on
+
+  """
+  Start date of the land use.
+  """
+  startDate: Date @on
+
+  """
+  End date of the land use.
+  """
+  endDate: Date @on
+
+  """
+  Date the land use was inserted.
+  """
+  insertDate: Date @on
+
+  """
+  Date the land use was deleted.
+  """
+  deleteDate: Date @on
+
+  """
+  Area of the land use.
+  """
+  area: Float @on
+
+  """
+  Length of the land use.
+  """
+  length: Float @on
+
+  """
+  Land use type. For example, 'SCRUB - UNGRAZEABLE'.
+  """
+  type: String @on
+
+  """
+  Campaign of the land use.
+  """
+  campaign: Int @on
 }
