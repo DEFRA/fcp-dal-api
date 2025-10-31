@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { getAuth } from '../auth/authenticate.js'
+import { config } from '../config.js'
 import { MongoBusiness } from '../data-sources/mongo/Business.js'
 import { MongoCustomer } from '../data-sources/mongo/Customer.js'
 import { MongoJWKS } from '../data-sources/mongo/JWKS.js'
@@ -9,6 +10,8 @@ import { Permissions } from '../data-sources/static/permissions.js'
 import { BadRequest } from '../errors/graphql.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
+
+const internalGatewayDevOverrideEmail = config.get('kits.internal.devOverrideEmail')
 
 export const extractOrgIdFromDefraIdToken = (sbi, token) => {
   const { payload } = jwt.decode(token, { complete: true })
@@ -38,7 +41,8 @@ export async function context({ request }) {
     { logger: requestLogger },
     {
       request,
-      gatewayType: request.headers['gateway-type'] || 'internal'
+      gatewayType: request.headers['gateway-type'] || 'internal',
+      internalGatewayDevOverrideEmail
     }
   ]
 

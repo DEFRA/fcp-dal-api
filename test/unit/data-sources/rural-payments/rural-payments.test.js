@@ -201,6 +201,64 @@ describe('RuralPayments', () => {
         )
       )
     })
+
+    test('throws error if gateway type is internal, but no email header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'internal',
+          request: {
+            headers: {}
+          }
+        }
+      )
+      const request = {}
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).rejects.toEqual(
+        new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+          extensions: {
+            message:
+              'Invalid request headers, must be either "email: {valid user email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
+          }
+        })
+      )
+    })
+
+    test('does not throw if gateway type is internal and email header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'internal',
+          request: {
+            headers: {
+              email: 'test'
+            }
+          }
+        }
+      )
+      const request = {}
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+    })
+
+    test('does not throw if gateway type is internal and internalGatewayDevOverrideEmail is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'internal',
+          request: {
+            headers: {}
+          },
+          internalGatewayDevOverrideEmail: 'test'
+        }
+      )
+      const request = {}
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+    })
   })
 
   describe('trace', () => {

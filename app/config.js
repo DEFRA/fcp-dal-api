@@ -173,6 +173,13 @@ export const config = convict({
         format: String,
         default: null,
         env: 'KITS_INT_GATEWAY_URL'
+      },
+      devOverrideEmail: {
+        doc: 'Dev email address to send in the `email` header',
+        format: String,
+        env: 'KITS_INT_DEV_OVERRIDE_EMAIL',
+        nullable: true,
+        default: null
       }
     },
     external: {

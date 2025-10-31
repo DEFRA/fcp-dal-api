@@ -66,7 +66,7 @@ export async function customFetch(url, options, requestTls) {
 export class RuralPayments extends RESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
-  constructor(config, { request, gatewayType }) {
+  constructor(config, { request, gatewayType, internalGatewayDevOverrideEmail }) {
     super(config)
     this.request = request
 
@@ -77,6 +77,7 @@ export class RuralPayments extends RESTDataSource {
       )
     }
 
+    this.internalGatewayDevOverrideEmail = internalGatewayDevOverrideEmail
     this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
     const requestTls = this.gatewayType === 'external' ? externalRequestTls : internalRequestTls
 
@@ -118,7 +119,10 @@ export class RuralPayments extends RESTDataSource {
   async willSendRequest(path, request) {
     const headers = this.request.headers
     const additionalHeaders = {}
-    if (this.gatewayType === 'internal' && headers.email) {
+
+    if (this.gatewayType === 'internal' && this.internalGatewayDevOverrideEmail) {
+      additionalHeaders.email = this.internalGatewayDevOverrideEmail
+    } else if (this.gatewayType === 'internal' && headers.email) {
       additionalHeaders.email = headers.email
     } else if (this.gatewayType === 'external' && headers['x-forwarded-authorization']) {
       additionalHeaders.Authorization = headers['x-forwarded-authorization']
