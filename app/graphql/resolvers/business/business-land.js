@@ -4,6 +4,7 @@ import {
   transformLandCoversToArea,
   transformLandParcels,
   transformLandParcelsEffectiveDates,
+  transformLandUses,
   transformTotalArea,
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
@@ -14,7 +15,7 @@ export const BusinessLand = {
     return { organisationId, date }
   },
 
-  async parcel({ organisationId }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
+  async parcel({ organisationId, sbi }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
     validateDate(date)
 
     const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
@@ -26,6 +27,7 @@ export const BusinessLand = {
     return {
       ...parcel,
       organisationId,
+      sbi,
       date
     }
   },
@@ -61,6 +63,12 @@ export const BusinessLand = {
         parcelId,
         date
       )
+    )
+  },
+
+  async parcelLandUses({ sbi }, { sheetId, parcelId }, { dataSources }) {
+    return transformLandUses(
+      await dataSources.ruralPaymentsBusiness.getLandUseByBusinessParcel(sbi, sheetId, parcelId)
     )
   }
 }

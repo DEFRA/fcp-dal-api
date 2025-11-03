@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { describe, jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
 import { RuralPaymentsBusiness } from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../../app/errors/graphql.js'
@@ -438,6 +438,20 @@ describe('Rural Payments Business', () => {
       await expect(
         ruralPaymentsBusiness.unlockOrganisation('123', { reason: 'test' })
       ).rejects.toThrow('Business is already unlocked')
+    })
+  })
+
+  describe('getLandUseByBusinessParcel', () => {
+    test('should return land use by business parcel', async () => {
+      const mockResponse = { data: 'mockData' }
+      httpGet.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.getLandUseByBusinessParcel(
+        'mockSbi',
+        'mockSheetId',
+        'mockParcelId'
+      )
+      expect(result).toEqual(mockResponse.data)
     })
   })
 })

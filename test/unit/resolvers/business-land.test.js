@@ -48,6 +48,21 @@ const dataSources = {
         { name: 'Permanent Grassland', area: 2000 },
         { name: 'Permanent Crops', area: 3000 }
       ]
+    },
+    getLandUseByBusinessParcel() {
+      return [
+        {
+          start_date: '2015-09-16T09:50:01:000+0000',
+          end_date: '2015-09-16T09:50:01:000+0000',
+          dt_insert: '2015-09-16T09:50:01:000+0000',
+          dt_delete: '2015-09-16T09:50:01:000+0000',
+          campaign: 1,
+          lu_code: 'mockCode',
+          landuse: 'mockLanduse',
+          area: 0.1,
+          length: 0.1
+        }
+      ]
     }
   }
 }
@@ -102,6 +117,28 @@ describe('BusinessLand', () => {
       )
     ).toEqual([
       { id: '11033654', area: 0.1, name: 'Mock Name', code: 'someCode', isBpsEligible: true }
+    ])
+  })
+
+  it('parcelLandUses', async () => {
+    expect(
+      await BusinessLand.parcelLandUses(
+        mockBusiness,
+        { sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { dataSources }
+      )
+    ).toEqual([
+      {
+        code: 'mockCode',
+        startDate: '2015-09-16T09:50:01.000Z',
+        endDate: '2015-09-16T09:50:01.000Z',
+        insertDate: '2015-09-16T09:50:01.000Z',
+        deleteDate: '2015-09-16T09:50:01.000Z',
+        area: 0.1,
+        length: 0.1,
+        type: 'mockLanduse',
+        campaign: 1
+      }
     ])
   })
 })

@@ -3,17 +3,17 @@ import jwt from 'jsonwebtoken'
 
 const parcels = [
   {
-    id: '6919136',
-    sheetId: 'SS6830',
-    parcelId: '3649',
-    area: 0.3429,
-    pendingDigitisation: true
+    id: '7386091',
+    sheetId: 'SS6627',
+    parcelId: '5662',
+    area: 1.027,
+    pendingDigitisation: false
   },
   {
-    id: '6772251',
-    sheetId: 'SS6629',
-    parcelId: '4244',
-    area: 0.4269,
+    id: '7386092',
+    sheetId: 'SS6828',
+    parcelId: '3818',
+    area: 1.027,
     pendingDigitisation: false
   }
 ]
@@ -376,29 +376,36 @@ const business = {
   },
   land: {
     summary: {
-      arableLandArea: 9.1844,
-      permanentCropsArea: 0.4886,
-      permanentGrasslandArea: 7.9759,
-      totalArea: 23.3594,
-      totalParcels: 11
+      arableLandArea: 1.027,
+      permanentCropsArea: 0,
+      permanentGrasslandArea: 0,
+      totalArea: 2.0541,
+      totalParcels: 2
     },
     parcels: expect.arrayContaining(parcels),
     parcel: {
-      id: '6919136',
-      sheetId: 'SS6830',
-      parcelId: '3649',
-      area: 0.3429,
-      pendingDigitisation: true,
-      effectiveToDate: '2024-06-04T08:02:01.902Z',
-      effectiveFromDate: '2024-06-02T08:02:01.902Z'
+      id: '7386091',
+      sheetId: 'SS6627',
+      parcelId: '5662',
+      area: 1.027,
+      pendingDigitisation: false,
+      effectiveToDate: '2024-09-15T07:52:37.868Z',
+      effectiveFromDate: '2024-09-13T07:52:37.868Z'
     },
     parcelCovers: [
       {
-        id: '10316094',
-        name: 'Woodland',
-        area: 0.3429,
-        code: '332',
-        isBpsEligible: false
+        id: '11769295',
+        name: 'Arable Land',
+        area: 1.027,
+        code: '110',
+        isBpsEligible: true
+      },
+      {
+        id: '11769235',
+        name: 'Permanent Grassland',
+        area: 2.541,
+        code: '131',
+        isBpsEligible: true
       }
     ]
   },
@@ -507,6 +514,80 @@ const customer = {
     sbi: '1111111111',
     name: 'Maggio, Murray and Dicki',
     role: 'Business Partner',
+    messages: [
+      {
+        id: '6070061621',
+        subject: 'Ocer uredo caecus tantillus.',
+        date: '2024-01-28T03:48:38.540Z',
+        body: '<p>Averto veniam suus cotidie arbor strues delectatio arx.</p>',
+        read: true,
+        deleted: false
+      },
+      {
+        id: '7363663048',
+        subject: 'Absconditus tergo mollitia at tempore.',
+        date: '2024-06-18T22:03:32.049Z',
+        body: '<p>Clamo corona brevis conventus quis alveus cattus amaritudo coadunatio maxime.</p>',
+        read: true,
+        deleted: false
+      },
+      {
+        id: '473535942',
+        subject: 'Argentum delectatio talus surculus fugit vita strues cras triduana tempore.',
+        date: '2024-03-14T07:35:30.255Z',
+        body: '<p>Vomica adsum culpo asporto atque illo averto deorsum.</p>',
+        read: false,
+        deleted: false
+      },
+      {
+        id: '340480251',
+        subject: 'Deprecator ipsum spiritus spero expedita succurro aestus.',
+        date: '2024-07-12T15:42:24.493Z',
+        body: '<p>Coepi vita admitto testimonium peior ocer tredecim teneo.</p>',
+        read: false,
+        deleted: false
+      },
+      {
+        id: '3825112313',
+        subject: 'Ducimus ustulo accedo amplus.',
+        date: '2023-11-26T04:44:18.125Z',
+        body: '<p>Tricesimus abstergo pariatur crebro degusto creptio acceptus corrumpo.</p>',
+        read: true,
+        deleted: false
+      },
+      {
+        id: '3048549481',
+        subject: 'Molestias amicitia conculco cui xiphias stips.',
+        date: '2024-07-18T21:20:50.225Z',
+        body: '<p>Ciminatio valens deporto magni usque absque appono repellat trado.</p>',
+        read: false,
+        deleted: false
+      },
+      {
+        id: '5609847382',
+        subject: 'Abbas thesis decumbo utpote alveus autem ultra celo alii itaque.',
+        date: '2024-02-22T10:02:55.639Z',
+        body: '<p>Angelus caries vicissitudo.</p>',
+        read: false,
+        deleted: false
+      },
+      {
+        id: '4773520611',
+        subject: 'Amissio quae cado delicate antea nostrum.',
+        date: '2023-12-20T21:31:12.884Z',
+        body: '<p>Absconditus tripudio coadunatio.</p>',
+        read: true,
+        deleted: false
+      },
+      {
+        id: '761422798',
+        subject: 'Comitatus aperio cito cruciamentum corrigo aureus.',
+        date: '2023-07-28T23:27:39.290Z',
+        body: '<p>Umbra aeger texo similique alveus vulgivagus.</p>',
+        read: true,
+        deleted: false
+      }
+    ],
     permissionGroups: [
       {
         id: 'BASIC_PAYMENT_SCHEME',
@@ -794,6 +875,15 @@ const businessQuery = gql`
           code
           isBpsEligible
         }
+        parcelLandUses(sheetId: $sheetId, parcelId: $parcelId) {
+          code
+          startDate
+          endDate
+          insertDate
+          deleteDate
+          area
+          length
+        }
       }
       countyParishHoldings {
         cphNumber
@@ -862,8 +952,8 @@ const businessVariables = {
   sbi: '1111111111',
   crn: '1111111100',
   date: '2025-05-04',
-  sheetId: 'SS6830',
-  parcelId: '3649'
+  sheetId: 'SS6627',
+  parcelId: '5662'
 }
 
 const customerQuery = gql`
