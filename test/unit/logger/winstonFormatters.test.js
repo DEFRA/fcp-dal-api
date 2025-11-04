@@ -47,6 +47,7 @@ const fixture = {
     statusCode: 200
   },
   requestTimeMs: 100,
+  tenant: { id: 'tenant-id', message: 'some tenant info' },
   otherItems: 'will be omitted', // because they will be pruned by CDP's log processing
   transactionId: 'transaction-id',
   traceId: 'trace-id'
@@ -105,6 +106,7 @@ describe('winstonFormatters', () => {
             response_time: 100
           }
         },
+        tenant: { id: 'tenant-id', message: 'some tenant info' },
         url: {
           full: 'http://localhost/path',
           query: 'searchFieldType=SBI&primarySearchPhrase=107183280&offset=0&limit=1'

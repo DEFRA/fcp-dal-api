@@ -56,7 +56,7 @@ const buildUrl = ({ body, path }) =>
   }
 
 export const cdpSchemaTranslator = format((info) => {
-  const { error, code, request, response, requestTimeMs, transactionId, traceId } = info
+  const { error, code, request, response, requestTimeMs, tenant, transactionId, traceId } = info
 
   return Object.assign(
     {
@@ -77,6 +77,7 @@ export const cdpSchemaTranslator = format((info) => {
         response?.statusCode,
         request?.path
       ),
+      tenant && { tenant },
       buildUrl(request || {})
     ]
   )
