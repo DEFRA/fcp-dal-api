@@ -28,9 +28,9 @@ export const logger = createLogger({
 })
 
 process.on('exit', () => {
-  logger.transports.forEach((transport) => {
+  for (const transport of logger.transports) {
     if (typeof transport.close === 'function') {
       transport.close()
     }
-  })
+  }
 })
