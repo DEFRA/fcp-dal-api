@@ -1,0 +1,157 @@
+{% extends "layout.njk" %}
+
+{% block title %}
+  {{ title }}
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <div class="column">
+      <form class="search-input" action="?token={{token}}&selectedCrn={{ customer.crn }}">
+        <label>Search</label>
+        <input name="search" autocomplete="off" value="{{search}}" placeholder="Enter search term"/>
+        <input name="token" value="{{token}}" type="hidden"/>
+        <input name="selectedCrn" value="{{selectedCrn}}" type="hidden"/>
+        <input name="selectedPermissionIndex" value="0" type="hidden"/>
+        <button type="submit">Submit</button>
+      </form>
+      <div class="primary-table clickable">
+        <table>
+          <thead>
+            <tr>
+              <th>CRN</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for customer in businessCustomers %}
+              <tr class="{% if customer.crn === selectedCrn %}selected{% endif %}">
+                <td class="link">
+                  <a href="?token={{token}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.crn }}</a>
+                </td>
+                <td class="link">
+                  <a href="?token={{token}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.firstName }}</a>
+                </td>
+                <td class="link">
+                  <a href="?token={{token}}&selectedCrn={{ customer.crn }}&search={{ search }}&selectedPermissionIndex=0">{{ customer.lastName }}</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="3">No customers found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="column right-column">
+      <h1>{{selectedResult.data.customer.info.name.first}}
+        {{selectedResult.data.customer.info.name.last}}</h1>
+
+      <div class="right-column-details-header">
+        <dl>
+          <dt>CRN:</dt>
+          <dd>{{selectedResult.data.customer.crn}}</dd>
+          <dt>Full Name:</dt>
+          <dd>{{selectedResult.data.customer.info.name.title}}
+            {{selectedResult.data.customer.info.name.first}}
+            {{selectedResult.data.customer.info.name.middle}}
+            {{selectedResult.data.customer.info.name.last}}</dd>
+          <dt>Role:</dt>
+          <dd>{{selectedResult.data.customer.business.role}}</dd>
+        </dl>
+        {% if showAuthentication %}
+          <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex=0">Show Permissions</a>
+        {% else %}
+          <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&showAuthentication=true&search={{ search }}&selectedPermissionIndex=0">Show Authenticate Questions</a>
+        {% endif %}
+      </div>
+
+      {%if showAuthentication %}
+        <table className="even-columns">
+          <thead>
+            <tr>
+              <th>Date of Birth</th>
+              <th>Memorable Date</th>
+              <th>Memorable Event</th>
+              <th>Memorable Place</th>
+              <th>Updated Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <td>
+              <div>{{selectedResult.data.customer.info.dateOfBirth}}</div>
+            </td>
+            <td>
+              <div>{{authenticationQuestions.data.customer.authenticationQuestions.memorableDate}}</div>
+            </td>
+
+            <td>
+              <div>{{authenticationQuestions.data.customer.authenticationQuestions.memorableEvent}}</div>
+            </td>
+            <td>
+              <div>{{authenticationQuestions.data.customer.authenticationQuestions.memorableLocation}}</div>
+            </td>
+            <td>
+              <div>{{authenticationQuestions.data.customer.authenticationQuestions.updatedAt}}</div>
+            </td>
+          </tbody>
+        </table>
+      {%else %}
+        <table class="even-columns clickable">
+          <thead>
+            <tr>
+              <th>Permission</th>
+              <th>Level</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for permissionGroup in selectedResult.data.customer.business.permissionGroups %}
+              <tr>
+                <td class="link">
+                  <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex={{loop.index0}}">
+                    {{ permissionGroup.id }}
+                  </a>
+                </td>
+                <td class="link">
+                  <a href="?token={{token}}&selectedCrn={{ selectedCrn }}&search={{ search }}&selectedPermissionIndex={{loop.index0}}">{{ permissionGroup.level }}</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="3">No customers found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <table className="even-columns">
+          <thead>
+            <tr>
+              <th>Permission Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for permissionDescription in selectedResult
+              .data
+              .customer
+              .business
+              .permissionGroups[selectedPermissionIndex]
+              .functions %}
+              <tr class="{% if selectedPermissionIndex == loop.index0 %}selected{% endif %}">
+                <td>
+                  <div>{{ permissionDescription }}</div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {%endif%}
+      </div>
+    </div>
+  {% endblock %}
