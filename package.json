@@ -36,7 +36,7 @@
     "@graphql-tools/merge": "^9.0.17",
     "@graphql-tools/schema": "^10.0.16",
     "@graphql-tools/utils": "^10.7.2",
-    "@hapi/hapi": "^21.3.12",
+    "@hapi/hapi": "^21.4.4",
     "apollo-datasource-mongodb": "^0.6.0",
     "aws-embedded-metrics": "^4.2.0",
     "aws4": "^1.13.2",
