@@ -2,7 +2,8 @@ import {
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels,
-  transformLandParcelsEffectiveDates
+  transformLandParcelsEffectiveDates,
+  transformLandUses
 } from '../../../../app/transformers/rural-payments/lms.js'
 
 describe('LMS transformer', () => {
@@ -72,5 +73,51 @@ describe('LMS transformer', () => {
       effectiveFrom: '2023-01-01T00:00:00.000Z'
     }
     expect(transformLandParcelsEffectiveDates(parcelId, sheetId, parcels)).toEqual(output)
+  })
+
+  describe('#transformLandUses', () => {
+    let input
+    let expectedOutput
+    beforeEach(() => {
+      input = [
+        {
+          start_date: '2015-09-16T09:50:01:000+0000',
+          end_date: '2015-09-16T09:50:01:000+0000',
+          dt_insert: '2015-09-16T09:50:01:000+0000',
+          dt_delete: '2015-09-16T09:50:01:000+0000',
+          campaign: 1,
+          lu_code: 'mockCode',
+          landuse: 'mockLanduse',
+          area: 1000,
+          length: null
+        }
+      ]
+
+      expectedOutput = [
+        {
+          startDate: '2015-09-16T09:50:01.000Z',
+          endDate: '2015-09-16T09:50:01.000Z',
+          insertDate: '2015-09-16T09:50:01.000Z',
+          deleteDate: '2015-09-16T09:50:01.000Z',
+          campaign: 1,
+          code: 'mockCode',
+          type: 'mockLanduse',
+          area: 0.1,
+          length: null
+        }
+      ]
+    })
+
+    test('transformLandUses - no length', () => {
+      expect(transformLandUses(input)).toEqual(expectedOutput)
+    })
+
+    test('transformLandUses - no area', () => {
+      input[0].area = null
+      input[0].length = 1000
+      expectedOutput[0].area = null
+      expectedOutput[0].length = 1000
+      expect(transformLandUses(input)).toEqual(expectedOutput)
+    })
   })
 })

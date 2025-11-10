@@ -3,74 +3,79 @@ import {
   BusinessLandSummary
 } from '../../../app/graphql/resolvers/business/business-land.js'
 
-const dataSources = {
-  ruralPaymentsPortalApi: {
-    getParcelsSummaryByOrganisationId() {
-      return {
-        totalParcels: 1000,
-        totalArea: 2000
-      }
-    }
-  },
-  ruralPaymentsBusiness: {
-    getParcelsByOrganisationIdAndDate() {
-      return [
-        {
-          id: 'mockId',
-          parcelId: 'mockParcelId',
-          sheetId: 'mockSheetId',
-          area: 1000,
-          pendingDigitisation: false
-        }
-      ]
-    },
-    getCoversByOrgSheetParcelIdDate() {
-      return {
-        type: 'FeatureCollection',
-        features: [
-          {
-            id: '11033654',
-            geometry: null,
-            properties: {
-              area: '1000',
-              code: 'someCode',
-              name: 'Mock Name',
-              isBpsEligible: 'true'
-            },
-            type: 'Feature'
-          }
-        ]
-      }
-    },
-    getCoversSummaryByOrganisationIdAndDate() {
-      return [
-        { name: 'Arable Land', area: 1000 },
-        { name: 'Permanent Grassland', area: 2000 },
-        { name: 'Permanent Crops', area: 3000 }
-      ]
-    },
-    getLandUseByBusinessParcel() {
-      return [
-        {
-          start_date: '2015-09-16T09:50:01:000+0000',
-          end_date: '2015-09-16T09:50:01:000+0000',
-          dt_insert: '2015-09-16T09:50:01:000+0000',
-          dt_delete: '2015-09-16T09:50:01:000+0000',
-          campaign: 1,
-          lu_code: 'mockCode',
-          landuse: 'mockLanduse',
-          area: 0.1,
-          length: 0.1
-        }
-      ]
-    }
-  }
-}
-
-const mockBusiness = { organisationId: 'mockId' }
-const mockArguments = { date: '2022-01-01' }
-
 describe('BusinessLand', () => {
+  const mockBusiness = { organisationId: 'mockId' }
+  const mockArguments = { date: '2022-01-01' }
+
+  let dataSources
+  let getParcelsByOrganisationIdAndDateResult
+  let getCoversByOrgSheetParcelIdDateResult
+  let getCoversSummaryByOrganisationIdAndDateResult
+  let getLandUseByBusinessParcelResult
+
+  beforeEach(() => {
+    getParcelsByOrganisationIdAndDateResult = [
+      {
+        id: 'mockId',
+        parcelId: 'mockParcelId',
+        sheetId: 'mockSheetId',
+        area: 1000,
+        pendingDigitisation: false
+      }
+    ]
+    getCoversByOrgSheetParcelIdDateResult = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          id: '11033654',
+          geometry: null,
+          properties: {
+            area: '1000',
+            code: 'someCode',
+            name: 'Mock Name',
+            isBpsEligible: 'true'
+          },
+          type: 'Feature'
+        }
+      ]
+    }
+    getCoversSummaryByOrganisationIdAndDateResult = [
+      { name: 'Arable Land', area: 1000 },
+      { name: 'Permanent Grassland', area: 2000 },
+      { name: 'Permanent Crops', area: 3000 }
+    ]
+    getLandUseByBusinessParcelResult = [
+      {
+        start_date: '2015-09-16T09:50:01:000+0000',
+        end_date: '2015-09-16T09:50:01:000+0000',
+        dt_insert: '2015-09-16T09:50:01:000+0000',
+        dt_delete: '2015-09-16T09:50:01:000+0000',
+        campaign: 1,
+        lu_code: 'mockCode',
+        landuse: 'mockLanduse',
+        area: 1000,
+        length: null
+      }
+    ]
+
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getParcelsByOrganisationIdAndDate() {
+          return getParcelsByOrganisationIdAndDateResult
+        },
+        getCoversByOrgSheetParcelIdDate() {
+          return getCoversByOrgSheetParcelIdDateResult
+        },
+        getCoversSummaryByOrganisationIdAndDate() {
+          return getCoversSummaryByOrganisationIdAndDateResult
+        },
+        getLandUseByBusinessParcel() {
+          return getLandUseByBusinessParcelResult
+        }
+      }
+    }
+  })
+
   it('summary', () => {
     expect(BusinessLand.summary(mockBusiness, mockArguments)).toEqual({
       ...mockBusiness,
@@ -120,7 +125,7 @@ describe('BusinessLand', () => {
     ])
   })
 
-  it('parcelLandUses', async () => {
+  it('parcelLandUses - no length', async () => {
     expect(
       await BusinessLand.parcelLandUses(
         mockBusiness,
@@ -135,52 +140,77 @@ describe('BusinessLand', () => {
         insertDate: '2015-09-16T09:50:01.000Z',
         deleteDate: '2015-09-16T09:50:01.000Z',
         area: 0.1,
-        length: 0.1,
+        length: null,
         type: 'mockLanduse',
         campaign: 1
       }
     ])
   })
-})
 
-describe('BusinessLandSummary', () => {
-  it('totalParcels', async () => {
+  it('parcelLandUses - no area', async () => {
+    getLandUseByBusinessParcelResult[0].area = null
+    getLandUseByBusinessParcelResult[0].length = 1000
+
     expect(
-      await BusinessLandSummary.totalParcels([{ id: 'mockId' }], null, {
-        dataSources
-      })
-    ).toEqual(1)
+      await BusinessLand.parcelLandUses(
+        mockBusiness,
+        { sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { dataSources }
+      )
+    ).toEqual([
+      {
+        code: 'mockCode',
+        startDate: '2015-09-16T09:50:01.000Z',
+        endDate: '2015-09-16T09:50:01.000Z',
+        insertDate: '2015-09-16T09:50:01.000Z',
+        deleteDate: '2015-09-16T09:50:01.000Z',
+        area: null,
+        length: 1000,
+        type: 'mockLanduse',
+        campaign: 1
+      }
+    ])
   })
 
-  it('totalArea', async () => {
-    expect(
-      await BusinessLandSummary.totalArea({ id: 'mockId' }, null, {
-        dataSources
-      })
-    ).toEqual(0.1)
-  })
+  describe('BusinessLandSummary', () => {
+    it('totalParcels', async () => {
+      expect(
+        await BusinessLandSummary.totalParcels([{ id: 'mockId' }], null, {
+          dataSources
+        })
+      ).toEqual(1)
+    })
 
-  it('arableLandArea', async () => {
-    expect(
-      await BusinessLandSummary.arableLandArea({ id: 'mockId' }, null, {
-        dataSources
-      })
-    ).toEqual(0.1)
-  })
+    it('totalArea', async () => {
+      expect(
+        await BusinessLandSummary.totalArea({ id: 'mockId' }, null, {
+          dataSources
+        })
+      ).toEqual(0.1)
+    })
 
-  it('permanentGrasslandArea', async () => {
-    expect(
-      await BusinessLandSummary.permanentGrasslandArea({ id: 'mockId' }, null, {
-        dataSources
-      })
-    ).toEqual(0.2)
-  })
+    it('arableLandArea', async () => {
+      expect(
+        await BusinessLandSummary.arableLandArea({ id: 'mockId' }, null, {
+          dataSources
+        })
+      ).toEqual(0.1)
+    })
 
-  it('permanentCropsArea', async () => {
-    expect(
-      await BusinessLandSummary.permanentCropsArea({ id: 'mockId' }, null, {
-        dataSources
-      })
-    ).toEqual(0.3)
+    it('permanentGrasslandArea', async () => {
+      expect(
+        await BusinessLandSummary.permanentGrasslandArea({ id: 'mockId' }, null, {
+          dataSources
+        })
+      ).toEqual(0.2)
+    })
+
+    it('permanentCropsArea', async () => {
+      expect(
+        await BusinessLandSummary.permanentCropsArea({ id: 'mockId' }, null, {
+          dataSources
+        })
+      ).toEqual(0.3)
+    })
   })
 })

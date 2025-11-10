@@ -66,7 +66,7 @@ export function transformLandUses(landUses) {
     campaign: landUse.campaign,
     code: landUse.lu_code,
     type: landUse.landuse,
-    area: landUse.area,
+    area: landUse.area && convertSquareMetersToHectares(landUse.area),
     length: landUse.length
   }))
 }
