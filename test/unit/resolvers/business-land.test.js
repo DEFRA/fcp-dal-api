@@ -129,7 +129,7 @@ describe('BusinessLand', () => {
     expect(
       await BusinessLand.parcelLandUses(
         mockBusiness,
-        { sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { date: '2025-05-04', sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
         { dataSources }
       )
     ).toEqual([
@@ -154,7 +154,7 @@ describe('BusinessLand', () => {
     expect(
       await BusinessLand.parcelLandUses(
         mockBusiness,
-        { sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { date: '2025-05-04', sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
         { dataSources }
       )
     ).toEqual([

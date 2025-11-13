@@ -134,7 +134,7 @@ type BusinessLand {
   date for a business.
   The earliest date is 01/01/2015.
   """
-  parcelLandUses(sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses] @on
+  parcelLandUses(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses] @on
 
   """
   Summary of the land for a particular date for a business.

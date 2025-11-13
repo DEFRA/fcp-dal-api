@@ -66,9 +66,16 @@ export const BusinessLand = {
     )
   },
 
-  async parcelLandUses({ sbi }, { sheetId, parcelId }, { dataSources }) {
+  async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, { dataSources }) {
+    validateDate(date)
+
     return transformLandUses(
-      await dataSources.ruralPaymentsBusiness.getLandUseByBusinessParcel(sbi, sheetId, parcelId)
+      await dataSources.ruralPaymentsBusiness.getLandUseByBusinessParcel(
+        sbi,
+        sheetId,
+        parcelId,
+        date
+      )
     )
   }
 }
