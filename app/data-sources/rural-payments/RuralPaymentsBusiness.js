@@ -213,9 +213,26 @@ export class RuralPaymentsBusiness extends RuralPayments {
     }
   }
 
-  async getLandUseByBusinessParcel(sbi, sheetId, parcelId) {
+  async getLandUseByBusinessParcel(sbi, sheetId, parcelId, date = new Date()) {
     const response = await this.get(
-      `SitiAgriApi/cv/landUseByBusinessParcel/sheet/${sheetId}/parcel/${parcelId}/sbi/${sbi}/list`
+      `SitiAgriApi/cv/landUseByBusinessParcel/sheet/${sheetId}/parcel/${parcelId}/sbi/${sbi}/list`,
+      {
+        params: {
+          // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm:ss`
+          pointInTime: new Date(date)
+            .toLocaleString('en-GB', {
+              timeZone: 'Europe/London',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false
+            })
+            .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2}:\d{2})/, '$3-$2-$1 $4')
+        }
+      }
     )
     return response.data
   }

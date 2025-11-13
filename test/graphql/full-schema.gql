@@ -350,7 +350,7 @@ type BusinessLand {
   parcels(date: Date): [BusinessLandParcelPartial]
   parcel(date: Date, sheetId: ID!, parcelId: ID!): BusinessLandParcel
   parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover]
-  parcelLandUses(sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses]
+  parcelLandUses(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses]
   summary(date: Date): BusinessLandSummary
 }
 
