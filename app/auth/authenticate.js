@@ -29,7 +29,6 @@ export async function getAuth(request, jwkDatasource) {
       code: DAL_REQUEST_AUTHENTICATION_001
     })
 
-    const payload = decodedToken.payload?.payload ?? {}
     logger.info('#DAL Request authentication - JWT verified', {
       type: 'http',
       code: DAL_REQUEST_AUTHENTICATION_001,
@@ -39,18 +38,21 @@ export async function getAuth(request, jwkDatasource) {
       },
       tenant: {
         message: JSON.stringify({
-          aud: payload.aud,
-          serviceId: payload.serviceId,
-          correlationId: payload.correlationId,
-          currentRelationshipId: payload.currentRelationshipId,
-          sessionId: payload.sessionId,
-          sub: payload.sub,
-          email: payload.email?.split('@')[1],
-          contactId: payload.contactId,
-          relationships: payload.relationships,
-          groups: payload.groups,
-          roles: payload.roles,
-          azp: payload.azp
+          appid: verified.appid,
+          aud: verified.aud,
+          oid: verified.oid,
+          serviceId: verified.serviceId,
+          correlationId: verified.correlationId,
+          currentRelationshipId: verified.currentRelationshipId,
+          sessionId: verified.sessionId,
+          sub: verified.sub,
+          tid: verified.tid,
+          email: verified.email?.split('@')[1],
+          contactId: verified.contactId,
+          relationships: verified.relationships,
+          groups: verified.groups,
+          roles: verified.roles,
+          azp: verified.azp
         })
       }
     })

@@ -13,51 +13,32 @@ const { authDirectiveTransformer, authGroups, checkAuthGroup, getAuth } = await 
 )
 
 const tokenPayload = {
-  header: {
-    typ: 'JWT',
-    alg: 'RS256',
-    x5t: 'x5t',
-    kid: 'kid'
-  },
-  payload: {
-    aud: 'api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
-    iss: 'https://sts.windows.net/2d731eb1-6721-4349-9cb2-8fe9b0ab53a2/',
-    iat: 1701713296,
-    nbf: 1701713296,
-    exp: 1701717196,
-    aio: 'aio',
-    appid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
-    appidacr: '1',
-    groups: ['2d731eb1-6721-4349-9cb2-8fe9b0ab53a2'],
-    idp: 'https://sts.windows.net/2d731eb1-6721-4349-9cb2-8fe9b0ab53a2/',
-    oid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
-    rh: 'rh',
-    sub: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
-    tid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
-    uti: 'uti',
-    ver: '1.0',
-    serviceId: 'service-id',
-    correlationId: 'correlation-id',
-    currentRelationshipId: 'relationship-id',
-    sessionId: 'session-id',
-    contactId: 'contact-id',
-    relationships: ['orgId:sbi:company name:'],
-    roles: ['role-id'],
-    azp: 'azp-id'
-  },
-  signature: 'signature'
+  aud: 'api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  iss: 'https://sts.windows.net/2d731eb1-6721-4349-9cb2-8fe9b0ab53a2/',
+  aio: 'aio',
+  appid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  appidacr: '1',
+  groups: ['2d731eb1-6721-4349-9cb2-8fe9b0ab53a2'],
+  idp: 'https://sts.windows.net/2d731eb1-6721-4349-9cb2-8fe9b0ab53a2/',
+  oid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  rh: 'rh',
+  sub: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  tid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  uti: 'uti',
+  ver: '1.0',
+  serviceId: 'service-id',
+  correlationId: 'correlation-id',
+  currentRelationshipId: 'relationship-id',
+  sessionId: 'session-id',
+  contactId: 'contact-id',
+  relationships: ['orgId:sbi:company name:'],
+  roles: ['role-id'],
+  azp: 'azp-id'
 }
 
-const token = jwt.sign(
-  {
-    ...tokenPayload,
-    payload: { ...tokenPayload.payload, email: 'pii@defra.gov.uk' }
-  },
-  'secret',
-  {
-    expiresIn: '1h'
-  }
-)
+const token = jwt.sign({ ...tokenPayload, email: 'pii@defra.gov.uk' }, 'secret', {
+  expiresIn: '1h'
+})
 const tokenDiffSecret = jwt.sign(tokenPayload, 'secret2', { expiresIn: '1h' })
 const requestInfo = { remoteAddress: '0.0.0.0' }
 const mockRequest = (token) => ({
@@ -66,7 +47,7 @@ const mockRequest = (token) => ({
   },
   info: requestInfo
 })
-const decodedToken = jwt.decode(token, 'secret')
+const decodedToken = jwt.verify(token, 'secret')
 const mockPublicKeyFunc = jest.fn()
 const mockJWKSDataSource = { getPublicKey: mockPublicKeyFunc }
 
@@ -94,12 +75,15 @@ describe('getAuth', () => {
           request: requestInfo,
           tenant: {
             message:
-              '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"serviceId":"service-id","correlationId":"correlation-id",' +
-              '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-              '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
+              '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
+              '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
+              '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
               '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
-              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
+              '"roles":["role-id"],"azp":"azp-id"}'
           }
         }
       ])
@@ -122,12 +106,15 @@ describe('getAuth', () => {
           request: requestInfo,
           tenant: {
             message:
-              '{"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"serviceId":"service-id","correlationId":"correlation-id",' +
-              '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-              '"sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
-              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],"roles":["role-id"],"azp":"azp-id"}'
+              '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
+              '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
+              '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+              '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","contactId":"contact-id",' +
+              '"relationships":["orgId:sbi:company name:"],' +
+              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
+              '"roles":["role-id"],"azp":"azp-id"}'
           }
         }
       ])
