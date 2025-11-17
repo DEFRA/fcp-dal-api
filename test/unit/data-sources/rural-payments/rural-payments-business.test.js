@@ -442,17 +442,7 @@ describe('Rural Payments Business', () => {
   })
 
   describe('getLandUseByBusinessParcel', () => {
-    beforeAll(() => {
-      jest.useFakeTimers()
-    })
-
-    afterAll(() => {
-      jest.useRealTimers()
-    })
-
     test('should return land use by business parcel without date', async () => {
-      jest.setSystemTime(new Date('2025-01-01T13:35:25'))
-
       const mockResponse = { data: 'mockData' }
       httpGet.mockImplementationOnce(async () => mockResponse)
 
@@ -466,7 +456,7 @@ describe('Rural Payments Business', () => {
       expect(httpGet).toHaveBeenCalledWith(
         'SitiAgriApi/cv/landUseByBusinessParcel/sheet/mockSheetId/parcel/mockParcelId/sbi/mockSbi/list',
         {
-          params: { pointInTime: '2025-01-01 13:35:25' }
+          params: { pointInTime: new Date().toISOString().replace('T', ' ').substring(0, 19) }
         }
       )
     })
