@@ -442,7 +442,7 @@ describe('Rural Payments Business', () => {
   })
 
   describe('getLandUseByBusinessParcel', () => {
-    test('should return land use by business parcel', async () => {
+    test('should return land use by business parcel without date', async () => {
       const mockResponse = { data: 'mockData' }
       httpGet.mockImplementationOnce(async () => mockResponse)
 
@@ -451,7 +451,34 @@ describe('Rural Payments Business', () => {
         'mockSheetId',
         'mockParcelId'
       )
+
       expect(result).toEqual(mockResponse.data)
+      expect(httpGet).toHaveBeenCalledWith(
+        'SitiAgriApi/cv/landUseByBusinessParcel/sheet/mockSheetId/parcel/mockParcelId/sbi/mockSbi/list',
+        {
+          params: { pointInTime: new Date().toISOString().replace('T', ' ').substring(0, 19) }
+        }
+      )
+    })
+
+    test('should return land use by business parcel with date', async () => {
+      const mockResponse = { data: 'mockData' }
+      httpGet.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.getLandUseByBusinessParcel(
+        'mockSbi',
+        'mockSheetId',
+        'mockParcelId',
+        new Date('2025-01-01T13:35:25')
+      )
+
+      expect(result).toEqual(mockResponse.data)
+      expect(httpGet).toHaveBeenCalledWith(
+        'SitiAgriApi/cv/landUseByBusinessParcel/sheet/mockSheetId/parcel/mockParcelId/sbi/mockSbi/list',
+        {
+          params: { pointInTime: '2025-01-01 13:35:25' }
+        }
+      )
     })
   })
 })
