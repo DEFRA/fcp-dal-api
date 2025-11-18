@@ -604,7 +604,7 @@ const businessQuery = gql`
           code
           isBpsEligible
         }
-        parcelLandUses(sheetId: $sheetId, parcelId: $parcelId) {
+        parcelLandUses(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
           code
           startDate
           endDate
