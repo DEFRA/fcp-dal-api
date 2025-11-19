@@ -62,16 +62,16 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       middle: data.middleName,
       last: data.lastName
     },
-    dateOfBirth: new Date(data.dateOfBirth).toISOString().substring(0, 10),
+    dateOfBirth: data.dateOfBirth && new Date(data.dateOfBirth).toISOString().substring(0, 10),
     phone: {
       mobile: data.mobile,
       landline: data.landline
     },
     email: {
       address: data.email,
-      validated: data.emailValidated
+      validated: !!data.emailValidated
     },
-    doNotContact: data.doNotContact,
+    doNotContact: !!data.doNotContact,
     personalIdentifiers: data.personalIdentifiers,
     address: kitsAddressToDalAddress(data.address),
     status: transformEntityStatus(data)
