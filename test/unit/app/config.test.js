@@ -22,8 +22,8 @@ describe('config', () => {
     delete process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
     delete process.env.HEALTH_CHECK_RP_THROTTLE_TIME_MS
     delete process.env.KITS_REQUEST_PAGE_SIZE
-    delete process.env.KITS_INT_CONNECTION_CERT
-    delete process.env.KITS_INT_CONNECTION_KEY
+    delete process.env.KITS_INTERNAL_CONNECTION_CERT
+    delete process.env.KITS_INTERNAL_CONNECTION_KEY
     delete process.env.ADMIN_AD_GROUP_ID
     delete process.env.CDP_HTTPS_PROXY
     delete process.env.CDP_HTTP_PROXY
