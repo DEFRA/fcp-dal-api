@@ -1,0 +1,30 @@
+{% extends "layout.njk" %}
+
+{% block title %}
+  {{ title }}
+{% endblock %}
+
+{% block content %}
+  <script type="importmap">
+    {
+      "imports": {
+        "@azure/msal-browser": "https://esm.sh/@azure/msal-browser"
+      }
+    }
+  </script>
+  <script type="module" src="/consolidated-view/static/login.js"></script>
+
+  <div class="loading-wrapper">
+    <div>
+      <div id="loginButton" style="display: none;">
+        <button class="login-button"  onclick="handleLogin()">Login</button>
+      </div>
+      <div  id="logoutButton" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading consolidated view…</div>
+        <button class="login-button" onclick="handleLogout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
