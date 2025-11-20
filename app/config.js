@@ -158,7 +158,7 @@ export const config = convict({
         default: null,
         sensitive: true,
         nullable: process.env.KITS_DISABLE_MTLS === 'true',
-        env: 'KITS_INT_CONNECTION_CERT'
+        env: 'KITS_INTERNAL_CONNECTION_CERT'
       },
       connectionKey: {
         doc: 'Base64 encoded mTLS key for the KITS internal gateway connection',
@@ -166,13 +166,13 @@ export const config = convict({
         default: null,
         sensitive: true,
         nullable: process.env.KITS_DISABLE_MTLS === 'true',
-        env: 'KITS_INT_CONNECTION_KEY'
+        env: 'KITS_INTERNAL_CONNECTION_KEY'
       },
       gatewayUrl: {
         doc: 'KITS gateway internal URL',
         format: String,
         default: null,
-        env: 'KITS_INT_GATEWAY_URL'
+        env: 'KITS_INTERNAL_GATEWAY_URL'
       }
     },
     external: {
@@ -182,7 +182,7 @@ export const config = convict({
         default: null,
         sensitive: true,
         nullable: process.env.KITS_DISABLE_MTLS === 'true',
-        env: 'KITS_EXT_CONNECTION_CERT'
+        env: 'KITS_EXTERNAL_CONNECTION_CERT'
       },
       connectionKey: {
         doc: 'Base64 encoded mTLS key for the KITS external gateway connection',
@@ -190,13 +190,13 @@ export const config = convict({
         default: null,
         sensitive: true,
         nullable: process.env.KITS_DISABLE_MTLS === 'true',
-        env: 'KITS_EXT_CONNECTION_KEY'
+        env: 'KITS_EXTERNAL_CONNECTION_KEY'
       },
       gatewayUrl: {
         doc: 'KITS gateway external URL',
         format: String,
         default: null,
-        env: 'KITS_EXT_GATEWAY_URL'
+        env: 'KITS_EXTERNAL_GATEWAY_URL'
       },
       personIdOverride: {
         doc: 'This is the person ID that can be used in place of an actual personId for external users and will return the data corresponding to their crn',
