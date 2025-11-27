@@ -389,8 +389,8 @@ const business = {
       parcelId: '5662',
       area: 1.027,
       pendingDigitisation: false,
-      effectiveToDate: '2024-09-15T07:52:37.868Z',
-      effectiveFromDate: '2024-09-13T07:52:37.868Z'
+      effectiveToDate: '2024-07-27T16:53:12.347Z',
+      effectiveFromDate: '2024-07-25T16:53:12.347Z'
     },
     parcelCovers: [
       {
