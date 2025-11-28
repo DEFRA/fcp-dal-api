@@ -1,5 +1,5 @@
 import {
-  transformBusinesDetailsToOrgAdditionalDetailsUpdate,
+  transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
 } from '../../../transformers/rural-payments/business.js'
 
@@ -23,7 +23,7 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
-  const newOrgAdditionalDetails = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
+  const newOrgAdditionalDetails = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
   const orgAdditionalDetails = { ...currentOrgDetails, ...newOrgAdditionalDetails }
   await dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails(
     organisationId,

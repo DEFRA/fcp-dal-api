@@ -156,7 +156,7 @@ const orgAdditionalDetailsMapping = {
       : undefined
 }
 
-export const transformBusinesDetailsToOrgAdditionalDetailsUpdate = (data) => {
+export const transformBusinessDetailsToOrgAdditionalDetailsUpdate = (data) => {
   return transformMapping(orgAdditionalDetailsMapping, data)
 }
 
