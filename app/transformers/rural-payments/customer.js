@@ -1,6 +1,6 @@
-import { validateDate } from '../../utils/date.js'
+import { validateUpstreamTimestamp, validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
-import { kitsAddressToDalAddress, transformEntityStatus } from '../common.js'
+import { booleanise, kitsAddressToDalAddress, transformEntityStatus } from '../common.js'
 
 export function transformBusinessCustomerToCustomerRole(crn, customers) {
   const customer = customers.find(({ customerReference }) => customerReference === crn)
@@ -62,16 +62,16 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       middle: data.middleName,
       last: data.lastName
     },
-    dateOfBirth: data.dateOfBirth && new Date(data.dateOfBirth).toISOString().substring(0, 10),
+    dateOfBirth: validateUpstreamTimestampToISO(data.dateOfBirth)?.substring(0, 10) ?? null,
     phone: {
       mobile: data.mobile,
       landline: data.landline
     },
     email: {
       address: data.email,
-      validated: !!data.emailValidated
+      validated: booleanise(data.emailValidated)
     },
-    doNotContact: !!data.doNotContact,
+    doNotContact: booleanise(data.doNotContact),
     personalIdentifiers: data.personalIdentifiers,
     address: kitsAddressToDalAddress(data.address),
     status: transformEntityStatus(data)
@@ -82,10 +82,10 @@ export function transformNotificationsToMessages(notifications = []) {
   return notifications.map((message) => ({
     id: message.id,
     subject: message.title,
-    date: validateDate(message.createdAt).toISOString(),
+    date: validateUpstreamTimestampToISO(message.createdAt),
     body: message.body,
-    read: !!message.readAt,
-    deleted: !!message.archivedAt
+    read: !!validateUpstreamTimestamp(message.readAt),
+    deleted: !!validateUpstreamTimestamp(message.archivedAt)
   }))
 }
 

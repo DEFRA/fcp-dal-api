@@ -1,4 +1,4 @@
-import { validateDate } from '../../utils/date.js'
+import { validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
 import { convertSquareMetersToHectares } from '../../utils/numbers.js'
 import {
@@ -212,8 +212,8 @@ function transformAgreement(agreement) {
     status: agreement.status,
     contractType: agreement.contract_type,
     schemeYear: agreement.scheme_year,
-    startDate: validateDate(agreement.start_date?.split('T')[0]).toISOString(),
-    endDate: validateDate(agreement.end_date?.split('T')[0]).toISOString(),
+    startDate: validateUpstreamTimestampToISO(agreement.start_date),
+    endDate: validateUpstreamTimestampToISO(agreement.end_date),
     paymentSchedules: agreement.payment_schedules.map(transformPaymentSchedule)
   }
 }
@@ -222,12 +222,12 @@ function transformPaymentSchedule(paymentSchedule) {
   return {
     optionCode: paymentSchedule.option_code,
     optionDescription: paymentSchedule.option_description,
-    commitmentGroupStartDate: validateDate(
-      paymentSchedule.commitment_group_start_date?.split('T')[0]
-    ).toISOString(),
-    commitmentGroupEndDate: validateDate(
-      paymentSchedule.commitment_group_end_date?.split('T')[0]
-    ).toISOString(),
+    commitmentGroupStartDate: validateUpstreamTimestampToISO(
+      paymentSchedule.commitment_group_start_date
+    ),
+    commitmentGroupEndDate: validateUpstreamTimestampToISO(
+      paymentSchedule.commitment_group_end_date
+    ),
     year: paymentSchedule.year,
     sheetName: paymentSchedule.sheet_name,
     parcelName: paymentSchedule.parcel_name,
@@ -235,10 +235,8 @@ function transformPaymentSchedule(paymentSchedule) {
     actionMTL: paymentSchedule.action_mtl,
     actionUnits: paymentSchedule.action_units,
     parcelTotalArea: convertSquareMetersToHectares(paymentSchedule.parcel_total_area),
-    startDate: validateDate(
-      paymentSchedule.payment_schedule_start_date?.split('T')[0]
-    ).toISOString(),
-    endDate: validateDate(paymentSchedule.payment_schedule_end_date?.split('T')[0]).toISOString()
+    startDate: validateUpstreamTimestampToISO(paymentSchedule.payment_schedule_start_date),
+    endDate: validateUpstreamTimestampToISO(paymentSchedule.payment_schedule_end_date)
   }
 }
 

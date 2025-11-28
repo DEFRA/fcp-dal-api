@@ -1,4 +1,4 @@
-import { validateDate } from '../../utils/date.js'
+import { validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { convertSquareMetersToHectares } from '../../utils/numbers.js'
 import { transformDateTimeToISO } from '../common.js'
 
@@ -22,8 +22,8 @@ export function transformLandParcelsEffectiveDates(parcelId, sheetId, parcels) {
   const parcel = parcels.find((p) => p.parcelId === parcelId && p.sheetId === sheetId)
 
   return {
-    effectiveFrom: validateDate(parcel?.validFrom).toISOString(),
-    effectiveTo: validateDate(parcel?.validTo).toISOString()
+    effectiveFrom: validateUpstreamTimestampToISO(parcel?.validFrom),
+    effectiveTo: validateUpstreamTimestampToISO(parcel?.validTo)
   }
 }
 
