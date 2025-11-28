@@ -46,11 +46,11 @@ Ensure the `.env` file exists. This can be copied from `.env.example`:
 cp .env.example .env
 ```
 
-Also make sure to set the `KITS_INT_GATEWAY_URL` & `KITS_EXT_GATEWAY_URL` variable to the desired data source, e.g. for local testing:
+Also make sure to set the `KITS_INTERNAL_GATEWAY_URL` & `KITS_EXTERNAL_GATEWAY_URL` variable to the desired data source, e.g. for local testing:
 
 ```env
-KITS_INT_GATEWAY_URL=http://localhost:3100/v1
-KITS_EXT_GATEWAY_URL=http://localhost:3101/v1
+KITS_INTERNAL_GATEWAY_URL=http://localhost:3100/v1
+KITS_EXTERNAL_GATEWAY_URL=http://localhost:3101/v1
 ```
 
 Also you will need to run mongodb locally you can do this with the following command:

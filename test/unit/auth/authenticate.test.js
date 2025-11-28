@@ -8,9 +8,8 @@ const info = jest.fn()
 jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
   logger: { info, debug: jest.fn(), warn: jest.fn(), error: jest.fn() }
 }))
-const { authDirectiveTransformer, authGroups, checkAuthGroup, getAuth } = await import(
-  '../../../app/auth/authenticate.js'
-)
+const { authDirectiveTransformer, authGroups, checkAuthGroup, getAuth } =
+  await import('../../../app/auth/authenticate.js')
 
 const tokenPayload = {
   aud: 'api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',

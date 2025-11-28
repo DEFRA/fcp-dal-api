@@ -14,7 +14,7 @@
     "start": "node -r dotenv/config app/index.js | jq .",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",
     "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
-    "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env jest --testPathPattern=test/acceptance --setupFiles dotenv/config",
+    "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/acceptance --coverage false",
     "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",

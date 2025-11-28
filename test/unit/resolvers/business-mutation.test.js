@@ -19,9 +19,8 @@ jest.unstable_mockModule(
   '../../../app/graphql/resolvers/customer/common.js',
   () => mockCustomerCommonModule
 )
-const { Mutation, UpdateBusinessResponse } = await import(
-  '../../../app/graphql/resolvers/business/mutation.js'
-)
+const { Mutation, UpdateBusinessResponse } =
+  await import('../../../app/graphql/resolvers/business/mutation.js')
 
 describe('Business Details Mutation resolvers', () => {
   const mockArgs = { input: { name: 'Test Business' } }
