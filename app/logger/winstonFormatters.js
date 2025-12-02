@@ -1,5 +1,4 @@
 import { format } from 'winston'
-import { sampleResponse } from './utils.js'
 
 const buildHttpDetails = (request, response, requestTimeMs) => {
   if (!request && !response && !requestTimeMs) return {}
@@ -45,15 +44,51 @@ const buildEvent = (kind, category, type, created, duration, outcome, reference)
     }
   }
 
-const buildUrl = ({ body, path }) =>
-  (body || path) && {
-    url: {
-      full: path,
-      ...(body && {
-        query: new URLSearchParams(typeof body === 'string' ? JSON.parse(body) : body).toString()
-      })
+const ALLOWED_KEYS = new Set([
+  'crn',
+  'customerReferenceNumber',
+  'id',
+  'primarySearchPhrase',
+  'sbi',
+  'searchFieldType'
+])
+
+const pickKeysForLogging = (obj) => {
+  if (obj == null) return obj
+
+  if (typeof obj !== 'object' || obj instanceof Date) {
+    return obj
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(pickKeysForLogging)
+  }
+
+  const cleaned = {}
+
+  for (const key of Object.keys(obj)) {
+    if (ALLOWED_KEYS.has(key)) {
+      cleaned[key] = pickKeysForLogging(obj[key])
     }
   }
+
+  return cleaned
+}
+
+const buildUrl = ({ body, path }) => {
+  const result = {}
+
+  if (path) {
+    result.full = path
+  }
+
+  if (body) {
+    const parsedBody = typeof body === 'string' ? JSON.parse(body) : body
+    result.query = JSON.stringify(pickKeysForLogging(parsedBody))
+  }
+
+  return Object.keys(result).length ? { url: result } : undefined
+}
 
 export const cdpSchemaTranslator = format((info) => {
   const { error, code, request, response, requestTimeMs, tenant, transactionId, traceId } = info
@@ -81,12 +116,4 @@ export const cdpSchemaTranslator = format((info) => {
       buildUrl(request || {})
     ]
   )
-})
-
-export const sampleResponseBodyData = format((info) => {
-  if (info?.response?.body) {
-    info.response.sampleResponseBody = sampleResponse(info.response.body)
-    delete info.response.body
-  }
-  return info
 })
