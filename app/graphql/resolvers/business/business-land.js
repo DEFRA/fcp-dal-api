@@ -8,7 +8,7 @@ import {
   transformTotalArea,
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
-import { validateDate } from '../../../utils/date.js'
+import { validateDateInput } from '../../../utils/date.js'
 
 export const BusinessLand = {
   summary({ organisationId }, { date }) {
@@ -16,7 +16,7 @@ export const BusinessLand = {
   },
 
   async parcel({ organisationId, sbi }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
-    validateDate(date)
+    validateDateInput(date)
 
     const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
     const parcel = parcels?.find((p) => p.sheetId === sheetId && p.parcelId === parcelId)
@@ -33,7 +33,7 @@ export const BusinessLand = {
   },
 
   async parcels({ organisationId }, { date = new Date() }, { dataSources }) {
-    validateDate(date)
+    validateDateInput(date)
 
     return transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
@@ -48,7 +48,7 @@ export const BusinessLand = {
     { date = new Date(), sheetId, parcelId },
     { dataSources }
   ) {
-    validateDate(date)
+    validateDateInput(date)
 
     const parcel = await BusinessLand.parcel(
       { organisationId },
@@ -67,7 +67,7 @@ export const BusinessLand = {
   },
 
   async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, { dataSources }) {
-    validateDate(date)
+    validateDateInput(date)
 
     return transformLandUses(
       await dataSources.ruralPaymentsBusiness.getLandUseByBusinessParcel(

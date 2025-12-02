@@ -7,7 +7,7 @@ import {
   transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments/customer.js'
-import { validatePastDate } from '../../../utils/date.js'
+import { validatePastDateInput } from '../../../utils/date.js'
 
 export const Customer = {
   async info({ personId }, __, { dataSources }) {
@@ -47,7 +47,7 @@ export const CustomerBusiness = {
 
   async messages({ organisationId, personId }, { fromDate }, { dataSources }) {
     if (fromDate) {
-      fromDate = validatePastDate(fromDate)
+      fromDate = validatePastDateInput(fromDate)
     }
 
     const notifications =

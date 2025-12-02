@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import { transformBusinesDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
+import { transformBusinessDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
 import { mockOrganisationSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
@@ -48,7 +48,7 @@ describe('business', () => {
       legalStatusCode: 123
     }
 
-    const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
+    const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
 
     const expectedPutPayload = {
       ...orgAdditionalDetailsUpdatePayload,
@@ -108,7 +108,7 @@ describe('business', () => {
       typeCode: 123
     }
 
-    const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
+    const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
     const expectedPutPayload = {
       ...orgAdditionalDetailsUpdatePayload,
       ...transformedInput
@@ -173,7 +173,7 @@ describe('business', () => {
       }
     }
 
-    const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
+    const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
     const { sbi: _, ...queryReturn } = input
 
     const expectedPutPayload = {
@@ -227,7 +227,7 @@ describe('business', () => {
       dateStartedFarming: '01-01-2020'
     }
 
-    const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
+    const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
 
     const expectedPutPayload = {
       ...orgAdditionalDetailsUpdatePayload,
@@ -300,7 +300,7 @@ describe('business - external', () => {
       legalStatusCode: 123
     }
 
-    const transformedInput = transformBusinesDetailsToOrgAdditionalDetailsUpdate(input)
+    const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
 
     const expectedPutPayload = {
       ...orgAdditionalDetailsUpdatePayload,

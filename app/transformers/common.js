@@ -44,7 +44,9 @@ export const dalAddressToKitsAddress = (address) => {
   }
 }
 
-export const booleanise = (value) => !!value
+// Converts various input types to boolean
+// NOTE: only the string 'true' is considered true, not every non-empty string!
+export const booleanise = (value) => (typeof value === 'string' ? value === 'true' : !!value)
 
 export const transformEntityStatus = (entity) => ({
   locked: booleanise(entity?.locked),

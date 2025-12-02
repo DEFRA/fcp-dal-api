@@ -80,7 +80,7 @@ describe('Common transformers', () => {
     it('should return true for truthy values', () => {
       expect(booleanise(true)).toBe(true)
       expect(booleanise(1)).toBe(true)
-      expect(booleanise('yes')).toBe(true)
+      expect(booleanise('true')).toBe(true)
     })
 
     it('should return false for falsy values', () => {
@@ -88,6 +88,8 @@ describe('Common transformers', () => {
       expect(booleanise(0)).toBe(false)
       expect(booleanise(null)).toBe(false)
       expect(booleanise(undefined)).toBe(false)
+      expect(booleanise('no')).toBe(false)
+      expect(booleanise('yes')).toBe(false)
     })
   })
 

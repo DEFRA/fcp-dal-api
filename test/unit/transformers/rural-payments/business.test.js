@@ -334,14 +334,14 @@ describe('Business transformer', () => {
         status: 'mockStatus',
         contract_type: 'mockContractType',
         scheme_year: 'mockSchemeYear',
-        start_date: '2020-01-01T00:00:00:000+0100',
-        end_date: '2020-12-31T00:00:00:000+0100',
+        start_date: '2020-06-01T01:00:00:000+0100',
+        end_date: '2020-12-31T00:00:00:000+0000',
         payment_schedules: [
           {
             option_code: 'mockOptionCode',
             option_description: 'mockOptionDescription',
-            commitment_group_start_date: '2020-01-01T00:00:00:000+0100',
-            commitment_group_end_date: '2020-12-31T00:00:00:000+0100',
+            commitment_group_start_date: '2020-01-01T01:00:00:000+0100',
+            commitment_group_end_date: '2020-12-31T00:00:00:000+0000',
             year: '2020',
             sheet_name: 'mockSheetName',
             parcel_name: 'mockParcelName',
@@ -363,7 +363,7 @@ describe('Business transformer', () => {
         status: 'mockStatus',
         contractType: 'mockContractType',
         schemeYear: 'mockSchemeYear',
-        startDate: '2020-01-01T00:00:00.000Z',
+        startDate: '2020-06-01T00:00:00.000Z',
         endDate: '2020-12-31T00:00:00.000Z',
         paymentSchedules: [
           {
@@ -378,8 +378,8 @@ describe('Business transformer', () => {
             actionMTL: 'mockActionMTL',
             actionUnits: 'mockActionUnits',
             parcelTotalArea: 0.01,
-            startDate: '2020-01-01T00:00:00.000Z',
-            endDate: '2020-12-31T00:00:00.000Z'
+            startDate: '2019-12-31T23:00:00.000Z',
+            endDate: '2020-12-30T23:00:00.000Z'
           }
         ]
       }
