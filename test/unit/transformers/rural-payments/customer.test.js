@@ -1,5 +1,6 @@
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
+  ruralPaymentsPortalCustomerTransformer,
   transformBusinessCustomerToCustomerPermissionGroups,
   transformBusinessCustomerToCustomerRole,
   transformCustomerUpdateInputToPersonUpdate,
@@ -248,6 +249,111 @@ describe('Customer transformer', () => {
         .flatMap(({ privilegeNames }) => privilegeNames)
       const privilegeNameCases = cases.map(([privilegeName]) => privilegeName)
       expect(privilegeNames).toEqual(privilegeNameCases)
+    })
+  })
+
+  describe('#ruralPaymentsPortalCustomerTransformer', () => {
+    test('should transform customer data', () => {
+      const input = {
+        title: 'Mr',
+        otherTitle: 'Sir',
+        firstName: 'John',
+        middleName: 'Alan',
+        lastName: 'Doe',
+        dateOfBirth: new Date('1980-01-31T00:00:00Z').getTime(),
+        mobile: '07123456789',
+        landline: '01234567890',
+        email: 'jad@defra.test.gov.uk',
+        emailValidated: true,
+        doNotContact: true,
+        personalIdentifiers: ['some-id'],
+        address: { uprn: '100023336956' },
+        locked: true,
+        deactivated: true,
+        confirmed: true
+      }
+      const transformed = {
+        name: {
+          title: 'Mr',
+          otherTitle: 'Sir',
+          first: 'John',
+          middle: 'Alan',
+          last: 'Doe'
+        },
+        dateOfBirth: '1980-01-31',
+        phone: {
+          mobile: '07123456789',
+          landline: '01234567890'
+        },
+        email: {
+          address: 'jad@defra.test.gov.uk',
+          validated: true
+        },
+        doNotContact: true,
+        personalIdentifiers: ['some-id'],
+        address: {
+          uprn: '100023336956'
+        },
+        status: {
+          locked: true,
+          deactivated: true,
+          confirmed: true
+        }
+      }
+
+      expect(ruralPaymentsPortalCustomerTransformer(input)).toEqual(transformed)
+    })
+
+    test('should handle nullable fields', () => {
+      const input = {
+        title: null,
+        otherTitle: null,
+        firstName: 'Jane',
+        middleName: null,
+        lastName: 'Smith',
+        dateOfBirth: null,
+        mobile: null,
+        landline: null,
+        email: null,
+        emailValidated: null,
+        doNotContact: null,
+        personalIdentifiers: null,
+        address: { uprn: null },
+        locked: null,
+        deactivated: null,
+        confirmed: null
+      }
+
+      const transformed = {
+        name: {
+          title: null,
+          otherTitle: null,
+          first: 'Jane',
+          middle: null,
+          last: 'Smith'
+        },
+        dateOfBirth: null,
+        phone: {
+          mobile: null,
+          landline: null
+        },
+        email: {
+          address: null,
+          validated: false
+        },
+        doNotContact: false,
+        personalIdentifiers: null,
+        address: {
+          uprn: null
+        },
+        status: {
+          locked: false,
+          deactivated: false,
+          confirmed: false
+        }
+      }
+
+      expect(ruralPaymentsPortalCustomerTransformer(input)).toEqual(transformed)
     })
   })
 
