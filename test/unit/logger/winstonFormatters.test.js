@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals'
-import { cdpSchemaTranslator, sampleResponseBodyData } from '../../../app/logger/winstonFormatters'
+import { cdpSchemaTranslator } from '../../../app/logger/winstonFormatters'
 
 const params = new URLSearchParams([
   ['p1', 'v1'],
@@ -109,7 +109,7 @@ describe('winstonFormatters', () => {
         tenant: { id: 'tenant-id', message: 'some tenant info' },
         url: {
           full: 'http://localhost/path',
-          query: 'searchFieldType=SBI&primarySearchPhrase=107183280&offset=0&limit=1'
+          query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
         }
       })
     })
@@ -143,7 +143,7 @@ describe('winstonFormatters', () => {
       },
       url: {
         full: 'http://localhost/path',
-        query: 'searchFieldType=SBI&primarySearchPhrase=107183280&offset=0&limit=1'
+        query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
       }
     })
   })
@@ -172,24 +172,6 @@ describe('winstonFormatters', () => {
       event: { created: 100 },
       level: undefined,
       message: undefined
-    })
-  })
-
-  describe('sampleResponseBodyData', () => {
-    const info = { level: 'info', message: 'hello' }
-
-    it('should leave a simple log request unchanged', () => {
-      expect(sampleResponseBodyData().transform(info)).toBe(info)
-    })
-    it('should limit log response body data to 5 items', () => {
-      const body = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-      const data = { ...info, response: { body } }
-      expect(sampleResponseBodyData().transform(data)).toEqual({
-        ...info,
-        response: {
-          sampleResponseBody: [1, 2, 3, 4, 5]
-        }
-      })
     })
   })
 })
