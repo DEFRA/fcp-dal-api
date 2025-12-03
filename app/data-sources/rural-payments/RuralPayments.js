@@ -171,7 +171,8 @@ export class RuralPayments extends RESTDataSource {
         id: request.id,
         method: request.method.toUpperCase(),
         headers: request.headers,
-        path: url.toString()
+        path: url.toString(),
+        body: request.body
       },
       response: { statusCode: response?.status }
     })

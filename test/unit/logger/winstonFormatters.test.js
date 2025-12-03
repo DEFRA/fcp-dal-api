@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from '@jest/globals'
-import { cdpSchemaTranslator, sampleResponseBodyData } from '../../../app/logger/winstonFormatters'
+import { cdpSchemaTranslator } from '../../../app/logger/winstonFormatters'
 
 const params = new URLSearchParams([
   ['p1', 'v1'],
@@ -109,7 +109,7 @@ describe('winstonFormatters', () => {
         tenant: { id: 'tenant-id', message: 'some tenant info' },
         url: {
           full: 'http://localhost/path',
-          query: 'searchFieldType=SBI&primarySearchPhrase=107183280&offset=0&limit=1'
+          query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
         }
       })
     })
@@ -143,7 +143,7 @@ describe('winstonFormatters', () => {
       },
       url: {
         full: 'http://localhost/path',
-        query: 'searchFieldType=SBI&primarySearchPhrase=107183280&offset=0&limit=1'
+        query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
       }
     })
   })
@@ -175,20 +175,59 @@ describe('winstonFormatters', () => {
     })
   })
 
-  describe('sampleResponseBodyData', () => {
-    const info = { level: 'info', message: 'hello' }
-
-    it('should leave a simple log request unchanged', () => {
-      expect(sampleResponseBodyData().transform(info)).toBe(info)
-    })
-    it('should limit log response body data to 5 items', () => {
-      const body = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-      const data = { ...info, response: { body } }
-      expect(sampleResponseBodyData().transform(data)).toEqual({
-        ...info,
-        response: {
-          sampleResponseBody: [1, 2, 3, 4, 5]
+  describe('pickKeysForLogging ', () => {
+    it('only allows whitelisted keys from object body', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: {
+            crn: 'CRN001',
+            customerReferenceNumber: 'CRN002',
+            sbi: '123456789',
+            primarySearchPhrase: 'john doe',
+            searchFieldType: 'name',
+            id: 'user-123',
+            password: 'secret',
+            creditCard: '4111111111111111',
+            nested: { crn: 'nested-crn', junk: 'remove' },
+            array: [{ id: 'allowed' }, { secret: 'remove' }],
+            other: {
+              crn: null
+            },
+            empty: null
+          }
         }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        crn: 'CRN001',
+        customerReferenceNumber: 'CRN002',
+        sbi: '123456789',
+        primarySearchPhrase: 'john doe',
+        searchFieldType: 'name',
+        id: 'user-123',
+        nested: { crn: 'nested-crn' },
+        array: [{ id: 'allowed' }],
+        other: {
+          crn: null
+        }
+      })
+    })
+
+    it('works when body is a JSON string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: JSON.stringify({
+            sbi: '987654321',
+            primarySearchPhrase: 'jane doe',
+            allowed: 'no',
+            disallowed: 'yes'
+          })
+        }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        sbi: '987654321',
+        primarySearchPhrase: 'jane doe'
       })
     })
   })
