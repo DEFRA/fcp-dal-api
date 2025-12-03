@@ -1,15 +1,12 @@
 import ecsFormat from '@elastic/ecs-winston-format'
 import { createLogger, format, transports } from 'winston'
 import { config } from '../config.js'
-import { cdpSchemaTranslator, sampleResponseBodyData } from './winstonFormatters.js'
+import { cdpSchemaTranslator } from './winstonFormatters.js'
 
 const transportTypes = []
 transportTypes.push(
   new transports.Console({
-    format:
-      config.get('nodeEnv') === 'production'
-        ? format.combine(cdpSchemaTranslator(), ecsFormat())
-        : sampleResponseBodyData()
+    format: format.combine(cdpSchemaTranslator(), ecsFormat())
   })
 )
 
