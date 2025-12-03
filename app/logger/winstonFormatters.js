@@ -61,18 +61,22 @@ const pickKeysForLogging = (obj) => {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(pickKeysForLogging)
+    return obj
+      .map(pickKeysForLogging)
+      .filter((v) => v && (typeof v !== 'object' || Object.keys(v).length > 0))
   }
 
-  const cleaned = {}
+  const picked = {}
 
   for (const key of Object.keys(obj)) {
-    if (ALLOWED_KEYS.has(key)) {
-      cleaned[key] = pickKeysForLogging(obj[key])
+    const value = pickKeysForLogging(obj[key])
+
+    if (ALLOWED_KEYS.has(key) || (typeof value === 'object' && value !== null)) {
+      picked[key] = value
     }
   }
 
-  return cleaned
+  return picked
 }
 
 const buildUrl = ({ body, path }) => {

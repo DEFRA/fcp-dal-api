@@ -174,4 +174,61 @@ describe('winstonFormatters', () => {
       message: undefined
     })
   })
+
+  describe('pickKeysForLogging ', () => {
+    it('only allows whitelisted keys from object body', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: {
+            crn: 'CRN001',
+            customerReferenceNumber: 'CRN002',
+            sbi: '123456789',
+            primarySearchPhrase: 'john doe',
+            searchFieldType: 'name',
+            id: 'user-123',
+            password: 'secret',
+            creditCard: '4111111111111111',
+            nested: { crn: 'nested-crn', junk: 'remove' },
+            array: [{ id: 'allowed' }, { secret: 'remove' }],
+            other: {
+              crn: null
+            },
+            empty: null
+          }
+        }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        crn: 'CRN001',
+        customerReferenceNumber: 'CRN002',
+        sbi: '123456789',
+        primarySearchPhrase: 'john doe',
+        searchFieldType: 'name',
+        id: 'user-123',
+        nested: { crn: 'nested-crn' },
+        array: [{ id: 'allowed' }],
+        other: {
+          crn: null
+        }
+      })
+    })
+
+    it('works when body is a JSON string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: JSON.stringify({
+            sbi: '987654321',
+            primarySearchPhrase: 'jane doe',
+            allowed: 'no',
+            disallowed: 'yes'
+          })
+        }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        sbi: '987654321',
+        primarySearchPhrase: 'jane doe'
+      })
+    })
+  })
 })
