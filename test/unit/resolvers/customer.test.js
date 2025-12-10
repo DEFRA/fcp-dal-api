@@ -63,7 +63,6 @@ const personBusinessesFixture = [
 const dataSources = {
   ruralPaymentsCustomer: {
     getPersonIdByCRN: jest.fn(),
-    getExternalPersonId: jest.fn(),
     getExternalPerson: jest.fn(),
     getCustomerByCRN: jest.fn(),
     getPersonByPersonId: jest.fn(),
@@ -83,7 +82,7 @@ const dataSources = {
     }
   },
   mongoCustomer: {
-    getPersonIdByCRN: jest.fn()
+    findPersonIdByCRN: jest.fn()
   },
   mongoBusiness: {
     getOrgIdBySbi: jest.fn()
@@ -97,14 +96,14 @@ describe('Customer', () => {
   })
 
   test('Query.customer.personId', async () => {
-    dataSources.mongoCustomer.getPersonIdByCRN.mockResolvedValue('internal person id')
+    dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('internal person id')
     const response = await Query.customer(
       undefined,
       { crn: personFixture.customerReferenceNumber },
       { dataSources }
     )
 
-    expect(dataSources.mongoCustomer.getPersonIdByCRN).toHaveBeenCalledWith(
+    expect(dataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith(
       personFixture.customerReferenceNumber
     )
 

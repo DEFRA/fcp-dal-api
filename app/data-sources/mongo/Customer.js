@@ -1,7 +1,7 @@
 import { MongoDataSource } from 'apollo-datasource-mongodb'
 
 export class MongoCustomer extends MongoDataSource {
-  async getPersonIdByCRN(crn) {
+  async findPersonIdByCRN(crn) {
     const customer = await this.collection.findOne({ _id: crn })
     return customer?.personId
   }
