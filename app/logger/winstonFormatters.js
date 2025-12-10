@@ -31,8 +31,8 @@ const buildError = ({ name, message, stack }, code) =>
     }
   }
 
-const buildEvent = (kind, category, type, created, duration, outcome, reference) =>
-  (kind || category || type || created || duration || outcome || reference) && {
+const buildEvent = (kind, category, type, created, duration, outcome, reference, action) =>
+  (kind || category || type || created || duration || outcome || reference || action) && {
     event: {
       ...(kind && { kind }),
       ...(category && { category }),
@@ -40,7 +40,8 @@ const buildEvent = (kind, category, type, created, duration, outcome, reference)
       ...(created && { created }), // Time the event was created in the system.
       ...(duration && { duration: duration * 1000000 }), // Total time of the event in nanoseconds.
       ...(outcome && { outcome }), // Outcome of the event.
-      ...(reference && { reference }) // A reference ID or URL tied to the event.
+      ...(reference && { reference }), // A reference ID or URL tied to the event.
+      ...(action && { action: `gateway=${action}` })
     }
   }
 
@@ -114,7 +115,8 @@ export const cdpSchemaTranslator = format((info) => {
         info['@timestamp'],
         requestTimeMs,
         response?.statusCode,
-        request?.path
+        request?.path,
+        info?.gatewayType
       ),
       tenant && { tenant },
       buildUrl(request || {})

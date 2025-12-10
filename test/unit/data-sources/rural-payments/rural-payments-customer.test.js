@@ -41,6 +41,14 @@ describe('Rural Payments Customer', () => {
     expect(response).toEqual({ id: 123 })
   })
 
+  test('should call getExternalPerson for external gateway ignoring specified CRN', async () => {
+    httpGetExt.mockImplementation(async () => ({ _data: { id: 123 } }))
+    const response = await ruralPaymentsCustomerExt.getCustomerByCRN('ignored-crn')
+
+    expect(httpGetExt.mock.calls).toEqual([['person/3337243/summary'], ['person/3337243/summary']])
+    expect(response).toEqual({ id: 123 })
+  })
+
   test('should handle customer not found', async () => {
     httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
