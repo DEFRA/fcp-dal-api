@@ -1,10 +1,10 @@
 import { jest } from '@jest/globals'
 
-import { Permissions } from '../../../app/data-sources/static/permissions.js'
-import { Customer, CustomerBusiness } from '../../../app/graphql/resolvers/customer/customer.js'
-import { Query } from '../../../app/graphql/resolvers/customer/query.js'
-import { organisationPeopleByOrgId } from '../../fixtures/organisation.js'
-import { buildPermissionsFromIdsAndLevels } from '../../test-helpers/permissions.js'
+import { Permissions } from '../../../../app/data-sources/static/permissions.js'
+import { Customer, CustomerBusiness } from '../../../../app/graphql/resolvers/customer/customer.js'
+import { Query } from '../../../../app/graphql/resolvers/customer/query.js'
+import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
+import { buildPermissionsFromIdsAndLevels } from '../../../test-helpers/permissions.js'
 
 const orgId = '5565448'
 const personFixture = {
