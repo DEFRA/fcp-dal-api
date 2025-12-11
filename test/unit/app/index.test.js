@@ -59,6 +59,26 @@ describe('App initialization', () => {
     expect(server.start).toHaveBeenCalled()
   })
 
+  it('should abort immediately if MongoDB fails to connect', async () => {
+    const mockError = new Error('MongoDB connection failed')
+    mongoClient.connect.mockRejectedValueOnce(mockError)
+
+    // Import the app after mocks are set up
+    await import('../../../app/index.js?call=2')
+
+    // Verify MongoDB connection was attempted
+    expect(mongoClient.connect).toHaveBeenCalled()
+
+    // Verify process exit was called due to failure
+    expect(process.exit).toHaveBeenCalledWith(1)
+
+    // Verify error was logged
+    expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - Error connecting to MongoDB', {
+      error: mockError,
+      code: expect.any(String)
+    })
+  })
+
   it('should handle unhandled rejections', async () => {
     const error = new Error('Test rejection')
     await import('../../../app/index.js')

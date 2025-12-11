@@ -70,6 +70,26 @@ describe('Rural Payments Customer', () => {
     )
   })
 
+  test('should throw an error from getPersonByPersonId when customer not found', async () => {
+    httpGet.mockImplementationOnce(async () => ({}))
+
+    await expect(ruralPaymentsCustomer.getPersonByPersonId('nonexistentId')).rejects.toEqual(
+      new NotFound('Rural payments customer not found')
+    )
+
+    expect(httpGet).toHaveBeenCalledWith('person/nonexistentId/summary')
+    expect(logger.warn).toHaveBeenCalledWith(
+      '#datasource - Rural payments - Customer not found for Person ID: nonexistentId',
+      {
+        code: 'RURALPAYMENTS_API_NOT_FOUND_001',
+        personId: 'nonexistentId',
+        response: { body: {} },
+        gatewayType: 'internal',
+        request: undefined
+      }
+    )
+  })
+
   test('should handle no notifications', async () => {
     httpGet.mockImplementationOnce(async () => ({ notifications: [] }))
 
