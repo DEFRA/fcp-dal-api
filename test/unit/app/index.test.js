@@ -2,6 +2,7 @@ import hapiApollo from '@as-integrations/hapi'
 import { secureContext } from '@defra/hapi-secure-context'
 import { expect, jest } from '@jest/globals'
 import { apolloServer } from '../../../app/graphql/server.js'
+import { mongoClient } from '../../../app/mongo.js'
 
 const mockLogger = {
   logger: {
@@ -19,6 +20,9 @@ describe('App initialization', () => {
     jest.spyOn(apolloServer, 'start').mockResolvedValue()
     jest.spyOn(server, 'register').mockResolvedValue()
     jest.spyOn(server, 'start').mockResolvedValue()
+    jest.spyOn(server, 'stop').mockResolvedValue()
+    jest.spyOn(mongoClient, 'connect').mockResolvedValue()
+    jest.spyOn(mongoClient, 'close').mockResolvedValue()
     jest.spyOn(process, 'exit').mockReturnValue(1)
 
     server.info = { uri: 'http://localhost:3000' }
@@ -48,20 +52,44 @@ describe('App initialization', () => {
       }
     ])
 
+    // Verify MongoDB connection was attempted
+    expect(mongoClient.connect).toHaveBeenCalled()
+
     // Verify server was started
     expect(server.start).toHaveBeenCalled()
   })
 
+  it('should abort immediately if MongoDB fails to connect', async () => {
+    const mockError = new Error('MongoDB connection failed')
+    mongoClient.connect.mockRejectedValueOnce(mockError)
+
+    // Import the app after mocks are set up
+    await import('../../../app/index.js?call=2')
+
+    // Verify MongoDB connection was attempted
+    expect(mongoClient.connect).toHaveBeenCalled()
+
+    // Verify process exit was called due to failure
+    expect(process.exit).toHaveBeenCalledWith(1)
+
+    // Verify error was logged
+    expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - Error connecting to MongoDB', {
+      error: mockError,
+      code: expect.any(String)
+    })
+  })
+
   it('should handle unhandled rejections', async () => {
     const error = new Error('Test rejection')
-
-    // Import the app
     await import('../../../app/index.js')
 
     // Simulate unhandled rejection
-    process.emit('unhandledRejection', error)
+    expect(process.emit('unhandledRejection', error)).toBe(true)
+    await new Promise(process.nextTick) // Wait for async handlers
 
-    // Verify process exit was called
+    // Verify clean-up and process exit was called
+    expect(mongoClient.close).toHaveBeenCalled()
+    expect(server.stop).toHaveBeenCalled()
     expect(process.exit).toHaveBeenCalledWith(1)
     expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - unhandled rejection', {
       error,
@@ -71,14 +99,15 @@ describe('App initialization', () => {
 
   it('should handle uncaught exceptions', async () => {
     const error = new Error('Test exception')
-
-    // Import the app
     await import('../../../app/index.js')
 
     // Simulate uncaught exception
     process.emit('uncaughtException', error)
+    await new Promise(process.nextTick) // Wait for async handlers
 
-    // Verify process exit was called
+    // Verify clean-up and process exit was called
+    expect(mongoClient.close).toHaveBeenCalled()
+    expect(server.stop).toHaveBeenCalled()
     expect(process.exit).toHaveBeenCalledWith(1)
     expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - uncaught reception', {
       error,

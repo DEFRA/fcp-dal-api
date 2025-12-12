@@ -5,14 +5,13 @@ import { secureContext } from '@defra/hapi-secure-context'
 
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
-import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
+import { DAL_UNHANDLED_ERROR_001, MONGO_DB_ERROR_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { mongoClient } from './mongo.js'
 import { server } from './server.js'
 
 const init = async () => {
   await apolloServer.start()
-
   await server.register([
     secureContext,
     {
@@ -26,22 +25,32 @@ const init = async () => {
   ])
 
   mongoClient.secureContext = tls.createSecureContext()
-
-  mongoClient.connect()
+  try {
+    await mongoClient.connect() // Test mongo connection
+    logger.info('Connected to MongoDB')
+  } catch (err) {
+    logger.error('#DAL - Error connecting to MongoDB', { error: err, code: MONGO_DB_ERROR_001 })
+    process.exit(1)
+  }
 
   await server.start()
 
   logger.info(`Server running on ${server.info.uri}`)
 }
 
-process.on('unhandledRejection', (error) => {
-  logger.error('#DAL - unhandled rejection', { error, code: DAL_UNHANDLED_ERROR_001 })
+const abort = async () => {
+  await Promise.allSettled([mongoClient.close(), server.stop()])
   process.exit(1)
+}
+
+process.on('unhandledRejection', async (error) => {
+  logger.error('#DAL - unhandled rejection', { error, code: DAL_UNHANDLED_ERROR_001 })
+  await abort()
 })
 
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', async (error) => {
   logger.error('#DAL - uncaught reception', { error, code: DAL_UNHANDLED_ERROR_001 })
-  process.exit(1)
+  await abort()
 })
 
 init()

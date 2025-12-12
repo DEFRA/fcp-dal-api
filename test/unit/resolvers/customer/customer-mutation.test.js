@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import { Mutation } from '../../../app/graphql/resolvers/customer/mutation.js'
+import { Mutation } from '../../../../app/graphql/resolvers/customer/mutation.js'
 
 describe('Customer Mutations', () => {
   let mockDataSources

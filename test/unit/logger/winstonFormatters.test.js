@@ -25,6 +25,7 @@ const fixture = {
   },
   level: 'info',
   '@timestamp': 1752678579327,
+  gatewayType: 'external',
   request: {
     id: 'power-apps-req-id',
     method: 'POST',
@@ -81,6 +82,7 @@ describe('winstonFormatters', () => {
           stack_trace: error.stack
         },
         event: {
+          action: 'gateway=external',
           category: 'RURALPAYMENTS_API_REQUEST_001',
           outcome: 200,
           reference: 'http://localhost/path',

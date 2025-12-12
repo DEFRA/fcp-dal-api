@@ -1,11 +1,11 @@
 import { expect, jest } from '@jest/globals'
-import { NotFound } from '../../../app/errors/graphql.js'
+import { NotFound } from '../../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
   businessUnlockResolver
-} from '../../../app/graphql/resolvers/business/common.js'
+} from '../../../../app/graphql/resolvers/business/common.js'
 
 describe('businessDetailsUpdateResolver', () => {
   let dataSources

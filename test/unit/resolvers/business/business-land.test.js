@@ -1,7 +1,7 @@
 import {
   BusinessLand,
   BusinessLandSummary
-} from '../../../app/graphql/resolvers/business/business-land.js'
+} from '../../../../app/graphql/resolvers/business/business-land.js'
 
 describe('BusinessLand', () => {
   const mockBusiness = { organisationId: 'mockId' }
