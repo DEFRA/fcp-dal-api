@@ -1,11 +1,11 @@
 services:
   mongodb:
-    image: mongo:4.4.29
+    image: mongo:7
     networks:
       - cdp-tenant
     ports:
       - '27017:27017'
-    restart: always
+    restart: unless-stopped
 
   kits-mock:
     image: defradigital/fcp-dal-upstream-mock
@@ -42,7 +42,6 @@ services:
       KIT_EXT_PERSON_ID_OVERRIDE: 3337243
       MONGO_URI: mongodb://mongodb:27017
       MONGO_DATABASE: 'fcp-dal-api'
-
     networks:
       - cdp-tenant
 

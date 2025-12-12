@@ -1,20 +1,20 @@
 import { expect, jest } from '@jest/globals'
 import { createRequire } from 'node:module'
 import { describe } from 'node:test'
-import { NotFound } from '../../../app/errors/graphql.js'
-import { Business, BusinessCustomer } from '../../../app/graphql/resolvers/business/business.js'
+import { NotFound } from '../../../../app/errors/graphql.js'
+import { Business, BusinessCustomer } from '../../../../app/graphql/resolvers/business/business.js'
 import {
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformOrganisationCustomer,
   transformOrganisationCustomers
-} from '../../../app/transformers/rural-payments/business.js'
+} from '../../../../app/transformers/rural-payments/business.js'
 import {
   organisationApplicationsByOrgId,
   organisationPeopleByOrgId
-} from '../../fixtures/organisation.js'
+} from '../../../fixtures/organisation.js'
 
 const permissionGroups = createRequire(import.meta.url)(
-  '../../../app/data-sources/static/permission-groups.json'
+  '../../../../app/data-sources/static/permission-groups.json'
 )
 
 const logger = {
