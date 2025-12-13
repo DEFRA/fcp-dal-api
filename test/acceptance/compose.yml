@@ -1,0 +1,17 @@
+services:
+  test:
+    image: fcp-dal-acceptance-tests
+    build:
+      context: ./test/acceptance
+    environment:
+      NODE_OPTIONS: --experimental-vm-modules
+      TARGET_URL: http://fcp-dal-api:3000/graphql
+    working_dir: /app
+    command: npm test
+    depends_on:
+      fcp-dal-api:
+        condition: service_healthy
+    networks:
+      - cdp-tenant
+    volumes:
+      - ./test/acceptance:/app/test

@@ -46,9 +46,7 @@ jobs:
           test-script: npm test
 
       - name: Local dev check
-        env:
-          NODE_OPTIONS: --experimental-vm-modules
-        run: sh test_scripts/local-dev-check.sh
+        run: npm run test:acceptance:docker
 
       - name: Sonarqube Cloud Scan
         if: github.actor != 'dependabot[bot]'
