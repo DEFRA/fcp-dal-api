@@ -5,6 +5,9 @@
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
   "type": "module",
+  "engines": {
+    "node": "24"
+  },
   "scripts": {
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
@@ -15,6 +18,8 @@
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",
     "start:mock": "nodemon -r dotenv/config ./mocks --watch ./mocks",
     "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/acceptance --coverage false",
+    "test:acceptance:docker": "docker compose -f compose.yml -f test/acceptance/compose.yml run --rm --build --pull always --quiet-pull test",
+    "posttest:acceptance:docker": "docker compose down --remove-orphans",
     "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
     "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
