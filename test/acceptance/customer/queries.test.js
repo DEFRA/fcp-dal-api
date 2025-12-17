@@ -1,6 +1,8 @@
 import { gql, GraphQLClient } from 'graphql-request'
 import jwt from 'jsonwebtoken'
 
+const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'
+
 const customerQuery = gql`
   query Customer($crn: ID!, $sbi: ID!) {
     customer(crn: $crn) {
@@ -285,7 +287,7 @@ const messages = [
 
 describe('Customer Queries', () => {
   it('should support full customer schema - internal', async () => {
-    const client = new GraphQLClient('http://localhost:3000/graphql')
+    const client = new GraphQLClient(targetURL)
     const response = await client.request(
       customerQuery,
       {
@@ -310,7 +312,7 @@ describe('Customer Queries', () => {
       },
       'test-secret'
     )
-    const client = new GraphQLClient('http://localhost:3000/graphql')
+    const client = new GraphQLClient(targetURL)
     const response = await client.request(
       customerQuery,
       {

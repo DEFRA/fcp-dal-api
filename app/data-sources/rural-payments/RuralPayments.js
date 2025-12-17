@@ -2,8 +2,8 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import jwt from 'jsonwebtoken'
+import https from 'node:https'
 import tls from 'node:tls'
-import { Agent, ProxyAgent } from 'undici'
 import { config as appConfig } from '../../config.js'
 import { BadRequest, HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
@@ -45,24 +45,6 @@ export function extractCrnFromDefraIdToken(token) {
   throw new BadRequest('Defra ID token does not contain crn')
 }
 
-export async function customFetch(url, options, requestTls) {
-  if (appConfig.get('disableProxy')) {
-    options.dispatcher = new Agent({
-      requestTls
-    })
-  } else {
-    options.dispatcher = new ProxyAgent({
-      uri: appConfig.get('cdp.httpsProxy'),
-      requestTls
-    })
-  }
-
-  return fetch(url, {
-    ...options,
-    signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
-  })
-}
-
 export class RuralPayments extends RESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
@@ -79,10 +61,16 @@ export class RuralPayments extends RESTDataSource {
 
     this.internalGatewayDevOverrideEmail = internalGatewayDevOverrideEmail
     this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
-    const requestTls = this.gatewayType === 'external' ? externalRequestTls : internalRequestTls
+    const agent = new https.Agent(
+      this.gatewayType === 'external' ? externalRequestTls : internalRequestTls
+    )
 
     this.httpCache.httpFetch = (url, options) => {
-      return customFetch(url, options, requestTls)
+      return fetch(url, {
+        ...options,
+        agent,
+        signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
+      })
     }
   }
 

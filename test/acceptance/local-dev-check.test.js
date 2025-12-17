@@ -1,6 +1,8 @@
 import { GraphQLClient, gql } from 'graphql-request'
 import jwt from 'jsonwebtoken'
 
+const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'
+
 const parcels = [
   {
     id: '7386091',
@@ -687,7 +689,7 @@ const businessVariables = {
 
 describe('Local mocked dev check', () => {
   it('should support full business schema - internal', async () => {
-    const client = new GraphQLClient('http://localhost:3000/graphql')
+    const client = new GraphQLClient(targetURL)
     const response = await client.request(businessQuery, businessVariables, {
       email: 'some-email',
       'gateway-type': 'internal'
@@ -705,7 +707,7 @@ describe('Local mocked dev check', () => {
       },
       'test-secret'
     )
-    const client = new GraphQLClient('http://localhost:3000/graphql')
+    const client = new GraphQLClient(targetURL)
     const response = await client.request(businessQuery, businessVariables, {
       'x-forwarded-authorization': tokenValue,
       'gateway-type': 'external'
