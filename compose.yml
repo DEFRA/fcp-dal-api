@@ -1,10 +1,15 @@
 services:
   mongodb:
     image: mongo:7
-    networks:
-      - cdp-tenant
     ports:
       - '27017:27017'
+    healthcheck:
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
+      interval: 3s
+      timeout: 2s
+      retries: 5
+    networks:
+      - cdp-tenant
     restart: unless-stopped
 
   kits-mock:
@@ -16,10 +21,16 @@ services:
       MOCK_SERVER_COLLECTION: all
       NODE_ENV: development
       PORT: 3100
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3100/health']
+      interval: 3s
+      timeout: 2s
+      retries: 5
     networks:
       - cdp-tenant
 
   fcp-dal-api:
+    image: defradigital/fcp-dal-api
     build:
       context: .
     ports:
@@ -42,6 +53,16 @@ services:
       KIT_EXT_PERSON_ID_OVERRIDE: 3337243
       MONGO_URI: mongodb://mongodb:27017
       MONGO_DATABASE: 'fcp-dal-api'
+    depends_on:
+      kits-mock:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 3s
+      timeout: 2s
+      retries: 5
     networks:
       - cdp-tenant
 
