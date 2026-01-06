@@ -2,12 +2,14 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import jwt from 'jsonwebtoken'
-import https from 'node:https'
-import tls from 'node:tls'
 import { config as appConfig } from '../../config.js'
-import { BadRequest, HttpError } from '../../errors/graphql.js'
-import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
+import { BadRequest, HttpError, NotFound } from '../../errors/graphql.js'
+import {
+  RURALPAYMENTS_API_NOT_FOUND_001,
+  RURALPAYMENTS_API_REQUEST_001
+} from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
+import { httpsProxyFetch } from '../../utils/https-proxy-fetch.js'
 
 const internalRequestTls = generateRequestTls('internal')
 const externalRequestTls = generateRequestTls('external')
@@ -15,26 +17,16 @@ const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
 
 export function generateRequestTls(gatewayType) {
-  const gatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
-  const kitsURL = new URL(gatewayUrl)
-  const requestTls = {
-    host: kitsURL.hostname,
-    port: kitsURL.port,
-    servername: kitsURL.hostname
-  }
-
   if (!appConfig.get('kits.disableMTLS')) {
     const connectionCert = appConfig.get(`kits.${gatewayType}.connectionCert`)
     const connectionKey = appConfig.get(`kits.${gatewayType}.connectionKey`)
     const decodedCert = Buffer.from(connectionCert, 'base64').toString('utf-8').trim()
     const decodedKey = Buffer.from(connectionKey, 'base64').toString('utf-8').trim()
-    requestTls.secureContext = tls.createSecureContext({
+    return {
       key: decodedKey,
       cert: decodedCert
-    })
+    }
   }
-
-  return requestTls
 }
 
 export function extractCrnFromDefraIdToken(token) {
@@ -61,16 +53,18 @@ export class RuralPayments extends RESTDataSource {
 
     this.internalGatewayDevOverrideEmail = internalGatewayDevOverrideEmail
     this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
-    const agent = new https.Agent(
-      this.gatewayType === 'external' ? externalRequestTls : internalRequestTls
-    )
+    const requestTls = gatewayType === 'internal' ? internalRequestTls : externalRequestTls
 
     this.httpCache.httpFetch = (url, options) => {
-      return fetch(url, {
-        ...options,
-        agent,
-        signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
-      })
+      const signal = AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
+      if (appConfig.get('kits.disableMTLS')) {
+        // for local dev, and CDP dev env (with auto-proxy)
+        // NOTE: requires NODE_USE_ENV_PROXY=1 node switch for auto-proxy from env vars
+        return fetch(url, { ...options, signal })
+      } else {
+        // full prod mode with mTLS and proxy
+        return httpsProxyFetch(url, { ...options, signal, ...requestTls })
+      }
     }
   }
 
