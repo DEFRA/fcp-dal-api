@@ -3,9 +3,14 @@ import tls from 'node:tls'
 
 import { secureContext } from '@defra/hapi-secure-context'
 
+import { RuralPayments } from './data-sources/rural-payments/RuralPayments.js'
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
-import { DAL_UNHANDLED_ERROR_001, MONGO_DB_ERROR_001 } from './logger/codes.js'
+import {
+  DAL_HEALTH_CHECK_001,
+  DAL_UNHANDLED_ERROR_001,
+  MONGO_DB_ERROR_001
+} from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { mongoClient } from './mongo.js'
 import { server } from './server.js'
@@ -30,6 +35,22 @@ const init = async () => {
     logger.info('Connected to MongoDB')
   } catch (err) {
     logger.error('#DAL - Error connecting to MongoDB', { error: err, code: MONGO_DB_ERROR_001 })
+    process.exit(1)
+  }
+
+  try {
+    // test connection to KITS upstream
+    const rp = new RuralPayments(
+      { logger },
+      { request: { headers: { email: 'robin.knipe@defra.gov.uk' } }, gatewayType: 'internal' }
+    )
+    await rp.getTitles() // will throw if data is not retrieved
+  } catch (err) {
+    logger.error('#DAL - Error connecting to KITS upstream', {
+      error: err,
+      type: JSON.stringify(err.cause),
+      code: DAL_HEALTH_CHECK_001
+    })
     process.exit(1)
   }
 
