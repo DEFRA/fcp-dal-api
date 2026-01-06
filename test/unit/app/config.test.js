@@ -25,8 +25,6 @@ describe('config', () => {
     delete process.env.KITS_INTERNAL_CONNECTION_CERT
     delete process.env.KITS_INTERNAL_CONNECTION_KEY
     delete process.env.ADMIN_AD_GROUP_ID
-    delete process.env.CDP_HTTPS_PROXY
-    delete process.env.CDP_HTTP_PROXY
     delete process.env.OIDC_JWKS_TIMEOUT_MS
     delete process.env.OIDC_JWKS_URI
   })
@@ -52,8 +50,6 @@ describe('config', () => {
     expect(config.get('kits.disableMTLS')).toBe(true)
     expect(config.get('kits.internal.connectionCert')).toBe(null)
     expect(config.get('kits.internal.connectionKey')).toBe(null)
-    expect(config.get('cdp.httpsProxy')).toBe(null)
-    expect(config.get('cdp.httpProxy')).toBe(null)
     expect(config.get('disableProxy')).toBe(true)
     expect(config.get('oidc.jwksURI')).toBe(null)
     expect(config.get('oidc.timeoutMs')).toBe(null)
@@ -83,11 +79,7 @@ describe('config', () => {
 
     // DISABLE_PROXY check
     process.env.DISABLE_PROXY = 'false'
-    expectedErrors = [
-      'cdp.httpsProxy: must be of type String',
-      'cdp.httpProxy: must be of type String'
-    ]
-    await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
+    await expect(loadFreshConfig()).resolves.toBeDefined()
     process.env.DISABLE_PROXY = 'true'
 
     // HEALTH_CHECK_ENABLED check
@@ -113,8 +105,6 @@ describe('config', () => {
     expect(() => config.set('healthCheck.ruralPaymentsInternalOrganisationId', null)).not.toThrow()
     expect(() => config.set('oidc.timeoutMs', null)).not.toThrow()
     expect(() => config.set('oidc.jwksURI', null)).not.toThrow()
-    expect(() => config.set('cdp.httpsProxy', null)).not.toThrow()
-    expect(() => config.set('cdp.httpProxy', null)).not.toThrow()
     expect(() => config.set('kits.internal.connectionCert', null)).not.toThrow()
     expect(() => config.set('kits.internal.connectionKey', null)).not.toThrow()
     expect(() => config.set('auth.groups.ADMIN', null)).not.toThrow()
