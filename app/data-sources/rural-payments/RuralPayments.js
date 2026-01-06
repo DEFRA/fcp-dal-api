@@ -198,4 +198,21 @@ export class RuralPayments extends RESTDataSource {
       return response.text()
     }
   }
+
+  async getTitles() {
+    const response = await this.get('reference/titles')
+
+    if (!response?._data?.length) {
+      const { gatewayType, request } = this
+      this.logger.warn(`#datasource - Rural payments - titles reference data not found`, {
+        code: RURALPAYMENTS_API_NOT_FOUND_001,
+        response: { body: response },
+        gatewayType,
+        request
+      })
+      throw new NotFound('Rural payments titles reference data not found')
+    }
+
+    return response._data
+  }
 }
