@@ -14,7 +14,7 @@ export const config = convict({
       default: null,
       sensitive: true,
       nullable: process.env.DISABLE_PROXY === 'true',
-      env: 'CDP_HTTPS_PROXY'
+      env: 'HTTPS_PROXY'
     },
     httpProxy: {
       doc: 'CDP HTTP proxy, automatically set on CDP',
@@ -22,7 +22,7 @@ export const config = convict({
       default: null,
       sensitive: true,
       nullable: process.env.DISABLE_PROXY === 'true',
-      env: 'CDP_HTTP_PROXY'
+      env: 'HTTP_PROXY'
     },
     env: {
       doc: 'CDP environment, automatically set on CDP',
