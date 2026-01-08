@@ -72,7 +72,7 @@ describe('RuralPayments Custom Fetch', () => {
         dispatcher: [
           {
             requestTls,
-            uri: config.get('cdp.httpsProxy')
+            uri: config.get('cdp.httpProxy')
           }
         ],
         method: 'GET',
@@ -86,7 +86,7 @@ describe('RuralPayments Custom Fetch', () => {
     })
     expect(undici.ProxyAgent).toHaveBeenCalledWith({
       requestTls,
-      uri: config.get('cdp.httpsProxy')
+      uri: config.get('cdp.httpProxy')
     })
     expect(AbortSignal.timeout).toHaveBeenCalledWith(timeout)
     expect(global.fetch).toHaveBeenCalledTimes(1)

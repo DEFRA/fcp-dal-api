@@ -25,7 +25,7 @@ export class MongoJWKS extends MongoDataSource {
     }
 
     if (!config.get('disableProxy')) {
-      clientConfig.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
+      clientConfig.requestAgent = new HttpsProxyAgent(config.get('cdp.httpProxy'))
     }
 
     const client = jwksClient({

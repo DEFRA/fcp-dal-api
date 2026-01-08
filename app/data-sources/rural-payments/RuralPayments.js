@@ -52,7 +52,7 @@ export async function customFetch(url, options, requestTls) {
     })
   } else {
     options.dispatcher = new ProxyAgent({
-      uri: appConfig.get('cdp.httpsProxy'),
+      uri: appConfig.get('cdp.httpProxy'),
       requestTls
     })
   }
