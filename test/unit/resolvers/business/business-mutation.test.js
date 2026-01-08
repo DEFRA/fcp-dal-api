@@ -1,5 +1,5 @@
 import { describe, jest } from '@jest/globals'
-import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
+import { transformBusinessDetailsToOrgDetailsCreate } from '../../../../app/transformers/rural-payments/business.js'
 
 const mockBusinessCommonModule = {
   businessDetailsUpdateResolver: jest.fn(),
@@ -12,15 +12,15 @@ const mockCustomerCommonModule = {
   retrievePersonIdByCRN: jest.fn()
 }
 jest.unstable_mockModule(
-  '../../../app/graphql/resolvers/business/common.js',
+  '../../../../app/graphql/resolvers/business/common.js',
   () => mockBusinessCommonModule
 )
 jest.unstable_mockModule(
-  '../../../app/graphql/resolvers/customer/common.js',
+  '../../../../app/graphql/resolvers/customer/common.js',
   () => mockCustomerCommonModule
 )
 const { Mutation, UpdateBusinessResponse } =
-  await import('../../../app/graphql/resolvers/business/mutation.js')
+  await import('../../../../app/graphql/resolvers/business/mutation.js')
 
 describe('Business Details Mutation resolvers', () => {
   const mockArgs = { input: { name: 'Test Business' } }

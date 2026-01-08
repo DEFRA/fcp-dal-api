@@ -256,6 +256,12 @@ export const config = convict({
         format: ['primary', 'primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'],
         default: 'primary',
         env: 'MONGO_READ_PREFERENCE'
+      },
+      timeoutMS: {
+        doc: 'mongo operation timeout in milliseconds',
+        format: 'int',
+        default: 3000,
+        env: 'MONGO_TIMEOUT_MS'
       }
     }
   }

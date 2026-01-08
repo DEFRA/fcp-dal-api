@@ -44,7 +44,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
   }
 
   async getExternalPerson() {
-    // This personId will will return details for the CRN provided for external users.
+    // This personId will return details for the CRN specified in external user's DEFRA ID token
     return this.getPersonByPersonId(config.get('kits.external.personIdOverride'))
   }
 
@@ -54,11 +54,17 @@ export class RuralPaymentsCustomer extends RuralPayments {
     }
     const response = await this.get(`person/${personId}/summary`)
     if (!response?._data?.id) {
-      this.logger.warn('#datasource - Rural payments - Customer not found for Person ID', {
-        personId,
-        code: RURALPAYMENTS_API_NOT_FOUND_001,
-        response: { body: response }
-      })
+      const { gatewayType, request } = this
+      this.logger.warn(
+        `#datasource - Rural payments - Customer not found for Person ID: ${personId}`,
+        {
+          personId,
+          code: RURALPAYMENTS_API_NOT_FOUND_001,
+          response: { body: response },
+          gatewayType,
+          request
+        }
+      )
       throw new NotFound('Rural payments customer not found')
     }
 
