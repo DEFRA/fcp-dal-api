@@ -1,5 +1,4 @@
 import { MongoDataSource } from 'apollo-datasource-mongodb'
-import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwksClient from 'jwks-rsa'
 import { config } from '../../config.js'
 
@@ -22,10 +21,6 @@ export class MongoJWKS extends MongoDataSource {
     const clientConfig = {
       jwksUri: config.get('oidc.jwksURI'),
       timeout: config.get('oidc.timeoutMs')
-    }
-
-    if (!config.get('disableProxy')) {
-      clientConfig.requestAgent = new HttpsProxyAgent(config.get('cdp.httpsProxy'))
     }
 
     const client = jwksClient({

@@ -45,12 +45,6 @@ export const config = convict({
     default: null,
     env: 'DAL_REQUEST_TIMEOUT_MS'
   },
-  disableProxy: {
-    doc: 'Disable proxy for DAL requests, used for testing',
-    format: Boolean,
-    default: false,
-    env: 'DISABLE_PROXY'
-  },
   oidc: {
     jwksURI: {
       doc: 'The URL used to validate the JWT, should be entra OIDC endpoint',
@@ -252,3 +246,16 @@ export const config = convict({
 })
 
 config.validate({ allowed: 'strict' })
+
+export const decodeBase64Config = (value) => Buffer.from(value, 'base64').toString('utf-8').trim()
+
+if (!config.get('kits.disableMTLS')) {
+  config.internalMTLS = {
+    cert: decodeBase64Config(config.get('kits.internal.connectionCert')),
+    key: decodeBase64Config(config.get('kits.internal.connectionKey'))
+  }
+  config.externalMTLS = {
+    cert: decodeBase64Config(config.get('kits.external.connectionCert')),
+    key: decodeBase64Config(config.get('kits.external.connectionKey'))
+  }
+}
