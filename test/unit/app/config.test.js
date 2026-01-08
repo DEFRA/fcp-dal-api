@@ -25,8 +25,8 @@ describe('config', () => {
     delete process.env.KITS_INTERNAL_CONNECTION_CERT
     delete process.env.KITS_INTERNAL_CONNECTION_KEY
     delete process.env.ADMIN_AD_GROUP_ID
-    delete process.env.CDP_HTTPS_PROXY
-    delete process.env.CDP_HTTP_PROXY
+    delete process.env.HTTPS_PROXY
+    delete process.env.HTTP_PROXY
     delete process.env.OIDC_JWKS_TIMEOUT_MS
     delete process.env.OIDC_JWKS_URI
   })
