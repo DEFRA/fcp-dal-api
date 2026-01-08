@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, jest } from '@jest/globals'
+import https from 'node:https'
 import tls from 'node:tls'
-import undici from 'undici'
 import { config } from '../../../../app/config.js'
 
 const fakeCert = 'KITS_CONNECTION_CERT'
@@ -13,6 +13,7 @@ const timeout = 1500
 const fakeInternalURL = 'https://rp_kits_gateway_internal_url/v1/'
 const fakeExternalURL = 'https://rp_kits_gateway_external_url/v1/'
 const kitsInternalURL = new URL(fakeInternalURL)
+const kitsExternalURL = new URL(fakeExternalURL)
 
 describe('RuralPayments Custom Fetch', () => {
   let configMockPath
@@ -35,8 +36,7 @@ describe('RuralPayments Custom Fetch', () => {
       )
 
     jest.spyOn(global, 'fetch').mockImplementation((...args) => args)
-    jest.spyOn(undici, 'ProxyAgent').mockImplementation((...args) => args)
-    jest.spyOn(undici, 'Agent').mockImplementation((...args) => args)
+    jest.spyOn(https, 'Agent').mockImplementation((...args) => args)
     jest.spyOn(tls, 'createSecureContext').mockImplementation((...args) => args)
     jest.spyOn(AbortSignal, 'timeout').mockReturnValue([timeout])
   })
@@ -45,89 +45,86 @@ describe('RuralPayments Custom Fetch', () => {
     jest.restoreAllMocks()
   })
 
-  it('should call fetch with an AbortSignal with timeout and proxy dispatcher', async () => {
-    const { customFetch } = await import(
+  it('should initialise the data source with the fetch configured with mTLS and timeout', async () => {
+    const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
+    const request = {}
+    const rp = new RuralPayments(config, {
+      request,
+      gatewayType: 'internal',
+      internalGatewayDevOverrideEmail: 'override-email'
+    })
 
+    expect(rp.request).toBe(request)
+    expect(rp.gatewayType).toBe('internal')
+    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
+    expect(rp.baseURL).toBe(fakeInternalURL)
     const requestTls = {
       host: kitsInternalURL.hostname,
       port: kitsInternalURL.port,
       servername: kitsInternalURL.hostname,
-      secureContext: {
+      secureContext: tls.createSecureContext({
         key: fakeKey,
         cert: fakeCert
-      }
+      })
     }
+    expect(https.Agent).toHaveBeenCalledWith(requestTls)
 
-    const returnedCustomFetch = await customFetch(
-      `${fakeInternalURL}example-path`,
-      { method: 'GET', headers: { 'Gateway-Type': 'internal' } },
-      requestTls
-    )
-
-    expect(returnedCustomFetch).toMatchObject([
-      `${fakeInternalURL}example-path`,
-      {
-        dispatcher: [
-          {
-            requestTls,
-            uri: config.get('cdp.httpsProxy')
-          }
-        ],
+    // check that the fetch works as expected with mTLS and timeout
+    fetch.mockImplementationOnce(() => 'data')
+    expect(
+      rp.httpCache.httpFetch(`${fakeInternalURL}example-path`, {
         method: 'GET',
-        signal: [timeout]
-      }
-    ])
-
-    expect(tls.createSecureContext).toHaveBeenCalledWith({
-      key: fakeKey,
-      cert: fakeCert
+        headers: { 'Gateway-Type': 'internal' }
+      })
+    ).toBe('data')
+    expect(fetch).toHaveBeenCalledWith(`${fakeInternalURL}example-path`, {
+      method: 'GET',
+      headers: { 'Gateway-Type': 'internal' },
+      agent: [requestTls],
+      signal: [timeout]
     })
-    expect(undici.ProxyAgent).toHaveBeenCalledWith({
-      requestTls,
-      uri: config.get('cdp.httpsProxy')
-    })
-    expect(AbortSignal.timeout).toHaveBeenCalledWith(timeout)
-    expect(global.fetch).toHaveBeenCalledTimes(1)
   })
 
-  it('should call fetch with an AbortSignal with timeout and proxy disabled without mTLS', async () => {
+  it('should initialise data source with fetch configured with timeout but no mTLS', async () => {
     configMockPath.disableProxy = true
     configMockPath['kits.disableMTLS'] = true
 
-    const { customFetch } = await import(
+    const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
+    const request = {}
+    const rp = new RuralPayments(config, {
+      request,
+      gatewayType: 'external',
+      internalGatewayDevOverrideEmail: 'override-email'
+    })
 
+    expect(rp.request).toBe(request)
+    expect(rp.gatewayType).toBe('external')
+    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
+    expect(rp.baseURL).toBe(fakeExternalURL)
     const requestTls = {
-      host: kitsInternalURL.hostname,
-      port: kitsInternalURL.port,
-      servername: kitsInternalURL.hostname
+      host: kitsExternalURL.hostname,
+      port: kitsExternalURL.port,
+      servername: kitsExternalURL.hostname
     }
+    expect(https.Agent).toHaveBeenCalledWith(requestTls)
 
-    const returnedCustomFetch = await customFetch(
-      `${fakeInternalURL}example-path`,
-      { method: 'GET', headers: { 'Gateway-Type': 'internal' } },
-      requestTls
-    )
-
-    expect(returnedCustomFetch).toMatchObject([
-      `${fakeInternalURL}example-path`,
-      {
-        dispatcher: [
-          {
-            requestTls
-          }
-        ],
+    // check that the fetch works as expected with timeout, but without mTLS
+    fetch.mockImplementationOnce(() => 'data')
+    expect(
+      rp.httpCache.httpFetch(`${fakeExternalURL}example-path`, {
         method: 'GET',
-        signal: [timeout]
-      }
-    ])
-
-    expect(tls.createSecureContext).not.toHaveBeenCalled()
-    expect(undici.Agent).toHaveBeenCalledWith({ requestTls })
-    expect(global.fetch).toHaveBeenCalledTimes(1)
-    expect(AbortSignal.timeout).toHaveBeenCalledWith(timeout)
+        headers: { 'Gateway-Type': 'external' }
+      })
+    ).toBe('data')
+    expect(fetch).toHaveBeenCalledWith(`${fakeExternalURL}example-path`, {
+      method: 'GET',
+      headers: { 'Gateway-Type': 'external' },
+      agent: [requestTls],
+      signal: [timeout]
+    })
   })
 })

@@ -41,6 +41,14 @@ describe('Rural Payments Customer', () => {
     expect(response).toEqual({ id: 123 })
   })
 
+  test('should call getExternalPerson for external gateway ignoring specified CRN', async () => {
+    httpGetExt.mockImplementation(async () => ({ _data: { id: 123 } }))
+    const response = await ruralPaymentsCustomerExt.getCustomerByCRN('ignored-crn')
+
+    expect(httpGetExt.mock.calls).toEqual([['person/3337243/summary'], ['person/3337243/summary']])
+    expect(response).toEqual({ id: 123 })
+  })
+
   test('should handle customer not found', async () => {
     httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
@@ -58,6 +66,26 @@ describe('Rural Payments Customer', () => {
         code: 'RURALPAYMENTS_API_NOT_FOUND_001',
         crn: '11111111',
         response: { body: { _data: [] } }
+      }
+    )
+  })
+
+  test('should throw an error from getPersonByPersonId when customer not found', async () => {
+    httpGet.mockImplementationOnce(async () => ({}))
+
+    await expect(ruralPaymentsCustomer.getPersonByPersonId('nonexistentId')).rejects.toEqual(
+      new NotFound('Rural payments customer not found')
+    )
+
+    expect(httpGet).toHaveBeenCalledWith('person/nonexistentId/summary')
+    expect(logger.warn).toHaveBeenCalledWith(
+      '#datasource - Rural payments - Customer not found for Person ID: nonexistentId',
+      {
+        code: 'RURALPAYMENTS_API_NOT_FOUND_001',
+        personId: 'nonexistentId',
+        response: { body: {} },
+        gatewayType: 'internal',
+        request: undefined
       }
     )
   })
