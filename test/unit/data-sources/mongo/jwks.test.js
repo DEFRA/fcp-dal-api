@@ -71,7 +71,7 @@ describe('getJwtPublicKey', () => {
     expect(jwt.verify(mockToken, await JWKS.getPublicKey('mock-key-id-123'))).toEqual(
       mockTokenPayload
     )
-    expect(mockHttpsProxyAgent).toHaveBeenCalledWith(config.get('cdp.httpsProxy'))
+    expect(mockHttpsProxyAgent).toHaveBeenCalledWith(config.get('cdp.httpProxy'))
   })
 
   it('should return the public key without proxy', async () => {
