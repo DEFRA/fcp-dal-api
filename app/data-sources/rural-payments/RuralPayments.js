@@ -2,40 +2,15 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import jwt from 'jsonwebtoken'
-import https from 'node:https'
-import tls from 'node:tls'
+import tls from 'tls'
+import { EnvHttpProxyAgent, fetch as fetch11 } from 'undici'
 import { config as appConfig } from '../../config.js'
 import { BadRequest, HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { sendMetric } from '../../logger/sendMetric.js'
 
-const internalRequestTls = generateRequestTls('internal')
-const externalRequestTls = generateRequestTls('external')
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
-
-export function generateRequestTls(gatewayType) {
-  const gatewayUrl = appConfig.get(`kits.${gatewayType}.gatewayUrl`)
-  const kitsURL = new URL(gatewayUrl)
-  const requestTls = {
-    host: kitsURL.hostname,
-    port: kitsURL.port,
-    servername: kitsURL.hostname
-  }
-
-  if (!appConfig.get('kits.disableMTLS')) {
-    const connectionCert = appConfig.get(`kits.${gatewayType}.connectionCert`)
-    const connectionKey = appConfig.get(`kits.${gatewayType}.connectionKey`)
-    const decodedCert = Buffer.from(connectionCert, 'base64').toString('utf-8').trim()
-    const decodedKey = Buffer.from(connectionKey, 'base64').toString('utf-8').trim()
-    requestTls.secureContext = tls.createSecureContext({
-      key: decodedKey,
-      cert: decodedCert
-    })
-  }
-
-  return requestTls
-}
 
 export function extractCrnFromDefraIdToken(token) {
   const { payload } = jwt.decode(token, { complete: true })
@@ -61,16 +36,32 @@ export class RuralPayments extends RESTDataSource {
 
     this.internalGatewayDevOverrideEmail = internalGatewayDevOverrideEmail
     this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
-    const agent = new https.Agent(
-      this.gatewayType === 'external' ? externalRequestTls : internalRequestTls
-    )
 
-    this.httpCache.httpFetch = (url, options) => {
-      return fetch(url, {
-        ...options,
-        agent,
-        signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
-      })
+    if (appConfig.get('kits.disableMTLS')) {
+      this.httpCache.httpFetch = (url, options = {}) =>
+        // no mTLS: use normal fetch with auto-proxy support
+        fetch(url, {
+          ...options,
+          signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
+        })
+    } else {
+      // set up mTLS config
+      const kitsURL = new URL(this.baseURL)
+      const requestTls = {
+        host: kitsURL.hostname,
+        port: kitsURL.port,
+        servername: kitsURL.hostname
+      }
+      requestTls.secureContext = tls.createSecureContext(
+        this.gatewayType === 'external' ? appConfig.externalMTLS : appConfig.internalMTLS
+      )
+      this.httpCache.httpFetch = (url, options = {}) =>
+        // use undici fetch which supports mTLS & env proxy via agent
+        fetch11(url, {
+          ...options,
+          dispatcher: new EnvHttpProxyAgent({ requestTls }),
+          signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
+        })
     }
   }
 
