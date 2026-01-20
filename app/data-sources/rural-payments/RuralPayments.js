@@ -65,8 +65,14 @@ export class RuralPayments extends RESTDataSource {
     }
   }
 
-  didEncounterError(error, request, url) {
+  didEncounterError(error = { message: 'unknown/empty error' }, request, url) {
     request.path = url
+    let { cause, message } = error
+    while (cause) {
+      message += ` | Caused by ${cause.constructor.name}: ${cause.message}`
+      cause = cause.cause
+    }
+    error.message = message
 
     this.logger.error('#datasource - Rural payments - request error', {
       error,
