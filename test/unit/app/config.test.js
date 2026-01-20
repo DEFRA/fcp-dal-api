@@ -116,10 +116,19 @@ describe('config', () => {
     process.env.KITS_INTERNAL_CONNECTION_KEY = Buffer.from('internal-key').toString('base64')
     process.env.KITS_EXTERNAL_CONNECTION_CERT = Buffer.from('external-cert').toString('base64')
     process.env.KITS_EXTERNAL_CONNECTION_KEY = Buffer.from('external-key').toString('base64')
+    process.env.KITS_CA_CERT = Buffer.from('ca-cert').toString('base64')
 
     const { config } = await loadFreshConfig()
-    expect(config.internalMTLS).toEqual({ cert: 'internal-cert', key: 'internal-key' })
-    expect(config.externalMTLS).toEqual({ cert: 'external-cert', key: 'external-key' })
+    expect(config.internalMTLS).toEqual({
+      cert: 'internal-cert',
+      key: 'internal-key',
+      ca: 'ca-cert'
+    })
+    expect(config.externalMTLS).toEqual({
+      cert: 'external-cert',
+      key: 'external-key',
+      ca: 'ca-cert'
+    })
   })
 })
 

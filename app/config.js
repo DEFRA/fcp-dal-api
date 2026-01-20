@@ -196,6 +196,14 @@ export const config = convict({
       default: false,
       env: 'KITS_DISABLE_MTLS'
     },
+    caCert: {
+      doc: 'Base64 encoded CA certificate for KITS mTLS connection',
+      format: String,
+      default: null,
+      sensitive: true,
+      nullable: true,
+      env: 'KITS_CA_CERT'
+    },
     gatewayTimeoutMs: {
       doc: 'KITS gateway timeout in milliseconds',
       format: 'int',
@@ -257,5 +265,11 @@ if (!config.get('kits.disableMTLS')) {
   config.externalMTLS = {
     cert: decodeBase64Config(config.get('kits.external.connectionCert')),
     key: decodeBase64Config(config.get('kits.external.connectionKey'))
+  }
+
+  if (config.get('kits.caCert')) {
+    const caCert = decodeBase64Config(config.get('kits.caCert'))
+    config.internalMTLS.ca = caCert
+    config.externalMTLS.ca = caCert
   }
 }
