@@ -212,8 +212,8 @@ const business = {
     },
     {
       personId: '11111119',
-      firstName: 'Murray',
-      lastName: 'Kihn',
+      firstName: 'Big',
+      lastName: 'Skeleton',
       crn: '1111111900',
       role: 'Business Partner'
     },
