@@ -1,0 +1,38 @@
+# NOTE: you're probably looking for the convenience script: test/acceptance/emulate-full-cdp.sh
+#
+# NOTE: this file extends the other compose files and cdp-mock-check.yml to add mTLS behaviour
+# to emulate the live environments in CDP that depend on KITS for data.
+#
+# * you can run or manually test with:
+#     docker compose \
+#       -f compose.yml -f test/acceptance/cdp-mock-check.yml \
+#       -f test/acceptance/cdp-kits-emulation.yml up
+#
+# * you can run the acceptance tests with:
+#     docker compose \
+#       -f compose.yml -f test/acceptance/cdp-mock-check.yml \
+#       -f test/acceptance/cdp-kits-emulation.yml \
+#       -f test/acceptance/compose.yml run test
+services:
+  kits-mock:
+    environment:
+      TLS_KEY: ${KITS_MOCK_TLS_SERVER_KEY:?KITS_MOCK_TLS_SERVER_KEY must be set for kits emulation}
+      TLS_CERT: ${KITS_MOCK_TLS_SERVER_CERT:?KITS_MOCK_TLS_SERVER_CERT must be set for kits emulation}
+      TLS_CA: ${KITS_CA_CERT:?KITS_CA_CERT must be set for kits emulation}
+    healthcheck:
+      test: curl -s --cacert /tmp/ca.crt --key /tmp/client.key --cert /tmp/client.crt https://kits-mock:3100/health
+    volumes:
+      - ./test/acceptance/mtls/ca.crt:/tmp/ca.crt:ro
+      - ./test/acceptance/mtls/client.crt:/tmp/client.crt:ro
+      - ./test/acceptance/mtls/client.key:/tmp/client.key:ro
+
+  fcp-dal-api:
+    environment:
+      KITS_DISABLE_MTLS: false
+      KITS_CA_CERT: ${KITS_CA_CERT:?KITS_CA_CERT must be set for kits emulation}
+      KITS_INTERNAL_GATEWAY_URL: https://kits-mock:3100/extapi/
+      KITS_INTERNAL_CONNECTION_KEY: ${KITS_INTERNAL_CONNECTION_KEY:?KITS_INTERNAL_CONNECTION_KEY must be set}
+      KITS_INTERNAL_CONNECTION_CERT: ${KITS_INTERNAL_CONNECTION_CERT:?KITS_INTERNAL_CONNECTION_CERT must be set}
+      KITS_EXTERNAL_GATEWAY_URL: https://kits-mock:3100/extapi/
+      KITS_EXTERNAL_CONNECTION_KEY: $KITS_INTERNAL_CONNECTION_KEY
+      KITS_EXTERNAL_CONNECTION_CERT: $KITS_INTERNAL_CONNECTION_CERT
