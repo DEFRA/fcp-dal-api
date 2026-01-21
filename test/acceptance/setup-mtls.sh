@@ -133,6 +133,7 @@ run_command openssl req -new \
 run_command openssl x509 -req \
     -in ./mtls/server.csr -out ./mtls/server.crt \
     -CA ${CA_CERT} -CAkey ${CA_KEY} -passin pass:ca-password \
+    -CAcreateserial -CAserial ./mtls/ca.srl \
     -days ${TEST_ASSET_TTL}
 
 # setup client assets
@@ -147,6 +148,7 @@ run_command openssl req -new \
 run_command openssl x509 -req \
     -in ./mtls/client.csr -out ./mtls/client.crt \
     -CA ${CA_CERT} -CAkey ${CA_KEY} -passin pass:ca-password \
+    -CAserial ./mtls/ca.srl \
     -days ${TEST_ASSET_TTL}
 
 # tidy up - remove CSR files

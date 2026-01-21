@@ -44,3 +44,8 @@ docker compose \
   ${COMPOSE_CMD[@]} \
   --build --quiet-pull \
   ${COMPOSE_SERVICE}
+
+# clean-up generated TLS assets
+echo
+echo "Cleaning up TLS assets..."
+rm -fr "${SCRIPT_DIR}/mtls"
