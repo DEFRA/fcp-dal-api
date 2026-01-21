@@ -19,6 +19,7 @@ services:
       - 3128:3128
     volumes:
       - ./test/acceptance/squid.conf:/etc/squid/squid.conf:ro
+    stop_grace_period: 1s
     networks:
       - cdp-external
       - cdp-tenant

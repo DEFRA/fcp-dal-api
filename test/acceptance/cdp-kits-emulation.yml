@@ -20,7 +20,7 @@ services:
       TLS_CERT: ${KITS_MOCK_TLS_SERVER_CERT:?KITS_MOCK_TLS_SERVER_CERT must be set for kits emulation}
       TLS_CA: ${KITS_CA_CERT:?KITS_CA_CERT must be set for kits emulation}
     healthcheck:
-      test: curl -s --cacert /tmp/ca.crt --key /tmp/client.key --cert /tmp/client.crt https://kits-mock:3100/health
+      test: curl -s --cacert /tmp/ca.crt --key /tmp/client.key --cert /tmp/client.crt https://kits-mock:3100/health > /tmp/start.log 2>&1
     volumes:
       - ./test/acceptance/mtls/ca.crt:/tmp/ca.crt:ro
       - ./test/acceptance/mtls/client.crt:/tmp/client.crt:ro
