@@ -45,8 +45,11 @@ jobs:
         with:
           test-script: npm test
 
-      - name: Local dev check
-        run: npm run test:acceptance:docker
+      - name: Acceptance & environment emulation tests
+        run: |
+          npm run test:acceptance:docker && \
+          npm run test:acceptance:proxy && \
+          npm run test:acceptance:proxy:mtls
 
       - name: Sonarqube Cloud Scan
         if: github.actor != 'dependabot[bot]'
