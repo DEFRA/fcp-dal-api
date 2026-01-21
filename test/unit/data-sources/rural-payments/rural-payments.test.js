@@ -131,7 +131,7 @@ describe('RuralPayments', () => {
       rp.didEncounterError(error, request, url)
 
       expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
-        error: { message: 'unknown/empty error' },
+        error: { message: 'unknown/empty error while trying to fetch upstream data' },
         request,
         response: {},
         code: RURALPAYMENTS_API_REQUEST_001

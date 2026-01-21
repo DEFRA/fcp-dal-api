@@ -2,7 +2,7 @@ import { RESTDataSource } from '@apollo/datasource-rest'
 import { Unit } from 'aws-embedded-metrics'
 import StatusCodes from 'http-status-codes'
 import jwt from 'jsonwebtoken'
-import tls from 'tls'
+import tls from 'node:tls'
 import { EnvHttpProxyAgent, fetch as fetch11 } from 'undici'
 import { config as appConfig } from '../../config.js'
 import { BadRequest, HttpError } from '../../errors/graphql.js'
@@ -65,8 +65,11 @@ export class RuralPayments extends RESTDataSource {
     }
   }
 
-  didEncounterError(error = { message: 'unknown/empty error' }, request, url) {
+  didEncounterError(error, request, url) {
     request.path = url
+    if (!error) {
+      error = { message: 'unknown/empty error while trying to fetch upstream data' }
+    }
     let { cause, message } = error
     while (cause) {
       message += ` | Caused by ${cause.constructor.name}: ${cause.message}`
