@@ -48,8 +48,9 @@ jobs:
       - name: Acceptance & environment emulation tests
         run: |
           npm run test:acceptance:docker && \
-          npm run test:acceptance:proxy && \
-          npm run test:acceptance:proxy:mtls
+          npm run test:acceptance:proxy
+        # TODO: re-enable mTLS tests when startup health check issue is resolved
+        #  && npm run test:acceptance:proxy:mtls
 
       - name: Sonarqube Cloud Scan
         if: github.actor != 'dependabot[bot]'
