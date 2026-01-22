@@ -1,24 +1,14 @@
-import { beforeAll, jest } from '@jest/globals'
+import { beforeAll } from '@jest/globals'
 import { generateKeyPairSync } from 'crypto'
 import jwt from 'jsonwebtoken'
 import { MongoClient } from 'mongodb'
 import nock from 'nock'
 import { config } from '../../../../app/config.js'
 
-const mockHttpsProxyAgent = jest.fn()
-const mockProxyAgentModule = {
-  HttpsProxyAgent: mockHttpsProxyAgent
-}
-jest.unstable_mockModule('https-proxy-agent', () => mockProxyAgentModule)
-
 const client = new MongoClient(config.get('mongo.mongoUrl'))
 client.connect()
 const db = client.db(config.get('mongo.databaseName'))
 const { MongoJWKS } = await import('../../../../app/data-sources/mongo/JWKS.js')
-const originalConfig = { ...config }
-const configMockPath = {
-  disableProxy: false
-}
 
 describe('getJwtPublicKey', () => {
   const { publicKey, privateKey } = generateKeyPairSync('rsa', {
@@ -30,12 +20,6 @@ describe('getJwtPublicKey', () => {
   })
 
   beforeEach(() => {
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
-
     nock(config.get('oidc.jwksURI'))
       .get('/')
       .reply(200, {
@@ -71,13 +55,11 @@ describe('getJwtPublicKey', () => {
     expect(jwt.verify(mockToken, await JWKS.getPublicKey('mock-key-id-123'))).toEqual(
       mockTokenPayload
     )
-    expect(mockHttpsProxyAgent).toHaveBeenCalledWith(config.get('cdp.httpsProxy'))
   })
 
   it('should return the public key without proxy', async () => {
     const JWKS = new MongoJWKS({ modelOrCollection: db.collection('jwks') })
 
-    config.set('disableProxy', true)
     const mockTokenPayload = {
       iat: Math.floor(Date.now() / 1000)
     }
@@ -89,6 +71,5 @@ describe('getJwtPublicKey', () => {
     expect(jwt.verify(mockToken, await JWKS.getPublicKey('mock-key-id-123'))).toEqual(
       mockTokenPayload
     )
-    expect(mockHttpsProxyAgent).not.toHaveBeenCalled()
   })
 })

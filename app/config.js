@@ -8,22 +8,6 @@ export const config = convict({
     env: 'NODE_ENV'
   },
   cdp: {
-    httpsProxy: {
-      doc: 'CDP HTTPS proxy, automatically set on CDP',
-      format: String,
-      default: null,
-      sensitive: true,
-      nullable: process.env.DISABLE_PROXY === 'true',
-      env: 'CDP_HTTPS_PROXY'
-    },
-    httpProxy: {
-      doc: 'CDP HTTP proxy, automatically set on CDP',
-      format: String,
-      default: null,
-      sensitive: true,
-      nullable: process.env.DISABLE_PROXY === 'true',
-      env: 'CDP_HTTP_PROXY'
-    },
     env: {
       doc: 'CDP environment, automatically set on CDP',
       format: ['dev', 'test', 'ext-test', 'perf-test', 'prod'],
@@ -60,12 +44,6 @@ export const config = convict({
     format: 'int',
     default: null,
     env: 'DAL_REQUEST_TIMEOUT_MS'
-  },
-  disableProxy: {
-    doc: 'Disable proxy for DAL requests, used for testing',
-    format: Boolean,
-    default: false,
-    env: 'DISABLE_PROXY'
   },
   oidc: {
     jwksURI: {
@@ -218,6 +196,14 @@ export const config = convict({
       default: false,
       env: 'KITS_DISABLE_MTLS'
     },
+    caCert: {
+      doc: 'Base64 encoded CA certificate for KITS mTLS connection',
+      format: String,
+      default: null,
+      sensitive: true,
+      nullable: true,
+      env: 'KITS_CA_CERT'
+    },
     gatewayTimeoutMs: {
       doc: 'KITS gateway timeout in milliseconds',
       format: 'int',
@@ -268,3 +254,22 @@ export const config = convict({
 })
 
 config.validate({ allowed: 'strict' })
+
+export const decodeBase64Config = (value) => Buffer.from(value, 'base64').toString('utf-8').trim()
+
+if (!config.get('kits.disableMTLS')) {
+  config.internalMTLS = {
+    cert: decodeBase64Config(config.get('kits.internal.connectionCert')),
+    key: decodeBase64Config(config.get('kits.internal.connectionKey'))
+  }
+  config.externalMTLS = {
+    cert: decodeBase64Config(config.get('kits.external.connectionCert')),
+    key: decodeBase64Config(config.get('kits.external.connectionKey'))
+  }
+
+  if (config.get('kits.caCert')) {
+    const caCert = decodeBase64Config(config.get('kits.caCert'))
+    config.internalMTLS.ca = caCert
+    config.externalMTLS.ca = caCert
+  }
+}

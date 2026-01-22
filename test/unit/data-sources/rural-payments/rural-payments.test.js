@@ -80,7 +80,7 @@ describe('RuralPayments', () => {
   })
 
   describe('didEncounterError', () => {
-    test('handles RPP errors', () => {
+    test('handles errors', () => {
       const rp = new RuralPayments(...datasourceOptions)
 
       const error = new Error('test error')
@@ -97,7 +97,31 @@ describe('RuralPayments', () => {
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
-    test('handles unknown RPP errors', () => {
+
+    test('handles complex errors with causes', () => {
+      const rp = new RuralPayments(...datasourceOptions)
+
+      const error = new Error('test error')
+      const intermediateError = new TypeError('intermediate cause')
+      intermediateError.cause = new Error('root cause error')
+      error.cause = intermediateError
+      // error.extensions = { response: { status: 400, headers: { get: () => 'text/html' } } }
+      const request = {}
+      const url = 'test url'
+
+      rp.didEncounterError(error, request, url)
+
+      expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
+        error: new Error(
+          'test error | Caused by TypeError: intermediate cause | Caused by Error: root cause error'
+        ),
+        request,
+        response: {},
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+
+    test('handles unknown errors', () => {
       const rp = new RuralPayments(...datasourceOptions)
 
       const error = undefined
@@ -107,7 +131,7 @@ describe('RuralPayments', () => {
       rp.didEncounterError(error, request, url)
 
       expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
-        error,
+        error: { message: 'unknown/empty error while trying to fetch upstream data' },
         request,
         response: {},
         code: RURALPAYMENTS_API_REQUEST_001
@@ -184,7 +208,7 @@ describe('RuralPayments', () => {
       )
     })
 
-    test('throws error if gatewaytype is not internal or external', () => {
+    test('throws error if gateway-type is not internal or external', () => {
       const invalidDataSourceOptions = [
         { logger },
         {
@@ -399,7 +423,7 @@ describe('RuralPayments', () => {
 })
 
 describe('extractCrnFromDefraIdToken', () => {
-  test('extracts crn succesfully from valid token', async () => {
+  test('extracts crn successfully from valid token', async () => {
     const response = extractCrnFromDefraIdToken(
       jwt.sign({ contactId: '11111111' }, 'secret', { expiresIn: '1h' })
     )

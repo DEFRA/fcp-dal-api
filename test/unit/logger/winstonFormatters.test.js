@@ -175,6 +175,11 @@ describe('winstonFormatters', () => {
       level: undefined,
       message: undefined
     })
+    expect(cdpSchemaTranslator().transform({ error: { message: 'error' } })).toEqual({
+      level: undefined,
+      message: undefined,
+      error: { message: 'error' } // must pick up partial error details
+    })
   })
 
   describe('pickKeysForLogging ', () => {

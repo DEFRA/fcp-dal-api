@@ -20,9 +20,7 @@ const buildHttpDetails = (request, response, requestTimeMs) => {
 }
 
 const buildError = ({ name, message, stack }, code) =>
-  name &&
-  message &&
-  stack && {
+  (name || message || stack) && {
     error: {
       ...(name && { type: name }),
       ...(message && { message }),

@@ -1,0 +1,47 @@
+# NOTE: this file extends the 2 compose.yml to add an outbound proxy behaviour
+# akin to CDP's dev env.
+#
+# * you can run or manually test with:
+#     docker compose -f compose.yml -f test/acceptance/cdp-mock-check.yml up
+#
+# * you can run the acceptance tests with:
+#     docker compose \
+#       -f compose.yml -f test/acceptance/cdp-mock-check.yml \
+#       -f test/acceptance/compose.yml run test
+services:
+  kits-mock:
+    networks:
+      - cdp-external
+
+  proxy:
+    image: ubuntu/squid
+    ports:
+      - 3128:3128
+    volumes:
+      - ./test/acceptance/squid.conf:/etc/squid/squid.conf:ro
+    stop_grace_period: 1s
+    networks:
+      - cdp-external
+      - cdp-tenant
+  # NOTE: proxy is on both networks so only route DAL-API can take to kits-mock!
+
+  fcp-dal-api:
+    environment:
+      # NODE_DEBUG: http # NOTE: useful for adding debug info on fetch failures!
+      NODE_USE_ENV_PROXY: 1
+      HTTP_PROXY: http://proxy:3128
+    depends_on:
+      proxy:
+        condition: service_started
+
+################################################################################
+
+networks:
+  # the parts that sit within CDP infrastructure
+  cdp-tenant:
+    driver: bridge
+    name: cdp-tenant
+  # the parts that sit external to CDP infrastructure (and the outbound proxy)
+  cdp-external:
+    driver: bridge
+    name: cdp-external
