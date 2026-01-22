@@ -2,14 +2,14 @@ import { v4 as uuidv4 } from 'uuid'
 
 const existingEnvVars = process.env
 
+const loadFreshConfig = async () => {
+  return await import(`../../../app/config.js?update=${uuidv4()}`)
+}
+
 describe('config', () => {
   afterAll(() => {
     process.env = existingEnvVars
   })
-
-  const loadFreshConfig = async () => {
-    return await import(`../../../app/config.js?update=${uuidv4()}`)
-  }
 
   beforeEach(() => {
     delete process.env.NODE_ENV
@@ -24,9 +24,9 @@ describe('config', () => {
     delete process.env.KITS_REQUEST_PAGE_SIZE
     delete process.env.KITS_INTERNAL_CONNECTION_CERT
     delete process.env.KITS_INTERNAL_CONNECTION_KEY
+    delete process.env.KITS_EXTERNAL_CONNECTION_CERT
+    delete process.env.KITS_EXTERNAL_CONNECTION_KEY
     delete process.env.ADMIN_AD_GROUP_ID
-    delete process.env.CDP_HTTPS_PROXY
-    delete process.env.CDP_HTTP_PROXY
     delete process.env.OIDC_JWKS_TIMEOUT_MS
     delete process.env.OIDC_JWKS_URI
   })
@@ -34,7 +34,6 @@ describe('config', () => {
   it('should have default values when optional env vars are unset', async () => {
     process.env.DISABLE_AUTH = 'true'
     process.env.KITS_DISABLE_MTLS = 'true'
-    process.env.DISABLE_PROXY = 'true'
     process.env.HEALTH_CHECK_ENABLED = 'false'
 
     const { config } = await loadFreshConfig()
@@ -52,17 +51,15 @@ describe('config', () => {
     expect(config.get('kits.disableMTLS')).toBe(true)
     expect(config.get('kits.internal.connectionCert')).toBe(null)
     expect(config.get('kits.internal.connectionKey')).toBe(null)
-    expect(config.get('cdp.httpsProxy')).toBe(null)
-    expect(config.get('cdp.httpProxy')).toBe(null)
-    expect(config.get('disableProxy')).toBe(true)
+    expect(config.get('kits.external.connectionCert')).toBe(null)
+    expect(config.get('kits.external.connectionKey')).toBe(null)
     expect(config.get('oidc.jwksURI')).toBe(null)
     expect(config.get('oidc.timeoutMs')).toBe(null)
   })
 
-  it('should throw an error any invalid combinations of env vars', async () => {
+  it('should throw an error with any invalid combinations of env vars', async () => {
     // These are in a single test to avoid race conditions when setting env vars
     process.env.KITS_DISABLE_MTLS = 'true'
-    process.env.DISABLE_PROXY = 'true'
     process.env.HEALTH_CHECK_ENABLED = 'false'
     let expectedErrors
 
@@ -76,19 +73,12 @@ describe('config', () => {
     process.env.KITS_DISABLE_MTLS = 'false'
     expectedErrors = [
       'kits.internal.connectionCert: must be of type String',
-      'kits.internal.connectionKey: must be of type String'
+      'kits.internal.connectionKey: must be of type String',
+      'kits.external.connectionCert: must be of type String',
+      'kits.external.connectionKey: must be of type String'
     ]
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
     process.env.KITS_DISABLE_MTLS = 'true'
-
-    // DISABLE_PROXY check
-    process.env.DISABLE_PROXY = 'false'
-    expectedErrors = [
-      'cdp.httpsProxy: must be of type String',
-      'cdp.httpProxy: must be of type String'
-    ]
-    await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-    process.env.DISABLE_PROXY = 'true'
 
     // HEALTH_CHECK_ENABLED check
     process.env.HEALTH_CHECK_ENABLED = 'true'
@@ -113,10 +103,40 @@ describe('config', () => {
     expect(() => config.set('healthCheck.ruralPaymentsInternalOrganisationId', null)).not.toThrow()
     expect(() => config.set('oidc.timeoutMs', null)).not.toThrow()
     expect(() => config.set('oidc.jwksURI', null)).not.toThrow()
-    expect(() => config.set('cdp.httpsProxy', null)).not.toThrow()
-    expect(() => config.set('cdp.httpProxy', null)).not.toThrow()
     expect(() => config.set('kits.internal.connectionCert', null)).not.toThrow()
     expect(() => config.set('kits.internal.connectionKey', null)).not.toThrow()
+    expect(() => config.set('kits.external.connectionCert', null)).not.toThrow()
+    expect(() => config.set('kits.external.connectionKey', null)).not.toThrow()
     expect(() => config.set('auth.groups.ADMIN', null)).not.toThrow()
+  })
+
+  it('should unpack base64 encoded config values', async () => {
+    process.env.KITS_DISABLE_MTLS = 'false'
+    process.env.KITS_INTERNAL_CONNECTION_CERT = Buffer.from('internal-cert').toString('base64')
+    process.env.KITS_INTERNAL_CONNECTION_KEY = Buffer.from('internal-key').toString('base64')
+    process.env.KITS_EXTERNAL_CONNECTION_CERT = Buffer.from('external-cert').toString('base64')
+    process.env.KITS_EXTERNAL_CONNECTION_KEY = Buffer.from('external-key').toString('base64')
+    process.env.KITS_CA_CERT = Buffer.from('ca-cert').toString('base64')
+
+    const { config } = await loadFreshConfig()
+    expect(config.internalMTLS).toEqual({
+      cert: 'internal-cert',
+      key: 'internal-key',
+      ca: 'ca-cert'
+    })
+    expect(config.externalMTLS).toEqual({
+      cert: 'external-cert',
+      key: 'external-key',
+      ca: 'ca-cert'
+    })
+  })
+})
+
+describe('decodeBase64Config', () => {
+  it('should decode base64 strings from config', async () => {
+    const config = await loadFreshConfig()
+    const encodedString = Buffer.from('test-string').toString('base64')
+    const decoded = config.decodeBase64Config(encodedString)
+    expect(decoded).toBe('test-string')
   })
 })
