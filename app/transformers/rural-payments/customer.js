@@ -53,6 +53,9 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses(properties,
   return transformed
 }
 
+const day = 24 * 60 * 60 * 1000
+const dob2utc = (dateOfBirth) => dateOfBirth && Math.round(dateOfBirth / day) * day
+
 export const ruralPaymentsPortalCustomerTransformer = (data) => {
   return {
     name: {
@@ -62,7 +65,8 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
       middle: data.middleName,
       last: data.lastName
     },
-    dateOfBirth: validateUpstreamTimestampToISO(data.dateOfBirth)?.substring(0, 10) ?? null,
+    dateOfBirth:
+      validateUpstreamTimestampToISO(dob2utc(data.dateOfBirth))?.substring(0, 10) ?? null,
     phone: {
       mobile: data.mobile,
       landline: data.landline
