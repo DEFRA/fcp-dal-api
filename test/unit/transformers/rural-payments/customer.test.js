@@ -414,7 +414,7 @@ describe('Customer transformer', () => {
         firstName: 'newFirstName',
         middleName: 'newMiddleName',
         lastName: 'newLastName',
-        dateOfBirth: 1735689600,
+        dateOfBirth: new Date('2023-01-02').getTime(), // proper UTC day at midnight
         landline: 'newLandline',
         mobile: 'newMobile',
         email: 'newEmail',
@@ -447,7 +447,7 @@ describe('Customer transformer', () => {
         first: newPerson.firstName,
         middle: newPerson.middleName,
         last: newPerson.lastName,
-        dateOfBirth: newPerson.dateOfBirth,
+        dateOfBirth: new Date('2023-01-01T12:47:59.123Z').getTime(), // not a UTC day at midnight,
         doNotContact: newPerson.doNotContact,
         phone: {
           landline: newPerson.landline,

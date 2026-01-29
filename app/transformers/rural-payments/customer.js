@@ -114,8 +114,7 @@ const customerUpdateInputMapping = {
   firstName: (input) => input.first,
   middleName: (input) => input.middle,
   lastName: (input) => input.last,
-  dateOfBirth: (input) =>
-    input.dateOfBirth ? new Date(input.dateOfBirth).getTime() : input.dateOfBirth,
+  dateOfBirth: (input) => input.dateOfBirth && dob2utc(new Date(input.dateOfBirth).getTime()),
   landline: (input) => input.phone?.landline,
   mobile: (input) => input.phone?.mobile,
   email: (input) => input.email?.address,
