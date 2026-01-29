@@ -84,7 +84,7 @@ describe('winstonFormatters', () => {
         event: {
           action: 'gateway=external',
           category: 'RURALPAYMENTS_API_REQUEST_001',
-          outcome: 200,
+          outcome: 'status code: 200',
           reference: 'http://localhost/path',
           type: 'POST',
           created: 1752678579327,
