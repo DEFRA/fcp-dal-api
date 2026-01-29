@@ -37,7 +37,7 @@ const buildEvent = (kind, category, type, created, duration, outcome, reference,
       ...(type && { type }), // Specific action taken or observed (e.g., user_login).
       ...(created && { created }), // Time the event was created in the system.
       ...(duration && { duration: duration * 1000000 }), // Total time of the event in nanoseconds.
-      ...(outcome && { outcome }), // Outcome of the event.
+      ...(outcome && { outcome: `status code: ${outcome}` }), // Outcome of the event.
       ...(reference && { reference }), // A reference ID or URL tied to the event.
       ...(action && { action: `gateway=${action}` })
     }
