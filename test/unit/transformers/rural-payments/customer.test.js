@@ -323,7 +323,6 @@ describe('Customer transformer', () => {
         deactivated: null,
         confirmed: null
       }
-
       const transformed = {
         name: {
           title: null,
@@ -354,6 +353,21 @@ describe('Customer transformer', () => {
       }
 
       expect(ruralPaymentsPortalCustomerTransformer(input)).toEqual(transformed)
+    })
+
+    test('should transform incorrect date of birth to nearest day', () => {
+      expect(
+        ruralPaymentsPortalCustomerTransformer({
+          dateOfBirth: new Date('25 Jul 2003').getTime() // BST date
+        })
+      ).toEqual(expect.objectContaining({ dateOfBirth: '2003-07-25' }))
+
+      expect(
+        ruralPaymentsPortalCustomerTransformer({
+          // this is actually 2003-12-12T12:47:59.123Z in UTC)
+          dateOfBirth: new Date('31 Dec 2003 13:47:59.123GMT+1').getTime() // full strange GMT+1 date
+        })
+      ).toEqual(expect.objectContaining({ dateOfBirth: '2004-01-01' })) // "corrects" to nearest day
     })
   })
 
@@ -400,7 +414,7 @@ describe('Customer transformer', () => {
         firstName: 'newFirstName',
         middleName: 'newMiddleName',
         lastName: 'newLastName',
-        dateOfBirth: 1735689600,
+        dateOfBirth: new Date('2023-01-02').getTime(), // proper UTC day at midnight
         landline: 'newLandline',
         mobile: 'newMobile',
         email: 'newEmail',
@@ -433,7 +447,7 @@ describe('Customer transformer', () => {
         first: newPerson.firstName,
         middle: newPerson.middleName,
         last: newPerson.lastName,
-        dateOfBirth: newPerson.dateOfBirth,
+        dateOfBirth: new Date('2023-01-01T12:47:59.123Z').getTime(), // not a UTC day at midnight,
         doNotContact: newPerson.doNotContact,
         phone: {
           landline: newPerson.landline,
