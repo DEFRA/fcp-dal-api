@@ -99,7 +99,7 @@ const customer = {
       middle: 'Daryl',
       last: 'Sanford'
     },
-    dateOfBirth: '1972-11-23',
+    dateOfBirth: '1972-11-24',
     phone: {
       mobile: '056 8967 5108',
       landline: '055 4582 4488'
