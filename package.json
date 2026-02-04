@@ -37,7 +37,7 @@
   "license": "OGL-UK-3.0",
   "dependencies": {
     "@apollo/datasource-rest": "^6.4.1",
-    "@apollo/server": "^5.0.0",
+    "@apollo/server": "^5.4.0",
     "@as-integrations/hapi": "^2.0.2",
     "@defra/hapi-secure-context": "^0.3.0",
     "@elastic/ecs-winston-format": "^1.5.3",
