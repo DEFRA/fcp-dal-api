@@ -1,6 +1,8 @@
 import hapiApollo from '@as-integrations/hapi'
 import { secureContext } from '@defra/hapi-secure-context'
 import { expect, jest } from '@jest/globals'
+import nock from 'nock'
+import { MongoJWKS } from '../../../app/data-sources/mongo/JWKS.js'
 import { apolloServer } from '../../../app/graphql/server.js'
 import { mongoClient } from '../../../app/mongo.js'
 
@@ -16,6 +18,15 @@ jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
 const { server } = await import('../../../app/server.js')
 
 describe('App initialization', () => {
+  beforeAll(() => {
+    nock.disableNetConnect()
+  })
+
+  afterAll(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
   beforeEach(() => {
     jest.spyOn(apolloServer, 'start').mockResolvedValue()
     jest.spyOn(server, 'register').mockResolvedValue()
@@ -23,6 +34,9 @@ describe('App initialization', () => {
     jest.spyOn(server, 'stop').mockResolvedValue()
     jest.spyOn(mongoClient, 'connect').mockResolvedValue()
     jest.spyOn(mongoClient, 'close').mockResolvedValue()
+    jest
+      .spyOn(MongoJWKS.prototype, 'fetchPublicKey')
+      .mockResolvedValue('-----BEGIN PUBLIC KEY-----')
     jest.spyOn(process, 'exit').mockReturnValue(1)
 
     server.info = { uri: 'http://localhost:3000' }
@@ -33,8 +47,13 @@ describe('App initialization', () => {
   })
 
   it('should initialize the application successfully', async () => {
+    const msOauth = nock('http://mock-jwks-endpoint/')
+    msOauth.get('/keys').reply(200, {
+      keys: [{ kid: 'test-key-id' }]
+    })
+
     // Import the app after mocks are set up
-    await import('../../../app/index.js')
+    await import('../../../app/index.js?call=1')
 
     // Verify Apollo server was started
     expect(apolloServer.start).toHaveBeenCalled()
@@ -54,6 +73,12 @@ describe('App initialization', () => {
 
     // Verify MongoDB connection was attempted
     expect(mongoClient.connect).toHaveBeenCalled()
+
+    // Verify JWKS key fetched and cached
+    expect(MongoJWKS.prototype.fetchPublicKey).toHaveBeenCalled()
+    expect(mockLogger.logger.info).toHaveBeenCalledWith('Fetched JWKS keys', { keyCount: 1 })
+    expect(nock.isDone()).toBe(true)
+    expect(mockLogger.logger.info).toHaveBeenCalledWith('Cached first JWKS key successfully')
 
     // Verify server was started
     expect(server.start).toHaveBeenCalled()
