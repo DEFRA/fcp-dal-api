@@ -13,6 +13,13 @@ export const config = convict({
       format: ['dev', 'test', 'ext-test', 'perf-test', 'prod'],
       default: null,
       env: 'ENVIRONMENT'
+    },
+    httpsProxy: {
+      doc: 'CDP HTTPS proxy, automatically set on CDP',
+      format: String,
+      default: null,
+      nullable: true,
+      env: 'HTTPS_PROXY'
     }
   },
   port: {
