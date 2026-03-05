@@ -19,16 +19,17 @@ type Mutation {
   updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
   updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
+  # eslint-disable-next-line @graphql-eslint/input-name
+  updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+  # eslint-disable-next-line @graphql-eslint/input-name
+  updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
   updateCustomerAddress(input: UpdateCustomerAddressInput!): UpdateCustomerResponse
   updateCustomerDateOfBirth(input: UpdateCustomerDateOfBirthInput!): UpdateCustomerResponse
   updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
-  # eslint-disable-next-line @graphql-eslint/input-name
-  updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
-  # eslint-disable-next-line @graphql-eslint/input-name
-  updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+  updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
 }
 
 input UpdateCustomerAddressInput {
@@ -63,6 +64,20 @@ input UpdateCustomerPhoneInput {
 input UpdateCustomerDoNotContactInput {
   crn: ID!
   doNotContact: Boolean!
+}
+
+input UpdateCustomerAllFieldsInput {
+  crn: ID!
+  first: String
+  last: String
+  middle: String
+  otherTitle: String
+  title: String
+  address: AddressInput
+  dateOfBirth: Date
+  email: EmailInput
+  phone: PhoneInput
+  doNotContact: Boolean
 }
 
 type UpdateCustomerResponse {

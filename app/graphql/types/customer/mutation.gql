@@ -11,6 +11,7 @@ extend type Mutation {
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+  updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
 }
 
 input UpdateCustomerAddressInput {
@@ -99,6 +100,54 @@ input UpdateCustomerDoNotContactInput {
   Do not contact status of the customer email address.
   """
   doNotContact: Boolean!
+}
+
+input UpdateCustomerAllFieldsInput {
+  """
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer.
+  """
+  crn: ID!
+  """
+  First name of the customer.
+  """
+  first: String
+  """
+  Last name of the customer.
+  """
+  last: String
+  """
+  Middle names of the customer.
+  """
+  middle: String
+  """
+  The title of the customer (e.g., Mr., Mrs., Dr.).
+  """
+  otherTitle: String
+  """
+  The title of the customer (e.g., Mr., Mrs., Dr.).
+  """
+  title: String
+  """
+  Address of the customer.
+  """
+  address: AddressInput
+  """
+  Date of birth of the customer (YYYY-MM-DD).
+  """
+  dateOfBirth: Date
+  """
+  Email address of the customer.
+  """
+  email: EmailInput
+  """
+  Telephone number of the customer.
+  """
+  phone: PhoneInput
+  """
+  Do not contact status of the customer email address.
+  """
+  doNotContact: Boolean
 }
 
 type UpdateCustomerResponse {
