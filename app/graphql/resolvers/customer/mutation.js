@@ -22,5 +22,6 @@ export const Mutation = {
   updateCustomerEmail: updateCustomerResolver,
   updateCustomerName: updateCustomerResolver,
   updateCustomerPhone: updateCustomerResolver,
-  updateCustomerDoNotContact: updateCustomerResolver
+  updateCustomerDoNotContact: updateCustomerResolver,
+  updateCustomerAllFields: updateCustomerResolver
 }
