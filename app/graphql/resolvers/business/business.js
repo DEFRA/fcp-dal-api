@@ -1,6 +1,7 @@
 import { NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
 import { logger } from '../../../logger/logger.js'
+import { transformBusinessPayments } from '../../../transformers/hitachi/payments.js'
 import {
   transformAgreements,
   transformApplications,
@@ -70,6 +71,18 @@ export const Business = {
     const applications = await dataSources.ruralPaymentsBusiness.getApplicationsBySBI(sbi)
 
     return transformApplications(applications)
+  },
+
+  async payments({ sbi }, _, { dataSources }) {
+    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+    const frn = organisation.businessReference
+
+    if (!frn) {
+      throw new NotFound('FRN not found for business')
+    }
+
+    const payments = await dataSources.hitachiPayments.getSupplierPayments(frn)
+    return transformBusinessPayments(payments)
   }
 }
 

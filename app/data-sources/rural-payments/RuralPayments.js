@@ -1,13 +1,11 @@
-import { RESTDataSource } from '@apollo/datasource-rest'
-import { Unit } from 'aws-embedded-metrics'
-import StatusCodes from 'http-status-codes'
+import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import tls from 'node:tls'
 import { EnvHttpProxyAgent, fetch as fetch11 } from 'undici'
 import { config as appConfig } from '../../config.js'
 import { BadRequest, HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
-import { sendMetric } from '../../logger/sendMetric.js'
+import { BaseRESTDataSource } from '../BaseRESTDataSource.js'
 
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
@@ -20,11 +18,11 @@ export function extractCrnFromDefraIdToken(token) {
   throw new BadRequest('Defra ID token does not contain crn')
 }
 
-export class RuralPayments extends RESTDataSource {
+export class RuralPayments extends BaseRESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
   constructor(config, { request, gatewayType, internalGatewayDevOverrideEmail }) {
-    super(config)
+    super(config, { name: 'Rural payments', code: RURALPAYMENTS_API_REQUEST_001 })
     this.request = request
 
     this.gatewayType = gatewayType || 'internal'
@@ -65,46 +63,7 @@ export class RuralPayments extends RESTDataSource {
     }
   }
 
-  didEncounterError(error, request, url) {
-    request.path = url
-    if (!error) {
-      error = { message: 'unknown/empty error while trying to fetch upstream data' }
-    }
-    let { cause, message } = error
-    while (cause) {
-      message += ` | Caused by ${cause.constructor.name}: ${cause.message}`
-      cause = cause.cause
-    }
-    error.message = message
-
-    this.logger.error('#datasource - Rural payments - request error', {
-      error,
-      request,
-      response: { ...error?.extensions?.response },
-      code: RURALPAYMENTS_API_REQUEST_001
-    })
-  }
-
-  async throwIfResponseIsError(options) {
-    if (options.response?.ok) {
-      return
-    }
-
-    const extensions = {
-      ...options,
-      response: {
-        status: options.response?.status,
-        headers: options.response?.headers,
-        body: options.parsedBody
-      }
-    }
-
-    throw new HttpError(options.response?.status, {
-      extensions
-    })
-  }
-
-  async willSendRequest(path, request) {
+  addAuthentication(request) {
     const headers = this.request.headers
     const additionalHeaders = {}
 
@@ -127,81 +86,6 @@ export class RuralPayments extends RESTDataSource {
     request.headers = {
       ...request.headers,
       ...additionalHeaders
-    }
-
-    this.logger.debug('#datasource - Rural payments - request', {
-      request: { ...request, path: path.toString() },
-      code: RURALPAYMENTS_API_REQUEST_001
-    })
-  }
-
-  // override trace function to avoid unnecessary logging
-  async trace(url, request, fn) {
-    const requestStart = Date.now()
-    const result = await fn()
-    const requestTimeMs = Date.now() - requestStart
-
-    const response = {
-      status: result.response?.status,
-      headers: result.response?.headers,
-      body: result.response?.body
-    }
-
-    sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
-      code: RURALPAYMENTS_API_REQUEST_001
-    })
-
-    this.logger.info('#datasource - Rural payments - response', {
-      type: 'http',
-      code: RURALPAYMENTS_API_REQUEST_001,
-      requestTimeMs,
-      request: {
-        id: request.id,
-        method: request.method.toUpperCase(),
-        headers: request.headers,
-        path: url.toString(),
-        body: request.body
-      },
-      response: { statusCode: response?.status }
-    })
-    this.logger.debug('#datasource - Rural payments - response detail', {
-      request: { ...request, path: url.toString() },
-      response: {
-        ...response,
-        body: result.parsedBody,
-        size: Buffer.byteLength(JSON.stringify(response.body))
-      },
-      code: RURALPAYMENTS_API_REQUEST_001,
-      requestTimeMs
-    })
-
-    return result
-  }
-
-  // ensure that the same request is not sent twice
-  requestDeduplicationPolicyFor(url, request) {
-    const method = request.method ?? 'GET'
-    const cacheKey = this.cacheKeyFor(url, request)
-    const requestId = request.id
-    return {
-      policy: 'deduplicate-during-request-lifetime',
-      deduplicationKey: `${requestId} ${method} ${cacheKey}`
-    }
-  }
-
-  parseBody(response) {
-    const contentType = response.headers.get('Content-Type')
-    const contentLength = response.headers.get('Content-Length')
-    if (response.status === StatusCodes.NO_CONTENT) {
-      return { status: StatusCodes.NO_CONTENT }
-    } else if (
-      contentLength !== '0' &&
-      contentType &&
-      (contentType.startsWith('application/json') || contentType.endsWith('+json'))
-    ) {
-      return response.json()
-    } else {
-      return response.text()
     }
   }
 }
