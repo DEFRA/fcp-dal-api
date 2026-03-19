@@ -26,6 +26,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get package version
+        id: version
+        run: echo "value=$(node -p 'require(`./package.json`).version')" >> $GITHUB_OUTPUT
+
       - name: Setup npm
         uses: actions/setup-node@v5
         with:
