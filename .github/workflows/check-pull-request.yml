@@ -30,6 +30,10 @@ jobs:
         id: version
         run: echo "value=$(node -p 'require(`./package.json`).version')" >> $GITHUB_OUTPUT
 
+      - name: Use package version
+        id: version
+        run: echo "Current version is ${{steps.version.outputs.value}}"
+
       - name: Setup npm
         uses: actions/setup-node@v5
         with:
