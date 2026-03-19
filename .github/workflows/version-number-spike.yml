@@ -1,0 +1,25 @@
+name: Check Pull Request
+
+on:
+  push:
+    branches:
+      - feature/vesrioning-spike
+
+permissions:
+  contents: read
+#  pull-requests: write
+#  checks: write
+
+jobs:
+  build:
+    name: Version reader
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get package version
+        id: version
+        run: echo "value=$(node -p 'require(`./package.json`).version')" >> $GITHUB_OUTPUT
