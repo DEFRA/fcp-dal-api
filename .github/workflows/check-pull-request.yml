@@ -45,7 +45,7 @@ jobs:
             import {gt as semanticVersionGreaterThan} from 'semver'
 
             if (!semanticVersionGreaterThan('$PR_BRANCH_VERSION', '$TARGET_BRANCH_VERSION')) {
-              console.log('ERROR: Branch package.json version (', $PR_BRANCH_VERSION, ') must be semantically greater than target branch (', $TARGET_BRANCH_VERSION, ')')
+              console.log('ERROR: Branch package.json version (', '$PR_BRANCH_VERSION', ') must be semantically greater than target branch (', '$TARGET_BRANCH_VERSION', ')')
               process.exit(1)
             }
           "
