@@ -1,0 +1,15 @@
+#!/bin/sh
+git fetch origin main --quiet
+
+node -e "
+  import {execSync} from 'child_process'
+  import {readFileSync} from 'fs'
+  import {gt as semanticVersionGreaterThan} from 'semver'
+  const remoteVersion = JSON.parse(execSync('git show origin/main:package.json')).version
+  const localVersion = JSON.parse(readFileSync('./package.json')).version
+
+  if (!semanticVersionGreaterThan(localVersion, remoteVersion)) {
+    console.log('ERROR: Local package.json version (', localVersion, ') must be semantically greater than remote main (', remoteVersion, ')')
+    process.exit(1)
+  }
+"
