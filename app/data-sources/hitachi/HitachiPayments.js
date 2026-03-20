@@ -21,7 +21,7 @@ function getMsalClient() {
 
 const gatewayUrl = config.get('hitachi.gatewayUrl')
 export class HitachiPayments extends BaseRESTDataSource {
-  constructor(config) {
+  constructor() {
     super(config, { name: 'Hitachi payments', code: HITACHI_API_REQUEST_001 })
     this.baseURL = gatewayUrl
   }

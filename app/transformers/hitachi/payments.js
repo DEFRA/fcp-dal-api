@@ -1,6 +1,12 @@
 function calculateOnHoldStatus(holdCodes) {
-  if (!holdCodes || holdCodes.length === 0) return false
-  if (holdCodes.length === 1 && holdCodes[0] === 'NTLD') return false
+  if (!holdCodes || holdCodes.length === 0) {
+    return false
+  }
+
+  if (holdCodes.length === 1 && holdCodes[0] === 'NTLD') {
+    return false
+  }
+
   return true
 }
 

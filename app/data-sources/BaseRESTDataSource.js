@@ -61,8 +61,9 @@ export class BaseRESTDataSource extends RESTDataSource {
   }
 
   // Subclasses should override this to add their specific authentication
-  addAuthentication(_request) {
+  async addAuthentication(_request) {
     // Default: no authentication
+    return
   }
 
   // override trace function to avoid unnecessary logging
