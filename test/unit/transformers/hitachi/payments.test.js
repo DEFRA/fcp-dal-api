@@ -92,9 +92,9 @@ describe('transformBusinessPayments', () => {
   test('should handle onHold status correctly', () => {
     const testCases = [
       { holdCodes: [], expected: false },
-      { holdCodes: ['NTLD'], expected: false },
+      { holdCodes: ['NTHLD'], expected: false },
       { holdCodes: ['HOLD1'], expected: true },
-      { holdCodes: ['NTLD', 'HOLD1'], expected: true },
+      { holdCodes: ['NTHLD', 'HOLD1'], expected: false },
       { holdCodes: ['HOLD1', 'HOLD2'], expected: true }
     ]
 
