@@ -26,13 +26,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Get package version
-        id: version
-        run: echo "value=$(node -p 'require(`./package.json`).version')" >> $GITHUB_OUTPUT
-
-      - name: Use package version
-        run: echo "Current version is ${{steps.version.outputs.value}}"
-
       - name: Setup npm
         uses: actions/setup-node@v5
         with:
@@ -43,6 +36,19 @@ jobs:
         run: |
           npm audit --omit=dev
           npm ci
+
+      - name: Verify semantic version bump
+        run: |
+          TARGET_BRANCH_VERSION=$(git show origin/${{ github.base_ref }}:package.json | jq -r '.version')
+          PR_BRANCH_VERSION=$(jq -r '.version' package.json)
+          node -e "
+            import {gt as semanticVersionGreaterThan} from 'semver'
+
+            if (!semanticVersionGreaterThan('$PR_BRANCH_VERSION', '$TARGET_BRANCH_VERSION')) {
+              console.log('ERROR: Branch package.json version (', $PR_BRANCH_VERSION, ') must be semantically greater than target branch (', $TARGET_BRANCH_VERSION, ')')
+              process.exit(1)
+            }
+          "
 
       - name: Lint code
         run: npm run lint
