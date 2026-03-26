@@ -224,6 +224,51 @@ export const config = convict({
       env: 'KITS_REQUEST_PAGE_SIZE'
     }
   },
+  hitachi: {
+    disableAuth: {
+      doc: 'Disable Hitachi API authentication (for environments using fcp-upstream-mock)',
+      format: Boolean,
+      default: false,
+      env: 'HITACHI_DISABLE_AUTH'
+    },
+    baseUrl: {
+      doc: 'Hitachi base API URL',
+      format: String,
+      default: 'https://api.example.com',
+      nullable: true,
+      env: 'HITACHI_BASE_URL'
+    },
+    timeoutMs: {
+      doc: 'Hitachi timeout in milliseconds',
+      format: 'int',
+      default: 3000,
+      env: 'HITACHI_TIMEOUT_MS'
+    },
+    entra: {
+      tenantId: {
+        doc: 'Entra tenant ID for Hitachi API authentication',
+        format: String,
+        default: null,
+        nullable: process.env.HITACHI_DISABLE_AUTH === 'true',
+        env: 'HITACHI_ENTRA_TENANT_ID'
+      },
+      clientId: {
+        doc: 'Entra client ID for Hitachi API authentication',
+        format: String,
+        default: null,
+        nullable: process.env.HITACHI_DISABLE_AUTH === 'true',
+        env: 'HITACHI_ENTRA_CLIENT_ID'
+      },
+      clientSecret: {
+        doc: 'Entra client secret for Hitachi API authentication',
+        format: String,
+        default: null,
+        sensitive: true,
+        nullable: process.env.HITACHI_DISABLE_AUTH === 'true',
+        env: 'HITACHI_ENTRA_CLIENT_SECRET'
+      }
+    }
+  },
   mongo: {
     mongoUrl: {
       doc: 'URL for mongodb',

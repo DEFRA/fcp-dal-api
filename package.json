@@ -39,6 +39,7 @@
     "@apollo/datasource-rest": "^6.4.1",
     "@apollo/server": "^5.0.0",
     "@as-integrations/hapi": "^2.0.2",
+    "@azure/msal-node": "^5.1.0",
     "@defra/hapi-secure-context": "^0.3.0",
     "@elastic/ecs-winston-format": "^1.5.3",
     "@graphql-tools/load-files": "^7.0.1",
