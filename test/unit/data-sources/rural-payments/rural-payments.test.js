@@ -140,12 +140,12 @@ describe('RuralPayments', () => {
   })
 
   describe('willSendRequest', () => {
-    test('adds email & gateway type header from request headers & gateway type for internal requests', () => {
+    test('adds email & gateway type header from request headers & gateway type for internal requests', async () => {
       const rp = new RuralPayments(...datasourceOptions)
       const request = { headers: { 'gateway-type': 'internal', email: 'test@test.test' } }
       const path = 'test-path'
 
-      rp.willSendRequest(path, request)
+      await rp.willSendRequest(path, request)
 
       expect(request.headers).toEqual({ email: 'test@test.test', 'gateway-type': 'internal' })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
@@ -154,7 +154,7 @@ describe('RuralPayments', () => {
       })
     })
 
-    test('adds crn, Authorization & gateway type header from request headers for external requests', () => {
+    test('adds crn, Authorization & gateway type header from request headers for external requests', async () => {
       const token = jwt.sign({ contactId: 'test-crn' }, 'secret', {
         expiresIn: '1h'
       })
@@ -173,7 +173,7 @@ describe('RuralPayments', () => {
       const request = { headers: {} }
       const path = 'test-path'
 
-      rp.willSendRequest(path, request)
+      await rp.willSendRequest(path, request)
 
       expect(request.headers).toEqual({
         Authorization: token,
