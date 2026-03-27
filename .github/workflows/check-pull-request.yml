@@ -37,6 +37,16 @@ jobs:
           npm audit --omit=dev
           npm ci
 
+      - name: Verify semantic version bump
+        run: |
+          TARGET_BRANCH_VERSION=$(git show origin/${{ github.base_ref }}:package.json | jq -r '.version')
+          PR_BRANCH_VERSION=$(jq -r '.version' package.json)
+
+          if ! npx -y semver -r ">${TARGET_BRANCH_VERSION}" "${PR_BRANCH_VERSION}" > /dev/null  ; then
+            echo "ERROR: Branch package.json version (${PR_BRANCH_VERSION}) must be semantically greater than target branch (${TARGET_BRANCH_VERSION})"
+            exit 1
+          fi
+
       - name: Lint code
         run: npm run lint
 

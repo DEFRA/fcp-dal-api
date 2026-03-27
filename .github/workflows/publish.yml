@@ -25,10 +25,15 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Discover version number
+        id: version
+        run: echo "value=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+
       - name: Build and Publish
         uses: DEFRA/cdp-build-action/build@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          version: ${{ steps.version.outputs.value }}
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
