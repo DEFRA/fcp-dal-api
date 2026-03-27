@@ -1,0 +1,16 @@
+#!/bin/sh
+git fetch origin main --quiet
+
+if ! command -v jq > /dev/null 2>&1; then
+  echo "ERROR: jq is required but not installed (so that package json version bump can be verified). See https://jqlang.org/download/"
+  exit 1
+fi
+
+REMOTE_VERSION=$(git show origin/main:package.json | jq -r '.version')
+LOCAL_VERSION=$(jq -r '.version' ./package.json)
+
+if ! npx -y semver -r ">${REMOTE_VERSION}" "${LOCAL_VERSION}" > /dev/null 2>&1 ; then
+  echo "ERROR: Branch package.json version (${LOCAL_VERSION}) must be semantically greater than target branch (${REMOTE_VERSION})"
+  exit 1
+fi
+

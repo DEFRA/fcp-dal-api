@@ -1,6 +1,6 @@
 {
   "name": "fcp-dal-api",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
