@@ -456,7 +456,12 @@ describe('Rural Payments Business', () => {
       expect(httpGet).toHaveBeenCalledWith(
         'SitiAgriApi/cv/landUseByBusinessParcel/sheet/mockSheetId/parcel/mockParcelId/sbi/mockSbi/list',
         {
-          params: { pointInTime: new Date().toISOString().replace('T', ' ').substring(0, 19) }
+          params: {
+            pointInTime: new Date()
+              // "sv" locale, with this timezone, creates an ISO formatted date string, but in the
+              // correct timezone (i.e. BST aware)
+              .toLocaleString('sv', { timeZone: 'Europe/London' })
+          }
         }
       )
     })
