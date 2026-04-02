@@ -326,68 +326,129 @@ describe('Business transformer', () => {
     ])
   })
 
-  test('#transformAgreements', () => {
-    const mockData = [
-      {
-        contract_id: '123',
-        agreement_name: 'mockAgreement',
-        status: 'mockStatus',
-        contract_type: 'mockContractType',
-        scheme_year: 'mockSchemeYear',
-        start_date: '2020-06-01T01:00:00:000+0100',
-        end_date: '2020-12-31T00:00:00:000+0000',
+  describe('#transformAgreements', () => {
+    const mockAgreement = {
+      contract_id: '123',
+      agreement_name: 'mockAgreement',
+      status: 'mockStatus',
+      contract_type: 'mockContractType',
+      scheme_year: 'mockSchemeYear',
+      start_date: '2020-06-01T01:00:00:000+0100',
+      end_date: '2020-12-31T00:00:00:000+0000'
+    }
+
+    const mockPaymentSchedule = {
+      option_code: 'mockOptionCode',
+      option_description: 'mockOptionDescription',
+      commitment_group_start_date: '2020-01-01T01:00:00:000+0100',
+      commitment_group_end_date: '2020-12-31T00:00:00:000+0000',
+      year: '2020',
+      sheet_name: 'mockSheetName',
+      parcel_name: 'mockParcelName',
+      action_area: 1000,
+      action_mtl: 'mockActionMTL',
+      action_units: 'mockActionUnits',
+      parcel_total_area: 100,
+      payment_schedule_start_date: '2020-01-01T00:00:00:000+0100',
+      payment_schedule_end_date: '2020-12-31T00:00:00:000+0100'
+    }
+
+    test('transforms agreement data correctly', () => {
+      const mockData = [
+        {
+          ...mockAgreement,
+          payment_schedules: [
+            {
+              ...mockPaymentSchedule,
+              action_area: 1000
+            }
+          ]
+        }
+      ]
+
+      expect(transformAgreements(mockData)).toEqual([
+        {
+          contractId: '123',
+          name: 'mockAgreement',
+          status: 'mockStatus',
+          contractType: 'mockContractType',
+          schemeYear: 'mockSchemeYear',
+          startDate: '2020-06-01T00:00:00.000Z',
+          endDate: '2020-12-31T00:00:00.000Z',
+          paymentSchedules: [
+            {
+              optionCode: 'mockOptionCode',
+              optionDescription: 'mockOptionDescription',
+              commitmentGroupStartDate: '2020-01-01T00:00:00.000Z',
+              commitmentGroupEndDate: '2020-12-31T00:00:00.000Z',
+              year: '2020',
+              sheetName: 'mockSheetName',
+              parcelName: 'mockParcelName',
+              actionArea: 0.1,
+              parcelTotalArea: 0.01,
+              startDate: '2019-12-31T23:00:00.000Z',
+              endDate: '2020-12-30T23:00:00.000Z'
+            }
+          ]
+        }
+      ])
+    })
+
+    test('action_area should be populated', () => {
+      const mockResult = {
+        ...mockAgreement,
         payment_schedules: [
           {
-            option_code: 'mockOptionCode',
-            option_description: 'mockOptionDescription',
-            commitment_group_start_date: '2020-01-01T01:00:00:000+0100',
-            commitment_group_end_date: '2020-12-31T00:00:00:000+0000',
-            year: '2020',
-            sheet_name: 'mockSheetName',
-            parcel_name: 'mockParcelName',
-            action_area: 1000,
-            action_mtl: 'mockActionMTL',
-            action_units: 'mockActionUnits',
-            parcel_total_area: 100,
-            payment_schedule_start_date: '2020-01-01T00:00:00:000+0100',
-            payment_schedule_end_date: '2020-12-31T00:00:00:000+0100'
+            ...mockPaymentSchedule,
+            action_area: 1000
           }
         ]
       }
-    ]
 
-    expect(transformAgreements(mockData)).toEqual([
-      {
-        contractId: '123',
-        name: 'mockAgreement',
-        status: 'mockStatus',
-        contractType: 'mockContractType',
-        schemeYear: 'mockSchemeYear',
-        startDate: '2020-06-01T00:00:00.000Z',
-        endDate: '2020-12-31T00:00:00.000Z',
-        paymentSchedules: [
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_area])).toEqual(0.1)
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_mtl])).toBeUndefined()
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_units])).toBeUndefined()
+    })
+
+    test('action_mtl should be populated', () => {
+      const mockResult = {
+        ...mockAgreement,
+        payment_schedules: [
           {
-            optionCode: 'mockOptionCode',
-            optionDescription: 'mockOptionDescription',
-            commitmentGroupStartDate: '2020-01-01T00:00:00.000Z',
-            commitmentGroupEndDate: '2020-12-31T00:00:00.000Z',
-            year: '2020',
-            sheetName: 'mockSheetName',
-            parcelName: 'mockParcelName',
-            actionArea: 0.1,
-            actionMTL: 'mockActionMTL',
-            actionUnits: 'mockActionUnits',
-            parcelTotalArea: 0.01,
-            startDate: '2019-12-31T23:00:00.000Z',
-            endDate: '2020-12-30T23:00:00.000Z'
+            ...mockPaymentSchedule,
+            action_mtl: 'mockActionMTL'
           }
         ]
       }
-    ])
+
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_area])).toBeUndefined()
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_mtl])).toEqual(
+        'mockActionMTL'
+      )
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_units])).toBeUndefined()
+    })
+
+    test('action_units should be populated', () => {
+      const mockResult = {
+        ...mockAgreement,
+        payment_schedules: [
+          {
+            ...mockPaymentSchedule,
+            action_units: 'mockActionUnits'
+          }
+        ]
+      }
+
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_area])).toBeUndefined()
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_mtl])).toBeUndefined()
+      expect(transformAgreements([mockResult.paymentSchedules[0].action_units])).toEqual(
+        'mockActionUnits'
+      )
+    })
   })
 
   describe('#transformApplications', () => {
-    it('should transform application data correctly', () => {
+    test('should transform application data correctly', () => {
       const mockApplications = [
         {
           sbi: '12345',
@@ -509,7 +570,7 @@ describe('Business transformer', () => {
 })
 
 describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
-  it('transforms base input correctly', () => {
+  test('transforms base input correctly', () => {
     const result = transformBusinessDetailsToOrgDetailsUpdate(baseInput)
     expect(result).toEqual({
       name: 'HADLEY FARMS LTD 2',
@@ -524,7 +585,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         buildingNumberRange: 'buildingNumberRange',
         buildingName: 'COLSHAW HALL',
         street: 'street',
-        city: 'BRAINTREE',
+        ctesty: 'BRAINTREE',
         county: null,
         postalCode: '12312312',
         country: 'United Kingdom',
@@ -564,7 +625,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
     })
   })
 
-  it('handles undefined and null in nested correspondence fields', () => {
+  test('handles undefined and null in nested correspondence fields', () => {
     const input = {
       ...baseInput,
       correspondenceAddress: null,
@@ -580,7 +641,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
     expect(result.correspondenceMobile).toBeNull()
   })
 
-  it('handles missing address nested fields', () => {
+  test('handles missing address nested fields', () => {
     const input = {
       ...baseInput,
       address: {
@@ -600,7 +661,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
     expect(result.address.addressTypeId).toBeUndefined()
   })
 
-  it('handles missing phone nested fields', () => {
+  test('handles missing phone nested fields', () => {
     const input = {
       ...baseInput,
       phone: {
@@ -714,7 +775,7 @@ describe('#transformBusinessDetailsToOrgDetailsCreate', () => {
     }
   }
 
-  it('transforms base input correctly', () => {
+  test('transforms base input correctly', () => {
     const result = transformBusinessDetailsToOrgDetailsCreate(businessCreateInput)
     expect(result).toEqual({
       name: 'Acme Farms Ltd',
