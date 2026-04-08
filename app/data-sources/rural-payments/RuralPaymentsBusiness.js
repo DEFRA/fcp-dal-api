@@ -219,18 +219,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       {
         params: {
           // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm:ss`
-          pointInTime: new Date(date)
-            .toLocaleString('en-GB', {
-              timeZone: 'Europe/London',
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: false
-            })
-            .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2}:\d{2})/, '$3-$2-$1 $4')
+          pointInTime: new Date(date).toISOString().substring(0, 19).replace('T', ' ')
         }
       }
     )
