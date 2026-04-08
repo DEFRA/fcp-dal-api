@@ -1,6 +1,9 @@
 import { describe, jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
-import { RuralPaymentsBusiness } from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
+import {
+  formatDateDDMMMYY,
+  RuralPaymentsBusiness
+} from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { NotFound } from '../../../../app/errors/graphql.js'
 import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../../app/transformers/rural-payments/business.js'
 
@@ -346,7 +349,7 @@ describe('Rural Payments Business', () => {
   describe('formatDateDDMMMYY', () => {
     test('should correctly format the date', async () => {
       const date = new Date('2024-09-19')
-      const response = ruralPaymentsBusiness.formatDateDDMMMYY(date)
+      const response = formatDateDDMMMYY(date)
       expect(response).toEqual('19-Sep-24')
     })
   })
