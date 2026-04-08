@@ -5,6 +5,18 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { RuralPayments } from './RuralPayments.js'
 
+const dateTimeLength = 19
+const dateStrToSitiAgriFormat = (date) => {
+  return date.toISOString().substring(0, dateTimeLength).replace('T', ' ')
+}
+export const formatDateDDMMMYY = (date) => {
+  // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
+  const day = date.toLocaleString('en-US', { day: '2-digit' }) // 01
+  const month = date.toLocaleString('en-US', { month: 'short' }) // "Sep"
+  const year = date.toLocaleString('en-US', { year: '2-digit' }) // "25"
+  return `${day}-${month}-${year}`
+}
+
 export class RuralPaymentsBusiness extends RuralPayments {
   async createOrganisationByPersonId(personId, orgDetails) {
     const response = await this.post(`organisation/create/${personId}`, {
@@ -70,19 +82,19 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   getParcelsByOrganisationIdAndDate(organisationId, date) {
-    const formattedDate = this.formatDateDDMMMYY(new Date(date))
+    const formattedDate = formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/parcels/historic/${formattedDate}`)
   }
 
   getParcelEffectiveDatesByOrganisationIdAndDate(organisationId, date) {
-    const formattedDate = this.formatDateDDMMMYY(new Date(date))
+    const formattedDate = formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/parcel-details/historic/${formattedDate}`)
   }
 
   getCoversByOrgSheetParcelIdDate(organisationId, sheetId, parcelId, date) {
-    const formattedDate = this.formatDateDDMMMYY(new Date(date))
+    const formattedDate = formatDateDDMMMYY(new Date(date))
 
     return this.get(
       `lms/organisation/${organisationId}/parcel/sheet-id/${sheetId}/parcel-id/${parcelId}/historic/${formattedDate}/land-covers`
@@ -90,7 +102,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   getCoversSummaryByOrganisationIdAndDate(organisationId, date) {
-    const formattedDate = this.formatDateDDMMMYY(new Date(date))
+    const formattedDate = formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/covers-summary/historic/${formattedDate}`)
   }
@@ -98,19 +110,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async getCountyParishHoldingsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`, {
       params: {
-        // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm:ss`
-        pointInTime: new Date()
-          .toLocaleString('en-GB', {
-            timeZone: 'Europe/London',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false
-          })
-          .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2}:\d{2})/, '$3-$2-$1 $4')
+        pointInTime: dateStrToSitiAgriFormat(new Date())
       }
     })
     return response.data
@@ -142,14 +142,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
 
     return response
-  }
-
-  formatDateDDMMMYY(date) {
-    // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
-    const day = date.toLocaleString('en-US', { day: '2-digit' }) // 01
-    const month = date.toLocaleString('en-US', { month: 'short' }) // "Sep"
-    const year = date.toLocaleString('en-US', { year: '2-digit' }) // "25"
-    return `${day}-${month}-${year}`
   }
 
   extractOrgIdFromDefraIdToken(sbi) {
@@ -219,18 +211,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       {
         params: {
           // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm:ss`
-          pointInTime: new Date(date)
-            .toLocaleString('en-GB', {
-              timeZone: 'Europe/London',
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: false
-            })
-            .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2}:\d{2})/, '$3-$2-$1 $4')
+          pointInTime: dateStrToSitiAgriFormat(new Date(date))
         }
       }
     )
