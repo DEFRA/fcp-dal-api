@@ -1,13 +1,10 @@
-import fetch from 'node-fetch'
-import qs from 'qs'
-
 export const retrieveAccessToken = async () => {
-  const body = qs.stringify({
+  const body = new URLSearchParams({
     client_id: process.env.CLIENT_ID,
     client_secret: process.env.CLIENT_SECRET,
     scope: `${process.env.CLIENT_ID}/.default`,
     grant_type: 'client_credentials'
-  })
+  }).toString()
 
   const headers = {
     'Content-Type': 'application/x-www-form-urlencoded'

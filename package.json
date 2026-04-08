@@ -1,6 +1,6 @@
 {
   "name": "fcp-dal-api",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
@@ -48,7 +48,6 @@
     "@hapi/hapi": "^21.3.12",
     "apollo-datasource-mongodb": "^0.6.0",
     "aws-embedded-metrics": "^4.2.0",
-    "aws4": "^1.13.2",
     "convict": "^6.2.4",
     "graphql": "^16.11.0",
     "http-status-codes": "^2.3.0",
@@ -62,6 +61,7 @@
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^4.4.0",
+    "@jest/globals": "^30.3.0",
     "@shelf/jest-mongodb": "^5.2.2",
     "dotenv": "^17.2.3",
     "eslint": "^8.57.1",
@@ -72,7 +72,8 @@
     "jest": "^29.7.0",
     "nock": "^14.0.2",
     "nodemon": "^3.1.9",
-    "prettier": "^3.4.2"
+    "prettier": "^3.4.2",
+    "winston-transport": "^4.9.0"
   },
   "eslintConfig": {
     "extends": [
