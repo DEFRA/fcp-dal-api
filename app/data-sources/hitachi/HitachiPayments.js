@@ -63,25 +63,38 @@ export class HitachiPayments extends BaseRESTDataSource {
   }
 
   async getSupplierPayments({ frn, fromDate, toDate, userIP, resourceId }) {
-    // Validate that all required audit values are present
-    const auditValues = {
+    // Validate client-provided values
+    if (!userIP) {
+      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+        extensions: {
+          message: 'Missing required value: userIP'
+        }
+      })
+    }
+
+    // Validate server-provided audit values
+    const serverAuditValues = {
       ...this.audit,
-      userIP,
       resourceId
     }
 
-    const missingAuditValues = [
+    const missingServerValues = [
       'requestedSystem',
       'requesterId',
       'correlationId',
-      'userIP',
       'resourceId'
-    ].filter((key) => !auditValues[key])
+    ].filter((key) => !serverAuditValues[key])
 
-    if (missingAuditValues.length > 0) {
-      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+    if (missingServerValues.length > 0) {
+      this.logger.error('#datasource - Hitachi payments - missing server-side audit values', {
+        missingValues: missingServerValues,
+        availableValues: serverAuditValues,
+        code: HITACHI_API_REQUEST_001
+      })
+
+      throw new HttpError(StatusCodes.INTERNAL_SERVER_ERROR, {
         extensions: {
-          message: `Missing required audit values: ${missingAuditValues.join(', ')}`
+          message: 'Internal server error'
         }
       })
     }
@@ -104,7 +117,10 @@ export class HitachiPayments extends BaseRESTDataSource {
         body: {
           request: {
             payment: paymentRequest,
-            audit: auditValues
+            audit: {
+              ...serverAuditValues,
+              userIP
+            }
           }
         }
       }

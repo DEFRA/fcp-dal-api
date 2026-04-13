@@ -329,7 +329,7 @@ describe('HitachiPayments', () => {
         })
       ).rejects.toMatchObject({
         extensions: {
-          message: 'Missing required audit values: userIP'
+          message: 'Missing required value: userIP'
         }
       })
     })
@@ -355,9 +355,18 @@ describe('HitachiPayments', () => {
         })
       ).rejects.toMatchObject({
         extensions: {
-          message: 'Missing required audit values: requesterId, correlationId, resourceId'
+          message: 'Internal server error'
         }
       })
+
+      // Verify that the detailed error was logged
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '#datasource - Hitachi payments - missing server-side audit values',
+        expect.objectContaining({
+          missingValues: expect.arrayContaining(['requesterId', 'correlationId', 'resourceId']),
+          code: HITACHI_API_REQUEST_001
+        })
+      )
     })
   })
 })
