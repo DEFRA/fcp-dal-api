@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import { HitachiPayments } from '../../../../app/data-sources/hitachi/HitachiPayments.js'
-import { HITACHI_API_REQUEST_001 } from '../../../../app/logger/codes.js'
+import { HITACHI_API_NOT_FOUND_001, HITACHI_API_REQUEST_001 } from '../../../../app/logger/codes.js'
 
 // Mock MSAL
 const acquireTokenByClientCredential = jest.fn()
@@ -113,10 +113,9 @@ describe('HitachiPayments', () => {
         // But we can verify that the logger was called with the error
         expect(mockLogger.error).toHaveBeenCalledWith(
           '#datasource - Hitachi payments - token acquisition failed',
-          expect.objectContaining({
-            error: expect.any(String),
+          {
             code: HITACHI_API_REQUEST_001
-          })
+          }
         )
       }
     })
@@ -179,16 +178,12 @@ describe('HitachiPayments', () => {
           userIP: '192.168.1.1',
           resourceId: '123456789'
         })
-      ).rejects.toThrow(
-        'Hitachi payments: *** FRN does not exist, No data retrieved for this request'
-      )
+      ).rejects.toThrow('Hitachi payments business not found')
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '#datasource - Hitachi payments - business not found or error',
+        '#datasource - Hitachi payments - business not found with FRN 123456789',
         {
-          frn: '123456789',
-          errorMessage: '*** FRN does not exist, No data retrieved for this request',
-          code: 'HITACHI_API_NOT_FOUND_001'
+          code: HITACHI_API_NOT_FOUND_001
         }
       )
     })
@@ -361,11 +356,10 @@ describe('HitachiPayments', () => {
 
       // Verify that the detailed error was logged
       expect(mockLogger.error).toHaveBeenCalledWith(
-        '#datasource - Hitachi payments - missing server-side audit values',
-        expect.objectContaining({
-          missingValues: expect.arrayContaining(['requesterId', 'correlationId', 'resourceId']),
+        '#datasource - Hitachi payments - missing server-side audit values: requesterId, correlationId, resourceId',
+        {
           code: HITACHI_API_REQUEST_001
-        })
+        }
       )
     })
   })

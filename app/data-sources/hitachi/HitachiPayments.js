@@ -53,7 +53,6 @@ export class HitachiPayments extends BaseRESTDataSource {
         }
       } catch (error) {
         this.logger.error('#datasource - Hitachi payments - token acquisition failed', {
-          error: error.message,
           code: HITACHI_API_REQUEST_001
         })
 
@@ -86,11 +85,12 @@ export class HitachiPayments extends BaseRESTDataSource {
     ].filter((key) => !serverAuditValues[key])
 
     if (missingServerValues.length > 0) {
-      this.logger.error('#datasource - Hitachi payments - missing server-side audit values', {
-        missingValues: missingServerValues,
-        availableValues: serverAuditValues,
-        code: HITACHI_API_REQUEST_001
-      })
+      this.logger.error(
+        `#datasource - Hitachi payments - missing server-side audit values: ${missingServerValues.join(', ')}`,
+        {
+          code: HITACHI_API_REQUEST_001
+        }
+      )
 
       throw new HttpError(StatusCodes.INTERNAL_SERVER_ERROR, {
         extensions: {
@@ -128,13 +128,10 @@ export class HitachiPayments extends BaseRESTDataSource {
 
     // Check for Hitachi-specific "not found" response
     if (response.Result === false) {
-      const errorMessage = response.InfoMessages?.join(', ') || 'Unknown error'
-      this.logger.warn('#datasource - Hitachi payments - business not found or error', {
-        frn,
-        errorMessage,
+      this.logger.warn(`#datasource - Hitachi payments - business not found with FRN ${frn}`, {
         code: HITACHI_API_NOT_FOUND_001
       })
-      throw new NotFound(`Hitachi payments: ${errorMessage}`)
+      throw new NotFound('Hitachi payments business not found')
     }
 
     return response
