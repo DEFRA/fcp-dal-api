@@ -75,6 +75,15 @@ export async function getAuth(request, jwkDatasource) {
   }
 }
 
+export function getRequestingGroup(groups) {
+  // Return mock UUID when auth is disabled in local/dev
+  if (config.get('auth.disabled')) {
+    return '00000000-0000-0000-0000-000000000000'
+  }
+
+  return groups?.find((group) => Object.values(authGroups).includes(group))
+}
+
 export function checkAuthGroup(requesterGroups, allowedGroups) {
   const isAdmin = requesterGroups.includes(authGroups.ADMIN)
   if (isAdmin) {

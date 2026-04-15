@@ -24,7 +24,7 @@ fi
 # Generate TLS assets
 echo "Generating TLS assets..."
 rm -fr "${SCRIPT_DIR}/mtls"
-"${SCRIPT_DIR}/setup-mtls.sh" kits-mock
+"${SCRIPT_DIR}/setup-mtls.sh" upstream-mock
 
 # Load env variables from generated TLS assets
 export KITS_CA_CERT="$(cat "${SCRIPT_DIR}/mtls/ca.crt" | base64 -w0)"
