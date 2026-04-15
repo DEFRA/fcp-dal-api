@@ -314,6 +314,28 @@ type Business {
   customer(crn: ID!): BusinessCustomer
   agreements: [Agreement]
   applications: [Application]
+  payments(fromDate: Date, toDate: Date, userIP: String!): BusinessPayments
+}
+
+type BusinessPayments {
+  onHold: Boolean!
+  payments: [Payment!]!
+}
+
+type Payment {
+  reference: String!
+  date: Date!
+  amount: Float!
+  currency: String!
+  lineItems: [PaymentLineItem!]!
+}
+
+type PaymentLineItem {
+  agreementClaimNo: String!
+  scheme: String!
+  marketingYear: String!
+  description: String!
+  amount: Float!
 }
 
 type BusinessCustomerPartial {

@@ -159,7 +159,10 @@ describe('Business Mutation UpdateBusinessResponse', () => {
         sbi: '123'
       },
       organisationId: '123',
-      sbi: '123'
+      sbi: '123',
+      payments: {
+        sbi: '123'
+      }
     })
   })
 })

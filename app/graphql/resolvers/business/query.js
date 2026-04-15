@@ -7,7 +7,8 @@ export const Query = {
     return {
       sbi,
       organisationId,
-      land: { sbi }
+      land: { sbi },
+      payments: { sbi }
     }
   }
 }

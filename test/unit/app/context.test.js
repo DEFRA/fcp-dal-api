@@ -11,7 +11,8 @@ const loggerChild = jest.fn()
 const loggerMock = { child: loggerChild }
 
 jest.unstable_mockModule('../../../app/auth/authenticate.js', () => ({
-  getAuth: getAuthMock
+  getAuth: getAuthMock,
+  getRequestingGroup: jest.fn()
 }))
 jest.unstable_mockModule('../../../app/data-sources/static/permissions.js', () => ({
   Permissions: PermissionsMock

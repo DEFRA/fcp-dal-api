@@ -37,6 +37,9 @@ describe('Business Query Resolver', () => {
       organisationId: 1,
       land: {
         sbi: '123456789'
+      },
+      payments: {
+        sbi: '123456789'
       }
     })
   })
