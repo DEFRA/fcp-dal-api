@@ -190,3 +190,20 @@ type CustomerBusiness {
   """
   permissionGroups: [ActivePermissionGroup] @on @excludeFromList
 }
+
+"""
+Customer email details.
+
+Data source: Rural Payments Portal
+"""
+type CustomerEmail {
+  """
+  The email address.
+  """
+  emailAddress: String!
+
+  """
+  Indicates if the address is already associated with a customer
+  """
+  addressInUse: Boolean!
+}

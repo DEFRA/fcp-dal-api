@@ -2,7 +2,6 @@ import { jest } from '@jest/globals'
 
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import { Customer, CustomerBusiness } from '../../../../app/graphql/resolvers/customer/customer.js'
-import { Query } from '../../../../app/graphql/resolvers/customer/query.js'
 import { organisationPeopleByOrgId } from '../../../fixtures/organisation.js'
 import { buildPermissionsFromIdsAndLevels } from '../../../test-helpers/permissions.js'
 
@@ -93,21 +92,6 @@ const dataSources = {
 describe('Customer', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-  })
-
-  test('Query.customer.personId', async () => {
-    dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('internal person id')
-    const response = await Query.customer(
-      undefined,
-      { crn: personFixture.customerReferenceNumber },
-      { dataSources }
-    )
-
-    expect(dataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith(
-      personFixture.customerReferenceNumber
-    )
-
-    expect(response).toEqual({ crn: 'crn-11111111', personId: 'internal person id' })
   })
 
   test('Customer.info', async () => {

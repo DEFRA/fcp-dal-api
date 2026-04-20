@@ -71,6 +71,12 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return response._data
   }
 
+  async customerEmailExistsByEmailAddress(emailAddress) {
+    const response = await this.get(`person/${emailAddress}/validateEmail`)
+
+    return response._data
+  }
+
   async getPersonBusinessesByPersonId(personId) {
     const personBusinessSummaries = await this.get(
       // Currently requires and empty search parameter or it returns 500 error

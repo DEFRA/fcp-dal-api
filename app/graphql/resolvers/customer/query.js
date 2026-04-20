@@ -5,5 +5,15 @@ export const Query = {
     const personId = await retrievePersonIdByCRN(crn, dataSources)
 
     return { crn, personId }
+  },
+
+  async customerEmail(__, { emailAddress }, { dataSources }) {
+    const results =
+      await dataSources.ruralPaymentsCustomer.customerEmailExistsByEmailAddress(emailAddress)
+
+    return {
+      emailAddress,
+      addressInUse: results.emailDuplicated
+    }
   }
 }
