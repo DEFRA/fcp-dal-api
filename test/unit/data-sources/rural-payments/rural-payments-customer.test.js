@@ -240,4 +240,22 @@ describe('Rural Payments Customer', () => {
     })
     expect(httpGet).toHaveBeenCalledTimes(1)
   })
+
+  test('should return emailDuplicated true when email already exists', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: true } }))
+
+    const result = await ruralPaymentsCustomer.customerEmailExistsByEmailAddress('test@example.com')
+
+    expect(result).toEqual({ emailDuplicated: true })
+    expect(httpGet).toHaveBeenCalledWith('person/test@example.com/validateEmail')
+  })
+
+  test('should return emailDuplicated false when email does not exist', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: false } }))
+
+    const result = await ruralPaymentsCustomer.customerEmailExistsByEmailAddress('new@example.com')
+
+    expect(result).toEqual({ emailDuplicated: false })
+    expect(httpGet).toHaveBeenCalledWith('person/new@example.com/validateEmail')
+  })
 })

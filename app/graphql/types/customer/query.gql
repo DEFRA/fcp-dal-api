@@ -2,4 +2,11 @@ extend type Query {
   customer(crn: ID!): Customer
     @on
     @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+
+  """
+  Checks whether an email address already exists in the system.
+
+  Data source: Rural Payments Portal
+  """
+  customerEmail(emailAddress: String!): CustomerEmail @on @auth(requires: [SINGLE_FRONT_DOOR])
 }

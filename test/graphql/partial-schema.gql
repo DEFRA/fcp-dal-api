@@ -2,6 +2,7 @@ type Query {
   business(sbi: ID!): Business
   customer(crn: ID!): Customer
   permissionGroups: [PermissionGroup]
+  customerEmail(emailAddress: String!): Boolean
 }
 
 type Phone {

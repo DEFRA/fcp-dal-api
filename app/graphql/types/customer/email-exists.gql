@@ -1,0 +1,10 @@
+extend type Query {
+  """
+  Checks whether an email address already exists in the system.
+
+  Data source: Rural Payments Portal
+  """
+  emailExists(emailAddress: String!): Boolean
+    @on
+    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR])
+}
