@@ -64,7 +64,7 @@ type PaymentSchedule {
   parcelName: String
   actionArea: Float
   actionMTL: Int
-  actionUnits: Int
+  actionUnits: Float
   parcelTotalArea: Float
   startDate: Date
   endDate: Date
