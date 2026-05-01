@@ -27,13 +27,24 @@ jobs:
 
       - name: Discover version number
         id: version
-        run: echo "value=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q "${VERSION}"; then
+            echo "Tag ${VERSION} already exists"
+            exit 1
+          fi
+          echo "value=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Build and Publish
         uses: DEFRA/cdp-build-action/build@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           version: ${{ steps.version.outputs.value }}
+
+      - name: Tag repository
+        run: |
+          git tag ${{ steps.version.outputs.value }}
+          git push --tags
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
