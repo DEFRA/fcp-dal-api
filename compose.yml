@@ -49,7 +49,7 @@ services:
       KITS_EXTERNAL_GATEWAY_URL: http://upstream-mock:3100/extapi/
       KITS_GATEWAY_TIMEOUT_MS: 3000
       KITS_DISABLE_MTLS: true
-      HITACHI_GATEWAY_URL: http://upstream-mock:3100/api/
+      HITACHI_BASE_URL: http://upstream-mock:3100/api/
       HITACHI_TIMEOUT_MS: 3000
       DAL_REQUEST_TIMEOUT_MS: 3000
       KIT_EXT_PERSON_ID_OVERRIDE: 3337243
