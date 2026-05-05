@@ -95,7 +95,7 @@ type PaymentSchedule {
   """
   Action units - Number of units of the action.
   """
-  actionUnits: Int @on
+  actionUnits: Float @on
 
   """
   Parcel total area - Total area (in hectares) of the parcel.
