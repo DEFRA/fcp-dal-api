@@ -46,6 +46,20 @@ export const config = convict({
     default: false,
     env: 'GRAPHQL_DASHBOARD_ENABLED'
   },
+  nonProdPartialResponseDecorator: {
+    enabled: {
+      doc: 'Enable (non production environments only) partial response decorator',
+      format: Boolean,
+      default: false,
+      env: 'NON_PROD_PARTIAL_RESPONSE_DECORATOR_ENABLED'
+    },
+    triggeringSbi: {
+      doc: 'Responses to requests with this SBI will be decorated with an error that clients can used to drive partial response behaviours',
+      format: String,
+      default: '300000206',
+      env: 'NON_PROD_PARTIAL_RESPONSE_DECORATOR_SBI'
+    }
+  },
   requestTimeoutMs: {
     doc: 'Timeout for DAL requests in milliseconds',
     format: 'int',
