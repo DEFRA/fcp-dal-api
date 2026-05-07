@@ -26,7 +26,7 @@ export class BaseRESTDataSource extends RESTDataSource {
     this.logger.error(`#datasource - ${this.name} - request error`, {
       error,
       request,
-      response: { ...error?.extensions?.response },
+      response: { statusCode: error?.extensions?.response?.status },
       code: this.code
     })
   }
@@ -97,6 +97,7 @@ export class BaseRESTDataSource extends RESTDataSource {
       request: { ...request, path: url.toString() },
       response: {
         ...response,
+        statusCode: response?.status,
         body: result.parsedBody,
         size: Buffer.byteLength(JSON.stringify(response.body))
       },

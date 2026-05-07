@@ -43,12 +43,24 @@ describe('BaseRESTDataSource', () => {
       expect(mockRequest.path).toBe(mockUrl)
       expect(mockLogger.error).toHaveBeenCalledWith(
         '#datasource - Test DataSource - request error',
-        {
+        expect.objectContaining({
           error: mockError,
           request: mockRequest,
-          response: {},
           code: 'TEST_001'
-        }
+        })
+      )
+    })
+
+    test('should log the upstream response status code from error extensions', () => {
+      const mockError = new Error('Upstream error')
+      mockError.extensions = { response: { status: 503 } }
+      const mockRequest = { headers: {} }
+
+      dataSource.didEncounterError(mockError, mockRequest, 'https://api.example.com/test')
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ response: { statusCode: 503 } })
       )
     })
 
