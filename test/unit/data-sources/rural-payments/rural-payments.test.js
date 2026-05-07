@@ -93,7 +93,7 @@ describe('RuralPayments', () => {
       expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
         error,
         request,
-        response: error.extensions.response,
+        response: { statusCode: 400 },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
@@ -105,7 +105,7 @@ describe('RuralPayments', () => {
       const intermediateError = new TypeError('intermediate cause')
       intermediateError.cause = new Error('root cause error')
       error.cause = intermediateError
-      // error.extensions = { response: { status: 400, headers: { get: () => 'text/html' } } }
+      error.extensions = { response: { status: 500 } }
       const request = {}
       const url = 'test url'
 
@@ -116,7 +116,7 @@ describe('RuralPayments', () => {
           'test error | Caused by TypeError: intermediate cause | Caused by Error: root cause error'
         ),
         request,
-        response: {},
+        response: { statusCode: 500 },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
