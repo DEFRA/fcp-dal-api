@@ -82,7 +82,15 @@ const buildUrl = ({ body, path }) => {
   const result = {}
 
   if (path) {
-    result.full = path
+    const pathStr = path.toString()
+    if (pathStr.startsWith('http')) {
+      result.full = pathStr
+      result.path = new URL(pathStr).pathname
+    } else {
+      result.path = pathStr
+      // Not strictly the full path, but populated with best endeavours
+      result.full = pathStr
+    }
   }
 
   if (body) {

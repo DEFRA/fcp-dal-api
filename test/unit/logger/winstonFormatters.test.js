@@ -111,6 +111,7 @@ describe('winstonFormatters', () => {
         tenant: { id: 'tenant-id', message: 'some tenant info' },
         url: {
           full: 'http://localhost/path',
+          path: '/path',
           query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
         }
       })
@@ -145,6 +146,7 @@ describe('winstonFormatters', () => {
       },
       url: {
         full: 'http://localhost/path',
+        path: '/path',
         query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
       }
     })
@@ -236,6 +238,42 @@ describe('winstonFormatters', () => {
         sbi: '987654321',
         primarySearchPhrase: 'jane doe'
       })
+    })
+  })
+
+  describe('buildUrl', () => {
+    it('sets url.full and url.path when request.path is a full URL string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: 'https://api.example.com/organisation/123' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.full and url.path when request.path is a URL object', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: new URL('https://api.example.com/organisation/123') }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.path (and url.full for completeness, even though it`s not a full path) when request.path is a path-only string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/organisation/123' }
+      })
+      expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
+    })
+
+    it('sets no url field when request has no path', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { method: 'GET' }
+      })
+      expect(result.url).not.toBeDefined()
     })
   })
 })
