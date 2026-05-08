@@ -35,7 +35,7 @@ describe('Server config and startup', () => {
   let configMockPath
   beforeEach(async () => {
     configMockPath = {
-      PORT: '3000',
+      port: '3987',
       requestTimeoutMs: timeout
     }
     const originalConfig = { ...config }
@@ -61,10 +61,12 @@ describe('Server config and startup', () => {
 
     test('idle socket should be closed by timeout', () => {
       return new Promise((resolve, reject) => {
-        const socket = net.connect({ port: config.get('PORT') })
+        const socket = net.connect({ port: config.get('port') })
         socket.on('connect', socketTimeoutTest(socket, reject))
         socket.on('close', resolve)
-        socket.on('error', console.error)
+        socket.on('error', () => {
+          throw new Error('Failed to obtain server connection')
+        })
       })
     })
 

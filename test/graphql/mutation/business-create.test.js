@@ -1,8 +1,10 @@
 import nock from 'nock'
 import { config } from '../../../app/config.js'
+import { db } from '../../../app/mongo.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 import { mockPersonSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
+import { waitFor } from '../../test-helpers/wait-for.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
@@ -152,19 +154,32 @@ mutation CreateBusiness($input: CreateBusinessInput!) {
 }
 `
 
+// retrievePersonIdByCRN fires a MongoDB insert without awaiting it to avoid slowing down the
+// request. In tests this means a potential race condition between the insert and the database cleanup.
+// For safety, we should wait for the insert complete  (allowing the db to be torn down in the afterEach)
+const waitForPersonIdToBeCachedInMongo = async () => {
+  await waitFor(async () => {
+    const cached = await db.collection('customers').findOne({ _id: 'crn' })
+    expect(cached?.personId).toBe('personId')
+  })
+}
+
 //  Nock is setup separately in each test to ensure the order and number of requests is as expected
 describe('business', () => {
-  afterEach(() => {
+  afterEach(async () => {
     nock.cleanAll()
     nock.enableNetConnect()
+    await db.dropDatabase()
   })
 
   beforeEach(setupNock)
 
   test('create a business - withoutUprn', async () => {
-    const result = await makeTestQuery(query, null, true, { input })
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
 
     expect(nock.isDone()).toBe(true)
+
+    await waitForPersonIdToBeCachedInMongo()
 
     expect(result).toEqual({
       data: {
@@ -268,7 +283,7 @@ describe('business', () => {
         withUprn: { ...input.correspondenceAddress.withoutUprn, uprn: '123456789012' }
       }
     }
-    const result = await makeTestQuery(query, null, true, { input: inputWithUprn })
+    const result = await makeTestQuery(query, null, true, { input: inputWithUprn }, [], false)
 
     expect(result).toEqual({
       data: {
