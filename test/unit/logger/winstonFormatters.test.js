@@ -111,7 +111,7 @@ describe('winstonFormatters', () => {
         tenant: { id: 'tenant-id', message: 'some tenant info' },
         url: {
           full: 'http://localhost/path',
-          path: '/path',
+          path: 'http://localhost/path',
           query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
         }
       })
@@ -146,7 +146,7 @@ describe('winstonFormatters', () => {
       },
       url: {
         full: 'http://localhost/path',
-        path: '/path',
+        path: 'http://localhost/path',
         query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
       }
     })
@@ -274,6 +274,33 @@ describe('winstonFormatters', () => {
         request: { method: 'GET' }
       })
       expect(result.url).not.toBeDefined()
+    })
+
+    it('uses url as full and path as-is when both are supplied', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { url: 'https://api.example.com/organisation/123', path: '/organisation/123' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.full and url.path when request.url is a full URL string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { url: 'https://api.example.com/organisation/123' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.full and url.path when request.url is a path-only string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { url: '/organisation/123' }
+      })
+      expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
     })
   })
 })
