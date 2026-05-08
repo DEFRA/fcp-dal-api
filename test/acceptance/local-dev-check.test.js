@@ -39,7 +39,7 @@ const agreement = [
         parcelName: '6797',
         actionArea: 0.1128,
         actionMTL: null,
-        actionUnits: 66,
+        actionUnits: 66.01,
         parcelTotalArea: 2.3776,
         startDate: '2018-03-07T11:56:24.206Z',
         endDate: '2026-05-10T15:13:55.156Z'
@@ -69,7 +69,7 @@ const agreement = [
         parcelName: '0019',
         actionArea: 0.3114,
         actionMTL: 19,
-        actionUnits: 16,
+        actionUnits: 16.16,
         parcelTotalArea: 1.6253,
         startDate: '2021-04-26T11:46:46.798Z',
         endDate: '2027-04-08T00:15:18.244Z'
