@@ -21,6 +21,7 @@ export class BaseRESTDataSource extends RESTDataSource {
       message += ` | Caused by ${cause.constructor.name}: ${cause.message}`
       cause = cause.cause
     }
+
     error.message = message
 
     this.logger.error(`#datasource - ${this.name} - request error`, {
@@ -54,7 +55,7 @@ export class BaseRESTDataSource extends RESTDataSource {
     await this.addAuthentication(request)
 
     this.logger.debug(`#datasource - ${this.name} - request`, {
-      request: { ...request, path: path.toString() },
+      request: { ...request, url: `${this.baseURL}${path}` },
       code: this.code
     })
   }
@@ -89,12 +90,12 @@ export class BaseRESTDataSource extends RESTDataSource {
         id: request.id,
         method: request.method.toUpperCase(),
         headers: request.headers,
-        path: url.toString()
+        url: url.toString()
       },
       response: { statusCode: response?.status }
     })
     this.logger.debug(`#datasource - ${this.name} - response detail`, {
-      request: { ...request, path: url.toString() },
+      request: { ...request, url: url.toString() },
       response: {
         ...response,
         statusCode: response?.status,

@@ -149,7 +149,7 @@ describe('RuralPayments', () => {
 
       expect(request.headers).toEqual({ email: 'test@test.test', 'gateway-type': 'internal' })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
-        request: { ...request, path: 'test-path' },
+        request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
@@ -180,7 +180,7 @@ describe('RuralPayments', () => {
         crn: 'test-crn'
       })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
-        request: { ...request, path: 'test-path' },
+        request: { ...request, url: 'https://rp_kits_gateway_external_url/test-path' },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
@@ -312,7 +312,7 @@ describe('RuralPayments', () => {
             id: '123',
             method: 'GET',
             headers: {},
-            path: 'test-url'
+            url: 'test-url'
           },
           response: { statusCode: 200 }
         })
@@ -320,7 +320,7 @@ describe('RuralPayments', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         '#datasource - Rural payments - response detail',
         expect.objectContaining({
-          request: { ...request, path: 'test-url' },
+          request: { ...request, url: 'test-url' },
           response: expect.objectContaining({
             body: { data: 'test' }
           }),
