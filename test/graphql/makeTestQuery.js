@@ -9,11 +9,12 @@ export const makeTestQuery = async (
   headers,
   isAuthenticated = true,
   variableValues = {},
-  authGroups = []
+  authGroups = [],
+  dropDbOnCompletion = true
 ) => {
   const ctx = await context({ request: { headers: headers ?? defaultHeaders } })
   try {
-    const response = await graphql({
+    return await graphql({
       source,
       schema: await createSchema(),
       contextValue: {
@@ -24,8 +25,9 @@ export const makeTestQuery = async (
       },
       variableValues
     })
-    return response
   } finally {
-    await ctx.db.dropDatabase()
+    if (dropDbOnCompletion) {
+      await ctx.db.dropDatabase()
+    }
   }
 }
