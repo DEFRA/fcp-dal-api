@@ -10,12 +10,13 @@ const buildHttpDetails = (request, response, requestTimeMs) => {
       ...(request?.method && { method: request.method }),
       ...(request?.headers && { headers: request.headers })
     }
-  if (response || requestTimeMs)
+  if (response || requestTimeMs) {
+    const statusCode = response?.statusCode || response?.status
     http.response = {
-      ...(response?.statusCode && { status_code: response.statusCode }),
+      ...(statusCode && { status_code: statusCode }),
       ...(requestTimeMs && { response_time: requestTimeMs })
     }
-
+  }
   return { http }
 }
 

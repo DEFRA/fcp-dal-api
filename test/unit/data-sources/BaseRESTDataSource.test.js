@@ -40,7 +40,7 @@ describe('BaseRESTDataSource', () => {
 
       dataSource.didEncounterError(mockError, mockRequest, mockUrl)
 
-      expect(mockRequest.path).toBe(mockUrl)
+      expect(mockRequest.url).toBe(mockUrl)
       expect(mockLogger.error).toHaveBeenCalledWith(
         '#datasource - Test DataSource - request error',
         expect.objectContaining({
@@ -60,7 +60,7 @@ describe('BaseRESTDataSource', () => {
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ response: { statusCode: 503 } })
+        expect.objectContaining({ response: { status: 503 } })
       )
     })
 
@@ -70,7 +70,7 @@ describe('BaseRESTDataSource', () => {
 
       dataSource.didEncounterError(null, mockRequest, mockUrl)
 
-      expect(mockRequest.path).toBe(mockUrl)
+      expect(mockRequest.url).toBe(mockUrl)
       expect(mockLogger.error).toHaveBeenCalledWith(
         '#datasource - Test DataSource - request error',
         expect.objectContaining({

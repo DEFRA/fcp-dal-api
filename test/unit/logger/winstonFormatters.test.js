@@ -184,6 +184,29 @@ describe('winstonFormatters', () => {
     })
   })
 
+  describe('buildHttpDetails', () => {
+    it('uses response.statusCode for status_code when present', () => {
+      const result = cdpSchemaTranslator().transform({
+        response: { statusCode: 201 }
+      })
+      expect(result.http.response.status_code).toBe(201)
+    })
+
+    it('falls back to response.status for status_code when statusCode is absent', () => {
+      const result = cdpSchemaTranslator().transform({
+        response: { status: 404 }
+      })
+      expect(result.http.response.status_code).toBe(404)
+    })
+
+    it('omits status_code when neither statusCode nor status is present', () => {
+      const result = cdpSchemaTranslator().transform({
+        response: { body: 'something' }
+      })
+      expect(result.http.response).not.toHaveProperty('status_code')
+    })
+  })
+
   describe('pickKeysForLogging ', () => {
     it('only allows whitelisted keys from object body', () => {
       const result = cdpSchemaTranslator().transform({
