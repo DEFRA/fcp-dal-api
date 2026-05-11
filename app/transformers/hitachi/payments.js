@@ -12,6 +12,7 @@ function calculateOnHoldStatus(holdCodes) {
 
 function transformPayment(payment) {
   return {
+    id: payment.$id,
     reference: payment.parmPaymentReference,
     date: payment.parmDate.split('T')[0], // Convert to YYYY-MM-DD
     amount: payment.parmAmount,

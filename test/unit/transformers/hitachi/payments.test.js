@@ -16,6 +16,7 @@ describe('transformBusinessPayments', () => {
       },
       parmPayments: [
         {
+          $id: '119',
           parmPaymentReference: 'PAY001',
           parmDate: '2023-06-15T10:30:00Z',
           parmAmount: 1500.5,
@@ -32,6 +33,7 @@ describe('transformBusinessPayments', () => {
           ]
         },
         {
+          $id: '120',
           parmPaymentReference: 'PAY002',
           parmDate: '2023-05-10T14:20:00Z',
           parmAmount: 750.25,
@@ -56,6 +58,7 @@ describe('transformBusinessPayments', () => {
       onHold: false,
       payments: [
         {
+          id: '120',
           reference: 'PAY002',
           date: '2023-05-10',
           amount: 750.25,
@@ -71,6 +74,7 @@ describe('transformBusinessPayments', () => {
           ]
         },
         {
+          id: '119',
           reference: 'PAY001',
           date: '2023-06-15',
           amount: 1500.5,
@@ -113,6 +117,7 @@ describe('transformBusinessPayments', () => {
     const hitachiResponse = {
       parmPayments: [
         {
+          $id: '121',
           parmPaymentReference: 'PAY001',
           parmDate: '2023-06-15T10:30:00Z',
           parmAmount: 1000,
@@ -140,6 +145,7 @@ describe('transformBusinessPayments', () => {
       parmSupplierInfo: { parmHoldCodes: [] },
       parmPayments: [
         {
+          $id: '123',
           parmPaymentReference: 'PAY003',
           parmDate: '2023-07-01T00:00:00Z',
           parmAmount: 100,
@@ -147,6 +153,7 @@ describe('transformBusinessPayments', () => {
           parmLineItems: []
         },
         {
+          $id: '121',
           parmPaymentReference: 'PAY001',
           parmDate: '2023-05-01T00:00:00Z',
           parmAmount: 100,
@@ -154,6 +161,7 @@ describe('transformBusinessPayments', () => {
           parmLineItems: []
         },
         {
+          $id: '122',
           parmPaymentReference: 'PAY002',
           parmDate: '2023-06-01T00:00:00Z',
           parmAmount: 100,
@@ -172,6 +180,7 @@ describe('transformBusinessPayments', () => {
       parmSupplierInfo: { parmHoldCodes: [] },
       parmPayments: [
         {
+          $id: '124',
           parmPaymentReference: 'PAY001',
           parmDate: '2023-06-15T10:30:00Z',
           parmAmount: 2000,

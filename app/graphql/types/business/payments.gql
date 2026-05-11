@@ -10,6 +10,7 @@ type BusinessPayments {
 }
 
 type Payment {
+  id: ID!
   reference: String!
   date: Date!
   amount: Float!
