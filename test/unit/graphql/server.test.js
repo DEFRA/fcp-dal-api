@@ -27,6 +27,11 @@ describe('GraphQL Dashboard test with mocks', () => {
     () => mockApolloPluginLandingPageModule
   )
 
+  const mockDeriveResponseCodePlugin = { requestDidStart: jest.fn() }
+  jest.unstable_mockModule('../../../app/graphql/plugins/derive-response-code-plugin.js', () => ({
+    deriveResponseCodePlugin: mockDeriveResponseCodePlugin
+  }))
+
   beforeEach(() => {
     jest.resetModules()
   })
@@ -46,7 +51,7 @@ describe('GraphQL Dashboard test with mocks', () => {
     expect(mockApolloPluginLandingPage).not.toHaveBeenCalled()
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginDisabled()],
+      plugins: [mockApolloPluginDisabled(), mockDeriveResponseCodePlugin],
       introspection: false
     })
   })
@@ -68,7 +73,7 @@ describe('GraphQL Dashboard test with mocks', () => {
 
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginLandingPage()],
+      plugins: [mockApolloPluginLandingPage(), mockDeriveResponseCodePlugin],
       introspection: true
     })
   })
