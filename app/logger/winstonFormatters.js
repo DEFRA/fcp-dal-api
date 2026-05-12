@@ -10,12 +10,13 @@ const buildHttpDetails = (request, response, requestTimeMs) => {
       ...(request?.method && { method: request.method }),
       ...(request?.headers && { headers: request.headers })
     }
-  if (response || requestTimeMs)
+  if (response || requestTimeMs) {
+    const statusCode = response?.statusCode || response?.status
     http.response = {
-      ...(response?.statusCode && { status_code: response.statusCode }),
+      ...(statusCode && { status_code: statusCode }),
       ...(requestTimeMs && { response_time: requestTimeMs })
     }
-
+  }
   return { http }
 }
 
@@ -78,11 +79,26 @@ const pickKeysForLogging = (obj) => {
   return picked
 }
 
-const buildUrl = ({ body, path }) => {
+const buildUrl = ({ body, path, url }) => {
   const result = {}
 
-  if (path) {
-    result.full = path
+  if (url && path) {
+    // Simplest case, both fields supplied, no interpretation needed
+    result.full = url
+    result.path = path
+  } else {
+    const pathToUse = url || path
+    if (pathToUse) {
+      const pathStr = pathToUse.toString()
+      if (pathStr.startsWith('http')) {
+        result.full = pathStr
+        result.path = new URL(pathStr).pathname
+      } else {
+        result.path = pathStr
+        // Not strictly the full path, but populated with best endeavours
+        result.full = pathStr
+      }
+    }
   }
 
   if (body) {

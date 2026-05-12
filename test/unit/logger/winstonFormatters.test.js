@@ -111,6 +111,7 @@ describe('winstonFormatters', () => {
         tenant: { id: 'tenant-id', message: 'some tenant info' },
         url: {
           full: 'http://localhost/path',
+          path: 'http://localhost/path',
           query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
         }
       })
@@ -145,6 +146,7 @@ describe('winstonFormatters', () => {
       },
       url: {
         full: 'http://localhost/path',
+        path: 'http://localhost/path',
         query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
       }
     })
@@ -179,6 +181,29 @@ describe('winstonFormatters', () => {
       level: undefined,
       message: undefined,
       error: { message: 'error' } // must pick up partial error details
+    })
+  })
+
+  describe('buildHttpDetails', () => {
+    it('uses response.statusCode for status_code when present', () => {
+      const result = cdpSchemaTranslator().transform({
+        response: { statusCode: 201 }
+      })
+      expect(result.http.response.status_code).toBe(201)
+    })
+
+    it('falls back to response.status for status_code when statusCode is absent', () => {
+      const result = cdpSchemaTranslator().transform({
+        response: { status: 404 }
+      })
+      expect(result.http.response.status_code).toBe(404)
+    })
+
+    it('omits status_code when neither statusCode nor status is present', () => {
+      const result = cdpSchemaTranslator().transform({
+        response: { body: 'something' }
+      })
+      expect(result.http.response).not.toHaveProperty('status_code')
     })
   })
 
@@ -236,6 +261,69 @@ describe('winstonFormatters', () => {
         sbi: '987654321',
         primarySearchPhrase: 'jane doe'
       })
+    })
+  })
+
+  describe('buildUrl', () => {
+    it('sets url.full and url.path when request.path is a full URL string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: 'https://api.example.com/organisation/123' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.full and url.path when request.path is a URL object', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: new URL('https://api.example.com/organisation/123') }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.path (and url.full for completeness, even though it`s not a full path) when request.path is a path-only string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/organisation/123' }
+      })
+      expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
+    })
+
+    it('sets no url field when request has no path', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { method: 'GET' }
+      })
+      expect(result.url).not.toBeDefined()
+    })
+
+    it('uses url as full and path as-is when both are supplied', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { url: 'https://api.example.com/organisation/123', path: '/organisation/123' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.full and url.path when request.url is a full URL string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { url: 'https://api.example.com/organisation/123' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/123',
+        path: '/organisation/123'
+      })
+    })
+
+    it('sets url.full and url.path when request.url is a path-only string', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { url: '/organisation/123' }
+      })
+      expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
     })
   })
 })

@@ -105,7 +105,7 @@ describe('RuralPayments', () => {
       const intermediateError = new TypeError('intermediate cause')
       intermediateError.cause = new Error('root cause error')
       error.cause = intermediateError
-      // error.extensions = { response: { status: 400, headers: { get: () => 'text/html' } } }
+      error.extensions = { response: { status: 500 } }
       const request = {}
       const url = 'test url'
 
@@ -116,7 +116,7 @@ describe('RuralPayments', () => {
           'test error | Caused by TypeError: intermediate cause | Caused by Error: root cause error'
         ),
         request,
-        response: {},
+        response: error.extensions.response,
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
@@ -149,7 +149,7 @@ describe('RuralPayments', () => {
 
       expect(request.headers).toEqual({ email: 'test@test.test', 'gateway-type': 'internal' })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
-        request: { ...request, path: 'test-path' },
+        request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
@@ -180,7 +180,7 @@ describe('RuralPayments', () => {
         crn: 'test-crn'
       })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
-        request: { ...request, path: 'test-path' },
+        request: { ...request, url: 'https://rp_kits_gateway_external_url/test-path' },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
@@ -312,15 +312,15 @@ describe('RuralPayments', () => {
             id: '123',
             method: 'GET',
             headers: {},
-            path: 'test-url'
+            url: 'test-url'
           },
-          response: { statusCode: 200 }
+          response: mockResult.response
         })
       )
       expect(logger.debug).toHaveBeenCalledWith(
         '#datasource - Rural payments - response detail',
         expect.objectContaining({
-          request: { ...request, path: 'test-url' },
+          request: { ...request, url: 'test-url' },
           response: expect.objectContaining({
             body: { data: 'test' }
           }),
