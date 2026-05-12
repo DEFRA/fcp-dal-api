@@ -34,6 +34,7 @@ server.ext({
         id: request.traceId,
         method: request.method.toUpperCase(),
         path: request.path,
+        url: `${server.info.uri}${request.path}`,
         params: request.params,
         payload: request.payload,
         body: request.body,
@@ -67,7 +68,7 @@ server.events.on('response', function (request) {
       request: {
         id: request.traceId,
         method: request.method.toUpperCase(),
-        path: request.path,
+        url: `${server.info.uri}${request.path}`,
         params: request.params,
         payload: request.payload,
         body: request.body,

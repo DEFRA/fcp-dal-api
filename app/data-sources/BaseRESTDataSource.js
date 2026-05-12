@@ -12,7 +12,7 @@ export class BaseRESTDataSource extends RESTDataSource {
   }
 
   didEncounterError(error, request, url) {
-    request.path = url
+    request.url = url
     if (!error) {
       error = { message: 'unknown/empty error while trying to fetch upstream data' }
     }
@@ -54,7 +54,7 @@ export class BaseRESTDataSource extends RESTDataSource {
     await this.addAuthentication(request)
 
     this.logger.debug(`#datasource - ${this.name} - request`, {
-      request: { ...request, path: path.toString() },
+      request: { ...request, url: `${this.baseURL}${path}` },
       code: this.code
     })
   }
@@ -89,12 +89,12 @@ export class BaseRESTDataSource extends RESTDataSource {
         id: request.id,
         method: request.method.toUpperCase(),
         headers: request.headers,
-        path: url.toString()
+        url: url.toString()
       },
-      response: { statusCode: response?.status }
+      response
     })
     this.logger.debug(`#datasource - ${this.name} - response detail`, {
-      request: { ...request, path: url.toString() },
+      request: { ...request, url: url.toString() },
       response: {
         ...response,
         body: result.parsedBody,
