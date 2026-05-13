@@ -3,7 +3,7 @@ import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/dis
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { config } from '../config.js'
 import { createSchema } from './schema.js'
-import { deriveResponseCodePlugin } from './plugins/derive-response-code-plugin.js'
+import { partialResponsePlugin } from './plugins/partial-response-plugin.js'
 
 export const schema = await createSchema()
 
@@ -17,6 +17,6 @@ export const enableApolloLandingPage = () => {
 
 export const apolloServer = new ApolloServer({
   schema,
-  plugins: [enableApolloLandingPage(), deriveResponseCodePlugin],
+  plugins: [enableApolloLandingPage(), partialResponsePlugin],
   introspection: config.get('graphqlDashboardEnabled')
 })
