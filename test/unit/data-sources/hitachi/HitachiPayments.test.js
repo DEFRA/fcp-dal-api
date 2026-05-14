@@ -313,13 +313,13 @@ describe('HitachiPayments', () => {
       expect(result).toBe(mockResponse)
     })
 
-    test('should throw HttpError when audit values are missing', async () => {
+    test('should throw HttpError when userIP is missing', async () => {
       await expect(
         dataSource.getSupplierPayments({
           frn: '123456789',
           fromDate: undefined,
           toDate: undefined,
-          userIP: undefined, // Missing userIP
+          userIP: undefined,
           resourceId: '123456789'
         })
       ).rejects.toMatchObject({
@@ -328,6 +328,42 @@ describe('HitachiPayments', () => {
         }
       })
     })
+
+    test.each(['not-an-ip', 'localhost', '999.999.999.999', '192.168.1'])(
+      'should throw HttpError when userIP is invalid (%s)',
+      async (userIP) => {
+        await expect(
+          dataSource.getSupplierPayments({
+            frn: '123456789',
+            fromDate: undefined,
+            toDate: undefined,
+            userIP,
+            resourceId: '123456789'
+          })
+        ).rejects.toMatchObject({
+          extensions: {
+            message: 'Invalid value: userIP must be a valid IP address'
+          }
+        })
+      }
+    )
+
+    test.each(['192.168.1.1', '10.0.0.1', '::1', '2001:db8::1'])(
+      'should accept valid IP address (%s)',
+      async (userIP) => {
+        mockPost.mockResolvedValue({ Result: true })
+
+        await expect(
+          dataSource.getSupplierPayments({
+            frn: '123456789',
+            fromDate: undefined,
+            toDate: undefined,
+            userIP,
+            resourceId: '123456789'
+          })
+        ).resolves.not.toThrow()
+      }
+    )
 
     test('should throw HttpError when multiple audit values are missing', async () => {
       const dataSourceWithMissingAudit = new HitachiPayments({

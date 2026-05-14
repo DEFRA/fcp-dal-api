@@ -100,7 +100,7 @@ describe('Common transformers', () => {
       expect(transformToISODate(1752246672000)).toBe('2025-07-11T15:11:12.000Z')
     })
 
-    it('should null for invalid values', () => {
+    it('should return null for invalid values', () => {
       expect(transformToISODate('')).toBe(null)
       expect(transformToISODate('2025-13-45T00:00:00.000Z')).toBe(null)
       expect(transformToISODate('abc')).toBe(null)
