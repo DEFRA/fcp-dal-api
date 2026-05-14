@@ -1,4 +1,4 @@
-import { isIP } from 'net'
+import { isIP } from 'node:net'
 import { ConfidentialClientApplication } from '@azure/msal-node'
 import { StatusCodes } from 'http-status-codes'
 import { config as appConfig } from '../../config.js'
