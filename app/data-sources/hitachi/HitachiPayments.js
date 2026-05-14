@@ -1,3 +1,4 @@
+import { isIP } from 'net'
 import { ConfidentialClientApplication } from '@azure/msal-node'
 import { StatusCodes } from 'http-status-codes'
 import { config as appConfig } from '../../config.js'
@@ -61,12 +62,20 @@ export class HitachiPayments extends BaseRESTDataSource {
     }
   }
 
-  async getSupplierPayments({ frn, fromDate, toDate, userIP, resourceId }) {
+  #validateAuditValues({ userIP, resourceId }) {
     // Validate client-provided values
     if (!userIP) {
       throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         extensions: {
           message: 'Missing required value: userIP'
+        }
+      })
+    }
+
+    if (!isIP(userIP)) {
+      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+        extensions: {
+          message: 'Invalid value: userIP must be a valid IP address'
         }
       })
     }
@@ -99,6 +108,12 @@ export class HitachiPayments extends BaseRESTDataSource {
       })
     }
 
+    return { ...serverAuditValues, userIP }
+  }
+
+  async getSupplierPayments({ frn, fromDate, toDate, userIP, resourceId }) {
+    const audit = this.#validateAuditValues({ userIP, resourceId })
+
     const paymentRequest = {
       SupplierAccount: frn
     }
@@ -117,10 +132,7 @@ export class HitachiPayments extends BaseRESTDataSource {
         body: {
           request: {
             payment: paymentRequest,
-            audit: {
-              ...serverAuditValues,
-              userIP
-            }
+            audit
           }
         }
       }
