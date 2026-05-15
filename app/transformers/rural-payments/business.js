@@ -342,6 +342,15 @@ const transformTransitions = ({ transition_id, transition_name, dt_transition, c
   checkStatus: check_status
 })
 
+const bankAccountTransformers = {
+  ukBusiness: transformUkBusinessAccount,
+  ukPersonal: transformUkPersonalAccount,
+  ukBusinessBuildingSociety: transformUkBusinessBuildingSocietyAccount,
+  ukPersonalBuildingSociety: transformUkPersonalBuildingSocietyAccount,
+  euBusiness: transformEuBusinessAccount,
+  euPersonal: transformEuPersonalAccount
+}
+
 export function transformBankChangeInputToSubmission(
   input,
   { organisationId, personId, frn },
@@ -351,28 +360,19 @@ export function transformBankChangeInputToSubmission(
 
   // `account` is a @oneOf input: exactly one entry is present.
   const [variantKey, variant] = Object.entries(account)[0]
+  const transformVariant = bankAccountTransformers[variantKey]
 
-  const base = {
+  if (!transformVariant) {
+    throw new Error(`Unknown bank account variant: ${variantKey}`)
+  }
+
+  return {
     organisationId,
     personId,
     sbi: `${sbi}`,
     frn: `${frn}`,
     crn: `${crn}`,
-    submissionDateTime: dateStrToSitiAgriFormat(now)
-  }
-
-  switch (variantKey) {
-    case 'ukBusiness':
-      return { ...base, ...transformUkBusinessAccount(variant) }
-    case 'ukPersonal':
-      return { ...base, ...transformUkPersonalAccount(variant) }
-    case 'ukBusinessBuildingSociety':
-      return { ...base, ...transformUkBusinessBuildingSocietyAccount(variant) }
-    case 'ukPersonalBuildingSociety':
-      return { ...base, ...transformUkPersonalBuildingSocietyAccount(variant) }
-    case 'euBusiness':
-      return { ...base, ...transformEuBusinessAccount(variant) }
-    case 'euPersonal':
-      return { ...base, ...transformEuPersonalAccount(variant) }
+    submissionDateTime: dateStrToSitiAgriFormat(now),
+    ...transformVariant(variant)
   }
 }
