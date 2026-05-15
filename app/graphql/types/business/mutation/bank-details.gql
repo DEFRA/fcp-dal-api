@@ -1,0 +1,264 @@
+extend type Mutation {
+  """
+  Submits a change of bank account details for a business.
+  """
+  createBusinessCustomerBankDetails(
+    input: CreateBusinessCustomerBankDetailsInput!
+  ): CreateBusinessCustomerBankDetailsResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input CreateBusinessCustomerBankDetailsInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business. There is also the Firm Reference
+  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  """
+  sbi: ID!
+
+  """
+  The Customer Reference Number (CRN) of the person submitting the bank change.
+  """
+  crn: ID!
+
+  """
+  Bank account details. Exactly one variant must be supplied.
+  """
+  account: BankAccountInput!
+}
+
+"""
+Bank account details. The supplied variant identifies the territory and account holder
+type; each variant declares which fields are mandatory.
+"""
+input BankAccountInput @oneOf {
+  ukBusiness: UkBusinessBankAccountInput
+  ukPersonal: UkPersonalBankAccountInput
+  ukBusinessBuildingSociety: UkBusinessBuildingSocietyBankAccountInput
+  ukPersonalBuildingSociety: UkPersonalBuildingSocietyBankAccountInput
+  euBusiness: EuBusinessBankAccountInput
+  euPersonal: EuPersonalBankAccountInput
+}
+
+input UkBusinessBankAccountInput {
+  """
+  Name on the account.
+  """
+  accountHolderName: String!
+
+  """
+  UK account number (8 digits).
+  """
+  accountNumber: UkAccountNumber!
+
+  """
+  Name of the bank.
+  """
+  bankName: String!
+
+  """
+  UK sort code (6 digits).
+  """
+  accountSortCode: UkSortCode!
+
+  """
+  Currency the account is held in.
+  """
+  currency: BankAccountCurrency!
+}
+
+input UkPersonalBankAccountInput {
+  """
+  Forename(s) of the account holder.
+  """
+  forename: String!
+
+  """
+  Surname of the account holder.
+  """
+  surname: String!
+
+  """
+  UK account number (8 digits).
+  """
+  accountNumber: UkAccountNumber!
+
+  """
+  Name of the bank.
+  """
+  bankName: String!
+
+  """
+  UK sort code (6 digits).
+  """
+  accountSortCode: UkSortCode!
+
+  """
+  Currency the account is held in.
+  """
+  currency: BankAccountCurrency!
+}
+
+input UkBusinessBuildingSocietyBankAccountInput {
+  """
+  Name on the account.
+  """
+  accountHolderName: String!
+
+  """
+  UK account number (8 digits).
+  """
+  accountNumber: UkAccountNumber!
+
+  """
+  Building society roll number, if there is one.
+  """
+  rollNumber: String
+
+  """
+  Name of the bank.
+  """
+  bankName: String!
+
+  """
+  UK sort code (6 digits).
+  """
+  accountSortCode: UkSortCode!
+
+  """
+  Currency the account is held in.
+  """
+  currency: BankAccountCurrency!
+}
+
+input UkPersonalBuildingSocietyBankAccountInput {
+  """
+  Forename(s) of the account holder.
+  """
+  forename: String!
+
+  """
+  Surname of the account holder.
+  """
+  surname: String!
+
+  """
+  UK account number (8 digits).
+  """
+  accountNumber: UkAccountNumber!
+
+  """
+  Building society roll number, if there is one.
+  """
+  rollNumber: String
+
+  """
+  Name of the bank.
+  """
+  bankName: String!
+
+  """
+  UK sort code (6 digits).
+  """
+  accountSortCode: UkSortCode!
+
+  """
+  Currency the account is held in.
+  """
+  currency: BankAccountCurrency!
+}
+
+input EuBusinessBankAccountInput {
+  """
+  Name on the account.
+  """
+  accountHolderName: String!
+
+  """
+  Bank account number. Format depends on the destination bank — no fixed length.
+  """
+  accountNumber: String!
+
+  iban: IBAN!
+
+  """
+  Country code of the bank account (e.g. IRL, FRA).
+  """
+  countryCode: String!
+
+  """
+  Name of the bank.
+  """
+  bankName: String!
+
+  """
+  Sort code or routing number. No fixed length.
+  """
+  accountSortCode: String!
+
+  """
+  SWIFT/BIC code. Optional; when supplied must be 8 or 11 alphanumeric characters.
+  """
+  swiftCode: SwiftCode
+
+  """
+  Currency the account is held in.
+  """
+  currency: BankAccountCurrency!
+}
+
+input EuPersonalBankAccountInput {
+  """
+  Forename(s) of the account holder.
+  """
+  forename: String!
+
+  """
+  Surname of the account holder.
+  """
+  surname: String!
+
+  """
+  Bank account number. Format depends on the destination bank — no fixed length.
+  """
+  accountNumber: String!
+
+  iban: IBAN!
+
+  """
+  Country code of the bank account (e.g. IRL, FRA).
+  """
+  countryCode: String!
+
+  """
+  Name of the bank.
+  """
+  bankName: String!
+
+  """
+  Sort code or routing number. No fixed length.
+  """
+  accountSortCode: String!
+
+  """
+  SWIFT/BIC code. Optional; when supplied must be 8 or 11 alphanumeric characters.
+  """
+  swiftCode: SwiftCode
+
+  """
+  Currency the account is held in.
+  """
+  currency: BankAccountCurrency!
+}
+
+enum BankAccountCurrency {
+  GBP
+  EUR
+}
+
+type CreateBusinessCustomerBankDetailsResponse {
+  """
+  `true` once the bank change submission has been accepted by the upstream service.
+  """
+  success: Boolean!
+}

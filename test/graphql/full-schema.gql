@@ -19,6 +19,9 @@ type Mutation {
   updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
   updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
+  createBusinessCustomerBankDetails(
+    input: CreateBusinessCustomerBankDetailsInput!
+  ): CreateBusinessCustomerBankDetailsResponse
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
   # eslint-disable-next-line @graphql-eslint/input-name
@@ -593,6 +596,94 @@ input UpdateBusinessLockUnlockInput {
   sbi: ID!
   reason: String
   note: String
+}
+
+input CreateBusinessCustomerBankDetailsInput {
+  sbi: ID!
+  crn: ID!
+  account: BankAccountInput!
+}
+
+input BankAccountInput @oneOf {
+  ukBusiness: UkBusinessBankAccountInput
+  ukPersonal: UkPersonalBankAccountInput
+  ukBusinessBuildingSociety: UkBusinessBuildingSocietyBankAccountInput
+  ukPersonalBuildingSociety: UkPersonalBuildingSocietyBankAccountInput
+  euBusiness: EuBusinessBankAccountInput
+  euPersonal: EuPersonalBankAccountInput
+}
+
+input UkBusinessBankAccountInput {
+  accountHolderName: String!
+  accountNumber: UkAccountNumber!
+  bankName: String!
+  accountSortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input UkPersonalBankAccountInput {
+  forename: String!
+  surname: String!
+  accountNumber: UkAccountNumber!
+  bankName: String!
+  accountSortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input UkBusinessBuildingSocietyBankAccountInput {
+  accountHolderName: String!
+  accountNumber: UkAccountNumber!
+  rollNumber: String
+  bankName: String!
+  accountSortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input UkPersonalBuildingSocietyBankAccountInput {
+  forename: String!
+  surname: String!
+  accountNumber: UkAccountNumber!
+  rollNumber: String
+  bankName: String!
+  accountSortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input EuBusinessBankAccountInput {
+  accountHolderName: String!
+  accountNumber: String!
+  iban: IBAN!
+  countryCode: String!
+  bankName: String!
+  accountSortCode: String!
+  swiftCode: SwiftCode
+  currency: BankAccountCurrency!
+}
+
+input EuPersonalBankAccountInput {
+  forename: String!
+  surname: String!
+  accountNumber: String!
+  iban: IBAN!
+  countryCode: String!
+  bankName: String!
+  accountSortCode: String!
+  swiftCode: SwiftCode
+  currency: BankAccountCurrency!
+}
+
+enum BankAccountCurrency {
+  GBP
+  EUR
+}
+
+scalar UkAccountNumber
+scalar UkSortCode
+scalar SwiftCode
+scalar IBAN
+
+type CreateBusinessCustomerBankDetailsResponse {
+  success: Boolean!
 }
 
 type UpdateBusinessResponse {

@@ -484,4 +484,33 @@ describe('Rural Payments Business', () => {
       )
     })
   })
+
+  describe('submitBankChange', () => {
+    test('posts the submission to the bank change service endpoint', async () => {
+      httpPost.mockResolvedValueOnce({})
+
+      const submission = {
+        organisationId: '5583781',
+        personId: '5020949',
+        sbi: '110405990',
+        frn: '10014489653',
+        crn: '1100209492',
+        submissionDateTime: '02/05/2026 14:12:11',
+        account: {
+          accountType: 'UK_BUSINESS',
+          name: 'John Doe',
+          number: '14345678',
+          bank: { name: 'Acme Bank', sortCode: '123456' }
+        }
+      }
+
+      const result = await ruralPaymentsBusiness.submitBankChange(submission)
+
+      expect(httpPost).toHaveBeenCalledWith('bank-change-service/v1/submit', {
+        body: submission,
+        headers: expect.any(Object)
+      })
+      expect(result).toEqual({})
+    })
+  })
 })
