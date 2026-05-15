@@ -1,4 +1,4 @@
-import { dateStrToSitiAgriFormat, validateUpstreamTimestampToISO } from '../../utils/date.js'
+import { formatDateAsUtcDateTime, validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
 import { convertSquareMetersToHectares } from '../../utils/numbers.js'
 import {
@@ -372,7 +372,7 @@ export function transformBankChangeInputToSubmission(
     sbi: `${sbi}`,
     frn: `${frn}`,
     crn: `${crn}`,
-    submissionDateTime: dateStrToSitiAgriFormat(now),
+    submissionDateTime: formatDateAsUtcDateTime(now),
     ...transformVariant(variant)
   }
 }

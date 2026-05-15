@@ -2,7 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
-import { dateStrToSitiAgriFormat } from '../../utils/date.js'
+import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { RuralPayments } from './RuralPayments.js'
 
@@ -107,7 +107,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async getCountyParishHoldingsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`, {
       params: {
-        pointInTime: dateStrToSitiAgriFormat(new Date())
+        pointInTime: formatDateAsUtcDateTime(new Date())
       }
     })
     return response.data
@@ -215,7 +215,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       {
         params: {
           // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm:ss`
-          pointInTime: dateStrToSitiAgriFormat(new Date(date))
+          pointInTime: formatDateAsUtcDateTime(new Date(date))
         }
       }
     )

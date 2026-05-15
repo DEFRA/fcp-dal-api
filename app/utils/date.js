@@ -43,5 +43,5 @@ export const validateUpstreamDate = (date) =>
 
 // formats a Date as `YYYY-MM-DD HH:mm:ss` in UTC
 const dateTimeLength = 19
-export const dateStrToSitiAgriFormat = (date) =>
+export const formatDateAsUtcDateTime = (date) =>
   date.toISOString().substring(0, dateTimeLength).replace('T', ' ')
