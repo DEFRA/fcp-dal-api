@@ -134,7 +134,8 @@ export class HitachiPayments extends BaseRESTDataSource {
             payment: paymentRequest,
             audit
           }
-        }
+        },
+        signal: AbortSignal.timeout(appConfig.get('hitachi.timeoutMs'))
       }
     )
 
