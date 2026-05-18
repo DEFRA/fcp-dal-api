@@ -1,17 +1,11 @@
-import { jest } from '@jest/globals'
-import { HitachiPayments } from '../../../../app/data-sources/hitachi/HitachiPayments.js'
+import { jest, afterEach, beforeAll, beforeEach, describe, test, expect } from '@jest/globals'
 import { HITACHI_API_NOT_FOUND_001, HITACHI_API_REQUEST_001 } from '../../../../app/logger/codes.js'
 
-// Mock MSAL
-const acquireTokenByClientCredential = jest.fn()
-const mockConfidentialClientApplication = jest.fn().mockImplementation(() => ({
-  acquireTokenByClientCredential
-}))
-jest.mock('@azure/msal-node', () => ({
-  ConfidentialClientApplication: mockConfidentialClientApplication
+// jest.unstable_mockModule is required for ESM packages (@azure/msal-node exports .mjs)
+jest.unstable_mockModule('@azure/msal-node', () => ({
+  ConfidentialClientApplication: jest.fn()
 }))
 
-// Mock config
 jest.mock('../../../../app/config.js', () => ({
   config: {
     get: jest.fn((key) => {
@@ -20,42 +14,45 @@ jest.mock('../../../../app/config.js', () => ({
         'hitachi.entra.clientId': '12345678-1234-1234-1234-123456789012',
         'hitachi.entra.clientSecret': 'client-secret',
         'hitachi.entra.tenantId': '12345678-1234-1234-1234-123456789012',
-        'hitachi.baseUrl': 'https://api.hitachi.com'
+        'hitachi.baseUrl': 'https://api.hitachi.com',
+        'hitachi.timeoutMs': 20000
       }
       return values[key]
     })
   }
 }))
 
-// Mock sendMetric
 jest.mock('../../../../app/logger/sendMetric.js', () => ({
   sendMetric: jest.fn()
 }))
-
-// Mock the getMsalClient function in the HitachiPayments module
-jest.mock('../../../../app/data-sources/hitachi/HitachiPayments.js', () => {
-  const originalModule = jest.requireActual(
-    '../../../../app/data-sources/hitachi/HitachiPayments.js'
-  )
-
-  // Mock the getMsalClient function
-  const mockGetMsalClient = jest.fn(() => ({
-    acquireTokenByClientCredential
-  }))
-
-  // Replace the getMsalClient in the module
-  originalModule.getMsalClient = mockGetMsalClient
-
-  return originalModule
-})
 
 describe('HitachiPayments', () => {
   let dataSource
   let mockLogger
   let mockPost
+  let HitachiPayments
 
-  beforeEach(() => {
-    // Mock logger
+  beforeAll(async () => {
+    // HitachiPayments must be imported after unstable_mockModule so its import of @azure/msal-node
+    // resolves to the mock, so deferring until beforeAll
+    HitachiPayments = (await import('../../../../app/data-sources/hitachi/HitachiPayments.js'))
+      .HitachiPayments
+  })
+
+  beforeEach(async () => {
+    const { config } = await import('../../../../app/config.js')
+    config.get = jest.fn((key) => {
+      const values = {
+        'hitachi.disableAuth': false,
+        'hitachi.entra.clientId': '12345678-1234-1234-1234-123456789012',
+        'hitachi.entra.clientSecret': 'client-secret',
+        'hitachi.entra.tenantId': '12345678-1234-1234-1234-123456789012',
+        'hitachi.baseUrl': 'https://api.hitachi.com',
+        'hitachi.timeoutMs': 20000
+      }
+      return values[key]
+    })
+
     mockLogger = {
       error: jest.fn(),
       info: jest.fn(),
@@ -63,10 +60,8 @@ describe('HitachiPayments', () => {
       warn: jest.fn()
     }
 
-    // Mock post method
     mockPost = jest.fn()
 
-    // Create instance
     dataSource = new HitachiPayments({
       audit: {
         requestedSystem: 'dal-api-system',
@@ -76,14 +71,14 @@ describe('HitachiPayments', () => {
     })
     dataSource.logger = mockLogger
     dataSource.post = mockPost
+  })
 
-    // Reset mocks
-    jest.clearAllMocks()
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   describe('addAuthentication', () => {
     test('should set placeholder token when auth is disabled', async () => {
-      // Mock config to return true for disableAuth
       const { config } = await import('../../../../app/config.js')
       config.get = jest.fn((key) => {
         if (key === 'hitachi.disableAuth') return true
@@ -96,28 +91,41 @@ describe('HitachiPayments', () => {
       expect(request.headers.Authorization).toBe('Bearer token')
     })
 
-    test('should handle token acquisition errors', async () => {
-      // Mock config to return false for disableAuth
+    test('should set Authorization header with acquired token when auth is enabled', async () => {
       const { config } = await import('../../../../app/config.js')
-      config.get = jest.fn((key) => {
-        if (key === 'hitachi.disableAuth') return false
-        return 'mock-value'
-      })
+      config.get = jest.fn((key) => (key === 'hitachi.disableAuth' ? false : 'mock-value'))
+
+      const acquireTokenByClientCredential = jest
+        .fn()
+        .mockResolvedValueOnce({ accessToken: 'test-access-token' })
+      const { ConfidentialClientApplication } = await import('@azure/msal-node')
+      ConfidentialClientApplication.mockImplementation(() => ({ acquireTokenByClientCredential }))
 
       const request = { headers: {} }
+      await dataSource.addAuthentication(request)
 
-      try {
-        await dataSource.addAuthentication(request)
-      } catch (error) {
-        // We expect this to fail due to network issues in test environment
-        // But we can verify that the logger was called with the error
-        expect(mockLogger.error).toHaveBeenCalledWith(
-          '#datasource - Hitachi payments - token acquisition failed',
-          {
-            code: HITACHI_API_REQUEST_001
-          }
-        )
-      }
+      expect(request.headers.Authorization).toBe('Bearer test-access-token')
+    })
+
+    test('should handle token acquisition errors', async () => {
+      const { config } = await import('../../../../app/config.js')
+      config.get = jest.fn((key) => (key === 'hitachi.disableAuth' ? false : 'mock-value'))
+
+      const acquireTokenByClientCredential = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('MSAL error'))
+      const { ConfidentialClientApplication } = await import('@azure/msal-node')
+      ConfidentialClientApplication.mockImplementation(() => ({ acquireTokenByClientCredential }))
+
+      const request = { headers: {} }
+      await expect(dataSource.addAuthentication(request)).rejects.toThrow()
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '#datasource - Hitachi payments - token acquisition failed',
+        {
+          code: HITACHI_API_REQUEST_001
+        }
+      )
     })
   })
 
@@ -155,10 +163,26 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
+    })
+
+    test('should use the configured timeout for the abort signal', async () => {
+      const timeoutSpy = jest.spyOn(AbortSignal, 'timeout')
+      mockPost.mockResolvedValue({ Result: true })
+
+      await dataSource.getSupplierPayments({
+        frn: '123456789',
+        fromDate: undefined,
+        toDate: undefined,
+        userIP: '192.168.1.1',
+        resourceId: '123456789'
+      })
+
+      expect(timeoutSpy).toHaveBeenCalledWith(20000)
     })
 
     test('should throw NotFound when response has Result: false', async () => {
@@ -223,7 +247,8 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
@@ -264,7 +289,8 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
@@ -307,7 +333,8 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
