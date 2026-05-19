@@ -33,7 +33,7 @@ describe('BaseRESTDataSource', () => {
   })
 
   describe('didEncounterError', () => {
-    test('should set request.path and log error when error occurs', () => {
+    test('should set request.url and log prepared error', () => {
       const mockError = new Error('Test error')
       const mockRequest = { headers: {} }
       const mockUrl = 'https://api.example.com/test'
@@ -44,7 +44,7 @@ describe('BaseRESTDataSource', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         '#datasource - Test DataSource - request error',
         expect.objectContaining({
-          error: mockError,
+          error: expect.objectContaining({ message: 'Test error' }),
           request: mockRequest,
           code: 'TEST_001'
         })
@@ -64,7 +64,7 @@ describe('BaseRESTDataSource', () => {
       )
     })
 
-    test('should handle null error and create default error message', () => {
+    test('should handle null error and log default message', () => {
       const mockRequest = { headers: {} }
       const mockUrl = 'https://api.example.com/test'
 
@@ -189,6 +189,63 @@ describe('BaseRESTDataSource', () => {
 
       expect(mockResponse.text).toHaveBeenCalled()
       expect(result).toBe(mockTextData)
+    })
+  })
+
+  describe('prepareErrorForLogging', () => {
+    test('returns default message for null error', () => {
+      const result = dataSource.prepareErrorForLogging(null)
+
+      expect(result).toEqual({ message: 'unknown/empty error while trying to fetch upstream data' })
+    })
+
+    test('returns message, name and stack for an error', () => {
+      const error = new Error('Something went wrong')
+
+      const result = dataSource.prepareErrorForLogging(error)
+
+      expect(result).toEqual({ message: 'Something went wrong', name: 'Error', stack: error.stack })
+    })
+
+    test('appends single cause to message', () => {
+      const error = new Error('Top level error')
+      error.cause = new TypeError('Root cause')
+
+      const result = dataSource.prepareErrorForLogging(error)
+
+      expect(result.message).toBe('Top level error | Caused by TypeError: Root cause')
+    })
+
+    test('walks full cause chain for nested causes', () => {
+      const rootCause = new Error('Root cause')
+      const middleCause = new TypeError('Middle cause')
+      middleCause.cause = rootCause
+      const error = new Error('Top level error')
+      error.cause = middleCause
+
+      const result = dataSource.prepareErrorForLogging(error)
+
+      expect(result.message).toBe(
+        'Top level error | Caused by TypeError: Middle cause | Caused by Error: Root cause'
+      )
+    })
+
+    test('does not throw for DOMException TimeoutError (read-only message property)', () => {
+      // AbortSignal.timeout fires a DOMException whose `message` is getter-only in strict mode.
+      const timeoutError = new DOMException(
+        'The operation was aborted due to timeout',
+        'TimeoutError'
+      )
+
+      expect(() => dataSource.prepareErrorForLogging(timeoutError)).not.toThrow()
+
+      const result = dataSource.prepareErrorForLogging(timeoutError)
+      expect(result).toEqual(
+        expect.objectContaining({
+          message: 'The operation was aborted due to timeout',
+          name: 'TimeoutError'
+        })
+      )
     })
   })
 })

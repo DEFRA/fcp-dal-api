@@ -11,20 +11,44 @@ export class BaseRESTDataSource extends RESTDataSource {
     this.code = code
   }
 
+  /**
+   * Converts an error into a plain object safe for logging.
+   *
+   * Reads `message`, `name`, and `stack` by value rather than assigning to them,
+   * so errors with getter-only `message` properties (e.g. `DOMException` thrown by
+   * `AbortSignal.timeout`) do not cause a `TypeError` in strict mode.
+   *
+   * The full cause chain is appended to `message` in the form:
+   * `"<message> | Caused by <ConstructorName>: <cause.message> | ..."`.
+   *
+   * @param {Error|null} error
+   * @returns {{ message: string, name?: string, stack?: string }}
+   */
+  prepareErrorForLogging(error) {
+    if (error) {
+      let { name, message, stack, cause } = error
+      let latestCause = cause
+
+      while (latestCause) {
+        message += ` | Caused by ${latestCause.constructor.name}: ${latestCause.message}`
+        latestCause = latestCause.cause
+      }
+
+      return {
+        message,
+        name,
+        stack
+      }
+    } else {
+      return { message: 'unknown/empty error while trying to fetch upstream data' }
+    }
+  }
+
   didEncounterError(error, request, url) {
     request.url = url
-    if (!error) {
-      error = { message: 'unknown/empty error while trying to fetch upstream data' }
-    }
-    let { cause, message } = error
-    while (cause) {
-      message += ` | Caused by ${cause.constructor.name}: ${cause.message}`
-      cause = cause.cause
-    }
-    error.message = message
 
     this.logger.error(`#datasource - ${this.name} - request error`, {
-      error,
+      error: this.prepareErrorForLogging(error),
       request,
       response: { ...error?.extensions?.response },
       code: this.code
