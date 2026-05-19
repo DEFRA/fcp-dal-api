@@ -25,9 +25,7 @@ export class BaseRESTDataSource extends RESTDataSource {
    * @returns {{ message: string, name?: string, stack?: string }}
    */
   prepareErrorForLogging(error) {
-    if (!error) {
-      return { message: 'unknown/empty error while trying to fetch upstream data' }
-    } else {
+    if (error) {
       let { name, message, stack, cause } = error
       let latestCause = cause
 
@@ -41,6 +39,8 @@ export class BaseRESTDataSource extends RESTDataSource {
         name,
         stack
       }
+    } else {
+      return { message: 'unknown/empty error while trying to fetch upstream data' }
     }
   }
 
