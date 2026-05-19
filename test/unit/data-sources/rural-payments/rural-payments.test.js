@@ -91,7 +91,7 @@ describe('RuralPayments', () => {
       rp.didEncounterError(error, request, url)
 
       expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
-        error,
+        error: expect.objectContaining({ message: 'test error' }),
         request,
         response: error.extensions.response,
         code: RURALPAYMENTS_API_REQUEST_001
@@ -112,9 +112,10 @@ describe('RuralPayments', () => {
       rp.didEncounterError(error, request, url)
 
       expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
-        error: new Error(
-          'test error | Caused by TypeError: intermediate cause | Caused by Error: root cause error'
-        ),
+        error: expect.objectContaining({
+          message:
+            'test error | Caused by TypeError: intermediate cause | Caused by Error: root cause error'
+        }),
         request,
         response: error.extensions.response,
         code: RURALPAYMENTS_API_REQUEST_001
