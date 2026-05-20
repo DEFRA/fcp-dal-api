@@ -113,6 +113,8 @@ export const cdpSchemaTranslator = format((info) => {
   const { error, code, request, response, requestTimeMs, tenant, transactionId, traceId } = info
 
   const parsedUrl = buildUrl(request || {})
+  const httpDetails = buildHttpDetails(request, response, requestTimeMs)
+
   return Object.assign(
     {
       level: info.level,
@@ -122,14 +124,14 @@ export const cdpSchemaTranslator = format((info) => {
       transactionId && { 'transaction.id': transactionId },
       traceId && { 'span.id': traceId, 'trace.id': traceId },
       buildError(error || {}, code),
-      buildHttpDetails(request, response, requestTimeMs),
+      httpDetails,
       buildEvent(
         info.type,
         code,
         request?.method,
         info['@timestamp'],
         requestTimeMs,
-        response?.statusCode,
+        httpDetails.http?.response?.status_code,
         // The URL path is mapped onto the event reference field, which is used in Grafana dashboard queries
         parsedUrl?.url?.path,
         info?.gatewayType
