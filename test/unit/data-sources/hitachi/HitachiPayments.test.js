@@ -365,6 +365,128 @@ describe('HitachiPayments', () => {
       }
     )
 
+    test('should throw HttpError when requested system is missing', async () => {
+      const dataSourceWithMissingAudit = new HitachiPayments({
+        audit: {
+          requestedSystem: undefined,
+          requesterId: 'defined',
+          correlationId: 'defined'
+        }
+      })
+      dataSourceWithMissingAudit.logger = mockLogger
+      dataSourceWithMissingAudit.post = mockPost
+
+      await expect(
+        dataSourceWithMissingAudit.getSupplierPayments({
+          frn: '123456789',
+          fromDate: undefined,
+          toDate: undefined,
+          userIP: '192.168.1.1',
+          resourceId: 'resource'
+        })
+      ).rejects.toMatchObject({
+        extensions: {
+          message: 'Internal server error'
+        }
+      })
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '#datasource - Hitachi payments - missing server-side audit values: requestedSystem',
+        {
+          code: HITACHI_API_REQUEST_001
+        }
+      )
+    })
+
+    test('should throw HttpError when requester id is missing', async () => {
+      const dataSourceWithMissingAudit = new HitachiPayments({
+        audit: {
+          requestedSystem: 'defined',
+          requesterId: undefined,
+          correlationId: 'defined'
+        }
+      })
+      dataSourceWithMissingAudit.logger = mockLogger
+      dataSourceWithMissingAudit.post = mockPost
+
+      await expect(
+        dataSourceWithMissingAudit.getSupplierPayments({
+          frn: '123456789',
+          fromDate: undefined,
+          toDate: undefined,
+          userIP: '192.168.1.1',
+          resourceId: 'resource'
+        })
+      ).rejects.toMatchObject({
+        extensions: {
+          message: 'Internal server error'
+        }
+      })
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '#datasource - Hitachi payments - missing server-side audit values: requesterId',
+        {
+          code: HITACHI_API_REQUEST_001
+        }
+      )
+    })
+
+    test('should throw HttpError when correlation id is missing', async () => {
+      const dataSourceWithMissingAudit = new HitachiPayments({
+        audit: {
+          requestedSystem: 'defined',
+          requesterId: 'defined',
+          correlationId: undefined
+        }
+      })
+      dataSourceWithMissingAudit.logger = mockLogger
+      dataSourceWithMissingAudit.post = mockPost
+
+      await expect(
+        dataSourceWithMissingAudit.getSupplierPayments({
+          frn: '123456789',
+          fromDate: undefined,
+          toDate: undefined,
+          userIP: '192.168.1.1',
+          resourceId: 'resource'
+        })
+      ).rejects.toMatchObject({
+        extensions: {
+          message: 'Internal server error'
+        }
+      })
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '#datasource - Hitachi payments - missing server-side audit values: correlationId',
+        {
+          code: HITACHI_API_REQUEST_001
+        }
+      )
+    })
+
+    test('should throw HttpError when resource id is missing', async () => {
+      await expect(
+        dataSource.getSupplierPayments({
+          frn: '123456789',
+          fromDate: undefined,
+          toDate: undefined,
+          userIP: '192.168.1.1',
+          resourceId: undefined
+        })
+      ).rejects.toMatchObject({
+        extensions: {
+          message: 'Internal server error'
+        }
+      })
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        '#datasource - Hitachi payments - missing server-side audit values: resourceId',
+        {
+          code: HITACHI_API_REQUEST_001
+        }
+      )
+    })
+
     test('should throw HttpError when multiple audit values are missing', async () => {
       const dataSourceWithMissingAudit = new HitachiPayments({
         audit: {

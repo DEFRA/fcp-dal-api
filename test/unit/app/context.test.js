@@ -1,6 +1,7 @@
-import { describe, jest } from '@jest/globals'
+import { describe, expect, jest } from '@jest/globals'
 
 const getAuthMock = jest.fn()
+const getRequestingGroupMock = jest.fn()
 const PermissionsMock = jest.fn()
 const RuralPaymentsBusinessMock = jest.fn()
 const RuralPaymentsCustomerMock = jest.fn()
@@ -12,7 +13,7 @@ const loggerMock = { child: loggerChild }
 
 jest.unstable_mockModule('../../../app/auth/authenticate.js', () => ({
   getAuth: getAuthMock,
-  getRequestingGroup: jest.fn()
+  getRequestingGroup: getRequestingGroupMock
 }))
 jest.unstable_mockModule('../../../app/data-sources/static/permissions.js', () => ({
   Permissions: PermissionsMock
@@ -76,5 +77,76 @@ describe('context', () => {
     expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
     expect(result.dataSources.mongoBusiness).toEqual({})
     expect(result.dataSources.mongoCustomer).toEqual({})
+  })
+
+  describe('hitachiPayments', () => {
+    test('Audit requesterId is extracted from request email header', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = {
+        headers: {
+          email: 'email@example.com'
+        }
+      }
+
+      const result = await context({ request })
+      expect(result.dataSources.hitachiPayments.audit.requesterId).toBe('email@example.com')
+    })
+
+    test('Audit requesterId is undefined if no email header found', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = {
+        headers: {}
+      }
+
+      const result = await context({ request })
+      expect(result.dataSources.hitachiPayments.audit.requesterId).toBeUndefined()
+    })
+
+    test('Audit correlationId is extracted from request traceId', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = {
+        headers: {},
+        traceId: '111-222-333'
+      }
+
+      const result = await context({ request })
+      expect(result.dataSources.hitachiPayments.audit.correlationId).toBe('111-222-333')
+    })
+
+    test('Audit correlationId is undefined if no request traceId is found', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = {
+        headers: {}
+      }
+
+      const result = await context({ request })
+      expect(result.dataSources.hitachiPayments.audit.correlationId).toBeUndefined()
+    })
+
+    test('Audit requestedSystem is extracted from requesting group response', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user', groups: ['group-1', 'group-2'] })
+      getRequestingGroupMock.mockReturnValue('SOME_AD_GROUP')
+      const request = {
+        headers: {},
+        traceId: '111-222-333'
+      }
+
+      const result = await context({ request })
+
+      expect(getRequestingGroupMock).toHaveBeenCalledWith(['group-1', 'group-2'])
+      expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBe('SOME_AD_GROUP')
+    })
+
+    test('Audit requestedSystem is undefined if no requesting group returned', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getRequestingGroupMock.mockReturnValue(undefined)
+      const request = {
+        headers: {},
+        traceId: '111-222-333'
+      }
+
+      const result = await context({ request })
+      expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBeUndefined()
+    })
   })
 })
