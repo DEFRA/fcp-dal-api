@@ -264,6 +264,17 @@ describe('winstonFormatters', () => {
     })
   })
 
+  describe('buildEvent', () => {
+    it('uses the path portion of a full URL as event.reference', () => {
+      const result = cdpSchemaTranslator().transform({
+        level: 'info',
+        message: 'test',
+        request: { path: 'https://api.example.com/organisation/123/details' }
+      })
+      expect(result.event.reference).toBe('/organisation/123/details')
+    })
+  })
+
   describe('buildUrl', () => {
     it('sets url.full and url.path when request.path is a full URL string', () => {
       const result = cdpSchemaTranslator().transform({
