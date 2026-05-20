@@ -9,10 +9,8 @@ extend type Mutation {
 
 input CreateBusinessCustomerBankDetailsInput {
   """
-  Single Business Identifier (SBI) of the business.
-
-  A unique 9-digit number that identifies the business. There is also the Firm Reference
-  Number (FRN), a unique 10-digit number, that is less well known to customers.
+  Single Business Identifier (SBI) of the business: a unique 9-digit number that
+  identifies the business.
   """
   sbi: ID!
 
@@ -59,7 +57,7 @@ input UkBusinessBankAccountInput {
   """
   UK sort code (6 digits).
   """
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
 
   """
   Currency the account is held in.
@@ -91,7 +89,7 @@ input UkPersonalBankAccountInput {
   """
   UK sort code (6 digits).
   """
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
 
   """
   Currency the account is held in.
@@ -123,7 +121,7 @@ input UkBusinessBuildingSocietyBankAccountInput {
   """
   UK sort code (6 digits).
   """
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
 
   """
   Currency the account is held in.
@@ -160,7 +158,7 @@ input UkPersonalBuildingSocietyBankAccountInput {
   """
   UK sort code (6 digits).
   """
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
 
   """
   Currency the account is held in.
@@ -179,6 +177,9 @@ input EuBusinessBankAccountInput {
   """
   accountNumber: String!
 
+  """
+  International Bank Account Number (IBAN) for the account.
+  """
   iban: IBAN!
 
   """
@@ -194,7 +195,7 @@ input EuBusinessBankAccountInput {
   """
   Sort code or routing number. No fixed length.
   """
-  accountSortCode: String!
+  sortCode: String!
 
   """
   SWIFT/BIC code. Optional; when supplied must be 8 or 11 alphanumeric characters.
@@ -223,6 +224,9 @@ input EuPersonalBankAccountInput {
   """
   accountNumber: String!
 
+  """
+  International Bank Account Number (IBAN) for the account.
+  """
   iban: IBAN!
 
   """
@@ -238,7 +242,7 @@ input EuPersonalBankAccountInput {
   """
   Sort code or routing number. No fixed length.
   """
-  accountSortCode: String!
+  sortCode: String!
 
   """
   SWIFT/BIC code. Optional; when supplied must be 8 or 11 alphanumeric characters.

@@ -16,7 +16,7 @@ const transformUkBusinessAccount = (variant) => ({
     number: variant.accountNumber,
     bank: {
       name: variant.bankName,
-      sortCode: variant.accountSortCode
+      sortCode: variant.sortCode
     }
   },
   country: { currency: variant.currency }
@@ -29,7 +29,7 @@ const transformUkPersonalAccount = (variant) => ({
     number: variant.accountNumber,
     bank: {
       name: variant.bankName,
-      sortCode: variant.accountSortCode
+      sortCode: variant.sortCode
     }
   },
   country: { currency: variant.currency }
@@ -59,7 +59,7 @@ const transformEuBusinessAccount = (variant) => ({
     iban: variant.iban,
     bank: {
       name: variant.bankName,
-      sortCode: variant.accountSortCode,
+      sortCode: variant.sortCode,
       swiftCode: variant.swiftCode
     }
   },
@@ -74,7 +74,7 @@ const transformEuPersonalAccount = (variant) => ({
     iban: variant.iban,
     bank: {
       name: variant.bankName,
-      sortCode: variant.accountSortCode,
+      sortCode: variant.sortCode,
       swiftCode: variant.swiftCode
     }
   },

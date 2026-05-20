@@ -617,7 +617,7 @@ input UkBusinessBankAccountInput {
   accountHolderName: String!
   accountNumber: UkAccountNumber!
   bankName: String!
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
   currency: BankAccountCurrency!
 }
 
@@ -626,7 +626,7 @@ input UkPersonalBankAccountInput {
   surname: String!
   accountNumber: UkAccountNumber!
   bankName: String!
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
   currency: BankAccountCurrency!
 }
 
@@ -635,7 +635,7 @@ input UkBusinessBuildingSocietyBankAccountInput {
   accountNumber: UkAccountNumber!
   rollNumber: String
   bankName: String!
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
   currency: BankAccountCurrency!
 }
 
@@ -645,7 +645,7 @@ input UkPersonalBuildingSocietyBankAccountInput {
   accountNumber: UkAccountNumber!
   rollNumber: String
   bankName: String!
-  accountSortCode: UkSortCode!
+  sortCode: UkSortCode!
   currency: BankAccountCurrency!
 }
 
@@ -655,7 +655,7 @@ input EuBusinessBankAccountInput {
   iban: IBAN!
   countryCode: String!
   bankName: String!
-  accountSortCode: String!
+  sortCode: String!
   swiftCode: SwiftCode
   currency: BankAccountCurrency!
 }
@@ -667,7 +667,7 @@ input EuPersonalBankAccountInput {
   iban: IBAN!
   countryCode: String!
   bankName: String!
-  accountSortCode: String!
+  sortCode: String!
   swiftCode: SwiftCode
   currency: BankAccountCurrency!
 }

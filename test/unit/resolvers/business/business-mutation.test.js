@@ -368,7 +368,7 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
         accountHolderName: 'Acme Farms Ltd',
         accountNumber: '14345678',
         bankName: 'Acme Bank',
-        accountSortCode: '123456',
+        sortCode: '123456',
         currency: 'GBP'
       }
     }
@@ -430,6 +430,35 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     await expect(
       Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
     ).rejects.toThrow('FRN not found for business')
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('propagates the data source error when the organisation lookup fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+      new Error('Rural payments organisation not found')
+    )
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Rural payments organisation not found')
+
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('propagates the data source error when the personId lookup fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
+      id: 5583781,
+      businessReference: '10014489653'
+    })
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockRejectedValue(
+      new Error('Rural payments customer not found')
+    )
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Rural payments customer not found')
 
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })

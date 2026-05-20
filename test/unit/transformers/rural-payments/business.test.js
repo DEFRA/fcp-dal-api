@@ -791,7 +791,7 @@ describe('#transformBankChangeInputToSubmission', () => {
         accountHolderName: 'Acme Farms Ltd',
         accountNumber: '14345678',
         bankName: 'Acme Bank',
-        accountSortCode: '123456',
+        sortCode: '123456',
         currency: 'GBP'
       }
     }
@@ -837,7 +837,7 @@ describe('#transformBankChangeInputToSubmission', () => {
             surname: 'Doe',
             accountNumber: '14345678',
             bankName: 'Acme Bank',
-            accountSortCode: '123456',
+            sortCode: '123456',
             currency: 'GBP'
           }
         }
@@ -863,7 +863,7 @@ describe('#transformBankChangeInputToSubmission', () => {
             accountNumber: '14345678',
             rollNumber: '2123414',
             bankName: 'Nationwide',
-            accountSortCode: '123456',
+            sortCode: '123456',
             currency: 'GBP'
           }
         }
@@ -892,7 +892,7 @@ describe('#transformBankChangeInputToSubmission', () => {
             countryCode: 'IRL',
             currency: 'EUR',
             bankName: 'Banco Acme',
-            accountSortCode: '12345678',
+            sortCode: '12345678',
             swiftCode: 'BARCGB22'
           }
         }
@@ -927,7 +927,7 @@ describe('#transformBankChangeInputToSubmission', () => {
       countryCode: 'IRL',
       currency: 'GBP',
       bankName: 'Acme Bank',
-      accountSortCode: '123456'
+      sortCode: '123456'
     }
     const submission = transformBankChangeInputToSubmission(
       {
@@ -940,6 +940,20 @@ describe('#transformBankChangeInputToSubmission', () => {
     )
 
     expect(submission.account.accountType).toBe(upstreamType)
+  })
+
+  test('throws when the account variant is not recognised', () => {
+    expect(() =>
+      transformBankChangeInputToSubmission(
+        {
+          sbi: '110405990',
+          crn: '1100209492',
+          account: { martianBusiness: { accountHolderName: 'Acme Farms Ltd' } }
+        },
+        baseIds,
+        new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+      )
+    ).toThrow('Unknown bank account variant: martianBusiness')
   })
 
   test('coerces sbi, crn and frn to strings', () => {

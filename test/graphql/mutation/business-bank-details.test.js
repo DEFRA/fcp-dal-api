@@ -15,7 +15,7 @@ const input = {
       accountHolderName: 'Acme Farms Ltd',
       accountNumber: '14345678',
       bankName: 'Acme Bank',
-      accountSortCode: '123456',
+      sortCode: '123456',
       currency: 'GBP'
     }
   }
