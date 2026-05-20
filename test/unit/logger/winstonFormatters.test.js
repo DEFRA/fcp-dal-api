@@ -273,6 +273,23 @@ describe('winstonFormatters', () => {
       })
       expect(result.event.reference).toBe('/organisation/123/details')
     })
+
+    describe('outcome', () => {
+      it('omits event.outcome when no response is provided', () => {
+        const result = cdpSchemaTranslator().transform({ level: 'info', message: 'test' })
+        expect(result.event).not.toBeDefined()
+      })
+
+      it('sets event.outcome from response.status', () => {
+        const result = cdpSchemaTranslator().transform({ response: { status: 404 } })
+        expect(result.event.outcome).toBe('status code: 404')
+      })
+
+      it('sets event.outcome from response.statusCode', () => {
+        const result = cdpSchemaTranslator().transform({ response: { statusCode: 201 } })
+        expect(result.event.outcome).toBe('status code: 201')
+      })
+    })
   })
 
   describe('buildUrl', () => {
