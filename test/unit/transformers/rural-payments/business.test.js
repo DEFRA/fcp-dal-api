@@ -3,6 +3,7 @@ import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   transformAgreements,
   transformApplications,
+  transformBankChangeInputToSubmission,
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformBusinessDetailsToOrgDetailsCreate,
   transformBusinessDetailsToOrgDetailsUpdate,
@@ -771,6 +772,201 @@ describe('#transformBusinessDetailsToOrgDetailsCreate', () => {
       traderNumber: 'TR12345',
       vendorNumber: 'VN67890',
       taxRegistrationNumber: 'GB123456789'
+    })
+  })
+})
+
+describe('#transformBankChangeInputToSubmission', () => {
+  const baseIds = {
+    organisationId: '5583781',
+    personId: '5020949',
+    frn: '10014489653'
+  }
+
+  const ukBusinessInput = {
+    sbi: '110405990',
+    crn: '1100209492',
+    account: {
+      ukBusiness: {
+        accountHolderName: 'Acme Farms Ltd',
+        accountNumber: '14345678',
+        bankName: 'Acme Bank',
+        sortCode: '123456',
+        currency: 'GBP'
+      }
+    }
+  }
+
+  test('builds the upstream submission payload from a ukBusiness variant', () => {
+    const now = new Date(Date.UTC(2026, 4, 2, 14, 12, 11))
+
+    expect(transformBankChangeInputToSubmission(ukBusinessInput, baseIds, now)).toEqual({
+      organisationId: '5583781',
+      personId: '5020949',
+      sbi: '110405990',
+      frn: '10014489653',
+      crn: '1100209492',
+      submissionDateTime: '2026-05-02 14:12:11',
+      account: {
+        accountType: 'UK_BUSINESS',
+        name: 'Acme Farms Ltd',
+        number: '14345678',
+        iban: undefined,
+        buildingSocietyRollNumber: undefined,
+        bank: {
+          name: 'Acme Bank',
+          sortCode: '123456',
+          swiftCode: undefined
+        }
+      },
+      country: {
+        code: undefined,
+        currency: 'GBP'
+      }
+    })
+  })
+
+  test('composes name from forename and surname for personal variants', () => {
+    const submission = transformBankChangeInputToSubmission(
+      {
+        sbi: '110405990',
+        crn: '1100209492',
+        account: {
+          ukPersonal: {
+            forename: 'John',
+            surname: 'Doe',
+            accountNumber: '14345678',
+            bankName: 'Acme Bank',
+            sortCode: '123456',
+            currency: 'GBP'
+          }
+        }
+      },
+      baseIds,
+      new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+    )
+
+    expect(submission.account).toMatchObject({
+      accountType: 'UK_PERSONAL',
+      name: 'John Doe'
+    })
+  })
+
+  test('passes building society roll number through for ukBusinessBuildingSociety', () => {
+    const submission = transformBankChangeInputToSubmission(
+      {
+        sbi: '110405990',
+        crn: '1100209492',
+        account: {
+          ukBusinessBuildingSociety: {
+            accountHolderName: 'Acme Farms Ltd',
+            accountNumber: '14345678',
+            rollNumber: '2123414',
+            bankName: 'Nationwide',
+            sortCode: '123456',
+            currency: 'GBP'
+          }
+        }
+      },
+      baseIds,
+      new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+    )
+
+    expect(submission.account).toMatchObject({
+      accountType: 'UK_BUSINESS',
+      buildingSocietyRollNumber: '2123414'
+    })
+  })
+
+  test('populates iban, country code and swift for EU variants', () => {
+    const submission = transformBankChangeInputToSubmission(
+      {
+        sbi: '110405990',
+        crn: '1100209492',
+        account: {
+          euPersonal: {
+            forename: 'John',
+            surname: 'Doe',
+            accountNumber: '14345678',
+            iban: 'PT392831273127334616',
+            countryCode: 'IRL',
+            currency: 'EUR',
+            bankName: 'Banco Acme',
+            sortCode: '12345678',
+            swiftCode: 'BARCGB22'
+          }
+        }
+      },
+      baseIds,
+      new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+    )
+
+    expect(submission.account).toMatchObject({
+      accountType: 'EU',
+      name: 'John Doe',
+      iban: 'PT392831273127334616',
+      bank: { swiftCode: 'BARCGB22' }
+    })
+    expect(submission.country).toEqual({ code: 'IRL', currency: 'EUR' })
+  })
+
+  test.each([
+    ['ukBusiness', 'UK_BUSINESS'],
+    ['ukPersonal', 'UK_PERSONAL'],
+    ['ukBusinessBuildingSociety', 'UK_BUSINESS'],
+    ['ukPersonalBuildingSociety', 'UK_PERSONAL'],
+    ['euBusiness', 'EU'],
+    ['euPersonal', 'EU']
+  ])('maps %s variant to upstream account type %s', (variant, upstreamType) => {
+    const variantInput = {
+      accountHolderName: 'Acme Farms Ltd',
+      forename: 'John',
+      surname: 'Doe',
+      accountNumber: '14345678',
+      iban: 'PT392831273127334616',
+      countryCode: 'IRL',
+      currency: 'GBP',
+      bankName: 'Acme Bank',
+      sortCode: '123456'
+    }
+    const submission = transformBankChangeInputToSubmission(
+      {
+        sbi: '110405990',
+        crn: '1100209492',
+        account: { [variant]: variantInput }
+      },
+      baseIds,
+      new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+    )
+
+    expect(submission.account.accountType).toBe(upstreamType)
+  })
+
+  test('throws when the account variant is not recognised', () => {
+    expect(() =>
+      transformBankChangeInputToSubmission(
+        {
+          sbi: '110405990',
+          crn: '1100209492',
+          account: { martianBusiness: { accountHolderName: 'Acme Farms Ltd' } }
+        },
+        baseIds,
+        new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+      )
+    ).toThrow('Unknown bank account variant: martianBusiness')
+  })
+
+  test('coerces sbi, crn and frn to strings', () => {
+    const submission = transformBankChangeInputToSubmission(
+      { ...ukBusinessInput, sbi: 110405990, crn: 1100209492 },
+      { organisationId: '5583781', personId: '5020949', frn: 10014489653 },
+      new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+    )
+
+    expect(submission).toMatchObject({
+      sbi: '110405990',
+      crn: '1100209492',
+      frn: '10014489653'
     })
   })
 })

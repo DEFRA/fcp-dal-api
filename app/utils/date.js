@@ -40,3 +40,8 @@ export const validateUpstreamTimestampToISO = (timestamp) =>
 // returns ISO Date string or null
 export const validateUpstreamDate = (date) =>
   validateUpstreamTimestamp(date)?.toISOString().split('T')[0] ?? null // ensure null, not undefined
+
+// formats a Date as `YYYY-MM-DD HH:mm:ss` in UTC
+const dateTimeLength = 19
+export const formatDateAsUtcDateTime = (date) =>
+  date.toISOString().substring(0, dateTimeLength).replace('T', ' ')

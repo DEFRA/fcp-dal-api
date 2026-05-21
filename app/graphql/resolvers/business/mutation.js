@@ -1,4 +1,6 @@
+import { NotFound } from '../../../errors/graphql.js'
 import {
+  transformBankChangeInputToSubmission,
   transformBusinessDetailsToOrgDetailsCreate,
   transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
@@ -23,6 +25,26 @@ export const Mutation = {
     const business = transformOrganisationToBusiness(response)
     const result = { success: true, business }
     return result
+  },
+  createBusinessCustomerBankDetails: async (_, { input }, { dataSources }) => {
+    const { sbi, crn } = input
+    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+
+    if (!organisation.businessReference) {
+      throw new NotFound('FRN not found for business')
+    }
+
+    const personId = await retrievePersonIdByCRN(crn, dataSources)
+
+    const submission = transformBankChangeInputToSubmission(input, {
+      organisationId: `${organisation.id}`,
+      personId: `${personId}`,
+      frn: organisation.businessReference
+    })
+
+    await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
+
+    return { success: true }
   },
   updateBusinessName: businessDetailsUpdateResolver,
   updateBusinessPhone: businessDetailsUpdateResolver,

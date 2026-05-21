@@ -357,6 +357,113 @@ describe('Business Mutation createBusiness', () => {
   })
 })
 
+describe('Business Mutation createBusinessCustomerBankDetails', () => {
+  let dataSources
+
+  const baseInput = {
+    sbi: '110405990',
+    crn: '1100209492',
+    account: {
+      ukBusiness: {
+        accountHolderName: 'Acme Farms Ltd',
+        accountNumber: '14345678',
+        bankName: 'Acme Bank',
+        sortCode: '123456',
+        currency: 'GBP'
+      }
+    }
+  }
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationBySBI: jest.fn(),
+        submitBankChange: jest.fn().mockResolvedValue({})
+      }
+    }
+  })
+
+  it('submits the bank change with ids resolved from sbi and crn', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
+      id: 5583781,
+      businessReference: '10014489653'
+    })
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationBySBI).toHaveBeenCalledWith('110405990')
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
+      '1100209492',
+      dataSources
+    )
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organisationId: '5583781',
+        personId: '5020949',
+        sbi: '110405990',
+        frn: '10014489653',
+        crn: '1100209492',
+        account: expect.objectContaining({
+          accountType: 'UK_BUSINESS',
+          name: 'Acme Farms Ltd',
+          number: '14345678',
+          bank: expect.objectContaining({ name: 'Acme Bank', sortCode: '123456' })
+        }),
+        country: expect.objectContaining({ currency: 'GBP' }),
+        submissionDateTime: expect.stringMatching(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+      })
+    )
+    expect(response).toEqual({ success: true })
+  })
+
+  it('throws NotFound when the organisation has no FRN', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
+      id: 5583781,
+      businessReference: null
+    })
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('FRN not found for business')
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('propagates the data source error when the organisation lookup fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+      new Error('Rural payments organisation not found')
+    )
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Rural payments organisation not found')
+
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('propagates the data source error when the personId lookup fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
+      id: 5583781,
+      businessReference: '10014489653'
+    })
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockRejectedValue(
+      new Error('Rural payments customer not found')
+    )
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Rural payments customer not found')
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+})
+
 describe('Business Mutation updateBusinessLockStatus', () => {
   const mockArgs = { input: { sbi: '123', reason: 'test' } }
 

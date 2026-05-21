@@ -1,4 +1,4 @@
-import { validateUpstreamTimestampToISO } from '../../utils/date.js'
+import { formatDateAsUtcDateTime, validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
 import { convertSquareMetersToHectares } from '../../utils/numbers.js'
 import {
@@ -8,6 +8,78 @@ import {
   transformDateTimeToISO,
   transformEntityStatus
 } from '../common.js'
+
+const transformUkBusinessAccount = (variant) => ({
+  account: {
+    accountType: 'UK_BUSINESS',
+    name: variant.accountHolderName,
+    number: variant.accountNumber,
+    bank: {
+      name: variant.bankName,
+      sortCode: variant.sortCode
+    }
+  },
+  country: { currency: variant.currency }
+})
+
+const transformUkPersonalAccount = (variant) => ({
+  account: {
+    accountType: 'UK_PERSONAL',
+    name: `${variant.forename} ${variant.surname}`,
+    number: variant.accountNumber,
+    bank: {
+      name: variant.bankName,
+      sortCode: variant.sortCode
+    }
+  },
+  country: { currency: variant.currency }
+})
+
+const transformUkBusinessBuildingSocietyAccount = (variant) => ({
+  account: {
+    ...transformUkBusinessAccount(variant).account,
+    buildingSocietyRollNumber: variant.rollNumber
+  },
+  country: { currency: variant.currency }
+})
+
+const transformUkPersonalBuildingSocietyAccount = (variant) => ({
+  account: {
+    ...transformUkPersonalAccount(variant).account,
+    buildingSocietyRollNumber: variant.rollNumber
+  },
+  country: { currency: variant.currency }
+})
+
+const transformEuBusinessAccount = (variant) => ({
+  account: {
+    accountType: 'EU',
+    name: variant.accountHolderName,
+    number: variant.accountNumber,
+    iban: variant.iban,
+    bank: {
+      name: variant.bankName,
+      sortCode: variant.sortCode,
+      swiftCode: variant.swiftCode
+    }
+  },
+  country: { code: variant.countryCode, currency: variant.currency }
+})
+
+const transformEuPersonalAccount = (variant) => ({
+  account: {
+    accountType: 'EU',
+    name: `${variant.forename} ${variant.surname}`,
+    number: variant.accountNumber,
+    iban: variant.iban,
+    bank: {
+      name: variant.bankName,
+      sortCode: variant.sortCode,
+      swiftCode: variant.swiftCode
+    }
+  },
+  country: { code: variant.countryCode, currency: variant.currency }
+})
 
 export const transformOrganisationCustomers = (data) => {
   return data.map(transformOrganisationCustomer)
@@ -269,3 +341,38 @@ const transformTransitions = ({ transition_id, transition_name, dt_transition, c
   timestamp: transformDateTimeToISO(dt_transition),
   checkStatus: check_status
 })
+
+const bankAccountTransformers = {
+  ukBusiness: transformUkBusinessAccount,
+  ukPersonal: transformUkPersonalAccount,
+  ukBusinessBuildingSociety: transformUkBusinessBuildingSocietyAccount,
+  ukPersonalBuildingSociety: transformUkPersonalBuildingSocietyAccount,
+  euBusiness: transformEuBusinessAccount,
+  euPersonal: transformEuPersonalAccount
+}
+
+export function transformBankChangeInputToSubmission(
+  input,
+  { organisationId, personId, frn },
+  now = new Date()
+) {
+  const { sbi, crn, account } = input
+
+  // `account` is a @oneOf input: exactly one entry is present.
+  const [variantKey, variant] = Object.entries(account)[0]
+  const transformVariant = bankAccountTransformers[variantKey]
+
+  if (!transformVariant) {
+    throw new Error(`Unknown bank account variant: ${variantKey}`)
+  }
+
+  return {
+    organisationId,
+    personId,
+    sbi: `${sbi}`,
+    frn: `${frn}`,
+    crn: `${crn}`,
+    submissionDateTime: formatDateAsUtcDateTime(now),
+    ...transformVariant(variant)
+  }
+}
