@@ -2,3 +2,18 @@ scalar Numeric
 scalar Date
 scalar Image
 scalar UUID
+
+"""
+A UK bank account number: exactly 8 digits.
+"""
+scalar UkAccountNumber
+
+"""
+A UK bank sort code: exactly 6 digits.
+"""
+scalar UkSortCode
+
+"""
+A SWIFT/BIC code: 8 or 11 alphanumeric characters.
+"""
+scalar SwiftCode

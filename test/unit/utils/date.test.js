@@ -1,5 +1,6 @@
 import { BadRequest } from '../../../app/errors/graphql.js'
 import {
+  formatDateAsUtcDateTime,
   validateDateInput,
   validatePastDateInput,
   validateUpstreamDate,
@@ -125,5 +126,23 @@ describe('validateUpstreamDate function', () => {
     expect(validateUpstreamDate('2020-31-01')).toEqual(null)
     // unless it's the 30th of February! ☣️ or any other day overflow which is apparently valid 🤷‍♂️
     expect(validateUpstreamDate('2020-02-30T13:46:58.954Z')).toEqual('2020-03-01')
+  })
+})
+
+describe('formatDateAsUtcDateTime function', () => {
+  it('formats a Date as `YYYY-MM-DD HH:mm:ss` in UTC', () => {
+    expect(formatDateAsUtcDateTime(new Date(Date.UTC(2026, 4, 2, 14, 12, 11)))).toBe(
+      '2026-05-02 14:12:11'
+    )
+  })
+
+  it('drops sub-second precision', () => {
+    expect(formatDateAsUtcDateTime(new Date('2020-01-01T13:46:58.954Z'))).toBe(
+      '2020-01-01 13:46:58'
+    )
+  })
+
+  it('formats the unix epoch', () => {
+    expect(formatDateAsUtcDateTime(new Date(0))).toBe('1970-01-01 00:00:00')
   })
 })

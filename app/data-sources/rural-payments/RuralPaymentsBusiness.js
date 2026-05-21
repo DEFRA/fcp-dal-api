@@ -2,13 +2,10 @@ import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { RuralPayments } from './RuralPayments.js'
 
-const dateTimeLength = 19
-const dateStrToSitiAgriFormat = (date) => {
-  return date.toISOString().substring(0, dateTimeLength).replace('T', ' ')
-}
 export const formatDateDDMMMYY = (date) => {
   // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
   const day = date.toLocaleString('en-US', { day: '2-digit' }) // 01
@@ -110,7 +107,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
   async getCountyParishHoldingsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`, {
       params: {
-        pointInTime: dateStrToSitiAgriFormat(new Date())
+        pointInTime: formatDateAsUtcDateTime(new Date())
       }
     })
     return response.data
@@ -205,13 +202,20 @@ export class RuralPaymentsBusiness extends RuralPayments {
     }
   }
 
+  async submitBankChange(submission) {
+    return this.post('bank-change-service/v1/submit', {
+      body: submission,
+      headers: postPutHeaders
+    })
+  }
+
   async getLandUseByBusinessParcel(sbi, sheetId, parcelId, date = new Date()) {
     const response = await this.get(
       `SitiAgriApi/cv/landUseByBusinessParcel/sheet/${sheetId}/parcel/${parcelId}/sbi/${sbi}/list`,
       {
         params: {
           // pointInTime: current date/time formatted as `YYYY-MM-DD hh:mm:ss`
-          pointInTime: dateStrToSitiAgriFormat(new Date(date))
+          pointInTime: formatDateAsUtcDateTime(new Date(date))
         }
       }
     )

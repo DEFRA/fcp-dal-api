@@ -2,6 +2,7 @@ import { loadFiles } from '@graphql-tools/load-files'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { filterSchema, pruneSchema } from '@graphql-tools/utils'
+import { IBANTypeDefinition } from 'graphql-scalars'
 import { dirname, join } from 'path'
 import { fileURLToPath, pathToFileURL } from 'url'
 import { authDirectiveTransformer } from '../auth/authenticate.js'
@@ -17,6 +18,7 @@ import * as Customer from './resolvers/customer/customer.js'
 import * as CustomerMutation from './resolvers/customer/mutation.js'
 import * as CustomerQuery from './resolvers/customer/query.js'
 import * as PermissionsQuery from './resolvers/permissions/query.js'
+import * as Scalars from './resolvers/scalars.js'
 
 async function getFiles(path) {
   return loadFiles(join(dirname(fileURLToPath(import.meta.url)), path), {
@@ -27,7 +29,7 @@ async function getFiles(path) {
 
 export async function createSchema() {
   let schema = makeExecutableSchema({
-    typeDefs: await getFiles('types'),
+    typeDefs: [...(await getFiles('types')), IBANTypeDefinition],
     resolvers: mergeResolvers([
       Business,
       BusinessLand,
@@ -36,7 +38,8 @@ export async function createSchema() {
       Customer,
       CustomerMutation,
       CustomerQuery,
-      PermissionsQuery
+      PermissionsQuery,
+      Scalars
     ])
   })
 
