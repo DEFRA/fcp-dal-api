@@ -62,7 +62,8 @@ describe('transformBusinessPayments', () => {
           currency: 'GBP',
           lineItems: [
             {
-              agreementClaimNo: 'AGR456/CLAIM002',
+              agreementNumber: 'AGR456',
+              claimReferenceNumber: 'CLAIM002',
               scheme: 'SFI',
               marketingYear: '2023',
               description: 'Sustainable Farming Incentive',
@@ -77,7 +78,8 @@ describe('transformBusinessPayments', () => {
           currency: 'GBP',
           lineItems: [
             {
-              agreementClaimNo: 'AGR123/CLAIM001',
+              agreementNumber: 'AGR123',
+              claimReferenceNumber: 'CLAIM001',
               scheme: 'BPS',
               marketingYear: '2023',
               description: 'Basic Payment Scheme',
@@ -200,7 +202,9 @@ describe('transformBusinessPayments', () => {
 
     const result = transformBusinessPayments(hitachiResponse)
     expect(result.payments[0].lineItems).toHaveLength(2)
-    expect(result.payments[0].lineItems[0].agreementClaimNo).toBe('AGR123/CLAIM001')
-    expect(result.payments[0].lineItems[1].agreementClaimNo).toBe('AGR123/CLAIM002')
+    expect(result.payments[0].lineItems[0].agreementNumber).toBe('AGR123')
+    expect(result.payments[0].lineItems[0].claimReferenceNumber).toBe('CLAIM001')
+    expect(result.payments[0].lineItems[1].agreementNumber).toBe('AGR123')
+    expect(result.payments[0].lineItems[1].claimReferenceNumber).toBe('CLAIM002')
   })
 })

@@ -22,7 +22,8 @@ function transformPayment(payment) {
 
 function transformLineItem(lineItem) {
   return {
-    agreementClaimNo: `${lineItem.parmAgreementNumber}/${lineItem.parmClaimRefNumber}`,
+    agreementNumber: lineItem.parmAgreementNumber,
+    claimReferenceNumber: lineItem.parmClaimRefNumber,
     scheme: lineItem.parmScheme,
     marketingYear: lineItem.parmMarketingYear,
     description: lineItem.parmDescription,

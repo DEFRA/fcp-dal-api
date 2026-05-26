@@ -334,7 +334,8 @@ type Payment {
 }
 
 type PaymentLineItem {
-  agreementClaimNo: String!
+  agreementNumber: String!
+  claimReferenceNumber: String!
   scheme: String!
   marketingYear: String!
   description: String!
