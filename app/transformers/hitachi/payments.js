@@ -3,7 +3,7 @@ function calculateOnHoldStatus(holdCodes) {
     return false
   }
 
-  if (holdCodes.includes('NTHLD')) {
+  if (holdCodes.includes('NTHLD') && holdCodes.length === 1) {
     return false
   }
 

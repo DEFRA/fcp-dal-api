@@ -94,7 +94,7 @@ describe('transformBusinessPayments', () => {
       { holdCodes: [], expected: false },
       { holdCodes: ['NTHLD'], expected: false },
       { holdCodes: ['HOLD1'], expected: true },
-      { holdCodes: ['NTHLD', 'HOLD1'], expected: false },
+      { holdCodes: ['NTHLD', 'HOLD1'], expected: true },
       { holdCodes: ['HOLD1', 'HOLD2'], expected: true }
     ]
 
