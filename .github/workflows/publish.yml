@@ -15,6 +15,27 @@ env:
   AWS_ACCOUNT_ID: '094954420758'
 
 jobs:
+  coverage-snapshot:
+    name: Snapshot base coverage for PR comparison
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run unit + graphql tests with coverage
+        run: npx jest --testPathPattern='test/(unit|graphql)' --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config --ci --json --testLocationInResults --outputFile=report.json
+        env:
+          NODE_OPTIONS: --experimental-vm-modules
+          DOTENV_CONFIG_PATH: ./.env.test
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-main
+          path: report.json
+          retention-days: 30
+
   build:
     if: github.run_number != 1
     name: CDP-build-workflow
