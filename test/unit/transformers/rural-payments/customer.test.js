@@ -6,10 +6,7 @@ import {
   transformCustomerUpdateInputToPersonUpdate,
   transformPersonSummaryToCustomerAuthorisedBusinesses
 } from '../../../../app/transformers/rural-payments/customer.js'
-import {
-  organisationPeopleByOrgId,
-  organisationPersonSummary
-} from '../../../fixtures/organisation.js'
+
 import {
   buildPermissionsFromIdsAndLevels,
   getPermissionFunctionsFromIdAndLevel
@@ -17,7 +14,117 @@ import {
 
 describe('Customer transformer', () => {
   test('#transformBusinessCustomerToCustomerRole', () => {
-    const { _data: customers } = organisationPeopleByOrgId(5565448)
+    const customers = [
+      {
+        id: 5263421,
+        firstName: 'Nicholas',
+        lastName: 'SANGSTER',
+        customerReference: '1638563942',
+        confirmed: false,
+        lastUpdatedOn: 1614108764000,
+        role: 'Business Partner',
+        privileges: [
+          'Full permission - business',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA'
+        ]
+      },
+      {
+        id: 5302028,
+        firstName:
+          'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
+        lastName: 'Cook',
+        customerReference: '9477368292',
+        confirmed: true,
+        lastUpdatedOn: 1688626184383,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree'
+        ]
+      },
+      {
+        id: 5311964,
+        firstName: 'Trevor',
+        lastName: 'Graham',
+        customerReference: '2446747270',
+        confirmed: true,
+        lastUpdatedOn: 1689606545687,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Amend - bps',
+          'AMEND - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree'
+        ]
+      },
+      {
+        id: 5331098,
+        firstName: 'Marcus',
+        lastName: 'Twigden',
+        customerReference: '4804081228',
+        confirmed: true,
+        lastUpdatedOn: 1699870896103,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree',
+          'ELM_APPLICATION_SUBMIT'
+        ]
+      },
+      {
+        id: 5778203,
+        firstName: 'Oliver',
+        lastName: 'Colwill',
+        customerReference: '6148241575',
+        confirmed: true,
+        lastUpdatedOn: 1707841972541,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree',
+          'ELM_APPLICATION_NO_ACCESS'
+        ]
+      }
+    ]
 
     const customer = customers[0]
 
@@ -30,7 +137,21 @@ describe('Customer transformer', () => {
   })
 
   test('#transformPersonSummaryToCustomerAuthorisedBusinesses', () => {
-    const data = organisationPersonSummary({ id: 5302028 })._data
+    const data = [
+      {
+        id: '5625145',
+        name: "Cliff Spence Teritorial Army's Abbey Farm, Hop-Worthering on the Naze a.k.a. the Donkey Sanctuary",
+        sbi: 107591843,
+        additionalSbiIds: [],
+        confirmed: true,
+        lastUpdatedOn: null,
+        landConfirmed: null,
+        deactivated: false,
+        locked: false,
+        unreadNotificationCount: 3,
+        readNotificationCount: 0
+      }
+    ]
 
     const personId = '5302028'
     const crn = '0866159801'

@@ -8,10 +8,6 @@ import {
   transformOrganisationCustomer,
   transformOrganisationCustomers
 } from '../../../../app/transformers/rural-payments/business.js'
-import {
-  organisationApplicationsByOrgId,
-  organisationPeopleByOrgId
-} from '../../../fixtures/organisation.js'
 
 const permissionGroups = createRequire(import.meta.url)(
   '../../../../app/data-sources/static/permission-groups.json'
@@ -27,18 +23,195 @@ const dataSources = {
       return permissionGroups
     }
   },
+
   ruralPaymentsBusiness: {
     getOrganisationCustomersByOrganisationId() {
-      return organisationPeopleByOrgId('5565448')._data
+      return [
+        {
+          id: 5263421,
+          firstName: 'Nicholas',
+          lastName: 'SANGSTER',
+          customerReference: '1638563942',
+          confirmed: false,
+          lastUpdatedOn: 1614108764000,
+          role: 'Business Partner',
+          privileges: [
+            'Full permission - business',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA'
+          ]
+        },
+        {
+          id: 5302028,
+          firstName:
+            'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
+          lastName: 'Cook',
+          customerReference: '9477368292',
+          confirmed: true,
+          lastUpdatedOn: 1688626184383,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree'
+          ]
+        },
+        {
+          id: 5311964,
+          firstName: 'Trevor',
+          lastName: 'Graham',
+          customerReference: '2446747270',
+          confirmed: true,
+          lastUpdatedOn: 1689606545687,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Amend - bps',
+            'AMEND - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree'
+          ]
+        },
+        {
+          id: 5331098,
+          firstName: 'Marcus',
+          lastName: 'Twigden',
+          customerReference: '4804081228',
+          confirmed: true,
+          lastUpdatedOn: 1699870896103,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree',
+            'ELM_APPLICATION_SUBMIT'
+          ]
+        },
+        {
+          id: 5778203,
+          firstName: 'Oliver',
+          lastName: 'Colwill',
+          customerReference: '6148241575',
+          confirmed: true,
+          lastUpdatedOn: 1707841972541,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree',
+            'ELM_APPLICATION_NO_ACCESS'
+          ]
+        }
+      ]
     },
     getCountyParishHoldingsBySBI: jest.fn(),
     getAgreementsBySBI: jest.fn(),
     getApplicationsBySBI: jest.fn(),
     getOrganisationById: jest.fn()
   },
+
   ruralPaymentsPortalApi: {
     getApplicationsCountrysideStewardship() {
-      return organisationApplicationsByOrgId('5565448')
+      return {
+        applications: [
+          {
+            application_id: 1641241,
+            year: 2023,
+            sector_description: 'PILLAR II (2014-2020)',
+            module_id: 535,
+            modcod: null,
+            application_type_ds: 'Countryside Stewardship (MT)',
+            application_type_de: 'Countryside Stewardship (MT) Module 2023',
+            status_code: 'STADOM',
+            status_sub_code: 'WTHDRW',
+            status_description: 'WITHDRAWN',
+            active_application_flag: false,
+            application_movement_date: '2023-08-08T16:16:27',
+            application_code: null,
+            workflow_context_sub_code: null,
+            needs_intervention: false,
+            show_withdraw: false,
+            show_accept: false,
+            submit_date: null,
+            status: 'Withdrawn',
+            common_lands_flag: false,
+            prints_count: 4,
+            queued: false,
+            has_sssi_intersection_c: 0,
+            has_sssi_intersection_y: 0,
+            has_hefer_intersection_y: 0,
+            has_been_AGRLIV: 0,
+            ter_closing_date: '2023-10-07T00:00:00',
+            eligibIntersections: null,
+            required_sssi_approval: false
+          },
+          {
+            application_id: 1646335,
+            year: 2023,
+            sector_description: 'PILLAR II (2014-2020)',
+            module_id: 535,
+            modcod: null,
+            application_type_ds: 'Countryside Stewardship (MT)',
+            application_type_de: 'Countryside Stewardship (MT) Module 2023',
+            status_code: 'STADOM',
+            status_sub_code: 'AGRLIV',
+            status_description: 'AGREEMENT LIVE',
+            active_application_flag: true,
+            application_movement_date: '2023-12-08T11:48:46',
+            application_code: null,
+            workflow_context_sub_code: 'STANDA',
+            needs_intervention: false,
+            show_withdraw: false,
+            show_accept: true,
+            submit_date: '2023-08-09T11:47:07',
+            status: 'Agreement Live',
+            common_lands_flag: false,
+            prints_count: 4,
+            queued: false,
+            has_sssi_intersection_c: 0,
+            has_sssi_intersection_y: 0,
+            has_hefer_intersection_y: 0,
+            has_been_AGRLIV: 1,
+            ter_closing_date: '2023-10-07T00:00:00',
+            eligibIntersections: null,
+            required_sssi_approval: false
+          }
+        ]
+      }
     }
   },
   mongoBusiness: {
@@ -55,14 +228,139 @@ describe('Business', () => {
   })
 
   it('customers', async () => {
-    const transformedData = transformOrganisationCustomers(
-      organisationPeopleByOrgId('5565448')._data
-    )
+    const transformedData = transformOrganisationCustomers([
+      {
+        id: 5263421,
+        firstName: 'Nicholas',
+        lastName: 'SANGSTER',
+        customerReference: '1638563942',
+        confirmed: false,
+        lastUpdatedOn: 1614108764000,
+        role: 'Business Partner',
+        privileges: [
+          'Full permission - business',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA'
+        ]
+      },
+      {
+        id: 5302028,
+        firstName:
+          'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
+        lastName: 'Cook',
+        customerReference: '9477368292',
+        confirmed: true,
+        lastUpdatedOn: 1688626184383,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree'
+        ]
+      },
+      {
+        id: 5311964,
+        firstName: 'Trevor',
+        lastName: 'Graham',
+        customerReference: '2446747270',
+        confirmed: true,
+        lastUpdatedOn: 1689606545687,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Amend - bps',
+          'AMEND - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree'
+        ]
+      },
+      {
+        id: 5331098,
+        firstName: 'Marcus',
+        lastName: 'Twigden',
+        customerReference: '4804081228',
+        confirmed: true,
+        lastUpdatedOn: 1699870896103,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree',
+          'ELM_APPLICATION_SUBMIT'
+        ]
+      },
+      {
+        id: 5778203,
+        firstName: 'Oliver',
+        lastName: 'Colwill',
+        customerReference: '6148241575',
+        confirmed: true,
+        lastUpdatedOn: 1707841972541,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree',
+          'ELM_APPLICATION_NO_ACCESS'
+        ]
+      }
+    ])
     expect(await Business.customers(mockBusiness, null, { dataSources })).toEqual(transformedData)
   })
 
   it('customer', async () => {
-    const customer = organisationPeopleByOrgId('5565448')._data[0]
+    const customer = {
+      id: 5263421,
+      firstName: 'Nicholas',
+      lastName: 'SANGSTER',
+      customerReference: '1638563942',
+      confirmed: false,
+      lastUpdatedOn: 1614108764000,
+      role: 'Business Partner',
+      privileges: [
+        'Full permission - business',
+        'Amend - land',
+        'Amend - entitlement',
+        'Submit - bps',
+        'SUBMIT - BPS - SA',
+        'AMEND - ENTITLEMENT - SA',
+        'AMEND - LAND - SA'
+      ]
+    }
     const transformed = transformOrganisationCustomer(customer)
 
     expect(await Business.customer(mockBusiness, { crn: '1638563942' }, { dataSources })).toEqual(
@@ -327,7 +625,117 @@ describe('Business', () => {
 
 describe('BusinessCustomer', () => {
   it('permissionGroups', async () => {
-    const customers = organisationPeopleByOrgId('5565448')._data
+    const customers = [
+      {
+        id: 5263421,
+        firstName: 'Nicholas',
+        lastName: 'SANGSTER',
+        customerReference: '1638563942',
+        confirmed: false,
+        lastUpdatedOn: 1614108764000,
+        role: 'Business Partner',
+        privileges: [
+          'Full permission - business',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA'
+        ]
+      },
+      {
+        id: 5302028,
+        firstName:
+          'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
+        lastName: 'Cook',
+        customerReference: '9477368292',
+        confirmed: true,
+        lastUpdatedOn: 1688626184383,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree'
+        ]
+      },
+      {
+        id: 5311964,
+        firstName: 'Trevor',
+        lastName: 'Graham',
+        customerReference: '2446747270',
+        confirmed: true,
+        lastUpdatedOn: 1689606545687,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Amend - bps',
+          'AMEND - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree'
+        ]
+      },
+      {
+        id: 5331098,
+        firstName: 'Marcus',
+        lastName: 'Twigden',
+        customerReference: '4804081228',
+        confirmed: true,
+        lastUpdatedOn: 1699870896103,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree',
+          'ELM_APPLICATION_SUBMIT'
+        ]
+      },
+      {
+        id: 5778203,
+        firstName: 'Oliver',
+        lastName: 'Colwill',
+        customerReference: '6148241575',
+        confirmed: true,
+        lastUpdatedOn: 1707841972541,
+        role: 'Agent',
+        privileges: [
+          'Full permission - business',
+          'SUBMIT - CS APP - SA',
+          'SUBMIT - CS AGREE - SA',
+          'Amend - land',
+          'Amend - entitlement',
+          'Submit - bps',
+          'SUBMIT - BPS - SA',
+          'AMEND - ENTITLEMENT - SA',
+          'AMEND - LAND - SA',
+          'Submit - cs app',
+          'Submit - cs agree',
+          'ELM_APPLICATION_NO_ACCESS'
+        ]
+      }
+    ]
     for (const customer of customers) {
       const transformed = transformBusinessCustomerPrivilegesToPermissionGroups(
         customer.privileges,
