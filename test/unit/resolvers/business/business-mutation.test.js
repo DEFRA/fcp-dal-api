@@ -375,21 +375,26 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
   }
 
   beforeEach(() => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockReset()
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationBySBI: jest.fn(),
+        getOrganisationBySBI: jest.fn().mockResolvedValue({
+          id: 5583781,
+          businessReference: '10014489653'
+        }),
+        validateBankChange: jest.fn().mockResolvedValue({
+          status: 'MATCH',
+          message: 'All good',
+          attemptsRemaining: 0,
+          account: { bank: { name: 'Acme Bank', sortCode: '123456' } }
+        }),
         submitBankChange: jest.fn().mockResolvedValue({})
       }
     }
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
   })
 
-  it('submits the bank change with ids resolved from sbi and crn', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
-      id: 5583781,
-      businessReference: '10014489653'
-    })
-    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
-
+  it('validates then submits the bank change', async () => {
     const response = await Mutation.createBusinessCustomerBankDetails(
       {},
       { input: baseInput },
@@ -397,28 +402,37 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     )
 
     expect(dataSources.ruralPaymentsBusiness.getOrganisationBySBI).toHaveBeenCalledWith('110405990')
-    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
-      '1100209492',
-      dataSources
-    )
-    expect(dataSources.ruralPaymentsBusiness.submitBankChange).toHaveBeenCalledWith(
+    expect(dataSources.ruralPaymentsBusiness.validateBankChange).toHaveBeenCalledWith(
       expect.objectContaining({
         organisationId: '5583781',
         personId: '5020949',
         sbi: '110405990',
         frn: '10014489653',
-        crn: '1100209492',
-        account: expect.objectContaining({
-          accountType: 'UK_BUSINESS',
-          name: 'Acme Farms Ltd',
-          number: '14345678',
-          bank: expect.objectContaining({ name: 'Acme Bank', sortCode: '123456' })
-        }),
-        country: expect.objectContaining({ currency: 'GBP' }),
-        submissionDateTime: expect.stringMatching(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)
+        crn: '1100209492'
       })
     )
-    expect(response).toEqual({ success: true })
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).toHaveBeenCalledWith(
+      dataSources.ruralPaymentsBusiness.validateBankChange.mock.calls[0][0]
+    )
+    expect(response).toEqual({ __typename: 'BankDetailsSubmitted', success: true })
+  })
+
+  it('submits when validation returns PARTIAL_MATCH', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'PARTIAL_MATCH',
+      message: 'Some details did not match',
+      attemptsRemaining: 0,
+      account: { bank: { name: 'Acme Bank' } }
+    })
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).toHaveBeenCalled()
+    expect(response).toEqual({ __typename: 'BankDetailsSubmitted', success: true })
   })
 
   it('throws NotFound when the organisation has no FRN', async () => {
@@ -434,32 +448,65 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
 
-  it('propagates the data source error when the organisation lookup fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
-      new Error('Rural payments organisation not found')
+  it('returns BankDetailsValidationFailed ', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'FAILED',
+      message: "Details don't match",
+      attemptsRemaining: 2,
+      account: { bank: { sortCode: '123456' } }
+    })
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
     )
 
-    await expect(
-      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
-    ).rejects.toThrow('Rural payments organisation not found')
-
-    expect(mockCustomerCommonModule.retrievePersonIdByCRN).not.toHaveBeenCalled()
+    expect(response).toEqual({
+      __typename: 'BankDetailsValidationFailed',
+      message: "Details don't match",
+      attemptsRemaining: 2
+    })
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
 
-  it('propagates the data source error when the personId lookup fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
-      id: 5583781,
-      businessReference: '10014489653'
+  it('falls back to a default message', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'FAILED',
+      attemptsRemaining: 1
     })
-    mockCustomerCommonModule.retrievePersonIdByCRN.mockRejectedValue(
-      new Error('Rural payments customer not found')
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
     )
 
-    await expect(
-      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
-    ).rejects.toThrow('Rural payments customer not found')
+    expect(response).toEqual({
+      __typename: 'BankDetailsValidationFailed',
+      message: 'Bank details failed validation',
+      attemptsRemaining: 1
+    })
+  })
 
+  it('returns BankDetailsLocked', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'FAILED',
+      message: "Details don't match",
+      attemptsRemaining: 0,
+      account: { bank: { sortCode: '123456' } }
+    })
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: "Details don't match"
+    })
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
 })

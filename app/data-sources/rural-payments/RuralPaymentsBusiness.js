@@ -209,6 +209,13 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
   }
 
+  async validateBankChange(submission) {
+    return this.post('bank-change-service/v1/validate', {
+      body: submission,
+      headers: postPutHeaders
+    })
+  }
+
   async getLandUseByBusinessParcel(sbi, sheetId, parcelId, date = new Date()) {
     const response = await this.get(
       `SitiAgriApi/cv/landUseByBusinessParcel/sheet/${sheetId}/parcel/${parcelId}/sbi/${sbi}/list`,
