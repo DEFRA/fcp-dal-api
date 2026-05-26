@@ -276,24 +276,24 @@ type BankDetailsSubmitted {
   """
   `true` once the bank change submission has been accepted by the upstream service.
   """
-  success: Boolean!
+  success: Boolean! @on
 }
 
 type BankDetailsValidationFailed {
   """
   Detail of the error
   """
-  message: String!
+  message: String! @on
 
   """
   Number of attempts remaining.
   """
-  attemptsRemaining: Int!
+  attemptsRemaining: Int! @on
 }
 
 type BankDetailsLocked {
   """
   Lock message.
   """
-  message: String!
+  message: String! @on
 }
