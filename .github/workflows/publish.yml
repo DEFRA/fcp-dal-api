@@ -26,10 +26,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Run unit + graphql tests with coverage
-        run: npx jest --testPathPattern='test/(unit|graphql)' --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config --ci --json --testLocationInResults --outputFile=report.json
-        env:
-          NODE_OPTIONS: --experimental-vm-modules
-          DOTENV_CONFIG_PATH: ./.env.test
+        run: npm test -- --ci --json --testLocationInResults --outputFile=report.json
       - uses: actions/upload-artifact@v4
         with:
           name: coverage-report-main
