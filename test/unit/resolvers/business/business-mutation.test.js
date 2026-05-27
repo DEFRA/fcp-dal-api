@@ -509,6 +509,25 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     })
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
+
+  it('returns BankDetailsLocked with default message when none provided', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'FAILED',
+      attemptsRemaining: 0
+    })
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: 'Bank details failed validation'
+    })
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
 })
 
 describe('Business Mutation updateBusinessLockStatus', () => {
