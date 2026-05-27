@@ -1,9 +1,9 @@
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { db } from '../../../app/mongo.js'
+import { waitFor } from '../../test-helpers/wait-for.js'
 import { mockOrganisationSearch, mockPersonSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
-import { waitFor } from '../../test-helpers/wait-for.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
@@ -24,10 +24,29 @@ const input = {
 const query = `
   mutation CreateBusinessCustomerBankDetails($input: CreateBusinessCustomerBankDetailsInput!) {
     createBusinessCustomerBankDetails(input: $input) {
-      success
+      __typename
+      ... on BankDetailsSubmitted {
+        success
+      }
+      ... on BankDetailsValidationFailed {
+        message
+        attemptsRemaining
+      }
+      ... on BankDetailsLocked {
+        message
+      }
     }
   }
 `
+
+const matchValidationResponse = {
+  status: 'MATCH',
+  message: 'All good',
+  attemptsRemaining: 0,
+  account: {
+    bank: { name: 'Acme Bank', sortCode: '123456' }
+  }
+}
 
 const waitForPersonIdToBeCachedInMongo = async () => {
   await waitFor(async () => {
@@ -54,6 +73,8 @@ describe('createBusinessCustomerBankDetails', () => {
   })
 
   test('submits the bank change to the upstream service', async () => {
+    v1.post('/bank-change-service/v1/validate').reply(200, matchValidationResponse)
+
     let submittedBody
     v1.post('/bank-change-service/v1/submit', (body) => {
       submittedBody = body
@@ -65,12 +86,9 @@ describe('createBusinessCustomerBankDetails', () => {
     await waitForPersonIdToBeCachedInMongo()
 
     expect(nock.isDone()).toBe(true)
-    expect(result).toEqual({
-      data: {
-        createBusinessCustomerBankDetails: {
-          success: true
-        }
-      }
+    expect(result.data.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsSubmitted',
+      success: true
     })
 
     expect(submittedBody).toEqual({
@@ -90,6 +108,67 @@ describe('createBusinessCustomerBankDetails', () => {
         }
       },
       country: { currency: 'GBP' }
+    })
+  })
+
+  test('submits when validation returns PARTIAL_MATCH', async () => {
+    v1.post('/bank-change-service/v1/validate').reply(200, {
+      status: 'PARTIAL_MATCH',
+      message: 'Some details did not match — please confirm',
+      attemptsRemaining: 0,
+      account: { bank: { name: 'Acme Bank', sortCode: '123456' } }
+    })
+    v1.post('/bank-change-service/v1/submit').reply(200, {})
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    await waitForPersonIdToBeCachedInMongo()
+
+    expect(nock.isDone()).toBe(true)
+    expect(result.data.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsSubmitted',
+      success: true
+    })
+  })
+
+  test('returns BankDetailsValidationFailed', async () => {
+    v1.post('/bank-change-service/v1/validate').reply(200, {
+      status: 'FAILED',
+      message: "Details don't match",
+      attemptsRemaining: 2,
+      account: { bank: { sortCode: '123456' } }
+    })
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    await waitForPersonIdToBeCachedInMongo()
+
+    expect(nock.isDone()).toBe(true)
+    expect(result.errors).toBeUndefined()
+    expect(result.data.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsValidationFailed',
+      message: "Details don't match",
+      attemptsRemaining: 2
+    })
+  })
+
+  test('returns BankDetailsLocked', async () => {
+    v1.post('/bank-change-service/v1/validate').reply(200, {
+      status: 'FAILED',
+      message: "Details don't match",
+      attemptsRemaining: 0,
+      account: { bank: { sortCode: '123456' } }
+    })
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    await waitForPersonIdToBeCachedInMongo()
+
+    expect(nock.isDone()).toBe(true)
+    expect(result.errors).toBeUndefined()
+    expect(result.data.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: "Details don't match"
     })
   })
 

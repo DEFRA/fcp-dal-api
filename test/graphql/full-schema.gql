@@ -21,7 +21,7 @@ type Mutation {
   updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
   createBusinessCustomerBankDetails(
     input: CreateBusinessCustomerBankDetailsInput!
-  ): CreateBusinessCustomerBankDetailsResponse
+  ): CreateBusinessCustomerBankDetailsResult
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
   # eslint-disable-next-line @graphql-eslint/input-name
@@ -683,8 +683,22 @@ scalar UkSortCode
 scalar SwiftCode
 scalar IBAN
 
-type CreateBusinessCustomerBankDetailsResponse {
+union CreateBusinessCustomerBankDetailsResult =
+  | BankDetailsSubmitted
+  | BankDetailsValidationFailed
+  | BankDetailsLocked
+
+type BankDetailsSubmitted {
   success: Boolean!
+}
+
+type BankDetailsValidationFailed {
+  message: String!
+  attemptsRemaining: Int!
+}
+
+type BankDetailsLocked {
+  message: String!
 }
 
 type UpdateBusinessResponse {

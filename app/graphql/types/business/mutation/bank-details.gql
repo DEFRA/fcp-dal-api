@@ -4,7 +4,7 @@ extend type Mutation {
   """
   createBusinessCustomerBankDetails(
     input: CreateBusinessCustomerBankDetailsInput!
-  ): CreateBusinessCustomerBankDetailsResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+  ): CreateBusinessCustomerBankDetailsResult @on @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input CreateBusinessCustomerBankDetailsInput {
@@ -260,9 +260,40 @@ enum BankAccountCurrency {
   EUR
 }
 
-type CreateBusinessCustomerBankDetailsResponse {
+"""
+The outcome of a bank details change request.
+
+- `BankDetailsSubmitted` — The change passed validation and has been submitted.
+- `BankDetailsValidationFailed` — Validation error,
+- `BankDetailsLocked` — The user is locked.
+"""
+union CreateBusinessCustomerBankDetailsResult =
+  | BankDetailsSubmitted
+  | BankDetailsValidationFailed
+  | BankDetailsLocked
+
+type BankDetailsSubmitted {
   """
   `true` once the bank change submission has been accepted by the upstream service.
   """
-  success: Boolean!
+  success: Boolean! @on
+}
+
+type BankDetailsValidationFailed {
+  """
+  Detail of the error
+  """
+  message: String! @on
+
+  """
+  Number of attempts remaining.
+  """
+  attemptsRemaining: Int! @on
+}
+
+type BankDetailsLocked {
+  """
+  Lock message.
+  """
+  message: String! @on
 }

@@ -28,23 +28,39 @@ export const Mutation = {
   },
   createBusinessCustomerBankDetails: async (_, { input }, { dataSources }) => {
     const { sbi, crn } = input
-    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+    const { ruralPaymentsBusiness } = dataSources
 
+    const organisation = await ruralPaymentsBusiness.getOrganisationBySBI(sbi)
     if (!organisation.businessReference) {
       throw new NotFound('FRN not found for business')
     }
 
     const personId = await retrievePersonIdByCRN(crn, dataSources)
+    const organisationId = `${organisation.id}`
 
     const submission = transformBankChangeInputToSubmission(input, {
-      organisationId: `${organisation.id}`,
+      organisationId,
       personId: `${personId}`,
       frn: organisation.businessReference
     })
 
-    await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
+    const validation = await ruralPaymentsBusiness.validateBankChange(submission)
+    if (validation.status === 'FAILED') {
+      if (validation.attemptsRemaining === 0) {
+        return {
+          __typename: 'BankDetailsLocked',
+          message: validation.message || 'Bank details failed validation'
+        }
+      }
+      return {
+        __typename: 'BankDetailsValidationFailed',
+        message: validation.message || 'Bank details failed validation',
+        attemptsRemaining: validation.attemptsRemaining
+      }
+    }
 
-    return { success: true }
+    await ruralPaymentsBusiness.submitBankChange(submission)
+    return { __typename: 'BankDetailsSubmitted', success: true }
   },
   updateBusinessName: businessDetailsUpdateResolver,
   updateBusinessPhone: businessDetailsUpdateResolver,

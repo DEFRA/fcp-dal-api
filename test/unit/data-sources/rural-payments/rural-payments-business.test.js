@@ -513,4 +513,35 @@ describe('Rural Payments Business', () => {
       expect(result).toEqual({})
     })
   })
+
+  describe('validateBankChange', () => {
+    test('posts the submission to the validate endpoint', async () => {
+      const validateResponse = {
+        status: 'MATCH',
+        message: 'All good',
+        attemptsRemaining: 0,
+        account: { bank: { name: 'Acme Bank', sortCode: '123456' } }
+      }
+      httpPost.mockResolvedValueOnce(validateResponse)
+
+      const submission = {
+        organisationId: '5583781',
+        sbi: '110405990',
+        account: {
+          accountType: 'UK_BUSINESS',
+          name: 'John Doe',
+          number: '14345678',
+          bank: { name: 'Acme Bank', sortCode: '123456' }
+        }
+      }
+
+      const result = await ruralPaymentsBusiness.validateBankChange(submission)
+
+      expect(httpPost).toHaveBeenCalledWith('bank-change-service/v1/validate', {
+        body: submission,
+        headers: expect.any(Object)
+      })
+      expect(result).toEqual(validateResponse)
+    })
+  })
 })
