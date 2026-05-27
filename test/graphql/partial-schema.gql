@@ -4,6 +4,12 @@ type Query {
   permissionGroups: [PermissionGroup]
 }
 
+type Mutation {
+  createBusinessCustomerBankDetails(
+    input: CreateBusinessCustomerBankDetailsInput!
+  ): CreateBusinessCustomerBankDetailsResult
+}
+
 type Phone {
   mobile: String
   landline: String
@@ -42,6 +48,12 @@ type EntityStatus {
 }
 
 scalar Date
+
+scalar UkAccountNumber
+
+scalar UkSortCode
+
+scalar SwiftCode
 
 type Agreement {
   contractId: ID
@@ -324,3 +336,102 @@ type PermissionGroup {
   id: PermissionGroupId!
   name: String!
 }
+
+input CreateBusinessCustomerBankDetailsInput {
+  sbi: ID!
+  crn: ID!
+  account: BankAccountInput!
+}
+
+input BankAccountInput @oneOf {
+  ukBusiness: UkBusinessBankAccountInput
+  ukPersonal: UkPersonalBankAccountInput
+  ukBusinessBuildingSociety: UkBusinessBuildingSocietyBankAccountInput
+  ukPersonalBuildingSociety: UkPersonalBuildingSocietyBankAccountInput
+  euBusiness: EuBusinessBankAccountInput
+  euPersonal: EuPersonalBankAccountInput
+}
+
+input UkBusinessBankAccountInput {
+  accountHolderName: String!
+  accountNumber: UkAccountNumber!
+  bankName: String!
+  sortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input UkPersonalBankAccountInput {
+  forename: String!
+  surname: String!
+  accountNumber: UkAccountNumber!
+  bankName: String!
+  sortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input UkBusinessBuildingSocietyBankAccountInput {
+  accountHolderName: String!
+  accountNumber: UkAccountNumber!
+  rollNumber: String
+  bankName: String!
+  sortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input UkPersonalBuildingSocietyBankAccountInput {
+  forename: String!
+  surname: String!
+  accountNumber: UkAccountNumber!
+  rollNumber: String
+  bankName: String!
+  sortCode: UkSortCode!
+  currency: BankAccountCurrency!
+}
+
+input EuBusinessBankAccountInput {
+  accountHolderName: String!
+  accountNumber: String!
+  iban: IBAN!
+  countryCode: String!
+  bankName: String!
+  sortCode: String!
+  swiftCode: SwiftCode
+  currency: BankAccountCurrency!
+}
+
+input EuPersonalBankAccountInput {
+  forename: String!
+  surname: String!
+  accountNumber: String!
+  iban: IBAN!
+  countryCode: String!
+  bankName: String!
+  sortCode: String!
+  swiftCode: SwiftCode
+  currency: BankAccountCurrency!
+}
+
+enum BankAccountCurrency {
+  GBP
+  EUR
+}
+
+union CreateBusinessCustomerBankDetailsResult =
+  | BankDetailsSubmitted
+  | BankDetailsValidationFailed
+  | BankDetailsLocked
+
+type BankDetailsSubmitted {
+  success: Boolean!
+}
+
+type BankDetailsValidationFailed {
+  message: String!
+  attemptsRemaining: Int!
+}
+
+type BankDetailsLocked {
+  message: String!
+}
+
+scalar IBAN
