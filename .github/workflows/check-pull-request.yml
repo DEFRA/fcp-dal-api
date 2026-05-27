@@ -15,6 +15,7 @@ permissions:
   contents: read
   pull-requests: write
   checks: write
+  actions: read
 
 jobs:
   pr-validator:
@@ -50,7 +51,31 @@ jobs:
       - name: Lint code
         run: npm run lint
 
-      - name: Jest Coverage Comment
+      - name: Download base coverage snapshot from main
+        id: base-cov
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p base-coverage
+          RUN_ID=$(gh run list --workflow=publish.yml --branch=main --status=success --limit=1 --json databaseId --jq '.[0].databaseId // empty')
+          if [ -n "$RUN_ID" ]; then
+            gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" -n coverage-report-main -D base-coverage || true
+          fi
+          if [ -f base-coverage/report.json ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Jest Coverage Comment (with base snapshot)
+        if: steps.base-cov.outputs.available == 'true'
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          test-script: npm test
+          base-coverage-file: base-coverage/report.json
+
+      - name: Jest Coverage Comment (no base snapshot)
+        if: steps.base-cov.outputs.available != 'true'
         uses: ArtiomTr/jest-coverage-report-action@v2
         with:
           test-script: npm test
