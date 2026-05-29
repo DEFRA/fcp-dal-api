@@ -34,11 +34,52 @@ More consumer focused documentation can be found on the project [Homepage...](ht
 
 ### Setup
 
+#### Install application dependencies
+
 Install application dependencies:
 
 ```bash
 npm install
 ```
+
+#### Implicit lifecycle scripts are disabled
+
+Due to the prevalence of NPM supply-chain attacks, scripts that would usually be run during npm install (and also
+pre/post scripts that are run alongside the target script) have been forcibly disabled with the following
+setting in `.npmrc`:
+
+```.npmrc
+ignore-scripts=true
+```
+
+All required post install steps have been gathered into a `postinstall` script. This script contains calls to commands
+that would have been run by 3rd party library installers, if `ignore-scripts` had not been set. These commands in this
+file have been limited to those that are required for our build process. It would still be prudent to examine this script,
+prior to running to ensure that you understand what will be run (you will be prompted to confirm at each step). To run
+this script, execute the following:
+
+```bash
+npm run postinstall
+```
+
+#### 3rd party libraries must be at least 7 days old before they can be installed
+
+The `.npmrc` setting below prevents libraries that have been released in the past 7 days from being installed.
+
+```.npmrc
+min-release-age=7
+```
+
+This gives the npm community time to detect a compromised release before this repo consumes it.
+
+This does create a potential issue. If `npm audit` identifies an issue that must be fixed, and the patched library
+has been released less than 7 days ago, then you will need to investigate the library in question:
+
+- Look at the published release
+- Verify that it's safe
+- Run `npm install {your-dependency}@{version-number} --min-release-age=0` (including `--save-dev` if it's a dev only dependency)
+
+#### Setup environment file
 
 Ensure the `.env` file exists. This can be copied from `.env.example`:
 
@@ -46,14 +87,17 @@ Ensure the `.env` file exists. This can be copied from `.env.example`:
 cp .env.example .env
 ```
 
-Also make sure to set the `KITS_INTERNAL_GATEWAY_URL` & `KITS_EXTERNAL_GATEWAY_URL` variable to the desired data source, e.g. for local testing:
+Also make sure to set the upstream datasource, e.g. for local testing against mock running in docker:
 
 ```env
 KITS_INTERNAL_GATEWAY_URL=http://localhost:3100/v1
-KITS_EXTERNAL_GATEWAY_URL=http://localhost:3101/v1
+KITS_EXTERNAL_GATEWAY_URL=http://localhost:3100/v1
+HITACHI_BASE_URL=http://localhost:3100/api
 ```
 
-Also you will need to run mongodb locally you can do this with the following command:
+#### Start mongo
+
+You will need to run mongodb locally. You can do this with the following command:
 
 ```bash
 docker-compose up -d mongodb
