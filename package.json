@@ -25,7 +25,6 @@
     "test:acceptance:proxy:mtls": "./test/acceptance/emulate-full-cdp.sh test",
     "posttest:acceptance:proxy:mtls": "docker compose down --remove-orphans",
     "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
-    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/integration  --setupFiles dotenv/config",
     "test:local": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand --setupFiles dotenv/config",
     "test:local-dev-check": "NODE_OPTIONS=--experimental-vm-modules jest --coverage false test/acceptance/local-dev-check.test.js",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config",
