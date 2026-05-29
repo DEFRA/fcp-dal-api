@@ -10,6 +10,7 @@
     "npm": ">=11.12.1"
   },
   "scripts": {
+    "postinstall": "./scripts/post-install.sh",
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "lint:test": "npm run lint && npm t",
