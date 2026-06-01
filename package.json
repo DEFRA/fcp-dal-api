@@ -16,7 +16,7 @@
     "lint:test": "npm run lint && npm t",
     "dev": "nodemon --ext js,gql --watch app/ -x 'node -r dotenv/config app/index.js | jq .'",
     "start": "node -r dotenv/config app/index.js | jq .",
-    "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js,gql --watch app/ app/index.js",
+    "start:debug": "nodemon --ext js,gql --watch app/ -x 'node --inspect-brk=0.0.0.0 -r dotenv/config app/index.js'",
     "start:proxy": "docker run --rm --net=host --name fcp-dal-api-proxy -v $(pwd)/test/acceptance/squid.conf:/etc/squid/squid.conf ubuntu/squid",
     "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=test/acceptance --coverage false",
     "test:acceptance:docker": "docker compose -f compose.yml -f test/acceptance/compose.yml run --rm --build --pull always --quiet-pull test",
