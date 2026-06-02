@@ -12,7 +12,8 @@ ENV PORT=${PORT}
 EXPOSE ${PORT} ${PORT_DEBUG}
 
 COPY --chown=node:node package*.json ./
-RUN npm ci --ignore-scripts=true
+COPY --chown=node:node .npmrc ./
+RUN npm ci
 COPY --chown=node:node . .
 CMD [ "npm", "run", "start:watch" ]
 
@@ -28,7 +29,8 @@ RUN apk add --no-cache curl
 USER node
 
 COPY package*.json ./
-RUN npm ci --omit=dev --ignore-scripts=true \
+COPY .npmrc ./
+RUN npm ci --omit=dev \
  && rm -fr .npm
 
 ARG PORT
