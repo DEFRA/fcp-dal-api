@@ -49,3 +49,5 @@ docker compose \
 echo
 echo "Cleaning up TLS assets..."
 rm -fr "${SCRIPT_DIR}/mtls"
+
+docker compose down --remove-orphans

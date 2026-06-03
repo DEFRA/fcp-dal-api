@@ -24,7 +24,9 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      - run: |
+          npm ci
+          npm run postinstall
       - name: Run unit + graphql tests with coverage
         run: npm test -- --ci --json --testLocationInResults --outputFile=report.json
       - uses: actions/upload-artifact@v4

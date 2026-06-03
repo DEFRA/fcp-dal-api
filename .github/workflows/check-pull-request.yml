@@ -37,6 +37,7 @@ jobs:
         run: |
           npm audit --omit=dev
           npm ci
+          npm run postinstall
 
       - name: Verify semantic version bump
         run: |
