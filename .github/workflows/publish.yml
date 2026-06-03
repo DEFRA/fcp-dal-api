@@ -29,7 +29,7 @@ jobs:
           npm run postinstall
       - name: Run unit + graphql tests with coverage
         run: npm test -- --ci --json --testLocationInResults --outputFile=report.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage-report-main
           path: report.json
