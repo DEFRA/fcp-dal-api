@@ -11,7 +11,12 @@ const mockLogger = {
   }
 }
 
+const mockRunHealthChecks = jest.fn()
+
 jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
+jest.unstable_mockModule('../../../app/utils/health/index.js', () => ({
+  runHealthChecks: mockRunHealthChecks
+}))
 
 const { server } = await import('../../../app/server.js')
 
@@ -21,8 +26,8 @@ describe('App initialization', () => {
     jest.spyOn(server, 'register').mockResolvedValue()
     jest.spyOn(server, 'start').mockResolvedValue()
     jest.spyOn(server, 'stop').mockResolvedValue()
-    jest.spyOn(mongoClient, 'connect').mockResolvedValue()
     jest.spyOn(mongoClient, 'close').mockResolvedValue()
+    mockRunHealthChecks.mockResolvedValue()
     jest.spyOn(process, 'exit').mockReturnValue(1)
 
     server.info = { uri: 'http://localhost:3000' }
@@ -52,31 +57,11 @@ describe('App initialization', () => {
       }
     ])
 
-    // Verify MongoDB connection was attempted
-    expect(mongoClient.connect).toHaveBeenCalled()
+    // Verify that health checks were run
+    expect(mockRunHealthChecks).toHaveBeenCalled()
 
     // Verify server was started
     expect(server.start).toHaveBeenCalled()
-  })
-
-  it('should abort immediately if MongoDB fails to connect', async () => {
-    const mockError = new Error('MongoDB connection failed')
-    mongoClient.connect.mockRejectedValueOnce(mockError)
-
-    // Import the app after mocks are set up
-    await import('../../../app/index.js?call=2')
-
-    // Verify MongoDB connection was attempted
-    expect(mongoClient.connect).toHaveBeenCalled()
-
-    // Verify process exit was called due to failure
-    expect(process.exit).toHaveBeenCalledWith(1)
-
-    // Verify error was logged
-    expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - Error connecting to MongoDB', {
-      error: mockError,
-      code: expect.any(String)
-    })
   })
 
   it('should handle unhandled rejections', async () => {

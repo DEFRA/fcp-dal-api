@@ -5,9 +5,10 @@ import { secureContext } from '@defra/hapi-secure-context'
 
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
-import { DAL_UNHANDLED_ERROR_001, MONGO_DB_ERROR_001 } from './logger/codes.js'
+import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { mongoClient } from './mongo.js'
+import { runHealthChecks } from './utils/health/index.js'
 import { server } from './server.js'
 
 const init = async () => {
@@ -25,13 +26,8 @@ const init = async () => {
   ])
 
   mongoClient.secureContext = tls.createSecureContext()
-  try {
-    await mongoClient.connect() // Test mongo connection
-    logger.info('Connected to MongoDB')
-  } catch (err) {
-    logger.error('#DAL - Error connecting to MongoDB', { error: err, code: MONGO_DB_ERROR_001 })
-    process.exit(1)
-  }
+
+  await runHealthChecks()
 
   await server.start()
 
