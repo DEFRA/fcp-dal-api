@@ -10,7 +10,8 @@ const { runHealthChecks } = await import('../../../../app/utils/health/index.js'
 
 describe('runHealthChecks', () => {
   beforeEach(() => {
-    mockMongoHealthCheck.mockResolvedValue()
+    mockMongoHealthCheck.mockResolvedValue(undefined)
+    jest.spyOn(process, 'exit').mockReturnValue(1)
   })
 
   afterEach(() => {
@@ -23,10 +24,12 @@ describe('runHealthChecks', () => {
     expect(mockMongoHealthCheck).toHaveBeenCalledTimes(1)
   })
 
-  it('should stop and propagate error on first failing health check', async () => {
+  it('should stop and terminate process if any mongo health check fails', async () => {
     const error = new Error('Health check failed')
     mockMongoHealthCheck.mockRejectedValueOnce(error)
 
-    await expect(runHealthChecks()).rejects.toThrow(error)
+    await runHealthChecks()
+
+    expect(process.exit).toHaveBeenCalledWith(1)
   })
 })

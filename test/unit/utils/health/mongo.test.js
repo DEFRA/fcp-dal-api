@@ -15,7 +15,6 @@ const { healthCheck } = await import('../../../../app/utils/health/mongo.js')
 describe('Mongo health check', () => {
   beforeEach(() => {
     jest.spyOn(mongoClient, 'connect').mockResolvedValue()
-    jest.spyOn(process, 'exit').mockReturnValue(1)
   })
 
   afterEach(() => {
@@ -29,16 +28,15 @@ describe('Mongo health check', () => {
     expect(mockLogger.logger.info).toHaveBeenCalledWith('Connected to MongoDB')
   })
 
-  it('should log error and exit when MongoDB fails to connect', async () => {
+  it('should log error and throw when MongoDB fails to connect', async () => {
     const mockError = new Error('MongoDB connection failed')
     mongoClient.connect.mockRejectedValueOnce(mockError)
 
-    await healthCheck()
+    await expect(healthCheck()).rejects.toThrow('MongoDB connection failed')
 
     expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - Error connecting to MongoDB', {
       error: mockError,
       code: expect.any(String)
     })
-    expect(process.exit).toHaveBeenCalledWith(1)
   })
 })

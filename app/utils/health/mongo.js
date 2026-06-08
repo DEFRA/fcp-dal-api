@@ -8,6 +8,6 @@ export const healthCheck = async () => {
     logger.info('Connected to MongoDB')
   } catch (err) {
     logger.error('#DAL - Error connecting to MongoDB', { error: err, code: MONGO_DB_ERROR_001 })
-    process.exit(1)
+    throw err
   }
 }
