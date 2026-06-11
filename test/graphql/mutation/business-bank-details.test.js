@@ -237,6 +237,47 @@ describe('createBusinessCustomerBankDetails', () => {
     })
   })
 
+  test('returns an error when the locked-status endpoint fails', async () => {
+    nock.cleanAll()
+    mockOrganisationSearch(v1)
+    mockPersonSearch(v1)
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', businessReference: '10014489653' }
+    })
+    v1.get('/bank-change-service/v1/locked-status/organisationId/personId').reply(500, {
+      message: 'Internal Server Error'
+    })
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    expect(result.data).toEqual({ createBusinessCustomerBankDetails: null })
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].extensions.code).toBe('INTERNAL SERVER ERROR')
+    expect(result.errors[0].extensions.http.status).toBe(500)
+  })
+
+  test('returns an error when the account-status endpoint fails', async () => {
+    nock.cleanAll()
+    mockOrganisationSearch(v1)
+    mockPersonSearch(v1)
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', businessReference: '10014489653' }
+    })
+    v1.get('/bank-change-service/v1/locked-status/organisationId/personId').reply(200, {
+      locked: false
+    })
+    v1.get('/bank-change-service/v1/account-status/organisationId').reply(500, {
+      message: 'Internal Server Error'
+    })
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    expect(result.data).toEqual({ createBusinessCustomerBankDetails: null })
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].extensions.code).toBe('INTERNAL SERVER ERROR')
+    expect(result.errors[0].extensions.http.status).toBe(500)
+  })
+
   test('returns NotFound when organisation has no FRN', async () => {
     nock.cleanAll()
     mockOrganisationSearch(v1)
