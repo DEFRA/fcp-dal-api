@@ -266,11 +266,13 @@ The outcome of a bank details change request.
 - `BankDetailsSubmitted` — The change passed validation and has been submitted.
 - `BankDetailsValidationFailed` — Validation error,
 - `BankDetailsLocked` — The user is locked.
+- `BankDetailsNotEditable` — The organisation's bank details cannot currently be changed.
 """
 union CreateBusinessCustomerBankDetailsResult =
   | BankDetailsSubmitted
   | BankDetailsValidationFailed
   | BankDetailsLocked
+  | BankDetailsNotEditable
 
 type BankDetailsSubmitted {
   """
@@ -296,4 +298,26 @@ type BankDetailsLocked {
   Lock message.
   """
   message: String! @on
+}
+
+type BankDetailsNotEditable {
+  """
+  Reason the bank details cannot currently be changed.
+  """
+  message: String! @on
+
+  """
+  `true` if the bank details passed validation and were submitted in the last 14 days.
+  """
+  submitted: Boolean! @on
+
+  """
+  `true` if the bank details were updated (or an update attempted) in the last 14 days.
+  """
+  updatedRecently: Boolean! @on
+
+  """
+  `true` if the organisation was created within the last 24 hours.
+  """
+  new: Boolean! @on
 }

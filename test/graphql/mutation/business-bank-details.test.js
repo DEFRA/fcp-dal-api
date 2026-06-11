@@ -35,6 +35,12 @@ const query = `
       ... on BankDetailsLocked {
         message
       }
+      ... on BankDetailsNotEditable {
+        message
+        submitted
+        updatedRecently
+        new
+      }
     }
   }
 `
@@ -69,6 +75,16 @@ describe('createBusinessCustomerBankDetails', () => {
 
     v1.get('/organisation/organisationId').reply(200, {
       _data: { id: 'organisationId', businessReference: '10014489653' }
+    })
+
+    v1.get('/bank-change-service/v1/locked-status/organisationId/personId').reply(200, {
+      locked: false
+    })
+    v1.get('/bank-change-service/v1/account-status/organisationId').reply(200, {
+      editable: true,
+      submitted: false,
+      updatedRecently: false,
+      new: false
     })
   })
 
@@ -169,6 +185,55 @@ describe('createBusinessCustomerBankDetails', () => {
     expect(result.data.createBusinessCustomerBankDetails).toEqual({
       __typename: 'BankDetailsLocked',
       message: "Details don't match"
+    })
+  })
+
+  test('returns BankDetailsLocked when the locked-status endpoint reports locked', async () => {
+    nock.cleanAll()
+    mockOrganisationSearch(v1)
+    mockPersonSearch(v1)
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', businessReference: '10014489653' }
+    })
+    v1.get('/bank-change-service/v1/locked-status/organisationId/personId').reply(200, {
+      locked: true
+    })
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: 'Bank details are locked for changes'
+    })
+  })
+
+  test('returns BankDetailsNotEditable when the account-status endpoint reports not editable', async () => {
+    nock.cleanAll()
+    mockOrganisationSearch(v1)
+    mockPersonSearch(v1)
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', businessReference: '10014489653' }
+    })
+    v1.get('/bank-change-service/v1/locked-status/organisationId/personId').reply(200, {
+      locked: false
+    })
+    v1.get('/bank-change-service/v1/account-status/organisationId').reply(200, {
+      editable: false,
+      submitted: true,
+      updatedRecently: true,
+      new: false
+    })
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsNotEditable',
+      message: 'Bank details are not currently editable',
+      submitted: true,
+      updatedRecently: true,
+      new: false
     })
   })
 

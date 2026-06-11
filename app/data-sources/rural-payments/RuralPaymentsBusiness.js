@@ -216,6 +216,14 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
   }
 
+  async getBankChangeLockedStatus(organisationId, personId) {
+    return this.get(`bank-change-service/v1/locked-status/${organisationId}/${personId}`)
+  }
+
+  async getBankChangeAccountStatus(organisationId) {
+    return this.get(`bank-change-service/v1/account-status/${organisationId}`)
+  }
+
   async getLandUseByBusinessParcel(sbi, sheetId, parcelId, date = new Date()) {
     const response = await this.get(
       `SitiAgriApi/cv/landUseByBusinessParcel/sheet/${sheetId}/parcel/${parcelId}/sbi/${sbi}/list`,

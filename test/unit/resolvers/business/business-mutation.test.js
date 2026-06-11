@@ -382,6 +382,13 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
           id: 5583781,
           businessReference: '10014489653'
         }),
+        getBankChangeLockedStatus: jest.fn().mockResolvedValue({ locked: false }),
+        getBankChangeAccountStatus: jest.fn().mockResolvedValue({
+          editable: true,
+          submitted: false,
+          updatedRecently: false,
+          new: false
+        }),
         validateBankChange: jest.fn().mockResolvedValue({
           status: 'MATCH',
           message: 'All good',
@@ -392,6 +399,61 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
       }
     }
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
+  })
+
+  it('checks locked and account status before validating', async () => {
+    await Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+
+    expect(dataSources.ruralPaymentsBusiness.getBankChangeLockedStatus).toHaveBeenCalledWith(
+      '5583781',
+      '5020949'
+    )
+    expect(dataSources.ruralPaymentsBusiness.getBankChangeAccountStatus).toHaveBeenCalledWith(
+      '5583781'
+    )
+  })
+
+  it('returns BankDetailsLocked when the locked-status endpoint reports locked', async () => {
+    dataSources.ruralPaymentsBusiness.getBankChangeLockedStatus.mockResolvedValue({ locked: true })
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: 'Bank details are locked for changes'
+    })
+    expect(dataSources.ruralPaymentsBusiness.getBankChangeAccountStatus).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.validateBankChange).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('returns BankDetailsNotEditable when the account-status endpoint reports not editable', async () => {
+    dataSources.ruralPaymentsBusiness.getBankChangeAccountStatus.mockResolvedValue({
+      editable: false,
+      submitted: true,
+      updatedRecently: true,
+      new: false
+    })
+
+    const response = await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsNotEditable',
+      message: 'Bank details are not currently editable',
+      submitted: true,
+      updatedRecently: true,
+      new: false
+    })
+    expect(dataSources.ruralPaymentsBusiness.validateBankChange).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
 
   it('validates then submits the bank change', async () => {
