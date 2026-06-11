@@ -38,6 +38,28 @@ export const Mutation = {
     const personId = await retrievePersonIdByCRN(crn, dataSources)
     const organisationId = `${organisation.id}`
 
+    const lockedStatus = await ruralPaymentsBusiness.getBankChangeLockedStatus(
+      organisationId,
+      `${personId}`
+    )
+    if (lockedStatus.locked) {
+      return {
+        __typename: 'BankDetailsLocked',
+        message: 'Bank details are locked for changes'
+      }
+    }
+
+    const accountStatus = await ruralPaymentsBusiness.getBankChangeAccountStatus(organisationId)
+    if (!accountStatus.editable) {
+      return {
+        __typename: 'BankDetailsNotEditable',
+        message: 'Bank details are not currently editable',
+        submitted: accountStatus.submitted,
+        updatedRecently: accountStatus.updatedRecently,
+        new: accountStatus.new
+      }
+    }
+
     const submission = transformBankChangeInputToSubmission(input, {
       organisationId,
       personId: `${personId}`,

@@ -687,6 +687,7 @@ union CreateBusinessCustomerBankDetailsResult =
   | BankDetailsSubmitted
   | BankDetailsValidationFailed
   | BankDetailsLocked
+  | BankDetailsNotEditable
 
 type BankDetailsSubmitted {
   success: Boolean!
@@ -699,6 +700,13 @@ type BankDetailsValidationFailed {
 
 type BankDetailsLocked {
   message: String!
+}
+
+type BankDetailsNotEditable {
+  message: String!
+  submitted: Boolean!
+  updatedRecently: Boolean!
+  new: Boolean!
 }
 
 type UpdateBusinessResponse {
