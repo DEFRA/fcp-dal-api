@@ -544,4 +544,32 @@ describe('Rural Payments Business', () => {
       expect(result).toEqual(validateResponse)
     })
   })
+
+  describe('getBankChangeLockedStatus', () => {
+    test('gets the locked status for an organisation/person pair', async () => {
+      httpGet.mockResolvedValueOnce({ locked: true })
+
+      const result = await ruralPaymentsBusiness.getBankChangeLockedStatus('5583781', '5020949')
+
+      expect(httpGet).toHaveBeenCalledWith('bank-change-service/v1/locked-status/5583781/5020949')
+      expect(result).toEqual({ locked: true })
+    })
+  })
+
+  describe('getBankChangeAccountStatus', () => {
+    test('gets the account status for an organisation', async () => {
+      const accountStatus = {
+        editable: true,
+        submitted: false,
+        updatedRecently: false,
+        new: false
+      }
+      httpGet.mockResolvedValueOnce(accountStatus)
+
+      const result = await ruralPaymentsBusiness.getBankChangeAccountStatus('5583781')
+
+      expect(httpGet).toHaveBeenCalledWith('bank-change-service/v1/account-status/5583781')
+      expect(result).toEqual(accountStatus)
+    })
+  })
 })
