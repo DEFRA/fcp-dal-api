@@ -228,7 +228,6 @@ export const config = convict({
       doc: 'Hitachi base API URL',
       format: String,
       default: 'https://api.example.com',
-      nullable: true,
       env: 'HITACHI_BASE_URL'
     },
     timeoutMs: {
