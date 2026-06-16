@@ -4,6 +4,7 @@ import {
   transformBusinessCustomerToCustomerPermissionGroups,
   transformBusinessCustomerToCustomerRole,
   transformCustomerUpdateInputToPersonUpdate,
+  transformPersonSearchResult,
   transformPersonSummaryToCustomerAuthorisedBusinesses
 } from '../../../../app/transformers/rural-payments/customer.js'
 
@@ -684,6 +685,56 @@ describe('Customer transformer', () => {
           address2: null,
           city: 'newCity'
         }
+      })
+    })
+  })
+
+  describe('#transformPersonSearchResult', () => {
+    test('transforms a full person search result', () => {
+      const result = transformPersonSearchResult({
+        id: 5263421,
+        fullName: 'John Smith',
+        primaryAddress: { address1: 'line 1', postalCode: 'AB12 3CD' },
+        personalIdentifiers: ['116172867'],
+        nationalInsuranceNumber: 'AB123456C',
+        customerReference: '1638563942',
+        email: 'john.smith@example.com',
+        locked: true,
+        deactivated: false
+      })
+
+      expect(result).toEqual({
+        personId: '5263421',
+        crn: '1638563942',
+        fullName: 'John Smith',
+        address: expect.objectContaining({ line1: 'line 1', postalCode: 'AB12 3CD' }),
+        personalIdentifiers: ['116172867'],
+        nationalInsuranceNumber: 'AB123456C',
+        email: 'john.smith@example.com',
+        status: { locked: true, deactivated: false, confirmed: false }
+      })
+    })
+
+    test('handles null primary address and missing optional fields', () => {
+      const result = transformPersonSearchResult({
+        id: 1,
+        fullName: 'John Smith',
+        primaryAddress: null,
+        personalIdentifiers: [],
+        nationalInsuranceNumber: null,
+        customerReference: '1638563942',
+        email: null,
+        locked: false,
+        deactivated: true
+      })
+
+      expect(result).toMatchObject({
+        personId: '1',
+        crn: '1638563942',
+        address: null,
+        nationalInsuranceNumber: null,
+        email: null,
+        status: { locked: false, deactivated: true, confirmed: false }
       })
     })
   })

@@ -1,0 +1,94 @@
+"""
+The field to search customers by.
+"""
+enum CustomerSearchFieldType {
+  """
+  The full 10-digit Customer Reference Number (CRN); returns 0 or 1 results.
+  """
+  CUSTOMER_REFERENCE
+
+  """
+  The full personal identifier, at least 9 characters; returns 0 or 1 results.
+  """
+  PERSONAL_IDENTIFIER
+
+  """
+  A partial first and/or last name (non-empty); returns 0 or more results.
+  """
+  CUSTOMER_NAME
+
+  """
+  A full customer postcode, at least 5 characters; returns 0 or more results.
+  """
+  CUSTOMER_POSTCODE
+
+  """
+  At least the first 6 characters of the vendor number; returns 0 or more results.
+  """
+  VENDOR_NUMBER
+
+  """
+  At least the first 6 characters of the trader number; returns 0 or more results.
+  """
+  TRADER_NUMBER
+}
+
+"""
+Summary details of a customer returned by a customer search.
+"""
+type CustomerSearchResult {
+  """
+  Internal SitiAgri/Portal unique identifier of the customer.
+  """
+  personId: ID @on
+
+  """
+  Customer Reference Number (CRN) of the customer.
+  """
+  crn: ID @on
+
+  """
+  Full name of the customer.
+  """
+  fullName: String @on
+
+  """
+  Primary address of the customer.
+  """
+  address: Address @on
+
+  """
+  Other IDs for this customer.
+  """
+  personalIdentifiers: [String] @on
+
+  """
+  National Insurance number of the customer.
+  """
+  nationalInsuranceNumber: String @on
+
+  """
+  Email address of the customer.
+  """
+  email: String @on
+
+  """
+  The status of the customer record/account.
+  """
+  status: EntityStatus @on
+}
+
+"""
+A page of customer search results.
+"""
+type CustomerSearchResponse {
+  """
+  The customers matching the search.
+  """
+  results: [CustomerSearchResult] @on
+
+  """
+  Paging information for the search results.
+  """
+  pageInfo: PageInfo @on
+}

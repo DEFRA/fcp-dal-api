@@ -70,6 +70,71 @@ describe('Rural Payments Customer', () => {
     )
   })
 
+  test('should post person search request with pagination and return data and page', async () => {
+    const mockResponse = {
+      _data: [{ id: 123, fullName: 'John Smith' }],
+      _page: { number: 2, size: 20, totalPages: 3, numberOfElements: 1, totalElements: 41 }
+    }
+    httpPost.mockImplementationOnce(async () => mockResponse)
+
+    const result = await ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', {
+      page: 2,
+      perPage: 20
+    })
+
+    expect(result).toEqual({ data: mockResponse._data, page: mockResponse._page })
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_NAME","primarySearchPhrase":"Smith","offset":20,"limit":20}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should default person search pagination and return empty data when no results', async () => {
+    const mockResponse = {
+      _data: [],
+      _page: { number: 1, size: 100, totalPages: 0, numberOfElements: 0, totalElements: 0 }
+    }
+    httpPost.mockImplementationOnce(async () => mockResponse)
+
+    const result = await ruralPaymentsCustomer.personSearch('CUSTOMER_POSTCODE', 'AB12 3CD')
+
+    expect(result).toEqual({ data: [], page: mockResponse._page })
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_POSTCODE","primarySearchPhrase":"AB12 3CD","offset":0,"limit":100}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should default person search page only when perPage provided without page', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+    await ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { perPage: 25 })
+
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_NAME","primarySearchPhrase":"Smith","offset":0,"limit":25}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should default person search perPage only when page provided without perPage', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+    await ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { page: 3 })
+
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_NAME","primarySearchPhrase":"Smith","offset":200,"limit":100}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should return empty data and undefined page when person search response is empty', async () => {
+    httpPost.mockImplementationOnce(async () => undefined)
+
+    const result = await ruralPaymentsCustomer.personSearch('CUSTOMER_REFERENCE', '1234567890')
+
+    expect(result).toEqual({ data: [], page: undefined })
+  })
+
   test('should throw an error from getPersonByPersonId when customer not found', async () => {
     httpGet.mockImplementationOnce(async () => ({}))
 

@@ -1,5 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
+import { config } from '../../config.js'
 import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { formatDateAsUtcDateTime } from '../../utils/date.js'
@@ -59,6 +60,28 @@ export class RuralPaymentsBusiness extends RuralPayments {
     }
 
     return organisationResponse._data[0]
+  }
+
+  async organisationSearch(searchFieldType, primarySearchPhrase, pagination) {
+    const perPage = pagination?.perPage ?? config.get('kits.requestPageSize')
+    const page = pagination?.page ?? 1
+
+    const body = JSON.stringify({
+      searchFieldType,
+      primarySearchPhrase,
+      offset: (page - 1) * perPage,
+      limit: perPage
+    })
+
+    const response = await this.post('organisation/search', {
+      body,
+      headers: postPutHeaders
+    })
+
+    return {
+      data: response?._data ?? [],
+      page: response?._page
+    }
   }
 
   async getOrganisationIdBySBI(sbi) {

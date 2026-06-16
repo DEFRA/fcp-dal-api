@@ -54,6 +54,14 @@ export const transformEntityStatus = (entity) => ({
   confirmed: booleanise(entity?.confirmed)
 })
 
+export const transformPageInfo = (page) => ({
+  number: page?.number,
+  size: page?.size,
+  totalPages: page?.totalPages,
+  numberOfElements: page?.numberOfElements,
+  totalElements: page?.totalElements
+})
+
 export function transformToISODate(timestamp) {
   if (!timestamp || typeof timestamp === 'boolean' || typeof timestamp === 'object') {
     return null

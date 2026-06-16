@@ -137,6 +137,34 @@ type EntityStatus {
   deactivated: Boolean @on
 }
 
+"Paging information for a page of search results"
+type PageInfo {
+  """
+  Current page number
+  """
+  number: Int @on
+
+  """
+  Number of items per page
+  """
+  size: Int @on
+
+  """
+  Total number of pages
+  """
+  totalPages: Int @on
+
+  """
+  Number of items on the current page
+  """
+  numberOfElements: Int @on
+
+  """
+  Total number of items across all pages
+  """
+  totalElements: Int @on
+}
+
 "Represents data about a pagination details for a list of items"
 input Pagination {
   """

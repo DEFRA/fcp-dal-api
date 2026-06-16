@@ -38,6 +38,28 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return customerResponse._data[0]
   }
 
+  async personSearch(searchFieldType, primarySearchPhrase, pagination) {
+    const perPage = pagination?.perPage ?? config.get('kits.requestPageSize')
+    const page = pagination?.page ?? 1
+
+    const body = JSON.stringify({
+      searchFieldType,
+      primarySearchPhrase,
+      offset: (page - 1) * perPage,
+      limit: perPage
+    })
+
+    const response = await this.post('person/search', {
+      body,
+      headers: postPutHeaders
+    })
+
+    return {
+      data: response?._data ?? [],
+      page: response?._page
+    }
+  }
+
   async getCustomerByCRN(crn) {
     const personId = await this.getPersonIdByCRN(crn)
     return this.getPersonByPersonId(personId)
