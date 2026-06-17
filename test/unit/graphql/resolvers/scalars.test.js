@@ -1,5 +1,6 @@
 import { Kind } from 'graphql'
 import {
+  GeoJSON,
   SwiftCode,
   UkAccountNumber,
   UkSortCode
@@ -7,6 +8,12 @@ import {
 
 const stringLiteral = (value) => ({ kind: Kind.STRING, value })
 const intLiteral = (value) => ({ kind: Kind.INT, value: `${value}` })
+const floatLiteral = (value) => ({ kind: Kind.FLOAT, value: `${value}` })
+const objectField = (name, value) => ({
+  kind: Kind.OBJECT_FIELD,
+  name: { kind: Kind.NAME, value: name },
+  value
+})
 
 describe('UkAccountNumber scalar', () => {
   it.each(['12345678', '00000000'])('accepts %s', (value) => {
@@ -79,5 +86,41 @@ describe('SwiftCode scalar', () => {
 
   it('serializes the value through unchanged', () => {
     expect(SwiftCode.serialize('BARCGB22XXX')).toBe('BARCGB22XXX')
+  })
+})
+
+describe('GeoJSON scalar', () => {
+  const bngPoint = { type: 'Point', coordinates: [266375.64, 128194.34] }
+  const invalidMessage = 'GeoJSON must have a string "type" and an array "coordinates"'
+
+  it('accepts a geometry with coordinates', () => {
+    expect(GeoJSON.parseValue(bngPoint)).toEqual(bngPoint)
+    expect(GeoJSON.serialize(bngPoint)).toEqual(bngPoint)
+
+    const bngPointLiteral = {
+      kind: Kind.OBJECT,
+      fields: [
+        objectField('type', stringLiteral('Point')),
+        objectField('coordinates', {
+          kind: Kind.LIST,
+          values: [floatLiteral(266375.64), floatLiteral(128194.34)]
+        })
+      ]
+    }
+    expect(GeoJSON.parseLiteral(bngPointLiteral)).toEqual(bngPoint)
+  })
+
+  it('accepts an empty coordinates array', () => {
+    const value = { type: 'Point', coordinates: [] }
+    expect(GeoJSON.parseValue(value)).toEqual(value)
+  })
+
+  it.each([null, { type: 'Point' }, { coordinates: [] }, 'Point', 42])('rejects %p', (value) => {
+    expect(() => GeoJSON.parseValue(value)).toThrow(invalidMessage)
+    expect(() => GeoJSON.serialize(value)).toThrow(invalidMessage)
+  })
+
+  it('rejects a non-object literal', () => {
+    expect(() => GeoJSON.parseLiteral(stringLiteral('Point'))).toThrow('GeoJSON must be an object')
   })
 })

@@ -30,6 +30,11 @@ type BusinessLandParcel {
   pendingDigitisation: Boolean @on
 
   """
+  GeoJSON representation of the land parcel boundary.
+  """
+  geometry: GeoJSON @on
+
+  """
   Date when this version of the land parcel finished.
   A date of 31/12/9999 indicates that this is the latest version of the parcel.
   """
@@ -99,6 +104,11 @@ type BusinessLandCover {
   Indicates whether the land cover is Basic Payment Scheme (BPS) eligible.
   """
   isBpsEligible: Boolean @on
+
+  """
+  GeoJSON representation of the land cover boundary.
+  """
+  geometry: GeoJSON @on
 }
 
 """
