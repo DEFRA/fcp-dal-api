@@ -1,4 +1,5 @@
-import { GraphQLError, GraphQLScalarType, Kind } from 'graphql'
+import { GraphQLError, GraphQLScalarType, Kind, valueFromASTUntyped } from 'graphql'
+import { isValidGeoJson } from '../../utils/geoJson.js'
 
 const makeStringScalar = ({ name, description, pattern, message }) =>
   new GraphQLScalarType({
@@ -38,6 +39,29 @@ export const SwiftCode = makeStringScalar({
   description: 'A SWIFT/BIC code: 8 or 11 alphanumeric characters.',
   pattern: /^[A-Z0-9]{8}([A-Z0-9]{3})?$/,
   message: 'SwiftCode must be 8 or 11 uppercase alphanumeric characters'
+})
+
+const validateGeoJson = (value) => {
+  if (!isValidGeoJson(value)) {
+    throw new GraphQLError('GeoJSON must have a string "type" and an array "coordinates"')
+  }
+  return value
+}
+
+export const GeoJSON = new GraphQLScalarType({
+  name: 'GeoJSON',
+  description:
+    'A GeoJSON-shaped geometry object (`{ type, coordinates }`) as returned by the upstream ' +
+    'LMS API, whose coordinates array varies by type.  The upstream contract is loosely typed, so ' +
+    'only the shallow type/coordinates shape is validated.',
+  serialize: validateGeoJson,
+  parseValue: validateGeoJson,
+  parseLiteral: (ast) => {
+    if (ast.kind !== Kind.OBJECT) {
+      throw new GraphQLError('GeoJSON must be an object')
+    }
+    return validateGeoJson(valueFromASTUntyped(ast))
+  }
 })
 
 export { IBANResolver as IBAN } from 'graphql-scalars'

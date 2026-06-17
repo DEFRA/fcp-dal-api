@@ -17,3 +17,9 @@ scalar UkSortCode
 A SWIFT/BIC code: 8 or 11 alphanumeric characters.
 """
 scalar SwiftCode
+
+"""
+A GeoJSON-shaped Feature, FeatureCollection or Geometry.  Type may be Polygon, MultiPolygon, Point, etc.
+Exact coordinate structure depends on the parcel geometry stored in LMS.
+"""
+scalar GeoJSON
