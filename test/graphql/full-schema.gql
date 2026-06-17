@@ -446,6 +446,7 @@ type BusinessLandParcel {
   parcelId: String
   area: Float
   pendingDigitisation: Boolean
+  geometry: GeoJSON
   effectiveToDate: Date
   effectiveFromDate: Date
 }
@@ -464,6 +465,7 @@ type BusinessLandCover {
   area: Float
   code: String
   isBpsEligible: Boolean
+  geometry: GeoJSON
 }
 
 type BusinessLand {
@@ -492,6 +494,7 @@ type BusinessLandParcelPartial {
   parcelId: String
   area: Float
   pendingDigitisation: Boolean
+  geometry: GeoJSON
 }
 
 type CustomerInfo {
@@ -776,6 +779,7 @@ scalar UkAccountNumber
 scalar UkSortCode
 scalar SwiftCode
 scalar IBAN
+scalar GeoJSON
 
 union CreateBusinessCustomerBankDetailsResult =
   | BankDetailsSubmitted
