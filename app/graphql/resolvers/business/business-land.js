@@ -1,5 +1,6 @@
 import { NotFound } from '../../../errors/graphql.js'
 import {
+  transformAndMergeParcelGeometries,
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels,
@@ -9,16 +10,22 @@ import {
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
 import { validateDateInput } from '../../../utils/date.js'
+import { isFieldRequested } from '../../../utils/graphql.js'
 
 export const BusinessLand = {
   summary({ organisationId }, { date }) {
     return { organisationId, date }
   },
 
-  async parcel({ organisationId, sbi }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
+  async parcel(
+    { organisationId, sbi },
+    { date = new Date(), parcelId, sheetId },
+    { dataSources },
+    info
+  ) {
     validateDateInput(date)
 
-    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
+    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources }, info)
     const parcel = parcels?.find((p) => p.sheetId === sheetId && p.parcelId === parcelId)
     if (!parcel) {
       throw new NotFound(`No parcel found for sheetId: ${sheetId} and parcelId: ${parcelId}`)
@@ -32,21 +39,34 @@ export const BusinessLand = {
     }
   },
 
-  async parcels({ organisationId }, { date = new Date() }, { dataSources }) {
+  async parcels({ organisationId }, { date = new Date() }, { dataSources }, info) {
     validateDateInput(date)
 
-    return transformLandParcels(
+    const parcels = transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
         organisationId,
         date
       )
     )
+
+    if (!isFieldRequested(info, 'geometry')) {
+      return parcels
+    }
+
+    const parcelGeometries =
+      await dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+        organisationId,
+        date
+      )
+
+    return transformAndMergeParcelGeometries(parcels, parcelGeometries)
   },
 
   async parcelCovers(
     { organisationId },
     { date = new Date(), sheetId, parcelId },
-    { dataSources }
+    { dataSources },
+    info
   ) {
     validateDateInput(date)
 
@@ -56,12 +76,15 @@ export const BusinessLand = {
       { dataSources }
     )
 
+    const includeGeometries = isFieldRequested(info, 'geometry')
+
     return transformLandCovers(
       await dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate(
         organisationId,
         parcel.sheetId,
         parcelId,
-        date
+        date,
+        includeGeometries
       )
     )
   },
