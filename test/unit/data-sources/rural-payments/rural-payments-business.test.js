@@ -335,6 +335,22 @@ describe('Rural Payments Business', () => {
     })
   })
 
+  describe('getGeometriesByOrganisationIdAndDate', () => {
+    test('should return geometries for organisation and date', async () => {
+      const mockResponse = { type: 'Polygon', coordinates: [] }
+      httpGet.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+        123,
+        '2024-03-19'
+      )
+      expect(result).toEqual(mockResponse)
+      expect(httpGet).toHaveBeenCalledWith(
+        'lms/organisation/123/geometries?bbox=0,0,0,0&historicDate=19-Mar-24'
+      )
+    })
+  })
+
   describe('getParcelEffectiveDatesByOrganisationIdAndDate', () => {
     test('should return parcel effective dates', async () => {
       const mockResponse = { dates: ['19-Mar-24'] }
@@ -358,11 +374,28 @@ describe('Rural Payments Business', () => {
         123,
         'sheet1',
         'parcel1',
-        '2024-03-19'
+        '2024-03-19',
+        false
       )
       expect(result).toEqual(mockResponse)
       expect(httpGet).toHaveBeenCalledWith(
-        'lms/organisation/123/parcel/sheet-id/sheet1/parcel-id/parcel1/historic/19-Mar-24/land-covers'
+        'lms/organisation/123/parcel/sheet-id/sheet1/parcel-id/parcel1/historic/19-Mar-24/land-covers?includeGeometries=false'
+      )
+    })
+
+    test('should request geometries when includeGeometries is true', async () => {
+      const mockResponse = { covers: [{ id: 1 }, { id: 2 }] }
+      httpGet.mockImplementationOnce(async () => mockResponse)
+
+      await ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate(
+        123,
+        'sheet1',
+        'parcel1',
+        '2024-03-19',
+        true
+      )
+      expect(httpGet).toHaveBeenCalledWith(
+        'lms/organisation/123/parcel/sheet-id/sheet1/parcel-id/parcel1/historic/19-Mar-24/land-covers?includeGeometries=true'
       )
     })
   })
