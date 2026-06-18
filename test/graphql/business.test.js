@@ -229,19 +229,21 @@ const setupNock = (v1) => {
 
   v1.get(
     '/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/04-May-25/land-covers'
-  ).reply(200, {
-    features: [
-      {
-        id: 'id',
-        properties: {
-          area: 1,
-          code: 'code',
-          name: 'name',
-          isBpsEligible: true
+  )
+    .query({ includeGeometries: 'false' })
+    .reply(200, {
+      features: [
+        {
+          id: 'id',
+          properties: {
+            area: 1,
+            code: 'code',
+            name: 'name',
+            isBpsEligible: true
+          }
         }
-      }
-    ]
-  })
+      ]
+    })
 
   v1.get('/lms/organisation/organisationId/covers-summary/historic/04-May-25').reply(200, [
     { name: 'Arable Land', area: 1 },
@@ -726,19 +728,21 @@ describe('Query.business internal', () => {
 
     v1.get(
       `/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/${formattedDate}/land-covers`
-    ).reply(200, {
-      features: [
-        {
-          id: 'id',
-          properties: {
-            area: 1,
-            code: 'code',
-            name: 'name',
-            isBpsEligible: true
+    )
+      .query({ includeGeometries: 'false' })
+      .reply(200, {
+        features: [
+          {
+            id: 'id',
+            properties: {
+              area: 1,
+              code: 'code',
+              name: 'name',
+              isBpsEligible: true
+            }
           }
-        }
-      ]
-    })
+        ]
+      })
 
     v1.get(`/lms/organisation/organisationId/covers-summary/historic/${formattedDate}`).reply(200, [
       { name: 'Arable Land', area: 1 },
