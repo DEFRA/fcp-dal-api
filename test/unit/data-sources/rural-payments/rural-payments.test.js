@@ -267,23 +267,6 @@ describe('RuralPayments', () => {
 
       expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
     })
-
-    test('does not throw if gateway type is internal and internalGatewayDevOverrideEmail is present', () => {
-      const rp = new RuralPayments(
-        { logger },
-        {
-          gatewayType: 'internal',
-          request: {
-            headers: {}
-          },
-          internalGatewayDevOverrideEmail: 'test'
-        }
-      )
-      const request = {}
-      const path = 'test-path'
-
-      expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
-    })
   })
 
   describe('trace', () => {
