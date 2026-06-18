@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import {
   BusinessLand,
   BusinessLandSummary
@@ -7,13 +8,34 @@ describe('BusinessLand', () => {
   const mockBusiness = { organisationId: 'mockId' }
   const mockArguments = { date: '2022-01-01' }
 
+  const buildGraphQLQueryInfo = (fields) => ({
+    fieldNodes: [
+      {
+        selectionSet: {
+          selections: fields.map((name) => ({ kind: 'Field', name: { value: name } }))
+        }
+      }
+    ]
+  })
+
   let dataSources
   let getParcelsByOrganisationIdAndDateResult
+  let getGeometriesByOrganisationIdAndDateResult
   let getCoversByOrgSheetParcelIdDateResult
   let getCoversSummaryByOrganisationIdAndDateResult
   let getLandUseByBusinessParcelResult
 
   beforeEach(() => {
+    getGeometriesByOrganisationIdAndDateResult = {
+      features: [
+        {
+          id: 1,
+          type: 'Feature',
+          geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] },
+          properties: { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: '1000' }
+        }
+      ]
+    }
     getParcelsByOrganisationIdAndDateResult = [
       {
         id: 'mockId',
@@ -63,9 +85,10 @@ describe('BusinessLand', () => {
         getParcelsByOrganisationIdAndDate() {
           return getParcelsByOrganisationIdAndDateResult
         },
-        getCoversByOrgSheetParcelIdDate() {
-          return getCoversByOrgSheetParcelIdDateResult
-        },
+        getGeometriesByOrganisationIdAndDate: jest.fn(
+          () => getGeometriesByOrganisationIdAndDateResult
+        ),
+        getCoversByOrgSheetParcelIdDate: jest.fn(() => getCoversByOrgSheetParcelIdDateResult),
         getCoversSummaryByOrganisationIdAndDate() {
           return getCoversSummaryByOrganisationIdAndDateResult
         },
@@ -83,14 +106,69 @@ describe('BusinessLand', () => {
     })
   })
 
-  it('parcels', async () => {
-    expect(await BusinessLand.parcels(mockBusiness, mockArguments, { dataSources })).toEqual([
+  it('parcels - geometry not requested', async () => {
+    expect(
+      await BusinessLand.parcels(
+        mockBusiness,
+        mockArguments,
+        { dataSources },
+        buildGraphQLQueryInfo(['id'])
+      )
+    ).toEqual([
       {
         id: 'mockId',
         sheetId: 'mockSheetId',
         area: 0.1,
         parcelId: 'mockParcelId',
         pendingDigitisation: false
+      }
+    ])
+    expect(
+      dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate
+    ).not.toHaveBeenCalled()
+  })
+
+  it('parcels - geometry requested', async () => {
+    expect(
+      await BusinessLand.parcels(
+        mockBusiness,
+        mockArguments,
+        { dataSources },
+        buildGraphQLQueryInfo(['id', 'geometry'])
+      )
+    ).toEqual([
+      {
+        id: 'mockId',
+        sheetId: 'mockSheetId',
+        area: 0.1,
+        parcelId: 'mockParcelId',
+        pendingDigitisation: false,
+        geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] }
+      }
+    ])
+    expect(
+      dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate
+    ).toHaveBeenCalledTimes(1)
+  })
+
+  it('parcels - geometry requested but no matching feature', async () => {
+    getGeometriesByOrganisationIdAndDateResult = { features: [] }
+
+    expect(
+      await BusinessLand.parcels(
+        mockBusiness,
+        mockArguments,
+        { dataSources },
+        buildGraphQLQueryInfo(['id', 'geometry'])
+      )
+    ).toEqual([
+      {
+        id: 'mockId',
+        sheetId: 'mockSheetId',
+        area: 0.1,
+        parcelId: 'mockParcelId',
+        pendingDigitisation: false,
+        geometry: null
       }
     ])
   })
@@ -111,18 +189,73 @@ describe('BusinessLand', () => {
       parcelId: 'mockParcelId',
       pendingDigitisation: false
     })
+    expect(
+      dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate
+    ).not.toHaveBeenCalled()
   })
 
-  it('parcelCovers', async () => {
+  it('parcel - geometry requested', async () => {
+    expect(
+      await BusinessLand.parcel(
+        mockBusiness,
+        { ...mockArguments, sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { dataSources },
+        buildGraphQLQueryInfo(['id', 'geometry'])
+      )
+    ).toEqual({
+      organisationId: 'mockId',
+      id: 'mockId',
+      date: mockArguments.date,
+      sheetId: 'mockSheetId',
+      area: 0.1,
+      parcelId: 'mockParcelId',
+      pendingDigitisation: false,
+      geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] }
+    })
+  })
+
+  it('parcelCovers - geometry requested', async () => {
     expect(
       await BusinessLand.parcelCovers(
         mockBusiness,
         { ...mockArguments, sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
-        { dataSources }
+        { dataSources },
+        buildGraphQLQueryInfo(['id', 'name', 'geometry'])
       )
     ).toEqual([
-      { id: '11033654', area: 0.1, name: 'Mock Name', code: 'someCode', isBpsEligible: true }
+      {
+        id: '11033654',
+        area: 0.1,
+        name: 'Mock Name',
+        code: 'someCode',
+        isBpsEligible: true,
+        geometry: null
+      }
     ])
+    expect(dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate).toHaveBeenCalledWith(
+      'mockId',
+      'mockSheetId',
+      'mockParcelId',
+      mockArguments.date,
+      true
+    )
+  })
+
+  it('parcelCovers - geometry not requested', async () => {
+    await BusinessLand.parcelCovers(
+      mockBusiness,
+      { ...mockArguments, sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+      { dataSources },
+      buildGraphQLQueryInfo(['id', 'name'])
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate).toHaveBeenCalledWith(
+      'mockId',
+      'mockSheetId',
+      'mockParcelId',
+      mockArguments.date,
+      false
+    )
   })
 
   it('parcelLandUses - no length', async () => {
