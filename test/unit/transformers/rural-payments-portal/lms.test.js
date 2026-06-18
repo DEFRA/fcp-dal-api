@@ -1,4 +1,5 @@
 import {
+  transformAndMergeParcelGeometries,
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels,
@@ -25,7 +26,14 @@ describe('LMS transformer', () => {
       ]
     }
     const output = [
-      { area: 0.1, id: 'mockId', name: 'Mock Name', code: 'mockId', isBpsEligible: true }
+      {
+        area: 0.1,
+        id: 'mockId',
+        name: 'Mock Name',
+        code: 'mockId',
+        isBpsEligible: true,
+        geometry: null
+      }
     ]
     expect(transformLandCovers(input)).toEqual(output)
   })
@@ -62,6 +70,35 @@ describe('LMS transformer', () => {
       }
     ]
     expect(transformLandParcels(input)).toEqual(output)
+  })
+
+  test('transformAndMergeParcelGeometries', () => {
+    const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+    const parcelGeometries = {
+      features: [
+        {
+          id: 1,
+          type: 'Feature',
+          geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] },
+          properties: { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: '1000' }
+        }
+      ]
+    }
+    expect(transformAndMergeParcelGeometries(parcels, parcelGeometries)).toEqual([
+      {
+        sheetId: 'mockSheetId',
+        parcelId: 'mockParcelId',
+        area: 0.1,
+        geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] }
+      }
+    ])
+  })
+
+  test('transformAndMergeParcelGeometries - no matching feature', () => {
+    const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+    expect(transformAndMergeParcelGeometries(parcels, { features: [] })).toEqual([
+      { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
+    ])
   })
 
   test('transformLandParcelsEffectiveDates', () => {
