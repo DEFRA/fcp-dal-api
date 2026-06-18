@@ -6,14 +6,15 @@ export function transformLandCovers(landCover) {
   const items = landCover?.features || []
   return items
     .filter((item) => item?.properties?.area !== '0')
-    .map(({ id, properties }) => {
+    .map(({ id, properties, geometry }) => {
       const { code, area, name, isBpsEligible } = properties
       return {
         id,
         code,
         area: convertSquareMetersToHectares(area),
         name: name,
-        isBpsEligible: isBpsEligible === 'true'
+        isBpsEligible: isBpsEligible === 'true',
+        geometry
       }
     })
 }
@@ -36,6 +37,29 @@ export function transformLandCoversToArea(name, landCovers) {
     return 0
   }
   return convertSquareMetersToHectares(landCover.area)
+}
+
+// Builds a lookup so each parcel's geometry can be efficiently obtained.
+// Keyed as a single string since organisationGeometries and parcels come from two
+// separate upstream calls and need to be joined by sheetId+parcelId here.
+function indexGeometriesBySheetAndParcelId(parcelGeometries) {
+  const features = parcelGeometries?.features || []
+
+  return new Map(
+    features.map(({ geometry, properties }) => [
+      `${properties.sheetId}:${properties.parcelId}`,
+      geometry
+    ])
+  )
+}
+
+export function transformAndMergeParcelGeometries(parcels, organisationGeometries) {
+  const parcelGeometries = indexGeometriesBySheetAndParcelId(organisationGeometries)
+
+  return parcels.map((parcel) => ({
+    ...parcel,
+    geometry: parcelGeometries.get(`${parcel.sheetId}:${parcel.parcelId}`) ?? null
+  }))
 }
 
 export function transformLandParcels(landParcels) {
