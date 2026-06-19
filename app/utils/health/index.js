@@ -1,7 +1,8 @@
-import { healthCheck as mongo } from './mongo.js'
 import { logger } from '../../logger/logger.js'
+import { healthCheck as jwks } from './jwks.js'
+import { healthCheck as mongo } from './mongo.js'
 
-const healthChecks = [mongo]
+const healthChecks = [mongo, jwks]
 
 /**
  * Runs all registered health checks.
