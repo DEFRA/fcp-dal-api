@@ -1,6 +1,6 @@
 {
   "name": "fcp-dal-api",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
@@ -55,7 +55,7 @@
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^3.1.0",
     "mongodb": "^7.1.1",
-    "undici": "^7.18.2",
+    "undici": "^7.28.0",
     "uuid": "^14.0.0",
     "winston": "^3.18.3"
   },
@@ -87,6 +87,7 @@
     },
     "micromatch": "4.0.8",
     "dset": "3.1.4",
+    "js-yaml": "^4.2.0",
     "uuid": "^14.0.0"
   }
 }

@@ -147,7 +147,7 @@ const customer = {
     organisationId: '1111111111',
     sbi: '1111111111',
     name: 'Maggio, Murray and Dicki',
-    role: 'Business Partner',
+    role: 'Key Contact',
     permissionGroups: [
       {
         id: 'BASIC_PAYMENT_SCHEME',
@@ -268,19 +268,19 @@ const customer = {
 }
 const messages = [
   {
-    id: '6070061621',
-    subject: 'Ocer uredo caecus tantillus.',
-    date: '2024-01-28T03:48:38.540Z',
-    body: '<p>Averto veniam suus cotidie arbor strues delectatio arx.</p>',
+    id: '3761260816',
+    subject: 'Caecus tantillus sollicito averto veniam suus cotidie arbor strues.',
+    date: '2024-06-27T03:27:27.902Z',
+    body: '<p>Arx succurro vetus tabella demergo expedita.</p>',
     read: true,
-    deleted: false
+    deleted: true
   },
   {
-    id: '7363663048',
-    subject: 'Absconditus tergo mollitia at tempore.',
-    date: '2024-06-18T22:03:32.049Z',
-    body: '<p>Clamo corona brevis conventus quis alveus cattus amaritudo coadunatio maxime.</p>',
-    read: true,
+    id: '7804800923',
+    subject: 'Vinum clamo corona brevis conventus quis alveus cattus amaritudo.',
+    date: '2024-03-05T00:55:50.487Z',
+    body: '<p>Maxime accedo adfero comes avaritia.</p>',
+    read: false,
     deleted: false
   }
 ]
