@@ -159,105 +159,105 @@ const business = {
       firstName: 'Lauren',
       lastName: 'Sanford',
       crn: '1111111100',
-      role: 'Business Partner'
+      role: 'Key Contact'
     },
     {
       personId: '11111112',
       firstName: 'Kristy',
       lastName: 'Stiedemann',
       crn: '1111111200',
-      role: 'Business Partner'
+      role: 'Director'
     },
     {
       personId: '11111113',
       firstName: 'Marco',
       lastName: 'Kovacek',
       crn: '1111111300',
-      role: 'Business Partner'
+      role: 'Director'
     },
     {
       personId: '11111114',
       firstName: 'Henri',
       lastName: 'Weissnat',
       crn: '1111111400',
-      role: 'Business Partner'
+      role: 'Trustee'
     },
     {
       personId: '11111115',
       firstName: 'Terry',
       lastName: 'Swaniawski',
       crn: '1111111500',
-      role: 'Business Partner'
+      role: 'Director'
     },
     {
       personId: '11111116',
       firstName: 'Juwan',
       lastName: 'Hahn',
       crn: '1111111600',
-      role: 'Business Partner'
+      role: 'Trustee'
     },
     {
       personId: '11111117',
       firstName: 'Frederic',
       lastName: 'Koch-Cassin',
       crn: '1111111700',
-      role: 'Business Partner'
+      role: 'Trustee'
     },
     {
       personId: '11111118',
       firstName: 'Mara',
       lastName: 'Stark',
       crn: '1111111800',
-      role: 'Business Partner'
+      role: 'Key Contact'
     },
     {
       personId: '11111119',
       firstName: 'Big',
       lastName: 'Skeleton',
       crn: '1111111900',
-      role: 'Business Partner'
+      role: 'Owner or Sole Trader'
     },
     {
       personId: '11111122',
       firstName: 'Rod',
       lastName: 'Quitzon-Gibson',
       crn: '1111112200',
-      role: 'Business Partner'
+      role: 'Agent'
     },
     {
       personId: '11111222',
       firstName: 'Nayeli',
       lastName: 'Kub',
       crn: '1111122200',
-      role: 'Business Partner'
+      role: 'Key Contact'
     },
     {
       personId: '11112222',
       firstName: 'Kellie',
       lastName: 'Flatley',
       crn: '1111222200',
-      role: 'Business Partner'
+      role: 'Agent'
     },
     {
       personId: '11122222',
       firstName: 'Meaghan',
       lastName: 'Torp',
       crn: '1112222200',
-      role: 'Business Partner'
+      role: 'Director'
     },
     {
       personId: '11222222',
       firstName: 'Stacey',
       lastName: 'Willms',
       crn: '1122222200',
-      role: 'Business Partner'
+      role: 'Agent'
     },
     {
       personId: '12222222',
       firstName: 'Vilma',
       lastName: 'Yundt',
       crn: '1222222200',
-      role: 'Business Partner'
+      role: 'Owner or Sole Trader'
     }
   ],
   customer: {
@@ -265,7 +265,7 @@ const business = {
     firstName: 'Lauren',
     lastName: 'Sanford',
     crn: '1111111100',
-    role: 'Business Partner',
+    role: 'Key Contact',
     permissionGroups: [
       {
         id: 'BASIC_PAYMENT_SCHEME',
