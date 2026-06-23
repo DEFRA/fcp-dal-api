@@ -101,6 +101,13 @@ describe('LMS transformer', () => {
     ])
   })
 
+  test('transformAndMergeParcelGeometries - no organisationGeometries', () => {
+    const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+    expect(transformAndMergeParcelGeometries(parcels, undefined)).toEqual([
+      { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
+    ])
+  })
+
   test('transformLandParcelsEffectiveDates', () => {
     const parcelId = 'mockParcelId'
     const sheetId = 'mockSheetId'
