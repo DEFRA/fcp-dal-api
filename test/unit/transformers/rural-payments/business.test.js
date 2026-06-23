@@ -1243,7 +1243,40 @@ describe('#transformOrganisationSearchResult', () => {
       organisationId: '1',
       sbi: '123456789',
       additionalSbis: [],
+      address: null,
       correspondenceAddress: null,
+      lastUpdated: null,
+      status: { locked: false, deactivated: false, confirmed: false }
+    })
+  })
+
+  test('handles undefined data', () => {
+    expect(transformOrganisationSearchResult(undefined)).toEqual({
+      organisationId: undefined,
+      sbi: undefined,
+      name: undefined,
+      additionalSbis: [],
+      address: null,
+      correspondenceAddress: null,
+      isFinancialToBusinessAddress: false,
+      isCorrespondenceAsBusinessAddress: false,
+      landConfirmed: false,
+      lastUpdated: null,
+      status: { locked: false, deactivated: false, confirmed: false }
+    })
+  })
+
+  test('handles defined data with all fields undefined', () => {
+    expect(transformOrganisationSearchResult({})).toEqual({
+      organisationId: undefined,
+      sbi: undefined,
+      name: undefined,
+      additionalSbis: [],
+      address: null,
+      correspondenceAddress: null,
+      isFinancialToBusinessAddress: false,
+      isCorrespondenceAsBusinessAddress: false,
+      landConfirmed: false,
       lastUpdated: null,
       status: { locked: false, deactivated: false, confirmed: false }
     })

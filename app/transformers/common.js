@@ -58,7 +58,6 @@ export const transformPageInfo = (page) => ({
   number: page?.number,
   size: page?.size,
   totalPages: page?.totalPages,
-  numberOfElements: page?.numberOfElements,
   totalElements: page?.totalElements
 })
 

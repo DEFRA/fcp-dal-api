@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
-import { config } from '../../config.js'
 import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
+import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export const formatDateDDMMMYY = (date) => {
@@ -63,14 +63,13 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async organisationSearch(searchFieldType, primarySearchPhrase, pagination) {
-    const perPage = pagination?.perPage ?? config.get('kits.requestPageSize')
-    const page = pagination?.page ?? 1
+    const { offset, limit } = getSearchOffsetAndLimit(pagination)
 
     const body = JSON.stringify({
       searchFieldType,
       primarySearchPhrase,
-      offset: (page - 1) * perPage,
-      limit: perPage
+      offset,
+      limit
     })
 
     const response = await this.post('organisation/search', {

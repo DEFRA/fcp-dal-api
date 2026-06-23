@@ -737,5 +737,31 @@ describe('Customer transformer', () => {
         status: { locked: false, deactivated: true, confirmed: false }
       })
     })
+
+    test('handles undefined data', () => {
+      expect(transformPersonSearchResult(undefined)).toEqual({
+        personId: undefined,
+        crn: undefined,
+        fullName: undefined,
+        address: null,
+        personalIdentifiers: undefined,
+        nationalInsuranceNumber: undefined,
+        email: undefined,
+        status: { locked: false, deactivated: false, confirmed: false }
+      })
+    })
+
+    test('handles defined data with all fields undefined', () => {
+      expect(transformPersonSearchResult({})).toEqual({
+        personId: undefined,
+        crn: undefined,
+        fullName: undefined,
+        address: null,
+        personalIdentifiers: undefined,
+        nationalInsuranceNumber: undefined,
+        email: undefined,
+        status: { locked: false, deactivated: false, confirmed: false }
+      })
+    })
   })
 })

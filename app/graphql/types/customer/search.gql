@@ -5,7 +5,7 @@ enum CustomerSearchFieldType {
   """
   The full 10-digit Customer Reference Number (CRN); returns 0 or 1 results.
   """
-  CUSTOMER_REFERENCE
+  CRN
 
   """
   The full personal identifier, at least 9 characters; returns 0 or 1 results.
@@ -13,7 +13,7 @@ enum CustomerSearchFieldType {
   PERSONAL_IDENTIFIER
 
   """
-  A partial first and/or last name (non-empty); returns 0 or more results.
+  A partial first and/or last name, at least 3 characters; returns 0 or more results.
   """
   CUSTOMER_NAME
 

@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
 import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
-import { NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 
 describe('Rural Payments Customer', () => {
   const logger = {
@@ -130,9 +130,36 @@ describe('Rural Payments Customer', () => {
   test('should return empty data and undefined page when person search response is empty', async () => {
     httpPost.mockImplementationOnce(async () => undefined)
 
-    const result = await ruralPaymentsCustomer.personSearch('CUSTOMER_REFERENCE', '1234567890')
+    const result = await ruralPaymentsCustomer.personSearch('CRN', '1234567890')
 
     expect(result).toEqual({ data: [], page: undefined })
+  })
+
+  test('should map CRN search type to the CUSTOMER_REFERENCE field expected by KITS', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+    await ruralPaymentsCustomer.personSearch('CRN', '1234567890')
+
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_REFERENCE","primarySearchPhrase":"1234567890","offset":0,"limit":100}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should throw BadRequest when person search page is less than 1', async () => {
+    await expect(
+      ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { page: 0, perPage: 20 })
+    ).rejects.toEqual(new BadRequest('Pagination page must be 1 or greater'))
+
+    expect(httpPost).not.toHaveBeenCalled()
+  })
+
+  test('should throw BadRequest when person search perPage is less than 1', async () => {
+    await expect(
+      ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { page: 1, perPage: 0 })
+    ).rejects.toEqual(new BadRequest('Pagination perPage must be 1 or greater'))
+
+    expect(httpPost).not.toHaveBeenCalled()
   })
 
   test('should throw an error from getPersonByPersonId when customer not found', async () => {

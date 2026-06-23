@@ -141,7 +141,7 @@ describe('Common transformers', () => {
           numberOfElements: 20,
           totalElements: 41
         })
-      ).toEqual({ number: 2, size: 20, totalPages: 3, numberOfElements: 20, totalElements: 41 })
+      ).toEqual({ number: 2, size: 20, totalPages: 3, totalElements: 41 })
     })
 
     it('should handle missing page', () => {
@@ -149,7 +149,6 @@ describe('Common transformers', () => {
         number: undefined,
         size: undefined,
         totalPages: undefined,
-        numberOfElements: undefined,
         totalElements: undefined
       })
     })

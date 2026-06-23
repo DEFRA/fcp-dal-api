@@ -52,7 +52,6 @@ const businessSearchQuery = gql`
         number
         size
         totalPages
-        numberOfElements
         totalElements
       }
     }
@@ -103,7 +102,6 @@ const customerSearchQuery = gql`
         number
         size
         totalPages
-        numberOfElements
         totalElements
       }
     }
@@ -163,7 +161,6 @@ describe('Business Search Queries', () => {
         number: 0,
         size: 20,
         totalPages: 1,
-        numberOfElements: 1,
         totalElements: 1
       }
     })
@@ -179,17 +176,16 @@ describe('Business Search Queries', () => {
 
     expect(response).not.toHaveProperty('errors')
     expect(response.businessSearch.results).toEqual([])
-    expect(response.businessSearch.pageInfo.numberOfElements).toEqual(0)
     expect(response.businessSearch.pageInfo.totalElements).toEqual(0)
   })
 })
 
 describe('Customer Search Queries', () => {
-  it('should return a customer when searching by CUSTOMER_REFERENCE - internal', async () => {
+  it('should return a customer when searching by CRN - internal', async () => {
     const client = new GraphQLClient(targetURL)
     const response = await client.request(
       customerSearchQuery,
-      { searchString: '1111111100', searchType: 'CUSTOMER_REFERENCE' },
+      { searchString: '1111111100', searchType: 'CRN' },
       { email: 'some-email', 'gateway-type': 'internal' }
     )
 
@@ -234,7 +230,6 @@ describe('Customer Search Queries', () => {
         number: 0,
         size: 20,
         totalPages: 1,
-        numberOfElements: 1,
         totalElements: 1
       }
     })
@@ -244,13 +239,12 @@ describe('Customer Search Queries', () => {
     const client = new GraphQLClient(targetURL)
     const response = await client.request(
       customerSearchQuery,
-      { searchString: '9999999999', searchType: 'CUSTOMER_REFERENCE' },
+      { searchString: '9999999999', searchType: 'CRN' },
       { email: 'some-email', 'gateway-type': 'internal' }
     )
 
     expect(response).not.toHaveProperty('errors')
     expect(response.customerSearch.results).toEqual([])
-    expect(response.customerSearch.pageInfo.numberOfElements).toEqual(0)
     expect(response.customerSearch.pageInfo.totalElements).toEqual(0)
   })
 })

@@ -188,7 +188,7 @@ export const transformOrganisationSearchResult = (data) => ({
   sbi: data?.sbi?.toString(),
   name: data?.name,
   additionalSbis: data?.additionalSbiIds || [],
-  address: kitsAddressToDalAddress(data?.address),
+  address: (data?.address && kitsAddressToDalAddress(data.address)) || null,
   correspondenceAddress:
     (data?.correspondenceAddress && kitsAddressToDalAddress(data.correspondenceAddress)) || null,
   isFinancialToBusinessAddress: booleanise(data?.isFinancialToBusinessAddr),

@@ -34,7 +34,7 @@ describe('Customer Query Resolver', () => {
   })
 
   it('customerSearch should return transformed results and page info', async () => {
-    const page = { number: 1, size: 20, totalPages: 1, numberOfElements: 1, totalElements: 1 }
+    const page = { number: 1, size: 20, totalPages: 1, totalElements: 1 }
     mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
       data: [
         {

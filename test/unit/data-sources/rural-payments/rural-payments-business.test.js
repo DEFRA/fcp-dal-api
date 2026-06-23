@@ -4,7 +4,7 @@ import {
   formatDateDDMMMYY,
   RuralPaymentsBusiness
 } from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
-import { NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../../app/transformers/rural-payments/business.js'
 
 const businessDetailsUpdatePayload = {
@@ -244,6 +244,28 @@ describe('Rural Payments Business', () => {
       const result = await ruralPaymentsBusiness.organisationSearch('SBI', '123456789')
 
       expect(result).toEqual({ data: [], page: undefined })
+    })
+
+    test('should throw BadRequest when page is less than 1', async () => {
+      await expect(
+        ruralPaymentsBusiness.organisationSearch('BUSINESS_NAME', 'Test Farm', {
+          page: 0,
+          perPage: 20
+        })
+      ).rejects.toEqual(new BadRequest('Pagination page must be 1 or greater'))
+
+      expect(httpPost).not.toHaveBeenCalled()
+    })
+
+    test('should throw BadRequest when perPage is less than 1', async () => {
+      await expect(
+        ruralPaymentsBusiness.organisationSearch('BUSINESS_NAME', 'Test Farm', {
+          page: 1,
+          perPage: 0
+        })
+      ).rejects.toEqual(new BadRequest('Pagination perPage must be 1 or greater'))
+
+      expect(httpPost).not.toHaveBeenCalled()
     })
   })
 

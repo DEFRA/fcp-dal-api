@@ -155,11 +155,6 @@ type PageInfo {
   totalPages: Int @on
 
   """
-  Number of items on the current page
-  """
-  numberOfElements: Int @on
-
-  """
   Total number of items across all pages
   """
   totalElements: Int @on

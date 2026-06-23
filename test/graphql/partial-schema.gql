@@ -66,7 +66,6 @@ type PageInfo {
   number: Int
   size: Int
   totalPages: Int
-  numberOfElements: Int
   totalElements: Int
 }
 
@@ -96,7 +95,7 @@ type BusinessSearchResponse {
 }
 
 enum CustomerSearchFieldType {
-  CUSTOMER_REFERENCE
+  CRN
   PERSONAL_IDENTIFIER
   CUSTOMER_NAME
   CUSTOMER_POSTCODE
