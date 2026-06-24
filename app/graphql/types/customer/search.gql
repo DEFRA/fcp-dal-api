@@ -13,7 +13,7 @@ enum CustomerSearchFieldType {
   PERSONAL_IDENTIFIER
 
   """
-  A partial first and/or last name, at least 3 characters; returns 0 or more results.
+  A partial last name, at least 3 characters; returns 0 or more results.
   """
   CUSTOMER_NAME
 
