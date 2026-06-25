@@ -1,11 +1,11 @@
 import { NotFound } from '../../../errors/graphql.js'
 import {
-  transformAndMergeParcelGeometries,
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels,
   transformLandParcelsEffectiveDates,
   transformLandUses,
+  transformParcelGeometry,
   transformTotalArea,
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
@@ -17,15 +17,10 @@ export const BusinessLand = {
     return { organisationId, date }
   },
 
-  async parcel(
-    { organisationId, sbi },
-    { date = new Date(), parcelId, sheetId },
-    { dataSources },
-    info
-  ) {
+  async parcel({ organisationId, sbi }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
     validateDateInput(date)
 
-    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources }, info)
+    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
     const parcel = parcels?.find((p) => p.sheetId === sheetId && p.parcelId === parcelId)
     if (!parcel) {
       throw new NotFound(`No parcel found for sheetId: ${sheetId} and parcelId: ${parcelId}`)
@@ -39,7 +34,7 @@ export const BusinessLand = {
     }
   },
 
-  async parcels({ organisationId }, { date = new Date() }, { dataSources }, info) {
+  async parcels({ organisationId }, { date = new Date() }, { dataSources }) {
     validateDateInput(date)
 
     const parcels = transformLandParcels(
@@ -49,17 +44,7 @@ export const BusinessLand = {
       )
     )
 
-    if (!isFieldRequested(info, 'geometry')) {
-      return parcels
-    }
-
-    const parcelGeometries =
-      await dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
-        organisationId,
-        date
-      )
-
-    return transformAndMergeParcelGeometries(parcels, parcelGeometries)
+    return parcels.map((parcel) => ({ ...parcel, organisationId, date }))
   },
 
   async parcelCovers(
@@ -117,6 +102,16 @@ const getParcelEffectiveDates = async (
 }
 
 export const BusinessLandParcel = {
+  async geometry({ organisationId, date, sheetId, parcelId }, __, { dataSources }) {
+    const organisationGeometries =
+      await dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+        organisationId,
+        date
+      )
+
+    return transformParcelGeometry(organisationGeometries, sheetId, parcelId)
+  },
+
   async effectiveToDate(parcel, __, { dataSources }) {
     const { effectiveTo } = await getParcelEffectiveDates(dataSources, parcel)
 
