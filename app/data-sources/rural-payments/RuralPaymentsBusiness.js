@@ -4,6 +4,7 @@ import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
+import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
 
 export const formatDateDDMMMYY = (date) => {
@@ -59,6 +60,27 @@ export class RuralPaymentsBusiness extends RuralPayments {
     }
 
     return organisationResponse._data[0]
+  }
+
+  async organisationSearch(searchFieldType, primarySearchPhrase, pagination) {
+    const { offset, limit } = getSearchOffsetAndLimit(pagination)
+
+    const body = JSON.stringify({
+      searchFieldType,
+      primarySearchPhrase,
+      offset,
+      limit
+    })
+
+    const response = await this.post('organisation/search', {
+      body,
+      headers: postPutHeaders
+    })
+
+    return {
+      data: response?._data ?? [],
+      page: response?._page
+    }
   }
 
   async getOrganisationIdBySBI(sbi) {

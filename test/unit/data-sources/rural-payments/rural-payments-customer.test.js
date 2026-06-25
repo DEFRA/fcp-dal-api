@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
 import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
-import { NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 
 describe('Rural Payments Customer', () => {
   const logger = {
@@ -68,6 +68,98 @@ describe('Rural Payments Customer', () => {
         response: { body: { _data: [] } }
       }
     )
+  })
+
+  test('should post person search request with pagination and return data and page', async () => {
+    const mockResponse = {
+      _data: [{ id: 123, fullName: 'John Smith' }],
+      _page: { number: 2, size: 20, totalPages: 3, numberOfElements: 1, totalElements: 41 }
+    }
+    httpPost.mockImplementationOnce(async () => mockResponse)
+
+    const result = await ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', {
+      page: 2,
+      perPage: 20
+    })
+
+    expect(result).toEqual({ data: mockResponse._data, page: mockResponse._page })
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_NAME","primarySearchPhrase":"Smith","offset":20,"limit":20}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should default person search pagination and return empty data when no results', async () => {
+    const mockResponse = {
+      _data: [],
+      _page: { number: 1, size: 100, totalPages: 0, numberOfElements: 0, totalElements: 0 }
+    }
+    httpPost.mockImplementationOnce(async () => mockResponse)
+
+    const result = await ruralPaymentsCustomer.personSearch('CUSTOMER_POSTCODE', 'AB12 3CD')
+
+    expect(result).toEqual({ data: [], page: mockResponse._page })
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_POSTCODE","primarySearchPhrase":"AB12 3CD","offset":0,"limit":100}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should default person search page only when perPage provided without page', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+    await ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { perPage: 25 })
+
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_NAME","primarySearchPhrase":"Smith","offset":0,"limit":25}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should default person search perPage only when page provided without perPage', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+    await ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { page: 3 })
+
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_NAME","primarySearchPhrase":"Smith","offset":200,"limit":100}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should return empty data and undefined page when person search response is empty', async () => {
+    httpPost.mockImplementationOnce(async () => undefined)
+
+    const result = await ruralPaymentsCustomer.personSearch('CRN', '1234567890')
+
+    expect(result).toEqual({ data: [], page: undefined })
+  })
+
+  test('should map CRN search type to the CUSTOMER_REFERENCE field expected by KITS', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+    await ruralPaymentsCustomer.personSearch('CRN', '1234567890')
+
+    expect(httpPost).toHaveBeenCalledWith('person/search', {
+      body: '{"searchFieldType":"CUSTOMER_REFERENCE","primarySearchPhrase":"1234567890","offset":0,"limit":100}',
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should throw BadRequest when person search page is less than 1', async () => {
+    await expect(
+      ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { page: 0, perPage: 20 })
+    ).rejects.toEqual(new BadRequest('Pagination page must be 1 or greater'))
+
+    expect(httpPost).not.toHaveBeenCalled()
+  })
+
+  test('should throw BadRequest when person search perPage is less than 1', async () => {
+    await expect(
+      ruralPaymentsCustomer.personSearch('CUSTOMER_NAME', 'Smith', { page: 1, perPage: 0 })
+    ).rejects.toEqual(new BadRequest('Pagination perPage must be 1 or greater'))
+
+    expect(httpPost).not.toHaveBeenCalled()
   })
 
   test('should throw an error from getPersonByPersonId when customer not found', async () => {

@@ -82,6 +82,17 @@ export const ruralPaymentsPortalCustomerTransformer = (data) => {
   }
 }
 
+export const transformPersonSearchResult = (data) => ({
+  personId: data?.id?.toString(),
+  crn: data?.customerReference,
+  fullName: data?.fullName,
+  address: data?.primaryAddress ? kitsAddressToDalAddress(data.primaryAddress) : null,
+  personalIdentifiers: data?.personalIdentifiers,
+  nationalInsuranceNumber: data?.nationalInsuranceNumber,
+  email: data?.email,
+  status: transformEntityStatus(data)
+})
+
 export function transformNotificationsToMessages(notifications = []) {
   return notifications.map((message) => ({
     id: message.id,

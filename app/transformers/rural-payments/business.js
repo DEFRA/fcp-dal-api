@@ -183,6 +183,21 @@ export const transformOrganisationToBusiness = (data) => ({
   sbi: data?.sbi?.toString()
 })
 
+export const transformOrganisationSearchResult = (data) => ({
+  organisationId: data?.id?.toString(),
+  sbi: data?.sbi?.toString(),
+  name: data?.name,
+  additionalSbis: data?.additionalSbiIds || [],
+  address: (data?.address && kitsAddressToDalAddress(data.address)) || null,
+  correspondenceAddress:
+    (data?.correspondenceAddress && kitsAddressToDalAddress(data.correspondenceAddress)) || null,
+  isFinancialToBusinessAddress: booleanise(data?.isFinancialToBusinessAddr),
+  isCorrespondenceAsBusinessAddress: booleanise(data?.isCorrespondenceAsBusinessAddr),
+  landConfirmed: booleanise(data?.landConfirmed),
+  lastUpdated: data?.lastUpdatedOn ? new Date(data.lastUpdatedOn) : null,
+  status: transformEntityStatus(data)
+})
+
 const orgDetailsUpdateMapping = {
   name: (data) => data.name,
   address: ({ address }) =>

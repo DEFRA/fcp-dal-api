@@ -1,0 +1,94 @@
+"""
+The field to search businesses by.
+"""
+enum BusinessSearchFieldType {
+  """
+  The full 9-digit Single Business Identifier (SBI); returns 0 or 1 results.
+  """
+  SBI
+
+  """
+  A partial business name, at least 2 characters; returns 0 or more results.
+  """
+  BUSINESS_NAME
+
+  """
+  A full business postcode, at least 5 characters; returns 0 or more results.
+  """
+  BUSINESS_POSTCODE
+}
+
+"""
+Summary details of a business returned by a business search.
+"""
+type BusinessSearchResult {
+  """
+  Internal SitiAgri/Portal unique identifier for the business.
+  """
+  organisationId: ID @on
+
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID @on
+
+  """
+  Name of the business.
+  """
+  name: String @on
+
+  """
+  Other SBIs by which the business is known.
+  """
+  additionalSbis: [ID] @on
+
+  """
+  Address of the business.
+  """
+  address: Address @on
+
+  """
+  Correspondence address of the business.
+  """
+  correspondenceAddress: Address @on
+
+  """
+  States the business address is also the financial address.
+  """
+  isFinancialToBusinessAddress: Boolean @on
+
+  """
+  States the correspondence address should be used as the business address.
+  """
+  isCorrespondenceAsBusinessAddress: Boolean @on
+
+  """
+  Whether the land for the business has been confirmed.
+  """
+  landConfirmed: Boolean @on
+
+  """
+  The date the business was last updated.
+  """
+  lastUpdated: Date @on
+
+  """
+  The status of the business.
+  """
+  status: EntityStatus @on
+}
+
+"""
+A page of business search results.
+"""
+type BusinessSearchResponse {
+  """
+  The businesses matching the search.
+  """
+  results: [BusinessSearchResult] @on
+
+  """
+  Paging information for the search results.
+  """
+  pageInfo: PageInfo @on
+}
