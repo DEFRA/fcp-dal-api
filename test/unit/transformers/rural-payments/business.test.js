@@ -8,7 +8,8 @@ import {
   transformBusinessDetailsToOrgDetailsCreate,
   transformBusinessDetailsToOrgDetailsUpdate,
   transformCountyParishHoldings,
-  transformOrganisationCustomers
+  transformOrganisationCustomers,
+  transformOrganisationSearchResult
 } from '../../../../app/transformers/rural-payments/business.js'
 
 import { buildPermissionsFromIdsAndLevels } from '../../../test-helpers/permissions.js'
@@ -1187,6 +1188,97 @@ describe('#transformBankChangeInputToSubmission', () => {
       sbi: '110405990',
       crn: '1100209492',
       frn: '10014489653'
+    })
+  })
+})
+
+describe('#transformOrganisationSearchResult', () => {
+  test('transforms a full organisation search result', () => {
+    const result = transformOrganisationSearchResult({
+      id: 5565448,
+      name: 'HADLEY FARMS LTD',
+      sbi: 107591843,
+      additionalSbiIds: [106284736],
+      confirmed: true,
+      lastUpdatedOn: 1614108764000,
+      landConfirmed: true,
+      deactivated: false,
+      locked: true,
+      address: { address1: 'line 1', postalCode: 'AB12 3CD' },
+      correspondenceAddress: { address1: 'c line 1', postalCode: 'CD34 5EF' },
+      isFinancialToBusinessAddr: null,
+      isCorrespondenceAsBusinessAddr: false
+    })
+
+    expect(result).toEqual({
+      organisationId: '5565448',
+      sbi: '107591843',
+      name: 'HADLEY FARMS LTD',
+      additionalSbis: [106284736],
+      address: expect.objectContaining({ line1: 'line 1', postalCode: 'AB12 3CD' }),
+      correspondenceAddress: expect.objectContaining({
+        line1: 'c line 1',
+        postalCode: 'CD34 5EF'
+      }),
+      isFinancialToBusinessAddress: false,
+      isCorrespondenceAsBusinessAddress: false,
+      landConfirmed: true,
+      lastUpdated: new Date(1614108764000),
+      status: { locked: true, deactivated: false, confirmed: true }
+    })
+  })
+
+  test('handles null/missing optional fields', () => {
+    const result = transformOrganisationSearchResult({
+      id: 1,
+      name: 'Farm',
+      sbi: 123456789,
+      additionalSbiIds: null,
+      address: null,
+      correspondenceAddress: null,
+      lastUpdatedOn: null
+    })
+
+    expect(result).toMatchObject({
+      organisationId: '1',
+      sbi: '123456789',
+      additionalSbis: [],
+      address: null,
+      correspondenceAddress: null,
+      lastUpdated: null,
+      status: { locked: false, deactivated: false, confirmed: false }
+    })
+  })
+
+  test('handles undefined data', () => {
+    expect(transformOrganisationSearchResult(undefined)).toEqual({
+      organisationId: undefined,
+      sbi: undefined,
+      name: undefined,
+      additionalSbis: [],
+      address: null,
+      correspondenceAddress: null,
+      isFinancialToBusinessAddress: false,
+      isCorrespondenceAsBusinessAddress: false,
+      landConfirmed: false,
+      lastUpdated: null,
+      status: { locked: false, deactivated: false, confirmed: false }
+    })
+  })
+
+  test('handles defined data with all fields undefined', () => {
+    expect(transformOrganisationSearchResult({})).toEqual({
+      organisationId: undefined,
+      sbi: undefined,
+      name: undefined,
+      additionalSbis: [],
+      address: null,
+      correspondenceAddress: null,
+      isFinancialToBusinessAddress: false,
+      isCorrespondenceAsBusinessAddress: false,
+      landConfirmed: false,
+      lastUpdated: null,
+      status: { locked: false, deactivated: false, confirmed: false }
     })
   })
 })

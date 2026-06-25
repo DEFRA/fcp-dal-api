@@ -1,6 +1,16 @@
 type Query {
   business(sbi: ID!): Business
+  businessSearch(
+    searchString: String!
+    searchType: BusinessSearchFieldType!
+    pagination: Pagination
+  ): BusinessSearchResponse
   customer(crn: ID!): Customer
+  customerSearch(
+    searchString: String!
+    searchType: CustomerSearchFieldType!
+    pagination: Pagination
+  ): CustomerSearchResponse
   permissionGroups: [PermissionGroup]
 }
 
@@ -45,6 +55,68 @@ type EntityStatus {
   locked: Boolean
   confirmed: Boolean
   deactivated: Boolean
+}
+
+input Pagination {
+  perPage: Int!
+  page: Int!
+}
+
+type PageInfo {
+  number: Int
+  size: Int
+  totalPages: Int
+  totalElements: Int
+}
+
+enum BusinessSearchFieldType {
+  SBI
+  BUSINESS_NAME
+  BUSINESS_POSTCODE
+}
+
+type BusinessSearchResult {
+  organisationId: ID
+  sbi: ID
+  name: String
+  additionalSbis: [ID]
+  address: Address
+  correspondenceAddress: Address
+  isFinancialToBusinessAddress: Boolean
+  isCorrespondenceAsBusinessAddress: Boolean
+  landConfirmed: Boolean
+  lastUpdated: Date
+  status: EntityStatus
+}
+
+type BusinessSearchResponse {
+  results: [BusinessSearchResult]
+  pageInfo: PageInfo
+}
+
+enum CustomerSearchFieldType {
+  CRN
+  PERSONAL_IDENTIFIER
+  CUSTOMER_NAME
+  CUSTOMER_POSTCODE
+  VENDOR_NUMBER
+  TRADER_NUMBER
+}
+
+type CustomerSearchResult {
+  personId: ID
+  crn: ID
+  fullName: String
+  address: Address
+  personalIdentifiers: [String]
+  nationalInsuranceNumber: String
+  email: String
+  status: EntityStatus
+}
+
+type CustomerSearchResponse {
+  results: [CustomerSearchResult]
+  pageInfo: PageInfo
 }
 
 scalar Date

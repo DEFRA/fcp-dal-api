@@ -4,7 +4,7 @@ import {
   formatDateDDMMMYY,
   RuralPaymentsBusiness
 } from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
-import { NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../../app/transformers/rural-payments/business.js'
 
 const businessDetailsUpdatePayload = {
@@ -149,6 +149,123 @@ describe('Rural Payments Business', () => {
           'Content-Type': 'application/json'
         }
       })
+    })
+  })
+
+  describe('organisationSearch', () => {
+    test('should post search request with pagination and return data and page', async () => {
+      const mockResponse = {
+        _data: [{ id: 123, name: 'Test Farm' }],
+        _page: { number: 2, size: 20, totalPages: 3, numberOfElements: 1, totalElements: 41 }
+      }
+      httpPost.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.organisationSearch('BUSINESS_NAME', 'Test Farm', {
+        page: 2,
+        perPage: 20
+      })
+
+      expect(result).toEqual({ data: mockResponse._data, page: mockResponse._page })
+      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
+        body: JSON.stringify({
+          searchFieldType: 'BUSINESS_NAME',
+          primarySearchPhrase: 'Test Farm',
+          offset: 20,
+          limit: 20
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    test('should default pagination and return empty data when no results', async () => {
+      const mockResponse = {
+        _data: [],
+        _page: { number: 1, size: 100, totalPages: 0, numberOfElements: 0, totalElements: 0 }
+      }
+      httpPost.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.organisationSearch('BUSINESS_POSTCODE', 'AB12 3CD')
+
+      expect(result).toEqual({ data: [], page: mockResponse._page })
+      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
+        body: JSON.stringify({
+          searchFieldType: 'BUSINESS_POSTCODE',
+          primarySearchPhrase: 'AB12 3CD',
+          offset: 0,
+          limit: 100
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    test('should default page only when perPage provided without page', async () => {
+      httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+      await ruralPaymentsBusiness.organisationSearch('BUSINESS_NAME', 'Test Farm', { perPage: 25 })
+
+      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
+        body: JSON.stringify({
+          searchFieldType: 'BUSINESS_NAME',
+          primarySearchPhrase: 'Test Farm',
+          offset: 0,
+          limit: 25
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    test('should default perPage only when page provided without perPage', async () => {
+      httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
+
+      await ruralPaymentsBusiness.organisationSearch('BUSINESS_NAME', 'Test Farm', { page: 3 })
+
+      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
+        body: JSON.stringify({
+          searchFieldType: 'BUSINESS_NAME',
+          primarySearchPhrase: 'Test Farm',
+          offset: 200,
+          limit: 100
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    test('should return empty data and undefined page when response is empty', async () => {
+      httpPost.mockImplementationOnce(async () => undefined)
+
+      const result = await ruralPaymentsBusiness.organisationSearch('SBI', '123456789')
+
+      expect(result).toEqual({ data: [], page: undefined })
+    })
+
+    test('should throw BadRequest when page is less than 1', async () => {
+      await expect(
+        ruralPaymentsBusiness.organisationSearch('BUSINESS_NAME', 'Test Farm', {
+          page: 0,
+          perPage: 20
+        })
+      ).rejects.toEqual(new BadRequest('Pagination page must be 1 or greater'))
+
+      expect(httpPost).not.toHaveBeenCalled()
+    })
+
+    test('should throw BadRequest when perPage is less than 1', async () => {
+      await expect(
+        ruralPaymentsBusiness.organisationSearch('BUSINESS_NAME', 'Test Farm', {
+          page: 1,
+          perPage: 0
+        })
+      ).rejects.toEqual(new BadRequest('Pagination perPage must be 1 or greater'))
+
+      expect(httpPost).not.toHaveBeenCalled()
     })
   })
 

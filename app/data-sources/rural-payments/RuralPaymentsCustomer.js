@@ -3,7 +3,13 @@ import { config } from '../../config.js'
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { postPutHeaders } from '../../utils/headers.js'
+import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
+
+// Maps DAL customer search field types to the values KITS expects.
+const KITS_CUSTOMER_SEARCH_FIELD = {
+  CRN: 'CUSTOMER_REFERENCE'
+}
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getPersonIdByCRN(crn) {
@@ -36,6 +42,27 @@ export class RuralPaymentsCustomer extends RuralPayments {
       throw new NotFound('Rural payments customer not found')
     }
     return customerResponse._data[0]
+  }
+
+  async personSearch(searchType, primarySearchPhrase, pagination) {
+    const { offset, limit } = getSearchOffsetAndLimit(pagination)
+
+    const body = JSON.stringify({
+      searchFieldType: KITS_CUSTOMER_SEARCH_FIELD[searchType] ?? searchType,
+      primarySearchPhrase,
+      offset,
+      limit
+    })
+
+    const response = await this.post('person/search', {
+      body,
+      headers: postPutHeaders
+    })
+
+    return {
+      data: response?._data ?? [],
+      page: response?._page
+    }
   }
 
   async getCustomerByCRN(crn) {

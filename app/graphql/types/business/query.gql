@@ -2,4 +2,13 @@ extend type Query {
   business(sbi: ID!): Business
     @on
     @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+
+  """
+  Search for businesses by SBI, business name, or business postcode.
+  """
+  businessSearch(
+    searchString: String!
+    searchType: BusinessSearchFieldType!
+    pagination: Pagination
+  ): BusinessSearchResponse @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 }

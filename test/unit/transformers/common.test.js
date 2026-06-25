@@ -4,6 +4,7 @@ import {
   kitsAddressToDalAddress,
   transformDateTimeToISO,
   transformEntityStatus,
+  transformPageInfo,
   transformToISODate
 } from '../../../app/transformers/common.js'
 
@@ -128,6 +129,28 @@ describe('Common transformers', () => {
 
     it('should return null for invalid date', () => {
       expect(transformDateTimeToISO(new Date('invalid'))).toBe(null)
+    })
+  })
+  describe('transformPageInfo', () => {
+    it('should map upstream page fields', () => {
+      expect(
+        transformPageInfo({
+          number: 2,
+          size: 20,
+          totalPages: 3,
+          numberOfElements: 20,
+          totalElements: 41
+        })
+      ).toEqual({ number: 2, size: 20, totalPages: 3, totalElements: 41 })
+    })
+
+    it('should handle missing page', () => {
+      expect(transformPageInfo(undefined)).toEqual({
+        number: undefined,
+        size: undefined,
+        totalPages: undefined,
+        totalElements: undefined
+      })
     })
   })
 })
