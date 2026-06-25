@@ -1,4 +1,4 @@
-import { isValidGeoJson } from '../../../app/utils/geoJson.js'
+import { isValidGeoJson } from '../../../app/utils/geo-json.js'
 
 describe('isValidGeoJson', () => {
   it('accepts a geometry with coordinates', () => {
