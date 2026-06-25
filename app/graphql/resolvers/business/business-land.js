@@ -61,6 +61,9 @@ export const BusinessLand = {
       { dataSources }
     )
 
+    // Inspect the GraphQL fields requested, looking for the geometry field, so that the
+    // data source can request the additional (more expensive) geometries from the
+    // land covers endpoint
     const includeGeometries = isFieldRequested(info, 'geometry')
 
     return transformLandCovers(
