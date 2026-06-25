@@ -1,5 +1,5 @@
 import { GraphQLError, GraphQLScalarType, Kind, valueFromASTUntyped } from 'graphql'
-import { isValidGeoJson } from '../../utils/geoJson.js'
+import { isValidGeoJson } from '../../utils/geo-json.js'
 
 const makeStringScalar = ({ name, description, pattern, message }) =>
   new GraphQLScalarType({
