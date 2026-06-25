@@ -1,10 +1,10 @@
 import {
-  transformAndMergeParcelGeometries,
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels,
   transformLandParcelsEffectiveDates,
-  transformLandUses
+  transformLandUses,
+  transformParcelGeometry
 } from '../../../../app/transformers/rural-payments/lms.js'
 
 describe('LMS transformer', () => {
@@ -72,8 +72,7 @@ describe('LMS transformer', () => {
     expect(transformLandParcels(input)).toEqual(output)
   })
 
-  test('transformAndMergeParcelGeometries', () => {
-    const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+  test('transformParcelGeometry', () => {
     const parcelGeometries = {
       features: [
         {
@@ -84,28 +83,18 @@ describe('LMS transformer', () => {
         }
       ]
     }
-    expect(transformAndMergeParcelGeometries(parcels, parcelGeometries)).toEqual([
-      {
-        sheetId: 'mockSheetId',
-        parcelId: 'mockParcelId',
-        area: 0.1,
-        geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] }
-      }
-    ])
+    expect(transformParcelGeometry(parcelGeometries, 'mockSheetId', 'mockParcelId')).toEqual({
+      type: 'Polygon',
+      coordinates: [[[266375.64, 128194.34]]]
+    })
   })
 
-  test('transformAndMergeParcelGeometries - no matching feature', () => {
-    const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
-    expect(transformAndMergeParcelGeometries(parcels, { features: [] })).toEqual([
-      { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
-    ])
+  test('transformParcelGeometry - no matching feature', () => {
+    expect(transformParcelGeometry({ features: [] }, 'mockSheetId', 'mockParcelId')).toBeNull()
   })
 
-  test('transformAndMergeParcelGeometries - no organisationGeometries', () => {
-    const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
-    expect(transformAndMergeParcelGeometries(parcels, undefined)).toEqual([
-      { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
-    ])
+  test('transformParcelGeometry - no organisationGeometries', () => {
+    expect(transformParcelGeometry(undefined, 'mockSheetId', 'mockParcelId')).toBeNull()
   })
 
   test('transformLandParcelsEffectiveDates', () => {
