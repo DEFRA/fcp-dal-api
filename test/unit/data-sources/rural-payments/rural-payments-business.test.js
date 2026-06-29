@@ -104,6 +104,7 @@ describe('Rural Payments Business', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    ruralPaymentsBusiness.geometriesCache?.clear()
   })
 
   describe('getOrganisationById', () => {
@@ -348,6 +349,35 @@ describe('Rural Payments Business', () => {
       expect(httpGet).toHaveBeenCalledWith(
         'lms/organisation/123/geometries?bbox=0,0,0,0&historicDate=19-Mar-24'
       )
+    })
+
+    test('should only call the upstream once for repeated calls with the same organisation and date', async () => {
+      const mockResponse = { type: 'Polygon', coordinates: [] }
+      httpGet.mockImplementation(async () => mockResponse)
+
+      const [resultA, resultB] = await Promise.all([
+        ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-19'),
+        ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-19')
+      ])
+      const resultC = await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+        123,
+        '2024-03-19'
+      )
+
+      expect(resultA).toEqual(mockResponse)
+      expect(resultB).toEqual(mockResponse)
+      expect(resultC).toEqual(mockResponse)
+      expect(httpGet).toHaveBeenCalledTimes(1)
+    })
+
+    test('should call the upstream again for a different organisation or date', async () => {
+      httpGet.mockImplementation(async () => ({ type: 'Polygon', coordinates: [] }))
+
+      await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-19')
+      await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(456, '2024-03-19')
+      await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-20')
+
+      expect(httpGet).toHaveBeenCalledTimes(3)
     })
   })
 
