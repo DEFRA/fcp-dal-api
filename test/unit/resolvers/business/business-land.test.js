@@ -170,6 +170,16 @@ describe('BusinessLand', () => {
     })
   })
 
+  it('parcel - not found', async () => {
+    await expect(
+      BusinessLand.parcel(
+        mockBusiness,
+        { ...mockArguments, sheetId: 'unknownSheet', parcelId: 'unknownParcel' },
+        { dataSources }
+      )
+    ).rejects.toThrow('No parcel found for sheetId: unknownSheet and parcelId: unknownParcel')
+  })
+
   it('parcelCovers - geometry requested', async () => {
     expect(
       await BusinessLand.parcelCovers(
