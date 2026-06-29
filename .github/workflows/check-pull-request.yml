@@ -30,6 +30,8 @@ jobs:
       - name: Setup npm
         uses: actions/setup-node@v5
         with:
+          # Temporarily forcing the node version beyond 24.17.  We don't want to pin to 24.18 - it should really be
+          # the latest node 24 version, but this was necessary to push beyond the default, which is 24.17 at the time of commit
           node-version: 24.18
           cache: npm
 
