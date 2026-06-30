@@ -106,9 +106,9 @@ const generateInputsForCRN = (crn) => ({
       line4: 'acceptance-line4',
       line5: 'acceptance-line5',
       pafOrganisationName: 'acceptance-pafOrganisationName',
-      postalCode: 'acceptance-postalCode',
+      postalCode: 'SW1A 2AA',
       street: 'acceptance-street',
-      uprn: 'acceptance-uprn'
+      uprn: '123456789012'
     }
   },
   dateOfBirthInput: {
@@ -122,7 +122,7 @@ const generateInputsForCRN = (crn) => ({
   emailInput: {
     crn,
     email: {
-      address: 'acceptance-email-address'
+      address: 'acceptance@example.com'
     }
   },
   nameInput: {
@@ -132,8 +132,8 @@ const generateInputsForCRN = (crn) => ({
   phoneInput: {
     crn,
     phone: {
-      landline: 'acceptance-landline',
-      mobile: 'acceptance-mobile'
+      landline: '01234 567890',
+      mobile: '07700 900000'
     }
   }
 })
@@ -195,7 +195,7 @@ const fullMutation = gql`
   }
 `
 const nameFullInput = {
-  title: 'acceptance-title-full',
+  title: 'acceptance-title-xxx',
   otherTitle: 'acceptance-otherTitle-full',
   first: 'acceptance-first-full',
   middle: 'acceptance-middle-full',
@@ -219,19 +219,19 @@ const generateFullInputForCRN = (crn) => ({
       line4: 'acceptance-line4-full',
       line5: 'acceptance-line5-full',
       pafOrganisationName: 'acceptance-pafOrganisationName-full',
-      postalCode: 'acceptance-postalCode-full',
+      postalCode: 'SW1A 2AB',
       street: 'acceptance-street-full',
-      uprn: 'acceptance-uprn-full'
+      uprn: '210987654321'
     },
     dateOfBirth: '2000-03-01', // must be a valid date string
     doNotContact: false, // must be boolean
     email: {
-      address: 'acceptance-email-address-full'
+      address: 'acceptance-full@example.com'
     },
     ...nameFullInput,
     phone: {
-      landline: 'acceptance-landline-full',
-      mobile: 'acceptance-mobile-full'
+      landline: '01234 567891',
+      mobile: '07700 900001'
     }
   }
 })
