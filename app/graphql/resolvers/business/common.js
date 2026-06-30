@@ -38,16 +38,16 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
   }
 }
 
-async function insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
+async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   const orgId = await ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-  await mongoBusiness.insertOrgIdBySbi(sbi, orgId)
+  await mongoBusiness.upsertOrgIdBySbi(sbi, orgId)
   return orgId
 }
 
 export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   return (
     (await mongoBusiness.getOrgIdBySbi(sbi)) ??
-    insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
+    upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
   )
 }
 
