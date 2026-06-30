@@ -22,4 +22,8 @@ describe('isFieldRequested', () => {
   test('returns false when there is no selection set', () => {
     expect(isFieldRequested({ fieldNodes: [{}] }, 'geometry')).toBe(false)
   })
+
+  test('returns false when info is null', () => {
+    expect(isFieldRequested(null, 'geometry')).toBe(false)
+  })
 })
