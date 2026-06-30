@@ -159,7 +159,7 @@ describe('Business Search Queries', () => {
       ],
       pageInfo: {
         number: 0,
-        size: 20,
+        size: 100,
         totalPages: 1,
         totalElements: 1
       }
@@ -228,7 +228,7 @@ describe('Customer Search Queries', () => {
       ],
       pageInfo: {
         number: 0,
-        size: 20,
+        size: 100,
         totalPages: 1,
         totalElements: 1
       }
