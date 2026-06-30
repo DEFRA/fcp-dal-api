@@ -497,6 +497,18 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     expect(response).toEqual({ __typename: 'BankDetailsSubmitted', success: true })
   })
 
+  it('propagates the error when validateBankChange fails and does not submit', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockRejectedValue(
+      new Error('Internal Server Error')
+    )
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Internal Server Error')
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
   it('throws NotFound when the organisation has no FRN', async () => {
     dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
       id: 5583781,
