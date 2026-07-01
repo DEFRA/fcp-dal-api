@@ -3,7 +3,8 @@ import {
   transformLandCoversToArea,
   transformLandParcels,
   transformLandParcelsEffectiveDates,
-  transformLandUses
+  transformLandUses,
+  transformParcelGeometry
 } from '../../../../app/transformers/rural-payments/lms.js'
 
 describe('LMS transformer', () => {
@@ -25,7 +26,14 @@ describe('LMS transformer', () => {
       ]
     }
     const output = [
-      { area: 0.1, id: 'mockId', name: 'Mock Name', code: 'mockId', isBpsEligible: true }
+      {
+        area: 0.1,
+        id: 'mockId',
+        name: 'Mock Name',
+        code: 'mockId',
+        isBpsEligible: true,
+        geometry: null
+      }
     ]
     expect(transformLandCovers(input)).toEqual(output)
   })
@@ -62,6 +70,31 @@ describe('LMS transformer', () => {
       }
     ]
     expect(transformLandParcels(input)).toEqual(output)
+  })
+
+  test('transformParcelGeometry', () => {
+    const parcelGeometries = {
+      features: [
+        {
+          id: 1,
+          type: 'Feature',
+          geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] },
+          properties: { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: '1000' }
+        }
+      ]
+    }
+    expect(transformParcelGeometry(parcelGeometries, 'mockSheetId', 'mockParcelId')).toEqual({
+      type: 'Polygon',
+      coordinates: [[[266375.64, 128194.34]]]
+    })
+  })
+
+  test('transformParcelGeometry - no matching feature', () => {
+    expect(transformParcelGeometry({ features: [] }, 'mockSheetId', 'mockParcelId')).toBeNull()
+  })
+
+  test('transformParcelGeometry - no organisationGeometries', () => {
+    expect(transformParcelGeometry(undefined, 'mockSheetId', 'mockParcelId')).toBeNull()
   })
 
   test('transformLandParcelsEffectiveDates', () => {

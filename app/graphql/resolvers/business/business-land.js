@@ -5,10 +5,12 @@ import {
   transformLandParcels,
   transformLandParcelsEffectiveDates,
   transformLandUses,
+  transformParcelGeometry,
   transformTotalArea,
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
 import { validateDateInput } from '../../../utils/date.js'
+import { isFieldRequested } from '../../../utils/graphql.js'
 
 export const BusinessLand = {
   summary({ organisationId }, { date }) {
@@ -35,18 +37,21 @@ export const BusinessLand = {
   async parcels({ organisationId }, { date = new Date() }, { dataSources }) {
     validateDateInput(date)
 
-    return transformLandParcels(
+    const parcels = transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
         organisationId,
         date
       )
     )
+
+    return parcels.map((parcel) => ({ ...parcel, organisationId, date }))
   },
 
   async parcelCovers(
     { organisationId },
     { date = new Date(), sheetId, parcelId },
-    { dataSources }
+    { dataSources },
+    info
   ) {
     validateDateInput(date)
 
@@ -56,12 +61,18 @@ export const BusinessLand = {
       { dataSources }
     )
 
+    // Inspect the GraphQL fields requested, looking for the geometry field, so that the
+    // data source can request the additional (more expensive) geometries from the
+    // land covers endpoint
+    const includeGeometries = isFieldRequested(info, 'geometry')
+
     return transformLandCovers(
       await dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate(
         organisationId,
         parcel.sheetId,
         parcelId,
-        date
+        date,
+        includeGeometries
       )
     )
   },
@@ -94,6 +105,16 @@ const getParcelEffectiveDates = async (
 }
 
 export const BusinessLandParcel = {
+  async geometry({ organisationId, date, sheetId, parcelId }, __, { dataSources }) {
+    const organisationGeometries =
+      await dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+        organisationId,
+        date
+      )
+
+    return transformParcelGeometry(organisationGeometries, sheetId, parcelId)
+  },
+
   async effectiveToDate(parcel, __, { dataSources }) {
     const { effectiveTo } = await getParcelEffectiveDates(dataSources, parcel)
 
