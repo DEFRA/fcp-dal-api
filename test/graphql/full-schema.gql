@@ -390,6 +390,12 @@ type Business {
   agreements: [Agreement]
   applications: [Application]
   payments(fromDate: Date, toDate: Date, userIP: String!): BusinessPayments
+  bankAccounts: [BusinessBankAccount!]
+}
+
+type BusinessBankAccount {
+  number: String!
+  currency: BankAccountCurrency!
 }
 
 type BusinessPayments {
