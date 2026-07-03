@@ -136,7 +136,7 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),
-        insertOrgIdBySbi: jest.fn()
+        upsertOrgIdBySbi: jest.fn()
       }
     }
   })

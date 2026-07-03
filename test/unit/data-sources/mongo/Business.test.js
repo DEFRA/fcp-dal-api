@@ -9,7 +9,7 @@ const db = client.db(config.get('mongo.databaseName'))
 const mockCollection = {
   ...db.collection('business'),
   findOne: jest.fn(),
-  insertOne: jest.fn()
+  updateOne: jest.fn()
 }
 const mongoBusiness = new MongoBusiness({ modelOrCollection: mockCollection })
 
@@ -38,18 +38,41 @@ describe('MongoBusiness', () => {
     expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '1234567890' })
   })
 
-  it('insertOrgIdBySbi', async () => {
+  it('upsertOrgIdBySbi', async () => {
     const dummyDate = new Date('2025-01-01')
     jest.useFakeTimers().setSystemTime(dummyDate)
-    mockCollection.insertOne.mockResolvedValue({ acknowledged: true, _id: 'orgId' })
+    mockCollection.updateOne.mockResolvedValue({ acknowledged: true, upsertedId: 'orgId' })
 
-    const result = await mongoBusiness.insertOrgIdBySbi('1234567890', 'orgId')
-    expect(result).toEqual({ acknowledged: true, _id: 'orgId' })
-    expect(mockCollection.insertOne).toHaveBeenCalledWith({
-      _id: '1234567890',
-      orgId: 'orgId',
-      createdAt: dummyDate,
-      updatedAt: dummyDate
+    const result = await mongoBusiness.upsertOrgIdBySbi('1234567890', 'orgId')
+    expect(result).toEqual({ acknowledged: true, upsertedId: 'orgId' })
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      { _id: '1234567890' },
+      {
+        $set: { orgId: 'orgId', updatedAt: dummyDate },
+        $setOnInsert: { createdAt: dummyDate }
+      },
+      { upsert: true }
+    )
+  })
+
+  describe('test concurrent writes', () => {
+    const realCollection = db.collection('business-concurrency')
+    const realMongoBusiness = new MongoBusiness({ modelOrCollection: realCollection })
+
+    it('upsertOrgIdBySbi handles two concurrent requests for the same SBI without failing', async () => {
+      jest.useRealTimers()
+      const sbi = '1234567890'
+      await realCollection.deleteMany({})
+
+      await expect(
+        Promise.all([
+          realMongoBusiness.upsertOrgIdBySbi(sbi, 'orgId'),
+          realMongoBusiness.upsertOrgIdBySbi(sbi, 'orgId')
+        ])
+      ).resolves.toHaveLength(2)
+
+      expect(await realMongoBusiness.getOrgIdBySbi(sbi)).toEqual('orgId')
+      expect(await realCollection.countDocuments({ _id: sbi })).toEqual(1)
     })
   })
 })

@@ -20,7 +20,7 @@ describe('businessDetailsUpdateResolver', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),
-        insertOrgIdBySbi: jest.fn()
+        upsertOrgIdBySbi: jest.fn()
       }
     }
     logger = {
@@ -50,7 +50,7 @@ describe('businessDetailsUpdateResolver', () => {
       { name: 'Test' }
     )
     expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.insertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
+    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
   })
@@ -79,7 +79,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),
-        insertOrgIdBySbi: jest.fn()
+        upsertOrgIdBySbi: jest.fn()
       }
     }
     logger = {
@@ -113,7 +113,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     ).toHaveBeenCalledWith('orgId', { dateStartedFarming: '2025-01-01T00:00:00.000Z' })
 
     expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.insertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
+    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
   })

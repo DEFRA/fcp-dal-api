@@ -6,12 +6,15 @@ export class MongoCustomer extends MongoDataSource {
     return customer?.personId
   }
 
-  async insertPersonIdByCRN(crn, personId) {
-    return this.collection.insertOne({
-      _id: crn,
-      personId,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    })
+  async upsertPersonIdByCRN(crn, personId) {
+    const now = new Date()
+    return this.collection.updateOne(
+      { _id: crn },
+      {
+        $set: { personId, updatedAt: now },
+        $setOnInsert: { createdAt: now }
+      },
+      { upsert: true }
+    )
   }
 }

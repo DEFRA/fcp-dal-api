@@ -12,7 +12,7 @@ describe('retrievePersonIdByCRN', () => {
       },
       mongoCustomer: {
         findPersonIdByCRN: jest.fn(),
-        insertPersonIdByCRN: jest.fn()
+        upsertPersonIdByCRN: jest.fn()
       }
     }
   })
@@ -31,13 +31,13 @@ describe('retrievePersonIdByCRN', () => {
     const crn = '1234567890'
     const personId = 'rpPersonId'
     dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(undefined)
-    dataSources.mongoCustomer.insertPersonIdByCRN.mockResolvedValue(undefined)
+    dataSources.mongoCustomer.upsertPersonIdByCRN.mockResolvedValue(undefined)
     dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue(personId)
 
     const result = await retrievePersonIdByCRN(crn, dataSources)
 
     expect(dataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith(crn)
-    expect(dataSources.mongoCustomer.insertPersonIdByCRN).toHaveBeenCalledWith(crn, personId)
+    expect(dataSources.mongoCustomer.upsertPersonIdByCRN).toHaveBeenCalledWith(crn, personId)
     expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith(crn)
     expect(result).toBe('rpPersonId')
   })
@@ -69,12 +69,12 @@ describe('retrievePersonIdByCRN', () => {
     const mongoError = new Error('MongoDB error')
     dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(undefined)
     dataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue(personId)
-    dataSources.mongoCustomer.insertPersonIdByCRN.mockRejectedValue(mongoError)
+    dataSources.mongoCustomer.upsertPersonIdByCRN.mockRejectedValue(mongoError)
 
     const result = await retrievePersonIdByCRN(crn, dataSources)
 
     expect(dataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith(crn)
-    expect(dataSources.mongoCustomer.insertPersonIdByCRN).toHaveBeenCalledWith(crn, personId)
+    expect(dataSources.mongoCustomer.upsertPersonIdByCRN).toHaveBeenCalledWith(crn, personId)
     expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith(crn)
     expect(result).toBe(personId)
   })

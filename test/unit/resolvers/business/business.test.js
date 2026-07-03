@@ -216,7 +216,7 @@ const dataSources = {
   },
   mongoBusiness: {
     getOrgIdBySbi: jest.fn(),
-    insertOrgIdBySbi: jest.fn()
+    upsertOrgIdBySbi: jest.fn()
   }
 }
 
