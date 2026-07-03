@@ -11,6 +11,7 @@ permissions:
 env:
   AWS_REGION: eu-west-2
   AWS_ACCOUNT_ID: '094954420758'
+  CUSTOM_TAG: 2.11.1
 
 jobs:
   build:
