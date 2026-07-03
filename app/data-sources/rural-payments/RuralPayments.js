@@ -21,7 +21,7 @@ export function extractCrnFromDefraIdToken(token) {
 export class RuralPayments extends BaseRESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
-  constructor(config, { request, gatewayType, internalGatewayDevOverrideEmail }) {
+  constructor(config, { request, gatewayType }) {
     super(config, { name: 'Rural payments', code: RURALPAYMENTS_API_REQUEST_001 })
     this.request = request
 
@@ -32,7 +32,6 @@ export class RuralPayments extends BaseRESTDataSource {
       )
     }
 
-    this.internalGatewayDevOverrideEmail = internalGatewayDevOverrideEmail
     this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
 
     if (appConfig.get('kits.disableMTLS')) {
@@ -67,9 +66,7 @@ export class RuralPayments extends BaseRESTDataSource {
     const headers = this.request.headers
     const additionalHeaders = {}
 
-    if (this.gatewayType === 'internal' && this.internalGatewayDevOverrideEmail) {
-      additionalHeaders.email = this.internalGatewayDevOverrideEmail
-    } else if (this.gatewayType === 'internal' && headers.email) {
+    if (this.gatewayType === 'internal' && headers.email) {
       additionalHeaders.email = headers.email
     } else if (this.gatewayType === 'external' && headers['x-forwarded-authorization']) {
       additionalHeaders.Authorization = headers['x-forwarded-authorization']

@@ -74,13 +74,11 @@ describe('RuralPayments Custom Fetch', () => {
     const request = {}
     const rp = new RuralPayments(config, {
       request,
-      gatewayType: 'internal',
-      internalGatewayDevOverrideEmail: 'override-email'
+      gatewayType: 'internal'
     })
 
     expect(rp.request).toBe(request)
     expect(rp.gatewayType).toBe('internal')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
     expect(rp.baseURL).toBe(fakeInternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -118,13 +116,11 @@ describe('RuralPayments Custom Fetch', () => {
     const request = {}
     const rp = new RuralPayments(config, {
       request,
-      gatewayType: 'external',
-      internalGatewayDevOverrideEmail: 'override-email'
+      gatewayType: 'external'
     })
 
     expect(rp.request).toBe(request)
     expect(rp.gatewayType).toBe('external')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
     expect(rp.baseURL).toBe(fakeExternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -163,13 +159,11 @@ describe('RuralPayments Custom Fetch', () => {
     const request = {}
     const rp = new RuralPayments(config, {
       request,
-      gatewayType: 'internal',
-      internalGatewayDevOverrideEmail: 'override-email'
+      gatewayType: 'internal'
     })
 
     expect(rp.request).toBe(request)
     expect(rp.gatewayType).toBe('internal')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
     expect(rp.baseURL).toBe(fakeInternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS
@@ -196,13 +190,11 @@ describe('RuralPayments Custom Fetch', () => {
     const request = {}
     const rp = new RuralPayments(config, {
       request,
-      gatewayType: 'external',
-      internalGatewayDevOverrideEmail: 'override-email'
+      gatewayType: 'external'
     })
 
     expect(rp.request).toBe(request)
     expect(rp.gatewayType).toBe('external')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
     expect(rp.baseURL).toBe(fakeExternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS
