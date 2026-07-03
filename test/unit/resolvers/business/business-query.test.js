@@ -15,7 +15,7 @@ describe('Business Query Resolver', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),
-        insertOrgIdBySbi: jest.fn()
+        upsertOrgIdBySbi: jest.fn()
       }
     }
   })

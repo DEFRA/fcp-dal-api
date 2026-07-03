@@ -13,7 +13,7 @@ describe('Customer Query Resolver', () => {
       },
       mongoCustomer: {
         findPersonIdByCRN: jest.fn(),
-        insertPersonIdByCRN: jest.fn()
+        upsertPersonIdByCRN: jest.fn()
       }
     }
   })
