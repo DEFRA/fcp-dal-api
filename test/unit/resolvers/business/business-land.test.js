@@ -32,7 +32,17 @@ describe('BusinessLand', () => {
         {
           id: 1,
           type: 'Feature',
-          geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [100.01, 100.01],
+                [150.7, 200],
+                [200.4, 100.01],
+                [100.01, 100.01]
+              ]
+            ]
+          },
           properties: { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: '1000' }
         }
       ]
@@ -156,7 +166,14 @@ describe('BusinessLand', () => {
     it('geometry', async () => {
       expect(await BusinessLandParcel.geometry(mockParcel, null, { dataSources })).toEqual({
         type: 'Polygon',
-        coordinates: [[[266375.64, 128194.34]]]
+        coordinates: [
+          [
+            [100.01, 100.01],
+            [150.7, 200],
+            [200.4, 100.01],
+            [100.01, 100.01]
+          ]
+        ]
       })
       expect(
         dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate
