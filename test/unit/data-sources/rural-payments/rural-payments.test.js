@@ -148,9 +148,16 @@ describe('RuralPayments', () => {
 
       await rp.willSendRequest(path, request)
 
-      expect(request.headers).toEqual({ email: 'test@test.test', 'gateway-type': 'internal' })
+      expect(request.headers).toEqual({
+        'Accept-Encoding': 'gzip, deflate, br',
+        email: 'test@test.test',
+        'gateway-type': 'internal'
+      })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
-        request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
+        request: {
+          ...request,
+          url: 'https://rp_kits_gateway_internal_url/test-path'
+        },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
@@ -177,6 +184,7 @@ describe('RuralPayments', () => {
       await rp.willSendRequest(path, request)
 
       expect(request.headers).toEqual({
+        'Accept-Encoding': 'gzip, deflate, br',
         Authorization: token,
         crn: 'test-crn'
       })
