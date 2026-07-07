@@ -1,5 +1,6 @@
 import { NotFound } from '../../../errors/graphql.js'
 import {
+  transformAndMergeParcelGeometries,
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels,
@@ -9,16 +10,22 @@ import {
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
 import { validateDateInput } from '../../../utils/date.js'
+import { isFieldRequested } from '../../../utils/graphql.js'
 
 export const BusinessLand = {
   summary({ organisationId }, { date }) {
     return { organisationId, date }
   },
 
-  async parcel({ organisationId, sbi }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
+  async parcel(
+    { organisationId, sbi },
+    { date = new Date(), parcelId, sheetId },
+    { dataSources },
+    info
+  ) {
     validateDateInput(date)
 
-    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
+    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources }, info)
     const parcel = parcels?.find((p) => p.sheetId === sheetId && p.parcelId === parcelId)
     if (!parcel) {
       throw new NotFound(`No parcel found for sheetId: ${sheetId} and parcelId: ${parcelId}`)
@@ -32,21 +39,38 @@ export const BusinessLand = {
     }
   },
 
-  async parcels({ organisationId }, { date = new Date() }, { dataSources }) {
+  async parcels({ organisationId }, { date = new Date() }, { dataSources }, info) {
     validateDateInput(date)
 
-    return transformLandParcels(
+    const parcels = transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
         organisationId,
         date
       )
     )
+    if (!isFieldRequested(info, 'geometry')) {
+      return parcels
+    }
+
+    // If geometries have been requested, then they are retrieved at org-level, not individual parcel
+    // level.  For larger organisations, the response payload to this call can be quite large.  Apollo's
+    // RestDataSource implementation would result in a parcel-by-parcel deep-clone of the result
+    // (potentially causing performance/heap issues), if we implemented this retrieval at the parcel level.
+    // Resolving and merging geometries at ths level to work around this limitation.
+    const parcelGeometries =
+      await dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+        organisationId,
+        date
+      )
+
+    return transformAndMergeParcelGeometries(parcels, parcelGeometries)
   },
 
   async parcelCovers(
     { organisationId },
     { date = new Date(), sheetId, parcelId },
-    { dataSources }
+    { dataSources },
+    info
   ) {
     validateDateInput(date)
 
@@ -56,12 +80,18 @@ export const BusinessLand = {
       { dataSources }
     )
 
+    // Inspect the GraphQL fields requested, looking for the geometry field, so that the
+    // data source can request the additional (more expensive) geometries from the
+    // land covers endpoint
+    const includeGeometries = isFieldRequested(info, 'geometry')
+
     return transformLandCovers(
       await dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate(
         organisationId,
         parcel.sheetId,
         parcelId,
-        date
+        date,
+        includeGeometries
       )
     )
   },

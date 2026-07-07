@@ -106,17 +106,25 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`lms/organisation/${organisationId}/parcels/historic/${formattedDate}`)
   }
 
+  getGeometriesByOrganisationIdAndDate(organisationId, date) {
+    const formattedDate = formatDateDDMMMYY(new Date(date))
+
+    return this.get(
+      `lms/organisation/${organisationId}/geometries?bbox=0,0,0,0&historicDate=${formattedDate}`
+    )
+  }
+
   getParcelEffectiveDatesByOrganisationIdAndDate(organisationId, date) {
     const formattedDate = formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/parcel-details/historic/${formattedDate}`)
   }
 
-  getCoversByOrgSheetParcelIdDate(organisationId, sheetId, parcelId, date) {
+  getCoversByOrgSheetParcelIdDate(organisationId, sheetId, parcelId, date, includeGeometries) {
     const formattedDate = formatDateDDMMMYY(new Date(date))
 
     return this.get(
-      `lms/organisation/${organisationId}/parcel/sheet-id/${sheetId}/parcel-id/${parcelId}/historic/${formattedDate}/land-covers`
+      `lms/organisation/${organisationId}/parcel/sheet-id/${sheetId}/parcel-id/${parcelId}/historic/${formattedDate}/land-covers?includeGeometries=${includeGeometries}`
     )
   }
 
