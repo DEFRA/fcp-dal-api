@@ -61,10 +61,9 @@ export const BusinessLand = {
         : Promise.resolve(null)
     ])
 
-    const parcels = transformLandParcels(parcelsResponse)
-    logger.info(`Parcels retrieved: ${parcels.length}`)
-
     if (!includeGeometries) {
+      const parcels = transformLandParcels(parcelsResponse)
+      logger.info(`Parcels retrieved: ${parcels.length}`)
       return parcels
     }
 
@@ -75,7 +74,10 @@ export const BusinessLand = {
       `Parcel geometries retrieved: ${parcelGeometries.features.length} (${parcelGeometriesSizeInMb} MB)`
     )
 
-    return transformAndMergeParcelGeometries(parcels, parcelGeometries)
+    const parcels = transformAndMergeParcelGeometries(parcelsResponse, parcelGeometries)
+    logger.info(`Parcels retrieved: ${parcels.length}`)
+
+    return parcels
   },
 
   async parcelCovers(
