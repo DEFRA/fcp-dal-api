@@ -243,6 +243,12 @@ type Business {
   customer(crn: ID!): BusinessCustomer
   agreements: [Agreement]
   applications: [Application]
+  bankAccounts: [BusinessBankAccount!]
+}
+
+type BusinessBankAccount {
+  number: String!
+  currency: BankAccountCurrency!
 }
 
 type BusinessCustomerPartial {

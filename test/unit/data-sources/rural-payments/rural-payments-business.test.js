@@ -689,4 +689,21 @@ describe('Rural Payments Business', () => {
       expect(result).toEqual(accountStatus)
     })
   })
+
+  describe('getExistingBankAccounts', () => {
+    test('gets the existing bank accounts for an FRN', async () => {
+      const existingAccounts = {
+        accounts: [
+          { number: '1234', currency: 'GBP' },
+          { number: '5678', currency: 'EUR' }
+        ]
+      }
+      httpGet.mockResolvedValueOnce(existingAccounts)
+
+      const result = await ruralPaymentsBusiness.getExistingBankAccounts('10014489653')
+
+      expect(httpGet).toHaveBeenCalledWith('bank-change-service/v1/existing-accounts/10014489653')
+      expect(result).toEqual(existingAccounts)
+    })
+  })
 })
