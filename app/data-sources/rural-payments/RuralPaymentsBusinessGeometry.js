@@ -25,7 +25,7 @@ export class RuralPaymentsBusinessGeometry extends RuralPayments {
    * Avoid deep cloning cached responses by simply returning the body as-is.
    */
   cloneParsedBody(parsedBody) {
-    logger.info('Cloning parsed body')
+    // logger.info('Cloning parsed body')
     return Object.freeze(parsedBody)
   }
 }
