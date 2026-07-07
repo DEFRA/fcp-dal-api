@@ -1,6 +1,5 @@
 import { RuralPayments } from './RuralPayments.js'
 import { formatDateDDMMMYY } from '../../utils/date.js'
-import { logger } from '../../logger/logger.js'
 
 /**
  * Due to the potentially large response payloads, combined with the large number of concurrent
@@ -17,7 +16,6 @@ export class RuralPaymentsBusinessGeometry extends RuralPayments {
     const geom = this.get(
       `lms/organisation/${organisationId}/geometries?bbox=0,0,0,0&historicDate=${formattedDate}`
     )
-    logger.info('Retrieved geometries')
     return geom
   }
 

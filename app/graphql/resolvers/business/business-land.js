@@ -11,6 +11,7 @@ import {
 } from '../../../transformers/rural-payments/lms.js'
 import { validateDateInput } from '../../../utils/date.js'
 import { isFieldRequested } from '../../../utils/graphql.js'
+import { logger } from '../../../logger/logger.js'
 
 export const BusinessLand = {
   summary({ organisationId }, { date }) {
@@ -112,7 +113,10 @@ export const BusinessLandParcel = {
         date
       )
 
-    return transformParcelGeometry(organisationGeometries, sheetId, parcelId)
+    logger.info(`Retrieved geometries for ${sheetId} / ${parcelId}`)
+    const g = transformParcelGeometry(organisationGeometries, sheetId, parcelId)
+    logger.info(`Done transforming`)
+    return g
   },
 
   async effectiveToDate(parcel, __, { dataSources }) {
