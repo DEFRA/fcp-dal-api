@@ -105,6 +105,7 @@ const getParcelEffectiveDates = async (
   return transformLandParcelsEffectiveDates(parcelId, sheetId, parclsWithAffectiveDates)
 }
 
+let geomCount = 0
 export const BusinessLandParcel = {
   async geometry({ organisationId, date, sheetId, parcelId }, __, { dataSources }) {
     const organisationGeometries =
@@ -113,7 +114,7 @@ export const BusinessLandParcel = {
         date
       )
 
-    logger.info(`Retrieved geometries for ${sheetId} / ${parcelId}`)
+    logger.info(`[${++geomCount}] Retrieved geometries for ${sheetId} / ${parcelId}`)
     const g = transformParcelGeometry(organisationGeometries, sheetId, parcelId)
     logger.info(`Done transforming`)
     return g

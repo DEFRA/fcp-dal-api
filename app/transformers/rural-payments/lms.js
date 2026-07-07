@@ -1,6 +1,7 @@
 import { validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { convertSquareMetersToHectares } from '../../utils/numbers.js'
 import { transformDateTimeToISO } from '../common.js'
+import { logger } from '../../logger/logger.js'
 
 export function transformLandCovers(landCover) {
   const items = landCover?.features || []
@@ -48,6 +49,7 @@ export function transformParcelGeometry(organisationGeometries, sheetId, parcelI
 }
 
 export function transformLandParcels(landParcels) {
+  logger.info(`Number of land parcels ${landParcels.length}`)
   return landParcels.map((parcel) => {
     return {
       ...parcel,
