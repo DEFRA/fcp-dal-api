@@ -98,6 +98,24 @@ describe('business bankAccounts', () => {
     })
   })
 
+  test('returns an empty list when the response has no accounts property', async () => {
+    mockOrganisationSearch(v1)
+    mockOrganisation()
+    v1.get('/bank-change-service/v1/existing-accounts/10014489653').reply(200, {})
+
+    const result = await makeTestQuery(query)
+
+    expect(nock.isDone()).toBe(true)
+    expect(result).toEqual({
+      data: {
+        business: {
+          sbi: 'sbi',
+          bankAccounts: []
+        }
+      }
+    })
+  })
+
   test('returns NotFound when the organisation has no FRN', async () => {
     mockOrganisationSearch(v1)
     mockOrganisation(null)
