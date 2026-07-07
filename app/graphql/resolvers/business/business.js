@@ -73,6 +73,18 @@ export const Business = {
     return transformApplications(applications)
   },
 
+  async bankAccounts({ organisationId }, __, { dataSources }) {
+    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+    const frn = organisation.businessReference
+
+    if (!frn) {
+      throw new NotFound('FRN not found for business')
+    }
+
+    const response = await dataSources.ruralPaymentsBusiness.getExistingBankAccounts(frn)
+    return response?.accounts ?? []
+  },
+
   async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources }) {
     const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
     const frn = organisation.businessReference

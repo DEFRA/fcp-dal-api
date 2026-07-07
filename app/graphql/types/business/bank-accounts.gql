@@ -1,0 +1,22 @@
+extend type Business {
+  """
+  Existing bank accounts held for the business.
+  """
+  bankAccounts: [BusinessBankAccount!] @on @auth(requires: [SINGLE_FRONT_DOOR, SFI_REFORM])
+}
+
+"""
+An existing bank account held for a business. Only the last four digits of the
+account number are returned.
+"""
+type BusinessBankAccount {
+  """
+  Last four digits of the bank account number.
+  """
+  number: String! @on
+
+  """
+  Currency the account is held in.
+  """
+  currency: BankAccountCurrency! @on
+}
