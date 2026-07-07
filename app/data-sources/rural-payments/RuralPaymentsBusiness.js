@@ -2,18 +2,10 @@ import { StatusCodes } from 'http-status-codes'
 import jwt from 'jsonwebtoken'
 import { BadRequest, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
-import { formatDateAsUtcDateTime } from '../../utils/date.js'
+import { formatDateAsUtcDateTime, formatDateDDMMMYY } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
-
-export const formatDateDDMMMYY = (date) => {
-  // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
-  const day = date.toLocaleString('en-US', { day: '2-digit' }) // 01
-  const month = date.toLocaleString('en-US', { month: 'short' }) // "Sep"
-  const year = date.toLocaleString('en-US', { year: '2-digit' }) // "25"
-  return `${day}-${month}-${year}`
-}
 
 export class RuralPaymentsBusiness extends RuralPayments {
   async createOrganisationByPersonId(personId, orgDetails) {
@@ -104,27 +96,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     const formattedDate = formatDateDDMMMYY(new Date(date))
 
     return this.get(`lms/organisation/${organisationId}/parcels/historic/${formattedDate}`)
-  }
-
-  getGeometriesByOrganisationIdAndDate(organisationId, date) {
-    const formattedDate = formatDateDDMMMYY(new Date(date))
-
-    // The geometry field resolver is called once per parcel, but each call requests the same organisation-wide
-    // geometries for a given organisationId/date. Cache the response for the duration of the request, so we only
-    // request the data once
-    const cacheKey = `${organisationId}:${formattedDate}`
-    this.geometriesCache ??= new Map()
-    if (!this.geometriesCache.has(cacheKey)) {
-      // Hardcoding bounding box, so that all geometries for an organisation are returned.
-      this.geometriesCache.set(
-        cacheKey,
-        this.get(
-          `lms/organisation/${organisationId}/geometries?bbox=0,0,0,0&historicDate=${formattedDate}`
-        )
-      )
-    }
-
-    return this.geometriesCache.get(cacheKey)
   }
 
   getParcelEffectiveDatesByOrganisationIdAndDate(organisationId, date) {

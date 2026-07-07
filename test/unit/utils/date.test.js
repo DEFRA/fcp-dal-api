@@ -1,12 +1,14 @@
 import { BadRequest } from '../../../app/errors/graphql.js'
 import {
   formatDateAsUtcDateTime,
+  formatDateDDMMMYY,
   validateDateInput,
   validatePastDateInput,
   validateUpstreamDate,
   validateUpstreamTimestamp,
   validateUpstreamTimestampToISO
 } from '../../../app/utils/date.js'
+import { describe } from '@jest/globals'
 
 describe('validateDateInput function', () => {
   it('should return a Date object for a valid ISO 8601 date string', () => {
@@ -144,5 +146,13 @@ describe('formatDateAsUtcDateTime function', () => {
 
   it('formats the unix epoch', () => {
     expect(formatDateAsUtcDateTime(new Date(0))).toBe('1970-01-01 00:00:00')
+  })
+})
+
+describe('formatDateDDMMMYY', () => {
+  test('should correctly format the date', async () => {
+    const date = new Date('2024-09-19')
+    const response = formatDateDDMMMYY(date)
+    expect(response).toEqual('19-Sep-24')
   })
 })

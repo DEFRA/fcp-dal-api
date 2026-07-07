@@ -45,3 +45,11 @@ export const validateUpstreamDate = (date) =>
 const dateTimeLength = 19
 export const formatDateAsUtcDateTime = (date) =>
   date.toISOString().substring(0, dateTimeLength).replace('T', ' ')
+
+export const formatDateDDMMMYY = (date) => {
+  // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
+  const day = date.toLocaleString('en-US', { day: '2-digit' }) // 01
+  const month = date.toLocaleString('en-US', { month: 'short' }) // "Sep"
+  const year = date.toLocaleString('en-US', { year: '2-digit' }) // "25"
+  return `${day}-${month}-${year}`
+}

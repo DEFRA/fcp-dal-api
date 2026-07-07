@@ -1,0 +1,27 @@
+import { RuralPayments } from './RuralPayments.js'
+import { formatDateDDMMMYY } from '../../utils/date.js'
+
+/**
+ * Due to the potentially large response payloads, combined with the large number of concurrent
+ * datasource requests, we need to override the cloneParsedBody function for geometries.  This
+ * avoids creating a deep clone for each request.
+ *
+ * To limit the scope to just the geometry retrieval, this function has been pulled out into its own
+ * data source .
+ */
+export class RuralPaymentsBusinessGeometry extends RuralPayments {
+  getGeometriesByOrganisationIdAndDate(organisationId, date) {
+    const formattedDate = formatDateDDMMMYY(new Date(date))
+
+    return this.get(
+      `lms/organisation/${organisationId}/geometries?bbox=0,0,0,0&historicDate=${formattedDate}`
+    )
+  }
+
+  /**
+   * Avoid deep cloning cached responses by simply returning the body as-is.
+   */
+  cloneParsedBody(parsedBody) {
+    return Object.freeze(parsedBody)
+  }
+}

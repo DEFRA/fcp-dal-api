@@ -1,9 +1,6 @@
 import { describe, jest } from '@jest/globals'
 import jwt from 'jsonwebtoken'
-import {
-  formatDateDDMMMYY,
-  RuralPaymentsBusiness
-} from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
+import { RuralPaymentsBusiness } from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../../app/transformers/rural-payments/business.js'
 
@@ -336,51 +333,6 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('getGeometriesByOrganisationIdAndDate', () => {
-    test('should return geometries for organisation and date', async () => {
-      const mockResponse = { type: 'Polygon', coordinates: [] }
-      httpGet.mockImplementationOnce(async () => mockResponse)
-
-      const result = await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
-        123,
-        '2024-03-19'
-      )
-      expect(result).toEqual(mockResponse)
-      expect(httpGet).toHaveBeenCalledWith(
-        'lms/organisation/123/geometries?bbox=0,0,0,0&historicDate=19-Mar-24'
-      )
-    })
-
-    test('should only call the upstream once for repeated calls with the same organisation and date', async () => {
-      const mockResponse = { type: 'Polygon', coordinates: [] }
-      httpGet.mockImplementation(async () => mockResponse)
-
-      const [resultA, resultB] = await Promise.all([
-        ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-19'),
-        ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-19')
-      ])
-      const resultC = await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
-        123,
-        '2024-03-19'
-      )
-
-      expect(resultA).toEqual(mockResponse)
-      expect(resultB).toEqual(mockResponse)
-      expect(resultC).toEqual(mockResponse)
-      expect(httpGet).toHaveBeenCalledTimes(1)
-    })
-
-    test('should call the upstream again for a different organisation or date', async () => {
-      httpGet.mockImplementation(async () => ({ type: 'Polygon', coordinates: [] }))
-
-      await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-19')
-      await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(456, '2024-03-19')
-      await ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(123, '2024-03-20')
-
-      expect(httpGet).toHaveBeenCalledTimes(3)
-    })
-  })
-
   describe('getParcelEffectiveDatesByOrganisationIdAndDate', () => {
     test('should return parcel effective dates', async () => {
       const mockResponse = { dates: ['19-Mar-24'] }
@@ -523,14 +475,6 @@ describe('Rural Payments Business', () => {
           'Content-Type': 'application/json'
         }
       })
-    })
-  })
-
-  describe('formatDateDDMMMYY', () => {
-    test('should correctly format the date', async () => {
-      const date = new Date('2024-09-19')
-      const response = formatDateDDMMMYY(date)
-      expect(response).toEqual('19-Sep-24')
     })
   })
 
