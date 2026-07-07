@@ -49,6 +49,8 @@ export const BusinessLand = {
         date
       )
     )
+    logger.info(`Parcels retrieved: ${parcels.length}`)
+
     if (!isFieldRequested(info, 'geometry')) {
       return parcels
     }
