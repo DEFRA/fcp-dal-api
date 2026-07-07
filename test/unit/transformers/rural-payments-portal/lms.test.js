@@ -1,10 +1,10 @@
 import {
+  transformAndMergeParcelGeometries,
   transformLandCovers,
   transformLandCoversToArea,
   transformLandParcels,
   transformLandParcelsEffectiveDates,
-  transformLandUses,
-  transformParcelGeometry
+  transformLandUses
 } from '../../../../app/transformers/rural-payments/lms.js'
 
 describe('LMS transformer', () => {
@@ -72,29 +72,139 @@ describe('LMS transformer', () => {
     expect(transformLandParcels(input)).toEqual(output)
   })
 
-  test('transformParcelGeometry', () => {
-    const parcelGeometries = {
-      features: [
-        {
-          id: 1,
-          type: 'Feature',
-          geometry: { type: 'Polygon', coordinates: [[[266375.64, 128194.34]]] },
-          properties: { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: '1000' }
-        }
+  describe('transformAndMergeParcelGeometries', () => {
+    test('with matching geometries', () => {
+      const parcels = [
+        { sheetId: 'mockSheet1', parcelId: 'mockParcel1', area: 0.1 },
+        { sheetId: 'mockSheet1', parcelId: 'mockParcel2', area: 0.1 },
+        { sheetId: 'mockSheet2', parcelId: 'mockParcel1', area: 0.1 },
+        { sheetId: 'mockSheet2', parcelId: 'mockParcel3', area: 0.1 } // Not present in geometries
       ]
-    }
-    expect(transformParcelGeometry(parcelGeometries, 'mockSheetId', 'mockParcelId')).toEqual({
-      type: 'Polygon',
-      coordinates: [[[266375.64, 128194.34]]]
+      const parcelGeometries = {
+        features: [
+          {
+            id: 1,
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [100.01, 100.01],
+                  [150.7, 200],
+                  [200.4, 100.01],
+                  [100.01, 100.01]
+                ]
+              ]
+            },
+            properties: { sheetId: 'mockSheet1', parcelId: 'mockParcel1', area: '1000' }
+          },
+          {
+            id: 1,
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [300.01, 100.01],
+                  [350.7, 200],
+                  [400.4, 100.01],
+                  [300.01, 100.01]
+                ]
+              ]
+            },
+            properties: { sheetId: 'mockSheet1', parcelId: 'mockParcel2', area: '1000' }
+          },
+          {
+            id: 1,
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [500.01, 100.01],
+                  [550.7, 200],
+                  [600.4, 100.01],
+                  [300.01, 100.01]
+                ]
+              ]
+            },
+            properties: { sheetId: 'mockSheet2', parcelId: 'mockParcel1', area: '1000' }
+          }
+        ]
+      }
+
+      const mergedParcel = transformAndMergeParcelGeometries(parcels, parcelGeometries)
+      expect(mergedParcel).toEqual([
+        {
+          sheetId: 'mockSheet1',
+          parcelId: 'mockParcel1',
+          area: 0.1,
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [100.01, 100.01],
+                [150.7, 200],
+                [200.4, 100.01],
+                [100.01, 100.01]
+              ]
+            ]
+          }
+        },
+        {
+          sheetId: 'mockSheet1',
+          parcelId: 'mockParcel2',
+          area: 0.1,
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [300.01, 100.01],
+                [350.7, 200],
+                [400.4, 100.01],
+                [300.01, 100.01]
+              ]
+            ]
+          }
+        },
+        {
+          sheetId: 'mockSheet2',
+          parcelId: 'mockParcel1',
+          area: 0.1,
+          geometry: {
+            type: 'Polygon',
+            coordinates: [
+              [
+                [500.01, 100.01],
+                [550.7, 200],
+                [600.4, 100.01],
+                [300.01, 100.01]
+              ]
+            ]
+          }
+        },
+        {
+          sheetId: 'mockSheet2',
+          parcelId: 'mockParcel3',
+          area: 0.1,
+          geometry: null
+        }
+      ])
     })
-  })
 
-  test('transformParcelGeometry - no matching feature', () => {
-    expect(transformParcelGeometry({ features: [] }, 'mockSheetId', 'mockParcelId')).toBeNull()
-  })
+    test('no matching geometry feature', () => {
+      const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+      expect(transformAndMergeParcelGeometries(parcels, { features: [] })).toEqual([
+        { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
+      ])
+    })
 
-  test('transformParcelGeometry - no organisationGeometries', () => {
-    expect(transformParcelGeometry(undefined, 'mockSheetId', 'mockParcelId')).toBeNull()
+    test('no organisationGeometries', () => {
+      const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+      expect(transformAndMergeParcelGeometries(parcels, undefined)).toEqual([
+        { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
+      ])
+    })
   })
 
   test('transformLandParcelsEffectiveDates', () => {

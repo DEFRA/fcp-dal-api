@@ -39,12 +39,27 @@ export function transformLandCoversToArea(name, landCovers) {
   return convertSquareMetersToHectares(landCover.area)
 }
 
-export function transformParcelGeometry(organisationGeometries, sheetId, parcelId) {
-  const feature = organisationGeometries?.features?.find(
-    (f) => f.properties.sheetId === sheetId && f.properties.parcelId === parcelId
-  )
+// Builds a lookup so each parcel's geometry can be efficiently obtained.
+// Keyed as a single string since organisationGeometries and parcels come from two
+// separate upstream calls and need to be joined by sheetId+parcelId here.
+function indexGeometriesBySheetAndParcelId(parcelGeometries) {
+  const features = parcelGeometries?.features || []
 
-  return feature?.geometry ?? null
+  return new Map(
+    features.map(({ geometry, properties }) => [
+      `${properties.sheetId}:${properties.parcelId}`,
+      geometry
+    ])
+  )
+}
+
+export function transformAndMergeParcelGeometries(parcels, organisationGeometries) {
+  const parcelGeometries = indexGeometriesBySheetAndParcelId(organisationGeometries)
+
+  return parcels.map((parcel) => ({
+    ...parcel,
+    geometry: parcelGeometries.get(`${parcel.sheetId}:${parcel.parcelId}`) ?? null
+  }))
 }
 
 export function transformLandParcels(landParcels) {
