@@ -75,10 +75,10 @@ describe('LMS transformer', () => {
   describe('transformAndMergeParcelGeometries', () => {
     test('with matching geometries', () => {
       const parcels = [
-        { sheetId: 'mockSheet1', parcelId: 'mockParcel1', area: 0.1 },
-        { sheetId: 'mockSheet1', parcelId: 'mockParcel2', area: 0.1 },
-        { sheetId: 'mockSheet2', parcelId: 'mockParcel1', area: 0.1 },
-        { sheetId: 'mockSheet2', parcelId: 'mockParcel3', area: 0.1 } // Not present in geometries
+        { id: 1, sheetId: 'mockSheet1', parcelId: 'mockParcel1', area: 1000 },
+        { id: 2, sheetId: 'mockSheet1', parcelId: 'mockParcel2', area: 1000 },
+        { id: 3, sheetId: 'mockSheet2', parcelId: 'mockParcel1', area: 1000 },
+        { id: 4, sheetId: 'mockSheet2', parcelId: 'mockParcel3', area: 1000 } // Not present in geometries
       ]
       const parcelGeometries = {
         features: [
@@ -136,6 +136,7 @@ describe('LMS transformer', () => {
       const mergedParcel = transformAndMergeParcelGeometries(parcels, parcelGeometries)
       expect(mergedParcel).toEqual([
         {
+          id: '1',
           sheetId: 'mockSheet1',
           parcelId: 'mockParcel1',
           area: 0.1,
@@ -152,6 +153,7 @@ describe('LMS transformer', () => {
           }
         },
         {
+          id: '2',
           sheetId: 'mockSheet1',
           parcelId: 'mockParcel2',
           area: 0.1,
@@ -168,6 +170,7 @@ describe('LMS transformer', () => {
           }
         },
         {
+          id: '3',
           sheetId: 'mockSheet2',
           parcelId: 'mockParcel1',
           area: 0.1,
@@ -184,6 +187,7 @@ describe('LMS transformer', () => {
           }
         },
         {
+          id: '4',
           sheetId: 'mockSheet2',
           parcelId: 'mockParcel3',
           area: 0.1,
@@ -193,16 +197,16 @@ describe('LMS transformer', () => {
     })
 
     test('no matching geometry feature', () => {
-      const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+      const parcels = [{ id: 1, sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 1000 }]
       expect(transformAndMergeParcelGeometries(parcels, { features: [] })).toEqual([
-        { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
+        { id: '1', sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
       ])
     })
 
     test('no organisationGeometries', () => {
-      const parcels = [{ sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1 }]
+      const parcels = [{ id: 1, sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 1000 }]
       expect(transformAndMergeParcelGeometries(parcels, undefined)).toEqual([
-        { sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
+        { id: '1', sheetId: 'mockSheetId', parcelId: 'mockParcelId', area: 0.1, geometry: null }
       ])
     })
   })

@@ -54,12 +54,20 @@ function indexGeometriesBySheetAndParcelId(parcelGeometries) {
   )
 }
 
-export function transformAndMergeParcelGeometries(parcels, organisationGeometries) {
+function transformLandParcel(parcel) {
+  return {
+    ...parcel,
+    id: `${parcel.id}`, // Transform to string to match the type in the graphql schema
+    area: convertSquareMetersToHectares(parcel.area)
+  }
+}
+
+export function transformAndMergeParcelGeometries(landParcels, organisationGeometries) {
   logger.info('About to index')
   const parcelGeometries = indexGeometriesBySheetAndParcelId(organisationGeometries)
   logger.info('Index complete')
-  const m = parcels.map((parcel) => ({
-    ...parcel,
+  const m = landParcels.map((parcel) => ({
+    ...transformLandParcel(parcel),
     geometry: parcelGeometries.get(`${parcel.sheetId}:${parcel.parcelId}`) ?? null
   }))
   logger.info('Geometry mapping complete')
@@ -67,13 +75,7 @@ export function transformAndMergeParcelGeometries(parcels, organisationGeometrie
 }
 
 export function transformLandParcels(landParcels) {
-  return landParcels.map((parcel) => {
-    return {
-      ...parcel,
-      id: `${parcel.id}`, // Transform to string to match the type in the graphql schema
-      area: convertSquareMetersToHectares(parcel.area)
-    }
-  })
+  return landParcels.map(transformLandParcel)
 }
 
 export function transformTotalParcels(landParcels) {
