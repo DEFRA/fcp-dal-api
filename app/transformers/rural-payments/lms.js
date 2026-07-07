@@ -1,6 +1,7 @@
 import { validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { convertSquareMetersToHectares } from '../../utils/numbers.js'
 import { transformDateTimeToISO } from '../common.js'
+import { logger } from '../../logger/logger.js'
 
 export function transformLandCovers(landCover) {
   const items = landCover?.features || []
@@ -54,12 +55,15 @@ function indexGeometriesBySheetAndParcelId(parcelGeometries) {
 }
 
 export function transformAndMergeParcelGeometries(parcels, organisationGeometries) {
+  logger.info('About to index')
   const parcelGeometries = indexGeometriesBySheetAndParcelId(organisationGeometries)
-
-  return parcels.map((parcel) => ({
+  logger.info('Index complete')
+  const m = parcels.map((parcel) => ({
     ...parcel,
     geometry: parcelGeometries.get(`${parcel.sheetId}:${parcel.parcelId}`) ?? null
   }))
+  logger.info('Geometry mapping complete')
+  return m
 }
 
 export function transformLandParcels(landParcels) {
