@@ -109,22 +109,9 @@ export class RuralPaymentsBusiness extends RuralPayments {
   getGeometriesByOrganisationIdAndDate(organisationId, date) {
     const formattedDate = formatDateDDMMMYY(new Date(date))
 
-    // The geometry field resolver is called once per parcel, but each call requests the same organisation-wide
-    // geometries for a given organisationId/date. Cache the response for the duration of the request, so we only
-    // request the data once
-    const cacheKey = `${organisationId}:${formattedDate}`
-    this.geometriesCache ??= new Map()
-    if (!this.geometriesCache.has(cacheKey)) {
-      // Hardcoding bounding box, so that all geometries for an organisation are returned.
-      this.geometriesCache.set(
-        cacheKey,
-        this.get(
-          `lms/organisation/${organisationId}/geometries?bbox=0,0,0,0&historicDate=${formattedDate}`
-        )
-      )
-    }
-
-    return this.geometriesCache.get(cacheKey)
+    return this.get(
+      `lms/organisation/${organisationId}/geometries?bbox=0,0,0,0&historicDate=${formattedDate}`
+    )
   }
 
   getParcelEffectiveDatesByOrganisationIdAndDate(organisationId, date) {
