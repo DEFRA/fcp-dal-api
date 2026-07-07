@@ -43,28 +43,29 @@ export const BusinessLand = {
   async parcels({ organisationId }, { date = new Date() }, { dataSources }, info) {
     validateDateInput(date)
 
-    const parcels = transformLandParcels(
-      await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
-        organisationId,
-        date
-      )
-    )
-    logger.info(`Parcels retrieved: ${parcels.length}`)
-
-    if (!isFieldRequested(info, 'geometry')) {
-      return parcels
-    }
+    const includeGeometries = isFieldRequested(info, 'geometry')
 
     // If geometries have been requested, then they are retrieved at org-level, not individual parcel
     // level.  For larger organisations, the response payload to this call can be quite large.  Apollo's
     // RestDataSource implementation would result in a parcel-by-parcel deep-clone of the result
     // (potentially causing performance/heap issues), if we implemented this retrieval at the parcel level.
     // Resolving and merging geometries at ths level to work around this limitation.
-    const parcelGeometries =
-      await dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
-        organisationId,
-        date
-      )
+    const [parcelsResponse, parcelGeometries] = await Promise.all([
+      dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(organisationId, date),
+      includeGeometries
+        ? dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+            organisationId,
+            date
+          )
+        : Promise.resolve(null)
+    ])
+
+    const parcels = transformLandParcels(parcelsResponse)
+    logger.info(`Parcels retrieved: ${parcels.length}`)
+
+    if (!includeGeometries) {
+      return parcels
+    }
 
     logger.info(`Parcel geometries retrieved: ${parcelGeometries.features.length}`)
 
