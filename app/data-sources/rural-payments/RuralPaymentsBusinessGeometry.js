@@ -1,5 +1,6 @@
 import { RuralPayments } from './RuralPayments.js'
 import { formatDateDDMMMYY } from '../../utils/date.js'
+import { logger } from '../../logger/logger.js'
 
 /**
  * Due to the potentially large response payloads, combined with the large number of concurrent
@@ -13,15 +14,18 @@ export class RuralPaymentsBusinessGeometry extends RuralPayments {
   getGeometriesByOrganisationIdAndDate(organisationId, date) {
     const formattedDate = formatDateDDMMMYY(new Date(date))
 
-    return this.get(
+    const geom = this.get(
       `lms/organisation/${organisationId}/geometries?bbox=0,0,0,0&historicDate=${formattedDate}`
     )
+    logger.info('Retrieved geometries')
+    return geom
   }
 
   /**
    * Avoid deep cloning cached responses by simply returning the body as-is.
    */
   cloneParsedBody(parsedBody) {
+    logger.info('Cloning parsed body')
     return Object.freeze(parsedBody)
   }
 }

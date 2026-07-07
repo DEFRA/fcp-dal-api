@@ -64,7 +64,9 @@ export class RuralPayments extends BaseRESTDataSource {
 
   async addAuthentication(request) {
     const headers = this.request.headers
-    const additionalHeaders = {}
+    const additionalHeaders = {
+      'Accept-Encoding': 'gzip, deflate, br'
+    }
 
     if (this.gatewayType === 'internal' && headers.email) {
       additionalHeaders.email = headers.email
