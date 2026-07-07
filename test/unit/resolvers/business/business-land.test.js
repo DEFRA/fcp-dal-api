@@ -96,9 +96,6 @@ describe('BusinessLand', () => {
         getParcelsByOrganisationIdAndDate() {
           return getParcelsByOrganisationIdAndDateResult
         },
-        getGeometriesByOrganisationIdAndDate: jest.fn(
-          () => getGeometriesByOrganisationIdAndDateResult
-        ),
         getCoversByOrgSheetParcelIdDate: jest.fn(() => getCoversByOrgSheetParcelIdDateResult),
         getCoversSummaryByOrganisationIdAndDate() {
           return getCoversSummaryByOrganisationIdAndDateResult
@@ -106,6 +103,11 @@ describe('BusinessLand', () => {
         getLandUseByBusinessParcel() {
           return getLandUseByBusinessParcelResult
         }
+      },
+      ruralPaymentsBusinessGeometry: {
+        getGeometriesByOrganisationIdAndDate: jest.fn(
+          () => getGeometriesByOrganisationIdAndDateResult
+        )
       }
     }
   })
@@ -130,7 +132,7 @@ describe('BusinessLand', () => {
       }
     ])
     expect(
-      dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate
+      dataSources.ruralPaymentsBusinessGeometry.getGeometriesByOrganisationIdAndDate
     ).not.toHaveBeenCalled()
   })
 
@@ -151,7 +153,7 @@ describe('BusinessLand', () => {
       pendingDigitisation: false
     })
     expect(
-      dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate
+      dataSources.ruralPaymentsBusinessGeometry.getGeometriesByOrganisationIdAndDate
     ).not.toHaveBeenCalled()
   })
 
@@ -176,7 +178,7 @@ describe('BusinessLand', () => {
         ]
       })
       expect(
-        dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate
+        dataSources.ruralPaymentsBusinessGeometry.getGeometriesByOrganisationIdAndDate
       ).toHaveBeenCalledWith('mockId', mockArguments.date)
     })
 

@@ -107,7 +107,7 @@ const getParcelEffectiveDates = async (
 export const BusinessLandParcel = {
   async geometry({ organisationId, date, sheetId, parcelId }, __, { dataSources }) {
     const organisationGeometries =
-      await dataSources.ruralPaymentsBusiness.getGeometriesByOrganisationIdAndDate(
+      await dataSources.ruralPaymentsBusinessGeometry.getGeometriesByOrganisationIdAndDate(
         organisationId,
         date
       )

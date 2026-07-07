@@ -4,6 +4,7 @@ const getAuthMock = jest.fn()
 const getRequestingGroupMock = jest.fn()
 const PermissionsMock = jest.fn()
 const RuralPaymentsBusinessMock = jest.fn()
+const RuralPaymentsBusinessGeometryMock = jest.fn()
 const RuralPaymentsCustomerMock = jest.fn()
 const MongoCustomerMock = jest.fn()
 const MongoBusinessMock = jest.fn()
@@ -22,6 +23,12 @@ jest.unstable_mockModule(
   '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js',
   () => ({
     RuralPaymentsBusiness: RuralPaymentsBusinessMock
+  })
+)
+jest.unstable_mockModule(
+  '../../../app/data-sources/rural-payments/RuralPaymentsBusinessGeometry.js',
+  () => ({
+    RuralPaymentsBusinessGeometry: RuralPaymentsBusinessGeometryMock
   })
 )
 jest.unstable_mockModule(
@@ -74,6 +81,7 @@ describe('context', () => {
     expect(result.requestLogger).toBeDefined()
     expect(result.dataSources.permissions.type).toBe('Permissions')
     expect(result.dataSources.ruralPaymentsBusiness).toEqual({})
+    expect(result.dataSources.ruralPaymentsBusinessGeometry).toEqual({})
     expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
     expect(result.dataSources.mongoBusiness).toEqual({})
     expect(result.dataSources.mongoCustomer).toEqual({})
