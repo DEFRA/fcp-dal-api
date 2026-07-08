@@ -1,0 +1,6 @@
+extend type Query {
+  """
+  Reference data, such as the country code to currency mapping required for bank details changes.
+  """
+  referenceData: ReferenceData @on @auth(requires: [SINGLE_FRONT_DOOR])
+}

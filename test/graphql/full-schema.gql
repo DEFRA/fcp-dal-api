@@ -12,6 +12,7 @@ type Query {
     pagination: Pagination
   ): CustomerSearchResponse
   permissionGroups: [PermissionGroup]
+  referenceData: ReferenceData
 }
 
 type Mutation {
@@ -589,6 +590,15 @@ type Permission {
   level: PermissionLevel
   functions: [String]
   active(crn: ID!, sbi: ID!): Boolean
+}
+
+type ReferenceData {
+  countriesCurrencies: [CountryCurrency!]
+}
+
+type CountryCurrency {
+  code: String!
+  currency: String!
 }
 
 input UpdateBusinessLegalStatusInput {
