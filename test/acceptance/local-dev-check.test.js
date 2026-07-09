@@ -83,9 +83,9 @@ const business = {
   info: {
     name: 'Maggio, Murray and Dicki',
     reference: '6561479446',
-    vat: '2272858234',
-    traderNumber: '338653',
-    vendorNumber: null,
+    vat: '227285823',
+    traderNumber: '735338',
+    vendorNumber: '581452',
     address: {
       pafOrganisationName: 'Maggio, Murray and Dicki',
       line1: '14',
@@ -125,27 +125,27 @@ const business = {
       landline: '0813 645 0023'
     },
     legalStatus: {
-      code: 671956,
+      code: 846100,
       type: 'Sole Proprietorship'
     },
     type: {
-      code: 962248,
+      code: 513326,
       type: 'Not Specified'
     },
     registrationNumbers: {
-      companiesHouse: 'yPDmr5q7',
-      charityCommission: 'UtKAQapw'
+      companiesHouse: 'GyPDmr5q',
+      charityCommission: null
     },
     additionalSbis: [],
     lastUpdated: '2024-12-31T23:45:32.357Z',
     isFinancialToBusinessAddress: false,
-    hasLandInNorthernIreland: false,
-    hasLandInScotland: false,
-    hasLandInWales: true,
+    hasLandInNorthernIreland: true,
+    hasLandInScotland: true,
+    hasLandInWales: false,
     hasAdditionalBusinessActivities: false,
     additionalBusinessActivities: [],
     isAccountablePeopleDeclarationCompleted: false,
-    dateStartedFarming: '2024-10-24T21:25:07.247Z',
+    dateStartedFarming: '2024-08-20T07:45:37.666Z',
     landConfirmed: true,
     status: {
       locked: false,
