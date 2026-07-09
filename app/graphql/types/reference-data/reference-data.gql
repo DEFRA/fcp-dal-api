@@ -1,0 +1,20 @@
+type ReferenceData {
+  """
+  Mapping of country codes to the currency bank payments to that country must be made in.
+  In most cases this will be GB/GBP, but for international payments the correct country
+  code and currency pair must be used when validating or submitting bank details.
+  """
+  countriesCurrencies: [CountryCurrency!] @on
+}
+
+type CountryCurrency {
+  """
+  Country code. For example, 'GB', 'IE', 'PT'.
+  """
+  code: String! @on
+
+  """
+  Currency code for bank payments to that country. For example, 'GBP', 'EUR'.
+  """
+  currency: String! @on
+}

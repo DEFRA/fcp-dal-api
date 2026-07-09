@@ -18,6 +18,7 @@ import * as Customer from './resolvers/customer/customer.js'
 import * as CustomerMutation from './resolvers/customer/mutation.js'
 import * as CustomerQuery from './resolvers/customer/query.js'
 import * as PermissionsQuery from './resolvers/permissions/query.js'
+import * as ReferenceDataQuery from './resolvers/reference-data/query.js'
 import * as Scalars from './resolvers/scalars.js'
 
 async function getFiles(path) {
@@ -39,6 +40,7 @@ export async function createSchema() {
       CustomerMutation,
       CustomerQuery,
       PermissionsQuery,
+      ReferenceDataQuery,
       Scalars
     ])
   })

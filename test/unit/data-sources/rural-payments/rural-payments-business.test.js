@@ -706,4 +706,22 @@ describe('Rural Payments Business', () => {
       expect(result).toEqual(existingAccounts)
     })
   })
+
+  describe('getCountryCodes', () => {
+    test('gets the country code to currency mapping', async () => {
+      const countryCodes = {
+        countriesCurrency: {
+          GB: 'GBP',
+          IE: 'EUR',
+          PT: 'EUR'
+        }
+      }
+      httpGet.mockResolvedValueOnce(countryCodes)
+
+      const result = await ruralPaymentsBusiness.getCountryCodes()
+
+      expect(httpGet).toHaveBeenCalledWith('bank-change-service/v1/country-codes')
+      expect(result).toEqual(countryCodes)
+    })
+  })
 })
