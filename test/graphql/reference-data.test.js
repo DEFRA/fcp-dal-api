@@ -87,4 +87,23 @@ describe('referenceData', () => {
     expect(result.errors).toBeUndefined()
     expect(result.data.referenceData).toEqual({ __typename: 'ReferenceData' })
   })
+
+  test('authentication is not necessary', async () => {
+    configMockPath['auth.disabled'] = false
+    v1.get('/reference/legalstatus').reply(200, {
+      _data: [
+        { id: 1, type: 'Limited Company' },
+        { id: 2, type: 'Public Limited Company' }
+      ]
+    })
+
+    const result = await makeTestQuery(refDataQuery, null, false)
+
+    expect(nock.isDone()).toBe(true)
+    expect(result.errors).toBeUndefined()
+    expect(result.data.referenceData.legalStatuses).toEqual([
+      { code: 1, description: 'Limited Company' },
+      { code: 2, description: 'Public Limited Company' }
+    ])
+  })
 })

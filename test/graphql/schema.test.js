@@ -166,9 +166,9 @@ describe('schema', () => {
     expect(findBreakingChanges(schema, partialSchema)).toHaveLength(0)
   })
 
-  it('ensures all top-level fields have @auth directive', async () => {
+  it('ensures all sensitive top-level fields have @auth directive', async () => {
     const schema = await createSchema()
     const unprotectedFields = getUnprotectedFields(schema)
-    expect(unprotectedFields).toEqual([])
+    expect(unprotectedFields).toEqual(['Query.referenceData'])
   })
 })
