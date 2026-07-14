@@ -75,6 +75,26 @@ describe('referenceData', () => {
     })
   })
 
+  describe('legalStatuses', () => {
+    test('returns the legal statuses from the upstream service', async () => {
+      v1.get('/reference/legalstatus').reply(200, {
+        _data: [
+          { id: 1, type: 'Limited Company' },
+          { id: 2, type: 'Public Limited Company' }
+        ]
+      })
+
+      const result = await makeTestQuery(refDataQuery)
+
+      expect(nock.isDone()).toBe(true)
+      expect(result.errors).toBeUndefined()
+      expect(result.data.referenceData.legalStatuses).toEqual([
+        { code: 1, description: 'Limited Company' },
+        { code: 2, description: 'Public Limited Company' }
+      ])
+    })
+  })
+
   test('does not call the upstream service unless some reference data is requested', async () => {
     const result = await makeTestQuery(gql`
       query ReferenceData {

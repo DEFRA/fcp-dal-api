@@ -29,4 +29,21 @@ describe('RuralPaymentsReferenceData', () => {
       expect(result).toEqual(countryCodes)
     })
   })
+
+  describe('getLegalStatuses', () => {
+    test('gets the legal statuses', async () => {
+      const legalStatuses = {
+        _data: [
+          { id: 1, type: 'Active' },
+          { id: 2, type: 'Inactive' }
+        ]
+      }
+      httpGet.mockResolvedValueOnce(legalStatuses)
+
+      const result = await ruralPaymentsReferenceData.getReferenceData('legalstatus')
+
+      expect(httpGet).toHaveBeenCalledWith('reference/legalstatus')
+      expect(result).toEqual(legalStatuses)
+    })
+  })
 })
