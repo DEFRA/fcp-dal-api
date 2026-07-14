@@ -94,7 +94,7 @@ describe('App initialization', () => {
     expect(mongoClient.close).toHaveBeenCalled()
     expect(server.stop).toHaveBeenCalled()
     expect(process.exit).toHaveBeenCalledWith(1)
-    expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - uncaught reception', {
+    expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - uncaught exception', {
       error,
       code: expect.any(String)
     })
