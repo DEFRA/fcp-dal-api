@@ -93,60 +93,60 @@ const customer = {
   crn: '1111111100',
   info: {
     name: {
-      title: 'Mrs.',
-      otherTitle: 'I',
-      first: 'Lauren',
-      middle: 'Daryl',
-      last: 'Sanford'
+      title: 'Mr.',
+      otherTitle: 'IV',
+      first: 'Raul',
+      middle: 'Demario',
+      last: 'Feil'
     },
-    dateOfBirth: '1972-11-24',
+    dateOfBirth: '1964-02-13',
     phone: {
-      mobile: '056 8967 5108',
-      landline: '055 4582 4488'
+      mobile: '0101 838 3675',
+      landline: '055 8858 9675'
     },
     email: {
-      address: 'lauren.sanford@immaculate-shark.info',
+      address: 'raul.feil@questionable-millet.uk',
       validated: false
     },
     status: {
       locked: false,
       confirmed: false,
-      deactivated: false
+      deactivated: true
     },
     address: {
       pafOrganisationName: null,
-      line1: '65',
-      line2: '1 McCullough Path',
-      line3: 'Newton Ratkedon',
-      line4: 'MS9 8BJ',
-      line5: 'North Macedonia',
+      line1: '681',
+      line2: '7 Tito Wood',
+      line3: 'South Yundtington',
+      line4: 'JT0 2WK',
+      line5: 'Mozambique',
       buildingNumberRange: null,
       buildingName: null,
       flatName: null,
       street: null,
-      city: 'Newton Bruen',
+      city: "Bode-Gorczany-under-O'Kon-Ebert",
       county: null,
-      postalCode: 'TC2 8KP',
+      postalCode: 'E3G 7YZ',
       country: 'Wales',
-      uprn: '790214962932',
+      uprn: '078329933641',
       dependentLocality: null,
       doubleDependentLocality: null,
       typeId: null
     },
-    doNotContact: false,
-    personalIdentifiers: ['8568845789', '370030956', '7899566034']
+    doNotContact: true,
+    personalIdentifiers: ['2363710898', '7209755783']
   },
   businesses: [
     {
-      name: 'Maggio, Murray and Dicki',
-      organisationId: '1111111111',
-      sbi: '1111111111'
+      name: 'Bechtelar - Stamm',
+      organisationId: '111111111',
+      sbi: '111111111'
     }
   ],
   business: {
-    organisationId: '1111111111',
-    sbi: '1111111111',
-    name: 'Maggio, Murray and Dicki',
+    organisationId: '111111111',
+    sbi: '111111111',
+    name: 'Bechtelar - Stamm',
     role: 'Key Contact',
     permissionGroups: [
       {
@@ -268,18 +268,18 @@ const customer = {
 }
 const messages = [
   {
-    id: '3761260816',
-    subject: 'Caecus tantillus sollicito averto veniam suus cotidie arbor strues.',
-    date: '2024-06-27T03:27:27.902Z',
-    body: '<p>Arx succurro vetus tabella demergo expedita.</p>',
+    id: '4219813749',
+    subject: 'Vulnero talio necessitatibus vero complectus venio convoco calculus veritatis.',
+    date: '2023-07-23T20:23:12.681Z',
+    body: '<p>Absconditus vulgaris calco acquiro.</p>',
     read: true,
-    deleted: true
+    deleted: false
   },
   {
-    id: '7804800923',
-    subject: 'Vinum clamo corona brevis conventus quis alveus cattus amaritudo.',
-    date: '2024-03-05T00:55:50.487Z',
-    body: '<p>Maxime accedo adfero comes avaritia.</p>',
+    id: '2023306539',
+    subject: 'Demulceo claro dedico degenero at vitae caelum adnuo cruentus.',
+    date: '2024-08-29T06:53:08.606Z',
+    body: '<p>Barba ocer alveus depromo tener comis acerbitas cohaero nemo.</p>',
     read: false,
     deleted: false
   }
@@ -291,7 +291,7 @@ describe('Customer Queries', () => {
     const response = await client.request(
       customerQuery,
       {
-        sbi: '1111111111',
+        sbi: '111111111',
         crn: '1111111100'
       },
       { email: 'some-email', 'gateway-type': 'internal' }
@@ -308,7 +308,7 @@ describe('Customer Queries', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '1111111100',
-        relationships: ['1111111111:1111111111']
+        relationships: ['111111111:111111111']
       },
       'test-secret'
     )
@@ -316,7 +316,7 @@ describe('Customer Queries', () => {
     const response = await client.request(
       customerQuery,
       {
-        sbi: '1111111111',
+        sbi: '111111111',
         crn: '1111111100'
       },
       { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
