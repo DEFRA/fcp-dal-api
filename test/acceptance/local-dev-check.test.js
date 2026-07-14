@@ -9,7 +9,7 @@ const parcels = [
     sheetId: 'SS6627',
     parcelId: '5662',
     area: 1.027,
-    pendingDigitisation: false
+    pendingDigitisation: true
   },
   {
     id: '7386092',
@@ -21,87 +21,87 @@ const parcels = [
 ]
 const agreement = [
   {
-    contractId: '1111111111',
-    name: 'ELS AGREEMENT',
-    status: 'ACTIVE',
-    contractType: 'Countryside Stewardship (MT)',
-    schemeYear: 2024,
-    startDate: '2019-06-04T17:22:33.856Z',
-    endDate: '2026-07-30T10:30:50.999Z',
+    contractId: '111111111',
+    name: 'CS AGREEMENT',
+    status: 'WITHDRAWN',
+    contractType: 'Higher Level Stewardship',
+    schemeYear: 2025,
+    startDate: '2024-12-19T10:40:05.244Z',
+    endDate: '2027-07-21T05:12:15.156Z',
     paymentSchedules: [
       {
-        optionCode: 'ZWY',
-        optionDescription: 'Cunabula agnitio cur demo acer sit.',
-        commitmentGroupEndDate: '2026-06-12T02:54:31.037Z',
-        commitmentGroupStartDate: '2022-09-11T07:42:14.845Z',
-        year: 2025,
-        sheetName: 'FBLUEA',
-        parcelName: '6797',
-        actionArea: 0.1128,
-        actionMTL: null,
-        actionUnits: 66.01,
-        parcelTotalArea: 2.3776,
-        startDate: '2018-03-07T11:56:24.206Z',
-        endDate: '2026-05-10T15:13:55.156Z'
-      },
-      {
-        optionCode: 'HJZ',
-        optionDescription: 'Abbas eaque solus commodi defessus.',
-        commitmentGroupEndDate: '2029-09-12T16:23:43.082Z',
-        commitmentGroupStartDate: '2019-03-23T12:47:15.916Z',
-        year: 2025,
-        sheetName: 'YVKIGZ',
-        parcelName: '1425',
-        actionArea: 1.8288,
-        actionMTL: 78,
-        actionUnits: null,
-        parcelTotalArea: 3.0861,
-        startDate: '2022-11-06T04:13:23.384Z',
-        endDate: '2025-04-03T18:09:05.779Z'
-      },
-      {
-        optionCode: 'DZC',
-        optionDescription: 'Sint colligo tabula capitulus.',
-        commitmentGroupEndDate: '2029-09-01T09:05:30.920Z',
-        commitmentGroupStartDate: '2018-10-29T23:44:06.320Z',
+        optionCode: 'LHC',
+        optionDescription: 'Thema tyrannus umbra.',
+        commitmentGroupStartDate: '2024-09-30T18:47:49.485Z',
+        commitmentGroupEndDate: '2029-10-02T15:56:57.542Z',
         year: 2024,
-        sheetName: 'EUANGB',
-        parcelName: '0019',
-        actionArea: 0.3114,
-        actionMTL: 19,
-        actionUnits: 16.16,
-        parcelTotalArea: 1.6253,
-        startDate: '2021-04-26T11:46:46.798Z',
-        endDate: '2027-04-08T00:15:18.244Z'
+        sheetName: 'CTHXRL',
+        parcelName: '8415',
+        actionArea: 1.5827,
+        actionMTL: null,
+        actionUnits: null,
+        parcelTotalArea: 1.7265,
+        startDate: '2023-06-04T21:47:50.970Z',
+        endDate: '2027-02-27T13:54:20.492Z'
+      },
+      {
+        optionCode: 'HKN',
+        optionDescription: 'Admiratio adsum velit vaco solus.',
+        commitmentGroupStartDate: '2021-08-07T19:25:05.643Z',
+        commitmentGroupEndDate: '2025-03-11T12:56:17.573Z',
+        year: 2025,
+        sheetName: 'MNSMFA',
+        parcelName: '3784',
+        actionArea: 0.7996,
+        actionMTL: 49,
+        actionUnits: null,
+        parcelTotalArea: 0.4882,
+        startDate: '2016-10-27T05:38:30.882Z',
+        endDate: '2026-08-21T04:14:26.468Z'
+      },
+      {
+        optionCode: 'XXH',
+        optionDescription: 'Quam ter suscipio validus.',
+        commitmentGroupStartDate: '2023-07-23T08:48:37.633Z',
+        commitmentGroupEndDate: '2028-06-14T08:16:08.043Z',
+        year: 2024,
+        sheetName: 'ZMRNDX',
+        parcelName: '7795',
+        actionArea: 3.1761,
+        actionMTL: null,
+        actionUnits: 81.41,
+        parcelTotalArea: 1.0088,
+        startDate: '2016-08-15T20:55:27.588Z',
+        endDate: '2025-03-05T15:35:30.290Z'
       }
     ]
   }
 ]
 const business = {
-  organisationId: '1111111111',
-  sbi: '1111111111',
+  organisationId: '111111111',
+  sbi: '111111111',
   info: {
-    name: 'Maggio, Murray and Dicki',
-    reference: '6561479446',
-    vat: '227285823',
-    traderNumber: '735338',
-    vendorNumber: '581452',
+    name: 'Bechtelar - Stamm',
+    reference: '2760178899',
+    vat: '997364387',
+    traderNumber: '535182',
+    vendorNumber: null,
     address: {
-      pafOrganisationName: 'Maggio, Murray and Dicki',
-      line1: '14',
-      line2: '16 Fourth Avenue',
-      line3: 'Miller-under-Raynor',
-      line4: 'XP0 6TX',
-      line5: 'Saint Helena',
+      pafOrganisationName: 'Bechtelar - Stamm',
+      line1: '98',
+      line2: '8 Gutmann Rise',
+      line3: 'North Cormier Park',
+      line4: 'GK0 0XW',
+      line5: 'Norfolk Island',
       buildingNumberRange: null,
       buildingName: null,
       flatName: null,
       street: null,
-      city: 'South Witting Green',
+      city: 'Fisher Court',
       county: null,
-      postalCode: 'IH1 1MM',
-      country: 'England',
-      uprn: '563449849116',
+      postalCode: 'HS26 53S',
+      country: 'Scotland',
+      uprn: '415400139912',
       dependentLocality: null,
       doubleDependentLocality: null,
       typeId: null
@@ -109,104 +109,108 @@ const business = {
     correspondenceAddress: null,
     isCorrespondenceAsBusinessAddress: false,
     email: {
-      address: 'Joe_Pollich@gmail.com',
+      address: 'Ivah_Simonis@yahoo.com',
       validated: true
     },
     correspondenceEmail: {
-      address: 'Anita4@hotmail.com',
-      validated: true
+      address: 'Demetris_Cartwright@hotmail.com',
+      validated: false
     },
     phone: {
-      mobile: '0800 008521',
-      landline: '010952 63723'
+      mobile: '016977 8110',
+      landline: '016977 9562'
     },
     correspondencePhone: {
-      mobile: '0800 531443',
-      landline: '0813 645 0023'
+      mobile: '016977 7045',
+      landline: '056 3909 0189'
     },
     legalStatus: {
-      code: 846100,
+      code: 857559,
       type: 'Sole Proprietorship'
     },
     type: {
-      code: 513326,
+      code: 617289,
       type: 'Not Specified'
     },
     registrationNumbers: {
-      companiesHouse: 'GyPDmr5q',
-      charityCommission: null
+      companiesHouse: 'XKtocsk2',
+      charityCommission: 'Ka7Kel6V'
     },
     additionalSbis: [],
-    lastUpdated: '2024-12-31T23:45:32.357Z',
-    isFinancialToBusinessAddress: false,
-    hasLandInNorthernIreland: true,
-    hasLandInScotland: true,
-    hasLandInWales: false,
-    hasAdditionalBusinessActivities: false,
-    additionalBusinessActivities: [],
-    isAccountablePeopleDeclarationCompleted: false,
-    dateStartedFarming: '2024-08-20T07:45:37.666Z',
+    lastUpdated: '2024-12-31T22:48:44.689Z',
+    isFinancialToBusinessAddress: true,
+    hasLandInNorthernIreland: false,
+    hasLandInScotland: false,
+    hasLandInWales: true,
+    hasAdditionalBusinessActivities: true,
+    additionalBusinessActivities: [
+      { code: 928058, type: 'Additional Business Activity 0' },
+      { code: 711028, type: 'Additional Business Activity 1' },
+      { code: 954131, type: 'Additional Business Activity 2' }
+    ],
+    isAccountablePeopleDeclarationCompleted: true,
+    dateStartedFarming: '2024-09-08T10:42:10.273Z',
     landConfirmed: true,
     status: {
       locked: false,
-      confirmed: true,
+      confirmed: false,
       deactivated: false
     }
   },
   customers: [
     {
       personId: '11111111',
-      firstName: 'Lauren',
-      lastName: 'Sanford',
+      firstName: 'Raul',
+      lastName: 'Feil',
       crn: '1111111100',
       role: 'Key Contact'
     },
     {
       personId: '11111112',
-      firstName: 'Kristy',
-      lastName: 'Stiedemann',
+      firstName: 'Royce',
+      lastName: 'Skiles',
       crn: '1111111200',
-      role: 'Director'
+      role: 'Owner or Sole Trader'
     },
     {
       personId: '11111113',
-      firstName: 'Marco',
-      lastName: 'Kovacek',
+      firstName: 'Jake',
+      lastName: 'Balistreri',
       crn: '1111111300',
       role: 'Director'
     },
     {
       personId: '11111114',
-      firstName: 'Henri',
-      lastName: 'Weissnat',
+      firstName: 'Trystan',
+      lastName: 'Kirlin',
       crn: '1111111400',
-      role: 'Trustee'
+      role: 'Key Contact'
     },
     {
       personId: '11111115',
-      firstName: 'Terry',
-      lastName: 'Swaniawski',
+      firstName: 'Shane',
+      lastName: 'Berge',
       crn: '1111111500',
-      role: 'Director'
+      role: 'Key Contact'
     },
     {
       personId: '11111116',
-      firstName: 'Juwan',
-      lastName: 'Hahn',
+      firstName: 'Ellis',
+      lastName: 'Cremin',
       crn: '1111111600',
-      role: 'Trustee'
+      role: 'Owner or Sole Trader'
     },
     {
       personId: '11111117',
-      firstName: 'Frederic',
-      lastName: 'Koch-Cassin',
+      firstName: 'Jacques',
+      lastName: 'Wiegand',
       crn: '1111111700',
-      role: 'Trustee'
+      role: 'Director'
     },
     {
       personId: '11111118',
-      firstName: 'Mara',
-      lastName: 'Stark',
+      firstName: 'Rosanna',
+      lastName: 'Rodriguez',
       crn: '1111111800',
       role: 'Key Contact'
     },
@@ -215,55 +219,55 @@ const business = {
       firstName: 'Big',
       lastName: 'Skeleton',
       crn: '1111111900',
-      role: 'Owner or Sole Trader'
+      role: 'Director'
     },
     {
       personId: '11111122',
-      firstName: 'Rod',
-      lastName: 'Quitzon-Gibson',
+      firstName: 'Maybelle',
+      lastName: 'Johns',
       crn: '1111112200',
       role: 'Agent'
     },
     {
       personId: '11111222',
-      firstName: 'Nayeli',
-      lastName: 'Kub',
+      firstName: 'Jeff',
+      lastName: 'Farrell',
       crn: '1111122200',
       role: 'Key Contact'
     },
     {
       personId: '11112222',
-      firstName: 'Kellie',
-      lastName: 'Flatley',
+      firstName: 'Dennis',
+      lastName: 'Stark',
       crn: '1111222200',
-      role: 'Agent'
+      role: 'Owner or Sole Trader'
     },
     {
       personId: '11122222',
-      firstName: 'Meaghan',
-      lastName: 'Torp',
+      firstName: 'Shaniya',
+      lastName: 'Stoltenberg',
       crn: '1112222200',
-      role: 'Director'
+      role: 'Owner or Sole Trader'
     },
     {
       personId: '11222222',
-      firstName: 'Stacey',
-      lastName: 'Willms',
+      firstName: 'Virgil',
+      lastName: 'Vandervort',
       crn: '1122222200',
-      role: 'Agent'
+      role: 'Key Contact'
     },
     {
       personId: '12222222',
-      firstName: 'Vilma',
-      lastName: 'Yundt',
+      firstName: 'Willis',
+      lastName: 'Connelly',
       crn: '1222222200',
       role: 'Owner or Sole Trader'
     }
   ],
   customer: {
     personId: '11111111',
-    firstName: 'Lauren',
-    lastName: 'Sanford',
+    firstName: 'Raul',
+    lastName: 'Feil',
     crn: '1111111100',
     role: 'Key Contact',
     permissionGroups: [
@@ -390,9 +394,9 @@ const business = {
       sheetId: 'SS6627',
       parcelId: '5662',
       area: 1.027,
-      pendingDigitisation: false,
-      effectiveToDate: '2024-07-27T16:53:12.347Z',
-      effectiveFromDate: '2024-07-25T16:53:12.347Z'
+      pendingDigitisation: true,
+      effectiveToDate: '2024-09-22T13:28:07.626Z',
+      effectiveFromDate: '2024-09-20T13:28:07.626Z'
     },
     parcelCovers: [
       {
@@ -414,29 +418,29 @@ const business = {
   agreements: expect.arrayContaining(agreement),
   applications: [
     {
-      sbi: '1111111111',
-      id: '5836775937',
-      subjectId: '1998217138',
+      sbi: '111111111',
+      id: '4370008780',
+      subjectId: '620008135',
       year: 2022,
-      name: 'VOX CURRUS DELEO PEIOR CUNABULA AGNITIO CUR DEMO',
-      moduleCode: null,
-      scheme: 'CIVITAS THECA PAUCI ACER SUNT VALETUDO',
-      statusCodeP: null,
-      statusCodeS: '000090',
-      status: 'PAID',
-      submissionDate: '2022-12-31T22:01:36.356Z',
+      name: 'TYRANNUS UMBRA VOLUPTATEM VIRGA CONTRA IURE USQUE SED VIRGO',
+      moduleCode: 'TUM_CULTELLUS_AUTUS_2022',
+      scheme: 'COMPREHENDO ADVERSUS CONATUS TURBO',
+      statusCodeP: 'STADOM',
+      statusCodeS: '000002',
+      status: 'DELETED',
+      submissionDate: null,
       portalStatusP: 'DOMPRS',
       portalStatusS: null,
       portalStatus: null,
       active: true,
-      transitionId: '6338450300',
-      transitionName: 'TO PAID',
-      agreementReferences: ['3242226112'],
+      transitionId: '6470349421',
+      transitionName: 'DELETE',
+      agreementReferences: ['6633536845'],
       transitionHistory: [
         {
-          id: '6338450300',
-          name: 'TO PAID',
-          timestamp: '2022-12-31T06:30:16.953Z',
+          id: '6470349421',
+          name: 'DELETE',
+          timestamp: '2022-12-31T00:54:50.310Z',
           checkStatus: 'PASSED'
         }
       ]
@@ -444,14 +448,14 @@ const business = {
   ],
   countyParishHoldings: [
     {
-      cphNumber: '14/794/4640',
-      parish: 'Fulbeck',
-      startDate: '2023-07-02',
-      endDate: '9999-12-31',
-      species: 'SHEEP,CATTLE,GOAT(S),POULTRY,DEER,PIGEONS',
-      xCoordinate: 0,
-      yCoordinate: 0,
-      address: 'NIHIL ACCOMMODO PORRO FARM, WEST END, ABERNATHY-LE-WITTING, MI21 1MM'
+      cphNumber: '01/788/9935',
+      parish: 'Spixworth',
+      startDate: '2021-04-21',
+      endDate: '2028-04-21',
+      species: 'PIG(S),PIGEONS,CATTLE,POULTRY,SHEEP,OTHER,CAMELIDS,GOAT(S)',
+      xCoordinate: 98337,
+      yCoordinate: 733971,
+      address: 'ARCESSO SUBNECTO FARM, ANNIE SIDE, BATZ-LE-HERMANN, DY65 37V'
     }
   ]
 }
@@ -680,7 +684,7 @@ const businessQuery = gql`
   }
 `
 const businessVariables = {
-  sbi: '1111111111',
+  sbi: '111111111',
   crn: '1111111100',
   date: '2025-05-04',
   sheetId: 'SS6627',
@@ -703,7 +707,7 @@ describe('Local mocked dev check', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '11111111',
-        relationships: ['1111111111:1111111111']
+        relationships: ['111111111:111111111']
       },
       'test-secret'
     )

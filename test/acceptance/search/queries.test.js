@@ -113,7 +113,7 @@ describe('Business Search Queries', () => {
     const client = new GraphQLClient(targetURL)
     const response = await client.request(
       businessSearchQuery,
-      { searchString: '1111111111', searchType: 'SBI' },
+      { searchString: '111111111', searchType: 'SBI' },
       { email: 'some-email', 'gateway-type': 'internal' }
     )
 
@@ -121,35 +121,35 @@ describe('Business Search Queries', () => {
     expect(response.businessSearch).toEqual({
       results: [
         {
-          organisationId: '1111111111',
-          sbi: '1111111111',
-          name: 'Maggio, Murray and Dicki',
+          organisationId: '111111111',
+          sbi: '111111111',
+          name: 'Bechtelar - Stamm',
           additionalSbis: [],
-          isFinancialToBusinessAddress: false,
+          isFinancialToBusinessAddress: true,
           isCorrespondenceAsBusinessAddress: false,
           landConfirmed: true,
-          lastUpdated: '2024-12-31T23:45:32.357Z',
+          lastUpdated: '2024-12-31T22:48:44.689Z',
           status: {
             locked: false,
-            confirmed: true,
+            confirmed: false,
             deactivated: false
           },
           address: {
-            pafOrganisationName: 'Maggio, Murray and Dicki',
-            line1: '14',
-            line2: '16 Fourth Avenue',
-            line3: 'Miller-under-Raynor',
-            line4: 'XP0 6TX',
-            line5: 'Saint Helena',
+            pafOrganisationName: 'Bechtelar - Stamm',
+            line1: '98',
+            line2: '8 Gutmann Rise',
+            line3: 'North Cormier Park',
+            line4: 'GK0 0XW',
+            line5: 'Norfolk Island',
             buildingNumberRange: null,
             buildingName: null,
             flatName: null,
             street: null,
-            city: 'South Witting Green',
+            city: 'Fisher Court',
             county: null,
-            postalCode: 'IH1 1MM',
-            country: 'England',
-            uprn: '563449849116',
+            postalCode: 'HS26 53S',
+            country: 'Scotland',
+            uprn: '415400139912',
             dependentLocality: null,
             doubleDependentLocality: null,
             typeId: null
@@ -195,31 +195,31 @@ describe('Customer Search Queries', () => {
         {
           personId: '11111111',
           crn: '1111111100',
-          fullName: 'Lauren Sanford',
-          personalIdentifiers: ['8568845789', '370030956', '7899566034'],
+          fullName: 'Raul Feil',
+          personalIdentifiers: ['2363710898', '7209755783'],
           nationalInsuranceNumber: null,
-          email: 'lauren.sanford@immaculate-shark.info',
+          email: 'raul.feil@questionable-millet.uk',
           status: {
             locked: false,
             confirmed: false,
-            deactivated: false
+            deactivated: true
           },
           address: {
             pafOrganisationName: null,
-            line1: '65',
-            line2: '1 McCullough Path',
-            line3: 'Newton Ratkedon',
-            line4: 'MS9 8BJ',
-            line5: 'North Macedonia',
+            line1: '681',
+            line2: '7 Tito Wood',
+            line3: 'South Yundtington',
+            line4: 'JT0 2WK',
+            line5: 'Mozambique',
             buildingNumberRange: null,
             buildingName: null,
             flatName: null,
             street: null,
-            city: 'Newton Bruen',
+            city: "Bode-Gorczany-under-O'Kon-Ebert",
             county: null,
-            postalCode: 'TC2 8KP',
+            postalCode: 'E3G 7YZ',
             country: 'Wales',
-            uprn: '790214962932',
+            uprn: '078329933641',
             dependentLocality: null,
             doubleDependentLocality: null,
             typeId: null

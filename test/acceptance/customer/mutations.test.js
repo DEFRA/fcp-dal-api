@@ -259,7 +259,7 @@ describe('Customer Mutations - as an internal user', () => {
         name: nameInput,
         dateOfBirth: '2000-02-29',
         phone: inputs.phoneInput.phone,
-        email: { ...inputs.emailInput.email, validated: false },
+        email: { ...inputs.emailInput.email, validated: true },
         status: {
           locked: true,
           confirmed: false,
@@ -267,7 +267,7 @@ describe('Customer Mutations - as an internal user', () => {
         },
         address: { ...inputs.addressInput.address, typeId: null },
         doNotContact: true,
-        personalIdentifiers: []
+        personalIdentifiers: ['1819421250', '9527746847', '3904800546']
       }
     })
   })
@@ -289,7 +289,7 @@ describe('Customer Mutations - as an internal user', () => {
         name: nameFullInput,
         dateOfBirth: '2000-03-01',
         phone: inputs.allFieldsInput.phone,
-        email: { ...inputs.allFieldsInput.email, validated: false },
+        email: { ...inputs.allFieldsInput.email, validated: true },
         status: {
           locked: true,
           confirmed: false,
@@ -297,7 +297,7 @@ describe('Customer Mutations - as an internal user', () => {
         },
         address: { ...inputs.allFieldsInput.address, typeId: null },
         doNotContact: false,
-        personalIdentifiers: []
+        personalIdentifiers: ['1819421250', '9527746847', '3904800546']
       }
     })
   })
@@ -336,13 +336,13 @@ describe('Customer Mutations - as an external user', () => {
         phone: inputs.phoneInput.phone,
         email: { ...inputs.emailInput.email, validated: false },
         status: {
-          locked: true,
-          confirmed: true,
+          locked: false,
+          confirmed: false,
           deactivated: false
         },
         address: { ...inputs.addressInput.address, typeId: null },
         doNotContact: true,
-        personalIdentifiers: ['1271974984']
+        personalIdentifiers: ['8500901592', '1596460156']
       }
     })
   })
@@ -366,13 +366,13 @@ describe('Customer Mutations - as an external user', () => {
         phone: inputs.allFieldsInput.phone,
         email: { ...inputs.allFieldsInput.email, validated: false },
         status: {
-          locked: true,
-          confirmed: true,
+          locked: false,
+          confirmed: false,
           deactivated: false
         },
         address: { ...inputs.allFieldsInput.address, typeId: null },
         doNotContact: false,
-        personalIdentifiers: ['1271974984']
+        personalIdentifiers: ['8500901592', '1596460156']
       }
     })
   })
