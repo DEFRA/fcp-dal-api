@@ -1,6 +1,6 @@
 """
 A land parcel for a business.
-When a change happens to a land parcel a new verion is created.
+When a change happens to a land parcel a new version is created.
 """
 type BusinessLandParcel {
   """
@@ -124,7 +124,7 @@ type BusinessLand {
 
   """
   Land covers of a single parcel based on its SheetId and ParcelId for a particular
-  date for a busines.
+  date for a business.
   The earliest date is 01/01/2015.
   """
   parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover] @on

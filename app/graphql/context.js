@@ -6,6 +6,7 @@ import { MongoCustomer } from '../data-sources/mongo/Customer.js'
 import { MongoJWKS } from '../data-sources/mongo/JWKS.js'
 import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPaymentsCustomer.js'
+import { RuralPaymentsReferenceData } from '../data-sources/rural-payments/RuralPaymentsReferenceData.js'
 import { Permissions } from '../data-sources/static/permissions.js'
 import { BadRequest } from '../errors/graphql.js'
 import { logger } from '../logger/logger.js'
@@ -51,6 +52,7 @@ export async function context({ request }) {
       permissions: new Permissions({ logger: requestLogger }),
       ruralPaymentsBusiness: new RuralPaymentsBusiness(...datasourceOptions),
       ruralPaymentsCustomer: new RuralPaymentsCustomer(...datasourceOptions),
+      ruralPaymentsReferenceData: new RuralPaymentsReferenceData(...datasourceOptions),
       hitachiPayments: new HitachiPayments({
         logger: requestLogger,
         audit: {
