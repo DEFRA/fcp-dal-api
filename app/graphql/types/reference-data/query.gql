@@ -1,6 +1,8 @@
 extend type Query {
   """
-  Reference data, such as the country code to currency mapping required for bank details changes.
+  Reference data. Usually an internal ID or code mapped to a human readable description.
+  Mostly static, but will change occasionally.
+  NOTE: no auth is required for querying, as the data is public domain.
   """
-  referenceData: ReferenceData @on @auth(requires: [SINGLE_FRONT_DOOR])
+  referenceData: ReferenceData @on
 }

@@ -250,10 +250,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`bank-change-service/v1/existing-accounts/${frn}`)
   }
 
-  async getCountryCodes() {
-    return this.get('bank-change-service/v1/country-codes')
-  }
-
   async getLandUseByBusinessParcel(sbi, sheetId, parcelId, date = new Date()) {
     const response = await this.get(
       `SitiAgriApi/cv/landUseByBusinessParcel/sheet/${sheetId}/parcel/${parcelId}/sbi/${sbi}/list`,

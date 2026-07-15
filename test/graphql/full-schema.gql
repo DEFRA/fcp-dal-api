@@ -594,11 +594,17 @@ type Permission {
 
 type ReferenceData {
   countriesCurrencies: [CountryCurrency!]
+  legalStatuses: [ReferenceDatum!]
 }
 
 type CountryCurrency {
   code: String!
   currency: String!
+}
+
+type ReferenceDatum {
+  code: Int!
+  description: String!
 }
 
 input UpdateBusinessLegalStatusInput {
