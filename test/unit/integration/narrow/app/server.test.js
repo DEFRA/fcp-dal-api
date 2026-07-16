@@ -7,7 +7,8 @@ const mockSendMetric = { sendMetric: jest.fn() }
 const mockLogger = {
   logger: {
     debug: jest.fn(),
-    info: jest.fn()
+    info: jest.fn(),
+    isDebugEnabled: jest.fn().mockReturnValue(true)
   }
 }
 
@@ -34,6 +35,9 @@ describe('Server config and startup', () => {
   let server
   let configMockPath
   beforeEach(async () => {
+    // jest.config.json sets resetMocks: true, which wipes mockReturnValue before every test
+    mockLogger.logger.isDebugEnabled.mockReturnValue(true)
+
     configMockPath = {
       port: '3987',
       requestTimeoutMs: timeout

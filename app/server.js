@@ -29,22 +29,26 @@ server.ext({
       uuidv4()
     request.traceId = request.headers['x-cdp-request-id'] || uuidv4()
 
-    logger.debug('FCP - Access log', {
-      request: {
-        id: request.traceId,
-        method: request.method.toUpperCase(),
-        path: request.path,
-        url: `${server.info.uri}${request.path}`,
-        params: request.params,
-        payload: request.payload,
-        body: request.body,
-        headers: request.headers,
-        remoteAddress: request.info.remoteAddress
-      },
-      code: DAL_APPLICATION_REQUEST_001,
-      transactionId: request.transactionId,
-      traceId: request.traceId
-    })
+    // Winston stringifies log arguments before checking the configured level, so this
+    // eagerly-evaluated debug call is guarded to avoid that cost when disabled.
+    if (logger.isDebugEnabled()) {
+      logger.debug('FCP - Access log', {
+        request: {
+          id: request.traceId,
+          method: request.method.toUpperCase(),
+          path: request.path,
+          url: `${server.info.uri}${request.path}`,
+          params: request.params,
+          payload: request.payload,
+          body: request.body,
+          headers: request.headers,
+          remoteAddress: request.info.remoteAddress
+        },
+        code: DAL_APPLICATION_REQUEST_001,
+        transactionId: request.transactionId,
+        traceId: request.traceId
+      })
+    }
 
     return h.continue
   }
@@ -81,15 +85,20 @@ server.events.on('response', function (request) {
     })
   }
 
-  logger.debug('FCP - Response log', {
-    response: {
-      statusCode: request.response.statusCode,
-      headers: request.response.headers,
-      body: request.response.source
-    },
-    requestTimeMs,
-    transactionId: request.transactionId,
-    traceId: request.traceId,
-    code: DAL_APPLICATION_RESPONSE_001
-  })
+  // Winston stringifies log arguments before checking the configured level, so this
+  // debug call - which embeds the full response body - is guarded to avoid that cost
+  // (e.g. tens of MB for large GraphQL responses) when disabled.
+  if (logger.isDebugEnabled()) {
+    logger.debug('FCP - Response log', {
+      response: {
+        statusCode: request.response.statusCode,
+        headers: request.response.headers,
+        body: request.response.source
+      },
+      requestTimeMs,
+      transactionId: request.transactionId,
+      traceId: request.traceId,
+      code: DAL_APPLICATION_RESPONSE_001
+    })
+  }
 })

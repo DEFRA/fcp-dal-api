@@ -13,7 +13,8 @@ const logger = {
   error: jest.fn(),
   warn: jest.fn(),
   debug: jest.fn(),
-  info: jest.fn()
+  info: jest.fn(),
+  isDebugEnabled: jest.fn().mockReturnValue(true)
 }
 
 const datasourceOptions = [
@@ -30,6 +31,11 @@ const datasourceOptions = [
 ]
 
 describe('RuralPayments', () => {
+  // jest.config.json sets resetMocks: true, which wipes mockReturnValue before every test
+  beforeEach(() => {
+    logger.isDebugEnabled.mockReturnValue(true)
+  })
+
   describe('fetch', () => {
     const mockFetch = jest.spyOn(RESTDataSource.prototype, 'fetch')
     const dummyRequest = { method: 'POST' }

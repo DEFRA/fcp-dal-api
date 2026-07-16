@@ -1,4 +1,3 @@
-import v8 from 'node:v8'
 import { NotFound } from '../../../errors/graphql.js'
 import {
   transformAndMergeParcelGeometries,
@@ -67,12 +66,7 @@ export const BusinessLand = {
       return parcels
     }
 
-    const parcelGeometriesSizeInMb = (v8.serialize(parcelGeometries).length / 1024 / 1024).toFixed(
-      2
-    )
-    logger.info(
-      `Parcel geometries retrieved: ${parcelGeometries.features.length} (${parcelGeometriesSizeInMb} MB)`
-    )
+    logger.info(`Parcel geometries retrieved: ${parcelGeometries.features.length}`)
 
     const parcels = transformAndMergeParcelGeometries(parcelsResponse, parcelGeometries)
     logger.info(`Parcels retrieved: ${parcels.length}`)
