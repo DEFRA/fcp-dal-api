@@ -19,6 +19,6 @@ export class JWKS {
 
   async getPublicKey(kid) {
     const getKey = this.getRemoteJwksSet()
-    return await getKey({ kid, alg: 'RS256' })
+    return getKey({ kid, alg: 'RS256' })
   }
 }

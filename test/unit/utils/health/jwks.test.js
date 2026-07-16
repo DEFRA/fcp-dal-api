@@ -45,7 +45,9 @@ describe('JWKS health check', () => {
 
     expect(global.fetch).toHaveBeenCalledWith(config.get('oidc.jwksURI'))
     expect(mockGetPublicKey).toHaveBeenCalledWith('mock-key-id-123')
-    expect(mockLogger.logger.info).toHaveBeenCalledWith('Fetched', 1, 'JWKS keys')
+    expect(mockLogger.logger.info).toHaveBeenCalledWith(
+      'SUCCESS: Resolved first JWKS key for kid: mock-key-id-123'
+    )
   })
 
   it('should log and throw when JWKS request is unsuccessful, e.g. rate limiting', async () => {
