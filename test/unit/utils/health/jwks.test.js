@@ -30,6 +30,7 @@ describe('JWKS health check', () => {
         keys: [{ kid: 'mock-key-id-123' }]
       })
     })
+    config.set('auth.disabled', false)
   })
 
   afterEach(() => {
@@ -54,13 +55,14 @@ describe('JWKS health check', () => {
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 429,
-      json: jest.fn().mockResolvedValue('')
+      text: jest.fn().mockResolvedValue('some upstream error')
     })
 
     await expect(healthCheck()).rejects.toThrow('Problem fetching JWKS keys, status: 429')
     expect(mockLogger.logger.error).toHaveBeenCalledWith('#DAL - Error fetching JWKS keys', {
       code: expect.any(String),
-      res: expect.any(Object)
+      res: expect.any(Object),
+      tenant: { message: 'some upstream error' }
     })
   })
 
@@ -100,5 +102,12 @@ describe('JWKS health check', () => {
       error: expect.any(Error),
       code: expect.any(String)
     })
+  })
+
+  it('should skip JWKS health check when auth is disabled', async () => {
+    config.set('auth.disabled', true)
+
+    expect(global.fetch).not.toHaveBeenCalled()
+    expect(await healthCheck()).toBeUndefined()
   })
 })
