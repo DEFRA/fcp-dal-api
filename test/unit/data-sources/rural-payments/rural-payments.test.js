@@ -168,6 +168,16 @@ describe('RuralPayments', () => {
       })
     })
 
+    test('does not log when debug is disabled', async () => {
+      logger.isDebugEnabled.mockReturnValue(false)
+      const rp = new RuralPayments(...datasourceOptions)
+      const request = { headers: { 'gateway-type': 'internal', email: 'test@test.test' } }
+
+      await rp.willSendRequest('test-path', request)
+
+      expect(logger.debug).not.toHaveBeenCalled()
+    })
+
     test('adds crn, Authorization & gateway type header from request headers for external requests', async () => {
       const token = jwt.sign({ contactId: 'test-crn' }, 'secret', {
         expiresIn: '1h'
@@ -325,6 +335,21 @@ describe('RuralPayments', () => {
           code: RURALPAYMENTS_API_REQUEST_001
         })
       )
+    })
+
+    test('does not log response detail when debug is disabled', async () => {
+      logger.isDebugEnabled.mockReturnValue(false)
+      const rp = new RuralPayments(...datasourceOptions)
+      const mockResult = {
+        response: { status: 200, headers: new Headers(), body: { data: 'test' } },
+        parsedBody: { data: 'test' }
+      }
+      const mockFn = jest.fn().mockResolvedValue(mockResult)
+
+      await rp.trace('test-url', { id: '123', method: 'GET', headers: {} }, mockFn)
+
+      expect(logger.debug).not.toHaveBeenCalled()
+      expect(logger.info).toHaveBeenCalled()
     })
   })
 
