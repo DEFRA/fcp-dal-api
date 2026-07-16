@@ -6,7 +6,8 @@ import { BaseRESTDataSource } from '../../../app/data-sources/BaseRESTDataSource
 const mockLogger = {
   error: jest.fn(),
   info: jest.fn(),
-  debug: jest.fn()
+  debug: jest.fn(),
+  isDebugEnabled: jest.fn().mockReturnValue(true)
 }
 
 // Mock sendMetric
@@ -18,6 +19,8 @@ describe('BaseRESTDataSource', () => {
   let dataSource
 
   beforeEach(() => {
+    // jest.config.json sets resetMocks: true, which wipes mockReturnValue before every test
+    mockLogger.isDebugEnabled.mockReturnValue(true)
     dataSource = new BaseRESTDataSource({}, { name: 'Test DataSource', code: 'TEST_001' })
     dataSource.logger = mockLogger
   })

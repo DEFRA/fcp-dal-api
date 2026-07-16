@@ -77,10 +77,14 @@ export class BaseRESTDataSource extends RESTDataSource {
   async willSendRequest(path, request) {
     await this.addAuthentication(request)
 
-    this.logger.debug(`#datasource - ${this.name} - request`, {
-      request: { ...request, url: `${this.baseURL}${path}` },
-      code: this.code
-    })
+    // Winston stringifies log arguments before checking the configured level, so
+    // this eagerly-evaluated debug call is guarded to avoid that cost when disabled.
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(`#datasource - ${this.name} - request`, {
+        request: { ...request, url: `${this.baseURL}${path}` },
+        code: this.code
+      })
+    }
   }
 
   // Subclasses should override this to add their specific authentication
@@ -117,16 +121,21 @@ export class BaseRESTDataSource extends RESTDataSource {
       },
       response
     })
-    this.logger.debug(`#datasource - ${this.name} - response detail`, {
-      request: { ...request, url: url.toString() },
-      response: {
-        ...response,
-        body: result.parsedBody,
-        size: Buffer.byteLength(JSON.stringify(response.body))
-      },
-      code: this.code,
-      requestTimeMs
-    })
+    // Winston stringifies log arguments before checking the configured level, so this
+    // debug call - which embeds the full parsed response body - is guarded to avoid
+    // that cost (e.g. tens of MB for large organisations' geometries) when disabled.
+    if (this.logger.isDebugEnabled()) {
+      this.logger.debug(`#datasource - ${this.name} - response detail`, {
+        request: { ...request, url: url.toString() },
+        response: {
+          ...response,
+          body: result.parsedBody,
+          size: Buffer.byteLength(JSON.stringify(result.parsedBody))
+        },
+        code: this.code,
+        requestTimeMs
+      })
+    }
 
     return result
   }
