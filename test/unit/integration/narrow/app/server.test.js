@@ -8,6 +8,7 @@ const mockLogger = {
   logger: {
     debug: jest.fn(),
     info: jest.fn(),
+    error: jest.fn(),
     isDebugEnabled: jest.fn().mockReturnValue(true)
   }
 }
@@ -102,6 +103,34 @@ describe('Server config and startup', () => {
       )
     })
 
+    test('onRequest does not log when debug is disabled', async () => {
+      mockLogger.logger.isDebugEnabled.mockReturnValue(false)
+
+      await server.inject({ method: 'GET', url: '/healthy' })
+
+      expect(mockLogger.logger.debug).not.toHaveBeenCalled()
+    })
+
+    test('logs unhandled request errors via the request/error channel', async () => {
+      server.route({
+        method: 'GET',
+        path: '/boom',
+        handler: () => {
+          throw new Error('boom')
+        }
+      })
+
+      await server.inject({ method: 'GET', url: '/boom' })
+
+      expect(mockLogger.logger.error).toHaveBeenCalledWith(
+        '#DAL - Unhandled request error',
+        expect.objectContaining({
+          error: expect.any(Error),
+          request: expect.objectContaining({ method: 'GET', path: '/boom' })
+        })
+      )
+    })
+
     test('response event logs and sends metrics (non-health path)', async () => {
       await server.inject({ method: 'GET', url: '/non-health' })
       expect(mockLogger.logger.debug).toHaveBeenCalledWith(
@@ -125,6 +154,15 @@ describe('Server config and startup', () => {
       await server.inject({ method: 'GET', url: '/health' })
       expect(mockSendMetric.sendMetric).not.toHaveBeenCalled()
       expect(mockLogger.logger.info).not.toHaveBeenCalled()
+    })
+
+    test('response event does not log debug detail when debug is disabled', async () => {
+      mockLogger.logger.isDebugEnabled.mockReturnValue(false)
+
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      expect(mockLogger.logger.debug).not.toHaveBeenCalled()
+      expect(mockLogger.logger.info).toHaveBeenCalled()
     })
   })
 })

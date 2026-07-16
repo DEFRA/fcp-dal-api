@@ -3,7 +3,11 @@ import hapi from '@hapi/hapi'
 import { Unit } from 'aws-embedded-metrics'
 import { v4 as uuidv4 } from 'uuid'
 import { config } from './config.js'
-import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
+import {
+  DAL_APPLICATION_REQUEST_001,
+  DAL_APPLICATION_RESPONSE_001,
+  DAL_UNHANDLED_ERROR_001
+} from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { sendMetric } from './logger/sendMetric.js'
 import { healthRoute } from './routes/health.js'
@@ -52,6 +56,22 @@ server.ext({
 
     return h.continue
   }
+})
+
+// Hapi only prints these to raw console output by default (separate from Winston), so
+// without this listener an unhandled exception in a resolver/handler produces a 500
+// response with no trace in the application's own logs.
+server.events.on({ name: 'request', channels: 'error' }, function (request, event) {
+  logger.error('#DAL - Unhandled request error', {
+    error: event.error,
+    code: DAL_UNHANDLED_ERROR_001,
+    transactionId: request.transactionId,
+    traceId: request.traceId,
+    request: {
+      method: request.method?.toUpperCase(),
+      path: request.path
+    }
+  })
 })
 
 server.events.on('response', function (request) {
