@@ -64,6 +64,13 @@ export class RuralPayments extends BaseRESTDataSource {
 
   async addAuthentication(request) {
     const headers = this.request.headers
+
+    if (headers.healthcheck) {
+      // Health check calls intentionally carry no user credentials. Sending the request
+      // unauthenticated still proves the upstream is reachable, typically via a 403 response.
+      return
+    }
+
     const additionalHeaders = {}
 
     if (this.gatewayType === 'internal' && headers.email) {

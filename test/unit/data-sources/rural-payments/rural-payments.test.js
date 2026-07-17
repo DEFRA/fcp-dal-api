@@ -267,6 +267,25 @@ describe('RuralPayments', () => {
 
       expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
     })
+
+    test('does not throw and sends the request unauthenticated when the healthcheck header is present', async () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'internal',
+          request: {
+            headers: {
+              healthcheck: true
+            }
+          }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      await expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+      expect(request.headers).toEqual({})
+    })
   })
 
   describe('trace', () => {
