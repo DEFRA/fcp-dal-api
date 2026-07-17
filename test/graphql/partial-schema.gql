@@ -245,6 +245,12 @@ type Business {
   agreements: [Agreement]
   applications: [Application]
   bankAccounts: [BusinessBankAccount!]
+  permittedFunctions(functions: [String!]!): [PermittedFunction!]
+}
+
+type PermittedFunction {
+  name: String!
+  permitted: Boolean!
 }
 
 type BusinessBankAccount {

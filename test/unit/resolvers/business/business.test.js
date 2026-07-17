@@ -141,6 +141,7 @@ const dataSources = {
     getCountyParishHoldingsBySBI: jest.fn(),
     getAgreementsBySBI: jest.fn(),
     getApplicationsBySBI: jest.fn(),
+    getAuthorisedFunctionsByOrganisationId: jest.fn(),
     getOrganisationById: jest.fn()
   },
 
@@ -618,6 +619,50 @@ describe('Business', () => {
             }
           ]
         }
+      ])
+    })
+  })
+
+  describe('permittedFunctions', () => {
+    it('maps each requested function to its upstream authorisation flag, in order', async () => {
+      dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce(
+        {
+          viewLand: true,
+          amendBusinessDetails: false
+        }
+      )
+
+      const result = await Business.permittedFunctions(
+        { organisationId: 'mockId' },
+        { functions: ['viewLand', 'amendBusinessDetails'] },
+        { dataSources }
+      )
+
+      expect(
+        dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId
+      ).toHaveBeenCalledWith('mockId', ['viewLand', 'amendBusinessDetails'])
+      expect(result).toEqual([
+        { name: 'viewLand', permitted: true },
+        { name: 'amendBusinessDetails', permitted: false }
+      ])
+    })
+
+    it('defaults to not permitted when the upstream omits a requested function', async () => {
+      dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce(
+        {
+          viewLand: true
+        }
+      )
+
+      const result = await Business.permittedFunctions(
+        { organisationId: 'mockId' },
+        { functions: ['viewLand', 'someUnknownFunction'] },
+        { dataSources }
+      )
+
+      expect(result).toEqual([
+        { name: 'viewLand', permitted: true },
+        { name: 'someUnknownFunction', permitted: false }
       ])
     })
   })
