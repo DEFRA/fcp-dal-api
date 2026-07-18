@@ -84,9 +84,27 @@ jobs:
           test-script: npm test
 
       - name: Acceptance & environment emulation tests
+        # the script is basically `npm run test:acceptance:docker && npm run test:acceptance:proxy`
+        # but with some extra logging and error handling to help debug failures
         run: |
-          npm run test:acceptance:docker && \
-          npm run test:acceptance:proxy
+          set +e
+          docker compose -f compose.yml -f test/acceptance/compose.yml \
+            run --rm --build --pull always --quiet-pull test
+          if [ $? -ne 0 ]; then
+            echo -e '\n\n====> Dumping DAL logs...\n'
+            docker logs fcp-dal-api-fcp-dal-api-1 | jq
+            docker compose down --remove-orphans
+            exit 1
+          fi
+          docker compose -f compose.yml -f test/acceptance/compose.yml -f test/acceptance/cdp-mock-check.yml \
+            run --rm --quiet-pull test # no need to build or pull again
+          if [ $? -ne 0 ]; then
+            echo -e '\n\n====> Dumping DAL logs...\n'
+            docker logs fcp-dal-api-fcp-dal-api-1 | jq
+            docker compose down --remove-orphans
+            exit 1
+          fi
+          docker compose down --remove-orphans
         # TODO: re-enable mTLS tests when startup health check issue is resolved
         #  && npm run test:acceptance:proxy:mtls
 
