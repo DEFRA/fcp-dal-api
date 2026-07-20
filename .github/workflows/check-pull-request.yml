@@ -23,12 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
       - name: Setup npm
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version: 24.18
           cache: npm
@@ -36,7 +36,7 @@ jobs:
       - name: Install and audit
         run: |
           npm audit --omit=dev
-          npm ci
+          npm ci --ignore-scripts
           npm run postinstall
 
       - name: Verify semantic version bump
@@ -71,6 +71,7 @@ jobs:
       - name: Jest Coverage Comment (with base snapshot)
         if: steps.base-cov.outputs.available == 'true'
         uses: ArtiomTr/jest-coverage-report-action@v2
+        # NOTE: need to switch to vitest!
         with:
           test-script: npm test
           base-coverage-file: base-coverage/report.json
@@ -78,19 +79,38 @@ jobs:
       - name: Jest Coverage Comment (no base snapshot)
         if: steps.base-cov.outputs.available != 'true'
         uses: ArtiomTr/jest-coverage-report-action@v2
+        # NOTE: need to switch to vitest!
         with:
           test-script: npm test
 
       - name: Acceptance & environment emulation tests
+        # the script is basically `npm run test:acceptance:docker && npm run test:acceptance:proxy`
+        # but with some extra logging and error handling to help debug failures
         run: |
-          npm run test:acceptance:docker && \
-          npm run test:acceptance:proxy
+          set +e
+          docker compose -f compose.yml -f test/acceptance/compose.yml \
+            run --rm --build --pull always --quiet-pull test
+          if [ $? -ne 0 ]; then
+            echo -e '\n\n====> Dumping DAL logs...\n'
+            docker logs fcp-dal-api-fcp-dal-api-1 | jq
+            docker compose down --remove-orphans
+            exit 1
+          fi
+          docker compose -f compose.yml -f test/acceptance/compose.yml -f test/acceptance/cdp-mock-check.yml \
+            run --rm --quiet-pull test # no need to build or pull again
+          if [ $? -ne 0 ]; then
+            echo -e '\n\n====> Dumping DAL logs...\n'
+            docker logs fcp-dal-api-fcp-dal-api-1 | jq
+            docker compose down --remove-orphans
+            exit 1
+          fi
+          docker compose down --remove-orphans
         # TODO: re-enable mTLS tests when startup health check issue is resolved
         #  && npm run test:acceptance:proxy:mtls
 
-      - name: Sonarqube Cloud Scan
+      - name: Sonar Cloud Scan
         if: github.actor != 'dependabot[bot]'
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
