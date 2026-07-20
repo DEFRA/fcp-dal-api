@@ -262,4 +262,21 @@ export class RuralPaymentsBusiness extends RuralPayments {
     )
     return response.data
   }
+
+  async createAuthorisationForOrganisation(organisationId, body) {
+    return this.post(`SitiAgriApi/authorisation/organisation/${organisationId}/authorisation`, {
+      body,
+      headers: postPutHeaders
+    })
+  }
+
+  async updateAuthorisationForPersonOnOrganisation(organisationId, personId, body) {
+    return this.put(
+      `SitiAgriApi/authorisation/organisation/${organisationId}/authorisation/person/${personId}`,
+      {
+        body,
+        headers: postPutHeaders
+      }
+    )
+  }
 }

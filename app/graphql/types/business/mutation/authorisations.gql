@@ -1,0 +1,41 @@
+extend type Mutation {
+  createCustomerAuthorisationOnBusiness(
+    input: CreateCustomerAuthorisationOnBusinessInput!
+  ): AuthorisationOnBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+  updateCustomerAuthorisationOnBusiness(
+    input: UpdateCustomerAuthorisationOnBusinessInput!
+  ): AuthorisationOnBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input CreateCustomerAuthorisationOnBusinessInput {
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID!
+  """
+  The customer to be added to the business
+  """
+  customer: AuthorisationCustomerInput!
+}
+
+input UpdateCustomerAuthorisationOnBusinessInput {
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID!
+  """
+  The customer to be updated
+  """
+  customer: AuthorisationCustomerInput!
+}
+
+input AuthorisationCustomerInput {
+  crn: ID!
+  role: String
+  privileges: [String]
+}
+
+type AuthorisationOnBusinessResponse {
+  success: Boolean
+  errorString: String
+}
