@@ -25,6 +25,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          # Full history including all tags, needed to find the highest existing version tag
           fetch-depth: 0
 
       - name: Setup npm
@@ -41,11 +42,12 @@ jobs:
 
       - name: Verify semantic version bump
         run: |
-          TARGET_BRANCH_VERSION=$(git show origin/${{ github.base_ref }}:package.json | jq -r '.version')
+          # Use the highest existing repo-wide tag rather than main's package.json version, since hotfix branches can tag a version higher than the latest main version
+          TARGET_VERSION=$(git tag -l | xargs npx -y semver | tail -n1)
           PR_BRANCH_VERSION=$(jq -r '.version' package.json)
 
-          if ! npx -y semver -r ">${TARGET_BRANCH_VERSION}" "${PR_BRANCH_VERSION}" > /dev/null  ; then
-            echo "ERROR: Branch package.json version (${PR_BRANCH_VERSION}) must be semantically greater than target branch (${TARGET_BRANCH_VERSION})"
+          if ! npx -y semver -r ">${TARGET_VERSION}" "${PR_BRANCH_VERSION}" > /dev/null  ; then
+            echo "ERROR: Branch package.json version (${PR_BRANCH_VERSION}) must be semantically greater than the highest existing repository tag (${TARGET_VERSION})"
             exit 1
           fi
 
