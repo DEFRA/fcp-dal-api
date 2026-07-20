@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
 import { getAuth, getRequestingGroup } from '../auth/authenticate.js'
 import { HitachiPayments } from '../data-sources/hitachi/HitachiPayments.js'
+import { JWKS } from '../data-sources/JWKS.js'
 import { MongoBusiness } from '../data-sources/mongo/Business.js'
 import { MongoCustomer } from '../data-sources/mongo/Customer.js'
-import { MongoJWKS } from '../data-sources/mongo/JWKS.js'
 import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { RuralPaymentsReferenceData } from '../data-sources/rural-payments/RuralPaymentsReferenceData.js'
@@ -29,7 +29,7 @@ export const extractOrgIdFromDefraIdToken = (sbi, token) => {
 }
 
 export async function context({ request }) {
-  const auth = await getAuth(request, new MongoJWKS({ modelOrCollection: db.collection('jwks') }))
+  const auth = await getAuth(request, new JWKS())
 
   const requestLogger = logger.child({
     transactionId: request.transactionId,

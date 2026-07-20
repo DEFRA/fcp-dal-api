@@ -7,7 +7,7 @@ const RuralPaymentsBusinessMock = jest.fn()
 const RuralPaymentsCustomerMock = jest.fn()
 const MongoCustomerMock = jest.fn()
 const MongoBusinessMock = jest.fn()
-const MongoJWKSMock = jest.fn()
+const JWKSMock = jest.fn()
 const loggerChild = jest.fn()
 const loggerMock = { child: loggerChild }
 
@@ -36,8 +36,8 @@ jest.unstable_mockModule('../../../app/data-sources/mongo/Business.js', () => ({
 jest.unstable_mockModule('../../../app/data-sources/mongo/Customer.js', () => ({
   MongoCustomer: MongoCustomerMock
 }))
-jest.unstable_mockModule('../../../app/data-sources/mongo/JWKS.js', () => ({
-  MongoJWKS: MongoJWKSMock
+jest.unstable_mockModule('../../../app/data-sources/JWKS.js', () => ({
+  JWKS: JWKSMock
 }))
 jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
   logger: loggerMock
@@ -52,7 +52,7 @@ describe('context', () => {
   test('should build context with correct properties', async () => {
     getAuthMock.mockResolvedValue({ user: 'test-user' })
     PermissionsMock.mockImplementation(() => ({ type: 'Permissions' }))
-    MongoJWKSMock.mockImplementation(() => ({}))
+    JWKSMock.mockImplementation(() => ({}))
     loggerChild.mockReturnValue({ log: jest.fn() })
     const request = {
       headers: {
@@ -65,7 +65,7 @@ describe('context', () => {
 
     const result = await context({ request })
 
-    expect(getAuthMock).toHaveBeenCalledWith(request, MongoJWKSMock())
+    expect(getAuthMock).toHaveBeenCalledWith(request, JWKSMock())
     expect(loggerMock.child).toHaveBeenCalledWith({
       transactionId: 'tx-1',
       traceId: 'trace-1'

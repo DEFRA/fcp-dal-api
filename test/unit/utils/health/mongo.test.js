@@ -25,7 +25,7 @@ describe('Mongo health check', () => {
     await healthCheck()
 
     expect(mongoClient.connect).toHaveBeenCalled()
-    expect(mockLogger.logger.info).toHaveBeenCalledWith('Connected to MongoDB')
+    expect(mockLogger.logger.info).toHaveBeenCalledWith('SUCCESS: Connected to MongoDB')
   })
 
   it('should log error and throw when MongoDB fails to connect', async () => {

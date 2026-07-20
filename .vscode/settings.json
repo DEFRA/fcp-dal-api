@@ -50,5 +50,9 @@
     }
   },
   "jestrunner.jestCommand": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test ./node_modules/jest/bin/jest.js",
-  "jestrunner.runOptions": ["--runInBand", "--coverage", "--setupFiles", "dotenv/config"]
+  "jestrunner.runOptions": ["--runInBand", "--coverage", "--setupFiles", "dotenv/config"],
+  "sonarlint.connectedMode.project": {
+    "connectionId": "defra",
+    "projectKey": "DEFRA_fcp-dal-api"
+  }
 }

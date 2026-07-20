@@ -1,7 +1,7 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
-import jwt from 'jsonwebtoken'
+import { decodeProtectedHeader, jwtVerify } from 'jose'
 import { config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
@@ -20,11 +20,13 @@ export async function getAuth(request, jwkDatasource) {
       code: DAL_REQUEST_AUTHENTICATION_001,
       request: { remoteAddress: request?.info?.remoteAddress }
     })
-    const decodedToken = jwt.decode(token, { complete: true })
+    const decodedToken = decodeProtectedHeader(token)
     const requestStart = Date.now()
-    const signingKey = await jwkDatasource.getPublicKey(decodedToken.header.kid)
+    const signingKey = await jwkDatasource.getPublicKey(decodedToken.kid)
     const requestTimeMs = Date.now() - requestStart
-    const verified = jwt.verify(token, signingKey)
+    const { payload: verified } = await jwtVerify(token, signingKey, {
+      algorithms: ['RS256']
+    })
     sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: DAL_REQUEST_AUTHENTICATION_001
     })
@@ -56,9 +58,14 @@ export async function getAuth(request, jwkDatasource) {
         })
       }
     })
+
     return verified
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
+    if (
+      error.name === 'TokenExpiredError' ||
+      error.code === 'ERR_JWT_EXPIRED' ||
+      error.name === 'JWTExpired'
+    ) {
       logger.warn('#DAL - request authentication - token expired', {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,

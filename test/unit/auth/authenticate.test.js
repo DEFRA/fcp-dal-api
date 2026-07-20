@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, jest, test } from '@jest/globals'
 import { buildSchema, findBreakingChanges } from 'graphql'
 import jwt from 'jsonwebtoken'
+import { generateKeyPairSync } from 'node:crypto'
 import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
@@ -35,10 +36,23 @@ const tokenPayload = {
   azp: 'azp-id'
 }
 
-const token = jwt.sign({ ...tokenPayload, email: 'pii@defra.gov.uk' }, 'secret', {
-  expiresIn: '1h'
+const { publicKey, privateKey } = generateKeyPairSync('rsa', {
+  modulusLength: 2048
 })
-const tokenDiffSecret = jwt.sign(tokenPayload, 'secret2', { expiresIn: '1h' })
+const { privateKey: wrongPrivateKey } = generateKeyPairSync('rsa', {
+  modulusLength: 2048
+})
+
+const token = jwt.sign({ ...tokenPayload, email: 'pii@defra.gov.uk' }, privateKey, {
+  algorithm: 'RS256',
+  expiresIn: '1h',
+  keyid: 'mock-key-id-123'
+})
+const tokenDiffSecret = jwt.sign(tokenPayload, wrongPrivateKey, {
+  algorithm: 'RS256',
+  expiresIn: '1h',
+  keyid: 'mock-key-id-123'
+})
 const requestInfo = { remoteAddress: '0.0.0.0' }
 const mockRequest = (token) => ({
   headers: {
@@ -46,7 +60,7 @@ const mockRequest = (token) => ({
   },
   info: requestInfo
 })
-const decodedToken = jwt.verify(token, 'secret')
+const decodedToken = jwt.decode(token)
 const mockPublicKeyFunc = jest.fn()
 const mockJWKSDataSource = { getPublicKey: mockPublicKeyFunc }
 
@@ -61,9 +75,11 @@ describe('getAuth', () => {
 
   describe('with a valid token', () => {
     test('should return decoded token, and log payload details', async () => {
-      mockPublicKeyFunc.mockReturnValue('secret')
-      expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual(decodedToken)
-      expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+      mockPublicKeyFunc.mockResolvedValue(publicKey)
+      const tokenPayload = await getAuth(mockRequest(token), mockJWKSDataSource)
+
+      expect(tokenPayload).toEqual(decodedToken)
+      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
       expect(info).toHaveBeenCalledTimes(1)
       expect(info.mock.calls[0]).toEqual([
         '#DAL Request authentication - JWT verified',
@@ -89,12 +105,17 @@ describe('getAuth', () => {
     })
 
     test('should return decoded token, and log payload details (no email check)', async () => {
-      mockPublicKeyFunc.mockReturnValue('secret')
-      const tokenNoEmail = jwt.sign(tokenPayload, 'secret', { expiresIn: '1h' })
+      mockPublicKeyFunc.mockResolvedValue(publicKey)
+      const tokenNoEmail = jwt.sign(tokenPayload, privateKey, {
+        algorithm: 'RS256',
+        expiresIn: '1h',
+        keyid: 'mock-key-id-123'
+      })
+
       expect(await getAuth(mockRequest(tokenNoEmail), mockJWKSDataSource)).toEqual(
-        jwt.decode(tokenNoEmail, 'secret')
+        jwt.decode(tokenNoEmail)
       )
-      expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
       expect(info).toHaveBeenCalledTimes(1)
       expect(info.mock.calls[0]).toEqual([
         '#DAL Request authentication - JWT verified',
@@ -126,8 +147,9 @@ describe('getAuth', () => {
   })
 
   test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
+    mockPublicKeyFunc.mockResolvedValue(publicKey)
     expect(await getAuth(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual({})
-    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+    expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
   })
 
   test('should return an empty object when token verification fails, due to token expiry', async () => {
@@ -137,7 +159,7 @@ describe('getAuth', () => {
       throw error
     })
     expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual({})
-    expect(mockPublicKeyFunc).toHaveBeenCalledWith(undefined)
+    expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
   })
 })
 
@@ -249,7 +271,6 @@ describe('authDirectiveTransformer', () => {
     }
 
     directive @auth(requires: AuthRole = TEST) on OBJECT | FIELD_DEFINITION
-
   `)
 
   const originalConfig = { ...config }
