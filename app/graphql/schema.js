@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { authDirectiveTransformer } from '../auth/authenticate.js'
 import { config } from '../config.js'
 import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
+import { externalToServiceAccountDirectiveTransformer } from './directives/externalToServiceAccount.js'
 import { onDirectiveTransformer } from './directives/onDirectiveTransformer.js'
 
 import * as BusinessLand from './resolvers/business/business-land.js'
@@ -56,6 +57,8 @@ export async function createSchema() {
       `DISABLE_AUTH:${config.get('auth.disabled')} ENVIRONMENT:${config.get('cdp.env')}`
     )
   }
+
+  schema = externalToServiceAccountDirectiveTransformer(schema)
 
   schema = excludeFromListTransformer(schema)
 
