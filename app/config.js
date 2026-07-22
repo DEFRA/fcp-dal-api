@@ -215,6 +215,12 @@ export const config = convict({
       format: 'int',
       default: 100,
       env: 'KITS_REQUEST_PAGE_SIZE'
+    },
+    dalServiceAccountEmail: {
+      doc: 'Email identifying the DAL service account.',
+      format: String,
+      default: null,
+      env: 'KITS_DAL_SERVICE_ACCOUNT_EMAIL'
     }
   },
   hitachi: {
