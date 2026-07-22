@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { getAuth, getRequestingGroup } from '../auth/authenticate.js'
+import { config } from '../config.js'
 import { HitachiPayments } from '../data-sources/hitachi/HitachiPayments.js'
 import { JWKS } from '../data-sources/JWKS.js'
 import { MongoBusiness } from '../data-sources/mongo/Business.js'
@@ -36,16 +37,31 @@ export async function context({ request }) {
     traceId: request.traceId
   })
 
+  const gatewayType = request.headers['gateway-type'] || 'internal'
+
   const datasourceOptions = [
     { logger: requestLogger },
     {
       request,
-      gatewayType: request.headers['gateway-type'] || 'internal'
+      gatewayType
     }
   ]
 
+  const ruralPaymentsBusinessServiceAccount = new RuralPaymentsBusiness(
+    { logger: requestLogger },
+    {
+      gatewayType: 'internal',
+      request: {
+        headers: {
+          email: config.get('kits.dalServiceAccountEmail')
+        }
+      }
+    }
+  )
+
   return {
     auth,
+    gatewayType,
     requestLogger,
     db,
     dataSources: {
@@ -66,7 +82,10 @@ export async function context({ request }) {
       }),
       mongoBusiness: new MongoBusiness({
         modelOrCollection: db.collection('businesses')
-      })
+      }),
+      serviceAccount: {
+        ruralPaymentsBusiness: ruralPaymentsBusinessServiceAccount
+      }
     }
   }
 }
