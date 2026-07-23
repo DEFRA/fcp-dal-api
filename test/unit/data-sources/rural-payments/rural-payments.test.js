@@ -209,7 +209,7 @@ describe('RuralPayments', () => {
       )
     })
 
-    test('throws error if gateway-type is not internal or external', () => {
+    test('throws error if gateway-type is not internal, external or service-account', () => {
       const invalidDataSourceOptions = [
         { logger },
         {
@@ -250,11 +250,69 @@ describe('RuralPayments', () => {
       )
     })
 
+    test('throws error if gateway type is service-account, but no email header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'service-account',
+          request: {
+            headers: {}
+          }
+        }
+      )
+      const request = {}
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).rejects.toEqual(
+        new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+          extensions: {
+            message:
+              'Invalid request headers, must be either "email: {valid user email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
+          }
+        })
+      )
+    })
+
     test('does not throw if gateway type is internal and email header is present', () => {
       const rp = new RuralPayments(
         { logger },
         {
           gatewayType: 'internal',
+          request: {
+            headers: {
+              email: 'test'
+            }
+          }
+        }
+      )
+      const request = {}
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+    })
+
+    test('does not throw if gateway type is service-account and email header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          gatewayType: 'service-account',
+          request: {
+            headers: {
+              email: 'test'
+            }
+          }
+        }
+      )
+      const request = {}
+      const path = 'test-path'
+
+      expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+    })
+
+    test('does not throw if no gateway-type defined (defaults to internal) and email header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
           request: {
             headers: {
               email: 'test'
@@ -311,6 +369,7 @@ describe('RuralPayments', () => {
         expect.objectContaining({
           type: 'http',
           code: RURALPAYMENTS_API_REQUEST_001,
+          gatewayType: 'internal',
           request: {
             id: '123',
             method: 'GET',
@@ -329,6 +388,36 @@ describe('RuralPayments', () => {
           }),
           code: RURALPAYMENTS_API_REQUEST_001
         })
+      )
+    })
+
+    test('logs the external gatewayType', async () => {
+      const rp = new RuralPayments({ logger }, { gatewayType: 'external' })
+      const mockFn = jest.fn().mockResolvedValue({
+        response: { status: 200, headers: new Headers(), body: {} },
+        parsedBody: {}
+      })
+
+      await rp.trace('test-url', { id: '123', method: 'GET', headers: {} }, mockFn)
+
+      expect(logger.info).toHaveBeenCalledWith(
+        '#datasource - Rural payments - response',
+        expect.objectContaining({ gatewayType: 'external' })
+      )
+    })
+
+    test('logs the service-account gatewayType', async () => {
+      const rp = new RuralPayments({ logger }, { gatewayType: 'service-account' })
+      const mockFn = jest.fn().mockResolvedValue({
+        response: { status: 200, headers: new Headers(), body: {} },
+        parsedBody: {}
+      })
+
+      await rp.trace('test-url', { id: '123', method: 'GET', headers: {} }, mockFn)
+
+      expect(logger.info).toHaveBeenCalledWith(
+        '#datasource - Rural payments - response',
+        expect.objectContaining({ gatewayType: 'service-account' })
       )
     })
   })

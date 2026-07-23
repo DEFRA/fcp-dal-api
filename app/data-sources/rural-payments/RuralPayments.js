@@ -21,12 +21,16 @@ export function extractCrnFromDefraIdToken(token) {
 export class RuralPayments extends BaseRESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
-  constructor(config, { request, gatewayType }) {
-    super(config, { name: 'Rural payments', code: RURALPAYMENTS_API_REQUEST_001 })
+  constructor(config, { request, gatewayType = 'internal' }) {
+    super(config, {
+      name: 'Rural payments',
+      code: RURALPAYMENTS_API_REQUEST_001,
+      action: gatewayType
+    })
     this.request = request
 
-    this.gatewayType = gatewayType || 'internal'
-    if (!['internal', 'external'].includes(this.gatewayType)) {
+    this.gatewayType = gatewayType
+    if (!['internal', 'external', 'service-account'].includes(this.gatewayType)) {
       throw new BadRequest(
         `gateway-type header must be one of internal or external received: ${gatewayType}`
       )
@@ -73,7 +77,10 @@ export class RuralPayments extends BaseRESTDataSource {
 
     const additionalHeaders = {}
 
-    if (this.gatewayType === 'internal' && headers.email) {
+    if (
+      (this.gatewayType === 'internal' || this.gatewayType === 'service-account') &&
+      headers.email
+    ) {
       additionalHeaders.email = headers.email
     } else if (this.gatewayType === 'external' && headers['x-forwarded-authorization']) {
       additionalHeaders.Authorization = headers['x-forwarded-authorization']
