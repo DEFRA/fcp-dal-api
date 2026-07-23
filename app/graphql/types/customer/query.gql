@@ -1,7 +1,5 @@
 extend type Query {
-  customer(crn: ID!): Customer
-    @on
-    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  customer(crn: ID!): Customer @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 
   """
   Search for customers by CRN, personal identifier, customer name, customer postcode,
@@ -11,5 +9,5 @@ extend type Query {
     searchString: String!
     searchType: CustomerSearchFieldType!
     pagination: Pagination
-  ): CustomerSearchResponse @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  ): CustomerSearchResponse @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 }

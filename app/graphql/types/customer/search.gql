@@ -40,42 +40,42 @@ type CustomerSearchResult {
   """
   Internal SitiAgri/Portal unique identifier of the customer.
   """
-  personId: ID @on
+  personId: ID
 
   """
   Customer Reference Number (CRN) of the customer.
   """
-  crn: ID @on
+  crn: ID
 
   """
   Full name of the customer.
   """
-  fullName: String @on
+  fullName: String
 
   """
   Primary address of the customer.
   """
-  address: Address @on
+  address: Address
 
   """
   Other IDs for this customer.
   """
-  personalIdentifiers: [String] @on
+  personalIdentifiers: [String]
 
   """
   National Insurance number of the customer.
   """
-  nationalInsuranceNumber: String @on
+  nationalInsuranceNumber: String
 
   """
   Email address of the customer.
   """
-  email: String @on
+  email: String
 
   """
   The status of the customer record/account.
   """
-  status: EntityStatus @on
+  status: EntityStatus
 }
 
 """
@@ -85,10 +85,10 @@ type CustomerSearchResponse {
   """
   The customers matching the search.
   """
-  results: [CustomerSearchResult] @on
+  results: [CustomerSearchResult]
 
   """
   Paging information for the search results.
   """
-  pageInfo: PageInfo @on
+  pageInfo: PageInfo
 }

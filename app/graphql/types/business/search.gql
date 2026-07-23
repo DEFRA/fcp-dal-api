@@ -25,57 +25,57 @@ type BusinessSearchResult {
   """
   Internal SitiAgri/Portal unique identifier for the business.
   """
-  organisationId: ID @on
+  organisationId: ID
 
   """
   Single Business Identifier (SBI) of the business.
   """
-  sbi: ID @on
+  sbi: ID
 
   """
   Name of the business.
   """
-  name: String @on
+  name: String
 
   """
   Other SBIs by which the business is known.
   """
-  additionalSbis: [ID] @on
+  additionalSbis: [ID]
 
   """
   Address of the business.
   """
-  address: Address @on
+  address: Address
 
   """
   Correspondence address of the business.
   """
-  correspondenceAddress: Address @on
+  correspondenceAddress: Address
 
   """
   States the business address is also the financial address.
   """
-  isFinancialToBusinessAddress: Boolean @on
+  isFinancialToBusinessAddress: Boolean
 
   """
   States the correspondence address should be used as the business address.
   """
-  isCorrespondenceAsBusinessAddress: Boolean @on
+  isCorrespondenceAsBusinessAddress: Boolean
 
   """
   Whether the land for the business has been confirmed.
   """
-  landConfirmed: Boolean @on
+  landConfirmed: Boolean
 
   """
   The date the business was last updated.
   """
-  lastUpdated: Date @on
+  lastUpdated: Date
 
   """
   The status of the business.
   """
-  status: EntityStatus @on
+  status: EntityStatus
 }
 
 """
@@ -85,10 +85,10 @@ type BusinessSearchResponse {
   """
   The businesses matching the search.
   """
-  results: [BusinessSearchResult] @on
+  results: [BusinessSearchResult]
 
   """
   Paging information for the search results.
   """
-  pageInfo: PageInfo @on
+  pageInfo: PageInfo
 }

@@ -4,5 +4,5 @@ extend type Query {
   Mostly static, but will change occasionally.
   NOTE: no auth is required for querying, as the data is public domain.
   """
-  referenceData: ReferenceData @on
+  referenceData: ReferenceData
 }

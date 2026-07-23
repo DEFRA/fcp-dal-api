@@ -21,34 +21,34 @@ type ActivePermissionGroup {
   """
   Permission group for the customer. For example, 'BUSINESS_DETAILS', 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS'.
   """
-  id: PermissionGroupId! @on
+  id: PermissionGroupId!
 
   """
   Permission level customer has for the business. For example, 'VIEW', 'AMEND.
   """
-  level: PermissionLevel @on
+  level: PermissionLevel
 
   """
   Functions that can be performed with given permission level.
   """
-  functions: [String] @on
+  functions: [String]
 }
 
 type PermissionGroup {
   """
   Permission group id.
   """
-  id: PermissionGroupId! @on
+  id: PermissionGroupId!
 
   """
   Permission group name.
   """
-  name: String! @on
+  name: String!
 
   """
   Permissions within the group.
   """
-  permissions: [Permission] @on
+  permissions: [Permission]
 }
 
 type Permission {

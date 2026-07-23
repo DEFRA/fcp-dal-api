@@ -2,7 +2,7 @@ extend type Business {
   """
   Existing bank accounts held for the business.
   """
-  bankAccounts: [BusinessBankAccount!] @on @auth(requires: [SINGLE_FRONT_DOOR, SFI_REFORM])
+  bankAccounts: [BusinessBankAccount!] @auth(requires: [SINGLE_FRONT_DOOR, SFI_REFORM])
 }
 
 """
@@ -13,10 +13,10 @@ type BusinessBankAccount {
   """
   Last four digits of the bank account number.
   """
-  number: String! @on
+  number: String!
 
   """
   Currency the account is held in.
   """
-  currency: BankAccountCurrency! @on
+  currency: BankAccountCurrency!
 }

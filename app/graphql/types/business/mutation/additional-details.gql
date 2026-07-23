@@ -3,7 +3,6 @@ extend type Mutation {
   Used to update the business legal status.
   """
   updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -11,13 +10,12 @@ extend type Mutation {
   """
   updateBusinessDateStartedFarming(
     input: UpdateBusinessDateStartedFarmingInput!
-  ): UpdateBusinessResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+  ): UpdateBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
   Used to update the date the business type.
   """
   updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -25,14 +23,13 @@ extend type Mutation {
   """
   updateBusinessRegistrationNumbers(
     input: UpdateBusinessRegistrationNumbersInput!
-  ): UpdateBusinessResponse @on @auth(requires: [SINGLE_FRONT_DOOR])
+  ): UpdateBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
   Update the business lock status.
   """
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -40,7 +37,6 @@ extend type Mutation {
   """
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
-    @on
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
