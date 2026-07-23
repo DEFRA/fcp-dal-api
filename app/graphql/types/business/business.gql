@@ -239,7 +239,7 @@ type Business {
   """
   County Parish Holdings (CPH) of the business.
   """
-  countyParishHoldings: [CountyParishHolding] @on
+  countyParishHoldings: [CountyParishHolding] @on @externalToServiceAccount
 
   """
   Customers associated with the business.
@@ -254,10 +254,10 @@ type Business {
   """
   Agreements associated with the business.
   """
-  agreements: [Agreement] @on
+  agreements: [Agreement] @on @externalToServiceAccount
 
   """
   Applications associated with the business.
   """
-  applications: [Application] @on
+  applications: [Application] @on @externalToServiceAccount
 }
