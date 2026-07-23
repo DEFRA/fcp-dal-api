@@ -1,4 +1,7 @@
 directive @on on FIELD_DEFINITION
 directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
 directive @excludeFromList on FIELD_DEFINITION
+
+# Can be applied to any field, but will be a silent no-op if support for the backing datasource is not added
+# to the externalToServiceAccountDirectiveTransformer
 directive @externalToServiceAccount on FIELD_DEFINITION

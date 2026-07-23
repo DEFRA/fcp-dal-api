@@ -84,6 +84,8 @@ export async function context({ request }) {
         modelOrCollection: db.collection('businesses')
       }),
       serviceAccount: {
+        // Service account only currently supported for ruralPaymentsBusiness.  Other ruralPayments datasources
+        // should be added both here and in externalToServiceAccount if the need arises.
         ruralPaymentsBusiness: ruralPaymentsBusinessServiceAccount
       }
     }
