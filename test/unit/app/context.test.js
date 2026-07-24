@@ -1,4 +1,5 @@
 import { describe, expect, jest } from '@jest/globals'
+import { config } from '../../../app/config.js'
 
 const getAuthMock = jest.fn()
 const getRequestingGroupMock = jest.fn()
@@ -71,12 +72,59 @@ describe('context', () => {
       traceId: 'trace-1'
     })
     expect(result.auth).toEqual({ user: 'test-user' })
+    expect(result.gatewayType).toBe('external')
     expect(result.requestLogger).toBeDefined()
     expect(result.dataSources.permissions.type).toBe('Permissions')
     expect(result.dataSources.ruralPaymentsBusiness).toEqual({})
     expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
     expect(result.dataSources.mongoBusiness).toEqual({})
     expect(result.dataSources.mongoCustomer).toEqual({})
+    expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toEqual({})
+  })
+
+  describe('gatewayType', () => {
+    test('defaults to internal when no gateway-type header is present', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = { headers: {} }
+
+      const result = await context({ request })
+
+      expect(result.gatewayType).toBe('internal')
+    })
+
+    test('reflects the gateway-type header when present', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = { headers: { 'gateway-type': 'external' } }
+
+      const result = await context({ request })
+
+      expect(result.gatewayType).toBe('external')
+    })
+  })
+
+  describe('serviceAccount', () => {
+    test('constructs a RuralPaymentsBusiness instance forced to service-account with the configured service-account email', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      loggerChild.mockReturnValue({ log: jest.fn() })
+      const configGetSpy = jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          path === 'kits.dalServiceAccountEmail' ? 'dal-service-account@example.com' : undefined
+        )
+      const request = { headers: { 'gateway-type': 'external' } }
+
+      await context({ request })
+
+      expect(RuralPaymentsBusinessMock).toHaveBeenCalledWith(
+        { logger: expect.anything() },
+        {
+          gatewayType: 'service-account',
+          request: { headers: { email: 'dal-service-account@example.com' } }
+        }
+      )
+
+      configGetSpy.mockRestore()
+    })
   })
 
   describe('hitachiPayments', () => {

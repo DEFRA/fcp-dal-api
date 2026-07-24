@@ -11,6 +11,7 @@ import { Permissions } from '../data-sources/static/permissions.js'
 import { BadRequest } from '../errors/graphql.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
+import { config } from '../config.js'
 
 export const extractOrgIdFromDefraIdToken = (sbi, token) => {
   const { payload } = jwt.decode(token, { complete: true })
@@ -36,16 +37,31 @@ export async function context({ request }) {
     traceId: request.traceId
   })
 
+  const gatewayType = request.headers['gateway-type'] || 'internal'
+
   const datasourceOptions = [
     { logger: requestLogger },
     {
       request,
-      gatewayType: request.headers['gateway-type'] || 'internal'
+      gatewayType
     }
   ]
 
+  const ruralPaymentsBusinessServiceAccount = new RuralPaymentsBusiness(
+    { logger: requestLogger },
+    {
+      gatewayType: 'service-account',
+      request: {
+        headers: {
+          email: config.get('kits.dalServiceAccountEmail')
+        }
+      }
+    }
+  )
+
   return {
     auth,
+    gatewayType,
     requestLogger,
     db,
     dataSources: {
@@ -66,7 +82,13 @@ export async function context({ request }) {
       }),
       mongoBusiness: new MongoBusiness({
         modelOrCollection: db.collection('businesses')
-      })
+      }),
+      serviceAccount: {
+        // Service account only currently supported for ruralPaymentsBusiness.  Other ruralPayments datasources
+        // should be added here too if the need arises, alongside a getXXXDataSource-style helper (see
+        // getRuralPaymentsBusinessDataSource in resolvers/business/common.js) for resolvers to pick the right instance.
+        ruralPaymentsBusiness: ruralPaymentsBusinessServiceAccount
+      }
     }
   }
 }
