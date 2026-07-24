@@ -51,6 +51,23 @@ export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusi
   )
 }
 
+// Some fields must always be resolved against the internal gateway using the DAL service
+// account, even when the request itself arrived via the external gateway. Resolvers for those
+// fields should call this instead of reading dataSources.ruralPaymentsBusiness directly.
+export function getRuralPaymentsBusinessDataSource({ gatewayType, dataSources }) {
+  if (gatewayType !== 'external') {
+    return dataSources.ruralPaymentsBusiness
+  }
+
+  if (!dataSources.serviceAccount?.ruralPaymentsBusiness) {
+    throw new Error(
+      'getRuralPaymentsBusinessDataSource misconfigured: dataSources.serviceAccount.ruralPaymentsBusiness is missing'
+    )
+  }
+
+  return dataSources.serviceAccount.ruralPaymentsBusiness
+}
+
 const validateLockUnlockInput = (input) => {
   if (!input.reason && !input.note) {
     throw new Error('Reason and/or note are required')
