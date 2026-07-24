@@ -260,4 +260,24 @@ type Business {
   Applications associated with the business.
   """
   applications: [Application] @on
+
+  """
+  For each requested operation (function), whether the authenticated external user is permitted
+  to perform it for this business. The result can be used to show/hide functionality in a UI.
+
+  The known external-user functions are: addOrRemoveOrTransferLand, addRoleOrPrivilege,
+  amendApplication, amendBankAccountDetails, amendBusinessDetails, amendControlledBusinessInfo,
+  amendELMApplications, amendEntitlements, amendLegallyResponsiblePeople, amendNewYoungFarmerProcess,
+  applyForBPS, closeBusiness, confirmBusiness, deleteBusiness, modifyRoleOrPrivilege,
+  removeRoleOrPrivilege, submitApplication, submitELMApplications, updateLandUse, viewApplication,
+  viewBusinessBankAccount, viewBusinessDetails, viewCPH, viewCSAgreements, viewCSApplications,
+  viewCSClaims, viewCountrysideStewardship, viewELMApplications, viewEntitlements, viewLand,
+  viewLegallyResponsiblePeople. Unrecognised/new function names may also be supplied and will be
+  echoed back in the response.
+
+  NOTE: DAL does not enforce these permissions - the upstream systems do.
+  """
+  permittedFunctions(functions: [String!]!): [PermittedFunction!]
+    @on
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }

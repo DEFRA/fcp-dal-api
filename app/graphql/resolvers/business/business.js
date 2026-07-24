@@ -73,6 +73,16 @@ export const Business = {
     return transformApplications(applications)
   },
 
+  async permittedFunctions({ organisationId }, { functions }, { dataSources }) {
+    const authorisedFunctions =
+      await dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(
+        organisationId,
+        functions
+      )
+
+    return functions.map((name) => ({ name, permitted: authorisedFunctions?.[name] ?? false }))
+  },
+
   async bankAccounts({ organisationId }, __, { dataSources }) {
     const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
     const frn = organisation.businessReference

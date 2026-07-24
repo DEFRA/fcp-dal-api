@@ -392,6 +392,12 @@ type Business {
   applications: [Application]
   payments(fromDate: Date, toDate: Date, userIP: String!): BusinessPayments
   bankAccounts: [BusinessBankAccount!]
+  permittedFunctions(functions: [String!]!): [PermittedFunction!]
+}
+
+type PermittedFunction {
+  name: String!
+  permitted: Boolean!
 }
 
 type BusinessBankAccount {

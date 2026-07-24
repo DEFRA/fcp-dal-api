@@ -1,0 +1,18 @@
+"""
+Whether the authenticated external user is permitted to perform a given operation (function)
+for a business. The result can be used to show/hide functionality in a UI.
+
+NOTE: DAL does not enforce these permissions - the upstream systems do.
+"""
+type PermittedFunction {
+  """
+  The operation (function) name, echoing the value requested. For example, 'viewLand',
+  'amendBusinessDetails'.
+  """
+  name: String! @on
+
+  """
+  Whether the external user is permitted to perform the function for the business.
+  """
+  permitted: Boolean! @on
+}
