@@ -11,6 +11,7 @@ import {
   transformOrganisationCustomers,
   transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
+import { getRuralPaymentsBusinessDataSource } from './common.js'
 
 export const Business = {
   async info({ organisationId, info }, __, { dataSources }) {
@@ -25,9 +26,9 @@ export const Business = {
     return { organisationId, sbi }
   },
 
-  async countyParishHoldings({ sbi }, __, { dataSources }) {
+  async countyParishHoldings({ sbi }, __, context) {
     const countyParishHoldings =
-      await dataSources.ruralPaymentsBusiness.getCountyParishHoldingsBySBI(sbi)
+      await getRuralPaymentsBusinessDataSource(context).getCountyParishHoldingsBySBI(sbi)
 
     return transformCountyParishHoldings(countyParishHoldings)
   },
@@ -61,14 +62,14 @@ export const Business = {
     return transformOrganisationCustomer(customer)
   },
 
-  async agreements({ sbi }, _, { dataSources }) {
-    const agreements = await dataSources.ruralPaymentsBusiness.getAgreementsBySBI(sbi)
+  async agreements({ sbi }, _, context) {
+    const agreements = await getRuralPaymentsBusinessDataSource(context).getAgreementsBySBI(sbi)
 
     return transformAgreements(agreements)
   },
 
-  async applications({ sbi }, _, { dataSources }) {
-    const applications = await dataSources.ruralPaymentsBusiness.getApplicationsBySBI(sbi)
+  async applications({ sbi }, _, context) {
+    const applications = await getRuralPaymentsBusinessDataSource(context).getApplicationsBySBI(sbi)
 
     return transformApplications(applications)
   },
