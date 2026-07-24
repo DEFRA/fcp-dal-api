@@ -4,7 +4,8 @@ import {
   businessAdditionalDetailsUpdateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
-  businessUnlockResolver
+  businessUnlockResolver,
+  getRuralPaymentsBusinessDataSource
 } from '../../../../app/graphql/resolvers/business/common.js'
 
 describe('businessDetailsUpdateResolver', () => {
@@ -192,6 +193,46 @@ describe('businessLockResolver', () => {
 
     await expect(businessLockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
       'Reason and/or note are required'
+    )
+  })
+})
+
+describe('getRuralPaymentsBusinessDataSource', () => {
+  const internal = { getAgreementsBySBI: jest.fn() }
+  const serviceAccount = { getAgreementsBySBI: jest.fn() }
+
+  it('returns the internal data source for internal requests', () => {
+    const dataSources = { ruralPaymentsBusiness: internal }
+
+    expect(getRuralPaymentsBusinessDataSource({ gatewayType: 'internal', dataSources })).toBe(
+      internal
+    )
+  })
+
+  it('returns the internal data source when gatewayType is not set', () => {
+    const dataSources = { ruralPaymentsBusiness: internal }
+
+    expect(getRuralPaymentsBusinessDataSource({ dataSources })).toBe(internal)
+  })
+
+  it('returns the service-account data source for external requests', () => {
+    const dataSources = {
+      ruralPaymentsBusiness: internal,
+      serviceAccount: { ruralPaymentsBusiness: serviceAccount }
+    }
+
+    expect(getRuralPaymentsBusinessDataSource({ gatewayType: 'external', dataSources })).toBe(
+      serviceAccount
+    )
+  })
+
+  it('throws a descriptive error when the service-account data source is missing for external requests', () => {
+    const dataSources = { ruralPaymentsBusiness: internal }
+
+    expect(() =>
+      getRuralPaymentsBusinessDataSource({ gatewayType: 'external', dataSources })
+    ).toThrow(
+      'getRuralPaymentsBusinessDataSource misconfigured: dataSources.serviceAccount.ruralPaymentsBusiness is missing'
     )
   })
 })

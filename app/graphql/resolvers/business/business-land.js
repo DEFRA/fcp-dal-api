@@ -9,6 +9,7 @@ import {
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
 import { validateDateInput } from '../../../utils/date.js'
+import { getRuralPaymentsBusinessDataSource } from './common.js'
 
 export const BusinessLand = {
   summary({ organisationId }, { date }) {
@@ -66,11 +67,11 @@ export const BusinessLand = {
     )
   },
 
-  async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, { dataSources }) {
+  async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, context) {
     validateDateInput(date)
 
     return transformLandUses(
-      await dataSources.ruralPaymentsBusiness.getLandUseByBusinessParcel(
+      await getRuralPaymentsBusinessDataSource(context).getLandUseByBusinessParcel(
         sbi,
         sheetId,
         parcelId,
