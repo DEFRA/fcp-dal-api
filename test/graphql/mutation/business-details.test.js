@@ -80,7 +80,7 @@ describe('business', () => {
 
   test('update business name', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       name: 'new name'
     }
 
@@ -130,7 +130,7 @@ describe('business', () => {
 
   test('update business email', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       email: {
         address: 'newemail@test.com'
       }
@@ -183,7 +183,7 @@ describe('business', () => {
 
   test('update business address - withUprn', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       address: {
         withUprn: {
           buildingName: 'new buildingName',
@@ -359,7 +359,7 @@ describe('business', () => {
 
   test('update business address - withoutUprn', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       address: {
         withoutUprn: {
           buildingName: 'new buildingName',
@@ -529,7 +529,7 @@ describe('business', () => {
 
   test('update business phone', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       phone: {
         landline: 'new phone',
         mobile: 'new mobile'
@@ -595,7 +595,7 @@ describe('business', () => {
 
   test('update business vat', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       vat: '123456789'
     }
     const putPayloadOverrides = {
@@ -646,7 +646,7 @@ describe('business', () => {
 describe('business - external gateway', () => {
   const tokenValue = jwt.sign(
     {
-      relationships: ['organisationId:sbi'],
+      relationships: ['organisationId:123456789'],
       contactId: 'crn'
     },
     'test-secret'
@@ -666,7 +666,7 @@ describe('business - external gateway', () => {
 
   test('update business name', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       name: 'new name'
     }
 

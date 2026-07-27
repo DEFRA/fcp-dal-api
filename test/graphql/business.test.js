@@ -8,7 +8,7 @@ import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
     query BusinessTest {
-      business(sbi: "sbi") {
+      business(sbi: "123456789") {
         organisationId
         sbi
         info {
@@ -155,7 +155,7 @@ const setupNock = (v1) => {
   v1.get('/organisation/organisationId').reply(200, {
     _data: {
       id: 'organisationId',
-      sbi: 'sbi',
+      sbi: '123456789',
       name: 'name',
       email: 'email address',
       address: {
@@ -249,12 +249,12 @@ const setupNock = (v1) => {
     { name: 'Permanent Crops', area: 1 }
   ])
 
-  v1.get(`/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/sbi/list`)
+  v1.get(`/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/123456789/list`)
     .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
       data: [
         {
-          sbi: 'sbi',
+          sbi: '123456789',
           dt_insert: '2021-03-01T12:09:09:009+0000',
           dt_delete: '9999-12-31T00:00:00:000+0000',
           sheet_name: 'sheetId',
@@ -272,7 +272,7 @@ const setupNock = (v1) => {
       errorString: null
     })
 
-  v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
+  v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/123456789/list')
     .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
       data: [
@@ -292,10 +292,10 @@ const setupNock = (v1) => {
       ]
     })
 
-  v1.get('/SitiAgriApi/cv/appByBusiness/sbi/sbi/list').reply(200, {
+  v1.get('/SitiAgriApi/cv/appByBusiness/sbi/123456789/list').reply(200, {
     data: [
       {
-        sbi: 'sbi',
+        sbi: '123456789',
         application_id: 'app123',
         subject_id: '123',
         year: 2025,
@@ -363,7 +363,7 @@ describe('Query.business internal', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '123',
-        relationships: ['organisationId:sbi']
+        relationships: ['organisationId:123456789']
       },
       'test-secret'
     )
@@ -377,7 +377,7 @@ describe('Query.business internal', () => {
       data: {
         business: {
           organisationId: 'organisationId',
-          sbi: 'sbi',
+          sbi: '123456789',
           info: {
             name: 'name',
             address: {
@@ -495,7 +495,7 @@ describe('Query.business internal', () => {
           ],
           applications: [
             {
-              sbi: 'sbi',
+              sbi: '123456789',
               id: 'app123',
               subjectId: '123',
               year: 2025,
@@ -541,7 +541,7 @@ describe('Query.business internal', () => {
       data: {
         business: {
           organisationId: 'organisationId',
-          sbi: 'sbi',
+          sbi: '123456789',
           info: {
             name: 'name',
             address: {
@@ -659,7 +659,7 @@ describe('Query.business internal', () => {
           ],
           applications: [
             {
-              sbi: 'sbi',
+              sbi: '123456789',
               id: 'app123',
               subjectId: '123',
               year: 2025,
@@ -747,11 +747,11 @@ describe('Query.business internal', () => {
     ])
 
     v1.get(
-      `/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/sbi/list`
+      `/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/123456789/list`
     ).reply(200, {
       data: [
         {
-          sbi: 'sbi',
+          sbi: '123456789',
           dt_insert: '2021-03-01T12:09:09:009+0000',
           dt_delete: '9999-12-31T00:00:00:000+0000',
           sheet_name: 'sheetId',
@@ -771,7 +771,7 @@ describe('Query.business internal', () => {
 
     const parcelsQuery = `#graphql
       query BusinessTest {
-          business(sbi: "sbi") {
+          business(sbi: "123456789") {
             land {
               parcels {
                 id

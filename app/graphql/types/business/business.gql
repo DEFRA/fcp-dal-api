@@ -218,6 +218,7 @@ type Business {
   Internal SitiAgri/Portal unique identifier for the business.
   """
   organisationId: ID
+
   """
   Single Business Identifier (SBI) of the business.
 

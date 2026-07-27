@@ -8,7 +8,7 @@ import { makeTestQuery } from '../makeTestQuery.js'
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const input = {
-  sbi: 'sbi',
+  sbi: '123456789',
   crn: 'crn',
   account: {
     ukBusiness: {
@@ -110,7 +110,7 @@ describe('createBusinessCustomerBankDetails', () => {
     expect(submittedBody).toEqual({
       organisationId: 'organisationId',
       personId: 'personId',
-      sbi: 'sbi',
+      sbi: '123456789',
       frn: '10014489653',
       crn: 'crn',
       submissionDateTime: expect.stringMatching(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
