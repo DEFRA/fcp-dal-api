@@ -9,7 +9,7 @@ const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const input = {
   sbi: '123456789',
-  crn: 'crn',
+  crn: '1234567890',
   account: {
     ukBusiness: {
       accountHolderName: 'Acme Farms Ltd',
@@ -56,7 +56,7 @@ const matchValidationResponse = {
 
 const waitForPersonIdToBeCachedInMongo = async () => {
   await waitFor(async () => {
-    const cached = await db.collection('customers').findOne({ _id: 'crn' })
+    const cached = await db.collection('customers').findOne({ _id: '1234567890' })
     expect(cached?.personId).toBe('personId')
   })
 }
@@ -112,7 +112,7 @@ describe('createBusinessCustomerBankDetails', () => {
       personId: 'personId',
       sbi: '123456789',
       frn: '10014489653',
-      crn: 'crn',
+      crn: '1234567890',
       submissionDateTime: expect.stringMatching(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
       account: {
         accountType: 'UK_BUSINESS',
