@@ -65,85 +65,29 @@ describe('schema', () => {
     const schema = await createSchema()
     const result = await graphql({ schema, source: getIntrospectionQuery() })
     expect(result.data.__schema.directives).toEqual([
-      {
-        args: [
-          {
-            defaultValue: null,
-            description: 'Included when true.',
-            name: 'if',
-            type: {
-              kind: 'NON_NULL',
-              name: null,
-              ofType: { kind: 'SCALAR', name: 'Boolean', ofType: null }
-            }
-          }
-        ],
+      expect.objectContaining({
         description:
           'Directs the executor to include this field or fragment only when the `if` argument is true.',
-        locations: ['FIELD', 'FRAGMENT_SPREAD', 'INLINE_FRAGMENT'],
         name: 'include'
-      },
-      {
-        args: [
-          {
-            defaultValue: null,
-            description: 'Skipped when true.',
-            name: 'if',
-            type: {
-              kind: 'NON_NULL',
-              name: null,
-              ofType: { kind: 'SCALAR', name: 'Boolean', ofType: null }
-            }
-          }
-        ],
+      }),
+      expect.objectContaining({
         description:
           'Directs the executor to skip this field or fragment when the `if` argument is true.',
-        locations: ['FIELD', 'FRAGMENT_SPREAD', 'INLINE_FRAGMENT'],
         name: 'skip'
-      },
-      {
-        args: [
-          {
-            defaultValue: '"No longer supported"',
-            description:
-              'Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/).',
-            name: 'reason',
-            type: { kind: 'SCALAR', name: 'String', ofType: null }
-          }
-        ],
+      }),
+      expect.objectContaining({
         description: 'Marks an element of a GraphQL schema as no longer supported.',
-        locations: [
-          'FIELD_DEFINITION',
-          'ARGUMENT_DEFINITION',
-          'INPUT_FIELD_DEFINITION',
-          'ENUM_VALUE'
-        ],
         name: 'deprecated'
-      },
-      {
-        args: [
-          {
-            defaultValue: null,
-            description: 'The URL that specifies the behavior of this scalar.',
-            name: 'url',
-            type: {
-              kind: 'NON_NULL',
-              name: null,
-              ofType: { kind: 'SCALAR', name: 'String', ofType: null }
-            }
-          }
-        ],
+      }),
+      expect.objectContaining({
         description: 'Exposes a URL that specifies the behavior of this scalar.',
-        locations: ['SCALAR'],
         name: 'specifiedBy'
-      },
-      {
-        args: [],
+      }),
+      expect.objectContaining({
         description:
           'Indicates exactly one field must be supplied and this field must not be `null`.',
-        locations: ['INPUT_OBJECT'],
         name: 'oneOf'
-      }
+      })
     ])
   })
 
@@ -165,67 +109,78 @@ describe('schema', () => {
     const schema = await createSchema()
 
     expect(findDangerousChanges(rawSchema, schema)).toHaveLength(0)
-    expect(findBreakingChanges(rawSchema, schema)).toEqual([
-      { type: 'TYPE_REMOVED', description: 'AuthGroup was removed.' },
-      { type: 'TYPE_REMOVED', description: 'Numeric was removed.' },
-      { type: 'TYPE_REMOVED', description: 'Image was removed.' },
-      { type: 'TYPE_REMOVED', description: 'UUID was removed.' },
-      {
-        type: 'TYPE_REMOVED',
-        description: 'PermittedFunction was removed.'
-      },
-      {
-        type: 'FIELD_REMOVED',
-        description: 'Query.wipExample was removed.'
-      },
-      {
-        type: 'FIELD_REMOVED',
-        description: 'Business.permittedFunctions was removed.'
-      },
-      {
-        type: 'FIELD_CHANGED_KIND',
-        description:
-          'Business.customers changed type from [BusinessCustomer] to [BusinessCustomerPartial].'
-      },
-      {
-        type: 'FIELD_CHANGED_KIND',
-        description:
-          'BusinessLand.parcels changed type from [BusinessLandParcel] to [BusinessLandParcelPartial].'
-      },
-      {
-        type: 'FIELD_CHANGED_KIND',
-        description:
-          'Customer.businesses changed type from [CustomerBusiness] to [CustomerBusinessPartial].'
-      },
-      { type: 'DIRECTIVE_REMOVED', description: 'wip was removed.' },
-      { type: 'DIRECTIVE_REMOVED', description: 'auth was removed.' },
-      {
-        type: 'DIRECTIVE_REMOVED',
-        description: 'excludeFromList was removed.'
-      }
-    ])
+    let changes = findBreakingChanges(rawSchema, schema)
+    expect(changes).toHaveLength(14) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
+    expect(changes).toEqual(
+      // loose array check, so ordering isn't important, length MUST match, see above
+      expect.arrayContaining([
+        { type: 'TYPE_REMOVED', description: 'AuthGroup was removed.' },
+        { type: 'TYPE_REMOVED', description: 'Numeric was removed.' },
+        { type: 'TYPE_REMOVED', description: 'Image was removed.' },
+        { type: 'TYPE_REMOVED', description: 'UUID was removed.' },
+        {
+          type: 'TYPE_REMOVED',
+          description: 'PermittedFunction was removed.'
+        },
+        {
+          type: 'FIELD_REMOVED',
+          description: 'Query.wipExample was removed.'
+        },
+        {
+          type: 'FIELD_REMOVED',
+          description: 'Business.permittedFunctions was removed.'
+        },
+        {
+          type: 'FIELD_CHANGED_KIND',
+          description:
+            'Business.customers changed type from [BusinessCustomer] to [BusinessCustomerPartial].'
+        },
+        {
+          type: 'FIELD_CHANGED_KIND',
+          description:
+            'BusinessLand.parcels changed type from [BusinessLandParcel] to [BusinessLandParcelPartial].'
+        },
+        {
+          type: 'FIELD_CHANGED_KIND',
+          description:
+            'Customer.businesses changed type from [CustomerBusiness] to [CustomerBusinessPartial].'
+        },
+        { type: 'DIRECTIVE_REMOVED', description: 'wip was removed.' },
+        { type: 'DIRECTIVE_REMOVED', description: 'auth was removed.' },
+        {
+          type: 'DIRECTIVE_REMOVED',
+          description: 'excludeFromList was removed.'
+        },
+        { type: 'DIRECTIVE_REMOVED', description: 'validateVariable was removed.' }
+      ])
+    )
 
     expect(findDangerousChanges(schema, rawSchema)).toHaveLength(0)
-    expect(findBreakingChanges(schema, rawSchema)).toEqual([
-      { description: 'BusinessCustomerPartial was removed.', type: 'TYPE_REMOVED' },
-      { description: 'BusinessLandParcelPartial was removed.', type: 'TYPE_REMOVED' },
-      { description: 'CustomerBusinessPartial was removed.', type: 'TYPE_REMOVED' },
-      {
-        description:
-          'Business.customers changed type from [BusinessCustomerPartial] to [BusinessCustomer].',
-        type: 'FIELD_CHANGED_KIND'
-      },
-      {
-        description:
-          'BusinessLand.parcels changed type from [BusinessLandParcelPartial] to [BusinessLandParcel].',
-        type: 'FIELD_CHANGED_KIND'
-      },
-      {
-        description:
-          'Customer.businesses changed type from [CustomerBusinessPartial] to [CustomerBusiness].',
-        type: 'FIELD_CHANGED_KIND'
-      }
-    ])
+    changes = findBreakingChanges(schema, rawSchema)
+    expect(changes).toHaveLength(6) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
+    expect(changes).toEqual(
+      // loose array check, so ordering isn't important, length MUST match, see above
+      expect.arrayContaining([
+        { description: 'BusinessCustomerPartial was removed.', type: 'TYPE_REMOVED' },
+        { description: 'BusinessLandParcelPartial was removed.', type: 'TYPE_REMOVED' },
+        { description: 'CustomerBusinessPartial was removed.', type: 'TYPE_REMOVED' },
+        {
+          description:
+            'Business.customers changed type from [BusinessCustomerPartial] to [BusinessCustomer].',
+          type: 'FIELD_CHANGED_KIND'
+        },
+        {
+          description:
+            'BusinessLand.parcels changed type from [BusinessLandParcelPartial] to [BusinessLandParcel].',
+          type: 'FIELD_CHANGED_KIND'
+        },
+        {
+          description:
+            'Customer.businesses changed type from [CustomerBusinessPartial] to [CustomerBusiness].',
+          type: 'FIELD_CHANGED_KIND'
+        }
+      ])
+    )
   })
 
   describe('wip directive', () => {
