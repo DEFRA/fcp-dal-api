@@ -6,7 +6,7 @@ import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
     query BusinessTest {
-      business(sbi: "sbi") {
+      business(sbi: "123456789") {
         organisationId
         sbi
         info {
@@ -130,7 +130,7 @@ describe('SFI Query', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '123',
-        relationships: ['organisationId:sbi']
+        relationships: ['organisationId:123456789']
       },
       'test-secret'
     )
@@ -149,7 +149,7 @@ describe('SFI Query', () => {
       data: {
         business: {
           organisationId: 'organisationId',
-          sbi: 'sbi',
+          sbi: '123456789',
           info: {
             name: 'name',
             address: {

@@ -19,7 +19,7 @@ const setupNock = () => {
 }
 
 const input = {
-  crn: 'crn',
+  crn: '1234567890',
   name: 'Acme Farms Ltd',
   vat: 'GB123456789',
   traderNumber: 'TR12345',
@@ -159,7 +159,7 @@ mutation CreateBusiness($input: CreateBusinessInput!) {
 // For safety, we should wait for the insert complete  (allowing the db to be torn down in the afterEach)
 const waitForPersonIdToBeCachedInMongo = async () => {
   await waitFor(async () => {
-    const cached = await db.collection('customers').findOne({ _id: 'crn' })
+    const cached = await db.collection('customers').findOne({ _id: '1234567890' })
     expect(cached?.personId).toBe('personId')
   })
 }

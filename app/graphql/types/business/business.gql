@@ -218,6 +218,7 @@ type Business {
   Internal SitiAgri/Portal unique identifier for the business.
   """
   organisationId: ID
+
   """
   Single Business Identifier (SBI) of the business.
 
@@ -249,7 +250,7 @@ type Business {
   """
   Customer associated with the business.
   """
-  customer(crn: ID!): BusinessCustomer
+  customer(crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")): BusinessCustomer
 
   """
   Agreements associated with the business.

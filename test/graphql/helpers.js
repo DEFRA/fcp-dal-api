@@ -2,7 +2,7 @@ export const mockOrganisationSearch = (nockInstance, orgId = 'organisationId') =
   nockInstance
     .post('/organisation/search', {
       searchFieldType: 'SBI',
-      primarySearchPhrase: 'sbi',
+      primarySearchPhrase: '123456789',
       offset: 0,
       limit: 1
     })
@@ -15,7 +15,7 @@ export const mockOrganisationSearch = (nockInstance, orgId = 'organisationId') =
     })
 }
 
-export const mockPersonSearch = (nockInstance, crn = 'crn') => {
+export const mockPersonSearch = (nockInstance, crn = '1234567890') => {
   nockInstance
     .post('/person/search', {
       searchFieldType: 'CUSTOMER_REFERENCE',
