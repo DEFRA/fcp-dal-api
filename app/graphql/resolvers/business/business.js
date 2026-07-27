@@ -27,8 +27,10 @@ export const Business = {
   },
 
   async countyParishHoldings({ sbi }, __, context) {
-    const countyParishHoldings =
-      await getRuralPaymentsBusinessDataSource(context).getCountyParishHoldingsBySBI(sbi)
+    const countyParishHoldings = await getRuralPaymentsBusinessDataSource({
+      ...context,
+      useServiceAccountForExternal: true
+    }).getCountyParishHoldingsBySBI(sbi)
 
     return transformCountyParishHoldings(countyParishHoldings)
   },
@@ -63,13 +65,19 @@ export const Business = {
   },
 
   async agreements({ sbi }, _, context) {
-    const agreements = await getRuralPaymentsBusinessDataSource(context).getAgreementsBySBI(sbi)
+    const agreements = await getRuralPaymentsBusinessDataSource({
+      ...context,
+      useServiceAccountForExternal: true
+    }).getAgreementsBySBI(sbi)
 
     return transformAgreements(agreements)
   },
 
   async applications({ sbi }, _, context) {
-    const applications = await getRuralPaymentsBusinessDataSource(context).getApplicationsBySBI(sbi)
+    const applications = await getRuralPaymentsBusinessDataSource({
+      ...context,
+      useServiceAccountForExternal: true
+    }).getApplicationsBySBI(sbi)
 
     return transformApplications(applications)
   },

@@ -71,12 +71,10 @@ export const BusinessLand = {
     validateDateInput(date)
 
     return transformLandUses(
-      await getRuralPaymentsBusinessDataSource(context).getLandUseByBusinessParcel(
-        sbi,
-        sheetId,
-        parcelId,
-        date
-      )
+      await getRuralPaymentsBusinessDataSource({
+        ...context,
+        useServiceAccountForExternal: true
+      }).getLandUseByBusinessParcel(sbi, sheetId, parcelId, date)
     )
   }
 }

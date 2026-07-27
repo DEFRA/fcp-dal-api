@@ -54,8 +54,12 @@ export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusi
 // Some fields must always be resolved against the internal gateway using the DAL service
 // account, even when the request itself arrived via the external gateway. Resolvers for those
 // fields should call this instead of reading dataSources.ruralPaymentsBusiness directly.
-export function getRuralPaymentsBusinessDataSource({ gatewayType, dataSources }) {
-  if (gatewayType !== 'external') {
+export function getRuralPaymentsBusinessDataSource({
+  gatewayType,
+  dataSources,
+  useServiceAccountForExternal = false
+}) {
+  if (gatewayType !== 'external' || !useServiceAccountForExternal) {
     return dataSources.ruralPaymentsBusiness
   }
 
