@@ -4,7 +4,7 @@ export const cdpEnvironments = ['dev', 'test', 'ext-test', 'perf-test', 'prod']
 
 export const config = convict({
   nodeEnv: {
-    doc: 'The application environment.',
+    doc: 'The application environment',
     format: ['production', 'development', 'test'],
     default: 'production',
     env: 'NODE_ENV'
@@ -17,7 +17,7 @@ export const config = convict({
       env: 'ENVIRONMENT'
     },
     httpsProxy: {
-      doc: 'CDP HTTPS proxy, automatically set on CDP',
+      doc: 'CDP HTTPS proxy, NOT automatically set on CDP (it comes from the "default" config)',
       format: String,
       default: null,
       nullable: true,
@@ -25,19 +25,19 @@ export const config = convict({
     }
   },
   port: {
-    doc: 'The port to bind.',
+    doc: 'The port to bind',
     format: 'port',
     default: 3000,
     env: 'PORT'
   },
   logLevel: {
-    doc: 'The log level to use.',
+    doc: 'The log level to use',
     format: ['error', 'warn', 'info', 'debug'],
     default: 'info',
     env: 'LOG_LEVEL'
   },
   graphqlDashboardEnabled: {
-    doc: 'Enable GraphQL dashboard',
+    doc: 'Enable GraphQL dashboard (the Apollo client UI)',
     format: Boolean,
     default: false,
     env: 'GRAPHQL_DASHBOARD_ENABLED'
@@ -103,6 +103,7 @@ export const config = convict({
       env: 'DISABLE_AUTH'
     }
   },
+  // @deprecated: health check endpoint needs binning, and all checks performed at startup ONLY
   healthCheck: {
     enabled: {
       doc: 'Enable health check endpoint',
@@ -150,7 +151,7 @@ export const config = convict({
         env: 'KITS_INTERNAL_CONNECTION_KEY'
       },
       gatewayUrl: {
-        doc: 'KITS gateway internal URL',
+        doc: 'KITS internal gateway URL',
         format: String,
         default: null,
         env: 'KITS_INTERNAL_GATEWAY_URL'
@@ -174,26 +175,30 @@ export const config = convict({
         env: 'KITS_EXTERNAL_CONNECTION_KEY'
       },
       gatewayUrl: {
-        doc: 'KITS gateway external URL',
+        doc: 'KITS external gateway URL',
         format: String,
         default: null,
         env: 'KITS_EXTERNAL_GATEWAY_URL'
       },
       personIdOverride: {
-        doc: 'This is the person ID that can be used in place of an actual personId for external users and will return the data corresponding to their crn',
+        doc:
+          'Magic person ID value, used in URL path instead of target person ID which comes ' +
+          "from external user's CRN",
         format: 'int',
         default: null,
         env: 'KIT_EXT_PERSON_ID_OVERRIDE'
       }
     },
     disableMTLS: {
-      doc: 'Disables mTLS for KITS connection, used for testing',
+      doc: 'Disables mTLS for KITS connection',
       format: Boolean,
       default: false,
       env: 'KITS_DISABLE_MTLS'
     },
     caCert: {
-      doc: 'Base64 encoded CA certificate for KITS mTLS connection',
+      doc:
+        'Base64 encoded CA certificate for KITS mTLS connection, ' +
+        'used for testing self-signed certs only',
       format: String,
       default: null,
       sensitive: true,
@@ -207,7 +212,7 @@ export const config = convict({
       env: 'KITS_GATEWAY_TIMEOUT_MS'
     },
     requestPageSize: {
-      doc: 'Enable metrics reporting',
+      doc: 'Default number of responses from KITS/RP Portal search endpoints (pagination)',
       format: 'int',
       default: 100,
       env: 'KITS_REQUEST_PAGE_SIZE'
@@ -265,26 +270,26 @@ export const config = convict({
       env: 'MONGO_URI'
     },
     databaseName: {
-      doc: 'database for mongodb',
+      doc: 'Database name for mongodb',
       format: String,
       default: 'fcp-dal-api',
       env: 'MONGO_DATABASE'
     },
     mongoOptions: {
       retryWrites: {
-        doc: 'enable mongo write retries',
+        doc: 'Enable mongo write retries',
         format: Boolean,
         default: true,
         env: 'MONGO_RETRY_WRITES'
       },
       readPreference: {
-        doc: 'mongo read preference',
+        doc: 'The read preference for the mongodb connection',
         format: ['primary', 'primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'],
         default: 'primary',
         env: 'MONGO_READ_PREFERENCE'
       },
       timeoutMS: {
-        doc: 'mongo operation timeout in milliseconds',
+        doc: 'Mongo operation timeout in milliseconds',
         format: 'int',
         default: 3000,
         env: 'MONGO_TIMEOUT_MS'
