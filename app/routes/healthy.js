@@ -8,7 +8,7 @@ import { throttle } from '../utils/throttle.js'
 const ruralPaymentsHealthCheck = async () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(
     { logger },
-    { headers: { email: config.get('healthCheck.ruralPaymentsPortalEmail') } }
+    { request: { headers: { email: config.get('healthCheck.ruralPaymentsPortalEmail') } } }
   )
   return ruralPaymentsBusiness.getOrganisationById(
     config.get('healthCheck.ruralPaymentsInternalOrganisationId')

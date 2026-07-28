@@ -37,36 +37,36 @@ export async function context({ request }) {
     traceId: request.traceId
   })
 
-  const gatewayType = request.headers['gateway-type'] || 'internal'
-
   const datasourceOptions = [
     { logger: requestLogger },
     {
-      request,
-      gatewayType
+      request
     }
   ]
 
-  const ruralPaymentsBusinessServiceAccount = new RuralPaymentsBusiness(
+  const internalServiceAccountDatasourceOptions = [
     { logger: requestLogger },
     {
-      gatewayType: 'service-account',
       request: {
+        ...request,
         headers: {
-          email: config.get('kits.dalServiceAccountEmail')
+          ...request.headers,
+          'service-account':
+            request.headers['service-account'] || config.get('kits.dalServiceAccountEmail')
         }
       }
     }
-  )
+  ]
+
+  const standardAuthRuralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
 
   return {
     auth,
-    gatewayType,
     requestLogger,
     db,
     dataSources: {
       permissions: new Permissions({ logger: requestLogger }),
-      ruralPaymentsBusiness: new RuralPaymentsBusiness(...datasourceOptions),
+      ruralPaymentsBusiness: standardAuthRuralPaymentsBusiness,
       ruralPaymentsCustomer: new RuralPaymentsCustomer(...datasourceOptions),
       ruralPaymentsReferenceData: new RuralPaymentsReferenceData(...datasourceOptions),
       hitachiPayments: new HitachiPayments({
@@ -87,7 +87,10 @@ export async function context({ request }) {
         // Service account only currently supported for ruralPaymentsBusiness.  Other ruralPayments datasources
         // should be added here too if the need arises, alongside a getXXXDataSource-style helper (see
         // getRuralPaymentsBusinessDataSource in resolvers/business/common.js) for resolvers to pick the right instance.
-        ruralPaymentsBusiness: ruralPaymentsBusinessServiceAccount
+        ruralPaymentsBusiness:
+          standardAuthRuralPaymentsBusiness.authType === 'external'
+            ? new RuralPaymentsBusiness(...internalServiceAccountDatasourceOptions)
+            : null
       }
     }
   }

@@ -72,38 +72,17 @@ describe('context', () => {
       traceId: 'trace-1'
     })
     expect(result.auth).toEqual({ user: 'test-user' })
-    expect(result.gatewayType).toBe('external')
     expect(result.requestLogger).toBeDefined()
     expect(result.dataSources.permissions.type).toBe('Permissions')
     expect(result.dataSources.ruralPaymentsBusiness).toEqual({})
     expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
     expect(result.dataSources.mongoBusiness).toEqual({})
     expect(result.dataSources.mongoCustomer).toEqual({})
-    expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toEqual({})
-  })
-
-  describe('gatewayType', () => {
-    test('defaults to internal when no gateway-type header is present', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
-      const request = { headers: {} }
-
-      const result = await context({ request })
-
-      expect(result.gatewayType).toBe('internal')
-    })
-
-    test('reflects the gateway-type header when present', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
-      const request = { headers: { 'gateway-type': 'external' } }
-
-      const result = await context({ request })
-
-      expect(result.gatewayType).toBe('external')
-    })
+    expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toBeNull()
   })
 
   describe('serviceAccount', () => {
-    test('constructs a RuralPaymentsBusiness instance forced to service-account with the configured service-account email', async () => {
+    test('constructs a service-account RuralPaymentsBusiness instance, injecting the configured DAL email as the "service-account" header, when the standard instance resolves to an external authType', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       loggerChild.mockReturnValue({ log: jest.fn() })
       const configGetSpy = jest
@@ -111,19 +90,70 @@ describe('context', () => {
         .mockImplementation((path) =>
           path === 'kits.dalServiceAccountEmail' ? 'dal-service-account@example.com' : undefined
         )
-      const request = { headers: { 'gateway-type': 'external' } }
+      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({ authType: 'external' }))
+      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
+        marker: 'service-account-instance'
+      }))
+      const request = { headers: { 'x-forwarded-authorization': 'token123' } }
+
+      const result = await context({ request })
+
+      expect(RuralPaymentsBusinessMock).toHaveBeenCalledTimes(2)
+      expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(
+        2,
+        { logger: expect.anything() },
+        {
+          request: {
+            ...request,
+            headers: { ...request.headers, 'service-account': 'dal-service-account@example.com' }
+          }
+        }
+      )
+      expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toEqual({
+        marker: 'service-account-instance'
+      })
+
+      configGetSpy.mockRestore()
+    })
+
+    test('preserves an existing "service-account" header instead of overwriting it with the configured DAL email', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      loggerChild.mockReturnValue({ log: jest.fn() })
+      const configGetSpy = jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          path === 'kits.dalServiceAccountEmail' ? 'dal-service-account@example.com' : undefined
+        )
+      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({ authType: 'external' }))
+      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({}))
+      const request = {
+        headers: {
+          'x-forwarded-authorization': 'token123',
+          'service-account': 'already-set@example.com'
+        }
+      }
 
       await context({ request })
 
-      expect(RuralPaymentsBusinessMock).toHaveBeenCalledWith(
+      expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(
+        2,
         { logger: expect.anything() },
-        {
-          gatewayType: 'service-account',
-          request: { headers: { email: 'dal-service-account@example.com' } }
-        }
+        { request: { ...request, headers: { ...request.headers } } }
       )
 
       configGetSpy.mockRestore()
+    })
+
+    test('does not construct a service-account data source when the standard instance does not resolve to an external authType', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      loggerChild.mockReturnValue({ log: jest.fn() })
+      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({ authType: 'internal' }))
+      const request = { headers: { email: 'user@example.com' } }
+
+      const result = await context({ request })
+
+      expect(RuralPaymentsBusinessMock).toHaveBeenCalledTimes(1)
+      expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toBeNull()
     })
   })
 
@@ -143,7 +173,7 @@ describe('context', () => {
     test('Audit requesterId is undefined if no email header found', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       const request = {
-        headers: {}
+        headers: { 'x-forwarded-authorization': 'placeholder-token' }
       }
 
       const result = await context({ request })
@@ -153,7 +183,7 @@ describe('context', () => {
     test('Audit correlationId is extracted from request traceId', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       const request = {
-        headers: {},
+        headers: { 'x-forwarded-authorization': 'placeholder-token' },
         traceId: '111-222-333'
       }
 
@@ -164,7 +194,7 @@ describe('context', () => {
     test('Audit correlationId is undefined if no request traceId is found', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       const request = {
-        headers: {}
+        headers: { 'x-forwarded-authorization': 'placeholder-token' }
       }
 
       const result = await context({ request })
@@ -175,7 +205,7 @@ describe('context', () => {
       getAuthMock.mockResolvedValue({ user: 'test-user', groups: ['group-1', 'group-2'] })
       getRequestingGroupMock.mockReturnValue('SOME_AD_GROUP')
       const request = {
-        headers: {},
+        headers: { 'x-forwarded-authorization': 'placeholder-token' },
         traceId: '111-222-333'
       }
 
@@ -189,7 +219,7 @@ describe('context', () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       getRequestingGroupMock.mockReturnValue(undefined)
       const request = {
-        headers: {},
+        headers: { 'x-forwarded-authorization': 'placeholder-token' },
         traceId: '111-222-333'
       }
 

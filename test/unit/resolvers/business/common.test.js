@@ -201,25 +201,16 @@ describe('getRuralPaymentsBusinessDataSource', () => {
   const standardDataSource = { getAgreementsBySBI: jest.fn() }
   const serviceAccountDataSource = { getAgreementsBySBI: jest.fn() }
 
-  it('maps internal to the standard data source, regardless of useServiceAccountForExternal', () => {
-    const dataSources = { ruralPaymentsBusiness: standardDataSource }
-
-    expect(
-      getRuralPaymentsBusinessDataSource({
-        gatewayType: 'internal',
-        dataSources,
-        useServiceAccountForExternal: true
-      })
-    ).toBe(standardDataSource)
-  })
-
-  it('returns the standard data source when gatewayType is not set', () => {
-    const dataSources = { ruralPaymentsBusiness: standardDataSource }
+  it('returns the standard data source when useServiceAccountForExternal is not provided', () => {
+    const dataSources = {
+      ruralPaymentsBusiness: standardDataSource,
+      serviceAccount: { ruralPaymentsBusiness: serviceAccountDataSource }
+    }
 
     expect(getRuralPaymentsBusinessDataSource({ dataSources })).toBe(standardDataSource)
   })
 
-  it('maps external to the standard data source when useServiceAccountForExternal is false', () => {
+  it('returns the standard data source when useServiceAccountForExternal is false', () => {
     const dataSources = {
       ruralPaymentsBusiness: standardDataSource,
       serviceAccount: { ruralPaymentsBusiness: serviceAccountDataSource }
@@ -227,25 +218,13 @@ describe('getRuralPaymentsBusinessDataSource', () => {
 
     expect(
       getRuralPaymentsBusinessDataSource({
-        gatewayType: 'external',
         dataSources,
         useServiceAccountForExternal: false
       })
     ).toBe(standardDataSource)
   })
 
-  it('defaults useServiceAccountForExternal to false when not provided', () => {
-    const dataSources = {
-      ruralPaymentsBusiness: standardDataSource,
-      serviceAccount: { ruralPaymentsBusiness: serviceAccountDataSource }
-    }
-
-    expect(getRuralPaymentsBusinessDataSource({ gatewayType: 'external', dataSources })).toBe(
-      standardDataSource
-    )
-  })
-
-  it('maps external to the service-account data source when useServiceAccountForExternal is true', () => {
+  it('returns the service-account data source when useServiceAccountForExternal is true and a service-account data source is configured', () => {
     const dataSources = {
       ruralPaymentsBusiness: standardDataSource,
       serviceAccount: { ruralPaymentsBusiness: serviceAccountDataSource }
@@ -253,25 +232,24 @@ describe('getRuralPaymentsBusinessDataSource', () => {
 
     expect(
       getRuralPaymentsBusinessDataSource({
-        gatewayType: 'external',
         dataSources,
         useServiceAccountForExternal: true
       })
     ).toBe(serviceAccountDataSource)
   })
 
-  it('throws a descriptive error when the service-account data source is missing and useServiceAccountForExternal is true', () => {
-    const dataSources = { ruralPaymentsBusiness: standardDataSource }
+  it('falls back to the standard data source when useServiceAccountForExternal is true but no service-account data source is configured (e.g. internal requests)', () => {
+    const dataSources = {
+      ruralPaymentsBusiness: standardDataSource,
+      serviceAccount: { ruralPaymentsBusiness: null }
+    }
 
-    expect(() =>
+    expect(
       getRuralPaymentsBusinessDataSource({
-        gatewayType: 'external',
         dataSources,
         useServiceAccountForExternal: true
       })
-    ).toThrow(
-      'getRuralPaymentsBusinessDataSource misconfigured: dataSources.serviceAccount.ruralPaymentsBusiness is missing'
-    )
+    ).toBe(standardDataSource)
   })
 })
 

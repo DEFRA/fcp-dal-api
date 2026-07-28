@@ -217,6 +217,9 @@ const dataSources = {
   mongoBusiness: {
     getOrgIdBySbi: jest.fn(),
     upsertOrgIdBySbi: jest.fn()
+  },
+  serviceAccount: {
+    ruralPaymentsBusiness: null
   }
 }
 

@@ -21,22 +21,13 @@ export function extractCrnFromDefraIdToken(token) {
 export class RuralPayments extends BaseRESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
-  constructor(config, { request, gatewayType = 'internal' }) {
+  constructor(config, { request }) {
     super(config, {
       name: 'Rural payments',
-      code: RURALPAYMENTS_API_REQUEST_001,
-      action: gatewayType
+      code: RURALPAYMENTS_API_REQUEST_001
     })
-    this.request = request
 
-    this.gatewayType = gatewayType
-    if (!['internal', 'external', 'service-account'].includes(this.gatewayType)) {
-      throw new BadRequest(
-        `gateway-type header must be one of internal or external received: ${gatewayType}`
-      )
-    }
-
-    this.baseURL = this.gatewayType === 'external' ? externalGatewayUrl : internalGatewayUrl
+    this.initialiseRequest(request)
 
     if (appConfig.get('kits.disableMTLS')) {
       this.httpCache.httpFetch = (url, options = {}) =>
@@ -53,9 +44,8 @@ export class RuralPayments extends BaseRESTDataSource {
         port: kitsURL.port,
         servername: kitsURL.hostname
       }
-      requestTls.secureContext = tls.createSecureContext(
-        this.gatewayType === 'external' ? appConfig.externalMTLS : appConfig.internalMTLS
-      )
+      requestTls.secureContext = this.createSecureContext()
+
       this.httpCache.httpFetch = (url, options = {}) =>
         // use undici fetch which supports mTLS & env proxy via agent
         fetch11(url, {
@@ -77,26 +67,68 @@ export class RuralPayments extends BaseRESTDataSource {
 
     const additionalHeaders = {}
 
-    if (
-      (this.gatewayType === 'internal' || this.gatewayType === 'service-account') &&
-      headers.email
-    ) {
-      additionalHeaders.email = headers.email
-    } else if (this.gatewayType === 'external' && headers['x-forwarded-authorization']) {
+    const internalEmail = this.authContext.internalAuthHeader || this.authContext.serviceAccount
+
+    if (internalEmail) {
+      additionalHeaders.email = internalEmail
+    } else {
       additionalHeaders.Authorization = headers['x-forwarded-authorization']
       additionalHeaders.crn = extractCrnFromDefraIdToken(headers['x-forwarded-authorization'])
-    } else {
-      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-        extensions: {
-          message:
-            'Invalid request headers, must be either "email: {valid user email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
-        }
-      })
     }
 
     request.headers = {
       ...request.headers,
       ...additionalHeaders
     }
+  }
+
+  isExternalRoute() {
+    return this.gatewayRoute === 'external'
+  }
+
+  getBaseURL() {
+    return this.isExternalRoute() ? externalGatewayUrl : internalGatewayUrl
+  }
+
+  createSecureContext() {
+    return tls.createSecureContext(
+      this.isExternalRoute() ? appConfig.externalMTLS : appConfig.internalMTLS
+    )
+  }
+
+  initialiseRequest(request) {
+    this.request = request
+    this.authContext = {
+      internalAuthHeader: this.request.headers.email,
+      externalAuthHeader: this.request.headers['x-forwarded-authorization'],
+      serviceAccount: this.request.headers['service-account']
+    }
+
+    if (this.authContext.internalAuthHeader) {
+      this.gatewayRoute = 'internal'
+      this.authType = 'internal'
+    } else if (this.authContext.serviceAccount && this.authContext.externalAuthHeader) {
+      // Service account supplied alongside the caller's own external auth header - this is an
+      // otherwise-external request that the DAL service account is taking over routing for.
+      this.gatewayRoute = 'internal'
+      this.authType = 'dal-service-account'
+    } else if (this.authContext.serviceAccount) {
+      // Consumer has supplied a service account email vis the service-account header
+      this.gatewayRoute = 'internal'
+      this.authType = 'client-service-account'
+    } else if (this.authContext.externalAuthHeader) {
+      this.gatewayRoute = 'external'
+      this.authType = 'external'
+    } else {
+      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+        extensions: {
+          message:
+            'Invalid request headers, must be either "email: {valid user email}", "email: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
+        }
+      })
+    }
+
+    this.gatewayType = `rural-payments-${this.authType}`
+    this.baseURL = this.getBaseURL()
   }
 }

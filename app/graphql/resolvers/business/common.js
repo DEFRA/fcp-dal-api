@@ -55,21 +55,15 @@ export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusi
 // account, even when the request itself arrived via the external gateway. Resolvers for those
 // fields should call this instead of reading dataSources.ruralPaymentsBusiness directly.
 export function getRuralPaymentsBusinessDataSource({
-  gatewayType,
   dataSources,
   useServiceAccountForExternal = false
 }) {
-  if (gatewayType !== 'external' || !useServiceAccountForExternal) {
-    return dataSources.ruralPaymentsBusiness
+  if (dataSources.serviceAccount.ruralPaymentsBusiness && useServiceAccountForExternal) {
+    // This is an externally routed request (service account datasource is only configured for external routes) and
+    // the resolver has explicitly asked for the service account
+    return dataSources.serviceAccount.ruralPaymentsBusiness
   }
-
-  if (!dataSources.serviceAccount?.ruralPaymentsBusiness) {
-    throw new Error(
-      'getRuralPaymentsBusinessDataSource misconfigured: dataSources.serviceAccount.ruralPaymentsBusiness is missing'
-    )
-  }
-
-  return dataSources.serviceAccount.ruralPaymentsBusiness
+  return dataSources.ruralPaymentsBusiness
 }
 
 const validateLockUnlockInput = (input) => {

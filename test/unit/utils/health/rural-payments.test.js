@@ -1,4 +1,5 @@
 import { expect, jest } from '@jest/globals'
+import { config } from '../../../../app/config.js'
 
 const mockLogger = {
   logger: {
@@ -38,15 +39,23 @@ describe('Rural payments health check', () => {
     expect(RuralPaymentsReferenceDataMock).toHaveBeenCalledWith(
       { logger: mockLogger.logger },
       {
-        gatewayType: 'internal',
-        request: { headers: { healthcheck: true } }
+        request: {
+          headers: {
+            healthcheck: true,
+            'service-account': config.get('kits.dalServiceAccountEmail')
+          }
+        }
       }
     )
     expect(RuralPaymentsReferenceDataMock).toHaveBeenCalledWith(
       { logger: mockLogger.logger },
       {
-        gatewayType: 'external',
-        request: { headers: { healthcheck: true } }
+        request: {
+          headers: {
+            healthcheck: true,
+            'x-forwarded-authorization': 'healthcheck'
+          }
+        }
       }
     )
     expect(mockLogger.logger.info).toHaveBeenCalledWith(
