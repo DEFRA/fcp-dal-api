@@ -1,10 +1,6 @@
-import { jest } from '@jest/globals'
-import { readFile } from 'fs/promises'
-import { dirname, join } from 'path'
-import { fileURLToPath } from 'url'
+import { beforeEach, jest } from '@jest/globals'
 
 import {
-  buildSchema,
   findBreakingChanges,
   findDangerousChanges,
   getIntrospectionQuery,
@@ -12,9 +8,7 @@ import {
   isObjectType
 } from 'graphql'
 import { config } from '../../app/config.js'
-import { createSchema } from '../../app/graphql/schema.js'
-
-const path = join(dirname(fileURLToPath(import.meta.url)))
+import { createRawSchema, createSchema } from '../../app/graphql/schema.js'
 
 function isFieldProtected(field) {
   const astNode = field.astNode
@@ -45,17 +39,25 @@ function getUnprotectedFields(schema) {
   return unprotected
 }
 
+const mockEnv = jest.fn()
+
+const originalConfig = { ...config }
+
 describe('schema', () => {
-  const originalConfig = { ...config }
-  const configMockPath = {
-    allSchemaOn: true
-  }
   beforeEach(() => {
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    mockEnv.mockReturnValue('dev')
+
+    jest.spyOn(config, 'get').mockImplementation((path) => {
+      if (path === 'cdp.env') {
+        return mockEnv()
+      }
+
+      if (path === 'auth.disabled') {
+        return false
+      }
+
+      return originalConfig.get(path)
+    })
   })
 
   it('should not include custom directives in final schema output', async () => {
@@ -144,31 +146,104 @@ describe('schema', () => {
     ])
   })
 
-  it('should contain all fields if process.env.ALL_SCHEMA is set', async () => {
-    const schema = await createSchema()
-    const fullSchema = buildSchema(await readFile(join(path, 'full-schema.gql'), 'utf-8'))
-
-    expect(findDangerousChanges(fullSchema, schema)).toHaveLength(0)
-    expect(findBreakingChanges(fullSchema, schema)).toHaveLength(0)
-    expect(findDangerousChanges(schema, fullSchema)).toHaveLength(0)
-    expect(findBreakingChanges(schema, fullSchema)).toHaveLength(0)
-  })
-
-  it('should only contain fields that have the directive', async () => {
-    configMockPath.allSchemaOn = null
-    const schema = await createSchema()
-
-    const partialSchema = buildSchema(await readFile(join(path, 'partial-schema.gql'), 'utf-8'))
-
-    expect(findDangerousChanges(partialSchema, schema)).toHaveLength(0)
-    expect(findBreakingChanges(partialSchema, schema)).toHaveLength(0)
-    expect(findDangerousChanges(schema, partialSchema)).toHaveLength(0)
-    expect(findBreakingChanges(schema, partialSchema)).toHaveLength(0)
-  })
-
   it('ensures all sensitive top-level fields have @auth directive', async () => {
     const schema = await createSchema()
     const unprotectedFields = getUnprotectedFields(schema)
     expect(unprotectedFields).toEqual(['Query.referenceData'])
+  })
+
+  it('directives clean up schema as expected', async () => {
+    // Schema with no directives applied
+    const rawSchema = await createRawSchema()
+    // Apply directives
+    const schema = await createSchema()
+
+    expect(findDangerousChanges(rawSchema, schema)).toHaveLength(0)
+    expect(findBreakingChanges(rawSchema, schema)).toEqual([
+      { type: 'TYPE_REMOVED', description: 'AuthGroup was removed.' },
+      { type: 'TYPE_REMOVED', description: 'Numeric was removed.' },
+      { type: 'TYPE_REMOVED', description: 'Image was removed.' },
+      { type: 'TYPE_REMOVED', description: 'UUID was removed.' },
+      {
+        type: 'FIELD_CHANGED_KIND',
+        description:
+          'Business.customers changed type from [BusinessCustomer] to [BusinessCustomerPartial].'
+      },
+      {
+        type: 'FIELD_CHANGED_KIND',
+        description:
+          'BusinessLand.parcels changed type from [BusinessLandParcel] to [BusinessLandParcelPartial].'
+      },
+      {
+        type: 'FIELD_CHANGED_KIND',
+        description:
+          'Customer.businesses changed type from [CustomerBusiness] to [CustomerBusinessPartial].'
+      },
+      { type: 'DIRECTIVE_REMOVED', description: 'wip was removed.' },
+      { type: 'DIRECTIVE_REMOVED', description: 'auth was removed.' },
+      {
+        type: 'DIRECTIVE_REMOVED',
+        description: 'excludeFromList was removed.'
+      }
+    ])
+
+    expect(findDangerousChanges(schema, rawSchema)).toHaveLength(0)
+    expect(findBreakingChanges(schema, rawSchema)).toEqual([
+      { description: 'BusinessCustomerPartial was removed.', type: 'TYPE_REMOVED' },
+      { description: 'BusinessLandParcelPartial was removed.', type: 'TYPE_REMOVED' },
+      { description: 'CustomerBusinessPartial was removed.', type: 'TYPE_REMOVED' },
+      {
+        description:
+          'Business.customers changed type from [BusinessCustomerPartial] to [BusinessCustomer].',
+        type: 'FIELD_CHANGED_KIND'
+      },
+      {
+        description:
+          'BusinessLand.parcels changed type from [BusinessLandParcelPartial] to [BusinessLandParcel].',
+        type: 'FIELD_CHANGED_KIND'
+      },
+      {
+        description:
+          'Customer.businesses changed type from [CustomerBusinessPartial] to [CustomerBusiness].',
+        type: 'FIELD_CHANGED_KIND'
+      }
+    ])
+  })
+
+  it('wip fields should be removed from schema in prod', async () => {
+    mockEnv.mockReturnValue('prod')
+
+    const rawSchema = await createRawSchema(`#graphql
+      extend type Query { wipTest: Boolean @wip, nested: Nested }
+      type Nested { otherNestedField: Boolean, nestedWipTest: Boolean @wip }
+    `)
+    const schema = await createSchema()
+
+    expect(config.get('cdp.env')).toBe('prod')
+    expect(findBreakingChanges(rawSchema, schema)).toEqual(
+      expect.arrayContaining([
+        { type: 'FIELD_REMOVED', description: 'Query.wipTest was removed.' },
+        { type: 'FIELD_REMOVED', description: 'Query.nested was removed.' }
+      ])
+    )
+  })
+
+  it('wip fields should NOT be removed from schema in dev', async () => {
+    const testSchema = `#graphql
+      extend type Query { wipTest: Boolean @wip, nested: Nested }
+      type Nested { otherNestedField: Boolean, nestedWipTest: Boolean @wip }
+    `
+
+    const rawSchema = await createRawSchema(testSchema)
+    const schema = await createSchema(testSchema)
+
+    expect(config.get('cdp.env')).toBe('dev')
+
+    expect(findBreakingChanges(rawSchema, schema)).toEqual(
+      expect.not.arrayContaining([
+        { type: 'FIELD_REMOVED', description: 'Query.wipTest was removed.' },
+        { type: 'FIELD_REMOVED', description: 'Query.nested was removed.' }
+      ])
+    )
   })
 })
