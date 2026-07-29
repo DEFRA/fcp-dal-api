@@ -71,14 +71,13 @@ describe('RuralPayments Custom Fetch', () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'internal'
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('internal')
+    expect(rp.authType).toBe('internal')
     expect(rp.baseURL).toBe(fakeInternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -113,14 +112,13 @@ describe('RuralPayments Custom Fetch', () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { 'x-forwarded-authorization': 'token123' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'external'
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('external')
+    expect(rp.authType).toBe('external')
     expect(rp.baseURL).toBe(fakeExternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -156,14 +154,13 @@ describe('RuralPayments Custom Fetch', () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'internal'
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('internal')
+    expect(rp.authType).toBe('internal')
     expect(rp.baseURL).toBe(fakeInternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS
@@ -187,14 +184,13 @@ describe('RuralPayments Custom Fetch', () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { 'x-forwarded-authorization': 'token123' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'external'
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('external')
+    expect(rp.authType).toBe('external')
     expect(rp.baseURL).toBe(fakeExternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS

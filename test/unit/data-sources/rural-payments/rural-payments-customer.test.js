@@ -12,14 +12,13 @@ describe('Rural Payments Customer', () => {
   const datasourceOptions = [
     { logger },
     {
-      gatewayType: 'internal'
+      request: { headers: { email: 'test@test.test' } }
     }
   ]
   const ruralPaymentsCustomer = new RuralPaymentsCustomer(...datasourceOptions)
   const ruralPaymentsCustomerExt = new RuralPaymentsCustomer(
     { logger },
     {
-      gatewayType: 'external',
       request: {
         headers: {
           'x-forwarded-authorization': jwt.sign({ contactId: '11111111' }, 'secret', {
@@ -176,8 +175,8 @@ describe('Rural Payments Customer', () => {
         code: 'RURALPAYMENTS_API_NOT_FOUND_001',
         personId: 'nonexistentId',
         response: { body: {} },
-        gatewayType: 'internal',
-        request: undefined
+        gatewayType: 'rural-payments-internal',
+        request: { headers: { email: 'test@test.test' } }
       }
     )
   })
