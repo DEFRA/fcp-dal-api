@@ -2,3 +2,4 @@ directive @wip on FIELD_DEFINITION
 directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
 directive @excludeFromList on FIELD_DEFINITION
 directive @validateVariable(pattern: String!, variable: String!) on FIELD_DEFINITION
+directive @validateVariables(patterns: [String!], variables: [String!]) on FIELD_DEFINITION

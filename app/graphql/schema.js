@@ -8,8 +8,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { authDirectiveTransformer } from '../auth/authenticate.js'
 import { config } from '../config.js'
 import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
+import {
+  validateVariableDirective,
+  validateVariablesDirective
+} from './directives/validateVariable.js'
 import { wipDirectiveTransformer } from './directives/wipDirectiveTransformer.js'
-import { validateVariableDirective } from './directives/validateVariable.js'
 
 import * as BusinessLand from './resolvers/business/business-land.js'
 import * as Business from './resolvers/business/business.js'
@@ -58,6 +61,7 @@ export async function createSchema(...typeDefs) {
 
   schema = wipDirectiveTransformer(schema)
   schema = validateVariableDirective(schema) // Apply the validateVariable directive to the schema
+  schema = validateVariablesDirective(schema) // Apply the validateVariables directive to the schema
 
   if (!config.get('auth.disabled')) {
     schema = authDirectiveTransformer(schema)

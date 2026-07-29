@@ -186,7 +186,8 @@ describe('schema', () => {
         type: 'DIRECTIVE_REMOVED',
         description: 'excludeFromList was removed.'
       },
-      { type: 'DIRECTIVE_REMOVED', description: 'validateVariable was removed.' }
+      { type: 'DIRECTIVE_REMOVED', description: 'validateVariable was removed.' },
+      { type: 'DIRECTIVE_REMOVED', description: 'validateVariables was removed.' }
     ])
 
     expect(findDangerousChanges(schema, rawSchema)).toHaveLength(0)
