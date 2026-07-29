@@ -18,7 +18,7 @@ function setupNock(update = {}) {
   kits
     .post('/person/search', {
       searchFieldType: 'CUSTOMER_REFERENCE',
-      primarySearchPhrase: 'crn',
+      primarySearchPhrase: '1234567890',
       offset: 0,
       limit: 1
     })
@@ -84,7 +84,7 @@ function setupNock(update = {}) {
   kits
     .post('/person/search', {
       searchFieldType: 'CUSTOMER_REFERENCE',
-      primarySearchPhrase: 'crn',
+      primarySearchPhrase: '1234567890',
       offset: 0,
       limit: 1
     })
@@ -129,7 +129,7 @@ describe('customer mutations', () => {
       mutation {
         updateCustomerAddress(
           input: {
-            crn: "crn"
+            crn: "1234567890"
             address: {
               buildingName: "newBuildingName"
               buildingNumberRange: "newBuildingNumberRange"
@@ -218,7 +218,7 @@ describe('customer mutations', () => {
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerDateOfBirth(input: { crn: "crn", dateOfBirth: "2025-01-01" }) {
+        updateCustomerDateOfBirth(input: { crn: "1234567890", dateOfBirth: "2025-01-01" }) {
           customer {
             info {
               dateOfBirth
@@ -250,7 +250,7 @@ describe('customer mutations', () => {
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerEmail(input: { crn: "crn", email: { address: "newEmail" } }) {
+        updateCustomerEmail(input: { crn: "1234567890", email: { address: "newEmail" } }) {
           success
           customer {
             info {
@@ -292,7 +292,7 @@ describe('customer mutations', () => {
       mutation {
         updateCustomerName(
           input: {
-            crn: "crn"
+            crn: "1234567890"
             first: "newFirst"
             last: "newLast"
             middle: "newMiddle"
@@ -345,7 +345,7 @@ describe('customer mutations', () => {
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerPhone(
-          input: { crn: "crn", phone: { landline: "newLandline", mobile: "newMobile" } }
+          input: { crn: "1234567890", phone: { landline: "newLandline", mobile: "newMobile" } }
         ) {
           success
           customer {
@@ -378,7 +378,7 @@ describe('customer mutations', () => {
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerDoNotContact(
-          input: { crn: "crn", doNotContact: true }
+          input: { crn: "1234567890", doNotContact: true }
         ) {
           success
           customer {

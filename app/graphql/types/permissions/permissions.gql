@@ -66,4 +66,5 @@ type Permission {
   Check if this level is active for given customer and business.
   """
   active(crn: ID!, sbi: ID!): Boolean
+    @validateVariables(patterns: ["^[1-9][0-9]{9}$", "^[1-9][0-9]{8}$"], variables: ["crn", "sbi"])
 }

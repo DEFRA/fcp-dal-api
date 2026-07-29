@@ -1,15 +1,21 @@
 extend type Mutation {
   updateCustomerAddress(input: UpdateCustomerAddressInput!): UpdateCustomerResponse
+    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDateOfBirth(input: UpdateCustomerDateOfBirthInput!): UpdateCustomerResponse
+    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
+    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
+    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
+    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
+    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])

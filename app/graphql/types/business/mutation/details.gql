@@ -1,13 +1,18 @@
 extend type Mutation {
   updateBusinessName(input: UpdateBusinessNameInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessEmail(input: UpdateBusinessEmailInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessPhone(input: UpdateBusinessPhoneInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessAddress(input: UpdateBusinessAddressInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateBusinessVAT(input: UpdateBusinessVATInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
 

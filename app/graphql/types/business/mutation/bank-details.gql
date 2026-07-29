@@ -4,7 +4,12 @@ extend type Mutation {
   """
   createBusinessCustomerBankDetails(
     input: CreateBusinessCustomerBankDetailsInput!
-  ): CreateBusinessCustomerBankDetailsResult @auth(requires: [SINGLE_FRONT_DOOR])
+  ): CreateBusinessCustomerBankDetailsResult
+    @validateVariables(
+      patterns: ["^[1-9][0-9]{8}$", "^[1-9][0-9]{9}$"]
+      variables: ["input.sbi", "input.crn"]
+    )
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input CreateBusinessCustomerBankDetailsInput {

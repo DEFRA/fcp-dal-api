@@ -3,6 +3,7 @@ extend type Mutation {
   Used to update the business legal status.
   """
   updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -10,12 +11,15 @@ extend type Mutation {
   """
   updateBusinessDateStartedFarming(
     input: UpdateBusinessDateStartedFarmingInput!
-  ): UpdateBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+  ): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
+    @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
   Used to update the date the business type.
   """
   updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -23,13 +27,16 @@ extend type Mutation {
   """
   updateBusinessRegistrationNumbers(
     input: UpdateBusinessRegistrationNumbersInput!
-  ): UpdateBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+  ): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
+    @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
   Update the business lock status.
   """
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -37,6 +44,7 @@ extend type Mutation {
   """
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
+    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
@@ -95,19 +103,19 @@ input UpdateBusinessRegistrationNumbersInput {
   sbi: ID!
 
   """
-  Registration numbers object to update companies house or charities comission numbers.
+  Registration numbers object to update companies house or charities commission numbers.
   """
   registrationNumbers: BusinessRegistrationNumbersInput!
 }
 
 input BusinessRegistrationNumbersInput {
   """
-  Charity comission registration number to set.
+  Charity commission registration number to set.
   """
   charityCommission: String
 
   """
-  Charity comission registration number to set.
+  Charity commission registration number to set.
   """
   companiesHouse: String
 }

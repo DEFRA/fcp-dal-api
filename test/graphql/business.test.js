@@ -100,7 +100,7 @@ const query = `#graphql
           crn
           role
         }
-        customer(crn: "customerReference") {
+        customer(crn: "1234567890") {
           personId
           firstName
           lastName
@@ -202,7 +202,7 @@ const setupNock = (v1) => {
         firstName: 'firstName',
         lastName: 'lastName',
         role: 'role',
-        customerReference: 'customerReference',
+        customerReference: '1234567890',
         privileges: ['Full permission - business']
       }
     ]
@@ -454,7 +454,7 @@ describe('Query.business internal', () => {
               personId: 'personId',
               firstName: 'firstName',
               lastName: 'lastName',
-              crn: 'customerReference',
+              crn: '1234567890',
               role: 'role'
             }
           ],
@@ -462,7 +462,7 @@ describe('Query.business internal', () => {
             personId: 'personId',
             firstName: 'firstName',
             lastName: 'lastName',
-            crn: 'customerReference',
+            crn: '1234567890',
             role: 'role',
             permissionGroups: [
               {
@@ -618,7 +618,7 @@ describe('Query.business internal', () => {
               personId: 'personId',
               firstName: 'firstName',
               lastName: 'lastName',
-              crn: 'customerReference',
+              crn: '1234567890',
               role: 'role'
             }
           ],
@@ -626,7 +626,7 @@ describe('Query.business internal', () => {
             personId: 'personId',
             firstName: 'firstName',
             lastName: 'lastName',
-            crn: 'customerReference',
+            crn: '1234567890',
             role: 'role',
             permissionGroups: [
               {
