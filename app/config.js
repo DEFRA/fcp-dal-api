@@ -1,5 +1,7 @@
 import convict from 'convict'
 
+export const cdpEnvironments = ['dev', 'test', 'ext-test', 'perf-test', 'prod']
+
 export const config = convict({
   nodeEnv: {
     doc: 'The application environment.',
@@ -10,7 +12,7 @@ export const config = convict({
   cdp: {
     env: {
       doc: 'CDP environment, automatically set on CDP',
-      format: ['dev', 'test', 'ext-test', 'perf-test', 'prod'],
+      format: cdpEnvironments,
       default: null,
       env: 'ENVIRONMENT'
     },

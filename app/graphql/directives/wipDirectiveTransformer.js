@@ -1,11 +1,11 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { config } from '../../config.js'
 
-const isWipEnabledEnvironments = ['dev', 'perf-test']
+// WIP fields are only enabled in environments backed by the mock
+export const wipEnabledEnvironments = new Set(['dev', 'perf-test'])
 
 export function wipDirectiveTransformer(schema) {
-  // WIP fields are only enabled in environments backed by the mock
-  const isWipEnabled = isWipEnabledEnvironments.includes(config.get('cdp.env'))
+  const isWipEnabled = wipEnabledEnvironments.has(config.get('cdp.env'))
 
   return mapSchema(schema, {
     [MapperKind.FIELD](fieldConfig) {

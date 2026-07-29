@@ -7,7 +7,9 @@ import {
   graphql,
   isObjectType
 } from 'graphql'
-import { config } from '../../app/config.js'
+import { describe } from 'node:test'
+import { cdpEnvironments, config } from '../../app/config.js'
+import { wipEnabledEnvironments } from '../../app/graphql/directives/wipDirectiveTransformer.js'
 import { createRawSchema, createSchema } from '../../app/graphql/schema.js'
 
 function isFieldProtected(field) {
@@ -210,40 +212,49 @@ describe('schema', () => {
     ])
   })
 
-  it('wip fields should be removed from schema in prod', async () => {
-    mockEnv.mockReturnValue('prod')
-
-    const rawSchema = await createRawSchema(`#graphql
-      extend type Query { wipTest: Boolean @wip, nested: Nested }
-      type Nested { otherNestedField: Boolean, nestedWipTest: Boolean @wip }
-    `)
-    const schema = await createSchema()
-
-    expect(config.get('cdp.env')).toBe('prod')
-    expect(findBreakingChanges(rawSchema, schema)).toEqual(
-      expect.arrayContaining([
-        { type: 'FIELD_REMOVED', description: 'Query.wipTest was removed.' },
-        { type: 'FIELD_REMOVED', description: 'Query.nested was removed.' }
-      ])
-    )
-  })
-
-  it('wip fields should NOT be removed from schema in dev', async () => {
+  describe('wip directive', () => {
     const testSchema = `#graphql
       extend type Query { wipTest: Boolean @wip, nested: Nested }
       type Nested { otherNestedField: Boolean, nestedWipTest: Boolean @wip }
     `
 
-    const rawSchema = await createRawSchema(testSchema)
-    const schema = await createSchema(testSchema)
+    it.each(cdpEnvironments.map((env) => [env, wipEnabledEnvironments.has(env)]))(
+      'wip fields are %s in %s',
+      async (env, isWipEnabled) => {
+        mockEnv.mockReturnValue(env)
+        expect(config.get('cdp.env')).toBe(env)
 
-    expect(config.get('cdp.env')).toBe('dev')
+        const schema = await createSchema(testSchema)
+        const queryType = schema.getQueryType()
+        const nestedType = schema.getType('Nested')
 
-    expect(findBreakingChanges(rawSchema, schema)).toEqual(
-      expect.not.arrayContaining([
-        { type: 'FIELD_REMOVED', description: 'Query.wipTest was removed.' },
-        { type: 'FIELD_REMOVED', description: 'Query.nested was removed.' }
-      ])
+        if (isWipEnabled) {
+          expect(queryType.getFields().wipTest).toBeDefined()
+          expect(nestedType.getFields().nestedWipTest).toBeDefined()
+        } else {
+          expect(queryType.getFields().wipTest).toBeUndefined()
+          expect(nestedType.getFields().nestedWipTest).toBeUndefined()
+        }
+      }
+    )
+
+    it.each([...wipEnabledEnvironments])(
+      'wip fields have a deprecation reason in %s',
+      async (env) => {
+        mockEnv.mockReturnValue(env)
+
+        const schema = await createSchema(testSchema)
+
+        const queryType = schema.getQueryType()
+        const nestedType = schema.getType('Nested')
+
+        expect(queryType.getFields().wipTest.deprecationReason).toBe(
+          'Work in progress — may change or be removed'
+        )
+        expect(nestedType.getFields().nestedWipTest.deprecationReason).toBe(
+          'Work in progress — may change or be removed'
+        )
+      }
     )
   })
 })
