@@ -92,7 +92,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeInternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'internal' }
+        headers: {}
       })
     ).toBe('data')
     expect(EnvHttpProxyAgent.mockConstructorArgs).toEqual({ requestTls })
@@ -102,13 +102,13 @@ describe('RuralPayments Custom Fetch', () => {
     expect(callArgs[0]).toBe(`${fakeInternalURL}example-path`)
     expect(callArgs[1]).toMatchObject({
       method: 'GET',
-      headers: { 'Gateway-Type': 'internal' },
+      headers: {},
       signal: [timeout]
     })
     expect(callArgs[1].dispatcher).toBeDefined()
   })
 
-  it('should initialise; fetch has EXternal mTLS, gateway, & timeout', async () => {
+  it('should initialise; fetch has External mTLS, gateway, & timeout', async () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
@@ -133,7 +133,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeExternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'external' }
+        headers: {}
       })
     ).toBe('data')
 
@@ -142,7 +142,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(callArgs[0]).toBe(`${fakeExternalURL}example-path`)
     expect(callArgs[1]).toMatchObject({
       method: 'GET',
-      headers: { 'Gateway-Type': 'external' },
+      headers: {},
       signal: [timeout]
     })
     expect(callArgs[1].dispatcher).toBeDefined()
@@ -168,12 +168,12 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeInternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'internal' }
+        headers: {}
       })
     ).toBe('data')
     expect(fetch).toHaveBeenCalledWith(`${fakeInternalURL}example-path`, {
       method: 'GET',
-      headers: { 'Gateway-Type': 'internal' },
+      headers: {},
       signal: [timeout]
     })
   })
@@ -198,12 +198,12 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeExternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'external' }
+        headers: {}
       })
     ).toBe('data')
     expect(fetch).toHaveBeenCalledWith(`${fakeExternalURL}example-path`, {
       method: 'GET',
-      headers: { 'Gateway-Type': 'external' },
+      headers: {},
       signal: [timeout]
     })
   })

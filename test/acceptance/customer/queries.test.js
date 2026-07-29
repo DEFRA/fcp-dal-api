@@ -294,7 +294,7 @@ describe('Customer Queries', () => {
         sbi: '111111111',
         crn: '1111111100'
       },
-      { email: 'some-email', 'gateway-type': 'internal' }
+      { email: 'some-email' }
     )
 
     expect(response).not.toHaveProperty('errors')
@@ -319,7 +319,7 @@ describe('Customer Queries', () => {
         sbi: '111111111',
         crn: '1111111100'
       },
-      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' }
+      { 'x-forwarded-authorization': tokenValue }
     )
 
     expect(response).not.toHaveProperty('errors')

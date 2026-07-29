@@ -241,8 +241,7 @@ describe('Customer Mutations - as an internal user', () => {
     const inputs = generateInputsForCRN('9000000000')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(mutation, inputs, {
-      email: 'some-email',
-      'gateway-type': 'internal'
+      email: 'some-email'
     })
 
     expect(response).not.toHaveProperty('errors')
@@ -276,8 +275,7 @@ describe('Customer Mutations - as an internal user', () => {
     const inputs = generateFullInputForCRN('9000000000')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(fullMutation, inputs, {
-      email: 'some-email',
-      'gateway-type': 'internal'
+      email: 'some-email'
     })
 
     expect(response).not.toHaveProperty('errors')
@@ -316,8 +314,7 @@ describe('Customer Mutations - as an external user', () => {
     const inputs = generateInputsForCRN('9000000001')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(mutation, inputs, {
-      'x-forwarded-authorization': tokenValue,
-      'gateway-type': 'external'
+      'x-forwarded-authorization': tokenValue
     })
 
     expect(response).not.toHaveProperty('errors')
@@ -351,8 +348,7 @@ describe('Customer Mutations - as an external user', () => {
     const inputs = generateFullInputForCRN('9000000001')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(fullMutation, inputs, {
-      'x-forwarded-authorization': tokenValue,
-      'gateway-type': 'external'
+      'x-forwarded-authorization': tokenValue
     })
 
     expect(response).not.toHaveProperty('errors')

@@ -21,7 +21,7 @@ describe('reference data query', () => {
         }
       `,
       {},
-      { email: 'some-email', 'gateway-type': 'internal' }
+      { email: 'some-email' }
     )
 
     expect(response).not.toHaveProperty('errors')

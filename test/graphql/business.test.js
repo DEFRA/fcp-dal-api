@@ -452,7 +452,6 @@ describe('Query.business internal', () => {
     setupAnnotatedFieldsNock(internalKitsGateway, 'dal-service-account@example.com')
 
     const result = await makeTestQuery(query, {
-      'gateway-type': 'external',
       'x-forwarded-authorization': tokenValue
     })
 

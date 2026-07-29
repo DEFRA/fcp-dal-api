@@ -248,7 +248,6 @@ describe('Query.customer', () => {
     })
 
     const result = await makeTestQuery(query, {
-      'gateway-type': 'external',
       'x-forwarded-authorization': jwt.sign({ contactId: '123' }, 'secret', { expiresIn: '1h' })
     })
 

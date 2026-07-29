@@ -61,7 +61,6 @@ describe('context', () => {
     loggerChild.mockReturnValue({ log: jest.fn() })
     const request = {
       headers: {
-        'gateway-type': 'external',
         'x-forwarded-authorization': 'token123'
       },
       transactionId: 'tx-1',

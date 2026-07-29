@@ -698,12 +698,9 @@ describe('business - external gateway', () => {
         }
       }
     `
-    const result = await makeTestQuery(
-      query,
-      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' },
-      true,
-      { input }
-    )
+    const result = await makeTestQuery(query, { 'x-forwarded-authorization': tokenValue }, true, {
+      input
+    })
 
     expect(result).toEqual({
       data: {
