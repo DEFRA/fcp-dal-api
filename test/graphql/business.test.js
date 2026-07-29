@@ -7,152 +7,181 @@ import { mockOrganisationSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
-    query BusinessTest {
-      business(sbi: "sbi") {
-        organisationId
-        sbi
-        info {
-          name
-          address {
-            pafOrganisationName
-            line1
-            line2
-            line3
-            line4
-            line5
-            buildingNumberRange
-            buildingName
-            flatName
-            street
-            city
-            county
-            postalCode
-            country
-            uprn
-            dependentLocality
-            doubleDependentLocality
-            typeId
-          }
-          email {
-            address
-          }
-          legalStatus {
-            code
-            type
-          }
-          phone {
-            mobile
-            landline
-          }
-          traderNumber
-          type {
-            code
-            type
-          }
-          vat
-          vendorNumber
-        }
-        land {
-          parcels(date: "2025-05-04") {
-            id
-            sheetId
-            parcelId
-            area
-            pendingDigitisation
-          }
-          parcel(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
-            id
-            sheetId
-            parcelId
-            area
-            pendingDigitisation
-            effectiveToDate
-            effectiveFromDate
-          }
-          parcelLandUses(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
-            code
-            startDate
-            endDate
-            insertDate
-            deleteDate
-            area
-            length
-          }
-          parcelCovers(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
-            id
-            name
-            area
-            code
-            isBpsEligible
-          }
-          summary(date: "2025-05-04") {
-            arableLandArea
-            permanentCropsArea
-            permanentGrasslandArea
-            totalArea
-            totalParcels
-          }
-        }
-        customers {
-          personId
-          firstName
-          lastName
-          crn
-          role
-        }
-        customer(crn: "customerReference") {
-          personId
-          firstName
-          lastName
-          crn
-          role
-          permissionGroups {
-            id
-            level
-            functions
-          }
-        }
-        countyParishHoldings {
-          cphNumber
-          parish
-          startDate
-          endDate
-          species
-          xCoordinate
-          yCoordinate
-        }
-        applications {
-          sbi
-          id
-          subjectId
-          year
-          name
-          moduleCode
-          scheme
-          statusCodeP
-          statusCodeS
-          status
-          submissionDate
-          portalStatusP
-          portalStatusS
-          portalStatus
-          active
-          transitionId
-          transitionName
-          agreementReferences
-          transitionHistory {
-            id
-            name
-            timestamp
-            checkStatus
-          }
-        }
+query BusinessTest {
+  business(sbi: "sbi") {
+    organisationId
+    sbi
+    info {
+      name
+      address {
+        pafOrganisationName
+        line1
+        line2
+        line3
+        line4
+        line5
+        buildingNumberRange
+        buildingName
+        flatName
+        street
+        city
+        county
+        postalCode
+        country
+        uprn
+        dependentLocality
+        doubleDependentLocality
+        typeId
+      }
+      email {
+        address
+      }
+      legalStatus {
+        code
+        type
+      }
+      phone {
+        mobile
+        landline
+      }
+      traderNumber
+      type {
+        code
+        type
+      }
+      vat
+      vendorNumber
+    }
+    land {
+      parcels(date: "2025-05-04") {
+        id
+        sheetId
+        parcelId
+        area
+        pendingDigitisation
+      }
+      parcel(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
+        id
+        sheetId
+        parcelId
+        area
+        pendingDigitisation
+        effectiveToDate
+        effectiveFromDate
+      }
+      parcelLandUses(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
+        code
+        startDate
+        endDate
+        insertDate
+        deleteDate
+        area
+        length
+      }
+      parcelCovers(sheetId: "sheetId", parcelId: "parcelId", date: "2025-05-04") {
+        id
+        name
+        area
+        code
+        isBpsEligible
+      }
+      summary(date: "2025-05-04") {
+        arableLandArea
+        permanentCropsArea
+        permanentGrasslandArea
+        totalArea
+        totalParcels
       }
     }
-  `
+    customers {
+      personId
+      firstName
+      lastName
+      crn
+      role
+    }
+    customer(crn: "customerReference") {
+      personId
+      firstName
+      lastName
+      crn
+      role
+      permissionGroups {
+        id
+        level
+        functions
+      }
+    }
+    countyParishHoldings {
+      cphNumber
+      parish
+      startDate
+      endDate
+      species
+      xCoordinate
+      yCoordinate
+    }
+    applications {
+      sbi
+      id
+      subjectId
+      year
+      name
+      moduleCode
+      scheme
+      statusCodeP
+      statusCodeS
+      status
+      submissionDate
+      portalStatusP
+      portalStatusS
+      portalStatus
+      active
+      transitionId
+      transitionName
+      agreementReferences
+      transitionHistory {
+        id
+        name
+        timestamp
+        checkStatus
+      }
+    }
+    agreements {
+      contractId
+      name
+      status
+      contractType
+      schemeYear
+      startDate
+      endDate
+      paymentSchedules {
+        optionCode
+        optionDescription
+        commitmentGroupStartDate
+        commitmentGroupEndDate
+        year
+        sheetName
+        parcelName
+        actionArea
+        actionMTL
+        actionUnits
+        parcelTotalArea
+        startDate
+        endDate
+      }
+    }
+  }
+}
+`
 
-const setupNock = (v1) => {
-  v1.get('/organisation/organisationId').reply(200, {
+const setupNock = (upstream, headers) => {
+  // Headers should either be a single email header (internal route) or an Authorization/CRN combination (external)
+  // Calling match header directly on 'upstream' applies the match to every interceptor registered on it, so this only needs
+  // setting once rather than on each individual .get() call below.
+  Object.entries(headers).forEach(([name, value]) => upstream.matchHeader(name, value))
+
+  upstream.get('/organisation/organisationId').reply(200, {
     _data: {
       id: 'organisationId',
       sbi: 'sbi',
@@ -195,7 +224,7 @@ const setupNock = (v1) => {
     }
   })
 
-  v1.get('/authorisation/organisation/organisationId').reply(200, {
+  upstream.get('/authorisation/organisation/organisationId').reply(200, {
     _data: [
       {
         id: 'personId',
@@ -208,7 +237,7 @@ const setupNock = (v1) => {
     ]
   })
 
-  v1.get('/lms/organisation/organisationId/parcels/historic/04-May-25').reply(200, [
+  upstream.get('/lms/organisation/organisationId/parcels/historic/04-May-25').reply(200, [
     {
       id: 'id',
       sheetId: 'sheetId',
@@ -218,7 +247,7 @@ const setupNock = (v1) => {
     }
   ])
 
-  v1.get('/lms/organisation/organisationId/parcel-details/historic/04-May-25').reply(200, [
+  upstream.get('/lms/organisation/organisationId/parcel-details/historic/04-May-25').reply(200, [
     {
       sheetId: 'sheetId',
       parcelId: 'parcelId',
@@ -227,29 +256,40 @@ const setupNock = (v1) => {
     }
   ])
 
-  v1.get(
-    '/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/04-May-25/land-covers'
-  ).reply(200, {
-    features: [
-      {
-        id: 'id',
-        properties: {
-          area: 1,
-          code: 'code',
-          name: 'name',
-          isBpsEligible: true
+  upstream
+    .get(
+      '/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/04-May-25/land-covers'
+    )
+    .reply(200, {
+      features: [
+        {
+          id: 'id',
+          properties: {
+            area: 1,
+            code: 'code',
+            name: 'name',
+            isBpsEligible: true
+          }
         }
-      }
-    ]
-  })
+      ]
+    })
 
-  v1.get('/lms/organisation/organisationId/covers-summary/historic/04-May-25').reply(200, [
+  upstream.get('/lms/organisation/organisationId/covers-summary/historic/04-May-25').reply(200, [
     { name: 'Arable Land', area: 1 },
     { name: 'Permanent Grassland', area: 1 },
     { name: 'Permanent Crops', area: 1 }
   ])
+}
 
-  v1.get(`/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/sbi/list`)
+// The fields backed by the queries below use getRuralPaymentsBusinessDataSource (see resolvers/business/common.js), so they
+// are always resolved against the internal gateway.  The email param will always be either the calling user's
+// email address for internal requests, or the dal service account for external requests that have been re-routed
+const setupAnnotatedFieldsNock = (internalUpstream, email) => {
+  // All requests should have an email header
+  internalUpstream.matchHeader('email', email)
+
+  internalUpstream
+    .get(`/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/sbi/list`)
     .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
       data: [
@@ -272,7 +312,8 @@ const setupNock = (v1) => {
       errorString: null
     })
 
-  v1.get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
+  internalUpstream
+    .get('/SitiAgriApi/cv/cphByBusiness/sbi/sbi/list')
     .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
       data: [
@@ -292,7 +333,7 @@ const setupNock = (v1) => {
       ]
     })
 
-  v1.get('/SitiAgriApi/cv/appByBusiness/sbi/sbi/list').reply(200, {
+  internalUpstream.get('/SitiAgriApi/cv/appByBusiness/sbi/sbi/list').reply(200, {
     data: [
       {
         sbi: 'sbi',
@@ -319,6 +360,37 @@ const setupNock = (v1) => {
             transition_name: 'Transition Name',
             dt_transition: '2025-05-04T02:00:00:123+0100',
             check_status: 'Check Status'
+          }
+        ]
+      }
+    ]
+  })
+
+  internalUpstream.get('/SitiAgriApi/cv/agreementsByBusiness/sbi/sbi/list').reply(200, {
+    data: [
+      {
+        contract_id: 'contract-1',
+        agreement_name: 'Agreement Name',
+        status: 'Status',
+        contract_type: 'Contract Type',
+        scheme_year: 2025,
+        start_date: '2025-01-01T00:00:00:000+0000',
+        end_date: '2025-12-31T00:00:00:000+0000',
+        payment_schedules: [
+          {
+            option_code: 'Option Code',
+            option_description: 'Option Description',
+            commitment_group_start_date: '2025-01-01T00:00:00:000+0000',
+            commitment_group_end_date: '2025-12-31T00:00:00:000+0000',
+            year: 2025,
+            sheet_name: 'sheetId',
+            parcel_name: 'parcelId',
+            action_area: 1,
+            action_mtl: 1,
+            action_units: 1,
+            parcel_total_area: 1,
+            payment_schedule_start_date: '2025-01-01T00:00:00:000+0000',
+            payment_schedule_end_date: '2025-12-31T00:00:00:000+0000'
           }
         ]
       }
@@ -355,18 +427,29 @@ describe('Query.business internal', () => {
   })
 
   test('authenticated external', async () => {
-    const v1 = nock(config.get('kits.external.gatewayUrl'))
-    setupNock(v1)
+    configMockPath['kits.dalServiceAccountEmail'] = 'dal-service-account@example.com'
 
     // For external requests we extract org id from token but don't verify.
     // so any jwt with a valid relationships array works
+    const crn = '123'
     const tokenValue = jwt.sign(
       {
-        contactId: '123',
+        contactId: crn,
         relationships: ['organisationId:sbi']
       },
       'test-secret'
     )
+
+    const externalKitsGateway = nock(config.get('kits.external.gatewayUrl'))
+    const internalKitsGateway = nock(config.get('kits.internal.gatewayUrl'))
+    setupNock(externalKitsGateway, {
+      Authorization: tokenValue,
+      crn
+    })
+
+    // Ensure that the service account annotated fields are routed to the internal gateway
+    // via the DAL service account, even though this request arrived via external.
+    setupAnnotatedFieldsNock(internalKitsGateway, 'dal-service-account@example.com')
 
     const result = await makeTestQuery(query, {
       'gateway-type': 'external',
@@ -522,6 +605,34 @@ describe('Query.business internal', () => {
                 }
               ]
             }
+          ],
+          agreements: [
+            {
+              contractId: 'contract-1',
+              name: 'Agreement Name',
+              status: 'Status',
+              contractType: 'Contract Type',
+              schemeYear: 2025,
+              startDate: '2025-01-01T00:00:00.000Z',
+              endDate: '2025-12-31T00:00:00.000Z',
+              paymentSchedules: [
+                {
+                  optionCode: 'Option Code',
+                  optionDescription: 'Option Description',
+                  commitmentGroupStartDate: '2025-01-01T00:00:00.000Z',
+                  commitmentGroupEndDate: '2025-12-31T00:00:00.000Z',
+                  year: 2025,
+                  sheetName: 'sheetId',
+                  parcelName: 'parcelId',
+                  actionArea: 0.0001,
+                  actionMTL: 1,
+                  actionUnits: 1,
+                  parcelTotalArea: 0.0001,
+                  startDate: '2025-01-01T00:00:00.000Z',
+                  endDate: '2025-12-31T00:00:00.000Z'
+                }
+              ]
+            }
           ]
         }
       }
@@ -531,9 +642,12 @@ describe('Query.business internal', () => {
   })
 
   test('authenticated internal', async () => {
-    const v1 = nock(config.get('kits.internal.gatewayUrl'))
-    setupNock(v1)
-    mockOrganisationSearch(v1)
+    const internalKitsGateway = nock(config.get('kits.internal.gatewayUrl'))
+    setupNock(internalKitsGateway, { email: 'test@defra.gov.uk' })
+    // Internal requests also route the annotated fields to the internal gateway, but using the caller's own identity
+    // (no service-account swap - the directive is a no-op here).
+    setupAnnotatedFieldsNock(internalKitsGateway, 'test@defra.gov.uk')
+    mockOrganisationSearch(internalKitsGateway)
 
     const result = await makeTestQuery(query)
 
@@ -686,6 +800,34 @@ describe('Query.business internal', () => {
                 }
               ]
             }
+          ],
+          agreements: [
+            {
+              contractId: 'contract-1',
+              name: 'Agreement Name',
+              status: 'Status',
+              contractType: 'Contract Type',
+              schemeYear: 2025,
+              startDate: '2025-01-01T00:00:00.000Z',
+              endDate: '2025-12-31T00:00:00.000Z',
+              paymentSchedules: [
+                {
+                  optionCode: 'Option Code',
+                  optionDescription: 'Option Description',
+                  commitmentGroupStartDate: '2025-01-01T00:00:00.000Z',
+                  commitmentGroupEndDate: '2025-12-31T00:00:00.000Z',
+                  year: 2025,
+                  sheetName: 'sheetId',
+                  parcelName: 'parcelId',
+                  actionArea: 0.0001,
+                  actionMTL: 1,
+                  actionUnits: 1,
+                  parcelTotalArea: 0.0001,
+                  startDate: '2025-01-01T00:00:00.000Z',
+                  endDate: '2025-12-31T00:00:00.000Z'
+                }
+              ]
+            }
           ]
         }
       }
@@ -695,9 +837,10 @@ describe('Query.business internal', () => {
   })
 
   test('is able to query land parcels with no date', async () => {
-    const v1 = nock(config.get('kits.internal.gatewayUrl'))
-    mockOrganisationSearch(v1)
-    setupNock(v1)
+    const internalKitsGateway = nock(config.get('kits.internal.gatewayUrl'))
+    mockOrganisationSearch(internalKitsGateway)
+    setupNock(internalKitsGateway, { email: 'test@defra.gov.uk' })
+    setupAnnotatedFieldsNock(internalKitsGateway, 'test@defra.gov.uk')
 
     const currentDate = new Date()
     const day = currentDate.toLocaleString('en-US', { day: '2-digit' }) // 01
@@ -705,117 +848,106 @@ describe('Query.business internal', () => {
     const year = currentDate.toLocaleString('en-US', { year: '2-digit' }) // "25"
     const formattedDate = `${day}-${month}-${year}`
 
-    v1.get(`/lms/organisation/organisationId/parcels/historic/${formattedDate}`).reply(200, [
-      {
-        id: 'id',
-        sheetId: 'sheetId',
-        parcelId: 'parcelId',
-        area: 1,
-        pendingDigitisation: true
-      }
-    ])
-
-    v1.get(`/lms/organisation/organisationId/parcel-details/historic/${formattedDate}`).reply(200, [
-      {
-        sheetId: 'sheetId',
-        parcelId: 'parcelId',
-        validFrom: 1636934401682,
-        validTo: 1636934392140
-      }
-    ])
-
-    v1.get(
-      `/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/${formattedDate}/land-covers`
-    ).reply(200, {
-      features: [
+    internalKitsGateway
+      .get(`/lms/organisation/organisationId/parcels/historic/${formattedDate}`)
+      .matchHeader('email', 'test@defra.gov.uk')
+      .reply(200, [
         {
           id: 'id',
-          properties: {
-            area: 1,
-            code: 'code',
-            name: 'name',
-            isBpsEligible: true
-          }
+          sheetId: 'sheetId',
+          parcelId: 'parcelId',
+          area: 1,
+          pendingDigitisation: true
         }
-      ]
-    })
+      ])
 
-    v1.get(`/lms/organisation/organisationId/covers-summary/historic/${formattedDate}`).reply(200, [
-      { name: 'Arable Land', area: 1 },
-      { name: 'Permanent Grassland', area: 1 },
-      { name: 'Permanent Crops', area: 1 }
-    ])
-
-    v1.get(
-      `/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/sbi/list`
-    ).reply(200, {
-      data: [
+    internalKitsGateway
+      .get(`/lms/organisation/organisationId/parcel-details/historic/${formattedDate}`)
+      .matchHeader('email', 'test@defra.gov.uk')
+      .reply(200, [
         {
-          sbi: 'sbi',
-          dt_insert: '2021-03-01T12:09:09:009+0000',
-          dt_delete: '9999-12-31T00:00:00:000+0000',
-          sheet_name: 'sheetId',
-          parcel_name: 'parcelId',
-          campaign: 2021,
-          lu_code: 'code',
-          landuse: 'SCRUB - UNGRAZEABLE',
-          start_date: '2021-01-01T00:00:00:000+0000',
-          end_date: '9999-12-31T00:00:00:000+0000',
-          area: 0,
-          length: null
+          sheetId: 'sheetId',
+          parcelId: 'parcelId',
+          validFrom: 1636934401682,
+          validTo: 1636934392140
         }
-      ],
-      success: true,
-      errorString: null
-    })
+      ])
 
-    const parcelsQuery = `#graphql
-      query BusinessTest {
-          business(sbi: "sbi") {
-            land {
-              parcels {
-                id
-                sheetId
-                parcelId
-                area
-                pendingDigitisation
-              }
-              parcel(sheetId: "sheetId", parcelId: "parcelId") {
-                id
-                sheetId
-                parcelId
-                area
-                pendingDigitisation
-                effectiveToDate
-                effectiveFromDate
-              }
-              parcelCovers(sheetId: "sheetId", parcelId: "parcelId") {
-                id
-                name
-                area
-                code
-                isBpsEligible
-              }
-              parcelLandUses(sheetId: "sheetId", parcelId: "parcelId") {
-                code
-                startDate
-                endDate
-                insertDate
-                deleteDate
-                area
-                length
-              }
-              summary {
-                arableLandArea
-                permanentCropsArea
-                permanentGrasslandArea
-                totalArea
-                totalParcels
-              }
+    internalKitsGateway
+      .get(
+        `/lms/organisation/organisationId/parcel/sheet-id/sheetId/parcel-id/parcelId/historic/${formattedDate}/land-covers`
+      )
+      .matchHeader('email', 'test@defra.gov.uk')
+      .reply(200, {
+        features: [
+          {
+            id: 'id',
+            properties: {
+              area: 1,
+              code: 'code',
+              name: 'name',
+              isBpsEligible: true
             }
           }
+        ]
+      })
+
+    internalKitsGateway
+      .get(`/lms/organisation/organisationId/covers-summary/historic/${formattedDate}`)
+      .matchHeader('email', 'test@defra.gov.uk')
+      .reply(200, [
+        { name: 'Arable Land', area: 1 },
+        { name: 'Permanent Grassland', area: 1 },
+        { name: 'Permanent Crops', area: 1 }
+      ])
+
+    const parcelsQuery = `#graphql
+    query BusinessTest {
+      business(sbi: "sbi") {
+        land {
+          parcels {
+            id
+            sheetId
+            parcelId
+            area
+            pendingDigitisation
+          }
+          parcel(sheetId: "sheetId", parcelId: "parcelId") {
+            id
+            sheetId
+            parcelId
+            area
+            pendingDigitisation
+            effectiveToDate
+            effectiveFromDate
+          }
+          parcelCovers(sheetId: "sheetId", parcelId: "parcelId") {
+            id
+            name
+            area
+            code
+            isBpsEligible
+          }
+          parcelLandUses(sheetId: "sheetId", parcelId: "parcelId") {
+            code
+            startDate
+            endDate
+            insertDate
+            deleteDate
+            area
+            length
+          }
+          summary {
+            arableLandArea
+            permanentCropsArea
+            permanentGrasslandArea
+            totalArea
+            totalParcels
+          }
         }
-      `
+      }
+    }
+    `
     const result = await makeTestQuery(parcelsQuery)
     expect(result).toEqual({
       data: {
