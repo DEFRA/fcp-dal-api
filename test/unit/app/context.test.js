@@ -46,6 +46,10 @@ jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
 const { context } = await import('../../../app/graphql/context.js')
 
 describe('context', () => {
+  beforeEach(() => {
+    RuralPaymentsBusinessMock.mockImplementation(() => ({ isExternalRoute: () => false }))
+  })
+
   afterEach(() => {
     jest.clearAllMocks()
   })
@@ -74,7 +78,7 @@ describe('context', () => {
     expect(result.auth).toEqual({ user: 'test-user' })
     expect(result.requestLogger).toBeDefined()
     expect(result.dataSources.permissions.type).toBe('Permissions')
-    expect(result.dataSources.ruralPaymentsBusiness).toEqual({})
+    expect(result.dataSources.ruralPaymentsBusiness).toBeDefined()
     expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
     expect(result.dataSources.mongoBusiness).toEqual({})
     expect(result.dataSources.mongoCustomer).toEqual({})
@@ -82,7 +86,7 @@ describe('context', () => {
   })
 
   describe('serviceAccount', () => {
-    test('constructs a service-account RuralPaymentsBusiness instance, injecting the configured DAL email as the "service-account" header, when the standard instance resolves to an external authType', async () => {
+    test('constructs a service-account RuralPaymentsBusiness instance, injecting the configured DAL email as the "service-account" header, when the standard instance is on the external route', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       loggerChild.mockReturnValue({ log: jest.fn() })
       const configGetSpy = jest
@@ -90,7 +94,9 @@ describe('context', () => {
         .mockImplementation((path) =>
           path === 'kits.dalServiceAccountEmail' ? 'dal-service-account@example.com' : undefined
         )
-      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({ authType: 'external' }))
+      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
+        isExternalRoute: () => true
+      }))
       RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
         marker: 'service-account-instance'
       }))
@@ -116,44 +122,59 @@ describe('context', () => {
       configGetSpy.mockRestore()
     })
 
-    test('preserves an existing "service-account" header instead of overwriting it with the configured DAL email', async () => {
+    test('does not construct a service-account data source when the standard instance is not on the external route', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       loggerChild.mockReturnValue({ log: jest.fn() })
-      const configGetSpy = jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          path === 'kits.dalServiceAccountEmail' ? 'dal-service-account@example.com' : undefined
-        )
-      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({ authType: 'external' }))
-      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({}))
-      const request = {
-        headers: {
-          'x-forwarded-authorization': 'token123',
-          'service-account': 'already-set@example.com'
-        }
-      }
-
-      await context({ request })
-
-      expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(
-        2,
-        { logger: expect.anything() },
-        { request: { ...request, headers: { ...request.headers } } }
-      )
-
-      configGetSpy.mockRestore()
-    })
-
-    test('does not construct a service-account data source when the standard instance does not resolve to an external authType', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
-      loggerChild.mockReturnValue({ log: jest.fn() })
-      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({ authType: 'internal' }))
+      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
+        isExternalRoute: () => false
+      }))
       const request = { headers: { email: 'user@example.com' } }
 
       const result = await context({ request })
 
       expect(RuralPaymentsBusinessMock).toHaveBeenCalledTimes(1)
       expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toBeNull()
+    })
+  })
+
+  describe('stripClientSuppliedServiceAccountHeader', () => {
+    test('removes a client-supplied "service-account" header from the request before continuing', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = {
+        headers: {
+          email: 'user@example.com',
+          'service-account': 'someone@example.com'
+        }
+      }
+
+      await expect(context({ request })).resolves.toBeDefined()
+
+      expect(request.headers['service-account']).toBeUndefined()
+    })
+
+    test('does not affect requests that do not supply a "service-account" header', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = { headers: { email: 'user@example.com' } }
+
+      await context({ request })
+
+      expect(request.headers).toEqual({ email: 'user@example.com' })
+    })
+
+    test('the stripped header is not passed on to the RuralPaymentsBusiness instance', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = {
+        headers: {
+          'x-forwarded-authorization': 'token123',
+          'service-account': 'someone@example.com'
+        }
+      }
+
+      await context({ request })
+
+      expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(1, expect.anything(), {
+        request: { headers: { 'x-forwarded-authorization': 'token123' } }
+      })
     })
   })
 

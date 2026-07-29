@@ -29,6 +29,13 @@ export const extractOrgIdFromDefraIdToken = (sbi, token) => {
   throw new BadRequest('Defra ID token is not valid for the provided SBI')
 }
 
+function stripClientSuppliedServiceAccountHeader(request) {
+  // Service account foundations have been added, to support the DAL internal service account, but this is not
+  // ready for client-use. Strip any client-supplied header so a caller can never masquerade as the DAL service
+  // account. This temporary guard should be removed as service account support is rolled out.
+  delete request.headers['service-account']
+}
+
 export async function context({ request }) {
   const auth = await getAuth(request, new JWKS())
 
@@ -36,6 +43,8 @@ export async function context({ request }) {
     transactionId: request.transactionId,
     traceId: request.traceId
   })
+
+  stripClientSuppliedServiceAccountHeader(request)
 
   const datasourceOptions = [
     { logger: requestLogger },
@@ -87,10 +96,9 @@ export async function context({ request }) {
         // Service account only currently supported for ruralPaymentsBusiness.  Other ruralPayments datasources
         // should be added here too if the need arises, alongside a getXXXDataSource-style helper (see
         // getRuralPaymentsBusinessDataSource in resolvers/business/common.js) for resolvers to pick the right instance.
-        ruralPaymentsBusiness:
-          standardAuthRuralPaymentsBusiness.authType === 'external'
-            ? new RuralPaymentsBusiness(...internalServiceAccountDatasourceOptions)
-            : null
+        ruralPaymentsBusiness: standardAuthRuralPaymentsBusiness.isExternalRoute()
+          ? new RuralPaymentsBusiness(...internalServiceAccountDatasourceOptions)
+          : null
       }
     }
   }
