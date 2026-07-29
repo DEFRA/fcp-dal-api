@@ -77,7 +77,7 @@ describe('RuralPayments Custom Fetch', () => {
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.authType).toBe('internal')
+    expect(rp.isExternalRoute()).toBe(false)
     expect(rp.baseURL).toBe(fakeInternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -118,7 +118,7 @@ describe('RuralPayments Custom Fetch', () => {
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.authType).toBe('external')
+    expect(rp.isExternalRoute()).toBe(true)
     expect(rp.baseURL).toBe(fakeExternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -160,7 +160,7 @@ describe('RuralPayments Custom Fetch', () => {
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.authType).toBe('internal')
+    expect(rp.isExternalRoute()).toBe(false)
     expect(rp.baseURL).toBe(fakeInternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS
@@ -190,7 +190,7 @@ describe('RuralPayments Custom Fetch', () => {
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.authType).toBe('external')
+    expect(rp.isExternalRoute()).toBe(true)
     expect(rp.baseURL).toBe(fakeExternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS

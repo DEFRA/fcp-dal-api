@@ -104,31 +104,32 @@ export class RuralPayments extends BaseRESTDataSource {
       serviceAccount: this.request.headers['service-account']
     }
 
+    let authType
     if (this.authContext.internalAuthHeader) {
       this.gatewayRoute = 'internal'
-      this.authType = 'internal'
+      authType = 'internal'
     } else if (this.authContext.serviceAccount && this.authContext.externalAuthHeader) {
       // Service account supplied alongside the caller's own external auth header - this is an
       // otherwise-external request that the DAL service account is taking over routing for.
       this.gatewayRoute = 'internal'
-      this.authType = 'dal-service-account'
+      authType = 'dal-service-account'
     } else if (this.authContext.serviceAccount) {
       // Consumer has supplied a service account email vis the service-account header
       this.gatewayRoute = 'internal'
-      this.authType = 'client-service-account'
+      authType = 'client-service-account'
     } else if (this.authContext.externalAuthHeader) {
       this.gatewayRoute = 'external'
-      this.authType = 'external'
+      authType = 'external'
     } else {
       throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
         extensions: {
           message:
-            'Invalid request headers, must be either "email: {valid user email}", "email: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
+            'Invalid request headers, must be either "email: {valid user email}", "service-account: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" headers'
         }
       })
     }
 
-    this.gatewayType = `rural-payments-${this.authType}`
+    this.gatewayType = `rural-payments-${authType}`
     this.baseURL = this.getBaseURL()
   }
 }
