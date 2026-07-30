@@ -7,7 +7,6 @@ import {
   graphql,
   isObjectType
 } from 'graphql'
-import { describe } from 'node:test'
 import { cdpEnvironments, config } from '../../app/config.js'
 import { wipEnabledEnvironments } from '../../app/graphql/directives/wipDirectiveTransformer.js'
 import { createRawSchema, createSchema } from '../../app/graphql/schema.js'
