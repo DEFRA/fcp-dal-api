@@ -12,6 +12,7 @@ extend type Mutation {
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input UpdateCustomerAddressInput {

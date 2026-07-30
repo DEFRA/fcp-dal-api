@@ -16,7 +16,7 @@ The graphQL explorer should now be available, head to http://localhost:3000/grap
 > NOTE: the IDs of the available customers and businesses can be found in the [mock code](https://github.com/DEFRA/fcp-dal-upstream-mock/blob/main/src/factories/id-lookups.js), along with their corresponding CRN or SBI (respectively), as well as the relationships between entities.
 
 > NOTE: The above is a simplified setup that is intended to aid consumer development.
-> For access to the live instances, [schema availability](#the-on-directive) and [authorisation](#security) would need to be carefully considered.
+> For access to the live instances, [schema availability](#the-wip-directive) and [authorisation](#security) would need to be carefully considered.
 
 More consumer focused documentation can be found on the project [Homepage...](https://defra.github.io/fcp-dal-api/homepage)
 
@@ -175,25 +175,39 @@ git config --global core.autocrlf false
 | `GET: /graphql`  | The interactive GraphQL service frontend (like Swagger docs but for GraphQL 😉). |
 | `POST: /graphql` | For making GraphQL requests to the DAL API.                                      |
 
-### The `@on` directive
+### The `@wip` directive
 
-To allow for the granular release of fields as data sources become available, fields must have the custom `@on` directive set to be included when the schema is built.
-Otherwise they will NOT be available in the graphQL queries, and an error will occur.
+The `@wip` directive marks fields that are still a work in progress. It is only valid on field definitions:
 
-For example:
+```graphql
+directive @wip on FIELD_DEFINITION
+```
+
+Fields annotated with `@wip` behave differently depending on the environment:
+
+- In `dev` and `perf-test`, the fields are included in the schema but are marked as deprecated with the reason: `Work in progress — may change or be removed`.
+- In all other environments (`test`, `ext-test`, `prod`), the fields are removed entirely from the schema.
+
+> **Note:** `dev` and `perf-test` are the environments backed by the upstream mock service (rather than a real KITS or Hitachi instance). The `@wip` directive is only active in these mock-backed environments.
+
+This allows WIP functionality to be safely exercised in supported environments without exposing it to consumers elsewhere.
+
+Example usage:
 
 ```graphql
 type Query {
-  customers: [Customer] @on
+  customers: [Customer]
+  experimentalFeature: String @wip
 }
 
 type Customer {
-  id: ID! @on
-  name: String # this field is not included in the final schema
+  id: ID!
+  name: String
+  wipOnlyField: Int @wip
 }
 ```
 
-For local development and lower environments, all fields can be turned on by setting the env variable: `ALL_SCHEMA_ON=true`.
+In non-WIP environments, `Query.experimentalFeature` and `Customer.wipOnlyField` will not exist in the schema. In `dev` and `perf-test` they will be present (with the deprecation reason).
 
 ### Security
 

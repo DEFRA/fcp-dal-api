@@ -6,39 +6,39 @@ type BusinessLandParcel {
   """
   Unique internal identifier of the land parcel.
   """
-  id: ID! @on
+  id: ID!
 
   """
   Sheet ID of the land parcel, for example 'AB1234'
   """
-  sheetId: String @on
+  sheetId: String
 
   """
   Parcel ID of the land parcel, for example '1234'.
   """
-  parcelId: String @on
+  parcelId: String
 
   """
   Area (in hectares) of the land parcel.
   """
-  area: Float @on
+  area: Float
 
   """
   Indicates if a parcel has a pending Customer Notified Change (CNC).
   CNC could be a boundary change, parcel merge, split etc.
   """
-  pendingDigitisation: Boolean @on
+  pendingDigitisation: Boolean
 
   """
   Date when this version of the land parcel finished.
   A date of 31/12/9999 indicates that this is the latest version of the parcel.
   """
-  effectiveToDate: Date @on @excludeFromList
+  effectiveToDate: Date @excludeFromList
 
   """
   Date when this version of the land parcel came into effect.
   """
-  effectiveFromDate: Date @on @excludeFromList
+  effectiveFromDate: Date @excludeFromList
 }
 
 """
@@ -48,27 +48,27 @@ type BusinessLandSummary {
   """
   Area (in hectares) of arable land.
   """
-  arableLandArea: Float @on
+  arableLandArea: Float
 
   """
   Area (in hectares) of permanent crops.
   """
-  permanentCropsArea: Float @on
+  permanentCropsArea: Float
 
   """
   Area of permanent grassland.
   """
-  permanentGrasslandArea: Float @on
+  permanentGrasslandArea: Float
 
   """
   Total area of land for the business (in hectares).
   """
-  totalArea: Float @on
+  totalArea: Float
 
   """
   Total number of parcels for the business.
   """
-  totalParcels: Float @on
+  totalParcels: Float
 }
 
 """
@@ -78,27 +78,27 @@ type BusinessLandCover {
   """
   Unique internal identifier of the land cover.
   """
-  id: ID! @on
+  id: ID!
 
   """
   Description of the land cover. For example, 'Arable Land', 'Permanent Grassland'
   """
-  name: String @on
+  name: String
 
   """
   Area (in hectares) of the land cover.
   """
-  area: Float @on
+  area: Float
 
   """
   Internal code of the land cover. For example, '110' is the code for 'Arable Land'.
   """
-  code: String @on
+  code: String
 
   """
   Indicates whether the land cover is Basic Payment Scheme (BPS) eligible.
   """
-  isBpsEligible: Boolean @on
+  isBpsEligible: Boolean
 }
 
 """
@@ -112,7 +112,6 @@ type BusinessLand {
   The earliest date is 01/01/2015.
   """
   parcels(date: Date): [BusinessLandParcel]
-    @on
     @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 
   """
@@ -120,27 +119,27 @@ type BusinessLand {
   particular date for a business.
   The earliest date is 01/01/2015.
   """
-  parcel(date: Date, sheetId: ID!, parcelId: ID!): BusinessLandParcel @on
+  parcel(date: Date, sheetId: ID!, parcelId: ID!): BusinessLandParcel
 
   """
   Land covers of a single parcel based on its SheetId and ParcelId for a particular
   date for a business.
   The earliest date is 01/01/2015.
   """
-  parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover] @on
+  parcelCovers(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandCover]
 
   """
   Land uses of a single parcel based on its SheetId and ParcelId for a particular
   date for a business.
   The earliest date is 01/01/2015.
   """
-  parcelLandUses(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses] @on
+  parcelLandUses(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses]
 
   """
   Summary of the land for a particular date for a business.
   The earliest date is 01/01/2015.
   """
-  summary(date: Date): BusinessLandSummary @on
+  summary(date: Date): BusinessLandSummary
 }
 
 """
@@ -150,45 +149,45 @@ type BusinessLandParcelUses {
   """
   Code of the land use.
   """
-  code: String! @on
+  code: String!
 
   """
   Start date of the land use.
   """
-  startDate: Date @on
+  startDate: Date
 
   """
   End date of the land use.
   """
-  endDate: Date @on
+  endDate: Date
 
   """
   Date the land use was inserted.
   """
-  insertDate: Date @on
+  insertDate: Date
 
   """
   Date the land use was deleted.
   """
-  deleteDate: Date @on
+  deleteDate: Date
 
   """
   Area of the land use.
   """
-  area: Float @on
+  area: Float
 
   """
   Length of the land use.
   """
-  length: Float @on
+  length: Float
 
   """
   Land use type. For example, 'SCRUB - UNGRAZEABLE'.
   """
-  type: String @on
+  type: String
 
   """
   Campaign of the land use.
   """
-  campaign: Int @on
+  campaign: Int
 }

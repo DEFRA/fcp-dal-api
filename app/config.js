@@ -1,5 +1,7 @@
 import convict from 'convict'
 
+export const cdpEnvironments = ['dev', 'test', 'ext-test', 'perf-test', 'prod']
+
 export const config = convict({
   nodeEnv: {
     doc: 'The application environment.',
@@ -10,7 +12,7 @@ export const config = convict({
   cdp: {
     env: {
       doc: 'CDP environment, automatically set on CDP',
-      format: ['dev', 'test', 'ext-test', 'perf-test', 'prod'],
+      format: cdpEnvironments,
       default: null,
       env: 'ENVIRONMENT'
     },
@@ -33,12 +35,6 @@ export const config = convict({
     format: ['error', 'warn', 'info', 'debug'],
     default: 'info',
     env: 'LOG_LEVEL'
-  },
-  allSchemaOn: {
-    doc: 'Enable all schema on, used for testing',
-    format: Boolean,
-    default: false,
-    env: 'ALL_SCHEMA_ON'
   },
   graphqlDashboardEnabled: {
     doc: 'Enable GraphQL dashboard',

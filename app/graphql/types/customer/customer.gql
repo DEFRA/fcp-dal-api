@@ -5,42 +5,42 @@ type CustomerInfo {
   """
   Name of the customer.
   """
-  name: CustomerName @on
+  name: CustomerName
 
   """
   Date of birth of the customer.
   """
-  dateOfBirth: Date @on
+  dateOfBirth: Date
 
   """
   Telephone number of the customer.
   """
-  phone: Phone @on
+  phone: Phone
 
   """
   Email address of the customer.
   """
-  email: Email @on
+  email: Email
 
   """
   Status of the customer record/account.
   """
-  status: EntityStatus @on
+  status: EntityStatus
 
   """
   Address of the customer.
   """
-  address: Address @on
+  address: Address
 
   """
   Do not contact status of the customer email address.
   """
-  doNotContact: Boolean @on
+  doNotContact: Boolean
 
   """
   Other IDs for this customer.
   """
-  personalIdentifiers: [String] @on
+  personalIdentifiers: [String]
 }
 
 """
@@ -50,27 +50,27 @@ type CustomerName {
   """
   The title of the customer (e.g., Mr., Mrs., Dr.).
   """
-  title: String @on
+  title: String
 
   """
   Any other title of the customer.
   """
-  otherTitle: String @on
+  otherTitle: String
 
   """
   First name of the customer.
   """
-  first: String @on
+  first: String
 
   """
   Middle names of the customer.
   """
-  middle: String @on
+  middle: String
 
   """
   Last name of the customer.
   """
-  last: String @on
+  last: String
 }
 
 """
@@ -87,27 +87,27 @@ type CustomerAuthenticationQuestions {
   """
   Memorable date response for the customer.
   """
-  memorableDate: String @on
+  memorableDate: String
 
   """
   Memorable event response for the customer.
   """
-  memorableEvent: String @on
+  memorableEvent: String
 
   """
   Memorable place response for the customer.
   """
-  memorableLocation: String @on
+  memorableLocation: String
 
   """
   The date the record was last updated.
   """
-  updatedAt: Date @on
+  updatedAt: Date
 
   """
   Indicates whether the authenticate questions record was found for the customer.
   """
-  isFound: Boolean @on
+  isFound: Boolean
 }
 
 """
@@ -119,35 +119,34 @@ type Customer {
   """
   Internal SitiAgri/Portal unique identifier of the customer.
   """
-  personId: ID! @on #eslint-disable-line @graphql-eslint/no-typename-prefix
+  personId: ID! #eslint-disable-line @graphql-eslint/no-typename-prefix
   """
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer. The customer should know their CRN, although their
   Single Business Identifier (SBI) for their business is more commonly quoted.
   """
-  crn: ID! @on
+  crn: ID!
 
   """
   Basic information of the customer.
   """
-  info: CustomerInfo @on
+  info: CustomerInfo
 
   """
   Security questions (memorable words) of the customer.
   """
   authenticationQuestions: CustomerAuthenticationQuestions
-    @on
     @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR])
 
   """
   Businesses associated with the customer.
   """
-  businesses: [CustomerBusiness] @on
+  businesses: [CustomerBusiness]
 
   """
   A single business filtered by the businesses using Single Business Identifier (SBI) associated with the customer.
   """
-  business(sbi: ID!): CustomerBusiness @on
+  business(sbi: ID!): CustomerBusiness
 }
 
 """
@@ -157,23 +156,23 @@ type CustomerBusiness {
   """
   Internal SitiAgri/Portal unique identifier of the customer.
   """
-  organisationId: ID @on
+  organisationId: ID
 
   """
   Single Business Identifier (SBI) of the business. A unique 9-digit identifier
   for the business.
   """
-  sbi: ID! @on
+  sbi: ID!
 
   """
   Name of the business.
   """
-  name: String! @on
+  name: String!
 
   """
   Role that the customer has for the business.
   """
-  role: String @on
+  role: String
 
   """
   Messages for the customer for the business. These message are those shown in the
@@ -183,10 +182,10 @@ type CustomerBusiness {
   Retrieves messages from fromDate to today if provided; otherwise, returns all messages.
   - fromDate: Optional. Include messages on or after this date up to the current date.
   """
-  messages(fromDate: Date): [CustomerBusinessMessage] @on @excludeFromList
+  messages(fromDate: Date): [CustomerBusinessMessage] @excludeFromList
 
   """
   Permission groups for the customer for the business.
   """
-  permissionGroups: [ActivePermissionGroup] @on @excludeFromList
+  permissionGroups: [ActivePermissionGroup] @excludeFromList
 }

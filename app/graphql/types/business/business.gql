@@ -5,7 +5,7 @@ type BusinessInfo {
   """
   Name of the business.
   """
-  name: String @on
+  name: String
 
   """
   Firm Reference Number (FRN) of the business.
@@ -15,132 +15,132 @@ type BusinessInfo {
   (SBI). FRN is commonly used in RPA's payment systems. The format is the same as the
   Customer Reference Number (CRN), which is also a 10-digit number.
   """
-  reference: String @on
+  reference: String
 
   """
   VAT number of the business. (a.k.a. `taxRegistrationNumber`)
   """
-  vat: String @on
+  vat: String
 
   """
   Trader number of the business.
   """
-  traderNumber: String @on
+  traderNumber: String
 
   """
   Vendor number of the business.
   """
-  vendorNumber: String @on
+  vendorNumber: String
 
   """
   Address of the business.
   """
-  address: Address @on
+  address: Address
 
   """
   Correspondence address of the business.
   """
-  correspondenceAddress: Address @on
+  correspondenceAddress: Address
 
   """
   States the correspondence address should be used as the business address.
   """
-  isCorrespondenceAsBusinessAddress: Boolean @on
+  isCorrespondenceAsBusinessAddress: Boolean
 
   """
   Email address of the business.
   """
-  email: Email @on
+  email: Email
 
   """
   Correspondence email of the business.
   """
-  correspondenceEmail: Email @on
+  correspondenceEmail: Email
 
   """
   Telephone numbers of the business.
   """
-  phone: Phone @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  phone: Phone @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 
   """
   Correspondence telephone numbers of the business.
   """
-  correspondencePhone: Phone @on
+  correspondencePhone: Phone
 
   """
   Legal status of the business. For example, Sole Proprietorship.
   """
-  legalStatus: BusinessType @on
+  legalStatus: BusinessType
 
   """
   Type of the business.
   """
-  type: BusinessType @on
+  type: BusinessType
 
   """
   Various registration numbers for the business. For example, Companies House number.
   """
-  registrationNumbers: BusinessRegistrationNumbers @on
+  registrationNumbers: BusinessRegistrationNumbers
 
   """
   Other SBIs by which the business is known.
   """
-  additionalSbis: [ID] @on
+  additionalSbis: [ID]
 
   """
   The date the business info was last updated.
   """
-  lastUpdated: Date @on
+  lastUpdated: Date
 
   """
   States the business address is also the financial address.
   """
-  isFinancialToBusinessAddress: Boolean @on
+  isFinancialToBusinessAddress: Boolean
 
   """
   States the business has land in Northern Ireland.
   """
-  hasLandInNorthernIreland: Boolean @on
+  hasLandInNorthernIreland: Boolean
 
   """
   States the business has land in Scotland.
   """
-  hasLandInScotland: Boolean @on
+  hasLandInScotland: Boolean
 
   """
   States the business has land in Wales.
   """
-  hasLandInWales: Boolean @on
+  hasLandInWales: Boolean
 
   """
   Whether the land for the business has been confirmed.
   """
-  landConfirmed: Boolean @on
+  landConfirmed: Boolean
 
   """
   Whether the business has additional business activities.
   """
-  hasAdditionalBusinessActivities: Boolean @on
+  hasAdditionalBusinessActivities: Boolean
 
   """
   The additional business activities for this business.
   """
-  additionalBusinessActivities: [BusinessType] @on
+  additionalBusinessActivities: [BusinessType]
 
   """
   Whether the "accountable people declaration" is complete.
   """
-  isAccountablePeopleDeclarationCompleted: Boolean @on
+  isAccountablePeopleDeclarationCompleted: Boolean
 
   """
   The date the business started farming.
   """
-  dateStartedFarming: Date @on
+  dateStartedFarming: Date
 
   """
   The status of the business.
   """
-  status: EntityStatus @on
+  status: EntityStatus
 }
 
 """
@@ -150,12 +150,12 @@ type BusinessRegistrationNumbers {
   """
   Companies House number of the business.
   """
-  companiesHouse: String @on
+  companiesHouse: String
 
   """
   Charity Commission number of the business.
   """
-  charityCommission: String @on
+  charityCommission: String
 }
 
 """
@@ -165,12 +165,12 @@ type BusinessType {
   """
   Code of the business type.
   """
-  code: Int @on
+  code: Int
 
   """
   Description of the business type.
   """
-  type: String @on
+  type: String
 }
 
 """
@@ -180,34 +180,34 @@ type BusinessCustomer {
   """
   Internal SitiAgri/Portal unique identifier of the customer.
   """
-  personId: ID @on
+  personId: ID
 
   """
   First name of the customer.
   """
-  firstName: String @on
+  firstName: String
 
   """
   Last name of the customer.
   """
-  lastName: String @on
+  lastName: String
 
   """
   Unique Customer Reference Number (CRN) of the customer. 10-digit number that should
   be known to to the customer, for example, 1234567890. This is the same format as the
   Firm Reference Number (FRN).
   """
-  crn: String @on
+  crn: String
 
   """
   Role the customer has for the business. For example, 'Owner', 'Agent', 'Employee'.
   """
-  role: String @on
+  role: String
 
   """
   Permissions the customer has for the business.
   """
-  permissionGroups: [ActivePermissionGroup] @on @excludeFromList
+  permissionGroups: [ActivePermissionGroup] @excludeFromList
 }
 
 """
@@ -217,47 +217,47 @@ type Business {
   """
   Internal SitiAgri/Portal unique identifier for the business.
   """
-  organisationId: ID @on
+  organisationId: ID
   """
   Single Business Identifier (SBI) of the business.
 
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID! @on
+  sbi: ID!
 
   """
   Information of the business.
   """
-  info: BusinessInfo @on
+  info: BusinessInfo
 
   """
   Land for the business.
   """
-  land: BusinessLand @on
+  land: BusinessLand
 
   """
   County Parish Holdings (CPH) of the business.
   """
-  countyParishHoldings: [CountyParishHolding] @on
+  countyParishHoldings: [CountyParishHolding]
 
   """
   Customers associated with the business.
   """
-  customers: [BusinessCustomer] @on
+  customers: [BusinessCustomer]
 
   """
   Customer associated with the business.
   """
-  customer(crn: ID!): BusinessCustomer @on
+  customer(crn: ID!): BusinessCustomer
 
   """
   Agreements associated with the business.
   """
-  agreements: [Agreement] @on
+  agreements: [Agreement]
 
   """
   Applications associated with the business.
   """
-  applications: [Application] @on
+  applications: [Application]
 }

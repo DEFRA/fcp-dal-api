@@ -4,7 +4,7 @@ extend type Mutation {
   """
   createBusinessCustomerBankDetails(
     input: CreateBusinessCustomerBankDetailsInput!
-  ): CreateBusinessCustomerBankDetailsResult @on @auth(requires: [SINGLE_FRONT_DOOR])
+  ): CreateBusinessCustomerBankDetailsResult @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input CreateBusinessCustomerBankDetailsInput {
@@ -278,46 +278,46 @@ type BankDetailsSubmitted {
   """
   `true` once the bank change submission has been accepted by the upstream service.
   """
-  success: Boolean! @on
+  success: Boolean!
 }
 
 type BankDetailsValidationFailed {
   """
   Detail of the error
   """
-  message: String! @on
+  message: String!
 
   """
   Number of attempts remaining.
   """
-  attemptsRemaining: Int! @on
+  attemptsRemaining: Int!
 }
 
 type BankDetailsLocked {
   """
   Lock message.
   """
-  message: String! @on
+  message: String!
 }
 
 type BankDetailsNotEditable {
   """
   Reason the bank details cannot currently be changed.
   """
-  message: String! @on
+  message: String!
 
   """
   `true` if the bank details passed validation and were submitted in the last 14 days.
   """
-  submitted: Boolean! @on
+  submitted: Boolean!
 
   """
   `true` if the bank details were updated (or an update attempted) in the last 14 days.
   """
-  updatedRecently: Boolean! @on
+  updatedRecently: Boolean!
 
   """
   `true` if the organisation was created within the last 24 hours.
   """
-  new: Boolean! @on
+  new: Boolean!
 }

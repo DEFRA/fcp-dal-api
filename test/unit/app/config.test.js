@@ -15,7 +15,6 @@ describe('config', () => {
     delete process.env.NODE_ENV
     delete process.env.PORT
     delete process.env.LOG_LEVEL
-    delete process.env.ALL_SCHEMA_ON
     delete process.env.GRAPHQL_DASHBOARD_ENABLED
     delete process.env.HEALTH_CHECK_ENABLED
     delete process.env.HEALTH_CHECK_RP_PORTAL_EMAIL
@@ -41,7 +40,6 @@ describe('config', () => {
     expect(config.get('nodeEnv')).toBe('production')
     expect(config.get('port')).toBe(3000)
     expect(config.get('logLevel')).toBe('info')
-    expect(config.get('allSchemaOn')).toBe(false)
     expect(config.get('auth.disabled')).toBe(true)
     expect(config.get('auth.groups.ADMIN')).toBe(null)
     expect(config.get('graphqlDashboardEnabled')).toBe(false)
