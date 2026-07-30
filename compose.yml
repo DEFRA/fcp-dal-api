@@ -36,7 +36,6 @@ services:
     ports:
       - '3000:3000'
     environment:
-      ALL_SCHEMA_ON: true
       LOG_LEVEL: info
       NODE_ENV: development
       PORT: 3000

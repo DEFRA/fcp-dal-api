@@ -36,12 +36,6 @@ export const config = convict({
     default: 'info',
     env: 'LOG_LEVEL'
   },
-  allSchemaOn: {
-    doc: 'Enable all schema on, used for testing',
-    format: Boolean,
-    default: false,
-    env: 'ALL_SCHEMA_ON'
-  },
   graphqlDashboardEnabled: {
     doc: 'Enable GraphQL dashboard',
     format: Boolean,

@@ -14,6 +14,8 @@ The <abbr title="Data Access Layer">DAL</abbr> has the following environments:
 
 > NOTE: the Tenant ID for Test is `6f504113-6b64-43f2-ade9-242e05780007` (O365_DEFRADEV), all higher environments use the Prod DEFRA Tenant `770a2450-0227-4c62-90c7-4e38537f1102`
 
+> **Note on WIP environments:** The `dev` and `perf-test` environments are backed by the upstream mock service rather than a real KITS or Hitachi instance. This is relevant for the `@wip` directive, which only includes work-in-progress fields in mock-backed environments.
+
 ## Onboarding
 
 The DAL requires a few things:
