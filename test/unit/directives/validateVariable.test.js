@@ -1,94 +1,61 @@
 import { buildSchema, graphql } from 'graphql'
-import {
-  validateVariableDirective,
-  validateVariablesDirective
-} from '../../../app/graphql/directives/validateVariable.js'
+import { validateVariableDirective } from '../../../app/graphql/directives/validateVariable.js'
 
 describe('validateVariable Directive', () => {
-  it('should validate the variable against the specified pattern and return data', async () => {
-    const schema = buildSchema(`#graphql
-        directive @validateVariable(pattern: String!, variable: String!) on FIELD_DEFINITION
+  const schema = buildSchema(`#graphql
+        directive @validateVariable(pattern: String!) on ARGUMENT_DEFINITION
 
         type Query {
-            test(id: ID!): String @validateVariable(pattern: "^[0-9]{9}$", variable: "id")
+            test(
+                """
+                Some description of the id field
+                """
+                id:  ID! @validateVariable(pattern: "^[1-9]\\\\d{8}$"),
+                id2: ID! @validateVariable(pattern: "^\\\\d{3}$")
+            ): String
         }
     `)
-    const transformedSchema = validateVariableDirective(schema)
+  const transformedSchema = validateVariableDirective(schema)
 
+  it('should annotate argument descriptions with the constraint pattern', () => {
+    const queryType = transformedSchema.getQueryType()
+    const testField = queryType.getFields().test
+
+    expect(testField.args[0].description).toEqual(
+      'Some description of the id field\n*Constraint:* must match pattern `^[1-9]\\d{8}$`'
+    )
+    expect(testField.args[1].description).toEqual('\n*Constraint:* must match pattern `^\\d{3}$`')
+  })
+
+  it('should validate each variable against its specified pattern and return data', async () => {
     const query = `#graphql
         query {
-            test(id: "123456789")
+            test(id: "123456789", id2: "123")
         }
     `
-
     const validResult = await graphql({ schema: transformedSchema, source: query })
+
     expect(validResult.errors).toBeUndefined()
     expect(validResult.data).toHaveProperty('test')
   })
 
-  it('should throw an error if the variable does not match the pattern', async () => {
-    const schema = buildSchema(`#graphql
-        directive @validateVariable(pattern: String!, variable: String!) on FIELD_DEFINITION
-
-        type Query {
-            test(id: ID!): String @validateVariable(pattern: "^[0-9]{9}$", variable: "id")
-        }
-    `)
-    const transformedSchema = validateVariableDirective(schema)
-
-    const query = `#graphql
-        query {
-            test(id: "invalid_id")
-        }
-    `
-
-    const invalidResult = await graphql({ schema: transformedSchema, source: query })
-    expect(invalidResult.errors?.[0]?.message).toMatch(/variable 'id' must match pattern/)
-  })
-})
-
-describe('validateVariables Directive', () => {
-  it('should validate the variable against the specified pattern and return data', async () => {
-    const schema = buildSchema(`#graphql
-        directive @validateVariables(patterns: [String!], variables: [String!]) on FIELD_DEFINITION
-
-        type Query {
-            test(id: ID!, id2: ID!): String
-                @validateVariables(patterns: ["^[0-9]{9}$", "^\\\\d+$"], variables: ["id", "id2"])
-        }
-    `) // NOTE: the uber escaping needed here for this pattern ☝️ first for this string,
-    //          then the outer graphql interpolator
-    const transformedSchema = validateVariablesDirective(schema)
-
-    const query = `#graphql
-        query {
-            test(id: "123456789", id2: "12345")
-        }
-    `
-
-    const validResult = await graphql({ schema: transformedSchema, source: query })
-    expect(validResult.errors).toBeUndefined()
-    expect(validResult.data).toHaveProperty('test')
-  })
-
-  it('should throw an error if the variable does not match the patterns', async () => {
-    const schema = buildSchema(`#graphql
-        directive @validateVariables(patterns: [String!], variables: [String!]) on FIELD_DEFINITION
-
-        type Query {
-            test(id: ID!, id2: ID!): String
-                @validateVariables(patterns: ["^[0-9]{9}$", "^\\\\d+$"], variables: ["id", "id2"])
-        }
-    `)
-    const transformedSchema = validateVariablesDirective(schema)
-
-    const query = `#graphql
+  it('should throw an error if a variable does not match the pattern', async () => {
+    const badIdQuery = `#graphql
         query {
             test(id: "invalid_id", id2: "invalid_id2")
         }
     `
-
-    const invalidResult = await graphql({ schema: transformedSchema, source: query })
+    let invalidResult = await graphql({ schema: transformedSchema, source: badIdQuery })
+    expect(invalidResult.errors).toHaveLength(1) // only first error thrown, then process aborts
     expect(invalidResult.errors?.[0]?.message).toMatch(/variable 'id' must match pattern/)
+
+    const badId2Query = `#graphql
+        query {
+            test(id: "123456789", id2: "invalid_id2")
+        }
+    `
+    invalidResult = await graphql({ schema: transformedSchema, source: badId2Query })
+    expect(invalidResult.errors).toHaveLength(1)
+    expect(invalidResult.errors?.[0]?.message).toMatch(/variable 'id2' must match pattern/)
   })
 })

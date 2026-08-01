@@ -2,75 +2,58 @@ import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { defaultFieldResolver, GraphQLError } from 'graphql'
 
 export const validateVariableDirective = (schema, directiveName = 'validateVariable') => {
-  return mapSchema(schema, {
-    [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
-      const directive = getDirective(schema, fieldConfig, directiveName)?.[0]
+  // Pass 1: annotate argument descriptions
+  schema = mapSchema(schema, {
+    [MapperKind.ARGUMENT]: (argConfig) => {
+      const directive = getDirective(schema, argConfig, directiveName)?.[0]
       if (!directive) {
-        return fieldConfig
+        return argConfig
       }
 
-      const regex = new RegExp(directive.pattern)
-      const variablePath = directive.variable
-      const { resolve = defaultFieldResolver } = fieldConfig
-
-      fieldConfig.resolve = (source, args, context, info) => {
-        const value = variablePath.split('.').reduce((obj, key) => obj[key], args)
-        if (value !== undefined && !regex.test(value)) {
-          throw new GraphQLError(
-            `variable '${variablePath}' must match pattern ${directive.pattern}`,
-            {
-              extensions: { code: 'BAD_USER_INPUT' }
-            }
-          )
-        }
-        return resolve(source, args, context, info)
-      }
-
-      return fieldConfig
+      argConfig.description =
+        (argConfig.description || '') +
+        `\n*Constraint:* must match pattern \`${directive.pattern}\``
+      return argConfig
     }
   })
-}
 
-export const validateVariablesDirective = (schema, directiveName = 'validateVariables') => {
-  return mapSchema(schema, {
+  // Pass 2: wrap resolvers to validate any arg carrying the directive
+  schema = mapSchema(schema, {
     [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
-      const directive = getDirective(schema, fieldConfig, directiveName)?.[0]
-      if (!directive) {
+      if (!fieldConfig.args) {
         return fieldConfig
       }
 
-      const variablesPaths = directive.variables // variable to check
-      const { resolve = defaultFieldResolver } = fieldConfig
-
-      if (
-        !Array.isArray(variablesPaths) ||
-        !Array.isArray(directive.patterns) ||
-        variablesPaths.length !== directive.patterns.length
-      ) {
-        throw new Error(
-          `The number of patterns must match the number of arguments in the @${directiveName} directive.`
-        )
+      const patterns = {}
+      for (const [argName, argConfig] of Object.entries(fieldConfig.args)) {
+        const directive = getDirective(schema, argConfig, directiveName)?.[0]
+        if (directive) {
+          patterns[argName] = new RegExp(directive.pattern)
+        }
       }
 
-      const regexes = directive.patterns.map((pattern) => new RegExp(pattern))
-      fieldConfig.resolve = (source, args, context, info) => {
-        regexes.forEach((regex, index) => {
-          const value = variablesPaths[index].split('.').reduce((obj, key) => obj[key], args)
+      if (Object.keys(patterns).length === 0) {
+        return fieldConfig
+      }
 
+      const { resolve = defaultFieldResolver } = fieldConfig
+      fieldConfig.resolve = (source, args, context, info) => {
+        for (const [variablePath, regex] of Object.entries(patterns)) {
+          const value = variablePath.split('.').reduce((obj, key) => obj[key], args)
           if (value !== undefined && !regex.test(value)) {
             throw new GraphQLError(
-              `variable '${variablesPaths[index]}' must match pattern: ${directive.patterns[index]}`,
+              `variable '${variablePath}' must match pattern ${regex.source}`,
               {
                 extensions: { code: 'BAD_USER_INPUT' }
               }
             )
           }
-        })
-
+        }
         return resolve(source, args, context, info)
       }
-
       return fieldConfig
     }
   })
+
+  return schema
 }
