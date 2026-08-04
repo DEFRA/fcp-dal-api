@@ -72,6 +72,7 @@ function setupNock(update = {}) {
   const updatedPerson = {
     ...person,
     ...update,
+    dateOfBirth: update.dateOfBirth || 1735732,
     address: {
       ...person.address,
       ...(update?.address || {})
