@@ -536,7 +536,7 @@ describe('Customer transformer', () => {
         firstName: 'newFirstName',
         middleName: 'newMiddleName',
         lastName: 'newLastName',
-        dateOfBirth: new Date('2023-01-02').getTime(), // proper UTC day at midnight
+        dateOfBirth: 1672617600, // seconds since epoch (transformer now outputs seconds)
         landline: 'newLandline',
         mobile: 'newMobile',
         email: 'newEmail',
@@ -569,7 +569,7 @@ describe('Customer transformer', () => {
         first: newPerson.firstName,
         middle: newPerson.middleName,
         last: newPerson.lastName,
-        dateOfBirth: new Date('2023-01-01T12:47:59.123Z').getTime(), // not a UTC day at midnight,
+        dateOfBirth: '2023-01-02', // ISO date string (transformer converts to seconds)
         doNotContact: newPerson.doNotContact,
         phone: {
           landline: newPerson.landline,
@@ -659,7 +659,8 @@ describe('Customer transformer', () => {
 
       const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
 
-      expect(result).toEqual({ ...currentPerson, dateOfBirth: 1735689600000 })
+      // seconds since epoch (upstream PUT expects seconds, not milliseconds)
+      expect(result).toEqual({ ...currentPerson, dateOfBirth: 1735689600 })
     })
 
     it('handles null values in input', () => {
