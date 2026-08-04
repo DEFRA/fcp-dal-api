@@ -4,12 +4,7 @@ extend type Mutation {
   """
   createBusinessCustomerBankDetails(
     input: CreateBusinessCustomerBankDetailsInput!
-  ): CreateBusinessCustomerBankDetailsResult
-    @validateVariables(
-      patterns: ["^[1-9][0-9]{8}$", "^[1-9][0-9]{9}$"]
-      variables: ["input.sbi", "input.crn"]
-    )
-    @auth(requires: [SINGLE_FRONT_DOOR])
+  ): CreateBusinessCustomerBankDetailsResult @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input CreateBusinessCustomerBankDetailsInput {
@@ -17,12 +12,12 @@ input CreateBusinessCustomerBankDetailsInput {
   Single Business Identifier (SBI) of the business: a unique 9-digit number that
   identifies the business.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
 
   """
   The Customer Reference Number (CRN) of the person submitting the bank change.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
 
   """
   Bank account details. Exactly one variant must be supplied.

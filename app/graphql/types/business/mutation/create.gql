@@ -1,6 +1,5 @@
 extend type Mutation {
   createBusiness(input: CreateBusinessInput!): CreateBusinessResponse
-    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
@@ -8,7 +7,7 @@ input CreateBusinessInput {
   """
   The Customer Reference Number (CRN) of the person under which to create the business.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   Name of the business.
   """

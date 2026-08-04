@@ -2,8 +2,7 @@ extend type Query {
   """
   Get a business by SBI (Single Business Identifier, a 9-digit number).
   """
-  business(sbi: ID!): Business
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "sbi")
+  business(sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")): Business
     @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 
   """

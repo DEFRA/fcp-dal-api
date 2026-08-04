@@ -146,8 +146,7 @@ type Customer {
   """
   A single business filtered by the businesses using Single Business Identifier (SBI) associated with the customer.
   """
-  business(sbi: ID!): CustomerBusiness
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "sbi")
+  business(sbi: ID!): CustomerBusiness @validateVariable(pattern: "^[1-9][0-9]{8}$")
 }
 
 """

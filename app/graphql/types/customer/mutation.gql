@@ -1,21 +1,15 @@
 extend type Mutation {
   updateCustomerAddress(input: UpdateCustomerAddressInput!): UpdateCustomerResponse
-    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDateOfBirth(input: UpdateCustomerDateOfBirthInput!): UpdateCustomerResponse
-    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
-    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
-    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
-    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
-    @validateVariable(pattern: "^[1-9][0-9]{9}$", variable: "input.crn")
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
@@ -26,7 +20,7 @@ input UpdateCustomerAddressInput {
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   Address of the customer.
   """
@@ -38,7 +32,7 @@ input UpdateCustomerDateOfBirthInput {
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   Date of birth of the customer (YYYY-MM-DD).
   """
@@ -50,7 +44,7 @@ input UpdateCustomerNameInput {
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   First name of the customer.
   """
@@ -78,7 +72,7 @@ input UpdateCustomerEmailInput {
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   Email address of the customer.
   """
@@ -90,7 +84,7 @@ input UpdateCustomerPhoneInput {
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   Telephone number of the customer.
   """
@@ -102,7 +96,7 @@ input UpdateCustomerDoNotContactInput {
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   Do not contact status of the customer email address.
   """
@@ -114,7 +108,7 @@ input UpdateCustomerAllFieldsInput {
   Customer Reference Number (CRN) of the customer. Unique 10-digit number used
   to identify the customer.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
   """
   First name of the customer.
   """

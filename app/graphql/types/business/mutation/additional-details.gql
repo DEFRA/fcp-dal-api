@@ -3,7 +3,6 @@ extend type Mutation {
   Used to update the business legal status.
   """
   updateBusinessLegalStatus(input: UpdateBusinessLegalStatusInput!): UpdateBusinessResponse
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -11,15 +10,12 @@ extend type Mutation {
   """
   updateBusinessDateStartedFarming(
     input: UpdateBusinessDateStartedFarmingInput!
-  ): UpdateBusinessResponse
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
-    @auth(requires: [SINGLE_FRONT_DOOR])
+  ): UpdateBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
   Used to update the date the business type.
   """
   updateBusinessType(input: UpdateBusinessTypeInput!): UpdateBusinessResponse
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -27,16 +23,13 @@ extend type Mutation {
   """
   updateBusinessRegistrationNumbers(
     input: UpdateBusinessRegistrationNumbersInput!
-  ): UpdateBusinessResponse
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
-    @auth(requires: [SINGLE_FRONT_DOOR])
+  ): UpdateBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
   Update the business lock status.
   """
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessLock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
@@ -44,7 +37,6 @@ extend type Mutation {
   """
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
-    @validateVariable(pattern: "^[1-9][0-9]{8}$", variable: "input.sbi")
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
@@ -55,7 +47,7 @@ input UpdateBusinessLegalStatusInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
 
   """
   Legal status object to update business with.
@@ -70,7 +62,7 @@ input UpdateBusinessTypeInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
 
   """
   business type code/id to update business with.
@@ -85,7 +77,7 @@ input UpdateBusinessDateStartedFarmingInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
 
   """
   The date the business started farming to update to.
@@ -100,7 +92,7 @@ input UpdateBusinessRegistrationNumbersInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
 
   """
   Registration numbers object to update companies house or charities commission numbers.
@@ -124,7 +116,7 @@ input UpdateBusinessLockUnlockInput {
   """
   Single Business Identifier (SBI) of the business.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
 
   """
   Reason for locking the business.
