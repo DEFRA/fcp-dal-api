@@ -13,7 +13,7 @@ const KITS_CUSTOMER_SEARCH_FIELD = {
 
 export class RuralPaymentsCustomer extends RuralPayments {
   async getPersonIdByCRN(crn) {
-    if (this.gatewayType === 'external') {
+    if (this.isExternalRoute()) {
       const response = await this.getExternalPerson()
       return response?.id
     }
@@ -76,7 +76,7 @@ export class RuralPaymentsCustomer extends RuralPayments {
   }
 
   async getPersonByPersonId(personId) {
-    if (this.gatewayType === 'external') {
+    if (this.isExternalRoute()) {
       personId = config.get('kits.external.personIdOverride')
     }
     const response = await this.get(`person/${personId}/summary`)

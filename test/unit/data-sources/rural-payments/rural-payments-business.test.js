@@ -76,7 +76,7 @@ describe('Rural Payments Business', () => {
   const datasourceOptions = [
     { logger },
     {
-      gatewayType: 'internal'
+      request: { headers: { email: 'test@test.test' } }
     }
   ]
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
@@ -90,7 +90,6 @@ describe('Rural Payments Business', () => {
   const ruralPaymentsBusinessExt = new RuralPaymentsBusiness(
     { logger },
     {
-      gatewayType: 'external',
       request: {
         headers: {
           'x-forwarded-authorization': tokenValue

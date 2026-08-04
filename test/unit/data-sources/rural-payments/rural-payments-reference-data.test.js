@@ -4,7 +4,7 @@ import { RuralPaymentsReferenceData } from '../../../../app/data-sources/rural-p
 describe('RuralPaymentsReferenceData', () => {
   const ruralPaymentsReferenceData = new RuralPaymentsReferenceData(
     { logger: console },
-    { gatewayType: 'internal' }
+    { request: { headers: { email: 'test@test.test' } } }
   )
   const httpGet = jest.spyOn(ruralPaymentsReferenceData, 'get')
 

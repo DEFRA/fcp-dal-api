@@ -114,7 +114,7 @@ describe('Business Search Queries', () => {
     const response = await client.request(
       businessSearchQuery,
       { searchString: '111111111', searchType: 'SBI' },
-      { email: 'some-email', 'gateway-type': 'internal' }
+      { email: 'some-email' }
     )
 
     expect(response).not.toHaveProperty('errors')
@@ -171,7 +171,7 @@ describe('Business Search Queries', () => {
     const response = await client.request(
       businessSearchQuery,
       { searchString: '999999999', searchType: 'SBI' },
-      { email: 'some-email', 'gateway-type': 'internal' }
+      { email: 'some-email' }
     )
 
     expect(response).not.toHaveProperty('errors')
@@ -186,7 +186,7 @@ describe('Customer Search Queries', () => {
     const response = await client.request(
       customerSearchQuery,
       { searchString: '1111111100', searchType: 'CRN' },
-      { email: 'some-email', 'gateway-type': 'internal' }
+      { email: 'some-email' }
     )
 
     expect(response).not.toHaveProperty('errors')
@@ -240,7 +240,7 @@ describe('Customer Search Queries', () => {
     const response = await client.request(
       customerSearchQuery,
       { searchString: '9999999999', searchType: 'CRN' },
-      { email: 'some-email', 'gateway-type': 'internal' }
+      { email: 'some-email' }
     )
 
     expect(response).not.toHaveProperty('errors')

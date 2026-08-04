@@ -138,7 +138,6 @@ describe('SFI Query', () => {
     const result = await makeTestQuery(
       query,
       {
-        'gateway-type': 'external',
         'x-forwarded-authorization': tokenValue
       },
       false,

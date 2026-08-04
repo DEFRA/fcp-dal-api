@@ -4,7 +4,8 @@ import {
   businessAdditionalDetailsUpdateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
-  businessUnlockResolver
+  businessUnlockResolver,
+  getRuralPaymentsBusinessDataSource
 } from '../../../../app/graphql/resolvers/business/common.js'
 
 describe('businessDetailsUpdateResolver', () => {
@@ -193,6 +194,62 @@ describe('businessLockResolver', () => {
     await expect(businessLockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
       'Reason and/or note are required'
     )
+  })
+})
+
+describe('getRuralPaymentsBusinessDataSource', () => {
+  const standardDataSource = { getAgreementsBySBI: jest.fn() }
+  const serviceAccountDataSource = { getAgreementsBySBI: jest.fn() }
+
+  it('returns the standard data source when useServiceAccountForExternal is not provided', () => {
+    const dataSources = {
+      ruralPaymentsBusiness: standardDataSource,
+      serviceAccount: { ruralPaymentsBusiness: serviceAccountDataSource }
+    }
+
+    expect(getRuralPaymentsBusinessDataSource({ dataSources })).toBe(standardDataSource)
+  })
+
+  it('returns the standard data source when useServiceAccountForExternal is false', () => {
+    const dataSources = {
+      ruralPaymentsBusiness: standardDataSource,
+      serviceAccount: { ruralPaymentsBusiness: serviceAccountDataSource }
+    }
+
+    expect(
+      getRuralPaymentsBusinessDataSource({
+        dataSources,
+        useServiceAccountForExternal: false
+      })
+    ).toBe(standardDataSource)
+  })
+
+  it('returns the service-account data source when useServiceAccountForExternal is true and a service-account data source is configured', () => {
+    const dataSources = {
+      ruralPaymentsBusiness: standardDataSource,
+      serviceAccount: { ruralPaymentsBusiness: serviceAccountDataSource }
+    }
+
+    expect(
+      getRuralPaymentsBusinessDataSource({
+        dataSources,
+        useServiceAccountForExternal: true
+      })
+    ).toBe(serviceAccountDataSource)
+  })
+
+  it('falls back to the standard data source when useServiceAccountForExternal is true but no service-account data source is configured (e.g. internal requests)', () => {
+    const dataSources = {
+      ruralPaymentsBusiness: standardDataSource,
+      serviceAccount: { ruralPaymentsBusiness: null }
+    }
+
+    expect(
+      getRuralPaymentsBusinessDataSource({
+        dataSources,
+        useServiceAccountForExternal: true
+      })
+    ).toBe(standardDataSource)
   })
 })
 

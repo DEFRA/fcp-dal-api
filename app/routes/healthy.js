@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
-import { RuralPaymentsBusiness } from '../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
+import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPaymentsBusiness.js'
 import { config } from '../config.js'
 import { DAL_HEALTH_CHECK_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
@@ -8,7 +8,7 @@ import { throttle } from '../utils/throttle.js'
 const ruralPaymentsHealthCheck = async () => {
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(
     { logger },
-    { headers: { email: config.get('healthCheck.ruralPaymentsPortalEmail') } }
+    { request: { headers: { email: config.get('healthCheck.ruralPaymentsPortalEmail') } } }
   )
   return ruralPaymentsBusiness.getOrganisationById(
     config.get('healthCheck.ruralPaymentsInternalOrganisationId')

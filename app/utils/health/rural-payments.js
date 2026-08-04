@@ -1,25 +1,28 @@
 import { StatusCodes } from 'http-status-codes'
+import { config } from '../../config.js'
 import { RURALPAYMENTS_API_ERROR_001 } from '../../logger/codes.js'
 import { logger } from '../../logger/logger.js'
 import { RuralPaymentsReferenceData } from '../../data-sources/rural-payments/RuralPaymentsReferenceData.js'
 
 const runRuralPaymentsCheck = async (type) => {
   try {
-    // Rural payment requests must be initiated by a real user, so health check calls will never have the necessary
-    // credentials to successfully invoke an endpoint (when auth is turned on).  The goal of the health check is to
-    // verify that the upstream is available and serving responses.   A forbidden response is still a response, so
-    // the goal of the health check is a 200 when auth is disabled, or a 403 when auth is enabled.  Given this, no
-    // authentication headers will be set and the 'healthcheck' header will instruct the datasource to submit the
-    // request, even without authorisation.
+    // Rural payment requests must be initiated by a real user (external/internal) or a service-account (internal only).
+    // Externally routed requests in this healthcheck will never have the credentials to successfully invoke an endpoint
+    // (when auth is turned on).  The goal of the health check is to verify that the upstream is available
+    // and serving responses.   A forbidden response is still a response, so the goal of the health check is either a
+    // HTTP 200 or HTTP 403 (both will pass, but will be logged differently for visibility).  For the external route,
+    // dummy auth credentials must be supplied (as this header is needed to drive the request to the external gateway),
+    // the additional healthchek header instructs the datasource to omit the auth credentials, guaranteeing that the
+    // request will fail with a 403
+    const headers =
+      type === 'external'
+        ? { healthcheck: true, 'x-forwarded-authorization': 'healthcheck' }
+        : { email: config.get('kits.dalServiceAccountEmail') }
+
     const ruralPaymentsReferenceData = new RuralPaymentsReferenceData(
       { logger },
       {
-        gatewayType: type,
-        request: {
-          headers: {
-            healthcheck: true
-          }
-        }
+        request: { headers }
       }
     )
     await ruralPaymentsReferenceData.getReferenceData('legalstatus')

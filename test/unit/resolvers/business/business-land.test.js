@@ -72,6 +72,9 @@ describe('BusinessLand', () => {
         getLandUseByBusinessParcel() {
           return getLandUseByBusinessParcelResult
         }
+      },
+      serviceAccount: {
+        ruralPaymentsBusiness: null
       }
     }
   })
