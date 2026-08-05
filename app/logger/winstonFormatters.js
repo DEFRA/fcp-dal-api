@@ -54,7 +54,8 @@ const ALLOWED_KEYS = new Set([
 ])
 
 // crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
-const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
+// primarySearchPhrase is masked too since it holds the crn when searchFieldType is a customer reference search.
+const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber', 'primarySearchPhrase'])
 
 const maskAllButLastFour = (value) => {
   if (typeof value !== 'string' || value.length <= 4) return value
