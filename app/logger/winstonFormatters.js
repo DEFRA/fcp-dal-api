@@ -44,18 +44,13 @@ const buildEvent = (kind, category, type, created, duration, outcome, reference,
     }
   }
 
-const ALLOWED_KEYS = new Set([
-  'crn',
-  'customerReferenceNumber',
-  'id',
-  'primarySearchPhrase',
-  'sbi',
-  'searchFieldType'
-])
+const ALLOWED_KEYS = new Set(['crn', 'customerReferenceNumber', 'id', 'sbi', 'searchFieldType'])
+
+// primarySearchPhrase is deliberately excluded from ALLOWED_KEYS above: depending on
+// searchFieldType it can hold a crn, customer name or postcode, all of which are PII.
 
 // crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
-// primarySearchPhrase is masked too since it holds the crn when searchFieldType is a customer reference search.
-const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber', 'primarySearchPhrase'])
+const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
 
 const maskAllButLastFour = (value) => {
   if (typeof value !== 'string' || value.length <= 4) return value

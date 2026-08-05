@@ -112,7 +112,7 @@ describe('winstonFormatters', () => {
         url: {
           full: 'http://localhost/path',
           path: 'http://localhost/path',
-          query: '{"searchFieldType":"SBI","primarySearchPhrase":"*****3280"}'
+          query: '{"searchFieldType":"SBI"}'
         }
       })
     })
@@ -147,7 +147,7 @@ describe('winstonFormatters', () => {
       url: {
         full: 'http://localhost/path',
         path: 'http://localhost/path',
-        query: '{"searchFieldType":"SBI","primarySearchPhrase":"*****3280"}'
+        query: '{"searchFieldType":"SBI"}'
       }
     })
   })
@@ -234,7 +234,6 @@ describe('winstonFormatters', () => {
         crn: '**N001',
         customerReferenceNumber: '**N002',
         sbi: '123456789',
-        primarySearchPhrase: '**** doe',
         searchFieldType: 'name',
         id: 'user-123',
         nested: { crn: '******-crn' },
@@ -245,13 +244,12 @@ describe('winstonFormatters', () => {
       })
     })
 
-    it('masks crn, customerReferenceNumber and primarySearchPhrase, keeping only the last 4 characters', () => {
+    it('masks crn and customerReferenceNumber, keeping only the last 4 characters', () => {
       const result = cdpSchemaTranslator().transform({
         request: {
           body: {
             crn: '1234567890',
             customerReferenceNumber: '9876543210',
-            primarySearchPhrase: '1234567890',
             shortCrn: 'ab', // key not masked, but also under 4 chars — included verbatim
             nested: { crn: '5555' } // exactly 4 chars, nothing to mask
           }
@@ -261,8 +259,24 @@ describe('winstonFormatters', () => {
       expect(JSON.parse(result.url.query)).toEqual({
         crn: '******7890',
         customerReferenceNumber: '******3210',
-        primarySearchPhrase: '******7890',
         nested: { crn: '5555' }
+      })
+    })
+
+    it('excludes primarySearchPhrase entirely, since it may hold a crn, name or postcode', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: {
+            sbi: '987654321',
+            primarySearchPhrase: 'jane doe',
+            allowed: 'no',
+            disallowed: 'yes'
+          }
+        }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        sbi: '987654321'
       })
     })
 
@@ -279,8 +293,7 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        sbi: '987654321',
-        primarySearchPhrase: '**** doe'
+        sbi: '987654321'
       })
     })
   })
