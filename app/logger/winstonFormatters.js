@@ -53,6 +53,14 @@ const ALLOWED_KEYS = new Set([
   'searchFieldType'
 ])
 
+// crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
+const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
+
+const maskAllButLastFour = (value) => {
+  if (typeof value !== 'string' || value.length <= 4) return value
+  return '*'.repeat(value.length - 4) + value.slice(-4)
+}
+
 const pickKeysForLogging = (obj) => {
   if (obj == null) return obj
 
@@ -72,7 +80,7 @@ const pickKeysForLogging = (obj) => {
     const value = pickKeysForLogging(obj[key])
 
     if (ALLOWED_KEYS.has(key) || (typeof value === 'object' && value !== null)) {
-      picked[key] = value
+      picked[key] = MASKED_KEYS.has(key) ? maskAllButLastFour(value) : value
     }
   }
 

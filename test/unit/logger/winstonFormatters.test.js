@@ -231,17 +231,36 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        crn: 'CRN001',
-        customerReferenceNumber: 'CRN002',
+        crn: '**N001',
+        customerReferenceNumber: '**N002',
         sbi: '123456789',
         primarySearchPhrase: 'john doe',
         searchFieldType: 'name',
         id: 'user-123',
-        nested: { crn: 'nested-crn' },
+        nested: { crn: '******-crn' },
         array: [{ id: 'allowed' }],
         other: {
           crn: null
         }
+      })
+    })
+
+    it('masks crn and customerReferenceNumber, keeping only the last 4 characters', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: {
+            crn: '1234567890',
+            customerReferenceNumber: '9876543210',
+            shortCrn: 'ab', // key not masked, but also under 4 chars — included verbatim
+            nested: { crn: '5555' } // exactly 4 chars, nothing to mask
+          }
+        }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        crn: '******7890',
+        customerReferenceNumber: '******3210',
+        nested: { crn: '5555' }
       })
     })
 
