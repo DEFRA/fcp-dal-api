@@ -123,8 +123,7 @@ export class BaseRESTDataSource extends RESTDataSource {
       request: { ...request, url: url.toString() },
       response: {
         ...response,
-        body: result.parsedBody,
-        size: Buffer.byteLength(JSON.stringify(response.body))
+        body: result.parsedBody
       },
       code: this.code,
       requestTimeMs
