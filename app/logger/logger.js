@@ -18,17 +18,17 @@ const logLevels = {
   trace: 4
 }
 
-// Runs first in the logger's format chain so a disabled level short-circuits
-// (logform/combine's cascade stops on a falsy return) before the JSON
-// serialisation format below ever executes, avoiding the full formatting
-// cost for calls like `logger.debug(...)` that no transport would accept.
-const levelGuard = format((info) => logger.isLevelEnabled(info.level) && info)
-
 export const logger = createLogger({
   level: config.get('logLevel'),
   transports: transportTypes,
   levels: logLevels,
-  format: format.combine(levelGuard(), format.json())
+  // A non-empty top-level format is required here: if `format` is omitted,
+  // winston falls back to its own default (`logform/json()`), which runs a
+  // full JSON.stringify of the whole info object on every log call -
+  // including disabled-level calls a transport will just drop. The real
+  // formatting (cdpSchemaTranslator, ecsFormat) already happens per-transport
+  // above, so this is intentionally a no-op.
+  format: format.combine()
 })
 
 process.on('exit', () => {
