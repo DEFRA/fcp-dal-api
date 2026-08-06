@@ -119,6 +119,8 @@ export class BaseRESTDataSource extends RESTDataSource {
       },
       response
     })
+
+    const debugLogStart = performance.now()
     this.logger.debug(`#datasource - ${this.name} - response detail`, {
       request: { ...request, url: url.toString() },
       response: {
@@ -127,6 +129,12 @@ export class BaseRESTDataSource extends RESTDataSource {
       },
       code: this.code,
       requestTimeMs
+    })
+
+    const duration = performance.now() - debugLogStart
+    this.logger.info(`#datasource - ${this.name} - debug log duration`, {
+      code: this.code,
+      requestTimeMs: duration
     })
 
     return result
