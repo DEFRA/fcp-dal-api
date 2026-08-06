@@ -251,7 +251,11 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async getAuthorisedFunctionsByOrganisationId(organisationId, functions) {
-    const query = `functions=${functions.join('|')}&module=CUST_SS_PORTAL&timestamp=${Date.now()}`
+    const query = new URLSearchParams({
+      functions: functions.join('|'),
+      module: 'CUST_SS_PORTAL',
+      timestamp: Date.now()
+    })
     const response = await this.get(
       `SitiAgriApi/authorisation/organisation/${organisationId}/byFunction?${query}`
     )
