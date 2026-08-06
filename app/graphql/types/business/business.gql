@@ -272,8 +272,10 @@ type Business {
   removeRoleOrPrivilege, submitApplication, submitELMApplications, updateLandUse, viewApplication,
   viewBusinessBankAccount, viewBusinessDetails, viewCPH, viewCSAgreements, viewCSApplications,
   viewCSClaims, viewCountrysideStewardship, viewELMApplications, viewEntitlements, viewLand,
-  viewLegallyResponsiblePeople. Unrecognised/new function names may also be supplied and will be
-  echoed back in the response.
+  viewLegallyResponsiblePeople. The above list is not exhaustive - names added to the upstream
+  but not yet listed here may also be supplied. If the upstream recognises a requested function
+  name, the appropriate true/false value for the user is returned; otherwise the function is
+  still included in the response, with `permitted` set to false.
 
   NOTE: DAL does not enforce these permissions - the upstream systems do.
   """

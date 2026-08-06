@@ -21,6 +21,10 @@ const query = `#graphql
 const authorisationPath =
   /^\/SitiAgriApi\/authorisation\/organisation\/organisationId\/byFunction\?functions=.+&module=CUST_SS_PORTAL&timestamp=\d+$/
 
+// The `functions` query parameter is present but empty when no (non-empty) function names are requested
+const emptyFunctionsAuthorisationPath =
+  /^\/SitiAgriApi\/authorisation\/organisation\/organisationId\/byFunction\?functions=&module=CUST_SS_PORTAL&timestamp=\d+$/
+
 describe('business.permittedFunctions', () => {
   beforeEach(() => {
     nock.disableNetConnect()
@@ -75,6 +79,67 @@ describe('business.permittedFunctions', () => {
       { name: 'viewLand', permitted: true },
       { name: 'someBrandNewFunction', permitted: false }
     ])
+  })
+
+  test('returns an empty list when an empty functions list is requested', async () => {
+    mockOrganisationSearch(v1)
+    // the upstream treats an empty functions parameter as a single empty-string function name
+    v1.get(emptyFunctionsAuthorisationPath).reply(200, {
+      data: { '': false },
+      success: true,
+      errorString: null
+    })
+
+    const result = await makeTestQuery(query, null, true, { functions: [] })
+
+    expect(nock.isDone()).toBe(true)
+    expect(result.errors).toBeUndefined()
+    expect(result.data.business.permittedFunctions).toEqual([])
+  })
+
+  test('echoes an empty-string function name back as not permitted', async () => {
+    mockOrganisationSearch(v1)
+    v1.get(emptyFunctionsAuthorisationPath).reply(200, {
+      data: { '': false },
+      success: true,
+      errorString: null
+    })
+
+    const result = await makeTestQuery(query, null, true, { functions: [''] })
+
+    expect(nock.isDone()).toBe(true)
+    expect(result.errors).toBeUndefined()
+    expect(result.data.business.permittedFunctions).toEqual([{ name: '', permitted: false }])
+  })
+
+  test('rejects a request that omits the functions argument', async () => {
+    const result = await makeTestQuery(query, null, true, {})
+
+    expect(result.data).toBeUndefined()
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toEqual(
+      'Variable "$functions" of required type "[String!]!" was not provided.'
+    )
+  })
+
+  test('rejects a null functions list', async () => {
+    const result = await makeTestQuery(query, null, true, { functions: null })
+
+    expect(result.data).toBeUndefined()
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toEqual(
+      'Variable "$functions" of non-null type "[String!]!" must not be null.'
+    )
+  })
+
+  test('rejects a functions list containing null', async () => {
+    const result = await makeTestQuery(query, null, true, { functions: ['viewLand', null] })
+
+    expect(result.data).toBeUndefined()
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toEqual(
+      'Variable "$functions" got invalid value null at "functions[1]"; Expected non-nullable type "String!" not to be null.'
+    )
   })
 
   const enableAuth = () => {
