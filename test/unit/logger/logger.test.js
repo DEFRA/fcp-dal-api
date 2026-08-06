@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import { v4 as uuidv4 } from 'uuid'
-import { format } from 'winston'
+import { createLogger, format, transports } from 'winston'
 import ConsoleTransportInstance from 'winston-transport'
 import { config } from '../../../app/config.js'
 
@@ -50,38 +50,34 @@ describe('logger', () => {
     expect(logger.transports[0].close).toHaveBeenCalled()
   })
 
-  describe('level-based JSON formatting guard', () => {
+  describe('top-level format', () => {
     let jsonTransformSpy
 
     beforeEach(() => {
-      // format.json() instances share this prototype transform (see logform/format.js),
-      // so spying here observes every JSON-formatting attempt made via format.json().
+      // format.json() instances share this prototype transform (see logform/format.js).
+      // Winston falls back to this exact format when `createLogger` is given no `format`
+      // option (see node_modules/winston/lib/winston/logger.js), stringifying the whole
+      // info object on every log call - including ones a transport will end up dropping.
       jsonTransformSpy = jest.spyOn(format.json.Format.prototype, 'transform')
     })
 
-    it('does not run JSON formatting for a disabled level (debug, with level=info)', async () => {
-      configMockPath.logLevel = 'info'
+    it('does not fall back to winston default JSON formatting', async () => {
       const { logger } = await loadFreshLogger()
 
-      logger.debug('this should be skipped before JSON formatting')
+      logger.info('this should not be JSON formatted at the logger level')
 
       expect(jsonTransformSpy).not.toHaveBeenCalled()
     })
 
-    it('runs JSON formatting for an enabled level (info, with level=info)', async () => {
-      configMockPath.logLevel = 'info'
-      const { logger } = await loadFreshLogger()
+    // Control: proves the spy above would actually catch the fallback if
+    // logger.js ever stopped passing a `format` option.
+    it('control: a logger created with no format option does fall back to JSON formatting', () => {
+      const controlLogger = createLogger({
+        level: 'info',
+        transports: [new transports.Console()]
+      })
 
-      logger.info('this should be JSON formatted')
-
-      expect(jsonTransformSpy).toHaveBeenCalled()
-    })
-
-    it('runs JSON formatting for debug once the level is raised to debug', async () => {
-      configMockPath.logLevel = 'debug'
-      const { logger } = await loadFreshLogger()
-
-      logger.debug('this should be JSON formatted')
+      controlLogger.info('this should be JSON formatted via the winston default')
 
       expect(jsonTransformSpy).toHaveBeenCalled()
     })
