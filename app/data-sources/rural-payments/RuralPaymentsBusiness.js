@@ -7,6 +7,13 @@ import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
 
+// The SitiAgri byFunction endpoint scopes function-level authorisation to a consuming module.
+// CUST_SS_PORTAL is the customer self-service portal (the external Rural Payments service) - the
+// module external users act through, and therefore the permission set permittedFunctions reports on.
+// Note the upstream does not validate the value; an unrecognised module just returns false for
+// every requested function.
+const SELF_SERVICE_PORTAL_MODULE = 'CUST_SS_PORTAL'
+
 export const formatDateDDMMMYY = (date) => {
   // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
   const day = date.toLocaleString('en-US', { day: '2-digit' }) // 01
@@ -248,6 +255,18 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
   async getExistingBankAccounts(frn) {
     return this.get(`bank-change-service/v1/existing-accounts/${frn}`)
+  }
+
+  async getAuthorisedFunctionsByOrganisationId(organisationId, functions) {
+    const query = new URLSearchParams({
+      functions: functions.join('|'),
+      module: SELF_SERVICE_PORTAL_MODULE,
+      timestamp: Date.now()
+    })
+    const response = await this.get(
+      `SitiAgriApi/authorisation/organisation/${organisationId}/byFunction?${query}`
+    )
+    return response.data
   }
 
   async getLandUseByBusinessParcel(sbi, sheetId, parcelId, date = new Date()) {
