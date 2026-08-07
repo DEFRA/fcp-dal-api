@@ -1,2 +1,11 @@
 type Query
 type Mutation
+
+extend type Query {
+  """
+  Example to show that the Work In Progress (WIP) directive is working.
+  This field should show in `dev` and `perf-test` with a deprecation warning,
+  and be hidden in other environments.
+  """
+  wipExample: Boolean @wip
+}

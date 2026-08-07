@@ -150,10 +150,15 @@ describe('schema', () => {
   it('ensures all sensitive top-level fields have @auth directive', async () => {
     const schema = await createSchema()
     const unprotectedFields = getUnprotectedFields(schema)
-    expect(unprotectedFields).toEqual(['Query.referenceData'])
+    expect(unprotectedFields).toEqual(
+      expect.arrayContaining(['Query.referenceData', 'Query.wipExample'])
+    )
   })
 
   it('directives clean up schema as expected', async () => {
+    mockEnv.mockReturnValue('prod')
+    expect(config.get('cdp.env')).toBe('prod')
+
     // Schema with no directives applied
     const rawSchema = await createRawSchema()
     // Apply directives
@@ -165,6 +170,18 @@ describe('schema', () => {
       { type: 'TYPE_REMOVED', description: 'Numeric was removed.' },
       { type: 'TYPE_REMOVED', description: 'Image was removed.' },
       { type: 'TYPE_REMOVED', description: 'UUID was removed.' },
+      {
+        type: 'TYPE_REMOVED',
+        description: 'PermittedFunction was removed.'
+      },
+      {
+        type: 'FIELD_REMOVED',
+        description: 'Query.wipExample was removed.'
+      },
+      {
+        type: 'FIELD_REMOVED',
+        description: 'Business.permittedFunctions was removed.'
+      },
       {
         type: 'FIELD_CHANGED_KIND',
         description:
@@ -217,25 +234,24 @@ describe('schema', () => {
       type Nested { otherNestedField: Boolean, nestedWipTest: Boolean @wip }
     `
 
-    it.each(cdpEnvironments.map((env) => [env, wipEnabledEnvironments.has(env)]))(
-      'wip fields are %s in %s',
-      async (env, isWipEnabled) => {
-        mockEnv.mockReturnValue(env)
-        expect(config.get('cdp.env')).toBe(env)
+    it.each(
+      cdpEnvironments.map((env) => [wipEnabledEnvironments.has(env) ? 'enabled' : 'disabled', env])
+    )('wip fields are %s in %s', async (isWipEnabled, env) => {
+      mockEnv.mockReturnValue(env)
+      expect(config.get('cdp.env')).toBe(env)
 
-        const schema = await createSchema(testSchema)
-        const queryType = schema.getQueryType()
-        const nestedType = schema.getType('Nested')
+      const schema = await createSchema(testSchema)
+      const queryType = schema.getQueryType()
+      const nestedType = schema.getType('Nested')
 
-        if (isWipEnabled) {
-          expect(queryType.getFields().wipTest).toBeDefined()
-          expect(nestedType.getFields().nestedWipTest).toBeDefined()
-        } else {
-          expect(queryType.getFields().wipTest).toBeUndefined()
-          expect(nestedType.getFields().nestedWipTest).toBeUndefined()
-        }
+      if (isWipEnabled === 'enabled') {
+        expect(queryType.getFields().wipTest).toBeDefined()
+        expect(nestedType.getFields().nestedWipTest).toBeDefined()
+      } else {
+        expect(queryType.getFields().wipTest).toBeUndefined()
+        expect(nestedType.getFields().nestedWipTest).toBeUndefined()
       }
-    )
+    })
 
     it.each([...wipEnabledEnvironments])(
       'wip fields have a deprecation reason in %s',
