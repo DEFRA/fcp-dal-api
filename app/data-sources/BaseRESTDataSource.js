@@ -119,12 +119,12 @@ export class BaseRESTDataSource extends RESTDataSource {
       },
       response
     })
+
     this.logger.debug(`#datasource - ${this.name} - response detail`, {
       request: { ...request, url: url.toString() },
       response: {
         ...response,
-        body: result.parsedBody,
-        size: Buffer.byteLength(JSON.stringify(response.body))
+        body: result.parsedBody
       },
       code: this.code,
       requestTimeMs
