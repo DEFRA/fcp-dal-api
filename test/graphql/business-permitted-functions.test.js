@@ -9,7 +9,7 @@ const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const query = `#graphql
   query PermittedFunctions($functions: [String!]!) {
-    business(sbi: "sbi") {
+    business(sbi: "123456789") {
       permittedFunctions(functions: $functions) {
         name
         permitted

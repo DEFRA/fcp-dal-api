@@ -44,7 +44,7 @@ describe('business', () => {
 
   test('update business legal status', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       legalStatusCode: 123
     }
 
@@ -104,7 +104,7 @@ describe('business', () => {
 
   test('update business type', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       typeCode: 123
     }
 
@@ -166,7 +166,7 @@ describe('business', () => {
 
   test('update business registration numbers', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       registrationNumbers: {
         charityCommission: '0123',
         companiesHouse: '0456'
@@ -222,7 +222,7 @@ describe('business', () => {
 
   test('update business date started farming', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       // Will get converted to ISO date
       dateStartedFarming: '01-01-2020'
     }
@@ -290,13 +290,13 @@ describe('business - external', () => {
   test('update business legal status', async () => {
     const tokenValue = jwt.sign(
       {
-        relationships: ['organisationId:sbi'],
+        relationships: ['organisationId:123456789'],
         contactId: 'crn'
       },
       'test-secret'
     )
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       legalStatusCode: 123
     }
 

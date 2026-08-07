@@ -8,6 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { authDirectiveTransformer } from '../auth/authenticate.js'
 import { config } from '../config.js'
 import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
+import { validateVariableDirective } from './directives/validateVariable.js'
 import { wipDirectiveTransformer } from './directives/wipDirectiveTransformer.js'
 
 import * as BusinessLand from './resolvers/business/business-land.js'
@@ -56,6 +57,7 @@ export async function createSchema(...typeDefs) {
   let schema = await createRawSchema(...typeDefs)
 
   schema = wipDirectiveTransformer(schema)
+  schema = validateVariableDirective(schema) // Apply the validateVariable directive to the schema
 
   if (!config.get('auth.disabled')) {
     schema = authDirectiveTransformer(schema)

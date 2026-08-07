@@ -1,5 +1,9 @@
 extend type Query {
-  customer(crn: ID!): Customer @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  """
+  Get a customer by CRN (Customer Reference Number, a 10-digit number).
+  """
+  customer(crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")): Customer
+    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 
   """
   Search for customers by CRN, personal identifier, customer name, customer postcode,

@@ -1,3 +1,6 @@
 directive @wip on FIELD_DEFINITION
 directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
 directive @excludeFromList on FIELD_DEFINITION
+directive @validateVariable(
+  pattern: String!
+) on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
