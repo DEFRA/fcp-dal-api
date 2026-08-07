@@ -75,6 +75,7 @@ export const validateVariableDirective = (schema, directiveName = 'validateVaria
         return fieldConfig
       }
 
+      // Reduce the type to a simple list of fields (that have a validator), with the corresponding validation pattern
       const patterns = Object.entries(fieldConfig.args).reduce((acc, [argName, argConfig]) => {
         Object.assign(acc, collectPatternsForArgument(schema, argConfig, directiveName, argName))
         return acc
@@ -87,6 +88,7 @@ export const validateVariableDirective = (schema, directiveName = 'validateVaria
       const { resolve = defaultFieldResolver } = fieldConfig
       fieldConfig.resolve = (source, args, context, info) => {
         for (const [variablePath, regex] of Object.entries(patterns)) {
+          // Walk the object graph to reach the field value, e.g. extract the sbi value from input.business.sbi
           const value = variablePath
             .split('.') // needed for variables inside input objects
             .reduce((obj, key) => {
