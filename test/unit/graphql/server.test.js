@@ -47,7 +47,8 @@ describe('GraphQL Dashboard test with mocks', () => {
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
       plugins: [mockApolloPluginDisabled()],
-      introspection: false
+      introspection: false,
+      formatError: expect.any(Function)
     })
   })
 
@@ -69,7 +70,8 @@ describe('GraphQL Dashboard test with mocks', () => {
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
       plugins: [mockApolloPluginLandingPage()],
-      introspection: true
+      introspection: true,
+      formatError: expect.any(Function)
     })
   })
 })
