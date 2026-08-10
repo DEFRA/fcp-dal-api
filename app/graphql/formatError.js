@@ -10,7 +10,7 @@ function sanitizeExtensions(extensions = {}) {
   )
 }
 
-export function formatError(formattedError, error) {
+export function formatError(formattedError) {
   return {
     ...formattedError,
     extensions: sanitizeExtensions(formattedError.extensions)
