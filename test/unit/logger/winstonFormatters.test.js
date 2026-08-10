@@ -112,7 +112,7 @@ describe('winstonFormatters', () => {
         url: {
           full: 'http://localhost/path',
           path: 'http://localhost/path',
-          query: '{"searchFieldType":"SBI"}'
+          query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
         }
       })
     })
@@ -147,7 +147,7 @@ describe('winstonFormatters', () => {
       url: {
         full: 'http://localhost/path',
         path: 'http://localhost/path',
-        query: '{"searchFieldType":"SBI"}'
+        query: '{"searchFieldType":"SBI","primarySearchPhrase":"107183280"}'
       }
     })
   })
@@ -294,6 +294,50 @@ describe('winstonFormatters', () => {
 
       expect(JSON.parse(result.url.query)).toEqual({
         sbi: '987654321'
+      })
+    })
+
+    describe('primarySearchPhrase, based on sibling searchFieldType', () => {
+      it.each(['SBI', 'VENDOR_NUMBER', 'TRADER_NUMBER', 'PERSONAL_IDENTIFIER'])(
+        'logs primarySearchPhrase when searchFieldType is %s',
+        (searchFieldType) => {
+          const result = cdpSchemaTranslator().transform({
+            request: {
+              body: { searchFieldType, primarySearchPhrase: 'ABC123' }
+            }
+          })
+
+          expect(JSON.parse(result.url.query)).toEqual({
+            searchFieldType,
+            primarySearchPhrase: 'ABC123'
+          })
+        }
+      )
+
+      it.each(['BUSINESS_NAME', 'BUSINESS_POSTCODE', 'CUSTOMER_NAME', 'CUSTOMER_POSTCODE', 'CRN'])(
+        'excludes primarySearchPhrase when searchFieldType is %s',
+        (searchFieldType) => {
+          const result = cdpSchemaTranslator().transform({
+            request: {
+              body: { searchFieldType, primarySearchPhrase: 'jane doe' }
+            }
+          })
+
+          expect(JSON.parse(result.url.query)).toEqual({ searchFieldType })
+        }
+      )
+
+      it('masks primarySearchPhrase to the last 4 digits when searchFieldType is CUSTOMER_REFERENCE (the wire-level CRN search type)', () => {
+        const result = cdpSchemaTranslator().transform({
+          request: {
+            body: { searchFieldType: 'CUSTOMER_REFERENCE', primarySearchPhrase: '1234567890' }
+          }
+        })
+
+        expect(JSON.parse(result.url.query)).toEqual({
+          searchFieldType: 'CUSTOMER_REFERENCE',
+          primarySearchPhrase: '******7890'
+        })
       })
     })
   })

@@ -46,8 +46,18 @@ const buildEvent = (kind, category, type, created, duration, outcome, reference,
 
 const ALLOWED_KEYS = new Set(['crn', 'customerReferenceNumber', 'id', 'sbi', 'searchFieldType'])
 
-// primarySearchPhrase is deliberately excluded from ALLOWED_KEYS above: depending on
-// searchFieldType it can hold a crn, customer name or postcode, all of which are PII.
+// primarySearchPhrase is stripped from logs by default: depending on searchFieldType it can hold
+// a crn, customer name or postcode, all of which are PII. It's logged verbatim only when the
+// sibling searchFieldType is one of the values below, which aren't personally identifying on
+// their own.
+const SEARCH_PHRASE_SAFE_FIELD_TYPES = new Set([
+  'SBI',
+  'VENDOR_NUMBER',
+  'TRADER_NUMBER',
+  'PERSONAL_IDENTIFIER'
+])
+
+const SEARCH_PHRASE_MASKED_FIELD_TYPES = new Set(['CUSTOMER_REFERENCE'])
 
 // crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
 const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
@@ -71,12 +81,20 @@ const pickKeysForLogging = (obj) => {
   }
 
   const picked = {}
+  const searchPhraseSafe = SEARCH_PHRASE_SAFE_FIELD_TYPES.has(obj.searchFieldType)
+  const searchPhraseMasked = SEARCH_PHRASE_MASKED_FIELD_TYPES.has(obj.searchFieldType)
 
   for (const key of Object.keys(obj)) {
     const value = pickKeysForLogging(obj[key])
 
-    if (ALLOWED_KEYS.has(key) || (typeof value === 'object' && value !== null)) {
-      picked[key] = MASKED_KEYS.has(key) ? maskAllButLastFour(value) : value
+    const isAllowed =
+      ALLOWED_KEYS.has(key) ||
+      (key === 'primarySearchPhrase' && (searchPhraseSafe || searchPhraseMasked))
+
+    if (isAllowed || (typeof value === 'object' && value !== null)) {
+      const shouldMask =
+        MASKED_KEYS.has(key) || (key === 'primarySearchPhrase' && searchPhraseMasked)
+      picked[key] = shouldMask ? maskAllButLastFour(value) : value
     }
   }
 
