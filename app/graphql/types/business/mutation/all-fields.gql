@@ -1,0 +1,96 @@
+extend type Mutation {
+  """
+  Used to update any combination of business details in a single request.
+
+  All fields are optional (except `sbi`), so consumers need only provide the fields they want to
+  change.
+  """
+  updateBusinessAllFields(input: UpdateBusinessAllFieldsInput!): UpdateBusinessAllFieldsResponse
+    @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+type UpdateBusinessAllFieldsResponse {
+  """
+  Always true; a failed update is reported in the standard GraphQL `errors` array instead.
+  """
+  success: Boolean
+  """
+  True when the business details update was applied. Null when NO business details fields were
+  provided, so the update was not attempted.
+
+  Business details fields: `name`, `email`, `correspondenceEmail`, `phone`,
+  `correspondencePhone`, `address`, `correspondenceAddress`,
+  `isCorrespondenceAsBusinessAddress` and `vat`.
+  """
+  businessDetailsUpdated: Boolean
+  """
+  True when the additional business details update was applied. Null when NO additional business
+  details fields were provided, so the update was not attempted.
+
+  Additional business details fields: `legalStatusCode`, `typeCode`, `dateStartedFarming` and
+  `registrationNumbers`.
+  """
+  additionalBusinessDetailsUpdated: Boolean
+  business: Business
+}
+
+input UpdateBusinessAllFieldsInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business.
+  """
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
+  """
+  Name of the business.
+  """
+  name: String
+  """
+  Email address of the business.
+  """
+  email: EmailInput
+  """
+  Correspondence email address of the business.
+  """
+  correspondenceEmail: EmailInput
+  """
+  Telephone number of the business.
+  """
+  phone: PhoneInput
+  """
+  Correspondence telephone number of the business.
+  """
+  correspondencePhone: PhoneInput
+  """
+  Address of the business.
+  """
+  address: ValidAddressInput
+  """
+  Correspondence address of the business.
+  """
+  correspondenceAddress: ValidAddressInput
+  """
+  States the correspondence address should be used as the business address.
+  """
+  isCorrespondenceAsBusinessAddress: Boolean
+  """
+  VAT number of the business. (a.k.a. `taxRegistrationNumber`)
+  """
+  vat: String
+  """
+  Legal status object to update business with.
+  """
+  legalStatusCode: Int
+  """
+  business type code/id to update business with.
+  """
+  typeCode: Int
+  """
+  The date the business started farming to update to.
+  """
+  dateStartedFarming: Date
+  """
+  Various registration numbers for the business. For example, Companies House number.
+  """
+  registrationNumbers: BusinessRegistrationNumbersInput
+}

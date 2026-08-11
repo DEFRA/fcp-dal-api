@@ -38,6 +38,50 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
   }
 }
 
+// Returns null when there is nothing to update, so consumers can distinguish "updated" from
+// "not attempted". Upstream failures propagate as standard GraphQL errors.
+const updateIfRequired = async (newDetails, update) => {
+  if (!Object.keys(newDetails).length) {
+    return null
+  }
+  await update()
+  return true
+}
+
+export const businessAllFieldsUpdateResolver = async (__, { input }, { dataSources }) => {
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+  const currentOrgDetails =
+    await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+
+  const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
+  const newOrgAdditionalDetails = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
+
+  const updatedOrgDetails = {
+    ...currentOrgDetails,
+    ...newOrgDetails,
+    ...newOrgAdditionalDetails
+  }
+
+  const businessDetailsUpdated = await updateIfRequired(newOrgDetails, () =>
+    dataSources.ruralPaymentsBusiness.updateOrganisationDetails(organisationId, updatedOrgDetails)
+  )
+  const additionalBusinessDetailsUpdated = await updateIfRequired(newOrgAdditionalDetails, () =>
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails(
+      organisationId,
+      updatedOrgDetails
+    )
+  )
+
+  return {
+    success: true,
+    businessDetailsUpdated,
+    additionalBusinessDetailsUpdated,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
 async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   const orgId = await ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
   await mongoBusiness.upsertOrgIdBySbi(sbi, orgId)

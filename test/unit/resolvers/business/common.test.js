@@ -2,6 +2,7 @@ import { expect, jest } from '@jest/globals'
 import { NotFound } from '../../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
+  businessAllFieldsUpdateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
   businessUnlockResolver,
@@ -127,6 +128,158 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     await expect(
       businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
+  })
+})
+
+describe('businessAllFieldsUpdateResolver', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn().mockResolvedValue('orgId'),
+        getOrganisationById: jest.fn().mockResolvedValue({
+          name: 'org name',
+          legalStatus: { id: 1 }
+        }),
+        updateOrganisationDetails: jest.fn(),
+        updateOrganisationAdditionalDetails: jest.fn()
+      },
+      mongoBusiness: {
+        getOrgIdBySbi: jest.fn(),
+        upsertOrgIdBySbi: jest.fn()
+      }
+    }
+  })
+
+  it('sends business details and additional details in a single upstream call each', async () => {
+    const input = {
+      sbi: '123',
+      name: 'Test',
+      vat: '123456789',
+      legalStatusCode: 2,
+      dateStartedFarming: '2025-01-01'
+    }
+
+    const result = await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+
+    const expectedPayload = {
+      name: 'Test',
+      taxRegistrationNumber: '123456789',
+      legalStatus: { id: 2 },
+      dateStartedFarming: '2025-01-01T00:00:00.000Z'
+    }
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledTimes(1)
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledTimes(1)
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledWith(
+      'orgId',
+      expectedPayload
+    )
+    expect(
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
+    ).toHaveBeenCalledTimes(1)
+    expect(
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
+    ).toHaveBeenCalledWith('orgId', expectedPayload)
+
+    expect(result).toEqual({
+      success: true,
+      businessDetailsUpdated: true,
+      additionalBusinessDetailsUpdated: true,
+      business: { sbi: '123' }
+    })
+  })
+
+  it('skips the additional details call when no additional details fields are provided', async () => {
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledWith(
+      'orgId',
+      { name: 'Test', legalStatus: { id: 1 } }
+    )
+    expect(
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
+    ).not.toHaveBeenCalled()
+  })
+
+  it('skips the business details call when no business details fields are provided', async () => {
+    const input = { sbi: '123', typeCode: 3 }
+
+    await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).not.toHaveBeenCalled()
+    expect(
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
+    ).toHaveBeenCalledWith('orgId', {
+      name: 'org name',
+      legalStatus: { id: 1 },
+      businessType: { id: 3 }
+    })
+  })
+
+  it('makes no upstream update calls when only the sbi is provided', async () => {
+    const input = { sbi: '123' }
+
+    const result = await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).not.toHaveBeenCalled()
+    expect(
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
+    ).not.toHaveBeenCalled()
+    expect(result).toEqual({
+      success: true,
+      businessDetailsUpdated: null,
+      additionalBusinessDetailsUpdated: null,
+      business: { sbi: '123' }
+    })
+  })
+
+  it('propagates a NotFound error when the organisation cannot be found', async () => {
+    const notFoundError = new NotFound('Rural payments organisation not found')
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
+
+    const input = { sbi: '999', name: 'Missing' }
+
+    await expect(businessAllFieldsUpdateResolver(null, { input }, { dataSources })).rejects.toThrow(
+      notFoundError
+    )
+  })
+
+  it('propagates the error when the additional details update fails', async () => {
+    const upstreamError = new Error('Upstream update failed')
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockRejectedValue(
+      upstreamError
+    )
+
+    const input = { sbi: '123', name: 'Test', typeCode: 3 }
+
+    await expect(businessAllFieldsUpdateResolver(null, { input }, { dataSources })).rejects.toThrow(
+      upstreamError
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledTimes(1)
+    expect(
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
+    ).toHaveBeenCalledTimes(1)
+  })
+
+  it('propagates the error and skips the additional details update when the details update fails', async () => {
+    const upstreamError = new Error('Upstream update failed')
+    dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockRejectedValue(upstreamError)
+
+    const input = { sbi: '123', name: 'Test', typeCode: 3 }
+
+    await expect(businessAllFieldsUpdateResolver(null, { input }, { dataSources })).rejects.toThrow(
+      upstreamError
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledTimes(1)
+    expect(
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
+    ).not.toHaveBeenCalled()
   })
 })
 
