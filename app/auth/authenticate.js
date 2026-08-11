@@ -6,6 +6,7 @@ import { config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
+import { maskAllButLastFour } from '../logger/utils.js'
 import { sendMetric } from '../logger/sendMetric.js'
 
 export const authGroups = config.get('auth.groups')
@@ -50,7 +51,7 @@ export async function getAuth(request, jwkDatasource) {
           sub: verified.sub,
           tid: verified.tid,
           email: verified.email?.split('@')[1],
-          contactId: verified.contactId,
+          contactId: maskAllButLastFour(verified.contactId),
           relationships: verified.relationships,
           groups: verified.groups,
           roles: verified.roles,

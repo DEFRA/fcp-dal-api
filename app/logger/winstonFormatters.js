@@ -63,6 +63,22 @@ const SEARCH_PHRASE_MASKED_FIELD_TYPES = new Set(['CUSTOMER_REFERENCE'])
 // crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
 const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
 
+// URL paths that embed PII directly as a path segment, rather than in the body. Each pattern's
+// second capture group is the segment to mask.
+const PII_PATH_PATTERNS = [/(external-auth\/security-answers\/)([^/?]+)/]
+
+const maskPathPII = (pathStr) => {
+  for (const pattern of PII_PATH_PATTERNS) {
+    if (pattern.test(pathStr)) {
+      return pathStr.replace(
+        pattern,
+        (_, prefix, segment) => `${prefix}${maskAllButLastFour(segment)}`
+      )
+    }
+  }
+  return pathStr
+}
+
 const pickKeysForLogging = (obj) => {
   if (obj == null) return obj
 
@@ -102,12 +118,12 @@ const buildUrl = ({ body, path, url }) => {
 
   if (url && path) {
     // Simplest case, both fields supplied, no interpretation needed
-    result.full = url
-    result.path = path
+    result.full = maskPathPII(url.toString())
+    result.path = maskPathPII(path.toString())
   } else {
     const pathToUse = url || path
     if (pathToUse) {
-      const pathStr = pathToUse.toString()
+      const pathStr = maskPathPII(pathToUse.toString())
       if (pathStr.startsWith('http')) {
         result.full = pathStr
         result.path = new URL(pathStr).pathname

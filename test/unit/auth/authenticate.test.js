@@ -96,7 +96,7 @@ describe('getAuth', () => {
               '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
               '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
               '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
-              '"contactId":"contact-id","relationships":["orgId:sbi:company name:"],' +
+              '"contactId":"******t-id","relationships":["orgId:sbi:company name:"],' +
               '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
               '"roles":["role-id"],"azp":"azp-id"}'
           }
@@ -131,7 +131,7 @@ describe('getAuth', () => {
               '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
               '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
               '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","contactId":"contact-id",' +
+              '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","contactId":"******t-id",' +
               '"relationships":["orgId:sbi:company name:"],' +
               '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
               '"roles":["role-id"],"azp":"azp-id"}'

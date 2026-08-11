@@ -431,5 +431,45 @@ describe('winstonFormatters', () => {
       })
       expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
     })
+
+    it('masks the crn segment of an external-auth security-answers path', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/external-auth/security-answers/1234567890' }
+      })
+      expect(result.url).toEqual({
+        full: '/external-auth/security-answers/******7890',
+        path: '/external-auth/security-answers/******7890'
+      })
+    })
+
+    it('masks the crn segment of a full external-auth security-answers URL', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: 'https://api.example.com/external-auth/security-answers/1234567890' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/external-auth/security-answers/******7890',
+        path: '/external-auth/security-answers/******7890'
+      })
+    })
+
+    it('masks the crn segment when both url and path are supplied', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          url: 'https://api.example.com/external-auth/security-answers/1234567890',
+          path: '/external-auth/security-answers/1234567890'
+        }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/external-auth/security-answers/******7890',
+        path: '/external-auth/security-answers/******7890'
+      })
+    })
+
+    it('does not affect paths that are not in the PII path pattern list', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/organisation/123' }
+      })
+      expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
+    })
   })
 })
