@@ -1,4 +1,5 @@
 import { format } from 'winston'
+import { maskAllButLastFour } from './utils.js'
 
 const buildHttpDetails = (request, response, requestTimeMs) => {
   if (!request && !response && !requestTimeMs) return {}
@@ -61,11 +62,6 @@ const SEARCH_PHRASE_MASKED_FIELD_TYPES = new Set(['CUSTOMER_REFERENCE'])
 
 // crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
 const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
-
-const maskAllButLastFour = (value) => {
-  if (typeof value !== 'string' || value.length <= 4) return value
-  return '*'.repeat(value.length - 4) + value.slice(-4)
-}
 
 const pickKeysForLogging = (obj) => {
   if (obj == null) return obj

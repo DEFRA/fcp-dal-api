@@ -1,4 +1,5 @@
 import { MONGO_DB_ERROR_001 } from '../../../logger/codes.js'
+import { maskAllButLastFour } from '../../../logger/utils.js'
 
 async function upsertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCustomer }) {
   const personId = await ruralPaymentsCustomer.getPersonIdByCRN(crn)
@@ -6,7 +7,7 @@ async function upsertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCustomer }
   // NOTE: fire-and-forget insertion to avoid slowing down the request, must use .catch for errors
   mongoCustomer.upsertPersonIdByCRN(crn, personId).catch((err) => {
     ruralPaymentsCustomer.logger.warn(
-      `#resolver - Customer - Error storing personId from MongoDB for CRN: ${crn}`,
+      `#resolver - Customer - Error storing personId from MongoDB for CRN: ${maskAllButLastFour(crn)}`,
       {
         crn,
         code: MONGO_DB_ERROR_001,
@@ -28,7 +29,7 @@ export const retrievePersonIdByCRN = async (crn, { mongoCustomer, ruralPaymentsC
     )
   } catch (err) {
     ruralPaymentsCustomer.logger.warn(
-      `#resolver - Customer - Error retrieving personId from MongoDB for CRN: ${crn}`,
+      `#resolver - Customer - Error retrieving personId from MongoDB for CRN: ${maskAllButLastFour(crn)}`,
       {
         crn,
         code: MONGO_DB_ERROR_001,

@@ -60,7 +60,7 @@ describe('Rural Payments Customer', () => {
       headers: { 'Content-Type': 'application/json' }
     })
     expect(logger.warn).toHaveBeenCalledWith(
-      '#datasource - Rural payments - Customer not found for CRN: 11111111',
+      '#datasource - Rural payments - Customer not found for CRN: ****1111',
       {
         code: 'RURALPAYMENTS_API_NOT_FOUND_001',
         crn: '11111111',

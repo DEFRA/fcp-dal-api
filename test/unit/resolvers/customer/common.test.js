@@ -53,7 +53,7 @@ describe('retrievePersonIdByCRN', () => {
 
     expect(dataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith(crn)
     expect(dataSources.ruralPaymentsCustomer.logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Error retrieving personId from MongoDB for CRN: 1234567890'),
+      expect.stringContaining('Error retrieving personId from MongoDB for CRN: ******7890'),
       expect.objectContaining({
         crn: crn,
         error: mongoError
