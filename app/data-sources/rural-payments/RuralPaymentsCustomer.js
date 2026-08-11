@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { config } from '../../config.js'
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
+import { maskAllButLastFour } from '../../logger/utils.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
@@ -34,11 +35,14 @@ export class RuralPaymentsCustomer extends RuralPayments {
     })
 
     if (!customerResponse?._data?.length) {
-      this.logger.warn(`#datasource - Rural payments - Customer not found for CRN: ${crn}`, {
-        crn,
-        code: RURALPAYMENTS_API_NOT_FOUND_001,
-        response: { body: customerResponse }
-      })
+      this.logger.warn(
+        `#datasource - Rural payments - Customer not found for CRN: ${maskAllButLastFour(crn)}`,
+        {
+          crn,
+          code: RURALPAYMENTS_API_NOT_FOUND_001,
+          response: { body: customerResponse }
+        }
+      )
       throw new NotFound('Rural payments customer not found')
     }
     return customerResponse._data[0]

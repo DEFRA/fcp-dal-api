@@ -69,6 +69,7 @@ export class RuralPayments extends BaseRESTDataSource {
 
     const internalEmail = this.authContext.internalAuthHeader || this.authContext.serviceAccount
 
+    // Note: these headers won't be logged. See https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md
     if (internalEmail) {
       additionalHeaders.email = internalEmail
     } else {

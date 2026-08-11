@@ -1,3 +1,8 @@
+export const maskAllButLastFour = (value) => {
+  if (typeof value !== 'string' || value.length <= 4) return value
+  return '*'.repeat(value.length - 4) + value.slice(-4)
+}
+
 const sampleArray = (array, sampleSize = 5) => {
   if (!Array.isArray(array)) {
     return array
