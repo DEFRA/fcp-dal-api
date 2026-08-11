@@ -133,6 +133,28 @@ To test the application run:
 npm test
 ```
 
+#### GraphQL schema coverage
+
+The acceptance test suite is checked against the GraphQL schema to ensure enough of the schema is actually exercised by tests. This runs as part of CI, but can also be run locally:
+
+```bash
+npm run test:acceptance:coverage
+```
+
+This prints the schema to `schema.graphql`, runs [`graphql-inspector coverage`](https://the-guild.dev/graphql/inspector/docs/products/cli#coverage) against the acceptance tests, and fails (via `scripts/check-schema-coverage.js`) if field coverage falls below a threshold (default `80%`, override with the `SCHEMA_COVERAGE_THRESHOLD` env var). Any uncovered fields are listed in the output.
+
+There is also a helper script to print the current schema to `schema.graphql` on its own:
+
+```bash
+npm run schema:print
+```
+
+And one to check for structurally similar types in the schema (useful for spotting duplication):
+
+```bash
+npm run schema:type:similarity
+```
+
 ### Production
 
 To mimic the application running in `production` mode locally run:

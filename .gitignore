@@ -16,6 +16,8 @@
 npm-debug.log
 coverage
 node_modules
+/schema.graphql
+/schema-coverage.json
 *.cer
 *.key
 *.crt

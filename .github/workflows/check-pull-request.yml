@@ -52,6 +52,11 @@ jobs:
       - name: Lint code
         run: npm run lint
 
+      - name: Check GraphQL schema coverage
+        env:
+          SCHEMA_COVERAGE_THRESHOLD: 80 # Testing failure. Drop down to 78%
+        run: npm run test:acceptance:coverage
+
       - name: Download base coverage snapshot from main
         id: base-cov
         env:
