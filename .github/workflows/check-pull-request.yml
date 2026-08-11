@@ -54,7 +54,7 @@ jobs:
 
       - name: Check GraphQL schema coverage
         env:
-          SCHEMA_COVERAGE_THRESHOLD: 80 # Testing failure. Drop down to 78%
+          SCHEMA_COVERAGE_THRESHOLD: 78
           DOTENV_CONFIG_PATH: .env.test
         run: npm run test:acceptance:coverage
 
