@@ -3,8 +3,11 @@ import { transformOrganisationSearchResult } from '../../../transformers/rural-p
 import { retrieveOrgIdBySbi } from './common.js'
 
 export const Query = {
-  async business(__, { sbi }, { dataSources }) {
+  async business(__, { sbi }, { dataSources, auditTrail }, info) {
     const organisationId = await retrieveOrgIdBySbi(sbi, dataSources)
+
+    auditTrail?.recordAccount(info, 'organisationId', organisationId)
+    auditTrail?.recordAccount(info, 'sbi', sbi)
 
     return {
       sbi,

@@ -45,6 +45,27 @@ describe('Business Query Resolver', () => {
     })
   })
 
+  it('records the organisationId and sbi as accounts on the audit trail', async () => {
+    const sbi = '123456789'
+    const auditTrail = { recordAccount: jest.fn() }
+    const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+    mockDataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(1)
+
+    await Query.business(null, { sbi }, { dataSources: mockDataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledTimes(2)
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 1)
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', sbi)
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    const sbi = '123456789'
+    mockDataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(1)
+
+    await Query.business(null, { sbi }, { dataSources: mockDataSources })
+  })
+
   it('businessSearch should return transformed results and page info', async () => {
     const page = { number: 1, size: 20, totalPages: 1, totalElements: 1 }
     mockDataSources.ruralPaymentsBusiness.organisationSearch.mockResolvedValue({
