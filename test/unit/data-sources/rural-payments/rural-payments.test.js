@@ -496,18 +496,3 @@ describe('RuralPayments', () => {
     })
   })
 })
-
-describe('extractCrnFromDefraIdToken', () => {
-  test('extracts crn successfully from valid token', async () => {
-    const response = extractCrnFromDefraIdToken(
-      jwt.sign({ contactId: '11111111' }, 'secret', { expiresIn: '1h' })
-    )
-    expect(response).toEqual('11111111')
-  })
-  test('Throws error when provided an invalid token', async () => {
-    const invalidToken = jwt.sign({}, 'secret', { expiresIn: '1h' })
-    expect(() => extractCrnFromDefraIdToken(invalidToken)).toThrow(
-      new BadRequest('Defra ID token does not contain crn')
-    )
-  })
-})

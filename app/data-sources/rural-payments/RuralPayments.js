@@ -1,22 +1,14 @@
 import { StatusCodes } from 'http-status-codes'
-import jwt from 'jsonwebtoken'
 import tls from 'node:tls'
 import { EnvHttpProxyAgent, fetch as fetch11 } from 'undici'
 import { config as appConfig } from '../../config.js'
-import { BadRequest, HttpError } from '../../errors/graphql.js'
+import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { BaseRESTDataSource } from '../BaseRESTDataSource.js'
+import { extractCrnFromDefraIdToken } from '../../auth/defra-id.js'
 
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
-
-export function extractCrnFromDefraIdToken(token) {
-  const { payload } = jwt.decode(token, { complete: true })
-  if (payload?.contactId) {
-    return payload.contactId
-  }
-  throw new BadRequest('Defra ID token does not contain crn')
-}
 
 export class RuralPayments extends BaseRESTDataSource {
   // Note this gets overridden by the customFetch
