@@ -53,9 +53,6 @@ jobs:
         run: npm run lint
 
       - name: Check GraphQL schema coverage
-        env:
-          SCHEMA_COVERAGE_THRESHOLD: 78
-          DOTENV_CONFIG_PATH: .env.test
         run: npm run test:acceptance:coverage
 
       - name: Download base coverage snapshot from main

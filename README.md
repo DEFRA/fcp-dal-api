@@ -141,7 +141,7 @@ The acceptance test suite is checked against the GraphQL schema to ensure enough
 npm run test:acceptance:coverage
 ```
 
-This prints the schema to `schema.graphql`, runs [`graphql-inspector coverage`](https://the-guild.dev/graphql/inspector/docs/products/cli#coverage) against the acceptance tests, and fails (via `scripts/check-schema-coverage.js`) if field coverage falls below a threshold (default `80%`, override with the `SCHEMA_COVERAGE_THRESHOLD` env var). Any uncovered fields are listed in the output.
+This prints the schema to `schema.graphql`, runs [`graphql-inspector coverage`](https://the-guild.dev/graphql/inspector/docs/products/cli#coverage) against the acceptance tests, and fails (via `scripts/check-schema-coverage.js`) if type or field coverage falls below a threshold (default `80%` for both, override with the `SCHEMA_TYPE_COVERAGE_THRESHOLD` and `SCHEMA_FIELD_COVERAGE_THRESHOLD` env vars). Any uncovered types and fields are listed in the output.
 
 There is also a helper script to print the current schema to `schema.graphql` on its own:
 
