@@ -104,13 +104,16 @@ export const Business = {
     return response?.accounts ?? []
   },
 
-  async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources }) {
+  async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources, auditTrail }, info) {
     const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
     const frn = organisation.businessReference
 
     if (!frn) {
       throw new NotFound('FRN not found for business')
     }
+
+    auditTrail?.recordAccount(info, 'frn', frn)
+    auditTrail?.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: frn })
 
     const payments = await dataSources.hitachiPayments.getSupplierPayments({
       frn,
