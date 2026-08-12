@@ -52,6 +52,9 @@ jobs:
       - name: Lint code
         run: npm run lint
 
+      - name: Check GraphQL schema coverage
+        run: npm run test:acceptance:coverage
+
       - name: Download base coverage snapshot from main
         id: base-cov
         env:
