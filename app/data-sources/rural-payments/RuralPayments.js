@@ -6,6 +6,7 @@ import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { BaseRESTDataSource } from '../BaseRESTDataSource.js'
 import { extractCrnFromDefraIdToken } from '../../auth/defra-id.js'
+import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
 
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
@@ -19,6 +20,7 @@ export class RuralPayments extends BaseRESTDataSource {
       code: RURALPAYMENTS_API_REQUEST_001
     })
 
+    this.endUserAuthContext = endUserAuthContext(request)
     this.initialiseRequest(request)
 
     if (appConfig.get('kits.disableMTLS')) {
@@ -59,14 +61,15 @@ export class RuralPayments extends BaseRESTDataSource {
 
     const additionalHeaders = {}
 
-    const internalEmail = this.authContext.internalAuthHeader || this.authContext.serviceAccount
+    const internalEmail =
+      this.endUserAuthContext.internalAuthHeader || this.endUserAuthContext.serviceAccount
 
     // Note: these headers won't be logged. See https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md
     if (internalEmail) {
       additionalHeaders.email = internalEmail
     } else {
-      additionalHeaders.Authorization = headers['x-forwarded-authorization']
-      additionalHeaders.crn = extractCrnFromDefraIdToken(headers['x-forwarded-authorization'])
+      additionalHeaders.Authorization = this.endUserAuthContext.externalAuthHeader
+      additionalHeaders.crn = extractCrnFromDefraIdToken(this.endUserAuthContext.externalAuthHeader)
     }
 
     request.headers = {
@@ -91,26 +94,24 @@ export class RuralPayments extends BaseRESTDataSource {
 
   initialiseRequest(request) {
     this.request = request
-    this.authContext = {
-      internalAuthHeader: this.request.headers.email,
-      externalAuthHeader: this.request.headers['x-forwarded-authorization'],
-      serviceAccount: this.request.headers['service-account']
-    }
 
     let authType
-    if (this.authContext.internalAuthHeader) {
+    if (this.endUserAuthContext.internalAuthHeader) {
       this.gatewayRoute = 'internal'
       authType = 'internal'
-    } else if (this.authContext.serviceAccount && this.authContext.externalAuthHeader) {
+    } else if (
+      this.endUserAuthContext.serviceAccount &&
+      this.endUserAuthContext.externalAuthHeader
+    ) {
       // Service account supplied alongside the caller's own external auth header - this is an
       // otherwise-external request that the DAL service account is taking over routing for.
       this.gatewayRoute = 'internal'
       authType = 'dal-service-account'
-    } else if (this.authContext.serviceAccount) {
+    } else if (this.endUserAuthContext.serviceAccount) {
       // Consumer has supplied a service account email vis the service-account header
       this.gatewayRoute = 'internal'
       authType = 'client-service-account'
-    } else if (this.authContext.externalAuthHeader) {
+    } else if (this.endUserAuthContext.externalAuthHeader) {
       this.gatewayRoute = 'external'
       authType = 'external'
     } else {

@@ -10,6 +10,7 @@ import { RuralPaymentsReferenceData } from '../data-sources/rural-payments/Rural
 import { Permissions } from '../data-sources/static/permissions.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
+import { endUserAuthContext } from '../auth/end-user-auth-context.js'
 
 function stripClientSuppliedServiceAccountHeader(request) {
   // Service account foundations have been added, to support the DAL internal service account, but this is not
@@ -39,6 +40,7 @@ export async function context({ request }) {
     }
   ]
 
+  const authContext = endUserAuthContext(request)
   const internalServiceAccountDatasourceOptions = [
     { logger: requestLogger },
     {
@@ -46,8 +48,7 @@ export async function context({ request }) {
         ...request,
         headers: {
           ...request.headers,
-          'service-account':
-            request.headers['service-account'] || config.get('kits.dalServiceAccountEmail')
+          'service-account': authContext.serviceAccount || config.get('kits.dalServiceAccountEmail')
         }
       }
     }
