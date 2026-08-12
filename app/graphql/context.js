@@ -11,6 +11,7 @@ import { Permissions } from '../data-sources/static/permissions.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
 import { endUserAuthContext } from '../auth/end-user-auth-context.js'
+import { createAuditTrail } from '../audit/audit-trail.js'
 
 function stripClientSuppliedServiceAccountHeader(request) {
   // Service account foundations have been added, to support the DAL internal service account, but this is not
@@ -40,6 +41,7 @@ export async function context({ request }) {
     }
   ]
 
+  const auditTrail = createAuditTrail()
   const authContext = endUserAuthContext(request)
   const internalServiceAccountDatasourceOptions = [
     { logger: requestLogger },
@@ -59,6 +61,7 @@ export async function context({ request }) {
   return {
     auth,
     requestLogger,
+    auditTrail,
     db,
     dataSources: {
       permissions: new Permissions({ logger: requestLogger }),

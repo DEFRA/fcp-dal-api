@@ -78,6 +78,7 @@ describe('context', () => {
     })
     expect(result.auth).toEqual({ user: 'test-user' })
     expect(result.requestLogger).toBeDefined()
+    expect(result.auditTrail).toBeDefined()
     expect(result.dataSources.permissions.type).toBe('Permissions')
     expect(result.dataSources.ruralPaymentsBusiness).toBeDefined()
     expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
@@ -221,6 +222,25 @@ describe('context', () => {
       expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(1, expect.anything(), {
         request: { headers: { 'x-forwarded-authorization': 'token123' } }
       })
+    })
+  })
+
+  describe('auditTrail', () => {
+    test('exposes a fresh, independent audit trail on every call', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = { headers: { email: 'user@example.com' } }
+
+      const first = await context({ request })
+      const second = await context({ request })
+
+      expect(first.auditTrail.recordEntity).toBeInstanceOf(Function)
+      expect(first.auditTrail.recordAccount).toBeInstanceOf(Function)
+      expect(first.auditTrail.getForRoot).toBeInstanceOf(Function)
+      expect(first.auditTrail).not.toBe(second.auditTrail)
+
+      first.auditTrail.recordAccount({ path: { key: 'business', prev: undefined } }, 'frn', '123')
+      expect(first.auditTrail.getForRoot('business').accounts).toEqual({ frn: '123' })
+      expect(second.auditTrail.getForRoot('business').accounts).toBeUndefined()
     })
   })
 
