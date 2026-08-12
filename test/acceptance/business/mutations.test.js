@@ -183,3 +183,172 @@ describe('Business Mutations - as an internal user', () => {
     )
   })
 })
+
+const validateMutation = gql`
+  mutation ValidateBusinessCustomerBankDetails($input: ValidateBusinessCustomerBankDetailsInput!) {
+    validateBusinessCustomerBankDetails(input: $input) {
+      __typename
+      ... on BankDetailsMatched {
+        message
+      }
+      ... on BankDetailsPartialMatch {
+        message
+      }
+      ... on BankDetailsValidationFailed {
+        message
+        attemptsRemaining
+      }
+      ... on BankDetailsLocked {
+        message
+      }
+      ... on BankDetailsNotEditable {
+        message
+        submitted
+        updatedRecently
+        new
+      }
+    }
+  }
+`
+
+const submitMutation = gql`
+  mutation CreateBusinessCustomerBankDetails($input: CreateBusinessCustomerBankDetailsInput!) {
+    createBusinessCustomerBankDetails(input: $input) {
+      __typename
+      ... on BankDetailsSubmitted {
+        success
+      }
+      ... on BankDetailsValidationFailed {
+        message
+        attemptsRemaining
+      }
+      ... on BankDetailsLocked {
+        message
+      }
+      ... on BankDetailsNotEditable {
+        message
+        submitted
+        updatedRecently
+        new
+      }
+    }
+  }
+`
+
+const accountForNumber = (accountNumber, sortCode, bankName) => ({
+  ukBusiness: {
+    accountHolderName: 'Acceptance Farms Ltd',
+    accountNumber,
+    bankName,
+    sortCode,
+    currency: 'GBP'
+  }
+})
+
+const matchAccount = accountForNumber('11111100', '111111', 'Match Bank')
+const partialMatchAccount = accountForNumber('22222200', '222222', 'Partial Match Bank')
+const noMatchAccount = accountForNumber('33333300', '333333', 'No Match Bank')
+
+const client = new GraphQLClient(targetURL)
+const headers = { email: 'some-email' }
+
+describe('validateBusinessCustomerBankDetails', () => {
+  it('returns BankDetailsMatched when the details fully match', async () => {
+    const response = await client.request(
+      validateMutation,
+      { input: { sbi: '111111111', crn: '1111111100', account: matchAccount } },
+      headers
+    )
+
+    expect(response.validateBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsMatched',
+      message: 'All good'
+    })
+  })
+
+  it('returns BankDetailsPartialMatch when the details partially match', async () => {
+    const response = await client.request(
+      validateMutation,
+      { input: { sbi: '111111111', crn: '1111111100', account: partialMatchAccount } },
+      headers
+    )
+
+    expect(response.validateBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsPartialMatch',
+      message: 'Some details did not match — please confirm'
+    })
+  })
+
+  it('returns BankDetailsValidationFailed when the details do not match', async () => {
+    const response = await client.request(
+      validateMutation,
+      { input: { sbi: '111111111', crn: '1111111100', account: noMatchAccount } },
+      headers
+    )
+
+    expect(response.validateBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsValidationFailed',
+      message: "Details don't match",
+      attemptsRemaining: 2
+    })
+  })
+
+  it('returns BankDetailsLocked when the person is locked for bank changes', async () => {
+    // person 11111119 (CRN 1111111900) is locked for org 111111111 in the mock
+    const response = await client.request(
+      validateMutation,
+      { input: { sbi: '111111111', crn: '1111111900', account: matchAccount } },
+      headers
+    )
+
+    expect(response.validateBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: 'Bank details are locked for changes'
+    })
+  })
+
+  it('returns BankDetailsNotEditable when the bank details cannot currently be changed', async () => {
+    // org 222222222 has bankAccountStatus submitted+updatedRecently in the mock
+    const response = await client.request(
+      validateMutation,
+      { input: { sbi: '222222222', crn: '2222222000', account: matchAccount } },
+      headers
+    )
+
+    expect(response.validateBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsNotEditable',
+      message: 'Bank details are not currently editable',
+      submitted: true,
+      updatedRecently: true,
+      new: false
+    })
+  })
+})
+
+describe('createBusinessCustomerBankDetails', () => {
+  it('submits the bank change when the details fully match', async () => {
+    const response = await client.request(
+      submitMutation,
+      { input: { sbi: '111111111', crn: '1111111100', account: matchAccount } },
+      headers
+    )
+
+    expect(response.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsSubmitted',
+      success: true
+    })
+  })
+
+  it('submits the bank change when the details partially match', async () => {
+    const response = await client.request(
+      submitMutation,
+      { input: { sbi: '111111111', crn: '1111111100', account: partialMatchAccount } },
+      headers
+    )
+
+    expect(response.createBusinessCustomerBankDetails).toEqual({
+      __typename: 'BankDetailsSubmitted',
+      success: true
+    })
+  })
+})

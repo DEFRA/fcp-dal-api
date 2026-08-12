@@ -14,6 +14,72 @@ import {
 } from './common.js'
 import { Query } from './query.js'
 
+const validateBankChangeRequest = async (input, dataSources) => {
+  const { sbi, crn } = input
+  const { ruralPaymentsBusiness } = dataSources
+
+  const organisation = await ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+  if (!organisation.businessReference) {
+    throw new NotFound('FRN not found for business')
+  }
+
+  const personId = await retrievePersonIdByCRN(crn, dataSources)
+  const organisationId = `${organisation.id}`
+
+  const lockedStatus = await ruralPaymentsBusiness.getBankChangeLockedStatus(
+    organisationId,
+    `${personId}`
+  )
+  if (lockedStatus.locked) {
+    return {
+      failure: {
+        __typename: 'BankDetailsLocked',
+        message: 'Bank details are locked for changes'
+      }
+    }
+  }
+
+  const accountStatus = await ruralPaymentsBusiness.getBankChangeAccountStatus(organisationId)
+  if (!accountStatus.editable) {
+    return {
+      failure: {
+        __typename: 'BankDetailsNotEditable',
+        message: 'Bank details are not currently editable',
+        submitted: accountStatus.submitted,
+        updatedRecently: accountStatus.updatedRecently,
+        new: accountStatus.new
+      }
+    }
+  }
+
+  const submission = transformBankChangeInputToSubmission(input, {
+    organisationId,
+    personId: `${personId}`,
+    frn: organisation.businessReference
+  })
+
+  const validation = await ruralPaymentsBusiness.validateBankChange(submission)
+  if (validation.status === 'FAILED') {
+    if (validation.attemptsRemaining === 0) {
+      return {
+        failure: {
+          __typename: 'BankDetailsLocked',
+          message: validation.message || 'Bank details failed validation'
+        }
+      }
+    }
+    return {
+      failure: {
+        __typename: 'BankDetailsValidationFailed',
+        message: validation.message || 'Bank details failed validation',
+        attemptsRemaining: validation.attemptsRemaining
+      }
+    }
+  }
+
+  return { submission, validation }
+}
+
 export const Mutation = {
   createBusiness: async (_, { input }, { dataSources }) => {
     const { crn, ...businessDetails } = input
@@ -28,62 +94,30 @@ export const Mutation = {
     return result
   },
   createBusinessCustomerBankDetails: async (_, { input }, { dataSources }) => {
-    const { sbi, crn } = input
-    const { ruralPaymentsBusiness } = dataSources
-
-    const organisation = await ruralPaymentsBusiness.getOrganisationBySBI(sbi)
-    if (!organisation.businessReference) {
-      throw new NotFound('FRN not found for business')
+    const { failure, submission } = await validateBankChangeRequest(input, dataSources)
+    if (failure) {
+      return failure
     }
 
-    const personId = await retrievePersonIdByCRN(crn, dataSources)
-    const organisationId = `${organisation.id}`
-
-    const lockedStatus = await ruralPaymentsBusiness.getBankChangeLockedStatus(
-      organisationId,
-      `${personId}`
-    )
-    if (lockedStatus.locked) {
-      return {
-        __typename: 'BankDetailsLocked',
-        message: 'Bank details are locked for changes'
-      }
-    }
-
-    const accountStatus = await ruralPaymentsBusiness.getBankChangeAccountStatus(organisationId)
-    if (!accountStatus.editable) {
-      return {
-        __typename: 'BankDetailsNotEditable',
-        message: 'Bank details are not currently editable',
-        submitted: accountStatus.submitted,
-        updatedRecently: accountStatus.updatedRecently,
-        new: accountStatus.new
-      }
-    }
-
-    const submission = transformBankChangeInputToSubmission(input, {
-      organisationId,
-      personId: `${personId}`,
-      frn: organisation.businessReference
-    })
-
-    const validation = await ruralPaymentsBusiness.validateBankChange(submission)
-    if (validation.status === 'FAILED') {
-      if (validation.attemptsRemaining === 0) {
-        return {
-          __typename: 'BankDetailsLocked',
-          message: validation.message || 'Bank details failed validation'
-        }
-      }
-      return {
-        __typename: 'BankDetailsValidationFailed',
-        message: validation.message || 'Bank details failed validation',
-        attemptsRemaining: validation.attemptsRemaining
-      }
-    }
-
-    await ruralPaymentsBusiness.submitBankChange(submission)
+    await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
     return { __typename: 'BankDetailsSubmitted', success: true }
+  },
+  validateBusinessCustomerBankDetails: async (_, { input }, { dataSources }) => {
+    const { failure, validation } = await validateBankChangeRequest(input, dataSources)
+    if (failure) {
+      return failure
+    }
+
+    if (validation.status === 'PARTIAL_MATCH') {
+      return {
+        __typename: 'BankDetailsPartialMatch',
+        message: validation.message || 'Bank details partially match'
+      }
+    }
+    return {
+      __typename: 'BankDetailsMatched',
+      message: validation.message || 'Bank details match'
+    }
   },
   updateBusinessName: businessDetailsUpdateResolver,
   updateBusinessPhone: businessDetailsUpdateResolver,
