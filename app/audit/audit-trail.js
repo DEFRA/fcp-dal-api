@@ -96,6 +96,15 @@ export function createAuditTrail() {
       }
     },
 
+    /**
+     * Every root selection something has been recorded against. Lets the audit plugin build one event per root without
+     * needing to re-parse the query document itself.
+     * @returns {string[]}
+     */
+    rootKeys() {
+      return Array.from(byRoot.keys())
+    },
+
     serviceAccount() {
       return serviceAccount
     }
