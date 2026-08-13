@@ -77,6 +77,7 @@ describe('context', () => {
       traceId: 'trace-1'
     })
     expect(result.auth).toEqual({ user: 'test-user' })
+    expect(result.endUserAuthContext).toMatchObject({ externalAuthHeader: 'token123' })
     expect(result.requestLogger).toBeDefined()
     expect(result.auditTrail).toBeDefined()
     expect(result.dataSources.permissions.type).toBe('Permissions')

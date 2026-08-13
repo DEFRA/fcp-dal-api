@@ -61,6 +61,7 @@ export async function context({ request }) {
   return {
     auth,
     requestLogger,
+    endUserAuthContext: authContext,
     auditTrail,
     db,
     dataSources: {
