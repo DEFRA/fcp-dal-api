@@ -9,8 +9,14 @@ const info = jest.fn()
 jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
   logger: { info, debug: jest.fn(), warn: jest.fn(), error: jest.fn() }
 }))
-const { authDirectiveTransformer, authGroups, checkAuthGroup, getAuth, getRequestingGroup } =
-  await import('../../../app/auth/authenticate.js')
+const {
+  authDirectiveTransformer,
+  authGroups,
+  checkAuthGroup,
+  getAuth,
+  getRequestingGroup,
+  getRequestingService
+} = await import('../../../app/auth/authenticate.js')
 
 const tokenPayload = {
   aud: 'api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
@@ -246,6 +252,46 @@ describe('getRequestingGroup', () => {
       expect(getRequestingGroup([])).toBeUndefined()
       expect(getRequestingGroup(undefined)).toBeUndefined()
     })
+  })
+})
+
+describe('getRequestingService', () => {
+  const adminGroupId = config.get('auth.groups.ADMIN')
+  const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
+  const sfiReformGroupId = config.get('auth.groups.SFI_REFORM')
+  const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
+
+  it('should return the service name for a single recognised group', () => {
+    expect(getRequestingService([consolidatedViewGroupId])).toBe('Consolidated View')
+    expect(getRequestingService([sfiReformGroupId])).toBe('Grants')
+    expect(getRequestingService([singleFrontDoorGroupId])).toBe('Single Front Door')
+  })
+
+  it('should return null when the only group present is ADMIN', () => {
+    expect(getRequestingService([adminGroupId])).toBeNull()
+  })
+
+  it('should return the first group in the array that maps to a service, skipping ADMIN', () => {
+    expect(getRequestingService([adminGroupId, sfiReformGroupId])).toBe('Grants')
+  })
+
+  it('should honour input array order over any fixed preference between services', () => {
+    expect(getRequestingService([sfiReformGroupId, consolidatedViewGroupId])).toBe('Grants')
+    expect(getRequestingService([consolidatedViewGroupId, sfiReformGroupId])).toBe(
+      'Consolidated View'
+    )
+  })
+
+  it('should return null when no groups are recognised', () => {
+    expect(getRequestingService(['unrecognised-group'])).toBeNull()
+  })
+
+  it('should return null when groups is an empty array', () => {
+    expect(getRequestingService([])).toBeNull()
+  })
+
+  it('should throw when groups is undefined', () => {
+    expect(() => getRequestingService(undefined)).toThrow()
   })
 })
 

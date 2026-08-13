@@ -6,10 +6,17 @@ import { config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
-import { maskAllButLastFour } from '../logger/utils.js'
 import { sendMetric } from '../logger/sendMetric.js'
+import { maskAllButLastFour } from '../logger/utils.js'
 
 export const authGroups = config.get('auth.groups')
+
+const authGroupServiceName = {
+  [authGroups.ADMIN]: null,
+  [authGroups.CONSOLIDATED_VIEW]: 'Consolidated View',
+  [authGroups.SFI_REFORM]: 'Grants',
+  [authGroups.SINGLE_FRONT_DOOR]: 'Single Front Door'
+}
 
 export async function getAuth(request, jwkDatasource) {
   try {
@@ -81,6 +88,19 @@ export async function getAuth(request, jwkDatasource) {
     }
     return {}
   }
+}
+
+/**
+ * Returns the requesting service name based on the security groups.
+ * Note: this will likely switch to using the appid see (https://eaflood.atlassian.net/browse/FCPDAL-490)
+ * however using groups for now for consisenticy with our permission model.
+ * @param {string[]} groups
+ * @returns the calling service or null if service wasn't identified
+ */
+export function getRequestingService(groups) {
+  return (
+    groups.map((group) => authGroupServiceName[group]).find((serviceName) => !!serviceName) ?? null
+  )
 }
 
 export function getRequestingGroup(groups) {

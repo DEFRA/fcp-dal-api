@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { getAuth, getRequestingGroup } from '../auth/authenticate.js'
+import { getAuth, getRequestingGroup, getRequestingService } from '../auth/authenticate.js'
 import { config } from '../config.js'
 import { HitachiPayments } from '../data-sources/hitachi/HitachiPayments.js'
 import { JWKS } from '../data-sources/JWKS.js'
@@ -38,10 +38,14 @@ function stripClientSuppliedServiceAccountHeader(request) {
 
 export async function context({ request }) {
   const auth = await getAuth(request, new JWKS())
+  const requestingService = getRequestingService(auth.groups ?? [])
+  // Following the pattern used by transactionId and traceId
+  request.requestingService = requestingService
 
   const requestLogger = logger.child({
     transactionId: request.transactionId,
-    traceId: request.traceId
+    traceId: request.traceId,
+    ...(requestingService && { tenant: { id: requestingService } })
   })
 
   stripClientSuppliedServiceAccountHeader(request)
