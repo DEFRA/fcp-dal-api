@@ -3,6 +3,7 @@ import { config } from '../../../app/config.js'
 
 const getAuthMock = jest.fn()
 const getRequestingGroupMock = jest.fn()
+const getRequestingServiceMock = jest.fn()
 const PermissionsMock = jest.fn()
 const RuralPaymentsBusinessMock = jest.fn()
 const RuralPaymentsCustomerMock = jest.fn()
@@ -14,7 +15,8 @@ const loggerMock = { child: loggerChild }
 
 jest.unstable_mockModule('../../../app/auth/authenticate.js', () => ({
   getAuth: getAuthMock,
-  getRequestingGroup: getRequestingGroupMock
+  getRequestingGroup: getRequestingGroupMock,
+  getRequestingService: getRequestingServiceMock
 }))
 jest.unstable_mockModule('../../../app/data-sources/static/permissions.js', () => ({
   Permissions: PermissionsMock
@@ -82,6 +84,51 @@ describe('context', () => {
     expect(result.dataSources.mongoBusiness).toEqual({})
     expect(result.dataSources.mongoCustomer).toEqual({})
     expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toBeNull()
+  })
+
+  test('binds the requesting service onto the request logger and the request itself, when one is identified', async () => {
+    getAuthMock.mockResolvedValue({ user: 'test-user', groups: ['some-group'] })
+    getRequestingServiceMock.mockReturnValue('Grants')
+    PermissionsMock.mockImplementation(() => ({ type: 'Permissions' }))
+    JWKSMock.mockImplementation(() => ({}))
+    loggerChild.mockReturnValue({ log: jest.fn() })
+    const request = {
+      headers: { 'x-forwarded-authorization': 'token123' },
+      transactionId: 'tx-1',
+      traceId: 'trace-1'
+    }
+
+    await context({ request })
+
+    expect(getRequestingServiceMock).toHaveBeenCalledWith(['some-group'])
+    expect(loggerMock.child).toHaveBeenCalledWith({
+      transactionId: 'tx-1',
+      traceId: 'trace-1',
+      tenant: { id: 'Grants' }
+    })
+    expect(request.requestingService).toBe('Grants')
+  })
+
+  test('omits tenant from the request logger bindings when no requesting service is identified', async () => {
+    getAuthMock.mockResolvedValue({ user: 'test-user' })
+    getRequestingServiceMock.mockReturnValue(null)
+    PermissionsMock.mockImplementation(() => ({ type: 'Permissions' }))
+    JWKSMock.mockImplementation(() => ({}))
+    loggerChild.mockReturnValue({ log: jest.fn() })
+    const request = {
+      headers: { 'x-forwarded-authorization': 'token123' },
+      transactionId: 'tx-1',
+      traceId: 'trace-1'
+    }
+
+    await context({ request })
+
+    expect(getRequestingServiceMock).toHaveBeenCalledWith([])
+    expect(loggerMock.child).toHaveBeenCalledWith({
+      transactionId: 'tx-1',
+      traceId: 'trace-1'
+    })
+    expect(request.requestingService).toBeNull()
   })
 
   describe('serviceAccount', () => {
