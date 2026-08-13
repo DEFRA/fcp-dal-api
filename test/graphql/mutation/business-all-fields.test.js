@@ -197,8 +197,45 @@ describe('updateBusinessAllFields', () => {
     expect(v1.isDone()).toBe(true)
     expect(result.data).toEqual({ updateBusinessAllFields: null })
     expect(result.errors).toHaveLength(1)
-    expect(result.errors[0].extensions.code).toBe('INTERNAL SERVER ERROR')
-    expect(result.errors[0].extensions.http.status).toBe(500)
+    expect(result.errors[0].extensions).toEqual(
+      expect.objectContaining({
+        code: 'INTERNAL SERVER ERROR',
+        http: { status: 500 },
+        businessDetailsUpdated: true,
+        additionalBusinessDetailsUpdated: false
+      })
+    )
+  })
+
+  test('reports neither update applied when the business details update fails first', async () => {
+    const input = {
+      sbi: '123456789',
+      name: 'new name',
+      typeCode: 3
+    }
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      name: 'new name',
+      businessType: { id: 3 }
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(500, {
+      message: 'Internal Server Error'
+    })
+
+    const result = await makeTestQuery(query, null, true, { input })
+
+    expect(result.data).toEqual({ updateBusinessAllFields: null })
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].extensions).toEqual(
+      expect.objectContaining({
+        code: 'INTERNAL SERVER ERROR',
+        http: { status: 500 },
+        businessDetailsUpdated: false,
+        additionalBusinessDetailsUpdated: null
+      })
+    )
   })
 
   test('only calls the additional business details endpoint when no business details fields are provided', async () => {

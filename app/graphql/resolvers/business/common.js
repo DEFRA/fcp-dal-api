@@ -1,3 +1,4 @@
+import { GraphQLError } from 'graphql'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
@@ -48,6 +49,17 @@ const updateIfRequired = async (newDetails, update) => {
   return true
 }
 
+// A failed update nulls the whole mutation payload, so the applied/not-applied state of each
+// update travels on the error's extensions instead: true = applied, false = attempted and
+// failed, null = not attempted.
+const withUpdateStatuses = (error, statuses) => {
+  if (error instanceof GraphQLError) {
+    Object.assign(error.extensions, statuses)
+    return error
+  }
+  return new GraphQLError(error.message, { originalError: error, extensions: statuses })
+}
+
 export const businessAllFieldsUpdateResolver = async (__, { input }, { dataSources }) => {
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
   const currentOrgDetails =
@@ -62,15 +74,32 @@ export const businessAllFieldsUpdateResolver = async (__, { input }, { dataSourc
     ...newOrgAdditionalDetails
   }
 
-  const businessDetailsUpdated = await updateIfRequired(newOrgDetails, () =>
-    dataSources.ruralPaymentsBusiness.updateOrganisationDetails(organisationId, updatedOrgDetails)
-  )
-  const additionalBusinessDetailsUpdated = await updateIfRequired(newOrgAdditionalDetails, () =>
-    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails(
-      organisationId,
-      updatedOrgDetails
+  let businessDetailsUpdated = null
+  try {
+    businessDetailsUpdated = await updateIfRequired(newOrgDetails, () =>
+      dataSources.ruralPaymentsBusiness.updateOrganisationDetails(organisationId, updatedOrgDetails)
     )
-  )
+  } catch (error) {
+    throw withUpdateStatuses(error, {
+      businessDetailsUpdated: false,
+      additionalBusinessDetailsUpdated: null
+    })
+  }
+
+  let additionalBusinessDetailsUpdated = null
+  try {
+    additionalBusinessDetailsUpdated = await updateIfRequired(newOrgAdditionalDetails, () =>
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails(
+        organisationId,
+        updatedOrgDetails
+      )
+    )
+  } catch (error) {
+    throw withUpdateStatuses(error, {
+      businessDetailsUpdated,
+      additionalBusinessDetailsUpdated: false
+    })
+  }
 
   return {
     success: true,

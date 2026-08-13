@@ -1,5 +1,5 @@
 import { expect, jest } from '@jest/globals'
-import { NotFound } from '../../../../app/errors/graphql.js'
+import { HttpError, NotFound } from '../../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
   businessAllFieldsUpdateResolver,
@@ -248,17 +248,23 @@ describe('businessAllFieldsUpdateResolver', () => {
     )
   })
 
-  it('propagates the error when the additional details update fails', async () => {
-    const upstreamError = new Error('Upstream update failed')
+  it('propagates the error with update statuses in extensions when the additional details update fails', async () => {
+    const upstreamError = new HttpError(500)
     dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockRejectedValue(
       upstreamError
     )
 
     const input = { sbi: '123', name: 'Test', typeCode: 3 }
 
-    await expect(businessAllFieldsUpdateResolver(null, { input }, { dataSources })).rejects.toThrow(
-      upstreamError
-    )
+    await expect(
+      businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+    ).rejects.toMatchObject({
+      message: 'Internal Server Error',
+      extensions: expect.objectContaining({
+        businessDetailsUpdated: true,
+        additionalBusinessDetailsUpdated: false
+      })
+    })
 
     expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledTimes(1)
     expect(
@@ -267,19 +273,45 @@ describe('businessAllFieldsUpdateResolver', () => {
   })
 
   it('propagates the error and skips the additional details update when the details update fails', async () => {
-    const upstreamError = new Error('Upstream update failed')
+    const upstreamError = new HttpError(500)
     dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockRejectedValue(upstreamError)
 
     const input = { sbi: '123', name: 'Test', typeCode: 3 }
 
-    await expect(businessAllFieldsUpdateResolver(null, { input }, { dataSources })).rejects.toThrow(
-      upstreamError
-    )
+    await expect(
+      businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+    ).rejects.toMatchObject({
+      message: 'Internal Server Error',
+      extensions: expect.objectContaining({
+        businessDetailsUpdated: false,
+        additionalBusinessDetailsUpdated: null
+      })
+    })
 
     expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledTimes(1)
     expect(
       dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
     ).not.toHaveBeenCalled()
+  })
+
+  it('reports the business details update as not attempted when only the additional details update was requested and it fails', async () => {
+    const upstreamError = new HttpError(500)
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockRejectedValue(
+      upstreamError
+    )
+
+    const input = { sbi: '123', typeCode: 3 }
+
+    await expect(
+      businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+    ).rejects.toMatchObject({
+      extensions: expect.objectContaining({
+        businessDetailsUpdated: null,
+        additionalBusinessDetailsUpdated: false
+      })
+    })
+
+    expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).not.toHaveBeenCalled()
   })
 })
 

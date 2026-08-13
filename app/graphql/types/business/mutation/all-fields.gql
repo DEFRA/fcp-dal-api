@@ -4,6 +4,12 @@ extend type Mutation {
 
   All fields are optional (except `sbi`), so consumers need only provide the fields they want to
   change.
+
+  The business details and additional business details are updated by separate upstream calls, so
+  one can fail after the other has been applied. When an update fails, the error in the GraphQL
+  `errors` array carries `businessDetailsUpdated` and `additionalBusinessDetailsUpdated` in its
+  `extensions`, each `true` (applied), `false` (attempted and failed) or `null` (not attempted).
+  Retrying the same request is safe.
   """
   updateBusinessAllFields(input: UpdateBusinessAllFieldsInput!): UpdateBusinessAllFieldsResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
