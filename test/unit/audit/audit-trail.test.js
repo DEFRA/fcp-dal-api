@@ -236,6 +236,36 @@ describe('createAuditTrail', () => {
     })
   })
 
+  describe('rootKeys', () => {
+    test('returns an empty array when nothing has been recorded', () => {
+      const auditTrail = createAuditTrail()
+
+      expect(auditTrail.rootKeys()).toEqual([])
+    })
+
+    test('returns each root selection something was recorded under, in first-recorded order', () => {
+      const auditTrail = createAuditTrail()
+
+      auditTrail.recordAccount({ path: pathTo('business2', undefined) }, 'sbi', '222')
+      auditTrail.recordEntity(
+        { path: pathTo('business1', undefined) },
+        { entity: 'payment-list', action: 'read', entityid: 'frn-1' }
+      )
+
+      expect(auditTrail.rootKeys()).toEqual(['business2', 'business1'])
+    })
+
+    test('does not repeat a root selection recorded under more than once', () => {
+      const auditTrail = createAuditTrail()
+      const info = { path: pathTo('business', undefined) }
+
+      auditTrail.recordAccount(info, 'sbi', '123456789')
+      auditTrail.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: 'frn-1' })
+
+      expect(auditTrail.rootKeys()).toEqual(['business'])
+    })
+  })
+
   test('separate createAuditTrail() instances do not share state', () => {
     const first = createAuditTrail()
     const second = createAuditTrail()
