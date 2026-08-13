@@ -117,6 +117,27 @@ describe('Server config and startup', () => {
       )
     })
 
+    test('response event logs the requesting service as tenant.id, when the request identifies one', async () => {
+      server.ext('onRequest', (request, h) => {
+        request.requestingService = 'Grants'
+        return h.continue
+      })
+
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({ tenant: { id: 'Grants' } })
+      )
+    })
+
+    test('response event omits tenant when the request has no requesting service', async () => {
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload).not.toHaveProperty('tenant')
+    })
+
     test('response event skips metrics for health path', async () => {
       await server.inject({ method: 'GET', url: '/health' })
       expect(mockSendMetric.sendMetric).not.toHaveBeenCalled()

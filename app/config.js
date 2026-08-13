@@ -67,6 +67,7 @@ export const config = convict({
   auth: {
     groups: {
       // Note must correspond to AuthGroup Enum except admin which has access to everything
+      // For groups used to identifiy the calling service, also need to update authGroupServiceName with the service name
       ADMIN: {
         doc: 'AD group ID for DAL Admins',
         format: String,
