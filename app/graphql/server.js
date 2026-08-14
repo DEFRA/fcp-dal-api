@@ -4,6 +4,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { config } from '../config.js'
 import { formatError } from './formatError.js'
 import { createSchema } from './schema.js'
+import { auditPlugin } from './plugins/audit.js'
 
 export const schema = await createSchema()
 
@@ -17,7 +18,7 @@ export const enableApolloLandingPage = () => {
 
 export const apolloServer = new ApolloServer({
   schema,
-  plugins: [enableApolloLandingPage()],
+  plugins: [enableApolloLandingPage(), auditPlugin()],
   introspection: config.get('graphqlDashboardEnabled'),
   formatError
 })
