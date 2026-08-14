@@ -43,11 +43,13 @@ const requestPayload = {
   operationName: 'GetBusiness'
 }
 
+const REQUEST_RECEIVED_MS = Date.parse('2026-01-01T00:00:00.000Z')
+
 const baseContextValue = {
   requestLogger: { error: jest.fn() },
   request: {
     headers: { 'x-forwarded-for': '203.0.113.5', email: 'internal@example.com' },
-    info: { remoteAddress: '0.0.0.0' },
+    info: { remoteAddress: '0.0.0.0', received: REQUEST_RECEIVED_MS },
     traceId: 'trace-1',
     payload: requestPayload
   },
@@ -356,6 +358,35 @@ describe('auditPlugin', () => {
 
       expect(publish).toHaveBeenCalledWith(
         expect.objectContaining({ correlationid: 'trace-xyz' }),
+        baseContextValue.requestLogger
+      )
+    })
+  })
+
+  describe('datetime', () => {
+    test('is sourced from request.info.received, not from when the event is built', async () => {
+      const publish = jest.fn()
+      const plugin = auditPlugin({ publish })
+
+      const contextValue = {
+        ...baseContextValue,
+        request: {
+          ...baseContextValue.request,
+          info: {
+            ...baseContextValue.request.info,
+            received: Date.parse('2020-06-15T09:30:00.000Z')
+          }
+        },
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
+        })
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+      await listener.willSendResponse(requestContext)
+
+      expect(publish).toHaveBeenCalledWith(
+        expect.objectContaining({ datetime: '2020-06-15T09:30:00.000Z' }),
         baseContextValue.requestLogger
       )
     })
