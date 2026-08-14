@@ -269,6 +269,19 @@ export const config = convict({
       }
     }
   },
+  audit: {
+    sns: {
+      topicArn: {
+        doc:
+          'SNS topic ARN to publish FCP audit events to. If unset, no audit events are ' +
+          'published (and nothing is logged in their place, since an audit event can contain PII).',
+        format: String,
+        default: null,
+        nullable: true,
+        env: 'AUDIT_SNS_TOPIC_ARN'
+      }
+    }
+  },
   mongo: {
     mongoUrl: {
       doc: 'URL for mongodb',
