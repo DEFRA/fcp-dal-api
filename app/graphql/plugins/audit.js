@@ -51,7 +51,8 @@ function buildEvent({ contextValue, rootSelection, errors }) {
     ip: getEndUserIpAddress(contextValue.request),
     // This is either the 'x-cdp-request-id' header or a new uuid generated at the start of this request
     correlationid: contextValue.request.traceId,
-    datetime: new Date().toISOString(),
+    // request.info.received is when Hapi received the request, not when this event is built/published.
+    datetime: new Date(contextValue.request.info.received).toISOString(),
     environment: ENVIRONMENT_NAME,
     application: APPLICATION,
     component: COMPONENT,
