@@ -1,9 +1,11 @@
 import { afterEach, describe, expect, jest, test } from '@jest/globals'
+import { validateAuditEvent } from '@defra/fcp-audit-publisher'
 
 const getRequestingGroupMock = jest.fn()
 const configGetMock = jest.fn()
 const extractCrnFromDefraIdTokenMock = jest.fn()
 const loggerMock = { error: jest.fn(), debug: jest.fn(), warn: jest.fn() }
+const snsPublishMock = jest.fn()
 
 jest.unstable_mockModule('../../../../app/auth/authenticate.js', () => ({
   getRequestingGroup: getRequestingGroupMock
@@ -17,11 +19,15 @@ jest.unstable_mockModule('../../../../app/config.js', () => ({
 jest.unstable_mockModule('../../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
+jest.unstable_mockModule('../../../../app/audit/sns-publisher.js', () => ({
+  snsPublish: snsPublishMock
+}))
 
 // ENVIRONMENT_NAME is computed once, at module load time, from config.get('cdp.env') - fixed to
 // 'dev' for every test in this file by default. The one test that cares about the 'local'
 // fallback branch resets the module registry and re-imports fresh after changing this mock.
-configGetMock.mockReturnValue('dev')
+const configMockPath = { 'cdp.env': 'dev' }
+configGetMock.mockImplementation((path) => configMockPath[path])
 
 const { auditPlugin } = await import('../../../../app/graphql/plugins/audit.js')
 
@@ -73,7 +79,7 @@ describe('auditPlugin', () => {
       expect(publish).toHaveBeenCalledTimes(1)
       expect(publish).toHaveBeenCalledWith(
         expect.objectContaining({
-          correlationId: 'trace-1',
+          correlationid: 'trace-1',
           environment: 'cdp-dev',
           version: '1.0.0',
           application: 'Data Access Layer',
@@ -349,7 +355,7 @@ describe('auditPlugin', () => {
       await listener.willSendResponse(requestContext)
 
       expect(publish).toHaveBeenCalledWith(
-        expect.objectContaining({ correlationId: 'trace-xyz' }),
+        expect.objectContaining({ correlationid: 'trace-xyz' }),
         baseContextValue.requestLogger
       )
     })
@@ -598,6 +604,73 @@ describe('auditPlugin', () => {
         expect.objectContaining({ error: expect.any(Error) })
       )
       expect(publish).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('default publish', () => {
+    // Whether there's actually anywhere to publish to (SNS topic configured or not) is
+    // sns-publisher.js's own decision (see test/unit/audit/sns-publisher.test.js) - this just
+    // confirms auditPlugin() wires snsPublish in as the default when no publish override is given.
+    test('uses snsPublish as the default publish implementation', async () => {
+      const plugin = auditPlugin()
+
+      const contextValue = {
+        ...baseContextValue,
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
+        })
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+      await listener.willSendResponse(requestContext)
+
+      expect(snsPublishMock).toHaveBeenCalledTimes(1)
+      const [event, requestLogger] = snsPublishMock.mock.calls[0]
+      expect(event.audit.entities).toEqual([
+        { entity: 'payment-list', action: 'read', entityid: 'frn-1' }
+      ])
+      expect(requestLogger).toBe(baseContextValue.requestLogger)
+    })
+  })
+
+  describe('schema conformance', () => {
+    test('a built event with a recorded entity passes real @defra/fcp-audit-publisher schema validation', async () => {
+      const publish = jest.fn()
+      const plugin = auditPlugin({ publish })
+
+      const contextValue = {
+        ...baseContextValue,
+        auditTrail: fakeAuditTrail({
+          business: {
+            entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }],
+            accounts: { sbi: '123456789' }
+          }
+        })
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+      await listener.willSendResponse(requestContext)
+
+      const [event] = publish.mock.calls[0]
+      expect(validateAuditEvent(event)).toMatchObject({ valid: true })
+    })
+
+    test('the synthetic audit/created fallback event also passes real schema validation', async () => {
+      const publish = jest.fn()
+      const plugin = auditPlugin({ publish })
+
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        contextValue,
+        errors: [
+          { message: 'Syntax Error', path: undefined, extensions: { code: 'GRAPHQL_PARSE_FAILED' } }
+        ]
+      }
+      await listener.willSendResponse(requestContext)
+
+      const [event] = publish.mock.calls[0]
+      expect(validateAuditEvent(event)).toMatchObject({ valid: true })
     })
   })
 })
