@@ -4,6 +4,7 @@ import { transformBusinessDetailsToOrgDetailsCreate } from '../../../../app/tran
 const mockBusinessCommonModule = {
   businessDetailsUpdateResolver: jest.fn(),
   businessAdditionalDetailsUpdateResolver: jest.fn(),
+  businessAllFieldsUpdateResolver: jest.fn(),
   retrieveOrgIdBySbi: jest.fn(),
   businessLockResolver: jest.fn(),
   businessUnlockResolver: jest.fn()
@@ -116,6 +117,16 @@ describe('Business Additional Details Mutation resolvers', () => {
   it('updateBusinessRegistrationNumbers calls businessAdditionalDetailsUpdateResolver', async () => {
     await Mutation.updateBusinessRegistrationNumbers({}, mockArgs, mockContext, mockInfo)
     expect(mockBusinessCommonModule.businessAdditionalDetailsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
+  })
+
+  it('updateBusinessAllFields calls businessAllFieldsUpdateResolver', async () => {
+    await Mutation.updateBusinessAllFields({}, mockArgs, mockContext, mockInfo)
+    expect(mockBusinessCommonModule.businessAllFieldsUpdateResolver).toHaveBeenCalledWith(
       {},
       mockArgs,
       mockContext,

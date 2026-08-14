@@ -1,3 +1,4 @@
+import { GraphQLError } from 'graphql'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
@@ -32,6 +33,78 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
 
   return {
     success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
+// Returns null when there is nothing to update, so consumers can distinguish "updated" from
+// "not attempted". Upstream failures propagate as standard GraphQL errors.
+const updateIfRequired = async (newDetails, update) => {
+  if (!Object.keys(newDetails).length) {
+    return null
+  }
+  await update()
+  return true
+}
+
+// A failed update nulls the whole mutation payload, so the applied/not-applied state of each
+// update travels on the error's extensions instead: true = applied, false = attempted and
+// failed, null = not attempted.
+const withUpdateStatuses = (error, statuses) => {
+  if (error instanceof GraphQLError) {
+    Object.assign(error.extensions, statuses)
+    return error
+  }
+  return new GraphQLError(error.message, { originalError: error, extensions: statuses })
+}
+
+export const businessAllFieldsUpdateResolver = async (__, { input }, { dataSources }) => {
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+  const currentOrgDetails =
+    await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+
+  const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
+  const newOrgAdditionalDetails = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
+
+  const updatedOrgDetails = {
+    ...currentOrgDetails,
+    ...newOrgDetails,
+    ...newOrgAdditionalDetails
+  }
+
+  let businessDetailsUpdated = null
+  try {
+    businessDetailsUpdated = await updateIfRequired(newOrgDetails, () =>
+      dataSources.ruralPaymentsBusiness.updateOrganisationDetails(organisationId, updatedOrgDetails)
+    )
+  } catch (error) {
+    throw withUpdateStatuses(error, {
+      businessDetailsUpdated: false,
+      additionalBusinessDetailsUpdated: null
+    })
+  }
+
+  let additionalBusinessDetailsUpdated = null
+  try {
+    additionalBusinessDetailsUpdated = await updateIfRequired(newOrgAdditionalDetails, () =>
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails(
+        organisationId,
+        updatedOrgDetails
+      )
+    )
+  } catch (error) {
+    throw withUpdateStatuses(error, {
+      businessDetailsUpdated,
+      additionalBusinessDetailsUpdated: false
+    })
+  }
+
+  return {
+    success: true,
+    businessDetailsUpdated,
+    additionalBusinessDetailsUpdated,
     business: {
       sbi: input.sbi
     }

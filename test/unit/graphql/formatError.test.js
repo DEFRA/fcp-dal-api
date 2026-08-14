@@ -38,6 +38,25 @@ describe('formatError', () => {
     expect(result.extensions).toEqual({ code: 'NOT FOUND', http: { status: 404 } })
   })
 
+  test('passes through the update status extensions attached on partial all-fields update failure', () => {
+    const httpError = new HttpError(500, {
+      extensions: {
+        businessDetailsUpdated: true,
+        additionalBusinessDetailsUpdated: false,
+        response: { body: { email: 'leak@example.com' } }
+      }
+    })
+
+    const result = formatThrownError(httpError)
+
+    expect(result.extensions).toEqual({
+      code: 'INTERNAL SERVER ERROR',
+      http: { status: 500 },
+      businessDetailsUpdated: true,
+      additionalBusinessDetailsUpdated: false
+    })
+  })
+
   test('passes through Unauthorized errors', () => {
     const unauthorized = new Unauthorized('Unauthorized access')
 
