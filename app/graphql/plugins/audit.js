@@ -4,17 +4,12 @@ import { DAL_AUDIT_EVENT_001 } from '../../logger/codes.js'
 import { extractCrnFromDefraIdToken } from '../../auth/defra-id.js'
 import { getEndUserIpAddress } from '../../audit/audit-ip.js'
 import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
+import { snsPublish } from '../../audit/sns-publisher.js'
 
 const AUDIT_EVENT_SCHEMA_VERSION = '1.0.0'
 const APPLICATION = 'Data Access Layer'
 const COMPONENT = 'fcp-dal-api'
 const ENVIRONMENT_NAME = config.get('cdp.env') ? `cdp-${config.get('cdp.env')}` : 'local'
-
-// Publishing destination (SNS) is not wired up yet
-// Must never throw / never reject: app/index.js treats unhandled rejections as fatal.
-async function defaultPublish(event, requestLogger) {
-  requestLogger.info(`#DAL - audit event - ${JSON.stringify(event)}`)
-}
 
 // Using the http request headers, work out the identifier for the end user
 function endUser(contextValue) {
@@ -30,9 +25,8 @@ function endUser(contextValue) {
 
 // Builds one AuditEventPayload for a single root selection.  Any entities/accounts explicitly
 // identified in the resolver layer are added to the audit event.  If no entities are discovered
-// then a top-level 'Audit' event is generated.   This will log the request payload including
-// GraphQL query and variables, so that the event is not lost, even if it doesn't have the
-// individual entity detail.
+// then a top-level 'Audit' event is generated.  The request payload (GraphQL query and variables)
+// is included in audit.details.requestBody so it's captured even without individual entity detail.
 function buildEvent({ contextValue, rootSelection, errors }) {
   // For each error, extract the message, path and status code
   const mappedErrors = (errors ?? []).map((error) => ({
@@ -53,10 +47,10 @@ function buildEvent({ contextValue, rootSelection, errors }) {
   return {
     version: AUDIT_EVENT_SCHEMA_VERSION,
     user: endUser(contextValue),
-    sessionId: undefined,
+    sessionid: undefined,
     ip: getEndUserIpAddress(contextValue.request),
     // This is either the 'x-cdp-request-id' header or a new uuid generated at the start of this request
-    correlationId: contextValue.request.traceId,
+    correlationid: contextValue.request.traceId,
     datetime: new Date().toISOString(),
     environment: ENVIRONMENT_NAME,
     application: APPLICATION,
@@ -81,10 +75,12 @@ function buildEvent({ contextValue, rootSelection, errors }) {
  * Emits one audit event per root selection touched by the query, from whatever contextValue.auditTrail
  * (see app/audit/audit-trail.js) recorded against it - resolvers record what they touched
  * (recordEntity/recordAccount) as they run, and this plugin reads it back once the response is
- * ready, rather than re-deriving it from the query document itself. A root selection that nothing was
- * recorded for still gets an event (see buildEvent).
+ * ready, rather than deriving it from the query document itself.
+ *
+ * If a root selection has nothing recorded against it, then an audit event is still created, so that nothing
+ * is left un-audited .
  */
-export function auditPlugin({ publish = defaultPublish } = {}) {
+export function auditPlugin({ publish = snsPublish } = {}) {
   return {
     async requestDidStart() {
       return {
