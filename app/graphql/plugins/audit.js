@@ -1,4 +1,4 @@
-import { getRequestingGroup } from '../../auth/authenticate.js'
+import { getRequestingGroup, getRequestingService } from '../../auth/authenticate.js'
 import { config } from '../../config.js'
 import { DAL_AUDIT_EVENT_001 } from '../../logger/codes.js'
 import { extractCrnFromDefraIdToken } from '../../auth/defra-id.js'
@@ -62,7 +62,7 @@ function buildEvent({ contextValue, rootSelection, errors }) {
       details: {
         requestBody: JSON.stringify(contextValue.request?.payload),
         rootField: rootSelection,
-        sourceSystem: getRequestingGroup(contextValue?.auth?.groups),
+        sourceSystem: getRequestingService(contextValue?.auth?.groups),
         sourceSystemSecurityGroupId: getRequestingGroup(contextValue?.auth?.groups),
         errorDetails: mappedErrors,
         serviceAccount: contextValue.auditTrail?.serviceAccount()
