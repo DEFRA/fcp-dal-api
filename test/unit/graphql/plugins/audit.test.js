@@ -2,13 +2,15 @@ import { afterEach, describe, expect, jest, test } from '@jest/globals'
 import { validateAuditEvent } from '@defra/fcp-audit-publisher'
 
 const getRequestingGroupMock = jest.fn()
+const getRequestingServiceMock = jest.fn()
 const configGetMock = jest.fn()
 const extractCrnFromDefraIdTokenMock = jest.fn()
 const loggerMock = { error: jest.fn(), debug: jest.fn(), warn: jest.fn() }
 const snsPublishMock = jest.fn()
 
 jest.unstable_mockModule('../../../../app/auth/authenticate.js', () => ({
-  getRequestingGroup: getRequestingGroupMock
+  getRequestingGroup: getRequestingGroupMock,
+  getRequestingService: getRequestingServiceMock
 }))
 jest.unstable_mockModule('../../../../app/auth/defra-id.js', () => ({
   extractCrnFromDefraIdToken: extractCrnFromDefraIdTokenMock
@@ -65,6 +67,7 @@ describe('auditPlugin', () => {
   describe('publish', () => {
     test('publishes exactly one event for a root selection with a recorded entity, shaped as an AuditEventPayload', async () => {
       getRequestingGroupMock.mockReturnValue('SOME_AD_GROUP')
+      getRequestingServiceMock.mockReturnValue('Some Service Name')
       const publish = jest.fn()
       const plugin = auditPlugin({ publish })
 
@@ -94,7 +97,7 @@ describe('auditPlugin', () => {
             details: expect.objectContaining({
               requestBody: JSON.stringify(requestPayload),
               rootField: 'business',
-              sourceSystem: 'SOME_AD_GROUP',
+              sourceSystem: 'Some Service Name',
               sourceSystemSecurityGroupId: 'SOME_AD_GROUP',
               errorDetails: []
             })
