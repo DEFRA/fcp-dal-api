@@ -256,10 +256,43 @@ describe('getRequestingGroup', () => {
 })
 
 describe('getRequestingService', () => {
-  const adminGroupId = config.get('auth.groups.ADMIN')
-  const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
-  const sfiReformGroupId = config.get('auth.groups.SFI_REFORM')
-  const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
+  describe('when auth is disabled', () => {
+    const originalConfig = { ...config }
+    const configMockPath = {
+      'auth.disabled': true
+    }
+
+    beforeEach(() => {
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
+    })
+
+    it('should return Auth Disabled', () => {
+      expect(getRequestingService(null)).toBe('auth-disabled')
+    })
+  })
+
+  describe('when auth is enabled', () => {
+    const originalConfig = { ...config }
+    const configMockPath = {
+      'auth.disabled': false
+    }
+
+    beforeEach(() => {
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
+    })
+
+    const adminGroupId = config.get('auth.groups.ADMIN')
+    const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
+    const sfiReformGroupId = config.get('auth.groups.SFI_REFORM')
+    const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
 
   it('should return the service name for a single recognised group', () => {
     expect(getRequestingService([consolidatedViewGroupId])).toBe('consolidated-view')
@@ -295,6 +328,7 @@ describe('getRequestingService', () => {
   it('should throw when groups is undefined', () => {
     expect(() => getRequestingService(undefined)).toThrow()
   })
+    })
 })
 
 describe('authDirectiveTransformer', () => {

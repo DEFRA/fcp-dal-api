@@ -93,11 +93,15 @@ export async function getAuth(request, jwkDatasource) {
 /**
  * Returns the requesting service name based on the security groups.
  * Note: this will likely switch to using the appid see (https://eaflood.atlassian.net/browse/FCPDAL-490)
- * however using groups for now for consisenticy with our permission model.
+ * however using groups for now for consistency with our permission model.
  * @param {string[]} groups
  * @returns the calling service or null if service wasn't identified
  */
 export function getRequestingService(groups) {
+  // Return mock UUID when auth is disabled in local/dev
+  if (config.get('auth.disabled')) {
+    return 'auth-disabled'
+  }
   return (
     groups.map((group) => authGroupServiceName[group]).find((serviceName) => !!serviceName) ?? null
   )
