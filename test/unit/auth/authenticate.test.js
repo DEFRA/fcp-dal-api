@@ -262,9 +262,9 @@ describe('getRequestingService', () => {
   const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
 
   it('should return the service name for a single recognised group', () => {
-    expect(getRequestingService([consolidatedViewGroupId])).toBe('Consolidated View')
-    expect(getRequestingService([sfiReformGroupId])).toBe('Grants')
-    expect(getRequestingService([singleFrontDoorGroupId])).toBe('Single Front Door')
+    expect(getRequestingService([consolidatedViewGroupId])).toBe('consolidated-view')
+    expect(getRequestingService([sfiReformGroupId])).toBe('grants-platform')
+    expect(getRequestingService([singleFrontDoorGroupId])).toBe('single-front-door')
   })
 
   it('should return null when the only group present is ADMIN', () => {
@@ -272,13 +272,15 @@ describe('getRequestingService', () => {
   })
 
   it('should return the first group in the array that maps to a service, skipping ADMIN', () => {
-    expect(getRequestingService([adminGroupId, sfiReformGroupId])).toBe('Grants')
+    expect(getRequestingService([adminGroupId, sfiReformGroupId])).toBe('grants-platform')
   })
 
   it('should honour input array order over any fixed preference between services', () => {
-    expect(getRequestingService([sfiReformGroupId, consolidatedViewGroupId])).toBe('Grants')
+    expect(getRequestingService([sfiReformGroupId, consolidatedViewGroupId])).toBe(
+      'grants-platform'
+    )
     expect(getRequestingService([consolidatedViewGroupId, sfiReformGroupId])).toBe(
-      'Consolidated View'
+      'consolidated-view'
     )
   })
 
