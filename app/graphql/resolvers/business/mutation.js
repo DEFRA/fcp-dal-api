@@ -1,4 +1,7 @@
-import { NotFound } from '../../../errors/graphql.js'
+import StatusCodes from 'http-status-codes'
+import { HttpError, NotFound } from '../../../errors/graphql.js'
+import { RURALPAYMENTS_API_ERROR_001 } from '../../../logger/codes.js'
+import { logger } from '../../../logger/logger.js'
 import {
   transformBankChangeInputToSubmission,
   transformBusinessDetailsToOrgDetailsCreate,
@@ -75,6 +78,14 @@ const validateBankChangeRequest = async (input, dataSources) => {
         attemptsRemaining: validation.attemptsRemaining
       }
     }
+  }
+
+  if (validation.status !== 'MATCH' && validation.status !== 'PARTIAL_MATCH') {
+    logger.error('Unexpected bank change validation status', {
+      status: validation.status,
+      code: RURALPAYMENTS_API_ERROR_001
+    })
+    throw new HttpError(StatusCodes.INTERNAL_SERVER_ERROR)
   }
 
   return { submission, validation }

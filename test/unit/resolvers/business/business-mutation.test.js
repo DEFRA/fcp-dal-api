@@ -520,6 +520,19 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
 
+  it('throws and does not submit when validation returns an unexpected status', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'UNEXPECTED_STATUS',
+      attemptsRemaining: 0
+    })
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Internal Server Error')
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
   it('throws NotFound when the organisation has no FRN', async () => {
     dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
       id: 5583781,
@@ -737,6 +750,17 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
       __typename: 'BankDetailsPartialMatch',
       message: 'Bank details partially match'
     })
+  })
+
+  it('throws when validation returns an unexpected status', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'UNEXPECTED_STATUS',
+      attemptsRemaining: 0
+    })
+
+    await expect(
+      Mutation.validateBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Internal Server Error')
   })
 
   it('returns BankDetailsValidationFailed when the details do not match', async () => {

@@ -145,6 +145,22 @@ describe('validateBusinessCustomerBankDetails', () => {
     })
   })
 
+  test('returns an internal server error when validation returns an unexpected status', async () => {
+    v1.post('/bank-change-service/v1/validate').reply(200, {
+      status: 'UNEXPECTED_STATUS',
+      attemptsRemaining: 0
+    })
+
+    const result = await makeTestQuery(query, null, true, { input }, [], false)
+
+    await waitForPersonIdToBeCachedInMongo()
+
+    expect(nock.isDone()).toBe(true)
+    expect(result.data.validateBusinessCustomerBankDetails).toBeNull()
+    expect(result.errors[0].extensions.code).toBe('INTERNAL SERVER ERROR')
+    expect(result.errors[0].extensions.http.status).toBe(500)
+  })
+
   test('returns BankDetailsValidationFailed when the details do not match', async () => {
     v1.post('/bank-change-service/v1/validate').reply(200, {
       status: 'FAILED',
