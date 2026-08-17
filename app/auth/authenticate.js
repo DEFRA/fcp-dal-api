@@ -13,9 +13,9 @@ export const authGroups = config.get('auth.groups')
 
 const authGroupServiceName = {
   [authGroups.ADMIN]: null,
-  [authGroups.CONSOLIDATED_VIEW]: 'Consolidated View',
-  [authGroups.SFI_REFORM]: 'Grants',
-  [authGroups.SINGLE_FRONT_DOOR]: 'Single Front Door'
+  [authGroups.CONSOLIDATED_VIEW]: 'consolidated-view',
+  [authGroups.SFI_REFORM]: 'grants-platform',
+  [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door'
 }
 
 export async function getAuth(request, jwkDatasource) {
