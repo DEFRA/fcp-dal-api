@@ -77,7 +77,8 @@ server.events.on('response', function (request) {
       },
       response: {
         statusCode: request.response.statusCode
-      }
+      },
+      ...(request.requestingService && { tenant: { id: request.requestingService } })
     })
   }
 
