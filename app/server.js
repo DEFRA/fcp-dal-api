@@ -51,7 +51,9 @@ server.ext({
 })
 
 server.events.on('response', function (request) {
-  // request.info.responded can be 0 if not responded yet which produces a negative duration in the logs
+  // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
+  // response is never fully written (e.g. the client disconnects mid-response).
+  // This produces a negative duration in the logs
   const requestTimeMs =
     request.info.responded === 0 ? null : request.info.responded - request.info.received
 
