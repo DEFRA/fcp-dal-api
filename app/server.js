@@ -51,13 +51,17 @@ server.ext({
 })
 
 server.events.on('response', function (request) {
-  const requestTimeMs = request.info.responded - request.info.received
+  // request.info.responded can be 0 if not responded yet which produces a negative duration in the logs
+  const requestTimeMs =
+    request.info.responded === 0 ? null : request.info.responded - request.info.received
 
   if (request.path !== healthRoute.path) {
     // Only send metrics and logs for non-health check paths
-    sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
-      code: DAL_APPLICATION_REQUEST_001
-    })
+    if (requestTimeMs !== null) {
+      sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+        code: DAL_APPLICATION_REQUEST_001
+      })
+    }
 
     logger.info('FCP - Access log', {
       type: 'http',
