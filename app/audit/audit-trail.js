@@ -1,5 +1,5 @@
 /**
- * Walks a GraphQL query path back up to it's root node.  For example, the for the query
+ * Walks a GraphQL query path back up to it's root node.  For example, for the query
  *
  * ```
  * Query {

@@ -31,7 +31,7 @@ export const getClientIp = (xForwardedFor) => {
  */
 function sanitiseIp(raw) {
   if (!raw) {
-    // The Audit IP field must now be null, so even if we can't determine an IP address, at leat return an
+    // The Audit IP field must not be null, so even if we can't determine an IP address, at least return an
     // empty string
     return ''
   }

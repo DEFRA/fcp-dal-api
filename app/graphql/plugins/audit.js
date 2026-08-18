@@ -114,15 +114,17 @@ export function auditPlugin({ publish = snsPublish } = {}) {
               await publishOne(event)
             }
 
-            for (const rootKey of rootKeys) {
-              const errorsForRoot = errors?.filter((error) => error.path?.[0] === rootKey)
-              const event = buildEvent({
-                contextValue,
-                rootSelection: rootKey,
-                errors: errorsForRoot
+            await Promise.all(
+              rootKeys.map((rootKey) => {
+                const errorsForRoot = errors?.filter((error) => error.path?.[0] === rootKey)
+                const event = buildEvent({
+                  contextValue,
+                  rootSelection: rootKey,
+                  errors: errorsForRoot
+                })
+                return publishOne(event)
               })
-              await publishOne(event)
-            }
+            )
           } catch (error) {
             requestLogger.error('#DAL - audit event build failed', {
               error,

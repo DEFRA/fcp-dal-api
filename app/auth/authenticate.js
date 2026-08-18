@@ -98,7 +98,7 @@ export async function getAuth(request, jwkDatasource) {
  * @returns the calling service or null if service wasn't identified
  */
 export function getRequestingService(groups) {
-  // Return mock UUID when auth is disabled in local/dev
+  // Return a placeholder service name, when auth is disabled.
   if (config.get('auth.disabled')) {
     return 'auth-disabled'
   }
