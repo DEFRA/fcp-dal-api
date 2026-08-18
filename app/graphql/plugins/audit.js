@@ -110,7 +110,7 @@ export function auditPlugin({ publish = snsPublish } = {}) {
               // Nothing recorded a root selection at all (e.g. a parse/validation error, or a pure
               // introspection query) - the rootKeys loop below has nothing to iterate, so publish a
               // single audit/created event for the request itself instead.
-              const event = buildEvent({ contextValue, rootSelection: undefined, errors })
+              const event = buildEvent({ contextValue, errors })
               await publishOne(event)
             }
 
