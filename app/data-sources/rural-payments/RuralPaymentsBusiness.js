@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes'
-import jwt from 'jsonwebtoken'
-import { BadRequest, NotFound } from '../../errors/graphql.js'
+import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
+import { extractOrgIdFromDefraIdToken } from '../../auth/defra-id.js'
 
 // The SitiAgri byFunction endpoint scopes function-level authorisation to a consuming module.
 // CUST_SS_PORTAL is the customer self-service portal (the external Rural Payments service) - the
@@ -92,7 +92,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
   async getOrganisationIdBySBI(sbi) {
     if (this.isExternalRoute()) {
-      return this.extractOrgIdFromDefraIdToken(sbi)
+      return extractOrgIdFromDefraIdToken(sbi, this.getDefraIdToken())
     }
     return (await this.organisationSearchBySbi(sbi)).id
   }
@@ -170,21 +170,8 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response
   }
 
-  extractOrgIdFromDefraIdToken(sbi) {
-    const token = this.request.headers['x-forwarded-authorization']
-    const { payload } = jwt.decode(token, { complete: true })
-    if (payload?.relationships && Array.isArray(payload.relationships)) {
-      // Find relationship string that matches the given SBI
-      const relationship = payload.relationships.find((rel) => {
-        const [, tokenSBI] = rel.split(':')
-        return sbi === tokenSBI
-      })
-      if (relationship) {
-        const [orgId] = relationship.split(':')
-        return orgId
-      }
-    }
-    throw new BadRequest('Defra ID token is not valid for the provided SBI')
+  getDefraIdToken() {
+    return this.request.headers['x-forwarded-authorization']
   }
 
   async lockOrganisation(organisationId, body) {

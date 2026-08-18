@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken'
 import { getAuth, getRequestingGroup, getRequestingService } from '../auth/authenticate.js'
 import { config } from '../config.js'
 import { HitachiPayments } from '../data-sources/hitachi/HitachiPayments.js'
@@ -9,25 +8,10 @@ import { RuralPaymentsBusiness } from '../data-sources/rural-payments/RuralPayme
 import { RuralPaymentsCustomer } from '../data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { RuralPaymentsReferenceData } from '../data-sources/rural-payments/RuralPaymentsReferenceData.js'
 import { Permissions } from '../data-sources/static/permissions.js'
-import { BadRequest } from '../errors/graphql.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
-
-export const extractOrgIdFromDefraIdToken = (sbi, token) => {
-  const { payload } = jwt.decode(token, { complete: true })
-  if (payload?.relationships && Array.isArray(payload.relationships)) {
-    // Find relationship string that matches the given SBI
-    const relationship = payload.relationships.find((rel) => {
-      const [, tokenSBI] = rel.split(':')
-      return sbi === tokenSBI
-    })
-    if (relationship) {
-      const [orgId] = relationship.split(':')
-      return orgId
-    }
-  }
-  throw new BadRequest('Defra ID token is not valid for the provided SBI')
-}
+import { endUserAuthContext } from '../auth/end-user-auth-context.js'
+import { createAuditTrail } from '../audit/audit-trail.js'
 
 function stripClientSuppliedServiceAccountHeader(request) {
   // Service account foundations have been added, to support the DAL internal service account, but this is not
@@ -57,6 +41,8 @@ export async function context({ request }) {
     }
   ]
 
+  const auditTrail = createAuditTrail()
+  const authContext = endUserAuthContext(request)
   const internalServiceAccountDatasourceOptions = [
     { logger: requestLogger },
     {
@@ -64,8 +50,7 @@ export async function context({ request }) {
         ...request,
         headers: {
           ...request.headers,
-          'service-account':
-            request.headers['service-account'] || config.get('kits.dalServiceAccountEmail')
+          'service-account': authContext.serviceAccount || config.get('kits.dalServiceAccountEmail')
         }
       }
     }
@@ -75,7 +60,9 @@ export async function context({ request }) {
 
   return {
     auth,
+    request,
     requestLogger,
+    auditTrail,
     db,
     dataSources: {
       permissions: new Permissions({ logger: requestLogger }),
