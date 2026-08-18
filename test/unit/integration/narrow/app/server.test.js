@@ -143,5 +143,31 @@ describe('Server config and startup', () => {
       expect(mockSendMetric.sendMetric).not.toHaveBeenCalled()
       expect(mockLogger.logger.info).not.toHaveBeenCalled()
     })
+
+    test('response event does not log a negative requestTimeMs when the client aborted the response', () => {
+      // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
+      // response is never fully written (e.g. the client disconnects mid-response).
+      const abortedRequest = {
+        path: '/non-health',
+        transactionId: 'test-transaction-id',
+        traceId: 'test-trace-id',
+        method: 'get',
+        params: {},
+        payload: null,
+        body: null,
+        headers: {},
+        requestingService: undefined,
+        info: { received: Date.now(), responded: 0, remoteAddress: '127.0.0.1' },
+        response: { statusCode: 499, headers: {}, source: null }
+      }
+
+      server.events.emit('response', abortedRequest)
+
+      expect(mockSendMetric.sendMetric).not.toHaveBeenCalled()
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({ requestTimeMs: null })
+      )
+    })
   })
 })
