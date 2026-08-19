@@ -153,5 +153,10 @@ input UpdateCustomerAllFieldsInput {
 
 type UpdateCustomerResponse {
   success: Boolean
+  """
+  Set to true when the update was rejected because the email address is
+  already in use by another customer. The customer record is left unchanged.
+  """
+  emailDuplicated: Boolean
   customer: Customer
 }

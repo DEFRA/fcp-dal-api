@@ -301,6 +301,84 @@ describe('Customer Mutations - as an internal user', () => {
   })
 })
 
+describe('Customer Mutations - duplicate email handling', () => {
+  const crn = '9000000000'
+  const headers = { email: 'some-email' }
+  const duplicateEmail = 'skeleton@the-closet.net' // known duplicate, see validateCustomerEmail acceptance tests
+
+  const setEmailMutation = gql`
+    mutation SetEmail($input: UpdateCustomerEmailInput!) {
+      updateCustomerEmail(input: $input) {
+        success
+        emailDuplicated
+      }
+    }
+  `
+
+  const setAllFieldsEmailMutation = gql`
+    mutation SetAllFieldsEmail($input: UpdateCustomerAllFieldsInput!) {
+      updateCustomerAllFields(input: $input) {
+        success
+        emailDuplicated
+      }
+    }
+  `
+
+  const customerEmailQuery = gql`
+    query CustomerEmail($crn: ID!) {
+      customer(crn: $crn) {
+        info {
+          email {
+            address
+          }
+        }
+      }
+    }
+  `
+
+  it('should reject updateCustomerEmail when the email address is a known duplicate, leaving the customer unchanged', async () => {
+    const client = new GraphQLClient(targetURL)
+
+    const setup = await client.request(
+      setEmailMutation,
+      { input: { crn, email: { address: 'not-a-duplicate@example.com' } } },
+      headers
+    )
+    expect(setup.updateCustomerEmail).toEqual({ success: true, emailDuplicated: null })
+
+    const response = await client.request(
+      setEmailMutation,
+      { input: { crn, email: { address: duplicateEmail } } },
+      headers
+    )
+    expect(response.updateCustomerEmail).toEqual({ success: false, emailDuplicated: true })
+
+    const check = await client.request(customerEmailQuery, { crn }, headers)
+    expect(check.customer.info.email.address).toBe('not-a-duplicate@example.com')
+  })
+
+  it('should reject updateCustomerAllFields when the email address is a known duplicate, leaving the customer unchanged', async () => {
+    const client = new GraphQLClient(targetURL)
+
+    const setup = await client.request(
+      setAllFieldsEmailMutation,
+      { input: { crn, email: { address: 'still-not-a-duplicate@example.com' } } },
+      headers
+    )
+    expect(setup.updateCustomerAllFields).toEqual({ success: true, emailDuplicated: null })
+
+    const response = await client.request(
+      setAllFieldsEmailMutation,
+      { input: { crn, email: { address: duplicateEmail } } },
+      headers
+    )
+    expect(response.updateCustomerAllFields).toEqual({ success: false, emailDuplicated: true })
+
+    const check = await client.request(customerEmailQuery, { crn }, headers)
+    expect(check.customer.info.email.address).toBe('still-not-a-duplicate@example.com')
+  })
+})
+
 describe('Customer Mutations - as an external user', () => {
   const tokenValue = jwt.sign(
     {
