@@ -154,23 +154,20 @@ describe('Customer Mutations', () => {
         )
       })
 
-      test('should not update the customer and should return emailDuplicated when the email is a duplicate', async () => {
+      test('should not update the customer and should throw when the email is a duplicate', async () => {
         const input = { crn: 'crn', email: { address: 'new@example.com' } }
 
         mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
           emailDuplicated: true
         })
 
-        const result = await Mutation[mutationName](
-          null,
-          { input },
-          { dataSources: mockDataSources }
-        )
-
-        expect(result).toEqual({
-          success: false,
-          emailDuplicated: true
+        await expect(
+          Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+        ).rejects.toMatchObject({
+          message: 'Email address is already in use by another customer',
+          extensions: { code: 'EMAIL_ALREADY_REGISTERED', http: { status: 400 } }
         })
+
         expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).not.toHaveBeenCalled()
       })
 

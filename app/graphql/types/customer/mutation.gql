@@ -3,6 +3,10 @@ extend type Mutation {
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDateOfBirth(input: UpdateCustomerDateOfBirthInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+  """
+  Updates the customer's email address. As a result, the email address is
+  marked as not validated.
+  """
   updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
@@ -153,10 +157,5 @@ input UpdateCustomerAllFieldsInput {
 
 type UpdateCustomerResponse {
   success: Boolean
-  """
-  Set to true when the update was rejected because the email address is
-  already in use by another customer. The customer record is left unchanged.
-  """
-  emailDuplicated: Boolean
   customer: Customer
 }

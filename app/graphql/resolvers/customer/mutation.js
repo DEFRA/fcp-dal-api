@@ -1,4 +1,5 @@
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
+import { BadRequest } from '../../../errors/graphql.js'
 
 async function updateCustomerResolver(_, { input }, { dataSources }) {
   const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(input.crn)
@@ -13,10 +14,9 @@ async function updateCustomerResolver(_, { input }, { dataSources }) {
       input.email.address
     )
     if (emailDuplicated) {
-      return {
-        success: false,
-        emailDuplicated: true
-      }
+      throw new BadRequest('Email address is already in use by another customer', {
+        extensions: { code: 'EMAIL_ALREADY_REGISTERED' }
+      })
     }
   }
 

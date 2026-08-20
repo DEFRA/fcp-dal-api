@@ -310,7 +310,6 @@ describe('Customer Mutations - duplicate email handling', () => {
     mutation SetEmail($input: UpdateCustomerEmailInput!) {
       updateCustomerEmail(input: $input) {
         success
-        emailDuplicated
       }
     }
   `
@@ -319,7 +318,6 @@ describe('Customer Mutations - duplicate email handling', () => {
     mutation SetAllFieldsEmail($input: UpdateCustomerAllFieldsInput!) {
       updateCustomerAllFields(input: $input) {
         success
-        emailDuplicated
       }
     }
   `
@@ -344,14 +342,24 @@ describe('Customer Mutations - duplicate email handling', () => {
       { input: { crn, email: { address: 'not-a-duplicate@example.com' } } },
       headers
     )
-    expect(setup.updateCustomerEmail).toEqual({ success: true, emailDuplicated: null })
+    expect(setup.updateCustomerEmail).toEqual({ success: true })
 
-    const response = await client.request(
-      setEmailMutation,
-      { input: { crn, email: { address: duplicateEmail } } },
-      headers
-    )
-    expect(response.updateCustomerEmail).toEqual({ success: false, emailDuplicated: true })
+    await expect(
+      client.request(
+        setEmailMutation,
+        { input: { crn, email: { address: duplicateEmail } } },
+        headers
+      )
+    ).rejects.toMatchObject({
+      response: {
+        errors: [
+          expect.objectContaining({
+            message: 'Email address is already in use by another customer',
+            extensions: expect.objectContaining({ code: 'EMAIL_ALREADY_REGISTERED' })
+          })
+        ]
+      }
+    })
 
     const check = await client.request(customerEmailQuery, { crn }, headers)
     expect(check.customer.info.email.address).toBe('not-a-duplicate@example.com')
@@ -365,14 +373,24 @@ describe('Customer Mutations - duplicate email handling', () => {
       { input: { crn, email: { address: 'still-not-a-duplicate@example.com' } } },
       headers
     )
-    expect(setup.updateCustomerAllFields).toEqual({ success: true, emailDuplicated: null })
+    expect(setup.updateCustomerAllFields).toEqual({ success: true })
 
-    const response = await client.request(
-      setAllFieldsEmailMutation,
-      { input: { crn, email: { address: duplicateEmail } } },
-      headers
-    )
-    expect(response.updateCustomerAllFields).toEqual({ success: false, emailDuplicated: true })
+    await expect(
+      client.request(
+        setAllFieldsEmailMutation,
+        { input: { crn, email: { address: duplicateEmail } } },
+        headers
+      )
+    ).rejects.toMatchObject({
+      response: {
+        errors: [
+          expect.objectContaining({
+            message: 'Email address is already in use by another customer',
+            extensions: expect.objectContaining({ code: 'EMAIL_ALREADY_REGISTERED' })
+          })
+        ]
+      }
+    })
 
     const check = await client.request(customerEmailQuery, { crn }, headers)
     expect(check.customer.info.email.address).toBe('still-not-a-duplicate@example.com')
