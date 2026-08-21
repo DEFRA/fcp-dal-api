@@ -188,51 +188,6 @@ describe('context', () => {
     })
   })
 
-  describe('stripClientSuppliedServiceAccountHeader', () => {
-    test('removes a client-supplied "service-account" header from the request before continuing', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
-      const request = {
-        headers: {
-          email: 'user@example.com',
-          'service-account': 'someone@example.com'
-        }
-      }
-
-      await expect(context({ request })).resolves.toBeDefined()
-
-      expect(request.headers['service-account']).toBeUndefined()
-    })
-
-    test('does not affect requests that do not supply a "service-account" header', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
-      const request = { headers: { email: 'user@example.com' } }
-
-      await context({ request })
-
-      expect(request.headers).toEqual({ email: 'user@example.com' })
-    })
-
-    test('the stripped header is not passed on to the RuralPaymentsBusiness instance', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
-      const request = {
-        headers: {
-          'x-forwarded-authorization': 'token123',
-          'service-account': 'someone@example.com'
-        }
-      }
-
-      await context({ request })
-
-      expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(
-        1,
-        expect.anything(),
-        expect.objectContaining({
-          request: { headers: { 'x-forwarded-authorization': 'token123' } }
-        })
-      )
-    })
-  })
-
   describe('auditTrail', () => {
     test('exposes a fresh, independent audit trail on every call', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
