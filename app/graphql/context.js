@@ -14,13 +14,6 @@ import { db } from '../mongo.js'
 import { endUserAuthContext } from '../auth/end-user-auth-context.js'
 import { createAuditTrail } from '../audit/audit-trail.js'
 
-function stripClientSuppliedServiceAccountHeader(request) {
-  // Service account foundations have been added, to support the DAL internal service account, but this is not
-  // ready for client-use. Strip any client-supplied header so a caller can never masquerade as the DAL service
-  // account. This temporary guard should be removed as service account support is rolled out.
-  delete request.headers['service-account']
-}
-
 export async function context({ request }) {
   const auth = await getAuth(request, new JWKS())
   const requestingService = getRequestingService(auth.groups ?? [])
@@ -33,10 +26,9 @@ export async function context({ request }) {
     ...(requestingService && { tenant: { id: requestingService } })
   })
 
-  stripClientSuppliedServiceAccountHeader(request)
-
   const authContext = endUserAuthContext(request)
   const defraIdCtx = await defraIdContext(authContext)
+  const auditTrail = createAuditTrail()
 
   const datasourceOptions = [
     { logger: requestLogger },
@@ -46,7 +38,6 @@ export async function context({ request }) {
     }
   ]
 
-  const auditTrail = createAuditTrail()
   const internalServiceAccountDatasourceOptions = [
     { logger: requestLogger },
     {
