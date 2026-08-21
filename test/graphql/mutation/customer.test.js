@@ -251,6 +251,10 @@ describe('customer mutations', () => {
       email: 'newEmail'
     })
 
+    nock(config.get('kits.internal.gatewayUrl'))
+      .get('/person/newEmail/validateEmail')
+      .reply(200, { _data: { emailDuplicated: false } })
+
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerEmail(input: { crn: "1234567890", email: { address: "newEmail" } }) {

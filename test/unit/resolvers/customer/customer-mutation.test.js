@@ -42,7 +42,8 @@ describe('Customer Mutations', () => {
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn(),
         getPersonByPersonId: jest.fn(),
-        updatePersonDetails: jest.fn()
+        updatePersonDetails: jest.fn(),
+        validateEmail: jest.fn()
       }
     }
   })
@@ -130,4 +131,98 @@ describe('Customer Mutations', () => {
       })
     })
   })
+
+  describe.each(['updateCustomerEmail', 'updateCustomerAllFields'])(
+    '%s email duplicate check',
+    (mutationName) => {
+      beforeEach(() => {
+        mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('currentId')
+        mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(mockPerson)
+      })
+
+      test('should call validateEmail with the new email address', async () => {
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+          emailDuplicated: false
+        })
+
+        await Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).toHaveBeenCalledWith(
+          'new@example.com'
+        )
+      })
+
+      test('should not update the customer and should throw when the email is a duplicate', async () => {
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+          emailDuplicated: true
+        })
+
+        await expect(
+          Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+        ).rejects.toMatchObject({
+          message: 'Email address is already in use by another customer',
+          extensions: { code: 'EMAIL_ALREADY_REGISTERED', http: { status: 400 } }
+        })
+
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).not.toHaveBeenCalled()
+      })
+
+      test('should update the customer when the email is not a duplicate', async () => {
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+          emailDuplicated: false
+        })
+
+        const result = await Mutation[mutationName](
+          null,
+          { input },
+          { dataSources: mockDataSources }
+        )
+
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).toHaveBeenCalled()
+        expect(result).toEqual({
+          success: true,
+          customer: { personId: 'currentId' }
+        })
+      })
+
+      test('should not call validateEmail when the input has no email', async () => {
+        const input = { crn: 'crn', first: 'newFirstName' }
+
+        await Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+      })
+
+      test("should not call validateEmail when the email is unchanged from the customer's current email", async () => {
+        const input = { crn: 'crn', email: { address: mockPerson.email } }
+
+        const result = await Mutation[mutationName](
+          null,
+          { input },
+          { dataSources: mockDataSources }
+        )
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).toHaveBeenCalled()
+        expect(result).toEqual({
+          success: true,
+          customer: { personId: 'currentId' }
+        })
+      })
+
+      test('should not call validateEmail when the email is unchanged except for casing', async () => {
+        const input = { crn: 'crn', email: { address: mockPerson.email.toUpperCase() } }
+
+        await Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+      })
+    }
+  )
 })
