@@ -61,12 +61,9 @@ export class RuralPayments extends BaseRESTDataSource {
 
     const additionalHeaders = {}
 
-    const internalEmail =
-      this.endUserAuthContext.internalAuthHeader || this.endUserAuthContext.serviceAccount
-
     // Note: these headers won't be logged. See https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md
-    if (internalEmail) {
-      additionalHeaders.email = internalEmail
+    if (this.endUserAuthContext.upstreamEmailHeader) {
+      additionalHeaders.email = this.endUserAuthContext.upstreamEmailHeader
     } else {
       additionalHeaders.Authorization = this.endUserAuthContext.externalAuthHeader
       additionalHeaders.crn = this.defraIdContext.crn()
