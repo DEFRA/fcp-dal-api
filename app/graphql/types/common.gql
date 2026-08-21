@@ -11,7 +11,11 @@ type Phone {
   landline: String
 }
 
-"Represents data about the email address of a customer or business"
+"""
+Represents data about the email address of a customer or business.
+
+This address should not be used for correspondence unless `validated` is `true`.
+"""
 type Email {
   """
   Email address of the customer or business
@@ -19,7 +23,8 @@ type Email {
   address: String
 
   """
-  Validated status of the email address
+  Whether the email address has been validated. Only use `address` for
+  correspondence when this is `true`.
   """
   validated: Boolean
 }
