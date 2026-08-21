@@ -13,6 +13,11 @@ const KITS_CUSTOMER_SEARCH_FIELD = {
 }
 
 export class RuralPaymentsCustomer extends RuralPayments {
+  async validateEmail(email) {
+    const response = await this.get(`person/${encodeURIComponent(email)}/validateEmail`)
+    return response._data
+  }
+
   async getPersonIdByCRN(crn) {
     if (this.isExternalRoute()) {
       const response = await this.getExternalPerson()

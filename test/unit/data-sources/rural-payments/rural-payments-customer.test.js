@@ -32,6 +32,31 @@ describe('Rural Payments Customer', () => {
   const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
   const httpGetExt = jest.spyOn(ruralPaymentsCustomerExt, 'get')
 
+  test('should return emailDuplicated from validateEmail', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: true } }))
+
+    const result = await ruralPaymentsCustomer.validateEmail('test@test.test')
+
+    expect(result).toEqual({ emailDuplicated: true })
+    expect(httpGet).toHaveBeenCalledWith('person/test%40test.test/validateEmail')
+  })
+
+  test('should return false when validateEmail response reports no duplicate', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: false } }))
+
+    const result = await ruralPaymentsCustomer.validateEmail('unique@test.test')
+
+    expect(result).toEqual({ emailDuplicated: false })
+  })
+
+  test('should URL-encode special characters in the email passed to validateEmail', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: false } }))
+
+    await ruralPaymentsCustomer.validateEmail('foo/bar+baz@example.com')
+
+    expect(httpGet).toHaveBeenCalledWith('person/foo%2Fbar%2Bbaz%40example.com/validateEmail')
+  })
+
   test('should call getExternalPerson for external gateway', async () => {
     httpGetExt.mockImplementation(async () => ({ _data: { id: 123 } }))
     const response = await ruralPaymentsCustomerExt.getCustomerByCRN('11111111')

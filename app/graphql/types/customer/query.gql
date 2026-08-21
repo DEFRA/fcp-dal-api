@@ -14,4 +14,11 @@ extend type Query {
     searchType: CustomerSearchFieldType!
     pagination: Pagination
   ): CustomerSearchResponse @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+
+  """
+  Check whether an email address is already registered (i.e. already in use by another customer).
+  Customers whose email address has not been verified are not included, so an unverified email
+  in use by another customer will not be reported as registered.
+  """
+  isCustomerEmailRegistered(email: String!): Boolean! @auth(requires: [SINGLE_FRONT_DOOR])
 }

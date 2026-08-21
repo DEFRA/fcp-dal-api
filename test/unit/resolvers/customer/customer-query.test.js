@@ -9,7 +9,8 @@ describe('Customer Query Resolver', () => {
     mockDataSources = {
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn(),
-        personSearch: jest.fn()
+        personSearch: jest.fn(),
+        validateEmail: jest.fn()
       },
       mongoCustomer: {
         findPersonIdByCRN: jest.fn(),
@@ -82,5 +83,36 @@ describe('Customer Query Resolver', () => {
       line1: 'line 1',
       postalCode: 'AB12 3CD'
     })
+  })
+
+  it('isCustomerEmailRegistered should return true when the email is duplicated', async () => {
+    mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+      emailDuplicated: true
+    })
+
+    const result = await Query.isCustomerEmailRegistered(
+      null,
+      { email: 'test@example.com' },
+      { dataSources: mockDataSources, logger: mockLogger }
+    )
+
+    expect(mockDataSources.ruralPaymentsCustomer.validateEmail).toHaveBeenCalledWith(
+      'test@example.com'
+    )
+    expect(result).toBe(true)
+  })
+
+  it('isCustomerEmailRegistered should return false when the email is not duplicated', async () => {
+    mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+      emailDuplicated: false
+    })
+
+    const result = await Query.isCustomerEmailRegistered(
+      null,
+      { email: 'test@example.com' },
+      { dataSources: mockDataSources, logger: mockLogger }
+    )
+
+    expect(result).toBe(false)
   })
 })

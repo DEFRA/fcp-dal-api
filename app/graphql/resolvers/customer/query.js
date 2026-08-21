@@ -20,5 +20,10 @@ export const Query = {
       results: data.map(transformPersonSearchResult),
       pageInfo: transformPageInfo(page)
     }
+  },
+
+  async isCustomerEmailRegistered(__, { email }, { dataSources }) {
+    const { emailDuplicated } = await dataSources.ruralPaymentsCustomer.validateEmail(email)
+    return emailDuplicated
   }
 }
