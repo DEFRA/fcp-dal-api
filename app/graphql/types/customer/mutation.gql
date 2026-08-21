@@ -6,6 +6,11 @@ extend type Mutation {
   """
   Updates the customer's email address. As a result, the email address is
   marked as not validated.
+
+  Error codes:
+  - `NOT FOUND`: No customer exists for the given CRN.
+  - `EMAIL_ALREADY_REGISTERED`: The email address is already in use by
+    another customer. The customer record is left unchanged.
   """
   updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
@@ -15,6 +20,15 @@ extend type Mutation {
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDoNotContact(input: UpdateCustomerDoNotContactInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+  """
+  Updates a customer. If the email address is updated, it is
+  marked as not validated.
+
+  Error codes:
+  - `NOT FOUND`: No customer exists for the given CRN.
+  - `EMAIL_ALREADY_REGISTERED`: The email address is already in use by
+    another customer. The customer record is left unchanged.
+  """
   updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
