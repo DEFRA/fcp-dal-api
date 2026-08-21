@@ -7,9 +7,12 @@ export const endUserAuthContext = (request) => {
     throw new Unauthorized('Service accounts must not use email header')
   }
 
+  const serviceAccountHeader = request.headers['service-account']
+
   return {
+    upstreamEmailHeader: emailHeader || serviceAccountHeader,
     internalAuthHeader: emailHeader,
     externalAuthHeader: request.headers['x-forwarded-authorization'],
-    serviceAccount: request.headers['service-account']
+    serviceAccount: serviceAccountHeader
   }
 }
