@@ -37,7 +37,7 @@ function setupNock(update = {}) {
     firstName: 'currentFirstName',
     middleName: 'currentMiddleName',
     lastName: 'currentLastName',
-    dateOfBirth: 1735732800,
+    dateOfBirth: 1735732800000,
     landline: 'currentLandline',
     mobile: 'currentMobile',
     email: 'currentEmail',
@@ -68,11 +68,11 @@ function setupNock(update = {}) {
     _data: person
   })
 
-  // Update - nock expects the seconds value the resolver sends
+  // Update - nock expects the milliseconds value the resolver now sends
   const updatedPerson = {
     ...person,
     ...update,
-    dateOfBirth: update.dateOfBirth || 1735732,
+    dateOfBirth: update.dateOfBirth || 1735732800000,
     address: {
       ...person.address,
       ...(update?.address || {})
@@ -95,11 +95,7 @@ function setupNock(update = {}) {
   kits.get('/person/personId/summary').reply(200, {
     _data: {
       ...updatedPerson,
-      // Upstream receives the value in seconds, returns in milliseconds
-      dateOfBirth:
-        typeof updatedPerson.dateOfBirth === 'number'
-          ? updatedPerson.dateOfBirth * 1000
-          : updatedPerson.dateOfBirth
+      dateOfBirth: updatedPerson.dateOfBirth
     }
   })
 }
@@ -216,7 +212,7 @@ describe('customer mutations', () => {
 
   test('updateCustomerDateOfBirth', async () => {
     setupNock({
-      dateOfBirth: 1735689600
+      dateOfBirth: 1735689600000
     })
 
     const result = await makeTestQuery(`#graphql
