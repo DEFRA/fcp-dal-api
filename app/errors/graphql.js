@@ -23,7 +23,8 @@ export class BadRequest extends GraphQLError {
   constructor(message, options) {
     super(message, options)
 
-    this.extensions.code = StatusCodes.getStatusText(StatusCodes.BAD_REQUEST).toUpperCase()
+    this.extensions.code =
+      options?.extensions?.code ?? StatusCodes.getStatusText(StatusCodes.BAD_REQUEST).toUpperCase()
     this.extensions.http = { status: StatusCodes.BAD_REQUEST }
   }
 }
