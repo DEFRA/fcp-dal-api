@@ -14,13 +14,47 @@ describe('endUserAuthContext', () => {
     const result = endUserAuthContext(request)
 
     expect(result).toEqual({
+      upstreamEmailHeader: 'user@example.com',
       internalAuthHeader: 'user@example.com',
       externalAuthHeader: 'token123',
       serviceAccount: 'service@example.com'
     })
   })
 
-  test('throws Unauthorized when the email header contains "robot-account." (case insensitive)', () => {
+  test('returns client email header as the upstream email header when present', () => {
+    const request = {
+      headers: {
+        email: 'user@example.com',
+        'service-account': 'service@example.com'
+      }
+    }
+
+    const result = endUserAuthContext(request)
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        upstreamEmailHeader: 'user@example.com'
+      })
+    )
+  })
+
+  test('returns service account as the upstream email header when client request email header is not set', () => {
+    const request = {
+      headers: {
+        'service-account': 'service@example.com'
+      }
+    }
+
+    const result = endUserAuthContext(request)
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        upstreamEmailHeader: 'service@example.com'
+      })
+    )
+  })
+
+  test('throws Unauthorized when the email header contains "robot-account." (case-insensitive)', () => {
     const request = {
       headers: {
         email: 'Robot-Account.something@example.com'
