@@ -14,5 +14,15 @@ export const ReferenceData = {
     const { _data: legalStatuses } =
       await dataSources.ruralPaymentsReferenceData.getReferenceData('legalstatus')
     return legalStatuses.map(({ id, type }) => ({ code: id, description: type }))
+  },
+  async businessTypes(__, ___, { dataSources }) {
+    const { _data: businessTypes } =
+      await dataSources.ruralPaymentsReferenceData.getReferenceData('business-types')
+    return businessTypes.map(({ id, type }) => ({ code: id, description: type }))
+  },
+  async titles(__, ___, { dataSources }) {
+    const { _data: titles } =
+      await dataSources.ruralPaymentsReferenceData.getReferenceData('titles')
+    return titles
   }
 }
