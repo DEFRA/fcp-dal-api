@@ -1,8 +1,8 @@
 import { StatusCodes } from 'http-status-codes'
 import { config } from '../../config.js'
+import { RuralPaymentsReferenceData } from '../../data-sources/rural-payments/RuralPaymentsReferenceData.js'
 import { RURALPAYMENTS_API_ERROR_001 } from '../../logger/codes.js'
 import { logger } from '../../logger/logger.js'
-import { RuralPaymentsReferenceData } from '../../data-sources/rural-payments/RuralPaymentsReferenceData.js'
 
 const runRuralPaymentsCheck = async (type) => {
   try {
@@ -25,7 +25,7 @@ const runRuralPaymentsCheck = async (type) => {
         request: { headers }
       }
     )
-    await ruralPaymentsReferenceData.getReferenceData('legalstatus')
+    await ruralPaymentsReferenceData.getReferenceData('titles')
 
     // Success case when auth is not enabled
     logger.info(`SUCCESS: HTTP connection to ${type} Rural Payments upstream succeeded`)
@@ -33,7 +33,9 @@ const runRuralPaymentsCheck = async (type) => {
     if (err?.extensions?.http?.status === StatusCodes.FORBIDDEN) {
       // A 403 still means the upstream responded - it just doesn't recognise the caller.
       logger.info(
-        `SUCCESS: HTTP connection to ${type} Rural Payments upstream succeeded (received expected 403 Forbidden)`
+        `SUCCESS: HTTP connection to ${
+          type
+        } Rural Payments upstream succeeded (received expected 403 Forbidden)`
       )
       return
     }
