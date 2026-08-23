@@ -21,6 +21,7 @@
     "defra",
     "defradigital",
     "healthcheck",
+    "healthchek",
     "jsonwebtoken",
     "legalstatus",
     "mongosh",
@@ -32,7 +33,8 @@
     "sitiagri",
     "sonarcloud",
     "TRUSTSTORE",
-    "uprn"
+    "uprn",
+    "vitest"
   ],
   "cSpell.ignorePaths": [
     ".git",
