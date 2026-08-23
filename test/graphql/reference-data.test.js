@@ -16,13 +16,30 @@ const query = gql`
     }
   }
 `
-const refDataQuery = gql`
+const businessTypesQuery = gql`
+  query ReferenceData {
+    referenceData {
+      businessTypes {
+        code
+        description
+      }
+    }
+  }
+`
+const legalStatusesQuery = gql`
   query ReferenceData {
     referenceData {
       legalStatuses {
         code
         description
       }
+    }
+  }
+`
+const titlesQuery = gql`
+  query ReferenceData {
+    referenceData {
+      titles
     }
   }
 `
@@ -75,6 +92,26 @@ describe('referenceData', () => {
     })
   })
 
+  describe('businessTypes', () => {
+    test('returns the business types from the upstream service', async () => {
+      v1.get('/reference/business-types').reply(200, {
+        _data: [
+          { id: 1, type: 'Farm Business' },
+          { id: 2, type: 'Non-Farm Business' }
+        ]
+      })
+
+      const result = await makeTestQuery(businessTypesQuery)
+
+      expect(nock.isDone()).toBe(true)
+      expect(result.errors).toBeUndefined()
+      expect(result.data.referenceData.businessTypes).toEqual([
+        { code: 1, description: 'Farm Business' },
+        { code: 2, description: 'Non-Farm Business' }
+      ])
+    })
+  })
+
   describe('legalStatuses', () => {
     test('returns the legal statuses from the upstream service', async () => {
       v1.get('/reference/legalstatus').reply(200, {
@@ -84,7 +121,7 @@ describe('referenceData', () => {
         ]
       })
 
-      const result = await makeTestQuery(refDataQuery)
+      const result = await makeTestQuery(legalStatusesQuery)
 
       expect(nock.isDone()).toBe(true)
       expect(result.errors).toBeUndefined()
@@ -92,6 +129,20 @@ describe('referenceData', () => {
         { code: 1, description: 'Limited Company' },
         { code: 2, description: 'Public Limited Company' }
       ])
+    })
+  })
+
+  describe('titles', () => {
+    test('returns the titles from the upstream service', async () => {
+      v1.get('/reference/titles').reply(200, {
+        _data: ['Mr', 'Mrs']
+      })
+
+      const result = await makeTestQuery(titlesQuery)
+
+      expect(nock.isDone()).toBe(true)
+      expect(result.errors).toBeUndefined()
+      expect(result.data.referenceData.titles).toEqual(['Mr', 'Mrs'])
     })
   })
 
@@ -117,7 +168,7 @@ describe('referenceData', () => {
       ]
     })
 
-    const result = await makeTestQuery(refDataQuery, null, false)
+    const result = await makeTestQuery(legalStatusesQuery, null, false)
 
     expect(nock.isDone()).toBe(true)
     expect(result.errors).toBeUndefined()

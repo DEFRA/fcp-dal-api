@@ -30,6 +30,23 @@ describe('RuralPaymentsReferenceData', () => {
     })
   })
 
+  describe('getBusinessTypes', () => {
+    test('gets the business types', async () => {
+      const businessTypes = {
+        _data: [
+          { id: 1, type: 'Sole Trader' },
+          { id: 2, type: 'Partnership' }
+        ]
+      }
+      httpGet.mockResolvedValueOnce(businessTypes)
+
+      const result = await ruralPaymentsReferenceData.getReferenceData('business-types')
+
+      expect(httpGet).toHaveBeenCalledWith('reference/business-types')
+      expect(result).toEqual(businessTypes)
+    })
+  })
+
   describe('getLegalStatuses', () => {
     test('gets the legal statuses', async () => {
       const legalStatuses = {
@@ -44,6 +61,18 @@ describe('RuralPaymentsReferenceData', () => {
 
       expect(httpGet).toHaveBeenCalledWith('reference/legalstatus')
       expect(result).toEqual(legalStatuses)
+    })
+  })
+
+  describe('getTitles', () => {
+    test('gets the titles', async () => {
+      const titles = { _data: ['Mr', 'Mrs'] }
+      httpGet.mockResolvedValueOnce(titles)
+
+      const result = await ruralPaymentsReferenceData.getReferenceData('titles')
+
+      expect(httpGet).toHaveBeenCalledWith('reference/titles')
+      expect(result).toEqual(titles)
     })
   })
 })

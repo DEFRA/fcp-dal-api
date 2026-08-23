@@ -7,9 +7,19 @@ type ReferenceData {
   countriesCurrencies: [CountryCurrency!]
 
   """
+  The possible Business Types for a business.
+  """
+  businessTypes: [ReferenceDatum!]
+
+  """
   The possible Legal Statuses of a business.
   """
   legalStatuses: [ReferenceDatum!]
+
+  """
+  The possible Titles for a person.
+  """
+  titles: [String!]
 }
 
 type CountryCurrency {
