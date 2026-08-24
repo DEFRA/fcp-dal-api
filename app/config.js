@@ -3,6 +3,18 @@ import convict from 'convict'
 export const cdpEnvironments = ['dev', 'test', 'ext-test', 'perf-test', 'prod']
 
 export const config = convict({
+  serviceVersion: {
+    doc: 'The service version, this variable is injected into your docker container in CDP environments',
+    format: String,
+    nullable: true,
+    default: null,
+    env: 'SERVICE_VERSION'
+  },
+  serviceName: {
+    doc: 'Api Service Name',
+    format: String,
+    default: 'fcp-dal-api'
+  },
   nodeEnv: {
     doc: 'The application environment',
     format: ['production', 'development', 'test'],
