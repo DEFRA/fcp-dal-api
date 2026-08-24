@@ -28,7 +28,7 @@ export async function context({ request }) {
 
   const authContext = endUserAuthContext(request)
   const defraIdCtx = await defraIdContext(authContext)
-  const auditTrail = createAuditTrail()
+  const auditTrail = createAuditTrail(authContext)
 
   const datasourceOptions = [
     { logger: requestLogger },

@@ -177,7 +177,13 @@ describe('createAuditTrail', () => {
   })
 
   describe('recordServiceAccount / serviceAccount', () => {
-    test('returns undefined before any service account has been recorded', () => {
+    test('returns the client supplied service account if present in the authContext', () => {
+      const auditTrail = createAuditTrail({ serviceAccount: 'service-account@example.com' })
+
+      expect(auditTrail.serviceAccount()).toBe('service-account@example.com')
+    })
+
+    test('returns undefined if no service account supplied', () => {
       const auditTrail = createAuditTrail()
 
       expect(auditTrail.serviceAccount()).toBeUndefined()
