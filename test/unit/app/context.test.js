@@ -205,6 +205,14 @@ describe('context', () => {
       expect(first.auditTrail.getForRoot('business').accounts).toEqual({ frn: '123' })
       expect(second.auditTrail.getForRoot('business').accounts).toBeUndefined()
     })
+    test('passes the authContext to the audit trail to allow service account to be captured', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      const request = { headers: { 'service-account': 'service@example.com' } }
+
+      const ctx = await context({ request })
+
+      expect(ctx.auditTrail.serviceAccount()).toBe('service@example.com')
+    })
   })
 
   describe('hitachiPayments', () => {
