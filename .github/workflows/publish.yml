@@ -43,28 +43,18 @@ jobs:
       - name: Check out code
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          fetch-depth: 0
-
-      - name: Discover version number
-        id: version
-        run: |
-          VERSION=$(jq -r '.version' package.json)
-          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q "${VERSION}"; then
-            echo "Tag ${VERSION} already exists"
-            exit 1
-          fi
-          echo "value=${VERSION}" >> $GITHUB_OUTPUT
+          fetch-depth: 0 # Depth 0 is required for tag-based auto-versioning
 
       - name: Build and Publish
         uses: DEFRA/cdp-build-action/build@f13fc42004f99a1df2e21ce1ff488cc72c897e40 # 17 Jul 2026
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          version: ${{ steps.version.outputs.value }}
-
-      - name: Tag repository
-        run: |
-          git tag ${{ steps.version.outputs.value }}
-          git push --tags
+        env:
+          # Patch releases are reserved for hotfixes (publish-hotfix.yml).
+          # Disabling the #patch commit-message trigger here means main can
+          # only bump minor/major, so it can never independently produce the
+          # same vX.Y.Z tag a hotfix branch computes off an older ancestor.
+          PATCH_STRING_TOKEN: disabled-on-main-do-not-use
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
