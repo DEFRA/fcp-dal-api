@@ -3,10 +3,19 @@ import { createLogger, format, transports } from 'winston'
 import { config } from '../config.js'
 import { cdpSchemaTranslator } from './winstonFormatters.js'
 
+const serviceName = config.get('serviceName')
+const serviceVersion = config.get('serviceVersion')
+
 const transportTypes = []
 transportTypes.push(
   new transports.Console({
-    format: format.combine(cdpSchemaTranslator(), ecsFormat())
+    format: format.combine(
+      cdpSchemaTranslator(),
+      ecsFormat({
+        serviceVersion,
+        serviceName
+      })
+    )
   })
 )
 
