@@ -5,7 +5,6 @@ import { config as appConfig } from '../../config.js'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { BaseRESTDataSource } from '../BaseRESTDataSource.js'
-import { extractCrnFromDefraIdToken } from '../../auth/defra-id.js'
 import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
 
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
@@ -14,7 +13,7 @@ const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
 export class RuralPayments extends BaseRESTDataSource {
   // Note this gets overridden by the customFetch
   request = null
-  constructor(config, { request }) {
+  constructor(config, { request, defraIdContext }) {
     super(config, {
       name: 'Rural payments',
       code: RURALPAYMENTS_API_REQUEST_001
@@ -22,6 +21,7 @@ export class RuralPayments extends BaseRESTDataSource {
 
     this.endUserAuthContext = endUserAuthContext(request)
     this.initialiseRequest(request)
+    this.defraIdContext = defraIdContext
 
     if (appConfig.get('kits.disableMTLS')) {
       this.httpCache.httpFetch = (url, options = {}) =>
@@ -69,7 +69,7 @@ export class RuralPayments extends BaseRESTDataSource {
       additionalHeaders.email = internalEmail
     } else {
       additionalHeaders.Authorization = this.endUserAuthContext.externalAuthHeader
-      additionalHeaders.crn = extractCrnFromDefraIdToken(this.endUserAuthContext.externalAuthHeader)
+      additionalHeaders.crn = this.defraIdContext.crn()
     }
 
     request.headers = {
