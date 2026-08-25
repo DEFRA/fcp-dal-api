@@ -125,8 +125,7 @@ const customerUpdateInputMapping = {
   firstName: (input) => input.first,
   middleName: (input) => input.middle,
   lastName: (input) => input.last,
-  dateOfBirth: (input) =>
-    input.dateOfBirth && Math.floor(dob2utc(new Date(input.dateOfBirth).getTime()) / 1000),
+  dateOfBirth: (input) => input.dateOfBirth && dob2utc(Date.parse(input.dateOfBirth)),
   landline: (input) => input.phone?.landline,
   mobile: (input) => input.phone?.mobile,
   email: (input) => input.email?.address,
@@ -155,16 +154,6 @@ const customerUpdateInputMapping = {
 
 export function transformCustomerUpdateInputToPersonUpdate(person, input) {
   const mappedInput = transformMapping(customerUpdateInputMapping, input)
-
-  // Convert dateOfBirth from seconds (DAL) to milliseconds (stored format).
-  // The schema allows integer, string, or null; integers/strings may be negative (pre-1970).
-  const rawDob = person.dateOfBirth
-  if (rawDob != null) {
-    const milliseconds = Number(rawDob)
-    if (Number.isFinite(milliseconds)) {
-      person.dateOfBirth = Math.floor(milliseconds / 1000)
-    }
-  }
 
   return {
     ...person,
