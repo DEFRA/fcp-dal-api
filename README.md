@@ -265,6 +265,18 @@ Modifications can be made by submitting a PR with changes to the relevant spec f
 The project is setup with SonarCloud to ensure certain important code quality standards are met.
 More information can be found [here](https://sonarcloud.io/project/overview?id=DEFRA_fcp-dal-api).
 
+### Publish Dev Build workflow
+
+The [`publish-dev-build`](./.github/workflows/publish-dev-build.yml) GitHub Actions workflow allows a build from any branch to be published to the `dev` environment ahead of merging to `main`, which is useful for testing changes before they are merged.
+
+For example, you might need to test logging works as expected within the cdp portal.
+
+It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) — select the branch to build from and run the workflow.
+
+The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, tagging it `0.0.<run_number>` (the GitHub Actions run number), so each dispatch of the workflow produces a unique, incrementing version regardless of branch.
+
+> NOTE: this bypasses the usual release process and is intended for short-lived dev testing only, not for tracking real releases.
+
 ### Dependabot - TODO!
 
 Decide whether to enable Depend-a-bot by renaming the [.github/example.dependabot.yml](.github/example.dependabot.yml) file to `.github/dependabot.yml` 🤷
