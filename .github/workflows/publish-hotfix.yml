@@ -38,6 +38,8 @@ jobs:
         uses: DEFRA/cdp-build-action/build-hotfix@f13fc42004f99a1df2e21ce1ff488cc72c897e40 # 17 Jul 2026
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          CUSTOM_TAG: 0.0.${{ github.run_number }}
 
       # FIXME: this step should be run before the tag publishing in case there are problems found!
       - name: SonarCloud Scan
