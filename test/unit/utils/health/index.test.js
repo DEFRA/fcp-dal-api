@@ -3,12 +3,16 @@ import { expect, jest } from '@jest/globals'
 const mockMongoHealthCheck = jest.fn()
 const mockRuralPaymentsHealthCheck = jest.fn()
 const mockJwksHealthCheck = jest.fn()
+const mockDefraIdHealthCheck = jest.fn()
 
 jest.unstable_mockModule('../../../../app/utils/health/mongo.js', () => ({
   healthCheck: mockMongoHealthCheck
 }))
 jest.unstable_mockModule('../../../../app/utils/health/jwks.js', () => ({
   healthCheck: mockJwksHealthCheck
+}))
+jest.unstable_mockModule('../../../../app/utils/health/defra-id.js', () => ({
+  healthCheck: mockDefraIdHealthCheck
 }))
 
 jest.unstable_mockModule('../../../../app/utils/health/rural-payments.js', () => ({
@@ -22,6 +26,7 @@ describe('runHealthChecks', () => {
     mockMongoHealthCheck.mockResolvedValue(undefined)
     mockRuralPaymentsHealthCheck.mockResolvedValue(undefined)
     mockJwksHealthCheck.mockResolvedValue(undefined)
+    mockDefraIdHealthCheck.mockResolvedValue(undefined)
     jest.spyOn(process, 'exit').mockReturnValue(1)
   })
 
@@ -34,6 +39,7 @@ describe('runHealthChecks', () => {
 
     expect(mockMongoHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockJwksHealthCheck).toHaveBeenCalledTimes(1)
+    expect(mockDefraIdHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockRuralPaymentsHealthCheck).toHaveBeenCalledTimes(1)
   })
 
@@ -41,6 +47,7 @@ describe('runHealthChecks', () => {
     const error = new Error('Health check failed')
     mockMongoHealthCheck.mockRejectedValueOnce(error)
     mockJwksHealthCheck.mockRejectedValueOnce(error)
+    mockDefraIdHealthCheck.mockRejectedValueOnce(error)
     mockRuralPaymentsHealthCheck.mockRejectedValueOnce(error)
 
     await runHealthChecks()
