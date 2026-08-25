@@ -4,16 +4,12 @@ import { validateAuditEvent } from '@defra/fcp-audit-publisher'
 const getRequestingGroupMock = jest.fn()
 const getRequestingServiceMock = jest.fn()
 const configGetMock = jest.fn()
-const extractCrnFromDefraIdTokenMock = jest.fn()
 const loggerMock = { error: jest.fn(), debug: jest.fn(), warn: jest.fn() }
 const snsPublishMock = jest.fn()
 
 jest.unstable_mockModule('../../../../app/auth/authenticate.js', () => ({
   getRequestingGroup: getRequestingGroupMock,
   getRequestingService: getRequestingServiceMock
-}))
-jest.unstable_mockModule('../../../../app/auth/defra-id.js', () => ({
-  extractCrnFromDefraIdToken: extractCrnFromDefraIdTokenMock
 }))
 jest.unstable_mockModule('../../../../app/config.js', () => ({
   config: { get: configGetMock }
@@ -56,7 +52,8 @@ const baseContextValue = {
     payload: requestPayload
   },
   auth: { groups: ['group-1'] },
-  auditTrail: fakeAuditTrail()
+  auditTrail: fakeAuditTrail(),
+  defraIdContext: { crn: jest.fn() }
 }
 
 describe('auditPlugin', () => {
@@ -256,7 +253,7 @@ describe('auditPlugin', () => {
         expect.objectContaining({ user: 'internal@example.com' }),
         baseContextValue.requestLogger
       )
-      expect(extractCrnFromDefraIdTokenMock).not.toHaveBeenCalled()
+      expect(contextValue.defraIdContext.crn).not.toHaveBeenCalled()
     })
 
     test('uses the service account when there is no internal auth header', async () => {
@@ -284,11 +281,10 @@ describe('auditPlugin', () => {
         expect.objectContaining({ user: 'service-account@example.com' }),
         baseContextValue.requestLogger
       )
-      expect(extractCrnFromDefraIdTokenMock).not.toHaveBeenCalled()
+      expect(contextValue.defraIdContext.crn).not.toHaveBeenCalled()
     })
 
     test('falls back to the DefraID CRN, prefixed IDM/, when there is neither an internal auth header nor a service account', async () => {
-      extractCrnFromDefraIdTokenMock.mockReturnValue('crn-123')
       const publish = jest.fn()
       const plugin = auditPlugin({ publish })
 
@@ -300,13 +296,14 @@ describe('auditPlugin', () => {
         },
         auditTrail: fakeAuditTrail({
           business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
-        })
+        }),
+        defraIdContext: { crn: jest.fn().mockReturnValue('crn-123') }
       }
       const listener = await plugin.requestDidStart()
       const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
       await listener.willSendResponse(requestContext)
 
-      expect(extractCrnFromDefraIdTokenMock).toHaveBeenCalledWith('the-defra-id-token')
+      expect(contextValue.defraIdContext.crn).toHaveBeenCalledTimes(1)
       expect(publish).toHaveBeenCalledWith(
         expect.objectContaining({ user: 'IDM/crn-123' }),
         baseContextValue.requestLogger

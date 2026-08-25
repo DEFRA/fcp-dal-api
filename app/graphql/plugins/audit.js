@@ -1,7 +1,6 @@
 import { getRequestingGroup, getRequestingService } from '../../auth/authenticate.js'
 import { config } from '../../config.js'
 import { DAL_AUDIT_EVENT_001 } from '../../logger/codes.js'
-import { extractCrnFromDefraIdToken } from '../../auth/defra-id.js'
 import { getEndUserIpAddress } from '../../audit/audit-ip.js'
 import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
 import { snsPublish } from '../../audit/sns-publisher.js'
@@ -19,7 +18,7 @@ function endUser(contextValue) {
   } else if (authContext.serviceAccount) {
     return authContext.serviceAccount
   } else {
-    return `IDM/${extractCrnFromDefraIdToken(authContext.externalAuthHeader)}`
+    return `IDM/${contextValue.defraIdContext.crn()}`
   }
 }
 
