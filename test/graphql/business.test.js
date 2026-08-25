@@ -1,9 +1,8 @@
 import { jest } from '@jest/globals'
-import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
-import { mockOrganisationSearch } from './helpers.js'
+import { mockDefraIdJwks, mockOrganisationSearch, signDefraIdToken } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
@@ -429,16 +428,12 @@ describe('Query.business internal', () => {
   test('authenticated external', async () => {
     configMockPath['kits.dalServiceAccountEmail'] = 'dal-service-account@example.com'
 
-    // For external requests we extract org id from token but don't verify.
-    // so any jwt with a valid relationships array works
+    mockDefraIdJwks()
     const crn = '123'
-    const tokenValue = jwt.sign(
-      {
-        contactId: crn,
-        relationships: ['organisationId:123456789']
-      },
-      'test-secret'
-    )
+    const tokenValue = signDefraIdToken({
+      contactId: crn,
+      relationships: ['organisationId:123456789']
+    })
 
     const externalKitsGateway = nock(config.get('kits.external.gatewayUrl'))
     const internalKitsGateway = nock(config.get('kits.internal.gatewayUrl'))
