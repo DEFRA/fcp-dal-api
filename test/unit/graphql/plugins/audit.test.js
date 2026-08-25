@@ -309,6 +309,36 @@ describe('auditPlugin', () => {
         baseContextValue.requestLogger
       )
     })
+
+    test('falls back to "unknown" (and still publishes) when the Defra ID token cannot be verified', async () => {
+      const publish = jest.fn()
+      const plugin = auditPlugin({ publish })
+
+      const contextValue = {
+        ...baseContextValue,
+        request: {
+          ...baseContextValue.request,
+          headers: { 'x-forwarded-authorization': 'the-defra-id-token' }
+        },
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
+        }),
+        defraIdContext: {
+          crn: jest.fn(() => {
+            throw new Error('Defra ID token failed verification')
+          })
+        }
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+      await listener.willSendResponse(requestContext)
+
+      expect(publish).toHaveBeenCalledWith(
+        expect.objectContaining({ user: 'unknown' }),
+        baseContextValue.requestLogger
+      )
+      expect(baseContextValue.requestLogger.error).not.toHaveBeenCalled()
+    })
   })
 
   describe('environment', () => {

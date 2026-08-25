@@ -18,7 +18,11 @@ function endUser(contextValue) {
   } else if (authContext.serviceAccount) {
     return authContext.serviceAccount
   } else {
-    return `IDM/${contextValue.defraIdContext.crn()}`
+    try {
+      return `IDM/${contextValue.defraIdContext.crn()}`
+    } catch (error) {
+      return `unknown`
+    }
   }
 }
 
