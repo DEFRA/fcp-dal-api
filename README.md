@@ -281,7 +281,7 @@ The workflow publishes the build via [`cdp-build-action`](https://github.com/DEF
 
 The [`publish-hotfix`](./.github/workflows/publish-hotfix.yml) GitHub Actions workflow publishes a patch release directly from any non-`main` branch, bypassing the normal PR-to-main release flow. This is used to ship an urgent fix to a live environment without waiting for a full release.
 
-It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-hotfix.yml) — select the branch to build from and run the workflow.
+It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-hotfix.yml) by selecting the branch to build from, and running the workflow.
 
 The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, which auto-increments the patch version using [`anothrNick/github-tag-action`](https://github.com/anothrNick/github-tag-action) (`DEFAULT_BUMP: patch`, `TAG_CONTEXT: branch`) based on the tags reachable from the branch's history.
 
