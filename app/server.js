@@ -20,6 +20,23 @@ server.ext('onPreStart', () => {
 const routes = [].concat(healthyRoute, healthRoute)
 server.route(routes)
 
+const SERVICE_VERSION_HEADER_NAME = 'x-dal-service-version'
+
+server.ext({
+  type: 'onPreResponse',
+  method: function (request, h) {
+    const response = request.response
+
+    if (response.isBoom) {
+      response.output.headers[SERVICE_VERSION_HEADER_NAME] = config.get('serviceVersion')
+    } else {
+      response.header(SERVICE_VERSION_HEADER_NAME, config.get('serviceVersion'))
+    }
+
+    return h.continue
+  }
+})
+
 server.ext({
   type: 'onRequest',
   method: function (request, h) {

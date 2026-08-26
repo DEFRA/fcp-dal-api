@@ -36,7 +36,8 @@ describe('Server config and startup', () => {
   beforeEach(async () => {
     configMockPath = {
       port: '3987',
-      requestTimeoutMs: timeout
+      requestTimeoutMs: timeout,
+      serviceVersion: '1.2.3'
     }
     const originalConfig = { ...config }
     jest
@@ -75,6 +76,19 @@ describe('Server config and startup', () => {
       const paths = routes.map((r) => r.path)
       expect(paths).toContain('/health')
       expect(paths).toContain('/healthy')
+    })
+  })
+
+  describe('dal-service-version response header', () => {
+    test('is set on a successful response', async () => {
+      const response = await server.inject({ method: 'GET', url: '/healthy' })
+      expect(response.headers['x-dal-service-version']).toBe('1.2.3')
+    })
+
+    test('is set on a Boom (error) response', async () => {
+      const response = await server.inject({ method: 'GET', url: '/does-not-exist' })
+      expect(response.statusCode).toBe(404)
+      expect(response.headers['x-dal-service-version']).toBe('1.2.3')
     })
   })
 
