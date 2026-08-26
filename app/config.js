@@ -48,6 +48,13 @@ export const config = convict({
     default: null,
     env: 'DAL_REQUEST_TIMEOUT_MS'
   },
+  serviceVersion: {
+    doc: 'The running version of the DAL service, returned in the x-dal-service-version response header',
+    format: String,
+    default: null,
+    nullable: true,
+    env: 'SERVICE_VERSION'
+  },
   oidc: {
     jwksURI: {
       doc: 'The URL used to validate the JWT, should be entra OIDC endpoint',
