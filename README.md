@@ -271,7 +271,7 @@ The [`publish-dev-build`](./.github/workflows/publish-dev-build.yml) GitHub Acti
 
 For example, you might need to test logging works as expected within the cdp portal.
 
-It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) — select the branch to build from and run the workflow.
+It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) by selecting the branch to build from, and running the workflow.
 
 The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, tagging it `0.0.<run_number>` (the GitHub Actions run number), so each dispatch of the workflow produces a unique, incrementing version regardless of branch.
 
@@ -303,7 +303,6 @@ Setting `CUSTOM_TAG` causes `github-tag-action` to skip auto-versioning entirely
 1. Check the version currently deployed to `prod` in the [CDP portal](https://portal.cdp-int.defra.cloud/services/fcp-dal-api) and then check the existing tags (`git tag --list --sort=-v:refname | head`) to find the next free patch version for the prod `major.minor` version
 2. Add the `CUSTOM_TAG` line above to `publish-hotfix.yml` on the hotfix branch and commit/push it.
 3. Dispatch the `Publish Hot Fix` workflow from that branch.
-4. Once published, revert the `CUSTOM_TAG` change in a follow-up commit so future hotfixes go back to auto-versioning.
 
 > NOTE: this same technique (`CUSTOM_TAG`) is what the [Publish Dev Build workflow](#publish-dev-build-workflow) uses to guarantee a unique version on every dispatch.
 
