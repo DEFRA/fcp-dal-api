@@ -7,7 +7,6 @@ import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './log
 import { logger } from './logger/logger.js'
 import { sendMetric } from './logger/sendMetric.js'
 import { healthRoute } from './routes/health.js'
-import { healthyRoute } from './routes/healthy.js'
 
 export const server = hapi.server({
   port: config.get('port')
@@ -17,8 +16,7 @@ server.ext('onPreStart', () => {
   server.listener.setTimeout(config.get('requestTimeoutMs'))
 })
 
-const routes = [].concat(healthyRoute, healthRoute)
-server.route(routes)
+server.route([healthRoute])
 
 const SERVICE_VERSION_HEADER_NAME = 'x-dal-service-version'
 
