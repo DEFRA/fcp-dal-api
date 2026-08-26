@@ -1,9 +1,10 @@
 import { logger } from '../../logger/logger.js'
+import { healthCheck as defraId } from './defra-id.js'
 import { healthCheck as jwks } from './jwks.js'
 import { healthCheck as mongo } from './mongo.js'
 import { healthCheck as ruralPayments } from './rural-payments.js'
 
-const healthChecks = [mongo, jwks, ruralPayments]
+const healthChecks = [mongo, jwks, defraId, ruralPayments]
 
 /**
  * Runs all registered health checks.

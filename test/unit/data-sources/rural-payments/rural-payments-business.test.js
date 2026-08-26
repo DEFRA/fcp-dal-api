@@ -1,5 +1,4 @@
 import { describe, jest } from '@jest/globals'
-import jwt from 'jsonwebtoken'
 import {
   formatDateDDMMMYY,
   RuralPaymentsBusiness
@@ -81,20 +80,16 @@ describe('Rural Payments Business', () => {
   ]
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
 
-  const tokenValue = jwt.sign(
-    {
-      relationships: ['123:123456789']
-    },
-    'test-secret'
-  )
+  const defraIdContext = { orgId: (sbi) => (sbi === '123456789' ? '123' : undefined) }
   const ruralPaymentsBusinessExt = new RuralPaymentsBusiness(
     { logger },
     {
       request: {
         headers: {
-          'x-forwarded-authorization': tokenValue
+          'x-forwarded-authorization': 'the-defra-id-token'
         }
-      }
+      },
+      defraIdContext
     }
   )
   const httpGet = jest.spyOn(ruralPaymentsBusiness, 'get')

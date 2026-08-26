@@ -44,7 +44,9 @@ describe('JWKS health check', () => {
   it('should fetch JWKS keys and resolve a public key', async () => {
     await healthCheck()
 
-    expect(global.fetch).toHaveBeenCalledWith(config.get('oidc.jwksURI'))
+    expect(global.fetch).toHaveBeenCalledWith(config.get('oidc.jwksURI'), {
+      signal: expect.any(AbortSignal)
+    })
     expect(mockGetPublicKey).toHaveBeenCalledWith('mock-key-id-123')
     expect(mockLogger.logger.info).toHaveBeenCalledWith(
       'SUCCESS: Resolved first JWKS key for kid: mock-key-id-123'

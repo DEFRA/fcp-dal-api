@@ -64,6 +64,24 @@ export const config = convict({
       env: 'OIDC_JWKS_TIMEOUT_MS'
     }
   },
+  defraId: {
+    wellKnownUrl: {
+      doc:
+        'The Defra Identity well known URL, used to discover the jwks_uri for verifying Defra ID ' +
+        'tokens. Required unless DISABLE_AUTH is true, in which case token verification is disabled.',
+      format: String,
+      default: null,
+      nullable: process.env.DISABLE_AUTH === 'true',
+      env: 'DEFRA_ID_WELL_KNOWN_URL'
+    },
+    timeoutMs: {
+      doc: 'Timeout of Defra ID well known/JWKS requests in milliseconds',
+      format: 'int',
+      default: null,
+      nullable: process.env.DISABLE_AUTH === 'true',
+      env: 'DEFRA_ID_TIMEOUT_MS'
+    }
+  },
   auth: {
     groups: {
       // Note must correspond to AuthGroup Enum except admin which has access to everything

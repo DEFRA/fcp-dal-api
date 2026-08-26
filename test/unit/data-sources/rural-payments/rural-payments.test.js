@@ -1,7 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import jwt from 'jsonwebtoken'
 import { RuralPayments } from '../../../../app/data-sources/rural-payments/RuralPayments.js'
 import { HttpError } from '../../../../app/errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../../app/logger/codes.js'
@@ -236,9 +235,7 @@ describe('RuralPayments', () => {
     })
 
     test('adds crn & Authorization headers from x-forwarded-authorization for external requests', async () => {
-      const token = jwt.sign({ contactId: 'test-crn' }, 'secret', {
-        expiresIn: '1h'
-      })
+      const token = 'the-defra-id-token'
       const rp = new RuralPayments(
         { logger },
         {
@@ -246,7 +243,8 @@ describe('RuralPayments', () => {
             headers: {
               'x-forwarded-authorization': token
             }
-          }
+          },
+          defraIdContext: { crn: () => 'test-crn' }
         }
       )
       const request = { headers: {} }
