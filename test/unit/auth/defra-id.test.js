@@ -14,6 +14,16 @@ describe('defraIdContext', () => {
 
   const jwksDataSource = () => ({ getPublicKey: jest.fn().mockResolvedValue(publicKey) })
 
+  let configGetSpy
+
+  beforeEach(() => {
+    configGetSpy = jest.spyOn(config, 'get').mockReturnValue(false)
+  })
+
+  afterEach(() => {
+    configGetSpy.mockRestore()
+  })
+
   describe('crn', () => {
     test('extracts crn from a verified token', async () => {
       const token = signToken({ contactId: '11111111' })
@@ -100,15 +110,9 @@ describe('defraIdContext', () => {
     expect(jwks.getPublicKey).toHaveBeenCalledTimes(1)
   })
 
-  describe('defra id verification disabled (when defraId.wellKnownUrl is not configured)', () => {
-    let configGetSpy
-
+  describe('defra id verification disabled (when auth.disabled is true)', () => {
     beforeEach(() => {
-      configGetSpy = jest.spyOn(config, 'get').mockReturnValue(null)
-    })
-
-    afterEach(() => {
-      configGetSpy.mockRestore()
+      configGetSpy.mockReturnValue(true)
     })
 
     test('decodes crn/orgId from the token without verifying its signature', async () => {

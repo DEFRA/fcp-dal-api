@@ -61,9 +61,9 @@ export const defraIdContext = async (authContext, jwksDataSource = defraIdJWKS) 
   let tokenPayload
   let verificationError
   try {
-    tokenPayload = config.get('defraId.wellKnownUrl')
-      ? await verifyDefraIdToken(authContext.externalAuthHeader, jwksDataSource)
-      : decodeUnverifiedDefraIdToken(authContext.externalAuthHeader)
+    tokenPayload = config.get('auth.disabled')
+      ? decodeUnverifiedDefraIdToken(authContext.externalAuthHeader)
+      : await verifyDefraIdToken(authContext.externalAuthHeader, jwksDataSource)
   } catch (error) {
     verificationError = error
   }

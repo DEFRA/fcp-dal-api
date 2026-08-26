@@ -2,7 +2,7 @@ import { jest } from '@jest/globals'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
-import { mockDefraIdJwks, mockOrganisationSearch, signDefraIdToken } from './helpers.js'
+import { mockOrganisationSearch, signDefraIdToken } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
@@ -428,7 +428,6 @@ describe('Query.business internal', () => {
   test('authenticated external', async () => {
     configMockPath['kits.dalServiceAccountEmail'] = 'dal-service-account@example.com'
 
-    mockDefraIdJwks()
     const crn = '123'
     const tokenValue = signDefraIdToken({
       contactId: crn,

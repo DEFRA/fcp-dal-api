@@ -2,7 +2,7 @@ import { jest } from '@jest/globals'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
-import { mockDefraIdJwks, mockPersonSearch, signDefraIdToken } from './helpers.js'
+import { mockPersonSearch, signDefraIdToken } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 describe('Query.customer', () => {
@@ -245,8 +245,6 @@ describe('Query.customer', () => {
       readCount: 1,
       unreadCount: 2
     })
-
-    mockDefraIdJwks()
 
     const result = await makeTestQuery(query, {
       'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' })

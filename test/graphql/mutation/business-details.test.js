@@ -1,6 +1,6 @@
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import { mockDefraIdJwks, mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
+import { mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -655,7 +655,6 @@ describe('business - external gateway', () => {
   beforeEach(() => {
     nock.disableNetConnect()
 
-    mockDefraIdJwks()
     v1_external.get('/organisation/organisationId').reply(200, {
       _data: orgDetailsUpdatePayload
     })
