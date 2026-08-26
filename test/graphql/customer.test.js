@@ -1,9 +1,8 @@
 import { jest } from '@jest/globals'
-import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
-import { mockPersonSearch } from './helpers.js'
+import { mockPersonSearch, signDefraIdToken } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 describe('Query.customer', () => {
@@ -248,9 +247,7 @@ describe('Query.customer', () => {
     })
 
     const result = await makeTestQuery(query, {
-      'x-forwarded-authorization': jwt.sign({ contactId: '1234567890' }, 'secret', {
-        expiresIn: '1h'
-      })
+      'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' })
     })
 
     expect(result).toEqual({

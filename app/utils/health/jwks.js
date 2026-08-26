@@ -7,7 +7,9 @@ export const healthCheck = async () => {
   if (!config.get('auth.disabled')) {
     try {
       logger.info(`Fetching JWKS keys from ${config.get('oidc.jwksURI')}`)
-      const res = await fetch(config.get('oidc.jwksURI'))
+      const res = await fetch(config.get('oidc.jwksURI'), {
+        signal: AbortSignal.timeout(config.get('oidc.timeoutMs'))
+      })
       if (!res.ok) {
         logger.error('#DAL - Error fetching JWKS keys', {
           res,

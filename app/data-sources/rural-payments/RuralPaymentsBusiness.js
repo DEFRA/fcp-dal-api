@@ -5,7 +5,6 @@ import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments } from './RuralPayments.js'
-import { extractOrgIdFromDefraIdToken } from '../../auth/defra-id.js'
 
 // The SitiAgri byFunction endpoint scopes function-level authorisation to a consuming module.
 // CUST_SS_PORTAL is the customer self-service portal (the external Rural Payments service) - the
@@ -92,7 +91,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
   async getOrganisationIdBySBI(sbi) {
     if (this.isExternalRoute()) {
-      return extractOrgIdFromDefraIdToken(sbi, this.getDefraIdToken())
+      return this.defraIdContext.orgId(sbi)
     }
     return (await this.organisationSearchBySbi(sbi)).id
   }
@@ -168,10 +167,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
 
     return response
-  }
-
-  getDefraIdToken() {
-    return this.request.headers['x-forwarded-authorization']
   }
 
   async lockOrganisation(organisationId, body) {

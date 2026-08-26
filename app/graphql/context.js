@@ -1,4 +1,5 @@
 import { getAuth, getRequestingGroup, getRequestingService } from '../auth/authenticate.js'
+import { defraIdContext } from '../auth/defra-id.js'
 import { config } from '../config.js'
 import { HitachiPayments } from '../data-sources/hitachi/HitachiPayments.js'
 import { JWKS } from '../data-sources/JWKS.js'
@@ -34,15 +35,18 @@ export async function context({ request }) {
 
   stripClientSuppliedServiceAccountHeader(request)
 
+  const authContext = endUserAuthContext(request)
+  const defraIdCtx = await defraIdContext(authContext)
+
   const datasourceOptions = [
     { logger: requestLogger },
     {
-      request
+      request,
+      defraIdContext: defraIdCtx
     }
   ]
 
   const auditTrail = createAuditTrail()
-  const authContext = endUserAuthContext(request)
   const internalServiceAccountDatasourceOptions = [
     { logger: requestLogger },
     {
@@ -52,7 +56,8 @@ export async function context({ request }) {
           ...request.headers,
           'service-account': authContext.serviceAccount || config.get('kits.dalServiceAccountEmail')
         }
-      }
+      },
+      defraIdContext: defraIdCtx
     }
   ]
 
@@ -63,6 +68,7 @@ export async function context({ request }) {
     request,
     requestLogger,
     auditTrail,
+    defraIdContext: defraIdCtx,
     db,
     dataSources: {
       permissions: new Permissions({ logger: requestLogger }),

@@ -10,7 +10,7 @@ export class JWKS {
       const url = new URL(jwksUri)
 
       jwksSet = createRemoteJWKSet(url, {
-        timeout: config.get('oidc.timeoutMs')
+        timeoutDuration: config.get('oidc.timeoutMs')
       })
     }
 

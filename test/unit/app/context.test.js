@@ -80,6 +80,9 @@ describe('context', () => {
     expect(result.request).toBe(request)
     expect(result.requestLogger).toBeDefined()
     expect(result.auditTrail).toBeDefined()
+
+    expect(result.defraIdContext.crn).toBeInstanceOf(Function)
+    expect(result.defraIdContext.orgId).toBeInstanceOf(Function)
     expect(result.dataSources.permissions.type).toBe('Permissions')
     expect(result.dataSources.ruralPaymentsBusiness).toBeDefined()
     expect(result.dataSources.ruralPaymentsCustomer).toEqual({})
@@ -156,12 +159,12 @@ describe('context', () => {
       expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(
         2,
         { logger: expect.anything() },
-        {
+        expect.objectContaining({
           request: {
             ...request,
             headers: { ...request.headers, 'service-account': 'dal-service-account@example.com' }
           }
-        }
+        })
       )
       expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toEqual({
         marker: 'service-account-instance'
@@ -220,9 +223,13 @@ describe('context', () => {
 
       await context({ request })
 
-      expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(1, expect.anything(), {
-        request: { headers: { 'x-forwarded-authorization': 'token123' } }
-      })
+      expect(RuralPaymentsBusinessMock).toHaveBeenNthCalledWith(
+        1,
+        expect.anything(),
+        expect.objectContaining({
+          request: { headers: { 'x-forwarded-authorization': 'token123' } }
+        })
+      )
     })
   })
 
