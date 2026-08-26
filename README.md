@@ -300,7 +300,7 @@ env:
 
 Setting `CUSTOM_TAG` causes `github-tag-action` to skip auto-versioning entirely and use exactly the version provided.
 
-1. Check the existing tags (`git tag --list --sort=-v:refname | head`), or the version currently deployed to `prod` in the [CDP portal](https://portal.cdp-int.defra.cloud/services/fcp-dal-api), to work out the next free patch version.
+1. Check the version currently deployed to `prod` in the [CDP portal](https://portal.cdp-int.defra.cloud/services/fcp-dal-api) and then check the existing tags (`git tag --list --sort=-v:refname | head`) to find the next free patch version for the prod `major.minor` version
 2. Add the `CUSTOM_TAG` line above to `publish-hotfix.yml` on the hotfix branch and commit/push it.
 3. Dispatch the `Publish Hot Fix` workflow from that branch.
 4. Once published, revert the `CUSTOM_TAG` change in a follow-up commit so future hotfixes go back to auto-versioning.
