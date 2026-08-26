@@ -271,11 +271,40 @@ The [`publish-dev-build`](./.github/workflows/publish-dev-build.yml) GitHub Acti
 
 For example, you might need to test logging works as expected within the cdp portal.
 
-It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) — select the branch to build from and run the workflow.
+It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) by selecting the branch to build from, and running the workflow.
 
 The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, tagging it `0.0.<run_number>` (the GitHub Actions run number), so each dispatch of the workflow produces a unique, incrementing version regardless of branch.
 
 > NOTE: this bypasses the usual release process and is intended for short-lived dev testing only, not for tracking real releases.
+
+### Publish Hot Fix workflow
+
+The [`publish-hotfix`](./.github/workflows/publish-hotfix.yml) GitHub Actions workflow publishes a patch release directly from any non-`main` branch, bypassing the normal PR-to-main release flow. This is used to ship an urgent fix to a live environment without waiting for a full release.
+
+It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-hotfix.yml) by selecting the branch to build from, and running the workflow.
+
+The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, which auto-increments the patch version using [`anothrNick/github-tag-action`](https://github.com/anothrNick/github-tag-action) (`DEFAULT_BUMP: patch`, `TAG_CONTEXT: branch`) based on the tags reachable from the branch's history.
+
+#### Working around a duplicate version number
+
+Because the next version is auto-computed from tags reachable from the branch, the computed version can collide with a tag that already exists — e.g. a release or another hotfix has been tagged since the hotfix branch diverged from `main`. When this happens, the publish fails because the version/tag already exists.
+
+To work around this, temporarily override the auto-versioning by adding a `CUSTOM_TAG` entry to the `env:` block of [`publish-hotfix.yml`](./.github/workflows/publish-hotfix.yml):
+
+```yaml
+env:
+  AWS_REGION: eu-west-2
+  AWS_ACCOUNT_ID: '094954420758'
+  CUSTOM_TAG: 2.18.2 # <-- pick the next unused version
+```
+
+Setting `CUSTOM_TAG` causes `github-tag-action` to skip auto-versioning entirely and use exactly the version provided.
+
+1. Check the version currently deployed to `prod` in the [CDP portal](https://portal.cdp-int.defra.cloud/services/fcp-dal-api) and then check the existing tags (`git tag --list --sort=-v:refname | head`) to find the next free patch version for the prod `major.minor` version
+2. Add the `CUSTOM_TAG` line above to `publish-hotfix.yml` on the hotfix branch and commit/push it.
+3. Dispatch the `Publish Hot Fix` workflow from that branch.
+
+> NOTE: this same technique (`CUSTOM_TAG`) is what the [Publish Dev Build workflow](#publish-dev-build-workflow) uses to guarantee a unique version on every dispatch.
 
 ### Dependabot - TODO!
 
