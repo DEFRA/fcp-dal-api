@@ -20,11 +20,23 @@ const { healthCheck } = await import('../../../../app/utils/health/defra-id.js')
 
 describe('Defra ID health check', () => {
   const originalFetch = global.fetch
+  const wellKnownUrl = 'https://defra-id.example/well-known'
+  let configGetSpy
 
   beforeEach(() => {
+    configGetSpy = jest.spyOn(config, 'get').mockImplementation((key) => {
+      if (key === 'auth.disabled') {
+        return false
+      }
+      if (key === 'defraId.wellKnownUrl') {
+        return wellKnownUrl
+      }
+      throw new Error(`Unexpected config key requested in test: ${key}`)
+    })
+
     mockGetPublicKey.mockResolvedValue('public-key')
     global.fetch = jest.fn().mockImplementation((url) => {
-      if (url === config.get('defraId.wellKnownUrl')) {
+      if (url === wellKnownUrl) {
         return Promise.resolve({
           ok: true,
           status: 200,
@@ -44,22 +56,21 @@ describe('Defra ID health check', () => {
     mockLogger.logger.error.mockReset()
     mockLogger.logger.info.mockReset()
     global.fetch = originalFetch
+    configGetSpy.mockRestore()
     jest.restoreAllMocks()
   })
 
-  it('should skip the health check when defraId.wellKnownUrl is not configured', async () => {
-    const configGetSpy = jest.spyOn(config, 'get').mockReturnValue(null)
+  it('should skip the health check when auth is disabled', async () => {
+    configGetSpy.mockImplementation((key) => key === 'auth.disabled')
 
     expect(await healthCheck()).toBeUndefined()
     expect(global.fetch).not.toHaveBeenCalled()
-
-    configGetSpy.mockRestore()
   })
 
   it('should fetch the well known configuration, the jwks_uri, and resolve a public key', async () => {
     await healthCheck()
 
-    expect(global.fetch).toHaveBeenCalledWith(config.get('defraId.wellKnownUrl'))
+    expect(global.fetch).toHaveBeenCalledWith(wellKnownUrl)
     expect(global.fetch).toHaveBeenCalledWith('https://defra-id.example/keys')
     expect(mockGetPublicKey).toHaveBeenCalledWith('mock-defra-id-key-id')
     expect(mockLogger.logger.info).toHaveBeenCalledWith(

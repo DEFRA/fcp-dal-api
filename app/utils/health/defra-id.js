@@ -4,12 +4,11 @@ import { DEFRA_ID_JWKS_FETCH_ERROR_001 } from '../../logger/codes.js'
 import { logger } from '../../logger/logger.js'
 
 export const healthCheck = async () => {
-  const wellKnownUrl = config.get('defraId.wellKnownUrl')
-  // No well known URL configured means Defra ID token verification has been turned off
-  if (!wellKnownUrl) {
+  if (config.get('auth.disabled')) {
     return
   }
 
+  const wellKnownUrl = config.get('defraId.wellKnownUrl')
   try {
     logger.info(`Fetching Defra ID well known configuration from ${wellKnownUrl}`)
     const wellKnownRes = await fetch(wellKnownUrl)

@@ -68,10 +68,10 @@ export const config = convict({
     wellKnownUrl: {
       doc:
         'The Defra Identity well known URL, used to discover the jwks_uri for verifying Defra ID ' +
-        'tokens. If not supplied, then token verification is disabled.',
+        'tokens. Required unless DISABLE_AUTH is true, in which case token verification is disabled.',
       format: String,
-      nullable: true,
       default: null,
+      nullable: process.env.DISABLE_AUTH === 'true',
       env: 'DEFRA_ID_WELL_KNOWN_URL'
     }
   },

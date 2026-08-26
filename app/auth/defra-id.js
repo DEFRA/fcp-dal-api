@@ -16,8 +16,7 @@ async function verifyDefraIdToken(token, jwksDataSource) {
   }
 }
 
-// If no well known URL is configured, then Defra ID token verification is disabled.
-// Token should just be decoded instead.
+// When DISABLE_AUTH is true, token verification is disabled and the token should just be decoded instead.
 function decodeUnverifiedDefraIdToken(token) {
   try {
     return decodeJwt(token)

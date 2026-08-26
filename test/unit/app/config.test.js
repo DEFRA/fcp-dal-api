@@ -156,7 +156,11 @@ describe('config', () => {
 
     // DISABLE_AUTH check
     process.env.DISABLE_AUTH = 'false'
-    expectedErrors = ['oidc.jwksURI: must be of type String', 'oidc.timeoutMs: must be an integer']
+    expectedErrors = [
+      'oidc.jwksURI: must be of type String',
+      'oidc.timeoutMs: must be an integer',
+      'defraId.wellKnownUrl: must be of type String'
+    ]
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
     process.env.DISABLE_AUTH = 'true'
 
