@@ -73,6 +73,13 @@ export const config = convict({
       default: null,
       nullable: process.env.DISABLE_AUTH === 'true',
       env: 'DEFRA_ID_WELL_KNOWN_URL'
+    },
+    timeoutMs: {
+      doc: 'Timeout of Defra ID well known/JWKS requests in milliseconds',
+      format: 'int',
+      default: null,
+      nullable: process.env.DISABLE_AUTH === 'true',
+      env: 'DEFRA_ID_TIMEOUT_MS'
     }
   },
   auth: {

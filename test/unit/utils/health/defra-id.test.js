@@ -31,6 +31,9 @@ describe('Defra ID health check', () => {
       if (key === 'defraId.wellKnownUrl') {
         return wellKnownUrl
       }
+      if (key === 'defraId.timeoutMs') {
+        return 5000
+      }
       throw new Error(`Unexpected config key requested in test: ${key}`)
     })
 
@@ -70,8 +73,10 @@ describe('Defra ID health check', () => {
   it('should fetch the well known configuration, the jwks_uri, and resolve a public key', async () => {
     await healthCheck()
 
-    expect(global.fetch).toHaveBeenCalledWith(wellKnownUrl)
-    expect(global.fetch).toHaveBeenCalledWith('https://defra-id.example/keys')
+    expect(global.fetch).toHaveBeenCalledWith(wellKnownUrl, { signal: expect.any(AbortSignal) })
+    expect(global.fetch).toHaveBeenCalledWith('https://defra-id.example/keys', {
+      signal: expect.any(AbortSignal)
+    })
     expect(mockGetPublicKey).toHaveBeenCalledWith('mock-defra-id-key-id')
     expect(mockLogger.logger.info).toHaveBeenCalledWith(
       'SUCCESS: Resolved first Defra ID JWKS key for kid: mock-defra-id-key-id'

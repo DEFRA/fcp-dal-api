@@ -29,6 +29,7 @@ describe('config', () => {
     delete process.env.OIDC_JWKS_TIMEOUT_MS
     delete process.env.OIDC_JWKS_URI
     delete process.env.DEFRA_ID_WELL_KNOWN_URL
+    delete process.env.DEFRA_ID_TIMEOUT_MS
   })
 
   it('should have default values when optional env vars are unset', async () => {
@@ -55,6 +56,7 @@ describe('config', () => {
     expect(config.get('oidc.jwksURI')).toBe(null)
     expect(config.get('oidc.timeoutMs')).toBe(null)
     expect(config.get('defraId.wellKnownUrl')).toBe(null)
+    expect(config.get('defraId.timeoutMs')).toBe(null)
   })
 
   it('should read values from the environment when supplied', async () => {
@@ -69,6 +71,7 @@ describe('config', () => {
     process.env.OIDC_JWKS_URI = 'https://example.com/jwks'
     process.env.OIDC_JWKS_TIMEOUT_MS = '5000'
     process.env.DEFRA_ID_WELL_KNOWN_URL = 'https://example.com/defra-id-well-known'
+    process.env.DEFRA_ID_TIMEOUT_MS = '4500'
     process.env.DISABLE_AUTH = 'false'
     process.env.ADMIN_AD_GROUP_ID = 'admin-group-id'
     process.env.CONSOLIDATED_VIEW_AD_GROUP_ID = 'consolidated-view-group-id'
@@ -114,6 +117,7 @@ describe('config', () => {
     expect(config.get('oidc.jwksURI')).toBe('https://example.com/jwks')
     expect(config.get('oidc.timeoutMs')).toBe(5000)
     expect(config.get('defraId.wellKnownUrl')).toBe('https://example.com/defra-id-well-known')
+    expect(config.get('defraId.timeoutMs')).toBe(4500)
     expect(config.get('auth.disabled')).toBe(false)
     expect(config.get('auth.groups.ADMIN')).toBe('admin-group-id')
     expect(config.get('auth.groups.CONSOLIDATED_VIEW')).toBe('consolidated-view-group-id')
@@ -159,7 +163,8 @@ describe('config', () => {
     expectedErrors = [
       'oidc.jwksURI: must be of type String',
       'oidc.timeoutMs: must be an integer',
-      'defraId.wellKnownUrl: must be of type String'
+      'defraId.wellKnownUrl: must be of type String',
+      'defraId.timeoutMs: must be an integer'
     ]
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
     process.env.DISABLE_AUTH = 'true'
@@ -207,6 +212,7 @@ describe('config', () => {
     expect(() => config.set('oidc.timeoutMs', null)).not.toThrow()
     expect(() => config.set('oidc.jwksURI', null)).not.toThrow()
     expect(() => config.set('defraId.wellKnownUrl', null)).not.toThrow()
+    expect(() => config.set('defraId.timeoutMs', null)).not.toThrow()
     expect(() => config.set('kits.internal.connectionCert', null)).not.toThrow()
     expect(() => config.set('kits.internal.connectionKey', null)).not.toThrow()
     expect(() => config.set('kits.external.connectionCert', null)).not.toThrow()

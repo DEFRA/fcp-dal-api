@@ -9,9 +9,10 @@ export const healthCheck = async () => {
   }
 
   const wellKnownUrl = config.get('defraId.wellKnownUrl')
+  const timeoutMs = config.get('defraId.timeoutMs')
   try {
     logger.info(`Fetching Defra ID well known configuration from ${wellKnownUrl}`)
-    const wellKnownRes = await fetch(wellKnownUrl)
+    const wellKnownRes = await fetch(wellKnownUrl, { signal: AbortSignal.timeout(timeoutMs) })
     if (!wellKnownRes.ok) {
       logger.error('#DAL - Error fetching Defra ID well known configuration', {
         res: wellKnownRes,
@@ -34,7 +35,7 @@ export const healthCheck = async () => {
       throw new Error('Defra ID well known configuration does not contain a jwks_uri')
     }
 
-    const jwksRes = await fetch(jwksUri)
+    const jwksRes = await fetch(jwksUri, { signal: AbortSignal.timeout(timeoutMs) })
     if (!jwksRes.ok) {
       logger.error('#DAL - Error fetching Defra ID JWKS keys', {
         res: jwksRes,

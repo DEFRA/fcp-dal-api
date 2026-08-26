@@ -7,7 +7,8 @@ export class DefraIdJWKS {
   async getRemoteJwksSet() {
     if (!jwksSet) {
       const wellKnownUrl = config.get('defraId.wellKnownUrl')
-      const response = await fetch(wellKnownUrl)
+      const timeoutMs = config.get('defraId.timeoutMs')
+      const response = await fetch(wellKnownUrl, { signal: AbortSignal.timeout(timeoutMs) })
       if (!response.ok) {
         throw new Error(
           `Failed to fetch Defra ID well known configuration, status: ${response.status}`
@@ -19,7 +20,7 @@ export class DefraIdJWKS {
         throw new Error('Defra ID well known configuration does not contain a jwks_uri')
       }
 
-      jwksSet = createRemoteJWKSet(new URL(jwksUri))
+      jwksSet = createRemoteJWKSet(new URL(jwksUri), { timeoutDuration: timeoutMs })
     }
 
     return jwksSet
