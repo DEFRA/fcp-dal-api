@@ -718,4 +718,14 @@ describe('Local mocked dev check', () => {
     expect(response).not.toHaveProperty('errors')
     expect(response.business).toMatchObject(business)
   })
+
+  it('should return the dal-service response header', async () => {
+    const client = new GraphQLClient(targetURL)
+    const { headers } = await client.rawRequest(businessQuery, businessVariables, {
+      email: 'some-email'
+    })
+
+    // Injected from SERVICE_VERSION environment variable
+    expect(headers.get('x-dal-service-version')).toBe('0.0.0')
+  })
 })
