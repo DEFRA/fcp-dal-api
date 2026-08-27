@@ -202,20 +202,14 @@ describe('RuralPayments', () => {
       expect(rp.isExternalRoute()).toBe(false)
     })
 
-    test('throws if none of email, x-forwarded-authorization or service-account headers are present', () => {
-      try {
-        new RuralPayments({ logger }, { request: { headers: {} } })
-      } catch (thrownError) {
-        expect(thrownError).toBeInstanceOf(HttpError)
-        expect(thrownError.extensions).toMatchObject({
-          http: { status: StatusCodes.UNPROCESSABLE_ENTITY },
-          message:
-            'Invalid request headers, must be either "email: {valid user email}", "service-account: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" headers'
-        })
-      }
+    test('does not throw when none of email, x-forwarded-authorization or service-account headers are present', () => {
+      // Constructing the datasource must not require a routing header - a request that never
+      // calls upstream (e.g. a pure introspection query) has no need for one. See willSendRequest
+      // below for the deferred throw that applies once an actual upstream call is attempted.
+      const rp = new RuralPayments({ logger }, { request: { headers: {} } })
 
-      // Ensure we actually ran the catch block assertions (i.e. the test did throw)
-      expect.assertions(2)
+      expect(rp.gatewayType).toBe('rural-payments-no-auth')
+      expect(rp.isExternalRoute()).toBe(false)
     })
   })
 
@@ -303,6 +297,26 @@ describe('RuralPayments', () => {
 
       await expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
       expect(request.headers).toEqual({})
+    })
+
+    test('throws when an upstream call is attempted with none of email, x-forwarded-authorization or service-account headers present', async () => {
+      const rp = new RuralPayments({ logger }, { request: { headers: {} } })
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      try {
+        await rp.willSendRequest(path, request)
+      } catch (thrownError) {
+        expect(thrownError).toBeInstanceOf(HttpError)
+        expect(thrownError.extensions).toMatchObject({
+          http: { status: StatusCodes.UNPROCESSABLE_ENTITY },
+          message:
+            'Invalid request headers, must be either "email: {valid user email}", "service-account: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" headers'
+        })
+      }
+
+      // Ensure we actually ran the catch block assertions (i.e. the test did throw)
+      expect.assertions(2)
     })
   })
 
