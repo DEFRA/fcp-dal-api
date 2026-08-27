@@ -16,11 +16,6 @@ describe('config', () => {
     delete process.env.PORT
     delete process.env.LOG_LEVEL
     delete process.env.GRAPHQL_DASHBOARD_ENABLED
-    delete process.env.SERVICE_VERSION
-    delete process.env.HEALTH_CHECK_ENABLED
-    delete process.env.HEALTH_CHECK_RP_PORTAL_EMAIL
-    delete process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
-    delete process.env.HEALTH_CHECK_RP_THROTTLE_TIME_MS
     delete process.env.KITS_REQUEST_PAGE_SIZE
     delete process.env.KITS_INTERNAL_CONNECTION_CERT
     delete process.env.KITS_INTERNAL_CONNECTION_KEY
@@ -36,7 +31,6 @@ describe('config', () => {
   it('should have default values when optional env vars are unset', async () => {
     process.env.DISABLE_AUTH = 'true'
     process.env.KITS_DISABLE_MTLS = 'true'
-    process.env.HEALTH_CHECK_ENABLED = 'false'
 
     const { config } = await loadFreshConfig()
 
@@ -47,8 +41,6 @@ describe('config', () => {
     expect(config.get('auth.groups.ADMIN')).toBe(null)
     expect(config.get('graphqlDashboardEnabled')).toBe(false)
     expect(config.get('serviceVersion')).toBe(null)
-    expect(config.get('healthCheck.enabled')).toBe(false)
-    expect(config.get('healthCheck.throttleTimeMs')).toBe(300000)
     expect(config.get('kits.requestPageSize')).toBe(100)
     expect(config.get('kits.disableMTLS')).toBe(true)
     expect(config.get('kits.internal.connectionCert')).toBe(null)
@@ -80,10 +72,6 @@ describe('config', () => {
     process.env.CONSOLIDATED_VIEW_AD_GROUP_ID = 'consolidated-view-group-id'
     process.env.SINGLE_FRONT_DOOR_AD_GROUP_ID = 'single-front-door-group-id'
     process.env.SFI_REFORM_AD_GROUP_ID = 'sfi-reform-group-id'
-    process.env.HEALTH_CHECK_ENABLED = 'true'
-    process.env.HEALTH_CHECK_RP_PORTAL_EMAIL = 'healthcheck@example.com'
-    process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID = 'org-id'
-    process.env.HEALTH_CHECK_RP_THROTTLE_TIME_MS = '1000'
     process.env.KITS_INTERNAL_CONNECTION_CERT = 'internal-cert-value'
     process.env.KITS_INTERNAL_CONNECTION_KEY = 'internal-key-value'
     process.env.KITS_INTERNAL_GATEWAY_URL = 'https://internal.example.com'
@@ -127,10 +115,6 @@ describe('config', () => {
     expect(config.get('auth.groups.CONSOLIDATED_VIEW')).toBe('consolidated-view-group-id')
     expect(config.get('auth.groups.SINGLE_FRONT_DOOR')).toBe('single-front-door-group-id')
     expect(config.get('auth.groups.SFI_REFORM')).toBe('sfi-reform-group-id')
-    expect(config.get('healthCheck.enabled')).toBe(true)
-    expect(config.get('healthCheck.ruralPaymentsPortalEmail')).toBe('healthcheck@example.com')
-    expect(config.get('healthCheck.ruralPaymentsInternalOrganisationId')).toBe('org-id')
-    expect(config.get('healthCheck.throttleTimeMs')).toBe(1000)
     expect(config.get('kits.internal.connectionCert')).toBe('internal-cert-value')
     expect(config.get('kits.internal.connectionKey')).toBe('internal-key-value')
     expect(config.get('kits.internal.gatewayUrl')).toBe('https://internal.example.com')
@@ -159,7 +143,6 @@ describe('config', () => {
   it('should throw an error with any invalid combinations of env vars', async () => {
     // These are in a single test to avoid race conditions when setting env vars
     process.env.KITS_DISABLE_MTLS = 'true'
-    process.env.HEALTH_CHECK_ENABLED = 'false'
     let expectedErrors
 
     // DISABLE_AUTH check
@@ -184,15 +167,6 @@ describe('config', () => {
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
     process.env.KITS_DISABLE_MTLS = 'true'
 
-    // HEALTH_CHECK_ENABLED check
-    process.env.HEALTH_CHECK_ENABLED = 'true'
-    expectedErrors = [
-      'healthCheck.ruralPaymentsPortalEmail: must be of type String',
-      'healthCheck.ruralPaymentsInternalOrganisationId: must be of type String'
-    ]
-    await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
-    process.env.HEALTH_CHECK_ENABLED = 'false'
-
     // KITS_DAL_SERVICE_ACCOUNT_EMAIL check
     const dalServiceAccountEmail = process.env.KITS_DAL_SERVICE_ACCOUNT_EMAIL
     delete process.env.KITS_DAL_SERVICE_ACCOUNT_EMAIL
@@ -211,8 +185,6 @@ describe('config', () => {
   it('should allow optional fields to be unset', async () => {
     const { config } = await loadFreshConfig()
 
-    expect(() => config.set('healthCheck.ruralPaymentsPortalEmail', null)).not.toThrow()
-    expect(() => config.set('healthCheck.ruralPaymentsInternalOrganisationId', null)).not.toThrow()
     expect(() => config.set('oidc.timeoutMs', null)).not.toThrow()
     expect(() => config.set('oidc.jwksURI', null)).not.toThrow()
     expect(() => config.set('defraId.wellKnownUrl', null)).not.toThrow()

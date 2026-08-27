@@ -75,7 +75,6 @@ describe('Server config and startup', () => {
       const routes = server.table()
       const paths = routes.map((r) => r.path)
       expect(paths).toContain('/health')
-      expect(paths).toContain('/healthy')
     })
   })
 
