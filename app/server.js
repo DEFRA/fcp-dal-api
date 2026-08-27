@@ -27,6 +27,10 @@ server.ext({
   method: function (request, h) {
     const response = request.response
 
+    logger.info(
+      `Adding service version ${config.get('serviceVersion')} to response header ${SERVICE_VERSION_HEADER_NAME}`
+    )
+
     if (response.isBoom) {
       response.output.headers[SERVICE_VERSION_HEADER_NAME] = config.get('serviceVersion')
     } else {
