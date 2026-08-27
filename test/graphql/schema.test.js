@@ -110,7 +110,7 @@ describe('schema', () => {
 
     expect(findDangerousChanges(rawSchema, schema)).toHaveLength(0)
     let changes = findBreakingChanges(rawSchema, schema)
-    expect(changes).toHaveLength(14) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
+    expect(changes).toHaveLength(16) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
     expect(changes).toEqual(
       // loose array check, so ordering isn't important, length MUST match, see above
       expect.arrayContaining([
@@ -123,8 +123,16 @@ describe('schema', () => {
           description: 'PermittedFunction was removed.'
         },
         {
+          type: 'TYPE_REMOVED',
+          description: 'InternalUser was removed.'
+        },
+        {
           type: 'FIELD_REMOVED',
           description: 'Query.wipExample was removed.'
+        },
+        {
+          type: 'FIELD_REMOVED',
+          description: 'Query.internalUser was removed.'
         },
         {
           type: 'FIELD_REMOVED',

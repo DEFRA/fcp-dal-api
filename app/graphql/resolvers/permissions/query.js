@@ -3,6 +3,19 @@ import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } f
 export const Query = {
   async permissionGroups(_, __, { dataSources }) {
     return dataSources.permissions.getPermissionGroups()
+  },
+
+  internalUser() {
+    return {}
+  }
+}
+
+export const InternalUser = {
+  async permittedFunctions(_, { functions }, { dataSources }) {
+    const authorisedFunctions =
+      await dataSources.ruralPaymentsCustomer.getInternalUserAuthorisedFunctions(functions)
+
+    return functions.map((name) => ({ name, permitted: authorisedFunctions?.[name] ?? false }))
   }
 }
 

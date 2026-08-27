@@ -4,14 +4,7 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
-import { RuralPayments } from './RuralPayments.js'
-
-// The SitiAgri byFunction endpoint scopes function-level authorisation to a consuming module.
-// CUST_SS_PORTAL is the customer self-service portal (the external Rural Payments service) - the
-// module external users act through, and therefore the permission set permittedFunctions reports on.
-// Note the upstream does not validate the value; an unrecognised module just returns false for
-// every requested function.
-const SELF_SERVICE_PORTAL_MODULE = 'CUST_SS_PORTAL'
+import { RuralPayments, SELF_SERVICE_PORTAL_MODULE } from './RuralPayments.js'
 
 export const formatDateDDMMMYY = (date) => {
   // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
