@@ -129,35 +129,6 @@ export const config = convict({
       env: 'DISABLE_AUTH'
     }
   },
-  // @deprecated: health check endpoint needs binning, and all checks performed at startup ONLY
-  healthCheck: {
-    enabled: {
-      doc: 'Enable health check endpoint',
-      format: Boolean,
-      default: false,
-      env: 'HEALTH_CHECK_ENABLED'
-    },
-    ruralPaymentsPortalEmail: {
-      doc: 'Email used for Rural Payments Portal health check',
-      format: String,
-      default: null,
-      nullable: process.env.HEALTH_CHECK_ENABLED !== 'true',
-      env: 'HEALTH_CHECK_RP_PORTAL_EMAIL'
-    },
-    ruralPaymentsInternalOrganisationId: {
-      doc: 'Internal organisation ID used for Rural Payments Portal health check',
-      format: String,
-      default: null,
-      nullable: process.env.HEALTH_CHECK_ENABLED !== 'true',
-      env: 'HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID'
-    },
-    throttleTimeMs: {
-      doc: 'Throttle time in milliseconds for Rural Payments Portal health check',
-      format: 'int',
-      default: 300000,
-      env: 'HEALTH_CHECK_RP_THROTTLE_TIME_MS'
-    }
-  },
   kits: {
     internal: {
       connectionCert: {
