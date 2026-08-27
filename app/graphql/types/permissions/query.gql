@@ -1,3 +1,8 @@
 extend type Query {
   permissionGroups: [PermissionGroup] @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR])
+
+  """
+  Get the authenticated internal user, identified by the `email` request header.
+  """
+  internalUser: InternalUser @wip @auth(requires: [SINGLE_FRONT_DOOR])
 }

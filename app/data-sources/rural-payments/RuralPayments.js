@@ -10,6 +10,13 @@ import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
 
+// The SitiAgri byFunction endpoints scope function-level authorisation to a consuming module.
+// CUST_SS_PORTAL is the customer self-service portal (the external Rural Payments service) - the
+// module users act through, and therefore the permission set permittedFunctions reports on.
+// Note the upstream does not validate the value; an unrecognised module just returns false for
+// every requested function.
+export const SELF_SERVICE_PORTAL_MODULE = 'CUST_SS_PORTAL'
+
 export class RuralPayments extends BaseRESTDataSource {
   // Note this gets overridden by the customFetch
   request = null

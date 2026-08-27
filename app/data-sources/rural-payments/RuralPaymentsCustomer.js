@@ -5,7 +5,7 @@ import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { maskAllButLastFour } from '../../logger/utils.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
-import { RuralPayments } from './RuralPayments.js'
+import { RuralPayments, SELF_SERVICE_PORTAL_MODULE } from './RuralPayments.js'
 
 // Maps DAL customer search field types to the values KITS expects.
 const KITS_CUSTOMER_SEARCH_FIELD = {
@@ -168,5 +168,15 @@ export class RuralPaymentsCustomer extends RuralPayments {
       body: personDetails,
       headers: postPutHeaders
     })
+  }
+
+  async getInternalUserAuthorisedFunctions(functions) {
+    const query = new URLSearchParams({
+      functions: functions.join('|'),
+      module: SELF_SERVICE_PORTAL_MODULE,
+      timestamp: Date.now()
+    })
+    const response = await this.get(`SitiAgriApi/authorisation/byFunction?${query}`)
+    return response.data
   }
 }

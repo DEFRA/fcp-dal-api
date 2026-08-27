@@ -356,4 +356,35 @@ describe('Rural Payments Customer', () => {
     })
     expect(httpGet).toHaveBeenCalledTimes(1)
   })
+
+  describe('getInternalUserAuthorisedFunctions', () => {
+    test('requests the pipe-separated functions and returns the authorisation data', async () => {
+      const data = { viewLand: true, amendBusinessDetails: false }
+      httpGet.mockResolvedValueOnce({ data, success: true, errorString: null })
+
+      const result = await ruralPaymentsCustomer.getInternalUserAuthorisedFunctions([
+        'viewLand',
+        'amendBusinessDetails'
+      ])
+
+      expect(httpGet).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^SitiAgriApi\/authorisation\/byFunction\?functions=viewLand%7CamendBusinessDetails&module=CUST_SS_PORTAL&timestamp=\d+$/
+        )
+      )
+      expect(result).toEqual(data)
+    })
+
+    test('URL-encodes function names containing reserved characters', async () => {
+      httpGet.mockResolvedValueOnce({ data: {}, success: true, errorString: null })
+
+      await ruralPaymentsCustomer.getInternalUserAuthorisedFunctions(['viewLand', 'does#Not&Exist'])
+
+      expect(httpGet).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^SitiAgriApi\/authorisation\/byFunction\?functions=viewLand%7Cdoes%23Not%26Exist&module=CUST_SS_PORTAL&timestamp=\d+$/
+        )
+      )
+    })
+  })
 })

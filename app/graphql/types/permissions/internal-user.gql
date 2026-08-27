@@ -1,0 +1,30 @@
+"""
+The authenticated internal user, identified by the `email` request header.
+"""
+type InternalUser {
+  """
+  For each requested operation (function), whether the internal user is permitted to perform it.
+  The result can be used to show/hide functionality in a UI.
+
+  The known internal-user functions are: 3RD PARTY ADVISOR SUPPORT -SA, addOrRemoveOrTransferLand,
+  addRoleOrPrivilege, amendApplication, amendBankAccountDetails, amendBusinessDetails,
+  amendControlledBusinessInfo, amendELMApplications, amendEntitlements,
+  amendLegallyResponsiblePeople, amendNewYoungFarmerProcess, applyForBPS, BANKDETAILSONLINECHANGE,
+  caseManagement, closeBusiness, confirmBusiness, createBusinessNote, createCustomerNote,
+  createInternalUserAccount, createNewBusiness, createNewCustomer, createNewIdentity,
+  deleteBusiness, deleteIdentity, EA ADVISOR SUPPORT -SA, FC ADVISOR SUPPORT -SA,
+  HE ADVISOR SUPPORT -SA, modifyRoleOrPrivilege, NE ADVISOR SUPPORT -SA, removeRoleOrPrivilege,
+  resetAnyPassword, search, submitApplication, submitELMApplications, unlockInternalUserAccount,
+  updateLandUse, upload_Alert, viewApplication, viewBusinessBankAccount, viewBusinessDetails,
+  viewBusinessNotes, viewCountrysideStewardship, viewCPH, viewCSAgreements, viewCSApplications,
+  viewCSClaims, viewCustomerNotes, viewELMApplications, viewEntitlements,
+  viewInternalUserLandingPage, viewLand, viewLegallyResponsiblePeople. The above list is not
+  exhaustive - names added to the upstream but not yet listed here may also be supplied. If the
+  upstream recognises a requested function name, the appropriate true/false value for the user is
+  returned; otherwise the function is still included in the response, with `permitted` set to
+  false.
+
+  NOTE: DAL does not enforce these permissions - the upstream systems do.
+  """
+  permittedFunctions(functions: [String!]!): [PermittedFunction!] @wip
+}
