@@ -16,6 +16,7 @@ describe('config', () => {
     delete process.env.PORT
     delete process.env.LOG_LEVEL
     delete process.env.GRAPHQL_DASHBOARD_ENABLED
+    delete process.env.SERVICE_VERSION
     delete process.env.HEALTH_CHECK_ENABLED
     delete process.env.HEALTH_CHECK_RP_PORTAL_EMAIL
     delete process.env.HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID
@@ -45,6 +46,7 @@ describe('config', () => {
     expect(config.get('auth.disabled')).toBe(true)
     expect(config.get('auth.groups.ADMIN')).toBe(null)
     expect(config.get('graphqlDashboardEnabled')).toBe(false)
+    expect(config.get('serviceVersion')).toBe(null)
     expect(config.get('healthCheck.enabled')).toBe(false)
     expect(config.get('healthCheck.throttleTimeMs')).toBe(300000)
     expect(config.get('kits.requestPageSize')).toBe(100)
@@ -68,6 +70,7 @@ describe('config', () => {
     process.env.ALL_SCHEMA_ON = 'true'
     process.env.GRAPHQL_DASHBOARD_ENABLED = 'true'
     process.env.DAL_REQUEST_TIMEOUT_MS = '1500'
+    process.env.SERVICE_VERSION = '1.2.3'
     process.env.OIDC_JWKS_URI = 'https://example.com/jwks'
     process.env.OIDC_JWKS_TIMEOUT_MS = '5000'
     process.env.DEFRA_ID_WELL_KNOWN_URL = 'https://example.com/defra-id-well-known'
@@ -114,6 +117,7 @@ describe('config', () => {
     expect(config.get('logLevel')).toBe('debug')
     expect(config.get('graphqlDashboardEnabled')).toBe(true)
     expect(config.get('requestTimeoutMs')).toBe(1500)
+    expect(config.get('serviceVersion')).toBe('1.2.3')
     expect(config.get('oidc.jwksURI')).toBe('https://example.com/jwks')
     expect(config.get('oidc.timeoutMs')).toBe(5000)
     expect(config.get('defraId.wellKnownUrl')).toBe('https://example.com/defra-id-well-known')
