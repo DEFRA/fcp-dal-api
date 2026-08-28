@@ -58,7 +58,7 @@ export const config = convict({
   },
   oidc: {
     jwksURI: {
-      doc: 'The URL used to validate the JWT, should be entra OIDC endpoint',
+      doc: 'The URL used to validate the JWT for consumer app auth, should be entra OIDC endpoint',
       format: String,
       default: null,
       nullable: process.env.DISABLE_AUTH === 'true',
@@ -93,7 +93,8 @@ export const config = convict({
   auth: {
     groups: {
       // Note must correspond to AuthGroup Enum except admin which has access to everything
-      // For groups used to identifiy the calling service, also need to update authGroupServiceName with the service name
+      // For groups used to identify the calling service,
+      // also need to update authGroupServiceName with the service name
       ADMIN: {
         doc: 'AD group ID for DAL Admins',
         format: String,
