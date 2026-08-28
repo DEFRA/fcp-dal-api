@@ -4,6 +4,7 @@ const mockMongoHealthCheck = jest.fn()
 const mockRuralPaymentsHealthCheck = jest.fn()
 const mockJwksHealthCheck = jest.fn()
 const mockDefraIdHealthCheck = jest.fn()
+const mockHitachiHealthCheck = jest.fn()
 
 jest.unstable_mockModule('../../../../app/utils/health/mongo.js', () => ({
   healthCheck: mockMongoHealthCheck
@@ -19,6 +20,10 @@ jest.unstable_mockModule('../../../../app/utils/health/rural-payments.js', () =>
   healthCheck: mockRuralPaymentsHealthCheck
 }))
 
+jest.unstable_mockModule('../../../../app/utils/health/hitachi.js', () => ({
+  healthCheck: mockHitachiHealthCheck
+}))
+
 const { runHealthChecks } = await import('../../../../app/utils/health/index.js')
 
 describe('runHealthChecks', () => {
@@ -27,6 +32,7 @@ describe('runHealthChecks', () => {
     mockRuralPaymentsHealthCheck.mockResolvedValue(undefined)
     mockJwksHealthCheck.mockResolvedValue(undefined)
     mockDefraIdHealthCheck.mockResolvedValue(undefined)
+    mockHitachiHealthCheck.mockResolvedValue(undefined)
     jest.spyOn(process, 'exit').mockReturnValue(1)
   })
 
@@ -41,6 +47,7 @@ describe('runHealthChecks', () => {
     expect(mockJwksHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockDefraIdHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockRuralPaymentsHealthCheck).toHaveBeenCalledTimes(1)
+    expect(mockHitachiHealthCheck).toHaveBeenCalledTimes(1)
   })
 
   it('should stop and terminate process if any health check fails', async () => {
@@ -49,6 +56,7 @@ describe('runHealthChecks', () => {
     mockJwksHealthCheck.mockRejectedValueOnce(error)
     mockDefraIdHealthCheck.mockRejectedValueOnce(error)
     mockRuralPaymentsHealthCheck.mockRejectedValueOnce(error)
+    mockHitachiHealthCheck.mockRejectedValueOnce(error)
 
     await runHealthChecks()
 
