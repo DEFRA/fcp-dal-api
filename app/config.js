@@ -14,13 +14,14 @@ export const config = convict({
       doc: 'CDP environment, automatically set on CDP',
       format: cdpEnvironments,
       default: null,
+      nullable: true,
       env: 'ENVIRONMENT'
     },
     httpsProxy: {
       doc: 'CDP HTTPS proxy, NOT automatically set on CDP (it comes from the "default" config)',
       format: String,
       default: null,
-      nullable: true,
+      nullable: !process.env.ENVIRONMENT, // only nullable locally, NOT on CDP
       env: 'HTTPS_PROXY'
     }
   },
