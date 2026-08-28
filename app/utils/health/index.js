@@ -1,11 +1,12 @@
 import { logger } from '../../logger/logger.js'
+import { healthCheck as audit } from './audit.js'
 import { healthCheck as defraId } from './defra-id.js'
 import { healthCheck as hitachi } from './hitachi.js'
 import { healthCheck as jwks } from './jwks.js'
 import { healthCheck as mongo } from './mongo.js'
 import { healthCheck as ruralPayments } from './rural-payments.js'
 
-const healthChecks = [mongo, jwks, defraId, ruralPayments, hitachi]
+const healthChecks = [mongo, jwks, defraId, ruralPayments, hitachi, audit]
 
 /**
  * Runs all registered health checks.
