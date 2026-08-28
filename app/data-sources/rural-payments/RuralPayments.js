@@ -66,6 +66,16 @@ export class RuralPayments extends BaseRESTDataSource {
       return
     }
 
+    if (!this.gatewayRoute) {
+      // No routing header was present when this datasource was constructed.  An upstream call will not be possible
+      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
+        extensions: {
+          message:
+            'Invalid request headers, must be either "email: {valid user email}", "service-account: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" headers'
+        }
+      })
+    }
+
     const additionalHeaders = {}
 
     const internalEmail =
@@ -122,12 +132,10 @@ export class RuralPayments extends BaseRESTDataSource {
       this.gatewayRoute = 'external'
       authType = 'external'
     } else {
-      throw new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-        extensions: {
-          message:
-            'Invalid request headers, must be either "email: {valid user email}", "service-account: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" headers'
-        }
-      })
+      // No routing header present. Upstream calls will not be possible, but this data source is constructed even
+      // for introspection queries - these do not require upstream calls.   Deferring any failures until auth is
+      // actually needed
+      authType = 'no-auth'
     }
 
     this.gatewayType = `rural-payments-${authType}`
