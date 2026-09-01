@@ -2,7 +2,6 @@ import { getRequestingGroup, getRequestingService } from '../../auth/authenticat
 import { config } from '../../config.js'
 import { DAL_AUDIT_EVENT_001 } from '../../logger/codes.js'
 import { getEndUserIpAddress } from '../../audit/audit-ip.js'
-import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
 import { snsPublish } from '../../audit/sns-publisher.js'
 
 const AUDIT_EVENT_SCHEMA_VERSION = '1.0.0'
@@ -12,7 +11,7 @@ const ENVIRONMENT_NAME = config.get('cdp.env') ? `cdp-${config.get('cdp.env')}` 
 
 // Using the http request headers, work out the identifier for the end user
 function endUser(contextValue) {
-  const authContext = endUserAuthContext(contextValue.request)
+  const authContext = contextValue.authContext
   if (authContext.internalAuthHeader) {
     return authContext.internalAuthHeader
   } else if (authContext.serviceAccount) {

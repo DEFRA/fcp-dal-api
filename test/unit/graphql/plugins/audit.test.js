@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, jest, test } from '@jest/globals'
 import { validateAuditEvent } from '@defra/fcp-audit-publisher'
+import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
 
 const getRequestingGroupMock = jest.fn()
 const getRequestingServiceMock = jest.fn()
@@ -43,14 +44,17 @@ const requestPayload = {
 
 const REQUEST_RECEIVED_MS = Date.parse('2026-01-01T00:00:00.000Z')
 
+const baseRequest = {
+  headers: { 'x-forwarded-for': '203.0.113.5', email: 'internal@example.com' },
+  info: { remoteAddress: '0.0.0.0', received: REQUEST_RECEIVED_MS },
+  traceId: 'trace-1',
+  payload: requestPayload
+}
+
 const baseContextValue = {
   requestLogger: { error: jest.fn() },
-  request: {
-    headers: { 'x-forwarded-for': '203.0.113.5', email: 'internal@example.com' },
-    info: { remoteAddress: '0.0.0.0', received: REQUEST_RECEIVED_MS },
-    traceId: 'trace-1',
-    payload: requestPayload
-  },
+  request: baseRequest,
+  authContext: endUserAuthContext(baseRequest),
   auth: { groups: ['group-1'] },
   auditTrail: fakeAuditTrail(),
   defraIdContext: { crn: jest.fn() }
@@ -230,17 +234,19 @@ describe('auditPlugin', () => {
       const publish = jest.fn()
       const plugin = auditPlugin({ publish })
 
+      const request = {
+        ...baseContextValue.request,
+        headers: {
+          email: 'internal@example.com',
+          // Although all 3 will never be present at the same time, included to show that email will be selected
+          'service-account': 'service-account@example.com',
+          'x-forwarded-authorization': 'the-defra-id-token'
+        }
+      }
       const contextValue = {
         ...baseContextValue,
-        request: {
-          ...baseContextValue.request,
-          headers: {
-            email: 'internal@example.com',
-            // Although all 3 will never be present at the same time, included to show that email will be selected
-            'service-account': 'service-account@example.com',
-            'x-forwarded-authorization': 'the-defra-id-token'
-          }
-        },
+        request,
+        authContext: endUserAuthContext(request),
         auditTrail: fakeAuditTrail({
           business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
         })
@@ -260,15 +266,17 @@ describe('auditPlugin', () => {
       const publish = jest.fn()
       const plugin = auditPlugin({ publish })
 
+      const request = {
+        ...baseContextValue.request,
+        headers: {
+          'service-account': 'service-account@example.com',
+          'x-forwarded-authorization': 'the-defra-id-token'
+        }
+      }
       const contextValue = {
         ...baseContextValue,
-        request: {
-          ...baseContextValue.request,
-          headers: {
-            'service-account': 'service-account@example.com',
-            'x-forwarded-authorization': 'the-defra-id-token'
-          }
-        },
+        request,
+        authContext: endUserAuthContext(request),
         auditTrail: fakeAuditTrail({
           business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
         })
@@ -288,12 +296,14 @@ describe('auditPlugin', () => {
       const publish = jest.fn()
       const plugin = auditPlugin({ publish })
 
+      const request = {
+        ...baseContextValue.request,
+        headers: { 'x-forwarded-authorization': 'the-defra-id-token' }
+      }
       const contextValue = {
         ...baseContextValue,
-        request: {
-          ...baseContextValue.request,
-          headers: { 'x-forwarded-authorization': 'the-defra-id-token' }
-        },
+        request,
+        authContext: endUserAuthContext(request),
         auditTrail: fakeAuditTrail({
           business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
         }),
@@ -314,12 +324,14 @@ describe('auditPlugin', () => {
       const publish = jest.fn()
       const plugin = auditPlugin({ publish })
 
+      const request = {
+        ...baseContextValue.request,
+        headers: { 'x-forwarded-authorization': 'the-defra-id-token' }
+      }
       const contextValue = {
         ...baseContextValue,
-        request: {
-          ...baseContextValue.request,
-          headers: { 'x-forwarded-authorization': 'the-defra-id-token' }
-        },
+        request,
+        authContext: endUserAuthContext(request),
         auditTrail: fakeAuditTrail({
           business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
         }),
