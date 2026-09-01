@@ -43,6 +43,23 @@ describe('audit startup health check', () => {
     expect(mockLogger.info).toHaveBeenCalledWith('SUCCESS: Published startup audit event to SNS')
   })
 
+  it('sets a cdp-prefixed environment when cdp.env is configured', async () => {
+    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    configGet.mockImplementation((key) => {
+      if (key === 'audit.sns.topicArn')
+        return 'arn:aws:sns:eu-west-2:000000000000:startup-audit-topic'
+      if (key === 'cdp.env') return 'dev'
+      return null
+    })
+
+    mockSnsPublish.mockResolvedValue({ messageId: 'startup-2' })
+
+    await healthCheck()
+
+    const [event] = mockSnsPublish.mock.calls[0]
+    expect(event.environment).toBe('cdp-dev')
+  })
+
   it('skips publication when no SNS topic is configured', async () => {
     const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => {
