@@ -21,7 +21,8 @@ export const config = convict({
       doc: 'CDP HTTPS proxy, NOT automatically set on CDP (it comes from the "default" config)',
       format: String,
       default: null,
-      nullable: !process.env.ENVIRONMENT, // only nullable locally, NOT on CDP
+      // only nullable locally (no environment) or in docker acceptance tests (explicit opt out via DISABLE_PROXY)
+      nullable: !process.env.ENVIRONMENT || process.env.DISABLE_PROXY,
       env: 'HTTPS_PROXY'
     }
   },
