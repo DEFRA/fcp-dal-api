@@ -116,9 +116,37 @@ export function getRequestingGroup(groups) {
   return groups?.find((group) => Object.values(authGroups).includes(group))
 }
 
+/**
+ * ADMIN group membership bypasses both the @auth group check and the serviceAccountPermitted gate.
+ */
+export function isAdminCaller(requesterGroups) {
+  return requesterGroups.includes(authGroups.ADMIN)
+}
+
+/**
+ * Check if the caller is a service account.
+ * @param authContext the auth context
+ * @returns {boolean} true if the caller is a service account, false otherwise
+ */
+function isServiceAccount(authContext) {
+  return !!authContext?.serviceAccount
+}
+
+function isServiceAccountPermitted(schema, authDirective, typeName) {
+  const mutationTypeName = schema.getMutationType()?.name
+  const isMutationField = typeName === mutationTypeName
+
+  // If directive value is supplied, use that, otherwise mutation fields default to false and
+  // non-mutation fields are true
+  return authDirective?.serviceAccountPermitted ?? !isMutationField
+}
+
+/**
+ * Checks that the requester's groups satisfy the given @auth allow-list.
+ * @throws {Unauthorized} if access is not granted
+ */
 export function checkAuthGroup(requesterGroups, allowedGroups) {
-  const isAdmin = requesterGroups.includes(authGroups.ADMIN)
-  if (isAdmin) {
+  if (isAdminCaller(requesterGroups)) {
     return
   } else {
     const hasAccess = allowedGroups.some((group) => {
@@ -128,6 +156,19 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
     if (!hasAccess) {
       throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
     }
+  }
+}
+
+/**
+ * A field guarded by @auth is usable by a service-account caller according to the following:
+ *  - if caller has ADMIN membership, always permitted
+ *  - if serviceAccountPermitted value supplied, the value on the directive is used
+ *  - if serviceAccountPermitted value is not supplied, defaults to true (permitted) on a Query field
+ *    or false (denied) on a Mutation field
+ */
+export function checkServiceAccountAccess(isServiceAccount, serviceAccountPermitted, isAdmin) {
+  if (isServiceAccount && !serviceAccountPermitted && !isAdmin) {
+    throw new Unauthorized('Authorization failed, this field is not available to service accounts')
   }
 }
 
@@ -145,10 +186,18 @@ export function authDirectiveTransformer(schema) {
     [MapperKind.OBJECT_FIELD](fieldConfig, _fieldName, typeName) {
       const authDirective =
         getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
+
       const { resolve = defaultFieldResolver } = fieldConfig
+
       if (authDirective) {
         fieldConfig.resolve = function (source, args, context, info) {
-          checkAuthGroup(context.auth.groups || [], authDirective.requires)
+          const requesterGroups = context.auth.groups || []
+          checkAuthGroup(requesterGroups, authDirective.requires)
+          checkServiceAccountAccess(
+            isServiceAccount(context.authContext),
+            isServiceAccountPermitted(schema, authDirective, typeName),
+            isAdminCaller(requesterGroups)
+          )
           return resolve(source, args, context, info)
         }
       }

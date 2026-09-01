@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, jest, test } from '@jest/globals'
-import { buildSchema, findBreakingChanges } from 'graphql'
+import { buildSchema, findBreakingChanges, graphql } from 'graphql'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
 import { config } from '../../../app/config.js'
@@ -13,9 +13,11 @@ const {
   authDirectiveTransformer,
   authGroups,
   checkAuthGroup,
+  checkServiceAccountAccess,
   getAuth,
   getRequestingGroup,
-  getRequestingService
+  getRequestingService,
+  isAdminCaller
 } = await import('../../../app/auth/authenticate.js')
 
 const tokenPayload = {
@@ -70,271 +72,324 @@ const decodedToken = jwt.decode(token)
 const mockPublicKeyFunc = jest.fn()
 const mockJWKSDataSource = { getPublicKey: mockPublicKeyFunc }
 
-describe('getAuth', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  test('should return an empty object when no authHeader is provided', async () => {
-    expect(await getAuth({})).toEqual({})
-  })
-
-  describe('with a valid token', () => {
-    test('should return decoded token, and log payload details', async () => {
-      mockPublicKeyFunc.mockResolvedValue(publicKey)
-      const tokenPayload = await getAuth(mockRequest(token), mockJWKSDataSource)
-
-      expect(tokenPayload).toEqual(decodedToken)
-      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-      expect(info).toHaveBeenCalledTimes(1)
-      expect(info.mock.calls[0]).toEqual([
-        '#DAL Request authentication - JWT verified',
-        {
-          type: 'http',
-          code: 'DAL_REQUEST_AUTHENTICATION_001',
-          requestTimeMs: expect.any(Number),
-          request: requestInfo,
-          tenant: {
-            message:
-              '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
-              '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
-              '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
-              '"contactId":"******t-id","relationships":["orgId:sbi:company name:"],' +
-              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
-              '"roles":["role-id"],"azp":"azp-id"}'
-          }
-        }
-      ])
+describe('authenticate', () => {
+  describe('getAuth', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
     })
 
-    test('should return decoded token, and log payload details (no email check)', async () => {
-      mockPublicKeyFunc.mockResolvedValue(publicKey)
-      const tokenNoEmail = jwt.sign(tokenPayload, privateKey, {
-        algorithm: 'RS256',
-        expiresIn: '1h',
-        keyid: 'mock-key-id-123'
+    test('should return an empty object when no authHeader is provided', async () => {
+      expect(await getAuth({})).toEqual({})
+    })
+
+    describe('with a valid token', () => {
+      test('should return decoded token, and log payload details', async () => {
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+        const tokenPayload = await getAuth(mockRequest(token), mockJWKSDataSource)
+
+        expect(tokenPayload).toEqual(decodedToken)
+        expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+        expect(info).toHaveBeenCalledTimes(1)
+        expect(info.mock.calls[0]).toEqual([
+          '#DAL Request authentication - JWT verified',
+          {
+            type: 'http',
+            code: 'DAL_REQUEST_AUTHENTICATION_001',
+            requestTimeMs: expect.any(Number),
+            request: requestInfo,
+            tenant: {
+              message:
+                '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+                '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+                '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
+                '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
+                '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+                '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
+                '"contactId":"******t-id","relationships":["orgId:sbi:company name:"],' +
+                '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
+                '"roles":["role-id"],"azp":"azp-id"}'
+            }
+          }
+        ])
       })
 
-      expect(await getAuth(mockRequest(tokenNoEmail), mockJWKSDataSource)).toEqual(
-        jwt.decode(tokenNoEmail)
-      )
-      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-      expect(info).toHaveBeenCalledTimes(1)
-      expect(info.mock.calls[0]).toEqual([
-        '#DAL Request authentication - JWT verified',
-        {
-          type: 'http',
-          code: 'DAL_REQUEST_AUTHENTICATION_001',
-          requestTimeMs: expect.any(Number),
-          request: requestInfo,
-          tenant: {
-            message:
-              '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
-              '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
-              '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-              '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","contactId":"******t-id",' +
-              '"relationships":["orgId:sbi:company name:"],' +
-              '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
-              '"roles":["role-id"],"azp":"azp-id"}'
+      test('should return decoded token, and log payload details (no email check)', async () => {
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+        const tokenNoEmail = jwt.sign(tokenPayload, privateKey, {
+          algorithm: 'RS256',
+          expiresIn: '1h',
+          keyid: 'mock-key-id-123'
+        })
+
+        expect(await getAuth(mockRequest(tokenNoEmail), mockJWKSDataSource)).toEqual(
+          jwt.decode(tokenNoEmail)
+        )
+        expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+        expect(info).toHaveBeenCalledTimes(1)
+        expect(info.mock.calls[0]).toEqual([
+          '#DAL Request authentication - JWT verified',
+          {
+            type: 'http',
+            code: 'DAL_REQUEST_AUTHENTICATION_001',
+            requestTimeMs: expect.any(Number),
+            request: requestInfo,
+            tenant: {
+              message:
+                '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+                '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+                '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
+                '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
+                '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
+                '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","contactId":"******t-id",' +
+                '"relationships":["orgId:sbi:company name:"],' +
+                '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
+                '"roles":["role-id"],"azp":"azp-id"}'
+            }
           }
-        }
-      ])
+        ])
+      })
+    })
+
+    test('should return an empty object when token cannot be decoded', async () => {
+      expect(await getAuth(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({})
+      expect(mockPublicKeyFunc).not.toHaveBeenCalled()
+    })
+
+    test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
+      mockPublicKeyFunc.mockResolvedValue(publicKey)
+      expect(await getAuth(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual({})
+      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+    })
+
+    test('should return an empty object when token verification fails, due to token expiry', async () => {
+      const error = new Error('TokenExpiredError')
+      error.name = 'TokenExpiredError'
+      mockPublicKeyFunc.mockImplementation(() => {
+        throw error
+      })
+      expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual({})
+      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
     })
   })
 
-  test('should return an empty object when token cannot be decoded', async () => {
-    expect(await getAuth(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({})
-    expect(mockPublicKeyFunc).not.toHaveBeenCalled()
-  })
+  describe('checkAuthGroup', () => {
+    const adminGroupId = config.get('auth.groups.ADMIN')
 
-  test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
-    mockPublicKeyFunc.mockResolvedValue(publicKey)
-    expect(await getAuth(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual({})
-    expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-  })
-
-  test('should return an empty object when token verification fails, due to token expiry', async () => {
-    const error = new Error('TokenExpiredError')
-    error.name = 'TokenExpiredError'
-    mockPublicKeyFunc.mockImplementation(() => {
-      throw error
-    })
-    expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual({})
-    expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-  })
-})
-
-describe('checkAuthGroup', () => {
-  const adminGroupId = config.get('auth.groups.ADMIN')
-
-  it('checkAuthGroup should not throw an error for admins with correct group', () => {
-    expect(() => checkAuthGroup([adminGroupId], [adminGroupId])).not.toThrow()
-  })
-
-  it('checkAuthGroup should throw Unauthorized when user is not in AD groups', () => {
-    const testGroup = 'ADMIN'
-    expect(() => checkAuthGroup([], [testGroup])).toThrow(Unauthorized)
-  })
-
-  it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
-    const testGroup = 'NON_EXISTENT_GROUP'
-    expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
-  })
-
-  it('checkAuthGroup should throw Unauthorized when AD group is null in token', () => {
-    const testGroup = null
-    expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
-  })
-
-  it('expect authGroups to match .env.test setup', () => {
-    expect(authGroups).toEqual({
-      ADMIN: 'some-ad-group-id',
-      CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
-      SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id',
-      SFI_REFORM: 'sfi-reform-ad-group-id'
-    })
-  })
-})
-
-describe('getRequestingGroup', () => {
-  const adminGroupId = config.get('auth.groups.ADMIN')
-  const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
-
-  describe('when auth is disabled', () => {
-    const originalConfig = { ...config }
-    const configMockPath = {
-      'auth.disabled': true
-    }
-
-    beforeEach(() => {
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
+    it('checkAuthGroup should not throw an error for admins with correct group', () => {
+      expect(() => checkAuthGroup([adminGroupId], [adminGroupId])).not.toThrow()
     })
 
-    it('should return the mock UUID when auth is disabled, regardless of groups', () => {
-      expect(getRequestingGroup([adminGroupId])).toBe('00000000-0000-0000-0000-000000000000')
-      expect(getRequestingGroup([])).toBe('00000000-0000-0000-0000-000000000000')
-      expect(getRequestingGroup(undefined)).toBe('00000000-0000-0000-0000-000000000000')
+    it('checkAuthGroup should throw Unauthorized when user is not in AD groups', () => {
+      const testGroup = 'ADMIN'
+      expect(() => checkAuthGroup([], [testGroup])).toThrow(Unauthorized)
+    })
+
+    it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
+      const testGroup = 'NON_EXISTENT_GROUP'
+      expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
+    })
+
+    it('checkAuthGroup should throw Unauthorized when AD group is null in token', () => {
+      const testGroup = null
+      expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
+    })
+
+    it('checkAuthGroup should not throw for an ADMIN caller regardless of the allow-list', () => {
+      expect(() => checkAuthGroup([adminGroupId], ['SOME_GROUP'])).not.toThrow()
+    })
+
+    it('checkAuthGroup should not throw for a caller with matching group membership', () => {
+      const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
+      expect(() => checkAuthGroup([sfdGroupId], ['SINGLE_FRONT_DOOR'])).not.toThrow()
+    })
+
+    it('expect authGroups to match .env.test setup', () => {
+      expect(authGroups).toEqual({
+        ADMIN: 'some-ad-group-id',
+        CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
+        SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id',
+        SFI_REFORM: 'sfi-reform-ad-group-id'
+      })
     })
   })
 
-  describe('when auth is enabled', () => {
-    const originalConfig = { ...config }
-    const configMockPath = {
-      'auth.disabled': false
-    }
+  describe('isAdminCaller', () => {
+    const adminGroupId = config.get('auth.groups.ADMIN')
+    const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
 
-    beforeEach(() => {
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
+    it('returns true when ADMIN is among the requester groups', () => {
+      expect(isAdminCaller([sfdGroupId, adminGroupId])).toBe(true)
     })
 
-    it('should return the first matching group when user has authorized groups', () => {
-      expect(getRequestingGroup([adminGroupId, 'other-group'])).toBe(adminGroupId)
-      expect(getRequestingGroup([consolidatedViewGroupId, adminGroupId])).toBe(
-        consolidatedViewGroupId
-      )
+    it('returns false when ADMIN is not among the requester groups', () => {
+      expect(isAdminCaller([sfdGroupId])).toBe(false)
     })
 
-    it('should return undefined when user has no authorized groups', () => {
-      expect(getRequestingGroup(['unauthorized-group'])).toBeUndefined()
-      expect(getRequestingGroup([])).toBeUndefined()
-      expect(getRequestingGroup(undefined)).toBeUndefined()
-    })
-  })
-})
-
-describe('getRequestingService', () => {
-  describe('when auth is disabled', () => {
-    const originalConfig = { ...config }
-    const configMockPath = {
-      'auth.disabled': true
-    }
-
-    beforeEach(() => {
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
-    })
-
-    it('should return Auth Disabled', () => {
-      expect(getRequestingService(null)).toBe('auth-disabled')
+    it('returns false for an empty group list', () => {
+      expect(isAdminCaller([])).toBe(false)
     })
   })
 
-  describe('when auth is enabled', () => {
-    const originalConfig = { ...config }
-    const configMockPath = {
-      'auth.disabled': false
-    }
-
-    beforeEach(() => {
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
+  describe('checkServiceAccountAccess', () => {
+    it('does not throw for a non-service-account caller', () => {
+      expect(() => checkServiceAccountAccess(false, false, false)).not.toThrow()
     })
 
+    it('does not throw when the field has serviceAccountPermitted: true', () => {
+      expect(() => checkServiceAccountAccess(true, true, false)).not.toThrow()
+    })
+
+    it('does not throw for an ADMIN bypass, even with serviceAccountPermitted: false', () => {
+      expect(() => checkServiceAccountAccess(true, false, true)).not.toThrow()
+    })
+
+    it('throws Unauthorized for a service account on a field with serviceAccountPermitted: false', () => {
+      expect(() => checkServiceAccountAccess(true, false, false)).toThrow(Unauthorized)
+    })
+  })
+
+  describe('getRequestingGroup', () => {
     const adminGroupId = config.get('auth.groups.ADMIN')
     const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
-    const sfiReformGroupId = config.get('auth.groups.SFI_REFORM')
-    const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
 
-    it('should return the service name for a single recognised group', () => {
-      expect(getRequestingService([consolidatedViewGroupId])).toBe('consolidated-view')
-      expect(getRequestingService([sfiReformGroupId])).toBe('grants-platform')
-      expect(getRequestingService([singleFrontDoorGroupId])).toBe('single-front-door')
+    describe('when auth is disabled', () => {
+      const originalConfig = { ...config }
+      const configMockPath = {
+        'auth.disabled': true
+      }
+
+      beforeEach(() => {
+        jest
+          .spyOn(config, 'get')
+          .mockImplementation((path) =>
+            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+          )
+      })
+
+      it('should return the mock UUID when auth is disabled, regardless of groups', () => {
+        expect(getRequestingGroup([adminGroupId])).toBe('00000000-0000-0000-0000-000000000000')
+        expect(getRequestingGroup([])).toBe('00000000-0000-0000-0000-000000000000')
+        expect(getRequestingGroup(undefined)).toBe('00000000-0000-0000-0000-000000000000')
+      })
     })
 
-    it('should return null when the only group present is ADMIN', () => {
-      expect(getRequestingService([adminGroupId])).toBeNull()
-    })
+    describe('when auth is enabled', () => {
+      const originalConfig = { ...config }
+      const configMockPath = {
+        'auth.disabled': false
+      }
 
-    it('should return the first group in the array that maps to a service, skipping ADMIN', () => {
-      expect(getRequestingService([adminGroupId, sfiReformGroupId])).toBe('grants-platform')
-    })
+      beforeEach(() => {
+        jest
+          .spyOn(config, 'get')
+          .mockImplementation((path) =>
+            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+          )
+      })
 
-    it('should honour input array order over any fixed preference between services', () => {
-      expect(getRequestingService([sfiReformGroupId, consolidatedViewGroupId])).toBe(
-        'grants-platform'
-      )
-      expect(getRequestingService([consolidatedViewGroupId, sfiReformGroupId])).toBe(
-        'consolidated-view'
-      )
-    })
+      it('should return the first matching group when user has authorized groups', () => {
+        expect(getRequestingGroup([adminGroupId, 'other-group'])).toBe(adminGroupId)
+        expect(getRequestingGroup([consolidatedViewGroupId, adminGroupId])).toBe(
+          consolidatedViewGroupId
+        )
+      })
 
-    it('should return null when no groups are recognised', () => {
-      expect(getRequestingService(['unrecognised-group'])).toBeNull()
-    })
-
-    it('should return null when groups is an empty array', () => {
-      expect(getRequestingService([])).toBeNull()
-    })
-
-    it('should throw when groups is undefined', () => {
-      expect(() => getRequestingService(undefined)).toThrow()
+      it('should return undefined when user has no authorized groups', () => {
+        expect(getRequestingGroup(['unauthorized-group'])).toBeUndefined()
+        expect(getRequestingGroup([])).toBeUndefined()
+        expect(getRequestingGroup(undefined)).toBeUndefined()
+      })
     })
   })
-})
 
-describe('authDirectiveTransformer', () => {
-  const schema = buildSchema(`#graphql
+  describe('getRequestingService', () => {
+    describe('when auth is disabled', () => {
+      const originalConfig = { ...config }
+      const configMockPath = {
+        'auth.disabled': true
+      }
+
+      beforeEach(() => {
+        jest
+          .spyOn(config, 'get')
+          .mockImplementation((path) =>
+            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+          )
+      })
+
+      it('should return Auth Disabled', () => {
+        expect(getRequestingService(null)).toBe('auth-disabled')
+      })
+    })
+
+    describe('when auth is enabled', () => {
+      const originalConfig = { ...config }
+      const configMockPath = {
+        'auth.disabled': false
+      }
+
+      beforeEach(() => {
+        jest
+          .spyOn(config, 'get')
+          .mockImplementation((path) =>
+            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+          )
+      })
+
+      const adminGroupId = config.get('auth.groups.ADMIN')
+      const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
+      const sfiReformGroupId = config.get('auth.groups.SFI_REFORM')
+      const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
+
+      it('should return the service name for a single recognised group', () => {
+        expect(getRequestingService([consolidatedViewGroupId])).toBe('consolidated-view')
+        expect(getRequestingService([sfiReformGroupId])).toBe('grants-platform')
+        expect(getRequestingService([singleFrontDoorGroupId])).toBe('single-front-door')
+      })
+
+      it('should return null when the only group present is ADMIN', () => {
+        expect(getRequestingService([adminGroupId])).toBeNull()
+      })
+
+      it('should return the first group in the array that maps to a service, skipping ADMIN', () => {
+        expect(getRequestingService([adminGroupId, sfiReformGroupId])).toBe('grants-platform')
+      })
+
+      it('should honour input array order over any fixed preference between services', () => {
+        expect(getRequestingService([sfiReformGroupId, consolidatedViewGroupId])).toBe(
+          'grants-platform'
+        )
+        expect(getRequestingService([consolidatedViewGroupId, sfiReformGroupId])).toBe(
+          'consolidated-view'
+        )
+      })
+
+      it('should return null when no groups are recognised', () => {
+        expect(getRequestingService(['unrecognised-group'])).toBeNull()
+      })
+
+      it('should return null when groups is an empty array', () => {
+        expect(getRequestingService([])).toBeNull()
+      })
+
+      it('should throw when groups is undefined', () => {
+        expect(() => getRequestingService(undefined)).toThrow()
+      })
+    })
+  })
+
+  describe('authDirectiveTransformer', () => {
+    const schema = buildSchema(`#graphql
     type Query {
       customer(crn: ID!): Customer
+      gatedQueryFieldDefault: String @auth(requires: [SINGLE_FRONT_DOOR])
+      gatedQueryFieldExplicitlyClosed: String @auth(requires: [SINGLE_FRONT_DOOR], serviceAccountPermitted: false)
+      open: String
+    }
+
+    type Mutation {
+      gatedMutationFieldDefault: String @auth(requires: [SINGLE_FRONT_DOOR])
+      gatedMutationFieldExplicitlyOpen: String @auth(requires: [SINGLE_FRONT_DOOR], serviceAccountPermitted: true)
     }
 
     type Customer {
@@ -345,31 +400,111 @@ describe('authDirectiveTransformer', () => {
       """
       The CRN (Customer Reference Number) of the customer.
       """
-      crn: ID! @auth(requires: TEST)
+      crn: ID! @auth(requires: [TEST])
     }
 
     enum AuthRole {
       TEST
+      ADMIN
+      SINGLE_FRONT_DOOR
     }
 
-    directive @auth(requires: AuthRole = TEST) on OBJECT | FIELD_DEFINITION
+    directive @auth(requires: [AuthRole!]! = [TEST], serviceAccountPermitted: Boolean) on OBJECT | FIELD_DEFINITION
   `)
 
-  const originalConfig = { ...config }
-  const configMockPath = {
-    'auth.disabled': true
-  }
+    const originalConfig = { ...config }
+    const configMockPath = {
+      'auth.disabled': true
+    }
 
-  beforeEach(() => {
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
-  })
+    beforeEach(() => {
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
+    })
 
-  it('authDirectiveTransformer should not impact output schema', async () => {
-    const transformedSchema = authDirectiveTransformer(schema)
-    expect(findBreakingChanges(schema, transformedSchema)).toHaveLength(0)
+    it('authDirectiveTransformer should not impact output schema', async () => {
+      const transformedSchema = authDirectiveTransformer(schema)
+      expect(findBreakingChanges(schema, transformedSchema)).toHaveLength(0)
+    })
+
+    describe('service account gating', () => {
+      const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
+      const adminGroupId = config.get('auth.groups.ADMIN')
+      const rootValue = {
+        gatedQueryFieldDefault: 'a',
+        gatedQueryFieldExplicitlyClosed: 'b',
+        gatedMutationFieldDefault: 'c',
+        gatedMutationFieldExplicitlyOpen: 'd',
+        open: 'e'
+      }
+
+      const run = (fieldName, contextValue, { mutation = false } = {}) =>
+        graphql({
+          schema: authDirectiveTransformer(schema),
+          source: mutation ? `mutation { ${fieldName} }` : `{ ${fieldName} }`,
+          rootValue,
+          contextValue
+        })
+
+      const serviceAccountContext = (groups) => ({
+        auth: { groups },
+        authContext: { serviceAccount: 'service-account@example.com' }
+      })
+
+      it('allows a non-service-account caller in the required group', async () => {
+        const result = await run('gatedQueryFieldDefault', {
+          auth: { groups: [sfdGroupId] },
+          authContext: {}
+        })
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedQueryFieldDefault).toBe('a')
+      })
+
+      it('allows a service account on a gated Query field with no serviceAccountPermitted set (inferred default: permitted)', async () => {
+        const result = await run('gatedQueryFieldDefault', serviceAccountContext([sfdGroupId]))
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedQueryFieldDefault).toBe('a')
+      })
+
+      it('denies a service account on a Query field explicitly closed with serviceAccountPermitted: false', async () => {
+        const result = await run(
+          'gatedQueryFieldExplicitlyClosed',
+          serviceAccountContext([sfdGroupId])
+        )
+        expect(result.errors?.[0]).toBeInstanceOf(Object)
+        expect(result.errors[0].message).toMatch(/not available to service accounts/)
+      })
+
+      it('denies a service account on a gated Mutation field with no serviceAccountPermitted set (inferred default: denied)', async () => {
+        const result = await run('gatedMutationFieldDefault', serviceAccountContext([sfdGroupId]), {
+          mutation: true
+        })
+        expect(result.errors?.[0]).toBeInstanceOf(Object)
+        expect(result.errors[0].message).toMatch(/not available to service accounts/)
+      })
+
+      it('allows a service account on a Mutation field explicitly opened with serviceAccountPermitted: true', async () => {
+        const result = await run(
+          'gatedMutationFieldExplicitlyOpen',
+          serviceAccountContext([sfdGroupId]),
+          { mutation: true }
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedMutationFieldExplicitlyOpen).toBe('d')
+      })
+
+      it('allows an ADMIN-group service account on a gated Mutation field, regardless of serviceAccountPermitted', async () => {
+        const result = await run(
+          'gatedMutationFieldDefault',
+          serviceAccountContext([adminGroupId]),
+          { mutation: true }
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedMutationFieldDefault).toBe('c')
+      })
+    })
   })
 })
