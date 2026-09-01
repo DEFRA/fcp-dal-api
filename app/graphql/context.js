@@ -56,6 +56,7 @@ export async function context({ request }) {
 
   return {
     auth,
+    authContext,
     request,
     requestLogger,
     auditTrail,
