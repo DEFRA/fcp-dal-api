@@ -1,5 +1,8 @@
 directive @wip on FIELD_DEFINITION
-directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
+directive @auth(
+  requires: [AuthGroup!]!
+  serviceAccountPermitted: Boolean
+) on OBJECT | FIELD_DEFINITION
 directive @excludeFromList on FIELD_DEFINITION
 directive @validateVariable(
   pattern: String!
