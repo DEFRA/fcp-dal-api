@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { decodeBase64Config } from '../../../app/config.js'
 
 const existingEnvVars = process.env
 
@@ -13,6 +14,8 @@ describe('config', () => {
 
   beforeEach(() => {
     delete process.env.NODE_ENV
+    delete process.env.ENVIRONMENT
+    delete process.env.HTTPS_PROXY
     delete process.env.PORT
     delete process.env.LOG_LEVEL
     delete process.env.GRAPHQL_DASHBOARD_ENABLED
@@ -31,10 +34,13 @@ describe('config', () => {
   it('should have default values when optional env vars are unset', async () => {
     process.env.DISABLE_AUTH = 'true'
     process.env.KITS_DISABLE_MTLS = 'true'
+    process.env.HITACHI_DISABLE_AUTH = 'true'
 
     const { config } = await loadFreshConfig()
 
     expect(config.get('nodeEnv')).toBe('production')
+    expect(config.get('cdp.env')).toBe(null)
+    expect(config.get('cdp.httpsProxy')).toBe(null)
     expect(config.get('port')).toBe(3000)
     expect(config.get('logLevel')).toBe('info')
     expect(config.get('auth.disabled')).toBe(true)
@@ -142,8 +148,17 @@ describe('config', () => {
 
   it('should throw an error with any invalid combinations of env vars', async () => {
     // These are in a single test to avoid race conditions when setting env vars
+    process.env.DISABLE_AUTH = 'true'
     process.env.KITS_DISABLE_MTLS = 'true'
     let expectedErrors
+
+    // PROXY check
+    process.env.ENVIRONMENT = 'dev'
+    delete process.env.HTTPS_PROXY
+    await expect(loadFreshConfig()).rejects.toEqual(
+      new Error('cdp.httpsProxy: must be of type String')
+    )
+    process.env.HTTPS_PROXY = 'some-proxy'
 
     // DISABLE_AUTH check
     process.env.DISABLE_AUTH = 'false'
@@ -167,6 +182,19 @@ describe('config', () => {
     await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
     process.env.KITS_DISABLE_MTLS = 'true'
 
+    // HITACHI_DISABLE_AUTH check
+    process.env.HITACHI_DISABLE_AUTH = 'false'
+    delete process.env.HITACHI_ENTRA_TENANT_ID
+    delete process.env.HITACHI_ENTRA_CLIENT_ID
+    delete process.env.HITACHI_ENTRA_CLIENT_SECRET
+    expectedErrors = [
+      'hitachi.entra.tenantId: must be of type String',
+      'hitachi.entra.clientId: must be of type String',
+      'hitachi.entra.clientSecret: must be of type String'
+    ]
+    await expect(loadFreshConfig()).rejects.toEqual(new Error(expectedErrors.join('\n')))
+    process.env.HITACHI_DISABLE_AUTH = 'true'
+
     // KITS_DAL_SERVICE_ACCOUNT_EMAIL check
     const dalServiceAccountEmail = process.env.KITS_DAL_SERVICE_ACCOUNT_EMAIL
     delete process.env.KITS_DAL_SERVICE_ACCOUNT_EMAIL
@@ -179,6 +207,14 @@ describe('config', () => {
     process.env.NODE_ENV = 'invalid'
     await expect(loadFreshConfig()).rejects.toThrow(
       'nodeEnv: must be one of the possible values: ["production","development","test"]: value was "invalid"'
+    )
+  })
+
+  it('should require the HTTPS_PROXY on CDP, i.e. when ENVIRONMENT is set', async () => {
+    process.env.ENVIRONMENT = 'dev'
+    delete process.env.HTTPS_PROXY
+    await expect(loadFreshConfig()).rejects.toEqual(
+      new Error('cdp.httpsProxy: must be of type String')
     )
   })
 
@@ -220,9 +256,8 @@ describe('config', () => {
 
 describe('decodeBase64Config', () => {
   it('should decode base64 strings from config', async () => {
-    const config = await loadFreshConfig()
     const encodedString = Buffer.from('test-string').toString('base64')
-    const decoded = config.decodeBase64Config(encodedString)
+    const decoded = decodeBase64Config(encodedString)
     expect(decoded).toBe('test-string')
   })
 })

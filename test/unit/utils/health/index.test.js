@@ -5,6 +5,8 @@ const mockRuralPaymentsHealthCheck = jest.fn()
 const mockJwksHealthCheck = jest.fn()
 const mockDefraIdHealthCheck = jest.fn()
 const mockHitachiHealthCheck = jest.fn()
+const mockAuditHealthCheck = jest.fn()
+const mockMetricsHealthCheck = jest.fn()
 
 jest.unstable_mockModule('../../../../app/utils/health/mongo.js', () => ({
   healthCheck: mockMongoHealthCheck
@@ -18,6 +20,12 @@ jest.unstable_mockModule('../../../../app/utils/health/defra-id.js', () => ({
 
 jest.unstable_mockModule('../../../../app/utils/health/rural-payments.js', () => ({
   healthCheck: mockRuralPaymentsHealthCheck
+}))
+jest.unstable_mockModule('../../../../app/utils/health/audit.js', () => ({
+  healthCheck: mockAuditHealthCheck
+}))
+jest.unstable_mockModule('../../../../app/utils/health/metrics.js', () => ({
+  healthCheck: mockMetricsHealthCheck
 }))
 
 jest.unstable_mockModule('../../../../app/utils/health/hitachi.js', () => ({
@@ -33,6 +41,8 @@ describe('runHealthChecks', () => {
     mockJwksHealthCheck.mockResolvedValue(undefined)
     mockDefraIdHealthCheck.mockResolvedValue(undefined)
     mockHitachiHealthCheck.mockResolvedValue(undefined)
+    mockAuditHealthCheck.mockResolvedValue(undefined)
+    mockMetricsHealthCheck.mockResolvedValue(undefined)
     jest.spyOn(process, 'exit').mockReturnValue(1)
   })
 
@@ -48,6 +58,8 @@ describe('runHealthChecks', () => {
     expect(mockDefraIdHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockRuralPaymentsHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockHitachiHealthCheck).toHaveBeenCalledTimes(1)
+    expect(mockAuditHealthCheck).toHaveBeenCalledTimes(1)
+    expect(mockMetricsHealthCheck).toHaveBeenCalledTimes(1)
   })
 
   it('should stop and terminate process if any health check fails', async () => {
@@ -57,6 +69,8 @@ describe('runHealthChecks', () => {
     mockDefraIdHealthCheck.mockRejectedValueOnce(error)
     mockRuralPaymentsHealthCheck.mockRejectedValueOnce(error)
     mockHitachiHealthCheck.mockRejectedValueOnce(error)
+    mockAuditHealthCheck.mockRejectedValueOnce(error)
+    mockMetricsHealthCheck.mockRejectedValueOnce(error)
 
     await runHealthChecks()
 
