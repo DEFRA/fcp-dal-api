@@ -228,6 +228,29 @@ describe('RuralPayments', () => {
       })
     })
 
+    test('adds service-account header from request headers for client service account requests', async () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          request: {
+            headers: {
+              'service-account': 'robot-account.some-client-service@example.com'
+            }
+          }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      await rp.willSendRequest(path, request)
+
+      expect(request.headers).toEqual({ email: 'robot-account.some-client-service@example.com' })
+      expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
+        request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+
     test('adds crn & Authorization headers from x-forwarded-authorization for external requests', async () => {
       const token = 'the-defra-id-token'
       const rp = new RuralPayments(
