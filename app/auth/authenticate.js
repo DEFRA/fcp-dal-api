@@ -169,8 +169,12 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
  *  - if serviceAccountPermitted value is not supplied, defaults to true (permitted) on a Query field
  *    or false (denied) on a Mutation field
  */
-export function checkServiceAccountAccess(isServiceAccount, serviceAccountPermitted, isAdmin) {
-  if (isServiceAccount && !serviceAccountPermitted && !isAdmin) {
+export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitted, admin) {
+  logger.info(
+    `serviceAccount: ${JSON.stringify(serviceAccount)}, serviceAccountPermitted: ${JSON.stringify(serviceAccountPermitted)}, admin: ${JSON.stringify(admin)}`
+  )
+  if (serviceAccount && !serviceAccountPermitted && !admin) {
+    logger.info(`Throwing`)
     throw new Unauthorized('Authorization failed, this field is not available to service accounts')
   }
 }
