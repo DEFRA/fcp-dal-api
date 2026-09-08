@@ -13,7 +13,7 @@ extend type Mutation {
     another customer. The customer record is left unchanged.
   """
   updateCustomerEmail(input: UpdateCustomerEmailInput!): UpdateCustomerResponse
-    @auth(requires: [SINGLE_FRONT_DOOR])
+    @auth(requires: [SINGLE_FRONT_DOOR], serviceAccountPermitted: true)
   updateCustomerName(input: UpdateCustomerNameInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerPhone(input: UpdateCustomerPhoneInput!): UpdateCustomerResponse
