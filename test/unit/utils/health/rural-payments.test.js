@@ -41,7 +41,7 @@ describe('Rural payments health check', () => {
       {
         request: {
           headers: {
-            email: config.get('kits.dalServiceAccountEmail')
+            'service-account': config.get('kits.dalServiceAccountEmail')
           }
         }
       }
