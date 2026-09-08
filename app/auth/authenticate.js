@@ -138,7 +138,9 @@ function isServiceAccountPermitted(schema, authDirective, typeName) {
 
   // If directive value is supplied, use that, otherwise mutation fields default to false and
   // non-mutation fields are true
-  logger.info(`Processing auth directive: ${JSON.stringify(authDirective)}`)
+  logger.info(
+    `Processing auth directive: ${JSON.stringify(authDirective)}, mutationTypeName: ${JSON.stringify(mutationTypeName)} typeName: ${JSON.stringify(typeName)} isMutationField: ${JSON.stringify(mutationTypeName)}, returns ${authDirective?.serviceAccountPermitted ?? !isMutationField}`
+  )
   return authDirective?.serviceAccountPermitted ?? !isMutationField
 }
 
