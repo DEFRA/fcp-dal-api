@@ -7,7 +7,7 @@ import { healthCheck as metrics } from './metrics.js'
 import { healthCheck as mongo } from './mongo.js'
 import { healthCheck as ruralPayments } from './rural-payments.js'
 
-const healthChecks = [mongo, jwks, defraId, ruralPayments, hitachi, audit, metrics]
+const healthChecks = [mongo, jwks, /*defraId,*/ ruralPayments, hitachi, audit, metrics]
 
 /**
  * Runs all registered health checks.
