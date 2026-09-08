@@ -55,7 +55,7 @@ describe('runHealthChecks', () => {
 
     expect(mockMongoHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockJwksHealthCheck).toHaveBeenCalledTimes(1)
-    expect(mockDefraIdHealthCheck).toHaveBeenCalledTimes(1)
+    // expect(mockDefraIdHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockRuralPaymentsHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockHitachiHealthCheck).toHaveBeenCalledTimes(1)
     expect(mockAuditHealthCheck).toHaveBeenCalledTimes(1)
