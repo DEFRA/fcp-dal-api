@@ -225,4 +225,39 @@ describe('Customer Mutations', () => {
       })
     }
   )
+
+  describe.each(updateMutations)('%s audit trail', (mutationName) => {
+    const info = { path: { key: mutationName, typename: 'Mutation', prev: undefined } }
+
+    beforeEach(() => {
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('currentId')
+      mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(mockPerson)
+    })
+
+    test('records the personId/crn accounts and an updated person entity', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { crn: 'crn' }
+
+      await Mutation[mutationName](
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'currentId')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'updated',
+        entityid: 'crn'
+      })
+    })
+
+    test('does not throw when no audit trail is supplied', async () => {
+      const input = { crn: 'crn' }
+
+      await Mutation[mutationName](null, { input }, { dataSources: mockDataSources }, info)
+    })
+  })
 })

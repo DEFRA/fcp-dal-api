@@ -123,4 +123,54 @@ describe('Business Query Resolver', () => {
       postalCode: 'AB12 3CD'
     })
   })
+
+  describe('businessSearch audit trail', () => {
+    const info = { path: { key: 'businessSearch', typename: 'Query', prev: undefined } }
+
+    beforeEach(() => {
+      mockDataSources.ruralPaymentsBusiness.organisationSearch.mockResolvedValue({
+        data: [],
+        page: { number: 1, size: 20, totalPages: 0, totalElements: 0 }
+      })
+    })
+
+    it('records the sbi as an account and an entity when searching by SBI', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      await Query.businessSearch(
+        null,
+        { searchString: '123456789', searchType: 'SBI', pagination: { page: 1, perPage: 20 } },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123456789')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'business',
+        action: 'search',
+        entityid: '123456789'
+      })
+    })
+
+    it('does not record an sbi account or an entityid when searching by a non-SBI type', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      await Query.businessSearch(
+        null,
+        {
+          searchString: 'Test Farm',
+          searchType: 'BUSINESS_NAME',
+          pagination: { page: 1, perPage: 20 }
+        },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'business',
+        action: 'search'
+      })
+    })
+  })
 })

@@ -17,7 +17,21 @@ export const Query = {
     }
   },
 
-  async businessSearch(__, { searchString, searchType, pagination }, { dataSources }) {
+  async businessSearch(
+    __,
+    { searchString, searchType, pagination },
+    { dataSources, auditTrail },
+    info
+  ) {
+    if (searchType === 'SBI') {
+      auditTrail?.recordAccount(info, 'sbi', searchString)
+    }
+    auditTrail?.recordEntity(info, {
+      entity: 'business',
+      action: 'search',
+      ...(searchType === 'SBI' ? { entityid: searchString } : {})
+    })
+
     const { data, page } = await dataSources.ruralPaymentsBusiness.organisationSearch(
       searchType,
       searchString,

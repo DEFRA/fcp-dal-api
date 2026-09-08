@@ -115,4 +115,73 @@ describe('Customer Query Resolver', () => {
 
     expect(result).toBe(false)
   })
+
+  describe('audit trail', () => {
+    const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
+
+    it('customer records the personId and crn as accounts', async () => {
+      const crn = '1234567890'
+      const auditTrail = { recordAccount: jest.fn() }
+
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
+
+      await Query.customer(null, { crn }, { dataSources: mockDataSources, auditTrail }, info)
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 123)
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', crn)
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
+
+      await Query.customer(null, { crn: '1234567890' }, { dataSources: mockDataSources })
+    })
+
+    it('customerSearch records the crn as an account and an entity when searching by CRN', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
+        data: [],
+        page: { number: 1, size: 20, totalPages: 0, totalElements: 0 }
+      })
+
+      await Query.customerSearch(
+        null,
+        { searchString: '1234567890', searchType: 'CRN', pagination: { page: 1, perPage: 20 } },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1234567890')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'search',
+        entityid: '1234567890'
+      })
+    })
+
+    it('does not record a crn account or an entityid when searching by a non-CRN type', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
+        data: [],
+        page: { number: 1, size: 20, totalPages: 0, totalElements: 0 }
+      })
+
+      await Query.customerSearch(
+        null,
+        {
+          searchString: 'Smith',
+          searchType: 'CUSTOMER_NAME',
+          pagination: { page: 1, perPage: 20 }
+        },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'search'
+      })
+    })
+  })
 })

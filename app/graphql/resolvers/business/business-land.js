@@ -16,7 +16,17 @@ export const BusinessLand = {
     return { organisationId, date }
   },
 
-  async parcel({ organisationId, sbi }, { date = new Date(), parcelId, sheetId }, { dataSources }) {
+  async parcel(
+    { organisationId, sbi },
+    { date = new Date(), parcelId, sheetId },
+    { dataSources, auditTrail },
+    info
+  ) {
+    auditTrail?.recordEntity(info, {
+      entity: 'parcel',
+      action: 'read',
+      entityid: `${sheetId}-${parcelId}`
+    })
     validateDateInput(date)
 
     const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
@@ -33,7 +43,12 @@ export const BusinessLand = {
     }
   },
 
-  async parcels({ organisationId }, { date = new Date() }, { dataSources }) {
+  async parcels({ organisationId, sbi }, { date = new Date() }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'parcel-list',
+      action: 'read',
+      entityid: sbi
+    })
     validateDateInput(date)
 
     return transformLandParcels(
@@ -47,8 +62,14 @@ export const BusinessLand = {
   async parcelCovers(
     { organisationId },
     { date = new Date(), sheetId, parcelId },
-    { dataSources }
+    { dataSources, auditTrail },
+    info
   ) {
+    auditTrail?.recordEntity(info, {
+      entity: 'land-cover-list',
+      action: 'read',
+      entityid: `${sheetId}-${parcelId}`
+    })
     validateDateInput(date)
 
     const parcel = await BusinessLand.parcel(
@@ -67,7 +88,13 @@ export const BusinessLand = {
     )
   },
 
-  async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, context) {
+  async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, context, info) {
+    const { auditTrail } = context
+    auditTrail?.recordEntity(info, {
+      entity: 'land-use-list',
+      action: 'read',
+      entityid: `${sheetId}-${parcelId}`
+    })
     validateDateInput(date)
 
     return transformLandUses(
@@ -83,13 +110,13 @@ const getParcelEffectiveDates = async (
   dataSources,
   { organisationId, date, parcelId, sheetId }
 ) => {
-  const parclsWithAffectiveDates =
+  const parcelsWithAffectiveDates =
     await dataSources.ruralPaymentsBusiness.getParcelEffectiveDatesByOrganisationIdAndDate(
       organisationId,
       date
     )
 
-  return transformLandParcelsEffectiveDates(parcelId, sheetId, parclsWithAffectiveDates)
+  return transformLandParcelsEffectiveDates(parcelId, sheetId, parcelsWithAffectiveDates)
 }
 
 export const BusinessLandParcel = {
