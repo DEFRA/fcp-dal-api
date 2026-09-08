@@ -3,13 +3,27 @@ import { transformPersonSearchResult } from '../../../transformers/rural-payment
 import { retrievePersonIdByCRN } from './common.js'
 
 export const Query = {
-  async customer(__, { crn }, { dataSources }) {
+  async customer(__, { crn }, { dataSources, auditTrail }, info) {
     const personId = await retrievePersonIdByCRN(crn, dataSources)
-
+    auditTrail?.recordAccount(info, 'personId', personId)
+    auditTrail?.recordAccount(info, 'crn', crn)
     return { crn, personId }
   },
 
-  async customerSearch(__, { searchString, searchType, pagination }, { dataSources }) {
+  async customerSearch(
+    __,
+    { searchString, searchType, pagination },
+    { dataSources, auditTrail },
+    info
+  ) {
+    if (searchType === 'CRN') {
+      auditTrail?.recordAccount(info, 'crn', searchString)
+    }
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'search',
+      ...(searchType === 'CRN' ? { entityid: searchString } : {})
+    })
     const { data, page } = await dataSources.ruralPaymentsCustomer.personSearch(
       searchType,
       searchString,

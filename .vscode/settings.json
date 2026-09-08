@@ -20,6 +20,7 @@
     "booleanise",
     "defra",
     "defradigital",
+    "entityid",
     "healthcheck",
     "jsonwebtoken",
     "legalstatus",

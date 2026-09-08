@@ -66,6 +66,40 @@ describe('businessDetailsUpdateResolver', () => {
       businessDetailsUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
   })
+
+  it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
+    dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'updateBusinessName', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessDetailsUpdateResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'updated',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
+    dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
+
+    await businessDetailsUpdateResolver(
+      null,
+      { input: { sbi: '123', name: 'Test' } },
+      {
+        dataSources
+      }
+    )
+  })
 })
 
 describe('businessAdditionalDetailsUpdateResolver', () => {
@@ -128,6 +162,49 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     await expect(
       businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
+  })
+
+  it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+      dateStartedFarming: '01-01-2024'
+    })
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'updateBusinessLegalStatus', typename: 'Mutation', prev: undefined }
+    }
+    const input = { sbi: '123', dateStartedFarming: '01-01-2025' }
+
+    await businessAdditionalDetailsUpdateResolver(
+      null,
+      { input },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'updated',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+      dateStartedFarming: '01-01-2024'
+    })
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
+
+    await businessAdditionalDetailsUpdateResolver(
+      null,
+      { input: { sbi: '123', dateStartedFarming: '01-01-2025' } },
+      { dataSources }
+    )
   })
 })
 
@@ -312,6 +389,28 @@ describe('businessAllFieldsUpdateResolver', () => {
     })
 
     expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).not.toHaveBeenCalled()
+  })
+
+  it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'updateBusinessAllFields', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessAllFieldsUpdateResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'updated',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
   })
 })
 

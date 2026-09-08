@@ -366,6 +366,31 @@ describe('Business Mutation createBusiness', () => {
       }
     })
   })
+
+  it('records the sbi/organisationId accounts and a created business entity on the audit trail', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
+    dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockResolvedValue({
+      sbi: 'sbi',
+      id: 'orgId'
+    })
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'createBusiness', typename: 'Mutation', prev: undefined } }
+
+    await Mutation.createBusiness(
+      {},
+      { input: { crn: '123', name: 'Acme Farms Ltd' } },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 'sbi')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'created',
+      entityid: 'sbi'
+    })
+  })
 })
 
 describe('Business Mutation createBusinessCustomerBankDetails', () => {
@@ -626,6 +651,29 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     })
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
+
+  it('records sbi/organisationId/frn accounts and an updated bank-account entity on the audit trail', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'createBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5583781')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', '10014489653')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'updated',
+      entityid: '10014489653'
+    })
+  })
 })
 
 describe('Business Mutation validateBusinessCustomerBankDetails', () => {
@@ -854,6 +902,29 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     await expect(
       Mutation.validateBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
     ).rejects.toThrow('FRN not found for business')
+  })
+
+  it('records sbi/organisationId/frn accounts and a validate bank-account entity on the audit trail', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'validateBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5583781')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', '10014489653')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'validate',
+      entityid: '10014489653'
+    })
   })
 })
 

@@ -4,8 +4,22 @@ import {
   transformBusinessDetailsToOrgDetailsUpdate
 } from '../../../transformers/rural-payments/business.js'
 
-export const businessDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
+export const businessDetailsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
@@ -20,8 +34,22 @@ export const businessDetailsUpdateResolver = async (__, { input }, { dataSources
   }
 }
 
-export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
+export const businessAdditionalDetailsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgAdditionalDetails = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -60,8 +88,22 @@ const withUpdateStatuses = (error, statuses) => {
   return new GraphQLError(error.message, { originalError: error, extensions: statuses })
 }
 
-export const businessAllFieldsUpdateResolver = async (__, { input }, { dataSources }) => {
+export const businessAllFieldsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
 
