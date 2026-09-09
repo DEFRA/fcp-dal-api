@@ -59,6 +59,25 @@ describe('Business Query Resolver', () => {
     expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', sbi)
   })
 
+  it('still records the sbi account when the organisationId lookup itself fails', async () => {
+    const sbi = '123456789'
+    const auditTrail = { recordAccount: jest.fn() }
+    const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+    mockDataSources.mongoBusiness.getOrgIdBySbi.mockRejectedValue(new Error('upstream failure'))
+
+    await expect(
+      Query.business(null, { sbi }, { dataSources: mockDataSources, auditTrail }, info)
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', sbi)
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+  })
+
   it('does not throw when no audit trail is supplied', async () => {
     const sbi = '123456789'
     mockDataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(1)

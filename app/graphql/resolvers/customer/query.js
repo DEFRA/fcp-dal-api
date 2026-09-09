@@ -4,9 +4,9 @@ import { retrievePersonIdByCRN } from './common.js'
 
 export const Query = {
   async customer(__, { crn }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordAccount(info, 'crn', crn)
     const personId = await retrievePersonIdByCRN(crn, dataSources)
     auditTrail?.recordAccount(info, 'personId', personId)
-    auditTrail?.recordAccount(info, 'crn', crn)
     return { crn, personId }
   },
 

@@ -131,6 +131,23 @@ describe('Customer Query Resolver', () => {
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', crn)
     })
 
+    it('still records the crn account when the personId lookup itself fails', async () => {
+      const crn = '1234567890'
+      const auditTrail = { recordAccount: jest.fn() }
+
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(null)
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
+        new Error('upstream failure')
+      )
+
+      await expect(
+        Query.customer(null, { crn }, { dataSources: mockDataSources, auditTrail }, info)
+      ).rejects.toThrow('upstream failure')
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', crn)
+      expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(info, 'personId', expect.anything())
+    })
+
     it('does not throw when no audit trail is supplied', async () => {
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
 
