@@ -116,9 +116,38 @@ export function getRequestingGroup(groups) {
   return groups?.find((group) => Object.values(authGroups).includes(group))
 }
 
+/**
+ * ADMIN group membership bypasses both the @auth group check and the serviceAccountPermitted gate.
+ */
+export function isAdminCaller(requesterGroups) {
+  return requesterGroups.includes(authGroups.ADMIN)
+}
+
+/**
+ * Check if the caller is a service account.
+ * @param authContext the auth context
+ * @returns {boolean} true if the caller is a service account, false otherwise
+ */
+function isServiceAccount(authContext) {
+  return !!authContext?.serviceAccount
+}
+
+/**
+ * Mutations can't be called by service accounts, queries are permitted by service accounts and non-service accounts.
+ */
+function isServiceAccountPermitted(schema, typeName) {
+  const mutationTypeName = schema.getMutationType()?.name
+  const isMutationField = typeName === mutationTypeName
+
+  return !isMutationField
+}
+
+/**
+ * Checks that the requester's groups satisfy the given @auth allow-list.
+ * @throws {Unauthorized} if access is not granted
+ */
 export function checkAuthGroup(requesterGroups, allowedGroups) {
-  const isAdmin = requesterGroups.includes(authGroups.ADMIN)
-  if (isAdmin) {
+  if (isAdminCaller(requesterGroups)) {
     return
   } else {
     const hasAccess = allowedGroups.some((group) => {
@@ -128,6 +157,18 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
     if (!hasAccess) {
       throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
     }
+  }
+}
+
+/**
+ * A field guarded by @auth is usable by a service-account caller according to the following:
+ * - if caller has ADMIN membership, always permitted
+ * - if this is a mutation - non-service accounts are permitted, but service accounts are not permitted
+ * - if this is a query - both service accounts and non-service accounts are permitted
+ */
+export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitted, adminCaller) {
+  if (serviceAccount && !serviceAccountPermitted && !adminCaller) {
+    throw new Unauthorized('Authorization failed, this field is not available to service accounts')
   }
 }
 
@@ -145,10 +186,18 @@ export function authDirectiveTransformer(schema) {
     [MapperKind.OBJECT_FIELD](fieldConfig, _fieldName, typeName) {
       const authDirective =
         getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
+
       const { resolve = defaultFieldResolver } = fieldConfig
+
       if (authDirective) {
         fieldConfig.resolve = function (source, args, context, info) {
-          checkAuthGroup(context.auth.groups || [], authDirective.requires)
+          const requesterGroups = context.auth.groups || []
+          checkAuthGroup(requesterGroups, authDirective.requires)
+          checkServiceAccountAccess(
+            isServiceAccount(context.authContext),
+            isServiceAccountPermitted(schema, typeName),
+            isAdminCaller(requesterGroups)
+          )
           return resolve(source, args, context, info)
         }
       }

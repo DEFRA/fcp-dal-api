@@ -67,7 +67,7 @@ describe('RuralPayments Custom Fetch', () => {
     jest.restoreAllMocks()
   })
 
-  it('should initialise; fetch has INternal mTLS, gateway, & timeout', async () => {
+  it('should initialise; fetch has Internal mTLS, gateway, & timeout', async () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
@@ -105,6 +105,24 @@ describe('RuralPayments Custom Fetch', () => {
       headers: {},
       signal: [timeout]
     })
+    expect(callArgs[1].dispatcher).toBeDefined()
+  })
+
+  it('defaults options to {} when httpFetch is called without options (mTLS)', async () => {
+    const { RuralPayments } = await import(
+      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
+    )
+    const request = { headers: { email: 'test@test.test' } }
+    const rp = new RuralPayments(config, {
+      request
+    })
+
+    fetch11.mockImplementationOnce(() => 'data')
+    expect(rp.httpCache.httpFetch(`${fakeInternalURL}example-path`)).toBe('data')
+
+    const callArgs = fetch11.mock.calls[0]
+    expect(callArgs[0]).toBe(`${fakeInternalURL}example-path`)
+    expect(callArgs[1]).toMatchObject({ signal: [timeout] })
     expect(callArgs[1].dispatcher).toBeDefined()
   })
 
@@ -174,6 +192,24 @@ describe('RuralPayments Custom Fetch', () => {
     expect(fetch).toHaveBeenCalledWith(`${fakeInternalURL}example-path`, {
       method: 'GET',
       headers: {},
+      signal: [timeout]
+    })
+  })
+
+  it('defaults options to {} when httpFetch is called without options (no mTLS)', async () => {
+    configMockPath['kits.disableMTLS'] = true
+
+    const { RuralPayments } = await import(
+      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
+    )
+    const request = { headers: { email: 'test@test.test' } }
+    const rp = new RuralPayments(config, {
+      request
+    })
+
+    fetch.mockImplementationOnce(() => 'data')
+    expect(rp.httpCache.httpFetch(`${fakeInternalURL}example-path`)).toBe('data')
+    expect(fetch).toHaveBeenCalledWith(`${fakeInternalURL}example-path`, {
       signal: [timeout]
     })
   })
