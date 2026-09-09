@@ -784,7 +784,7 @@ describe('Business', () => {
       })
     })
 
-    it('bankAccounts does not record anything when the FRN cannot be found', async () => {
+    it('bankAccounts still records the attempted bank-account entity when the FRN cannot be found', async () => {
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
         businessReference: null
@@ -794,8 +794,28 @@ describe('Business', () => {
         Business.bankAccounts(mockBusiness, undefined, { dataSources, auditTrail }, info)
       ).rejects.toThrow('FRN not found for business')
 
-      expect(auditTrail.recordAccount).not.toHaveBeenCalled()
-      expect(auditTrail.recordEntity).not.toHaveBeenCalled()
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'bank-account',
+        action: 'read',
+        entityid: null
+      })
+    })
+
+    it('bankAccounts still records an attempted bank-account entity when the organisation lookup itself fails', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValueOnce(
+        new Error('upstream failure')
+      )
+
+      await expect(
+        Business.bankAccounts(mockBusiness, undefined, { dataSources, auditTrail }, info)
+      ).rejects.toThrow('upstream failure')
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'bank-account',
+        action: 'read',
+        entityid: undefined
+      })
     })
 
     it('customer records a person-list entity keyed by sbi and crn/personId accounts', async () => {

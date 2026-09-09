@@ -367,6 +367,23 @@ describe('Customer', () => {
       })
     })
 
+    it('info still records an attempted person entity when the person lookup itself fails', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonByPersonId.mockRejectedValue(
+        new Error('upstream failure')
+      )
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await expect(
+        Customer.info({ personId: personFixture.id }, undefined, { dataSources, auditTrail }, info)
+      ).rejects.toThrow('upstream failure')
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'read',
+        entityid: undefined
+      })
+    })
+
     it('businesses records a business-list entity keyed by crn', async () => {
       dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
         personBusinessesFixture

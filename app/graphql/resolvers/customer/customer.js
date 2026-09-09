@@ -11,13 +11,16 @@ import { validatePastDateInput } from '../../../utils/date.js'
 
 export const Customer = {
   async info({ personId }, __, { dataSources, auditTrail }, info) {
-    const response = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
-
-    auditTrail?.recordEntity(info, {
-      entity: 'person',
-      action: 'read',
-      entityid: response.customerReferenceNumber
-    })
+    let response
+    try {
+      response = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
+    } finally {
+      auditTrail?.recordEntity(info, {
+        entity: 'person',
+        action: 'read',
+        entityid: response?.customerReferenceNumber
+      })
+    }
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
