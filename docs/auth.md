@@ -25,4 +25,11 @@ The <abbr title="Data Access Layer">DAL</abbr> requires multiple things to be pr
 
 - Set `x-forwarded-authorization` header to a Defra ID token that contains the relevant <abbr title="Customer Reference Number">CRN</abbr> and <abbr title="Single Business Identifier">SBI</abbr> (if requesting business data)
 
+## Service Account requests
+
+The internal and external routes above require a user to be accessing the system. If a client needs to make a DAL call when there is no user initiating the request (for example a batch), then a service account may be used.
+Please refer to the [Service Account](https://eaflood.atlassian.net/wiki/spaces/FDM/pages/6535938295/Service+account) documentation for more information.
+
+- The email address of the service account should be added to the `service-account` header.
+
 [< back to Homepage](./homepage)

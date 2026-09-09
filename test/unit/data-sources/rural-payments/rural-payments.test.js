@@ -184,15 +184,16 @@ describe('RuralPayments', () => {
       expect(rp.isExternalRoute()).toBe(false)
     })
 
-    test('email always wins, regardless of what other auth headers are also present', () => {
+    test('email wins over x-forwarded-authorization when both are present', () => {
+      // Both should never be present, but it would be a breaking change to throw here
+      // (an error log statement has been added when this happens so that we can get alerted and deal with this)
       const rp = new RuralPayments(
         { logger },
         {
           request: {
             headers: {
               email: 'test@test.test',
-              'x-forwarded-authorization': 'token123',
-              'service-account': 'dal-service-account@example.com'
+              'x-forwarded-authorization': 'token123'
             }
           }
         }
@@ -200,6 +201,23 @@ describe('RuralPayments', () => {
 
       expect(rp.gatewayType).toBe('rural-payments-internal')
       expect(rp.isExternalRoute()).toBe(false)
+    })
+
+    test('throws when both email and service-account headers are present', () => {
+      expect(
+        () =>
+          new RuralPayments(
+            { logger },
+            {
+              request: {
+                headers: {
+                  email: 'test@test.test',
+                  'service-account': 'dal-service-account@example.com'
+                }
+              }
+            }
+          )
+      ).toThrow('Cannot supply both email and service-account headers')
     })
 
     test('does not throw when none of email, x-forwarded-authorization or service-account headers are present', () => {
@@ -222,6 +240,29 @@ describe('RuralPayments', () => {
       await rp.willSendRequest(path, request)
 
       expect(request.headers).toEqual({ email: 'test@test.test' })
+      expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
+        request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+
+    test('adds service-account header from request headers for client service account requests', async () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          request: {
+            headers: {
+              'service-account': 'robot-account.some-client-service@example.com'
+            }
+          }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      await rp.willSendRequest(path, request)
+
+      expect(request.headers).toEqual({ email: 'robot-account.some-client-service@example.com' })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
         request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
         code: RURALPAYMENTS_API_REQUEST_001

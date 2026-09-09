@@ -30,9 +30,9 @@ export function rootKeyFromInfoPath(info) {
  * from an upstream call). One instance lives on
  * contextValue for the lifetime of a single request
  */
-export function createAuditTrail() {
+export function createAuditTrail(authContext) {
   const byRoot = new Map()
-  let serviceAccount
+  const serviceAccount = authContext?.serviceAccount
 
   const bucket = (rootKey) => {
     if (!byRoot.has(rootKey)) {
@@ -72,14 +72,6 @@ export function createAuditTrail() {
         return
       }
       bucket(rootKey).accounts[accountIdentifierName] = String(accountIdentifier)
-    },
-
-    /**
-     * Some requests may be serviced by a client supplied service account
-     * @param {string} serviceAccountValue the value (email address) of the service account
-     */
-    recordServiceAccount(serviceAccountValue) {
-      serviceAccount = serviceAccountValue
     },
 
     /**
