@@ -238,8 +238,6 @@ describe('auditPlugin', () => {
         ...baseContextValue.request,
         headers: {
           email: 'internal@example.com',
-          // Although all 3 will never be present at the same time, included to show that email will be selected
-          'service-account': 'service-account@example.com',
           'x-forwarded-authorization': 'the-defra-id-token'
         }
       }

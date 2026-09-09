@@ -1,13 +1,25 @@
+import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import { endUserAuthContext } from '../../../app/auth/end-user-auth-context.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
+import { DAL_REQUEST_AUTHENTICATION_001 } from '../../../app/logger/codes.js'
+import { logger } from '../../../app/logger/logger.js'
 
 describe('endUserAuthContext', () => {
-  test('returns auth headers extracted from the request', () => {
+  let loggerErrorSpy
+
+  beforeEach(() => {
+    loggerErrorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    loggerErrorSpy.mockRestore()
+  })
+
+  test('returns auth headers extracted from the request, logging the conflicting email/external-auth headers', () => {
     const request = {
       headers: {
         email: 'user@example.com',
-        'x-forwarded-authorization': 'token123',
-        'service-account': 'service@example.com'
+        'x-forwarded-authorization': 'token123'
       }
     }
 
@@ -17,11 +29,46 @@ describe('endUserAuthContext', () => {
       upstreamEmailHeader: 'user@example.com',
       internalAuthHeader: 'user@example.com',
       externalAuthHeader: 'token123',
-      serviceAccount: 'service@example.com'
+      serviceAccount: undefined
     })
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      '#DAL - Request authentication - conflicting auth headers',
+      expect.objectContaining({ code: DAL_REQUEST_AUTHENTICATION_001 })
+    )
   })
 
-  test('returns client email header as the upstream email header when present', () => {
+  test('does not log when only an email header is present', () => {
+    const request = { headers: { email: 'user@example.com' } }
+
+    endUserAuthContext(request)
+
+    expect(loggerErrorSpy).not.toHaveBeenCalled()
+  })
+
+  test('does not log when an x-forwarded-authorization header is supplied alongside a service-account header', () => {
+    // The DAL itself legitimately injects a service-account header onto an already-external
+    // request to take over routing (the dal-service-account authType) - this must not be logged.
+    const request = {
+      headers: {
+        'x-forwarded-authorization': 'token123',
+        'service-account': 'service@example.com'
+      }
+    }
+
+    endUserAuthContext(request)
+
+    expect(loggerErrorSpy).not.toHaveBeenCalled()
+  })
+
+  test('does not log when only an x-forwarded-authorization header is present', () => {
+    const request = { headers: { 'x-forwarded-authorization': 'token123' } }
+
+    endUserAuthContext(request)
+
+    expect(loggerErrorSpy).not.toHaveBeenCalled()
+  })
+
+  test('throws Unauthorized when both email and service-account headers are present', () => {
     const request = {
       headers: {
         email: 'user@example.com',
@@ -29,12 +76,9 @@ describe('endUserAuthContext', () => {
       }
     }
 
-    const result = endUserAuthContext(request)
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        upstreamEmailHeader: 'user@example.com'
-      })
+    expect(() => endUserAuthContext(request)).toThrow(Unauthorized)
+    expect(() => endUserAuthContext(request)).toThrow(
+      'Cannot supply both email and service-account headers'
     )
   })
 
