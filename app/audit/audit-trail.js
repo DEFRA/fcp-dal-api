@@ -32,7 +32,7 @@ export function rootKeyFromInfoPath(info) {
  */
 export function createAuditTrail(authContext) {
   const byRoot = new Map()
-  let serviceAccount = authContext?.serviceAccount
+  const serviceAccount = authContext?.serviceAccount
 
   const bucket = (rootKey) => {
     if (!byRoot.has(rootKey)) {
@@ -72,14 +72,6 @@ export function createAuditTrail(authContext) {
         return
       }
       bucket(rootKey).accounts[accountIdentifierName] = String(accountIdentifier)
-    },
-
-    /**
-     * Some requests may be serviced by a client supplied service account
-     * @param {string} serviceAccountValue the value (email address) of the service account
-     */
-    recordServiceAccount(serviceAccountValue) {
-      serviceAccount = serviceAccountValue
     },
 
     /**

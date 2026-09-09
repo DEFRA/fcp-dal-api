@@ -166,8 +166,8 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
  *  - if serviceAccountPermitted value is not supplied, defaults to true (permitted) on a Query field
  *    or false (denied) on a Mutation field
  */
-export function checkServiceAccountAccess(isServiceAccount, serviceAccountPermitted, isAdmin) {
-  if (isServiceAccount && !serviceAccountPermitted && !isAdmin) {
+export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitted, adminCaller) {
+  if (serviceAccount && !serviceAccountPermitted && !adminCaller) {
     throw new Unauthorized('Authorization failed, this field is not available to service accounts')
   }
 }

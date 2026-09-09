@@ -176,7 +176,7 @@ describe('createAuditTrail', () => {
     })
   })
 
-  describe('recordServiceAccount / serviceAccount', () => {
+  describe('serviceAccount', () => {
     test('returns the client supplied service account if present in the authContext', () => {
       const auditTrail = createAuditTrail({ serviceAccount: 'service-account@example.com' })
 
@@ -187,23 +187,6 @@ describe('createAuditTrail', () => {
       const auditTrail = createAuditTrail()
 
       expect(auditTrail.serviceAccount()).toBeUndefined()
-    })
-
-    test('returns the recorded service account value', () => {
-      const auditTrail = createAuditTrail()
-
-      auditTrail.recordServiceAccount('service-account@example.com')
-
-      expect(auditTrail.serviceAccount()).toBe('service-account@example.com')
-    })
-
-    test('a later recording overwrites an earlier one', () => {
-      const auditTrail = createAuditTrail()
-
-      auditTrail.recordServiceAccount('first@example.com')
-      auditTrail.recordServiceAccount('second@example.com')
-
-      expect(auditTrail.serviceAccount()).toBe('second@example.com')
     })
   })
 
@@ -279,9 +262,7 @@ describe('createAuditTrail', () => {
 
     first.recordAccount(info, 'frn', '6561479446')
     first.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: 'frn-1' })
-    first.recordServiceAccount('service-account@example.com')
 
     expect(second.getForRoot('business')).toEqual({ entities: undefined, accounts: undefined })
-    expect(second.serviceAccount()).toBeUndefined()
   })
 })
