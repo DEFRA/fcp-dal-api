@@ -9,6 +9,8 @@ import {
 } from '../../../transformers/rural-payments/customer.js'
 import { validatePastDateInput } from '../../../utils/date.js'
 
+const BUSINESS_LIST_ENTITY = 'business-list'
+
 export const Customer = {
   async info({ personId }, __, { dataSources, auditTrail }, info) {
     let response
@@ -26,7 +28,7 @@ export const Customer = {
 
   async business({ personId, crn }, { sbi }, { dataSources, auditTrail }, info) {
     auditTrail?.recordAccount(info, 'sbi', sbi)
-    auditTrail?.recordEntity(info, { entity: 'business-list', action: 'read', entityid: crn })
+    auditTrail?.recordEntity(info, { entity: BUSINESS_LIST_ENTITY, action: 'read', entityid: crn })
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
     const transformedBusiness = transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
@@ -39,7 +41,7 @@ export const Customer = {
   },
 
   async businesses({ personId, crn }, __, { dataSources, auditTrail }, info) {
-    auditTrail?.recordEntity(info, { entity: 'business-list', action: 'read', entityid: crn })
+    auditTrail?.recordEntity(info, { entity: BUSINESS_LIST_ENTITY, action: 'read', entityid: crn })
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
     return transformPersonSummaryToCustomerAuthorisedBusinesses({ personId, crn }, summary)
@@ -61,7 +63,7 @@ export const CustomerBusiness = {
     auditTrail?.recordAccount(info, 'sbi', sbi)
     auditTrail?.recordAccount(info, 'organisationId', organisationId)
     auditTrail?.recordEntity(info, {
-      entity: 'business-list',
+      entity: BUSINESS_LIST_ENTITY,
       action: 'read',
       entityid: crn
     })
