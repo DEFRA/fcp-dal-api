@@ -1,8 +1,8 @@
+import { getEndUserIpAddress } from '../../audit/audit-ip.js'
+import { snsPublish } from '../../audit/sns-publisher.js'
 import { getRequestingGroup, getRequestingService } from '../../auth/authenticate.js'
 import { config } from '../../config.js'
 import { DAL_AUDIT_EVENT_001 } from '../../logger/codes.js'
-import { getEndUserIpAddress } from '../../audit/audit-ip.js'
-import { snsPublish } from '../../audit/sns-publisher.js'
 
 const AUDIT_EVENT_SCHEMA_VERSION = '1.0.0'
 const APPLICATION = 'Data Access Layer'
@@ -64,7 +64,7 @@ function buildEvent({ contextValue, rootSelection, errors }) {
       details: {
         requestBody: JSON.stringify(contextValue.request?.payload),
         rootField: rootSelection,
-        sourceSystem: getRequestingService(contextValue?.auth?.groups),
+        sourceSystem: getRequestingService(contextValue?.auth?.groups ?? []),
         sourceSystemSecurityGroupId: getRequestingGroup(contextValue?.auth?.groups),
         errorDetails: mappedErrors,
         serviceAccount: contextValue.auditTrail?.serviceAccount()
