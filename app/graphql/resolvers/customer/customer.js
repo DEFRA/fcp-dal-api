@@ -59,14 +59,7 @@ export const Customer = {
 }
 
 export const CustomerBusiness = {
-  async role({ organisationId, crn, sbi }, __, { dataSources, auditTrail }, info) {
-    auditTrail?.recordAccount(info, 'sbi', sbi)
-    auditTrail?.recordAccount(info, 'organisationId', organisationId)
-    auditTrail?.recordEntity(info, {
-      entity: BUSINESS_LIST_ENTITY,
-      action: 'read',
-      entityid: crn
-    })
+  async role({ organisationId, crn }, __, { dataSources }) {
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId

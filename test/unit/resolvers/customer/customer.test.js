@@ -484,7 +484,7 @@ describe('CustomerBusiness', () => {
     expect(response).toEqual(permissions)
   })
 
-  test('CustomerBusiness.role records sbi/organisationId accounts and a business-list entity', async () => {
+  test('CustomerBusiness.role does not record any audit trail (fully duplicative of Customer.business)', async () => {
     const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
     const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
 
@@ -495,13 +495,8 @@ describe('CustomerBusiness', () => {
       info
     )
 
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 'mockSbi')
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '4309257')
-    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
-      entity: 'business-list',
-      action: 'read',
-      entityid: '1638563942'
-    })
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+    expect(auditTrail.recordEntity).not.toHaveBeenCalled()
   })
 
   test('CustomerBusiness.permissionGroups records a permission-list entity without duplicating account fields recorded by Customer.business', async () => {
