@@ -391,6 +391,31 @@ describe('Business Mutation createBusiness', () => {
       entityid: 'sbi'
     })
   })
+
+  it('still records a created business entity, but no accounts, when the organisation creation fails', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
+    dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'createBusiness', typename: 'Mutation', prev: undefined } }
+
+    await expect(
+      Mutation.createBusiness(
+        {},
+        { input: { crn: '123', name: 'Acme Farms Ltd' } },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'created',
+      entityid: undefined
+    })
+  })
 })
 
 describe('Business Mutation createBusinessCustomerBankDetails', () => {
@@ -569,6 +594,37 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     ).rejects.toThrow('FRN not found for business')
 
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('still records the sbi account and an attempted bank-account entity when getOrganisation fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'createBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails(
+        {},
+        { input: baseInput },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'updated',
+      entityid: undefined
+    })
   })
 
   it('returns BankDetailsValidationFailed ', async () => {
@@ -902,6 +958,37 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     await expect(
       Mutation.validateBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
     ).rejects.toThrow('FRN not found for business')
+  })
+
+  it('still records the sbi account and an attempted bank-account entity when getOrganisation fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'validateBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await expect(
+      Mutation.validateBusinessCustomerBankDetails(
+        {},
+        { input: baseInput },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'validate',
+      entityid: undefined
+    })
   })
 
   it('records sbi/organisationId/frn accounts and a validate bank-account entity on the audit trail', async () => {

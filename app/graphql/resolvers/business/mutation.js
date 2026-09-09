@@ -98,33 +98,44 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
 export const Mutation = {
   createBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
     const { crn, ...businessDetails } = input
-    const personId = await retrievePersonIdByCRN(crn, dataSources)
-    const orgDetails = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
-    const response = await dataSources.ruralPaymentsBusiness.createOrganisationByPersonId(
-      personId,
-      orgDetails
-    )
-    const business = transformOrganisationToBusiness(response)
-    const result = { success: true, business }
-    auditTrail?.recordAccount(info, 'sbi', business.sbi)
-    auditTrail?.recordAccount(info, 'organisationId', business.organisationId)
-    auditTrail?.recordEntity(info, {
-      entity: 'business',
-      action: 'created',
-      entityid: business.sbi
-    })
-    return result
+    let business
+    try {
+      const personId = await retrievePersonIdByCRN(crn, dataSources)
+      const orgDetails = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
+      const response = await dataSources.ruralPaymentsBusiness.createOrganisationByPersonId(
+        personId,
+        orgDetails
+      )
+      business = transformOrganisationToBusiness(response)
+    } finally {
+      if (business) {
+        auditTrail?.recordAccount(info, 'sbi', business.sbi)
+        auditTrail?.recordAccount(info, 'organisationId', business.organisationId)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'business',
+        action: 'created',
+        entityid: business?.sbi
+      })
+    }
+    return { success: true, business }
   },
   createBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
-    const organisation = await getOrganisation(dataSources, input.sbi)
-    auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
-    auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
-    auditTrail?.recordEntity(info, {
-      entity: 'bank-account',
-      action: 'updated',
-      entityid: organisation.businessReference
-    })
+    let organisation
+    try {
+      organisation = await getOrganisation(dataSources, input.sbi)
+    } finally {
+      if (organisation) {
+        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
+        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'bank-account',
+        action: 'updated',
+        entityid: organisation?.businessReference
+      })
+    }
     const { failure, submission } = await validateBankChangeRequest(
       input,
       dataSources,
@@ -139,14 +150,20 @@ export const Mutation = {
   },
   validateBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
-    const organisation = await getOrganisation(dataSources, input.sbi)
-    auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
-    auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
-    auditTrail?.recordEntity(info, {
-      entity: 'bank-account',
-      action: 'validate',
-      entityid: organisation.businessReference
-    })
+    let organisation
+    try {
+      organisation = await getOrganisation(dataSources, input.sbi)
+    } finally {
+      if (organisation) {
+        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
+        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'bank-account',
+        action: 'validate',
+        entityid: organisation?.businessReference
+      })
+    }
     const { failure, validation } = await validateBankChangeRequest(
       input,
       dataSources,

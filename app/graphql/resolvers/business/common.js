@@ -10,15 +10,15 @@ export const businessDetailsUpdateResolver = async (
   { dataSources, auditTrail },
   info
 ) => {
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
-
-  auditTrail?.recordAccount(info, 'organisationId', organisationId)
   auditTrail?.recordAccount(info, 'sbi', input.sbi)
   auditTrail?.recordEntity(info, {
     entity: 'business',
     action: 'updated',
     entityid: input.sbi
   })
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
@@ -40,15 +40,15 @@ export const businessAdditionalDetailsUpdateResolver = async (
   { dataSources, auditTrail },
   info
 ) => {
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
-
-  auditTrail?.recordAccount(info, 'organisationId', organisationId)
   auditTrail?.recordAccount(info, 'sbi', input.sbi)
   auditTrail?.recordEntity(info, {
     entity: 'business',
     action: 'updated',
     entityid: input.sbi
   })
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
@@ -94,15 +94,15 @@ export const businessAllFieldsUpdateResolver = async (
   { dataSources, auditTrail },
   info
 ) => {
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
-
-  auditTrail?.recordAccount(info, 'organisationId', organisationId)
   auditTrail?.recordAccount(info, 'sbi', input.sbi)
   auditTrail?.recordEntity(info, {
     entity: 'business',
     action: 'updated',
     entityid: input.sbi
   })
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
@@ -189,15 +189,17 @@ const validateLockUnlockInput = (input) => {
 
 export const businessLockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...lockBodyAttributes } = input
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-
   auditTrail?.recordAccount(info, 'sbi', sbi)
-  auditTrail?.recordAccount(info, 'organisationId', organisationId)
   auditTrail?.recordEntity(info, {
     entity: 'business',
     action: 'locked',
     entityid: sbi
   })
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
   validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
@@ -212,14 +214,16 @@ export const businessLockResolver = async (__, { input }, { dataSources, auditTr
 
 export const businessUnlockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...unlockBodyAttributes } = input
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
   auditTrail?.recordAccount(info, 'sbi', sbi)
-  auditTrail?.recordAccount(info, 'organisationId', organisationId)
   auditTrail?.recordEntity(info, {
     entity: 'business',
     action: 'unlocked',
     entityid: sbi
   })
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
   validateLockUnlockInput(input)
 

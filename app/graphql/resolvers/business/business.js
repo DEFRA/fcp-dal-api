@@ -115,28 +115,40 @@ export const Business = {
   },
 
   async bankAccounts({ organisationId }, __, { dataSources, auditTrail }, info) {
-    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
-    const frn = organisation.businessReference
+    let frn
+    try {
+      const organisation =
+        await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+      frn = organisation.businessReference
+    } finally {
+      if (frn) {
+        auditTrail?.recordAccount(info, 'frn', frn)
+      }
+      auditTrail?.recordEntity(info, { entity: 'bank-account', action: 'read', entityid: frn })
+    }
 
     if (!frn) {
       throw new NotFound('FRN not found for business')
     }
-    auditTrail?.recordAccount(info, 'frn', frn)
-    auditTrail?.recordEntity(info, { entity: 'bank-account', action: 'read', entityid: frn })
     const response = await dataSources.ruralPaymentsBusiness.getExistingBankAccounts(frn)
     return response?.accounts ?? []
   },
 
   async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources, auditTrail }, info) {
-    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
-    const frn = organisation.businessReference
+    let frn
+    try {
+      const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+      frn = organisation.businessReference
+    } finally {
+      if (frn) {
+        auditTrail?.recordAccount(info, 'frn', frn)
+      }
+      auditTrail?.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: frn })
+    }
 
     if (!frn) {
       throw new NotFound('FRN not found for business')
     }
-
-    auditTrail?.recordAccount(info, 'frn', frn)
-    auditTrail?.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: frn })
 
     const payments = await dataSources.hitachiPayments.getSupplierPayments({
       frn,
