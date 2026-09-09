@@ -383,13 +383,11 @@ describe('authenticate', () => {
     type Query {
       customer(crn: ID!): Customer
       gatedQueryFieldDefault: String @auth(requires: [SINGLE_FRONT_DOOR])
-      gatedQueryFieldExplicitlyClosed: String @auth(requires: [SINGLE_FRONT_DOOR], serviceAccountPermitted: false)
       open: String
     }
 
     type Mutation {
       gatedMutationFieldDefault: String @auth(requires: [SINGLE_FRONT_DOOR])
-      gatedMutationFieldExplicitlyOpen: String @auth(requires: [SINGLE_FRONT_DOOR], serviceAccountPermitted: true)
     }
 
     type Customer {
@@ -409,7 +407,7 @@ describe('authenticate', () => {
       SINGLE_FRONT_DOOR
     }
 
-    directive @auth(requires: [AuthRole!]! = [TEST], serviceAccountPermitted: Boolean) on OBJECT | FIELD_DEFINITION
+    directive @auth(requires: [AuthRole!]! = [TEST]) on OBJECT | FIELD_DEFINITION
   `)
 
     const originalConfig = { ...config }
@@ -463,22 +461,13 @@ describe('authenticate', () => {
         expect(result.data.gatedQueryFieldDefault).toBe('a')
       })
 
-      it('allows a service account on a gated Query field with no serviceAccountPermitted set (inferred default: permitted)', async () => {
+      it('allows a service account on a Query field ', async () => {
         const result = await run('gatedQueryFieldDefault', serviceAccountContext([sfdGroupId]))
         expect(result.errors).toBeUndefined()
         expect(result.data.gatedQueryFieldDefault).toBe('a')
       })
 
-      it('denies a service account on a Query field explicitly closed with serviceAccountPermitted: false', async () => {
-        const result = await run(
-          'gatedQueryFieldExplicitlyClosed',
-          serviceAccountContext([sfdGroupId])
-        )
-        expect(result.errors?.[0]).toBeInstanceOf(Object)
-        expect(result.errors[0].message).toMatch(/not available to service accounts/)
-      })
-
-      it('denies a service account on a gated Mutation field with no serviceAccountPermitted set (inferred default: denied)', async () => {
+      it('denies a service account access to Mutations', async () => {
         const result = await run('gatedMutationFieldDefault', serviceAccountContext([sfdGroupId]), {
           mutation: true
         })
@@ -486,17 +475,7 @@ describe('authenticate', () => {
         expect(result.errors[0].message).toMatch(/not available to service accounts/)
       })
 
-      it('allows a service account on a Mutation field explicitly opened with serviceAccountPermitted: true', async () => {
-        const result = await run(
-          'gatedMutationFieldExplicitlyOpen',
-          serviceAccountContext([sfdGroupId]),
-          { mutation: true }
-        )
-        expect(result.errors).toBeUndefined()
-        expect(result.data.gatedMutationFieldExplicitlyOpen).toBe('d')
-      })
-
-      it('allows an ADMIN-group service account on a gated Mutation field, regardless of serviceAccountPermitted', async () => {
+      it('allows an ADMIN-group service account on a Mutation field', async () => {
         const result = await run(
           'gatedMutationFieldDefault',
           serviceAccountContext([adminGroupId]),

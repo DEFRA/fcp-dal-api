@@ -7,10 +7,7 @@ once a caller is identified, which parts of the GraphQL schema is it actually al
 ## The `@auth` directive
 
 ```graphql
-directive @auth(
-  requires: [AuthGroup!]!
-  serviceAccountPermitted: Boolean
-) on OBJECT | FIELD_DEFINITION
+directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
 ```
 
 `@auth` is applied to fields and types throughout the schema, e.g.:
@@ -56,37 +53,18 @@ type Business @auth(requires: [SINGLE_FRONT_DOOR]) {
 
 A field-level `@auth` always overrides the type-level one for that field.
 
-### `serviceAccountPermitted` - can a service account use this field?
+### Service account access
 
 A [service account](./auth) call carries no end-user identity - it's typically an unattended,
-batch-style caller. `serviceAccountPermitted` has **no static default** - if a field's resolved
-`@auth` doesn't set it, the effective value is inferred from where the field lives:
-
-- `false` (denied) for a field directly on `Mutation`.
-- `true` (permitted) for everything else, `Query` included.
-
-An explicit value on the directive always wins over the inferred default, in either direction -
-so a specific mutation can still be opened up to service accounts, and a specific query can still
-be closed off, without changing the rule for every other field:
-
-```graphql
-# Inferred true (Query) - a service account may call this without setting anything.
-customer(crn: ID!): Customer @auth(requires: [SINGLE_FRONT_DOOR])
-
-# Explicitly overridden to false, even though it's a Query field.
-sensitiveLookup: SensitiveThing @auth(requires: [SINGLE_FRONT_DOOR], serviceAccountPermitted: false)
-
-# Explicitly overridden to true, even though it's a Mutation field.
-triggerAutomatedReconciliation: Boolean
-  @auth(requires: [SINGLE_FRONT_DOOR], serviceAccountPermitted: true)
-```
+batch-style caller. Service accounts are only permitted to make read-only calls to the DAL - no
+mutations are allowed.
 
 Whether the _current_ caller is a service account is derived from the same request-level
 `authContext` that [DAL Authentication](./auth) describes (`context.authContext.serviceAccount`,
 truthy when a `service-account` header was supplied) - see `app/graphql/context.js` and
 `app/auth/end-user-auth-context.js`.
 
-As with `requires`, an `ADMIN`-group caller bypasses the `serviceAccountPermitted` check too - an
+As with the `@auth` directive, an `ADMIN`-group caller bypasses the service account check too - an
 admin service account can call any `@auth`-protected field, mutations included.
 
 ### What actually happens when access is denied

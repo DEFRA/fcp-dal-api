@@ -132,13 +132,14 @@ function isServiceAccount(authContext) {
   return !!authContext?.serviceAccount
 }
 
-function isServiceAccountPermitted(schema, authDirective, typeName) {
+/**
+ * Mutations can't be called by service accounts, queries are permitted by service accounts and non-service accounts.
+ */
+function isServiceAccountPermitted(schema, typeName) {
   const mutationTypeName = schema.getMutationType()?.name
   const isMutationField = typeName === mutationTypeName
 
-  // If directive value is supplied, use that, otherwise mutation fields default to false and
-  // non-mutation fields are true
-  return authDirective?.serviceAccountPermitted ?? !isMutationField
+  return !isMutationField
 }
 
 /**
@@ -161,10 +162,9 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
 
 /**
  * A field guarded by @auth is usable by a service-account caller according to the following:
- *  - if caller has ADMIN membership, always permitted
- *  - if serviceAccountPermitted value supplied, the value on the directive is used
- *  - if serviceAccountPermitted value is not supplied, defaults to true (permitted) on a Query field
- *    or false (denied) on a Mutation field
+ * - if caller has ADMIN membership, always permitted
+ * - if this is a mutation - non-service accounts are permitted, but service accounts are not permitted
+ * - if this is a query - both service accounts and non-service accounts are permitted
  */
 export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitted, adminCaller) {
   if (serviceAccount && !serviceAccountPermitted && !adminCaller) {
@@ -195,7 +195,7 @@ export function authDirectiveTransformer(schema) {
           checkAuthGroup(requesterGroups, authDirective.requires)
           checkServiceAccountAccess(
             isServiceAccount(context.authContext),
-            isServiceAccountPermitted(schema, authDirective, typeName),
+            isServiceAccountPermitted(schema, typeName),
             isAdminCaller(requesterGroups)
           )
           return resolve(source, args, context, info)
