@@ -187,12 +187,18 @@ const validateLockUnlockInput = (input) => {
   }
 }
 
-export const businessLockResolver = async (__, { input }, { dataSources }) => {
-  validateLockUnlockInput(input)
-
+export const businessLockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...lockBodyAttributes } = input
-
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'locked',
+    entityid: sbi
+  })
+  validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
 
@@ -204,12 +210,18 @@ export const businessLockResolver = async (__, { input }, { dataSources }) => {
   }
 }
 
-export const businessUnlockResolver = async (__, { input }, { dataSources }) => {
-  validateLockUnlockInput(input)
-
+export const businessUnlockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...unlockBodyAttributes } = input
-
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'unlocked',
+    entityid: sbi
+  })
+
+  validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, unlockBodyAttributes)
 

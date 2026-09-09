@@ -798,6 +798,46 @@ describe('Business', () => {
       expect(auditTrail.recordEntity).not.toHaveBeenCalled()
     })
 
+    it('customer records a person-list entity keyed by sbi and crn/personId accounts', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      const result = await Business.customer(
+        mockBusiness,
+        { crn: '1638563942' },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person-list',
+        action: 'read',
+        entityid: mockBusiness.sbi
+      })
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1638563942')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 5263421)
+      expect(result.sbi).toEqual(mockBusiness.sbi)
+    })
+
+    it('permittedFunctions records a permitted-function-list entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce(
+        { viewLand: true }
+      )
+
+      await Business.permittedFunctions(
+        mockBusiness,
+        { functions: ['viewLand'] },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'permitted-function-list',
+        action: 'read',
+        entityid: mockBusiness.sbi
+      })
+    })
+
     it('does not throw when no audit trail is supplied', async () => {
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
         id: '1',

@@ -387,6 +387,28 @@ describe('Customer', () => {
       })
     })
 
+    it('business records sbi/organisationId accounts and a business-list entity keyed by crn', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+        personBusinessesFixture
+      )
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      await Customer.business(
+        { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
+        { sbi: 107591843 },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 107591843)
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'business-list',
+        action: 'read',
+        entityid: personFixture.customerReferenceNumber
+      })
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5625145')
+    })
+
     it('authenticationQuestions records an authenticate-question entity keyed by crn', async () => {
       const auditTrail = { recordEntity: jest.fn() }
 
@@ -443,6 +465,26 @@ describe('CustomerBusiness', () => {
       ]
     ])[0]
     expect(response).toEqual(permissions)
+  })
+
+  test('CustomerBusiness.role records sbi/organisationId accounts and a business-list entity', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
+
+    await CustomerBusiness.role(
+      { organisationId: '4309257', sbi: 'mockSbi', crn: '1638563942' },
+      undefined,
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 'mockSbi')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '4309257')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business-list',
+      action: 'read',
+      entityid: '1638563942'
+    })
   })
 
   test('CustomerBusiness.permissionGroups records organisationId/sbi accounts and a permission-list entity', async () => {

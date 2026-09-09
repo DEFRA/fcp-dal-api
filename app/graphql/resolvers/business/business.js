@@ -49,7 +49,9 @@ export const Business = {
     return transformOrganisationCustomers(customers, sbi)
   },
 
-  async customer({ organisationId, sbi }, { crn }, { dataSources }) {
+  async customer({ organisationId, sbi }, { crn }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, { entity: 'person-list', action: 'read', entityid: sbi })
+    auditTrail?.recordAccount(info, 'crn', crn)
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
@@ -66,7 +68,7 @@ export const Business = {
       })
       throw new NotFound('Customer not found')
     }
-
+    auditTrail?.recordAccount(info, 'personId', customer.id)
     return transformOrganisationCustomer(customer, sbi)
   },
 
@@ -92,7 +94,17 @@ export const Business = {
     return transformApplications(applications)
   },
 
-  async permittedFunctions({ organisationId }, { functions }, { dataSources }) {
+  async permittedFunctions(
+    { organisationId, sbi },
+    { functions },
+    { dataSources, auditTrail },
+    info
+  ) {
+    auditTrail?.recordEntity(info, {
+      entity: 'permitted-function-list',
+      action: 'read',
+      entityid: sbi
+    })
     const authorisedFunctions =
       await dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(
         organisationId,
