@@ -1002,7 +1002,7 @@ describe('BusinessCustomer', () => {
     }
   })
 
-  it('permissionGroups records crn/personId accounts and a permission-list entity', async () => {
+  it('permissionGroups records a permission-list entity without duplicating account fields recorded by Business.customer', async () => {
     const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
@@ -1013,8 +1013,7 @@ describe('BusinessCustomer', () => {
       info
     )
 
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'mockCrn')
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'mockPersonId')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
     expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
       entity: 'permission-list',
       action: 'read',

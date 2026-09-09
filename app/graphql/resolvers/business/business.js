@@ -163,14 +163,7 @@ export const Business = {
 }
 
 export const BusinessCustomer = {
-  async permissionGroups(
-    { privileges, sbi, crn, personId },
-    __,
-    { dataSources, auditTrail },
-    info
-  ) {
-    auditTrail?.recordAccount(info, 'crn', crn)
-    auditTrail?.recordAccount(info, 'personId', personId)
+  async permissionGroups({ privileges, sbi, crn }, __, { dataSources, auditTrail }, info) {
     auditTrail?.recordEntity(info, {
       entity: 'permission-list',
       action: 'read',

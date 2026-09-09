@@ -504,7 +504,7 @@ describe('CustomerBusiness', () => {
     })
   })
 
-  test('CustomerBusiness.permissionGroups records organisationId/sbi accounts and a permission-list entity', async () => {
+  test('CustomerBusiness.permissionGroups records a permission-list entity without duplicating account fields recorded by Customer.business', async () => {
     const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
     const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
 
@@ -515,12 +515,11 @@ describe('CustomerBusiness', () => {
       info
     )
 
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5625145')
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 'mockSbi')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
     expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
       entity: 'permission-list',
       action: 'read',
-      entityid: 'mockSbi-1638563942'
+      entityid: '1638563942-mockSbi'
     })
   })
 
@@ -640,7 +639,7 @@ describe('CustomerBusiness', () => {
       ).rejects.toThrow(`Invalid date: "${futureDate}" must be in the past.`)
     })
 
-    test('records sbi/organisationId accounts and a message-list entity on the audit trail', async () => {
+    test('records a message-list entity without duplicating account fields recorded by Customer.business', async () => {
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
       const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
 
@@ -656,16 +655,11 @@ describe('CustomerBusiness', () => {
         info
       )
 
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 'mockSbi')
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(
-        info,
-        'organisationId',
-        'mockOrganisationId'
-      )
+      expect(auditTrail.recordAccount).not.toHaveBeenCalled()
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'message-list',
         action: 'read',
-        entityid: 'mockSbi-mockCrn'
+        entityid: 'mockCrn-mockSbi'
       })
     })
   })

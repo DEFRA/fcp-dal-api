@@ -80,12 +80,10 @@ export const CustomerBusiness = {
     { dataSources, auditTrail },
     info
   ) {
-    auditTrail?.recordAccount(info, 'sbi', sbi)
-    auditTrail?.recordAccount(info, 'organisationId', organisationId)
     auditTrail?.recordEntity(info, {
       entity: 'message-list',
       action: 'read',
-      entityid: `${sbi}-${crn}`
+      entityid: `${crn}-${sbi}`
     })
     if (fromDate) {
       fromDate = validatePastDateInput(fromDate)
@@ -102,12 +100,10 @@ export const CustomerBusiness = {
   },
 
   async permissionGroups({ organisationId, sbi, crn }, __, { dataSources, auditTrail }, info) {
-    auditTrail?.recordAccount(info, 'organisationId', organisationId)
-    auditTrail?.recordAccount(info, 'sbi', sbi)
     auditTrail?.recordEntity(info, {
       entity: 'permission-list',
       action: 'read',
-      entityid: `${sbi}-${crn}`
+      entityid: `${crn}-${sbi}`
     })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
