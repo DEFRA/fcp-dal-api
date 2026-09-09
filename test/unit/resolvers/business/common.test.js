@@ -479,6 +479,51 @@ describe('businessLockResolver', () => {
       'Reason and/or note are required'
     )
   })
+
+  it('records the sbi/organisationId accounts and a locked business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', reason: 'test' }
+
+    await businessLockResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'locked',
+      entityid: '123'
+    })
+  })
+
+  it('records the audit trail even when input validation subsequently fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123' }
+
+    await expect(
+      businessLockResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('Reason and/or note are required')
+
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'locked',
+      entityid: '123'
+    })
+    expect(dataSources.ruralPaymentsBusiness.lockOrganisation).not.toHaveBeenCalled()
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
+
+    await businessLockResolver(null, { input: { sbi: '123', reason: 'test' } }, { dataSources })
+  })
 })
 
 describe('getRuralPaymentsBusinessDataSource', () => {
@@ -601,5 +646,50 @@ describe('businessUnlockResolver', () => {
     await expect(businessUnlockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
       'Reason and/or note are required'
     )
+  })
+
+  it('records the sbi/organisationId accounts and an unlocked business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', reason: 'test' }
+
+    await businessUnlockResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'unlocked',
+      entityid: '123'
+    })
+  })
+
+  it('records the audit trail even when input validation subsequently fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123' }
+
+    await expect(
+      businessUnlockResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('Reason and/or note are required')
+
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'unlocked',
+      entityid: '123'
+    })
+    expect(dataSources.ruralPaymentsBusiness.unlockOrganisation).not.toHaveBeenCalled()
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
+
+    await businessUnlockResolver(null, { input: { sbi: '123', reason: 'test' } }, { dataSources })
   })
 })

@@ -81,7 +81,7 @@ describe('BusinessLand', () => {
   })
 
   it('summary', () => {
-    expect(BusinessLand.summary(mockBusiness, mockArguments)).toEqual({
+    expect(BusinessLand.summary(mockBusiness, mockArguments, {})).toEqual({
       ...mockBusiness,
       ...mockArguments
     })
@@ -178,6 +178,18 @@ describe('BusinessLand', () => {
 
   describe('audit trail', () => {
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+    it('summary records a land-summary entity keyed by sbi', () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      BusinessLand.summary({ ...mockBusiness, sbi: 'mockSbi' }, mockArguments, { auditTrail }, info)
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'land-summary',
+        action: 'read',
+        entityid: 'mockSbi'
+      })
+    })
 
     it('parcel records a parcel entity keyed by sheetId-parcelId', async () => {
       const auditTrail = { recordEntity: jest.fn() }

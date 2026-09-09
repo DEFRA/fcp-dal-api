@@ -21,13 +21,18 @@ export const Customer = {
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business({ personId, crn }, { sbi }, { dataSources }) {
+  async business({ personId, crn }, { sbi }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordAccount(info, 'sbi', sbi)
+    auditTrail?.recordEntity(info, { entity: 'business-list', action: 'read', entityid: crn })
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
-    return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+    const transformedBusiness = transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       { personId, crn, sbi },
       summary
     )
+
+    auditTrail?.recordAccount(info, 'organisationId', transformedBusiness.organisationId)
+    return transformedBusiness
   },
 
   async businesses({ personId, crn }, __, { dataSources, auditTrail }, info) {
@@ -49,7 +54,14 @@ export const Customer = {
 }
 
 export const CustomerBusiness = {
-  async role({ organisationId, crn }, __, { dataSources }) {
+  async role({ organisationId, crn, sbi }, __, { dataSources, auditTrail }, info) {
+    auditTrail?.recordAccount(info, 'sbi', sbi)
+    auditTrail?.recordAccount(info, 'organisationId', organisationId)
+    auditTrail?.recordEntity(info, {
+      entity: 'business-list',
+      action: 'read',
+      entityid: crn
+    })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId

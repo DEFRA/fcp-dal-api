@@ -36,7 +36,12 @@ export const Query = {
     }
   },
 
-  async isCustomerEmailRegistered(__, { email }, { dataSources }) {
+  async isCustomerEmailRegistered(__, { email }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'search',
+      entityid: email
+    })
     const { emailDuplicated } = await dataSources.ruralPaymentsCustomer.validateEmail(email)
     return emailDuplicated
   }

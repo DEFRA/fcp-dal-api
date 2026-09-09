@@ -37,6 +37,37 @@ describe('ReferenceData', () => {
     ])
   })
 
+  describe('countriesCurrencies audit trail', () => {
+    const info = { path: { key: 'referenceData', typename: 'Query', prev: undefined } }
+
+    beforeEach(() => {
+      mockDataSources.ruralPaymentsReferenceData.getCountryCodes.mockResolvedValue({
+        countriesCurrency: {}
+      })
+    })
+
+    it('records a reference-data entity for countries/currencies', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await ReferenceData.countriesCurrencies(
+        null,
+        null,
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'reference-data',
+        action: 'read',
+        entityid: 'countries-currencies'
+      })
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      await ReferenceData.countriesCurrencies(null, null, { dataSources: mockDataSources }, info)
+    })
+  })
+
   it('legalStatuses returns a code/description pair for each entry', async () => {
     mockDataSources.ruralPaymentsReferenceData.getReferenceData.mockResolvedValue({
       _data: [

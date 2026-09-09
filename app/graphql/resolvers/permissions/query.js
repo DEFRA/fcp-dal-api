@@ -11,7 +11,8 @@ export const Query = {
 }
 
 export const InternalUser = {
-  async permittedFunctions(_, { functions }, { dataSources }) {
+  async permittedFunctions(_, { functions }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, { entity: 'permitted-function-list', action: 'read' })
     const authorisedFunctions =
       await dataSources.ruralPaymentsCustomer.getInternalUserAuthorisedFunctions(functions)
 

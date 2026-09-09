@@ -12,7 +12,13 @@ import { validateDateInput } from '../../../utils/date.js'
 import { getRuralPaymentsBusinessDataSource } from './common.js'
 
 export const BusinessLand = {
-  summary({ organisationId }, { date }) {
+  summary({ organisationId, sbi }, { date }, { auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'land-summary',
+      action: 'read',
+      entityid: sbi
+    })
+
     return { organisationId, date }
   },
 

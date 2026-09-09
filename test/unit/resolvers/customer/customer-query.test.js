@@ -159,6 +159,26 @@ describe('Customer Query Resolver', () => {
       })
     })
 
+    it('isCustomerEmailRegistered records a person entity keyed by email', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+        emailDuplicated: true
+      })
+
+      await Query.isCustomerEmailRegistered(
+        null,
+        { email: 'test@example.com' },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'search',
+        entityid: 'test@example.com'
+      })
+    })
+
     it('does not record a crn account or an entityid when searching by a non-CRN type', async () => {
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
       mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
