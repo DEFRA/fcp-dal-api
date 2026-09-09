@@ -141,7 +141,61 @@ export const Mutation = {
   updateBusinessRegistrationNumbers: businessAdditionalDetailsUpdateResolver,
   updateBusinessAllFields: businessAllFieldsUpdateResolver,
   updateBusinessLock: businessLockResolver,
-  updateBusinessUnlock: businessUnlockResolver
+  updateBusinessUnlock: businessUnlockResolver,
+
+  // Create Authorisation
+  createCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
+    const { sbi, customer } = input
+    const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(customer.crn)
+
+    const response = await dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(
+      organisationId,
+      {
+        personRoles: [
+          {
+            role: customer.role,
+            personId: personId,
+            personPrivileges: [
+              {
+                privilegeNames: customer.privileges
+              }
+            ]
+          }
+        ]
+      }
+    )
+
+    return response
+  },
+
+  // Update Authorisation
+  updateCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
+    const { sbi, customer } = input
+    const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(customer.crn)
+
+    const response =
+      await dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
+        organisationId,
+        personId,
+        {
+          personRoles: [
+            {
+              role: customer.role,
+              personId: personId,
+              personPrivileges: [
+                {
+                  privilegeNames: customer.privileges
+                }
+              ]
+            }
+          ]
+        }
+      )
+
+    return response
+  }
 }
 
 export const UpdateBusinessResponse = {
