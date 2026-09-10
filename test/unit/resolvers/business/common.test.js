@@ -66,6 +66,40 @@ describe('businessDetailsUpdateResolver', () => {
       businessDetailsUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
   })
+
+  it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
+    dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'updateBusinessName', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessDetailsUpdateResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'updated',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
+    dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
+
+    await businessDetailsUpdateResolver(
+      null,
+      { input: { sbi: '123', name: 'Test' } },
+      {
+        dataSources
+      }
+    )
+  })
 })
 
 describe('businessAdditionalDetailsUpdateResolver', () => {
@@ -128,6 +162,49 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     await expect(
       businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, logger })
     ).rejects.toThrow(notFoundError)
+  })
+
+  it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+      dateStartedFarming: '01-01-2024'
+    })
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'updateBusinessLegalStatus', typename: 'Mutation', prev: undefined }
+    }
+    const input = { sbi: '123', dateStartedFarming: '01-01-2025' }
+
+    await businessAdditionalDetailsUpdateResolver(
+      null,
+      { input },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'updated',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+      dateStartedFarming: '01-01-2024'
+    })
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
+
+    await businessAdditionalDetailsUpdateResolver(
+      null,
+      { input: { sbi: '123', dateStartedFarming: '01-01-2025' } },
+      { dataSources }
+    )
   })
 })
 
@@ -313,6 +390,28 @@ describe('businessAllFieldsUpdateResolver', () => {
 
     expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).not.toHaveBeenCalled()
   })
+
+  it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'updateBusinessAllFields', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessAllFieldsUpdateResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'updated',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+  })
 })
 
 describe('businessLockResolver', () => {
@@ -379,6 +478,77 @@ describe('businessLockResolver', () => {
     await expect(businessLockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
       'Reason and/or note are required'
     )
+  })
+
+  it('records the sbi/organisationId accounts and a locked business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', reason: 'test' }
+
+    await businessLockResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'locked',
+      entityid: '123'
+    })
+  })
+
+  it('records the audit trail even when input validation subsequently fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123' }
+
+    await expect(
+      businessLockResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('Reason and/or note are required')
+
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'locked',
+      entityid: '123'
+    })
+    expect(dataSources.ruralPaymentsBusiness.lockOrganisation).not.toHaveBeenCalled()
+  })
+
+  it('still records the sbi account and a locked business entity when the organisation lookup itself fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', reason: 'test' }
+
+    await expect(
+      businessLockResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'locked',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
+
+    await businessLockResolver(null, { input: { sbi: '123', reason: 'test' } }, { dataSources })
   })
 })
 
@@ -502,5 +672,76 @@ describe('businessUnlockResolver', () => {
     await expect(businessUnlockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
       'Reason and/or note are required'
     )
+  })
+
+  it('records the sbi/organisationId accounts and an unlocked business entity on the audit trail', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', reason: 'test' }
+
+    await businessUnlockResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'unlocked',
+      entityid: '123'
+    })
+  })
+
+  it('records the audit trail even when input validation subsequently fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123' }
+
+    await expect(
+      businessUnlockResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('Reason and/or note are required')
+
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'unlocked',
+      entityid: '123'
+    })
+    expect(dataSources.ruralPaymentsBusiness.unlockOrganisation).not.toHaveBeenCalled()
+  })
+
+  it('still records the sbi account and an unlocked business entity when the organisation lookup itself fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
+    const input = { sbi: '123', reason: 'test' }
+
+    await expect(
+      businessUnlockResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'unlocked',
+      entityid: '123'
+    })
+  })
+
+  it('does not throw when no audit trail is supplied', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
+
+    await businessUnlockResolver(null, { input: { sbi: '123', reason: 'test' } }, { dataSources })
   })
 })

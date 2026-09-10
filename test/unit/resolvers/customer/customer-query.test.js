@@ -115,4 +115,110 @@ describe('Customer Query Resolver', () => {
 
     expect(result).toBe(false)
   })
+
+  describe('audit trail', () => {
+    const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
+
+    it('customer records the personId and crn as accounts', async () => {
+      const crn = '1234567890'
+      const auditTrail = { recordAccount: jest.fn() }
+
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
+
+      await Query.customer(null, { crn }, { dataSources: mockDataSources, auditTrail }, info)
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 123)
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', crn)
+    })
+
+    it('still records the crn account when the personId lookup itself fails', async () => {
+      const crn = '1234567890'
+      const auditTrail = { recordAccount: jest.fn() }
+
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(null)
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
+        new Error('upstream failure')
+      )
+
+      await expect(
+        Query.customer(null, { crn }, { dataSources: mockDataSources, auditTrail }, info)
+      ).rejects.toThrow('upstream failure')
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', crn)
+      expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(info, 'personId', expect.anything())
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
+
+      await Query.customer(null, { crn: '1234567890' }, { dataSources: mockDataSources })
+    })
+
+    it('customerSearch records the crn as an account and an entity when searching by CRN', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
+        data: [],
+        page: { number: 1, size: 20, totalPages: 0, totalElements: 0 }
+      })
+
+      await Query.customerSearch(
+        null,
+        { searchString: '1234567890', searchType: 'CRN', pagination: { page: 1, perPage: 20 } },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1234567890')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'search',
+        entityid: '1234567890'
+      })
+    })
+
+    it('isCustomerEmailRegistered records a person entity keyed by email', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+        emailDuplicated: true
+      })
+
+      await Query.isCustomerEmailRegistered(
+        null,
+        { email: 'test@example.com' },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'search',
+        entityid: 'test@example.com'
+      })
+    })
+
+    it('does not record a crn account or an entityid when searching by a non-CRN type', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
+        data: [],
+        page: { number: 1, size: 20, totalPages: 0, totalElements: 0 }
+      })
+
+      await Query.customerSearch(
+        null,
+        {
+          searchString: 'Smith',
+          searchType: 'CUSTOMER_NAME',
+          pagination: { page: 1, perPage: 20 }
+        },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'search'
+      })
+    })
+  })
 })

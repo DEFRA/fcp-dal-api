@@ -4,10 +4,10 @@ import { retrieveOrgIdBySbi } from './common.js'
 
 export const Query = {
   async business(__, { sbi }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordAccount(info, 'sbi', sbi)
     const organisationId = await retrieveOrgIdBySbi(sbi, dataSources)
 
     auditTrail?.recordAccount(info, 'organisationId', organisationId)
-    auditTrail?.recordAccount(info, 'sbi', sbi)
 
     return {
       sbi,
@@ -17,7 +17,21 @@ export const Query = {
     }
   },
 
-  async businessSearch(__, { searchString, searchType, pagination }, { dataSources }) {
+  async businessSearch(
+    __,
+    { searchString, searchType, pagination },
+    { dataSources, auditTrail },
+    info
+  ) {
+    if (searchType === 'SBI') {
+      auditTrail?.recordAccount(info, 'sbi', searchString)
+    }
+    auditTrail?.recordEntity(info, {
+      entity: 'business',
+      action: 'search',
+      ...(searchType === 'SBI' ? { entityid: searchString } : {})
+    })
+
     const { data, page } = await dataSources.ruralPaymentsBusiness.organisationSearch(
       searchType,
       searchString,

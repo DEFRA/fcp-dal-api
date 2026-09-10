@@ -142,7 +142,8 @@ const dataSources = {
     getAgreementsBySBI: jest.fn(),
     getApplicationsBySBI: jest.fn(),
     getAuthorisedFunctionsByOrganisationId: jest.fn(),
-    getOrganisationById: jest.fn()
+    getOrganisationById: jest.fn(),
+    getExistingBankAccounts: jest.fn()
   },
 
   ruralPaymentsPortalApi: {
@@ -224,7 +225,7 @@ const dataSources = {
   }
 }
 
-const mockBusiness = { organisationId: 'mockId' }
+const mockBusiness = { organisationId: 'mockId', sbi: 'mockSbi' }
 
 describe('Business', () => {
   it('land', () => {
@@ -232,118 +233,123 @@ describe('Business', () => {
   })
 
   it('customers', async () => {
-    const transformedData = transformOrganisationCustomers([
-      {
-        id: 5263421,
-        firstName: 'Nicholas',
-        lastName: 'SANGSTER',
-        customerReference: '1638563942',
-        confirmed: false,
-        lastUpdatedOn: 1614108764000,
-        role: 'Business Partner',
-        privileges: [
-          'Full permission - business',
-          'Amend - land',
-          'Amend - entitlement',
-          'Submit - bps',
-          'SUBMIT - BPS - SA',
-          'AMEND - ENTITLEMENT - SA',
-          'AMEND - LAND - SA'
-        ]
-      },
-      {
-        id: 5302028,
-        firstName:
-          'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
-        lastName: 'Cook',
-        customerReference: '9477368292',
-        confirmed: true,
-        lastUpdatedOn: 1688626184383,
-        role: 'Agent',
-        privileges: [
-          'Full permission - business',
-          'SUBMIT - CS APP - SA',
-          'SUBMIT - CS AGREE - SA',
-          'Amend - land',
-          'Amend - entitlement',
-          'Submit - bps',
-          'SUBMIT - BPS - SA',
-          'AMEND - ENTITLEMENT - SA',
-          'AMEND - LAND - SA',
-          'Submit - cs app',
-          'Submit - cs agree'
-        ]
-      },
-      {
-        id: 5311964,
-        firstName: 'Trevor',
-        lastName: 'Graham',
-        customerReference: '2446747270',
-        confirmed: true,
-        lastUpdatedOn: 1689606545687,
-        role: 'Agent',
-        privileges: [
-          'Full permission - business',
-          'SUBMIT - CS APP - SA',
-          'SUBMIT - CS AGREE - SA',
-          'Amend - land',
-          'Amend - entitlement',
-          'Amend - bps',
-          'AMEND - BPS - SA',
-          'AMEND - ENTITLEMENT - SA',
-          'AMEND - LAND - SA',
-          'Submit - cs app',
-          'Submit - cs agree'
-        ]
-      },
-      {
-        id: 5331098,
-        firstName: 'Marcus',
-        lastName: 'Twigden',
-        customerReference: '4804081228',
-        confirmed: true,
-        lastUpdatedOn: 1699870896103,
-        role: 'Agent',
-        privileges: [
-          'Full permission - business',
-          'SUBMIT - CS APP - SA',
-          'SUBMIT - CS AGREE - SA',
-          'Amend - land',
-          'Amend - entitlement',
-          'Submit - bps',
-          'SUBMIT - BPS - SA',
-          'AMEND - ENTITLEMENT - SA',
-          'AMEND - LAND - SA',
-          'Submit - cs app',
-          'Submit - cs agree',
-          'ELM_APPLICATION_SUBMIT'
-        ]
-      },
-      {
-        id: 5778203,
-        firstName: 'Oliver',
-        lastName: 'Colwill',
-        customerReference: '6148241575',
-        confirmed: true,
-        lastUpdatedOn: 1707841972541,
-        role: 'Agent',
-        privileges: [
-          'Full permission - business',
-          'SUBMIT - CS APP - SA',
-          'SUBMIT - CS AGREE - SA',
-          'Amend - land',
-          'Amend - entitlement',
-          'Submit - bps',
-          'SUBMIT - BPS - SA',
-          'AMEND - ENTITLEMENT - SA',
-          'AMEND - LAND - SA',
-          'Submit - cs app',
-          'Submit - cs agree',
-          'ELM_APPLICATION_NO_ACCESS'
-        ]
-      }
-    ])
-    expect(await Business.customers(mockBusiness, null, { dataSources })).toEqual(transformedData)
+    const transformedData = transformOrganisationCustomers(
+      [
+        {
+          id: 5263421,
+          firstName: 'Nicholas',
+          lastName: 'SANGSTER',
+          customerReference: '1638563942',
+          confirmed: false,
+          lastUpdatedOn: 1614108764000,
+          role: 'Business Partner',
+          privileges: [
+            'Full permission - business',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA'
+          ]
+        },
+        {
+          id: 5302028,
+          firstName:
+            'Ingrid Jerimire Klaufichus Limouhetta Mortimious Neuekind Orpheus Perimillian Quixillotrio Reviticlese',
+          lastName: 'Cook',
+          customerReference: '9477368292',
+          confirmed: true,
+          lastUpdatedOn: 1688626184383,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree'
+          ]
+        },
+        {
+          id: 5311964,
+          firstName: 'Trevor',
+          lastName: 'Graham',
+          customerReference: '2446747270',
+          confirmed: true,
+          lastUpdatedOn: 1689606545687,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Amend - bps',
+            'AMEND - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree'
+          ]
+        },
+        {
+          id: 5331098,
+          firstName: 'Marcus',
+          lastName: 'Twigden',
+          customerReference: '4804081228',
+          confirmed: true,
+          lastUpdatedOn: 1699870896103,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree',
+            'ELM_APPLICATION_SUBMIT'
+          ]
+        },
+        {
+          id: 5778203,
+          firstName: 'Oliver',
+          lastName: 'Colwill',
+          customerReference: '6148241575',
+          confirmed: true,
+          lastUpdatedOn: 1707841972541,
+          role: 'Agent',
+          privileges: [
+            'Full permission - business',
+            'SUBMIT - CS APP - SA',
+            'SUBMIT - CS AGREE - SA',
+            'Amend - land',
+            'Amend - entitlement',
+            'Submit - bps',
+            'SUBMIT - BPS - SA',
+            'AMEND - ENTITLEMENT - SA',
+            'AMEND - LAND - SA',
+            'Submit - cs app',
+            'Submit - cs agree',
+            'ELM_APPLICATION_NO_ACCESS'
+          ]
+        }
+      ],
+      mockBusiness.sbi
+    )
+    const result = await Business.customers(mockBusiness, null, { dataSources })
+    expect(result).toEqual(transformedData)
+    expect(result[0].sbi).toEqual(mockBusiness.sbi)
   })
 
   it('customer', async () => {
@@ -365,11 +371,11 @@ describe('Business', () => {
         'AMEND - LAND - SA'
       ]
     }
-    const transformed = transformOrganisationCustomer(customer)
+    const transformed = transformOrganisationCustomer(customer, mockBusiness.sbi)
 
-    expect(await Business.customer(mockBusiness, { crn: '1638563942' }, { dataSources })).toEqual(
-      transformed
-    )
+    const result = await Business.customer(mockBusiness, { crn: '1638563942' }, { dataSources })
+    expect(result).toEqual(transformed)
+    expect(result.sbi).toEqual(mockBusiness.sbi)
   })
 
   it('handle customer not found', async () => {
@@ -669,6 +675,198 @@ describe('Business', () => {
       ])
     })
   })
+
+  describe('audit trail', () => {
+    const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+    it('info records a business entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
+        id: '1',
+        name: 'Test Farm'
+      })
+
+      await Business.info(mockBusiness, undefined, { dataSources, auditTrail }, info)
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'business',
+        action: 'read',
+        entityid: mockBusiness.sbi
+      })
+    })
+
+    it('info does not record anything when a pre-resolved business info is already present', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await Business.info(
+        { ...mockBusiness, info: { name: 'already resolved' } },
+        undefined,
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).not.toHaveBeenCalled()
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
+    })
+
+    it('countyParishHoldings records a cph-list entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getCountyParishHoldingsBySBI.mockResolvedValueOnce([])
+
+      await Business.countyParishHoldings(
+        { sbi: 'mockSbi' },
+        undefined,
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'cph-list',
+        action: 'read',
+        entityid: 'mockSbi'
+      })
+    })
+
+    it('customers records a person-list entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await Business.customers(mockBusiness, null, { dataSources, auditTrail }, info)
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person-list',
+        action: 'read',
+        entityid: mockBusiness.sbi
+      })
+    })
+
+    it('agreements records an agreement-list entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getAgreementsBySBI.mockResolvedValueOnce([])
+
+      await Business.agreements({ sbi: 'mockSbi' }, undefined, { dataSources, auditTrail }, info)
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'agreement-list',
+        action: 'read',
+        entityid: 'mockSbi'
+      })
+    })
+
+    it('applications records an application-list entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getApplicationsBySBI.mockResolvedValueOnce([])
+
+      await Business.applications({ sbi: 'mockSbi' }, undefined, { dataSources, auditTrail }, info)
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'application-list',
+        action: 'read',
+        entityid: 'mockSbi'
+      })
+    })
+
+    it('bankAccounts records the FRN as an account and a bank-account entity', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
+        businessReference: 'mockFrn'
+      })
+      dataSources.ruralPaymentsBusiness.getExistingBankAccounts.mockResolvedValueOnce({
+        accounts: []
+      })
+
+      await Business.bankAccounts(mockBusiness, undefined, { dataSources, auditTrail }, info)
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', 'mockFrn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'bank-account',
+        action: 'read',
+        entityid: 'mockFrn'
+      })
+    })
+
+    it('bankAccounts still records the attempted bank-account entity when the FRN cannot be found', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
+        businessReference: null
+      })
+
+      await expect(
+        Business.bankAccounts(mockBusiness, undefined, { dataSources, auditTrail }, info)
+      ).rejects.toThrow('FRN not found for business')
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'bank-account',
+        action: 'read',
+        entityid: null
+      })
+    })
+
+    it('bankAccounts still records an attempted bank-account entity when the organisation lookup itself fails', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValueOnce(
+        new Error('upstream failure')
+      )
+
+      await expect(
+        Business.bankAccounts(mockBusiness, undefined, { dataSources, auditTrail }, info)
+      ).rejects.toThrow('upstream failure')
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'bank-account',
+        action: 'read',
+        entityid: undefined
+      })
+    })
+
+    it('customer records a person-list entity keyed by sbi and crn/personId accounts', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      const result = await Business.customer(
+        mockBusiness,
+        { crn: '1638563942' },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person-list',
+        action: 'read',
+        entityid: mockBusiness.sbi
+      })
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1638563942')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 5263421)
+      expect(result.sbi).toEqual(mockBusiness.sbi)
+    })
+
+    it('permittedFunctions records a permitted-function-list entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce(
+        { viewLand: true }
+      )
+
+      await Business.permittedFunctions(
+        mockBusiness,
+        { functions: ['viewLand'] },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'permitted-function-list',
+        action: 'read',
+        entityid: mockBusiness.sbi
+      })
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
+        id: '1',
+        name: 'Test Farm'
+      })
+
+      await Business.info(mockBusiness, undefined, { dataSources }, info)
+    })
+  })
 })
 
 describe('BusinessCustomer', () => {
@@ -802,5 +1000,24 @@ describe('BusinessCustomer', () => {
         )
       ).toEqual(transformed)
     }
+  })
+
+  it('permissionGroups records a permission-list entity without duplicating account fields recorded by Business.customer', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+    await BusinessCustomer.permissionGroups(
+      { privileges: [], sbi: 'mockSbi', crn: 'mockCrn', personId: 'mockPersonId' },
+      null,
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission-list',
+      action: 'read',
+      entityid: 'mockSbi-mockCrn'
+    })
   })
 })

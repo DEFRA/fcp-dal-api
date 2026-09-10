@@ -310,4 +310,36 @@ describe('InternalUser.permittedFunctions', () => {
       { name: 'someUnknownFunction', permitted: false }
     ])
   })
+
+  describe('audit trail', () => {
+    const info = { path: { key: 'internalUser', typename: 'Query', prev: undefined } }
+
+    it('records a permitted-function-list entity', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      getInternalUserAuthorisedFunctions.mockResolvedValueOnce({ viewLand: true })
+
+      await InternalUser.permittedFunctions(
+        {},
+        { functions: ['viewLand'] },
+        { dataSources: internalUserDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'permitted-function-list',
+        action: 'read'
+      })
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      getInternalUserAuthorisedFunctions.mockResolvedValueOnce({ viewLand: true })
+
+      await InternalUser.permittedFunctions(
+        {},
+        { functions: ['viewLand'] },
+        { dataSources: internalUserDataSources },
+        info
+      )
+    })
+  })
 })

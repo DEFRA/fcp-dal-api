@@ -4,8 +4,22 @@ import {
   transformBusinessDetailsToOrgDetailsUpdate
 } from '../../../transformers/rural-payments/business.js'
 
-export const businessDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
+export const businessDetailsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
@@ -20,8 +34,22 @@ export const businessDetailsUpdateResolver = async (__, { input }, { dataSources
   }
 }
 
-export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
+export const businessAdditionalDetailsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgAdditionalDetails = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -60,8 +88,22 @@ const withUpdateStatuses = (error, statuses) => {
   return new GraphQLError(error.message, { originalError: error, extensions: statuses })
 }
 
-export const businessAllFieldsUpdateResolver = async (__, { input }, { dataSources }) => {
+export const businessAllFieldsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
   const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
 
@@ -145,12 +187,20 @@ const validateLockUnlockInput = (input) => {
   }
 }
 
-export const businessLockResolver = async (__, { input }, { dataSources }) => {
-  validateLockUnlockInput(input)
-
+export const businessLockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...lockBodyAttributes } = input
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'locked',
+    entityid: sbi
+  })
 
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
+  validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
 
@@ -162,12 +212,20 @@ export const businessLockResolver = async (__, { input }, { dataSources }) => {
   }
 }
 
-export const businessUnlockResolver = async (__, { input }, { dataSources }) => {
-  validateLockUnlockInput(input)
-
+export const businessUnlockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...unlockBodyAttributes } = input
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'unlocked',
+    entityid: sbi
+  })
 
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
+  validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, unlockBodyAttributes)
 

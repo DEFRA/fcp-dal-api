@@ -3,13 +3,27 @@ import { transformPersonSearchResult } from '../../../transformers/rural-payment
 import { retrievePersonIdByCRN } from './common.js'
 
 export const Query = {
-  async customer(__, { crn }, { dataSources }) {
+  async customer(__, { crn }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordAccount(info, 'crn', crn)
     const personId = await retrievePersonIdByCRN(crn, dataSources)
-
+    auditTrail?.recordAccount(info, 'personId', personId)
     return { crn, personId }
   },
 
-  async customerSearch(__, { searchString, searchType, pagination }, { dataSources }) {
+  async customerSearch(
+    __,
+    { searchString, searchType, pagination },
+    { dataSources, auditTrail },
+    info
+  ) {
+    if (searchType === 'CRN') {
+      auditTrail?.recordAccount(info, 'crn', searchString)
+    }
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'search',
+      ...(searchType === 'CRN' ? { entityid: searchString } : {})
+    })
     const { data, page } = await dataSources.ruralPaymentsCustomer.personSearch(
       searchType,
       searchString,
@@ -22,7 +36,12 @@ export const Query = {
     }
   },
 
-  async isCustomerEmailRegistered(__, { email }, { dataSources }) {
+  async isCustomerEmailRegistered(__, { email }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'search',
+      entityid: email
+    })
     const { emailDuplicated } = await dataSources.ruralPaymentsCustomer.validateEmail(email)
     return emailDuplicated
   }

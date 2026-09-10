@@ -345,6 +345,110 @@ describe('Customer', () => {
       Customer.authenticationQuestions({ id: 'mockCustomerId' }, { dataSources })
     ).rejects.toThrow(Error)
   })
+
+  describe('audit trail', () => {
+    const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
+
+    it('info records a person entity keyed by the resolved customer reference number', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(personFixture)
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await Customer.info(
+        { personId: personFixture.id },
+        undefined,
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'read',
+        entityid: personFixture.customerReferenceNumber
+      })
+    })
+
+    it('info still records an attempted person entity when the person lookup itself fails', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonByPersonId.mockRejectedValue(
+        new Error('upstream failure')
+      )
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await expect(
+        Customer.info({ personId: personFixture.id }, undefined, { dataSources, auditTrail }, info)
+      ).rejects.toThrow('upstream failure')
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'read',
+        entityid: undefined
+      })
+    })
+
+    it('businesses records a business-list entity keyed by crn', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+        personBusinessesFixture
+      )
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await Customer.businesses(
+        { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
+        undefined,
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'business-list',
+        action: 'read',
+        entityid: personFixture.customerReferenceNumber
+      })
+    })
+
+    it('business records sbi/organisationId accounts and a business-list entity keyed by crn', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+        personBusinessesFixture
+      )
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      await Customer.business(
+        { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
+        { sbi: 107591843 },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 107591843)
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'business-list',
+        action: 'read',
+        entityid: personFixture.customerReferenceNumber
+      })
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5625145')
+    })
+
+    it('authenticationQuestions records an authenticate-question entity keyed by crn', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await Customer.authenticationQuestions(
+        { crn: 'mockCustomerCRN' },
+        undefined,
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'authenticate-question',
+        action: 'read',
+        entityid: 'mockCustomerCRN'
+      })
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(personFixture)
+
+      await Customer.info({ personId: personFixture.id }, undefined, { dataSources }, info)
+    })
+  })
 })
 
 describe('CustomerBusiness', () => {
@@ -378,6 +482,40 @@ describe('CustomerBusiness', () => {
       ]
     ])[0]
     expect(response).toEqual(permissions)
+  })
+
+  test('CustomerBusiness.role does not record any audit trail (fully duplicative of Customer.business)', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
+
+    await CustomerBusiness.role(
+      { organisationId: '4309257', sbi: 'mockSbi', crn: '1638563942' },
+      undefined,
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+    expect(auditTrail.recordEntity).not.toHaveBeenCalled()
+  })
+
+  test('CustomerBusiness.permissionGroups records a permission-list entity without duplicating account fields recorded by Customer.business', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
+
+    await CustomerBusiness.permissionGroups(
+      { organisationId: '5625145', sbi: 'mockSbi', crn: '1638563942' },
+      undefined,
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission-list',
+      action: 'read',
+      entityid: '1638563942-mockSbi'
+    })
   })
 
   describe('CustomerBusiness.messages', () => {
@@ -494,6 +632,30 @@ describe('CustomerBusiness', () => {
           { dataSources }
         )
       ).rejects.toThrow(`Invalid date: "${futureDate}" must be in the past.`)
+    })
+
+    test('records a message-list entity without duplicating account fields recorded by Customer.business', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
+
+      await CustomerBusiness.messages(
+        {
+          organisationId: 'mockOrganisationId',
+          sbi: 'mockSbi',
+          personId: 'mockPersonId',
+          crn: 'mockCrn'
+        },
+        {},
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'message-list',
+        action: 'read',
+        entityid: 'mockCrn-mockSbi'
+      })
     })
   })
 })
