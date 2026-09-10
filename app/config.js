@@ -123,6 +123,13 @@ export const config = convict({
         default: null,
         env: 'SFI_REFORM_AD_GROUP_ID',
         nullable: true
+      },
+      LAND_GRANTS_API: {
+        doc: 'AD group ID for Land Grants API team',
+        format: String,
+        default: null,
+        env: 'LAND_GRANTS_API_AD_GROUP_ID',
+        nullable: true
       }
     },
     disabled: {
