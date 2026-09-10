@@ -15,6 +15,7 @@ const authGroupServiceName = {
   [authGroups.ADMIN]: null,
   [authGroups.CONSOLIDATED_VIEW]: 'consolidated-view',
   [authGroups.SFI_REFORM]: 'grants-platform',
+  [authGroups.LAND_GRANTS_API]: 'land-grants-api',
   [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door'
 }
 
