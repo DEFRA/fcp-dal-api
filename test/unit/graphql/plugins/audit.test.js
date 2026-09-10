@@ -526,6 +526,44 @@ describe('auditPlugin', () => {
     })
   })
 
+  describe('sourceSystem', () => {
+    test('passes an empty array to getRequestingService, not undefined, when auth has no groups', async () => {
+      const publish = jest.fn()
+      const plugin = auditPlugin({ publish })
+
+      const contextValue = {
+        ...baseContextValue,
+        auth: {},
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
+        })
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+      await listener.willSendResponse(requestContext)
+
+      expect(getRequestingServiceMock).toHaveBeenCalledWith([])
+    })
+
+    test('passes an empty array to getRequestingService, not undefined, when auth itself is missing', async () => {
+      const publish = jest.fn()
+      const plugin = auditPlugin({ publish })
+
+      const { auth: _auth, ...contextValueWithoutAuth } = baseContextValue
+      const contextValue = {
+        ...contextValueWithoutAuth,
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
+        })
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+      await listener.willSendResponse(requestContext)
+
+      expect(getRequestingServiceMock).toHaveBeenCalledWith([])
+    })
+  })
+
   describe('serviceAccount', () => {
     test('includes the recorded service account in details when present', async () => {
       const publish = jest.fn()

@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals'
 import {
   BusinessLand,
   BusinessLandSummary
@@ -80,7 +81,7 @@ describe('BusinessLand', () => {
   })
 
   it('summary', () => {
-    expect(BusinessLand.summary(mockBusiness, mockArguments)).toEqual({
+    expect(BusinessLand.summary(mockBusiness, mockArguments, {})).toEqual({
       ...mockBusiness,
       ...mockArguments
     })
@@ -173,6 +174,96 @@ describe('BusinessLand', () => {
         campaign: 1
       }
     ])
+  })
+
+  describe('audit trail', () => {
+    const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+    it('summary records a land-summary entity keyed by sbi', () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      BusinessLand.summary({ ...mockBusiness, sbi: 'mockSbi' }, mockArguments, { auditTrail }, info)
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'land-summary',
+        action: 'read',
+        entityid: 'mockSbi'
+      })
+    })
+
+    it('parcel records a parcel entity keyed by sheetId-parcelId', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await BusinessLand.parcel(
+        { ...mockBusiness, sbi: 'mockSbi' },
+        { ...mockArguments, sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'parcel',
+        action: 'read',
+        entityid: 'mockSheetId-mockParcelId'
+      })
+    })
+
+    it('parcels records a parcel-list entity keyed by sbi', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await BusinessLand.parcels(
+        { ...mockBusiness, sbi: 'mockSbi' },
+        mockArguments,
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'parcel-list',
+        action: 'read',
+        entityid: 'mockSbi'
+      })
+    })
+
+    it('parcelCovers records a land-cover-list entity keyed by sheetId-parcelId', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await BusinessLand.parcelCovers(
+        mockBusiness,
+        { ...mockArguments, sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'land-cover-list',
+        action: 'read',
+        entityid: 'mockSheetId-mockParcelId'
+      })
+    })
+
+    it('parcelLandUses records a land-use-list entity keyed by sheetId-parcelId', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+
+      await BusinessLand.parcelLandUses(
+        { sbi: 'mockSbi' },
+        { date: '2025-05-04', sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'land-use-list',
+        action: 'read',
+        entityid: 'mockSheetId-mockParcelId'
+      })
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      await BusinessLand.parcels({ ...mockBusiness, sbi: 'mockSbi' }, mockArguments, {
+        dataSources
+      })
+    })
   })
 
   describe('BusinessLandSummary', () => {

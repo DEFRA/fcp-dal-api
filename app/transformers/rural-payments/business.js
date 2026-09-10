@@ -81,24 +81,21 @@ const transformEuPersonalAccount = (variant) => ({
   country: { code: variant.countryCode, currency: variant.currency }
 })
 
-export const transformOrganisationCustomers = (data) => {
-  return data.map(transformOrganisationCustomer)
+export const transformOrganisationCustomers = (data, sbi) => {
+  return data.map((customer) => transformOrganisationCustomer(customer, sbi))
 }
 
-export const transformOrganisationCustomer = ({
-  id,
-  firstName,
-  lastName,
-  customerReference,
-  role,
-  privileges
-}) => ({
+export const transformOrganisationCustomer = (
+  { id, firstName, lastName, customerReference, role, privileges },
+  sbi
+) => ({
   personId: id,
   firstName,
   lastName,
   crn: customerReference,
   role,
-  privileges
+  privileges,
+  sbi
 })
 
 export function transformBusinessCustomerPrivilegesToPermissionGroups(

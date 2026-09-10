@@ -17,18 +17,22 @@ import {
 } from './common.js'
 import { Query } from './query.js'
 
-const validateBankChangeRequest = async (input, dataSources) => {
-  const { sbi, crn } = input
+const getOrganisation = async (dataSources, sbi) => {
   const { ruralPaymentsBusiness } = dataSources
-
   const organisation = await ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+
   if (!organisation.businessReference) {
     throw new NotFound('FRN not found for business')
   }
+  return organisation
+}
+
+const validateBankChangeRequest = async (input, dataSources, organisation) => {
+  const { crn } = input
+  const { ruralPaymentsBusiness } = dataSources
 
   const personId = await retrievePersonIdByCRN(crn, dataSources)
   const organisationId = `${organisation.id}`
-
   const lockedStatus = await ruralPaymentsBusiness.getBankChangeLockedStatus(
     organisationId,
     `${personId}`
@@ -92,20 +96,51 @@ const validateBankChangeRequest = async (input, dataSources) => {
 }
 
 export const Mutation = {
-  createBusiness: async (_, { input }, { dataSources }) => {
+  createBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
     const { crn, ...businessDetails } = input
-    const personId = await retrievePersonIdByCRN(crn, dataSources)
-    const orgDetails = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
-    const response = await dataSources.ruralPaymentsBusiness.createOrganisationByPersonId(
-      personId,
-      orgDetails
-    )
-    const business = transformOrganisationToBusiness(response)
-    const result = { success: true, business }
-    return result
+    let business
+    try {
+      const personId = await retrievePersonIdByCRN(crn, dataSources)
+      const orgDetails = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
+      const response = await dataSources.ruralPaymentsBusiness.createOrganisationByPersonId(
+        personId,
+        orgDetails
+      )
+      business = transformOrganisationToBusiness(response)
+    } finally {
+      if (business) {
+        auditTrail?.recordAccount(info, 'sbi', business.sbi)
+        auditTrail?.recordAccount(info, 'organisationId', business.organisationId)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'business',
+        action: 'created',
+        entityid: business?.sbi
+      })
+    }
+    return { success: true, business }
   },
-  createBusinessCustomerBankDetails: async (_, { input }, { dataSources }) => {
-    const { failure, submission } = await validateBankChangeRequest(input, dataSources)
+  createBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
+    auditTrail?.recordAccount(info, 'sbi', input.sbi)
+    let organisation
+    try {
+      organisation = await getOrganisation(dataSources, input.sbi)
+    } finally {
+      if (organisation) {
+        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
+        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'bank-account',
+        action: 'updated',
+        entityid: organisation?.businessReference
+      })
+    }
+    const { failure, submission } = await validateBankChangeRequest(
+      input,
+      dataSources,
+      organisation
+    )
     if (failure) {
       return failure
     }
@@ -113,8 +148,27 @@ export const Mutation = {
     await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
     return { __typename: 'BankDetailsSubmitted', success: true }
   },
-  validateBusinessCustomerBankDetails: async (_, { input }, { dataSources }) => {
-    const { failure, validation } = await validateBankChangeRequest(input, dataSources)
+  validateBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
+    auditTrail?.recordAccount(info, 'sbi', input.sbi)
+    let organisation
+    try {
+      organisation = await getOrganisation(dataSources, input.sbi)
+    } finally {
+      if (organisation) {
+        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
+        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'bank-account',
+        action: 'validate',
+        entityid: organisation?.businessReference
+      })
+    }
+    const { failure, validation } = await validateBankChangeRequest(
+      input,
+      dataSources,
+      organisation
+    )
     if (failure) {
       return failure
     }

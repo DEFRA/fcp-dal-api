@@ -14,11 +14,13 @@ import {
 import { getRuralPaymentsBusinessDataSource } from './common.js'
 
 export const Business = {
-  async info({ organisationId, info }, __, { dataSources }) {
-    if (info) {
-      return info
+  async info({ organisationId, sbi, info: businessInfo }, __, { dataSources, auditTrail }, info) {
+    if (businessInfo) {
+      return businessInfo
     }
+    auditTrail?.recordEntity(info, { entity: 'business', action: 'read', entityid: sbi })
     const response = await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+
     return transformOrganisationToBusiness(response).info
   },
 
@@ -26,7 +28,9 @@ export const Business = {
     return { organisationId, sbi }
   },
 
-  async countyParishHoldings({ sbi }, __, context) {
+  async countyParishHoldings({ sbi }, __, context, info) {
+    const { auditTrail } = context
+    auditTrail?.recordEntity(info, { entity: 'cph-list', action: 'read', entityid: sbi })
     const countyParishHoldings = await getRuralPaymentsBusinessDataSource({
       ...context,
       useServiceAccountForExternal: true
@@ -35,15 +39,19 @@ export const Business = {
     return transformCountyParishHoldings(countyParishHoldings)
   },
 
-  async customers({ organisationId }, _, { dataSources }) {
+  async customers({ organisationId, sbi }, _, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, { entity: 'person-list', action: 'read', entityid: sbi })
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
       )
-    return transformOrganisationCustomers(customers)
+
+    return transformOrganisationCustomers(customers, sbi)
   },
 
-  async customer({ organisationId, sbi }, { crn }, { dataSources }) {
+  async customer({ organisationId, sbi }, { crn }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, { entity: 'person-list', action: 'read', entityid: sbi })
+    auditTrail?.recordAccount(info, 'crn', crn)
     const customers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
@@ -60,11 +68,13 @@ export const Business = {
       })
       throw new NotFound('Customer not found')
     }
-
-    return transformOrganisationCustomer(customer)
+    auditTrail?.recordAccount(info, 'personId', customer.id)
+    return transformOrganisationCustomer(customer, sbi)
   },
 
-  async agreements({ sbi }, _, context) {
+  async agreements({ sbi }, _, context, info) {
+    const { auditTrail } = context
+    auditTrail?.recordEntity(info, { entity: 'agreement-list', action: 'read', entityid: sbi })
     const agreements = await getRuralPaymentsBusinessDataSource({
       ...context,
       useServiceAccountForExternal: true
@@ -73,7 +83,9 @@ export const Business = {
     return transformAgreements(agreements)
   },
 
-  async applications({ sbi }, _, context) {
+  async applications({ sbi }, _, context, info) {
+    const { auditTrail } = context
+    auditTrail?.recordEntity(info, { entity: 'application-list', action: 'read', entityid: sbi })
     const applications = await getRuralPaymentsBusinessDataSource({
       ...context,
       useServiceAccountForExternal: true
@@ -82,7 +94,17 @@ export const Business = {
     return transformApplications(applications)
   },
 
-  async permittedFunctions({ organisationId }, { functions }, { dataSources }) {
+  async permittedFunctions(
+    { organisationId, sbi },
+    { functions },
+    { dataSources, auditTrail },
+    info
+  ) {
+    auditTrail?.recordEntity(info, {
+      entity: 'permitted-function-list',
+      action: 'read',
+      entityid: sbi
+    })
     const authorisedFunctions =
       await dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(
         organisationId,
@@ -92,28 +114,41 @@ export const Business = {
     return functions.map((name) => ({ name, permitted: authorisedFunctions?.[name] ?? false }))
   },
 
-  async bankAccounts({ organisationId }, __, { dataSources }) {
-    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
-    const frn = organisation.businessReference
+  async bankAccounts({ organisationId }, __, { dataSources, auditTrail }, info) {
+    let frn
+    try {
+      const organisation =
+        await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+      frn = organisation.businessReference
+    } finally {
+      if (frn) {
+        auditTrail?.recordAccount(info, 'frn', frn)
+      }
+      auditTrail?.recordEntity(info, { entity: 'bank-account', action: 'read', entityid: frn })
+    }
 
     if (!frn) {
       throw new NotFound('FRN not found for business')
     }
-
     const response = await dataSources.ruralPaymentsBusiness.getExistingBankAccounts(frn)
     return response?.accounts ?? []
   },
 
   async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources, auditTrail }, info) {
-    const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
-    const frn = organisation.businessReference
+    let frn
+    try {
+      const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+      frn = organisation.businessReference
+    } finally {
+      if (frn) {
+        auditTrail?.recordAccount(info, 'frn', frn)
+      }
+      auditTrail?.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: frn })
+    }
 
     if (!frn) {
       throw new NotFound('FRN not found for business')
     }
-
-    auditTrail?.recordAccount(info, 'frn', frn)
-    auditTrail?.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: frn })
 
     const payments = await dataSources.hitachiPayments.getSupplierPayments({
       frn,
@@ -128,7 +163,12 @@ export const Business = {
 }
 
 export const BusinessCustomer = {
-  async permissionGroups({ privileges }, __, { dataSources }) {
+  async permissionGroups({ privileges, sbi, crn }, __, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'permission-list',
+      action: 'read',
+      entityid: `${sbi}-${crn}`
+    })
     return transformBusinessCustomerPrivilegesToPermissionGroups(
       privileges,
       dataSources.permissions.getPermissionGroups()

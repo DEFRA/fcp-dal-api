@@ -9,28 +9,50 @@ import {
 } from '../../../transformers/rural-payments/customer.js'
 import { validatePastDateInput } from '../../../utils/date.js'
 
+const BUSINESS_LIST_ENTITY = 'business-list'
+
 export const Customer = {
-  async info({ personId }, __, { dataSources }) {
-    const response = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
+  async info({ personId }, __, { dataSources, auditTrail }, info) {
+    let response
+    try {
+      response = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
+    } finally {
+      auditTrail?.recordEntity(info, {
+        entity: 'person',
+        action: 'read',
+        entityid: response?.customerReferenceNumber
+      })
+    }
     return ruralPaymentsPortalCustomerTransformer(response)
   },
 
-  async business({ personId, crn }, { sbi }, { dataSources }) {
+  async business({ personId, crn }, { sbi }, { dataSources, auditTrail }, info) {
+    auditTrail?.recordAccount(info, 'sbi', sbi)
+    auditTrail?.recordEntity(info, { entity: BUSINESS_LIST_ENTITY, action: 'read', entityid: crn })
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
-    return transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
+    const transformedBusiness = transformPersonSummaryToCustomerAuthorisedFilteredBusiness(
       { personId, crn, sbi },
       summary
     )
+
+    auditTrail?.recordAccount(info, 'organisationId', transformedBusiness.organisationId)
+    return transformedBusiness
   },
 
-  async businesses({ personId, crn }, __, { dataSources }) {
+  async businesses({ personId, crn }, __, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, { entity: BUSINESS_LIST_ENTITY, action: 'read', entityid: crn })
     const summary = await dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId(personId)
 
     return transformPersonSummaryToCustomerAuthorisedBusinesses({ personId, crn }, summary)
   },
 
-  async authenticationQuestions({ crn }, __, { dataSources }) {
+  async authenticationQuestions({ crn }, __, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'authenticate-question',
+      action: 'read',
+      entityid: crn
+    })
     const results = await dataSources.ruralPaymentsCustomer.getAuthenticateAnswersByCRN(crn)
     return transformAuthenticateQuestionsAnswers(results)
   }
@@ -45,7 +67,17 @@ export const CustomerBusiness = {
     return transformBusinessCustomerToCustomerRole(crn, businessCustomers)
   },
 
-  async messages({ organisationId, personId }, { fromDate }, { dataSources }) {
+  async messages(
+    { organisationId, sbi, personId, crn },
+    { fromDate },
+    { dataSources, auditTrail },
+    info
+  ) {
+    auditTrail?.recordEntity(info, {
+      entity: 'message-list',
+      action: 'read',
+      entityid: `${crn}-${sbi}`
+    })
     if (fromDate) {
       fromDate = validatePastDateInput(fromDate)
     }
@@ -60,7 +92,12 @@ export const CustomerBusiness = {
     return transformNotificationsToMessages(notifications)
   },
 
-  async permissionGroups({ organisationId, crn }, __, { dataSources }) {
+  async permissionGroups({ organisationId, sbi, crn }, __, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'permission-list',
+      action: 'read',
+      entityid: `${crn}-${sbi}`
+    })
     const businessCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
         organisationId
