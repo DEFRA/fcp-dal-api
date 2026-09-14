@@ -123,6 +123,7 @@ export const transformOrganisationToBusiness = (data) => ({
   info: {
     name: data?.name,
     reference: data?.businessReference,
+    frn: data?.businessReference,
     vat: data?.taxRegistrationNumber,
     traderNumber: data?.traderNumber,
     vendorNumber: data?.vendorNumber,
