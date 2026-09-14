@@ -160,6 +160,7 @@ describe('Business transformer', () => {
           fax: 'correspondence fax'
         },
         reference: 'businessReference',
+        frn: 'businessReference',
         registrationNumbers: {
           charityCommission: 'charityCommissionRegistrationNumber',
           companiesHouse: 'companiesHouseRegistrationNumber'
