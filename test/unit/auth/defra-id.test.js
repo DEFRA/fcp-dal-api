@@ -41,18 +41,12 @@ describe('defraIdContext', () => {
       expect(() => ctx.crn()).toThrow(new BadRequest('Defra ID token does not contain crn'))
     })
 
-    test('throws the original verification error when the token signature is invalid', async () => {
+    test('throws an error when the token signature is invalid', async () => {
       const token = signToken({ contactId: '11111111' }, wrongPrivateKey)
 
-      const ctx = await defraIdContext({ externalAuthHeader: token }, jwksDataSource())
-
-      expect(() => ctx.crn()).toThrow(new Unauthorized('Defra ID token failed verification'))
-    })
-
-    test('throws when no token was supplied at all', async () => {
-      const ctx = await defraIdContext({ externalAuthHeader: undefined }, jwksDataSource())
-
-      expect(() => ctx.crn()).toThrow(Unauthorized)
+      await expect(defraIdContext({ externalAuthHeader: token }, jwksDataSource())).rejects.toThrow(
+        new Unauthorized('Defra ID token failed verification')
+      )
     })
   })
 
@@ -89,13 +83,22 @@ describe('defraIdContext', () => {
       expect(() => ctx.orgId('123456789')).toThrow(BadRequest)
     })
 
-    test('throws the original verification error when the token signature is invalid', async () => {
+    test('throws an error when the token signature is invalid', async () => {
       const token = signToken({ relationships: ['orgId2:123456789'] }, wrongPrivateKey)
 
-      const ctx = await defraIdContext({ externalAuthHeader: token }, jwksDataSource())
-
-      expect(() => ctx.orgId('123456789')).toThrow(Unauthorized)
+      await expect(defraIdContext({ externalAuthHeader: token }, jwksDataSource())).rejects.toThrow(
+        Unauthorized
+      )
     })
+  })
+
+  test('resolves to undefined, without attempting verification, when no externalAuthHeader is supplied', async () => {
+    const jwks = jwksDataSource()
+
+    const ctx = await defraIdContext({ externalAuthHeader: undefined }, jwks)
+
+    expect(ctx).toBeUndefined()
+    expect(jwks.getPublicKey).not.toHaveBeenCalled()
   })
 
   test('verifies the token once, not on every crn()/orgId() call', async () => {
@@ -132,9 +135,9 @@ describe('defraIdContext', () => {
     })
 
     test('throws Unauthorized if the token cannot be decoded at all', async () => {
-      const ctx = await defraIdContext({ externalAuthHeader: 'not-a-jwt' }, jwksDataSource())
-
-      expect(() => ctx.crn()).toThrow(Unauthorized)
+      await expect(
+        defraIdContext({ externalAuthHeader: 'not-a-jwt' }, jwksDataSource())
+      ).rejects.toThrow(Unauthorized)
     })
   })
 })
