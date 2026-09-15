@@ -139,9 +139,9 @@ describe('RuralPayments Custom Fetch', () => {
     expect(rp.isExternalRoute()).toBe(true)
     expect(rp.baseURL).toBe(fakeExternalURL)
     const requestTls = {
-      host: 'rp_kits_gateway_internal_url',
+      host: 'rp_kits_gateway_external_url',
       port: '',
-      servername: 'rp_kits_gateway_internal_url',
+      servername: 'rp_kits_gateway_external_url',
       secureContext: [{ key: fakeKey, cert: fakeCert }]
     }
     expect(EnvHttpProxyAgent.mockConstructorArgs).toEqual({ requestTls })

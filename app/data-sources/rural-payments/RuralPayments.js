@@ -10,6 +10,19 @@ import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
 
+// One dispatcher per gateway route, shared by every RuralPayments instance (a new instance is
+// constructed per GraphQL request - see app/graphql/context.js). EnvHttpProxyAgent owns a
+// connection pool; building a fresh one per request/call would mean every upstream call pays a
+// full TCP + TLS(+mTLS) handshake instead of reusing a pooled, kept-alive connection.
+const gatewayDispatchers = new Map()
+
+function getGatewayDispatcher(route, requestTls) {
+  if (!gatewayDispatchers.has(route)) {
+    gatewayDispatchers.set(route, new EnvHttpProxyAgent({ requestTls }))
+  }
+  return gatewayDispatchers.get(route)
+}
+
 // The SitiAgri byFunction endpoints scope function-level authorisation to a consuming module.
 // CUST_SS_PORTAL is the customer self-service portal (the external Rural Payments service) - the
 // module users act through, and therefore the permission set permittedFunctions reports on.
@@ -47,11 +60,16 @@ export class RuralPayments extends BaseRESTDataSource {
       }
       requestTls.secureContext = this.createSecureContext()
 
+      const dispatcher = getGatewayDispatcher(
+        this.isExternalRoute() ? 'external' : 'internal',
+        requestTls
+      )
+
       this.httpCache.httpFetch = (url, options = {}) =>
         // use undici fetch which supports mTLS & env proxy via agent
         fetch11(url, {
           ...options,
-          dispatcher: new EnvHttpProxyAgent({ requestTls }),
+          dispatcher,
           signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
         })
     }
