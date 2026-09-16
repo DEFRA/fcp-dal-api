@@ -6,8 +6,56 @@ import {
   businessDetailsUpdateResolver,
   businessLockResolver,
   businessUnlockResolver,
-  getRuralPaymentsBusinessDataSource
+  getRuralPaymentsBusinessDataSource,
+  retrieveOrgIdBySbi
 } from '../../../../app/graphql/resolvers/business/common.js'
+
+describe('retrieveOrgIdBySbi', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      mongoBusiness: {
+        getOrgIdBySbi: jest.fn(),
+        upsertOrgIdBySbi: jest.fn()
+      },
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn()
+      }
+    }
+  })
+
+  it('returns the cached orgId from mongo without calling upstream, when no defraIdContext is present', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('cachedOrgId')
+
+    const result = await retrieveOrgIdBySbi('123', { dataSources, defraIdContext: undefined })
+
+    expect(result).toBe('cachedOrgId')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+  })
+
+  it('falls back to upstream and caches the result in mongo on a cache miss, when no defraIdContext is present', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(undefined)
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('upstreamOrgId')
+
+    const result = await retrieveOrgIdBySbi('123', { dataSources, defraIdContext: undefined })
+
+    expect(result).toBe('upstreamOrgId')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'upstreamOrgId')
+  })
+
+  it('reads the orgId from the Defra ID token, without touching mongo or upstream, when a defraIdContext is present', async () => {
+    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+
+    const result = await retrieveOrgIdBySbi('123', { dataSources, defraIdContext })
+
+    expect(result).toBe('orgIdFromToken')
+    expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+  })
+})
 
 describe('businessDetailsUpdateResolver', () => {
   let dataSources
@@ -99,6 +147,23 @@ describe('businessDetailsUpdateResolver', () => {
         dataSources
       }
     )
+  })
+
+  it('retrieves the organisationId from the Defra ID token when a defraIdContext is present', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
+    dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
+
+    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessDetailsUpdateResolver(null, { input }, { dataSources, defraIdContext })
+
+    expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+      'orgIdFromToken'
+    )
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
   })
 })
 
@@ -205,6 +270,25 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
       { input: { sbi: '123', dateStartedFarming: '01-01-2025' } },
       { dataSources }
     )
+  })
+
+  it('retrieves the organisationId from the Defra ID token when a defraIdContext is present', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+      dateStartedFarming: '01-01-2024'
+    })
+    dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
+
+    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const input = { sbi: '123', dateStartedFarming: '01-01-2025' }
+
+    await businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, defraIdContext })
+
+    expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+      'orgIdFromToken'
+    )
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
   })
 })
 
@@ -411,6 +495,20 @@ describe('businessAllFieldsUpdateResolver', () => {
     const input = { sbi: '123', name: 'Test' }
 
     await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
+  })
+
+  it('retrieves the organisationId from the Defra ID token when a defraIdContext is present', async () => {
+    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const input = { sbi: '123', name: 'Test' }
+
+    await businessAllFieldsUpdateResolver(null, { input }, { dataSources, defraIdContext })
+
+    expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+      'orgIdFromToken'
+    )
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
   })
 })
 

@@ -85,6 +85,22 @@ describe('Business Query Resolver', () => {
     await Query.business(null, { sbi }, { dataSources: mockDataSources })
   })
 
+  it('retrieves the organisationId from the Defra ID token when a defraIdContext is present', async () => {
+    const sbi = '123456789'
+    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+
+    const result = await Query.business(
+      null,
+      { sbi },
+      { dataSources: mockDataSources, defraIdContext }
+    )
+
+    expect(defraIdContext.orgId).toHaveBeenCalledWith(sbi)
+    expect(result.organisationId).toBe('orgIdFromToken')
+    expect(mockDataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    expect(mockDataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+  })
+
   it('businessSearch should return transformed results and page info', async () => {
     const page = { number: 1, size: 20, totalPages: 1, totalElements: 1 }
     mockDataSources.ruralPaymentsBusiness.organisationSearch.mockResolvedValue({
