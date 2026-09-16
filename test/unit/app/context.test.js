@@ -1,5 +1,13 @@
 import { describe, expect, jest } from '@jest/globals'
+import jwt from 'jsonwebtoken'
 import { config } from '../../../app/config.js'
+
+// A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only
+// decoded (jose's decodeJwt), never signature-verified, so the signing secret doesn't matter.
+const validDefraIdToken = jwt.sign(
+  { contactId: 'contact-1', relationships: ['org-1:123456789'] },
+  'test-secret'
+)
 
 const getAuthMock = jest.fn()
 const getRequestingGroupMock = jest.fn()
@@ -63,7 +71,7 @@ describe('context', () => {
     loggerChild.mockReturnValue({ log: jest.fn() })
     const request = {
       headers: {
-        'x-forwarded-authorization': 'token123'
+        'x-forwarded-authorization': validDefraIdToken
       },
       transactionId: 'tx-1',
       traceId: 'trace-1'
@@ -98,7 +106,7 @@ describe('context', () => {
     JWKSMock.mockImplementation(() => ({}))
     loggerChild.mockReturnValue({ log: jest.fn() })
     const request = {
-      headers: { 'x-forwarded-authorization': 'token123' },
+      headers: { 'x-forwarded-authorization': validDefraIdToken },
       transactionId: 'tx-1',
       traceId: 'trace-1'
     }
@@ -121,7 +129,7 @@ describe('context', () => {
     JWKSMock.mockImplementation(() => ({}))
     loggerChild.mockReturnValue({ log: jest.fn() })
     const request = {
-      headers: { 'x-forwarded-authorization': 'token123' },
+      headers: { 'x-forwarded-authorization': validDefraIdToken },
       transactionId: 'tx-1',
       traceId: 'trace-1'
     }
@@ -140,18 +148,19 @@ describe('context', () => {
     test('constructs a service-account RuralPaymentsBusiness instance, injecting the configured DAL email as the "service-account" header, when the standard instance is on the external route', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       loggerChild.mockReturnValue({ log: jest.fn() })
-      const configGetSpy = jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          path === 'kits.dalServiceAccountEmail' ? 'dal-service-account@example.com' : undefined
-        )
+      const configGetSpy = jest.spyOn(config, 'get').mockImplementation((path) => {
+        if (path === 'kits.dalServiceAccountEmail') return 'dal-service-account@example.com'
+        // Decode-only mode, so the Defra ID token below is accepted without a real JWKS lookup.
+        if (path === 'auth.disabled') return true
+        return undefined
+      })
       RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
         isExternalRoute: () => true
       }))
       RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
         marker: 'service-account-instance'
       }))
-      const request = { headers: { 'x-forwarded-authorization': 'token123' } }
+      const request = { headers: { 'x-forwarded-authorization': validDefraIdToken } }
 
       const result = await context({ request })
 
@@ -231,7 +240,7 @@ describe('context', () => {
     test('Audit requesterId is undefined if no email header found', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       const request = {
-        headers: { 'x-forwarded-authorization': 'placeholder-token' }
+        headers: { 'x-forwarded-authorization': validDefraIdToken }
       }
 
       const result = await context({ request })
@@ -241,7 +250,7 @@ describe('context', () => {
     test('Audit correlationId is extracted from request traceId', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       const request = {
-        headers: { 'x-forwarded-authorization': 'placeholder-token' },
+        headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'
       }
 
@@ -252,7 +261,7 @@ describe('context', () => {
     test('Audit correlationId is undefined if no request traceId is found', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       const request = {
-        headers: { 'x-forwarded-authorization': 'placeholder-token' }
+        headers: { 'x-forwarded-authorization': validDefraIdToken }
       }
 
       const result = await context({ request })
@@ -263,7 +272,7 @@ describe('context', () => {
       getAuthMock.mockResolvedValue({ user: 'test-user', groups: ['group-1', 'group-2'] })
       getRequestingGroupMock.mockReturnValue('SOME_AD_GROUP')
       const request = {
-        headers: { 'x-forwarded-authorization': 'placeholder-token' },
+        headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'
       }
 
@@ -277,7 +286,7 @@ describe('context', () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       getRequestingGroupMock.mockReturnValue(undefined)
       const request = {
-        headers: { 'x-forwarded-authorization': 'placeholder-token' },
+        headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'
       }
 

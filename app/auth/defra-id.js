@@ -48,39 +48,28 @@ function extractOrgIdFromDefraIdToken(sbi, payload) {
 }
 
 /**
- * Verifies the Defra ID token once - so the JWKS round-trip happens during context build rather
- * than the first time a resolver needs it. A failed verification is not thrown from here: it's
- * captured and only re-thrown from crn()/orgId() (only when something actually calls them), so a
- * request that never needs Defra ID identity is unaffected by a bad token.
+ * Verifies the Defra ID token. Verification is only attempted when authContext.externalAuthHeader is set - a request
+ * authenticated another way (internal email/service-account headers) carries no Defra ID token at all, so this
+ * resolves to undefined. When the header is present, a failed verification/decode throws an Unauthorized error
  *
  * @param {{ externalAuthHeader?: string }} authContext
  * @param {DefraIdJWKS} [jwksDataSource]
- * @returns {Promise<{ crn: () => string, orgId: (sbi: string) => string }>}
+ * @returns {Promise<{ crn: () => string, orgId: (sbi: string) => string } | undefined>}
  */
 export const defraIdContext = async (authContext, jwksDataSource = defraIdJWKS) => {
-  let tokenPayload
-  let verificationError
-  try {
-    tokenPayload = config.get('auth.disabled')
-      ? decodeUnverifiedDefraIdToken(authContext.externalAuthHeader)
-      : await verifyDefraIdToken(authContext.externalAuthHeader, jwksDataSource)
-  } catch (error) {
-    verificationError = error
+  if (!authContext.externalAuthHeader) {
+    return undefined
   }
 
-  const ensureTokenIsValid = () => {
-    if (verificationError) {
-      throw verificationError
-    }
-  }
+  const tokenPayload = config.get('auth.disabled')
+    ? decodeUnverifiedDefraIdToken(authContext.externalAuthHeader)
+    : await verifyDefraIdToken(authContext.externalAuthHeader, jwksDataSource)
 
   return {
     crn: () => {
-      ensureTokenIsValid()
       return extractCrnFromDefraIdToken(tokenPayload)
     },
     orgId: (sbi) => {
-      ensureTokenIsValid()
       return extractOrgIdFromDefraIdToken(sbi, tokenPayload)
     }
   }

@@ -164,7 +164,7 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       { dataSources }
     )
 
-    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('123', dataSources)
+    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('123', { dataSources })
     expect(result).toEqual({
       land: {
         sbi: '123'

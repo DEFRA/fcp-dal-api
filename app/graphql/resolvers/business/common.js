@@ -7,7 +7,7 @@ import {
 export const businessDetailsUpdateResolver = async (
   __,
   { input },
-  { dataSources, auditTrail },
+  { dataSources, auditTrail, defraIdContext },
   info
 ) => {
   auditTrail?.recordAccount(info, 'sbi', input.sbi)
@@ -16,7 +16,7 @@ export const businessDetailsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
@@ -37,7 +37,7 @@ export const businessDetailsUpdateResolver = async (
 export const businessAdditionalDetailsUpdateResolver = async (
   __,
   { input },
-  { dataSources, auditTrail },
+  { dataSources, auditTrail, defraIdContext },
   info
 ) => {
   auditTrail?.recordAccount(info, 'sbi', input.sbi)
@@ -46,7 +46,7 @@ export const businessAdditionalDetailsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
@@ -91,7 +91,7 @@ const withUpdateStatuses = (error, statuses) => {
 export const businessAllFieldsUpdateResolver = async (
   __,
   { input },
-  { dataSources, auditTrail },
+  { dataSources, auditTrail, defraIdContext },
   info
 ) => {
   auditTrail?.recordAccount(info, 'sbi', input.sbi)
@@ -100,7 +100,7 @@ export const businessAllFieldsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
@@ -159,7 +159,14 @@ async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   return orgId
 }
 
-export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
+export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
+  if (defraIdContext) {
+    // A defraIdContext is only built for externally authenticated requests, in which case the org id
+    // can be retrieved directly from the token
+    return defraIdContext.orgId(sbi)
+  }
+
+  const { mongoBusiness, ruralPaymentsBusiness } = dataSources
   return (
     (await mongoBusiness.getOrgIdBySbi(sbi)) ??
     upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
