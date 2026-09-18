@@ -6,6 +6,7 @@ import {
   transformBankChangeInputToSubmission,
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformBusinessDetailsToOrgDetailsCreate,
+  transformPermissionGroupsToBusinessCustomerPrivileges,
   transformBusinessDetailsToOrgDetailsUpdate,
   transformCountyParishHoldings,
   transformOrganisationCustomer,
@@ -416,6 +417,81 @@ describe('Business transformer', () => {
     })
 
     expect(transformedPermissionGroups).toEqual(expectedPermissions)
+  })
+
+  test('#transformPermissionGroupsToBusinessCustomerPrivileges', () => {
+    expect(
+      transformPermissionGroupsToBusinessCustomerPrivileges(
+        [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }],
+        permissionGroups
+      )
+    ).toEqual(['Full permission - business'])
+
+    expect(
+      transformPermissionGroupsToBusinessCustomerPrivileges(
+        [{ id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' }],
+        permissionGroups
+      )
+    ).toEqual(['Submit - bps'])
+
+    expect(
+      transformPermissionGroupsToBusinessCustomerPrivileges(
+        [{ id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS', level: 'VIEW' }],
+        permissionGroups
+      )
+    ).toEqual(['VIEW - CS APP'])
+
+    expect(
+      transformPermissionGroupsToBusinessCustomerPrivileges(
+        [
+          { id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' },
+          { id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' },
+          { id: 'ENTITLEMENTS', level: 'AMEND' },
+          { id: 'LAND_DETAILS', level: 'AMEND' }
+        ],
+        permissionGroups
+      )
+    ).toEqual(['Submit - bps', 'Full permission - business', 'Amend - entitlement', 'Amend - land'])
+  })
+
+  test('#transformPermissionGroupsToBusinessCustomerPrivileges handles empty and unmatched permissions', () => {
+    expect(
+      transformPermissionGroupsToBusinessCustomerPrivileges(undefined, permissionGroups)
+    ).toEqual([])
+    expect(transformPermissionGroupsToBusinessCustomerPrivileges([], permissionGroups)).toEqual([])
+    expect(
+      transformPermissionGroupsToBusinessCustomerPrivileges(
+        [{ id: 'BUSINESS_DETAILS', level: 'NO_ACCESS' }],
+        permissionGroups
+      )
+    ).toEqual([])
+    expect(
+      transformPermissionGroupsToBusinessCustomerPrivileges(
+        [{ id: 'LAND_DETAILS', level: 'FULL_PERMISSION' }],
+        permissionGroups
+      )
+    ).toEqual([])
+  })
+
+  test('#transformPermissionGroupsToBusinessCustomerPrivileges is the inverse of transformBusinessCustomerPrivilegesToPermissionGroups', () => {
+    const permissions = [
+      { id: 'BASIC_PAYMENT_SCHEME', level: 'SUBMIT' },
+      { id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' },
+      { id: 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS', level: 'SUBMIT' },
+      { id: 'COUNTRYSIDE_STEWARDSHIP_APPLICATIONS', level: 'SUBMIT' },
+      { id: 'ENTITLEMENTS', level: 'AMEND' },
+      { id: 'ENVIRONMENTAL_LAND_MANAGEMENT_APPLICATIONS', level: 'SUBMIT' },
+      { id: 'LAND_DETAILS', level: 'AMEND' }
+    ]
+    const [expected] = buildPermissionsFromIdsAndLevels([permissions])
+    const privileges = transformPermissionGroupsToBusinessCustomerPrivileges(
+      permissions,
+      permissionGroups
+    )
+
+    expect(
+      transformBusinessCustomerPrivilegesToPermissionGroups(privileges, permissionGroups)
+    ).toEqual(expected)
   })
 
   test('#transformCountyParishHoldings sorts CPH numbers numerically by county, parish, and holding', () => {
