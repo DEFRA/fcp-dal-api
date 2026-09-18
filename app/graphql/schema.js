@@ -7,6 +7,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { authDirectiveTransformer } from '../auth/authenticate.js'
 import { config } from '../config.js'
+import { restrictSchemaVisibility } from './directives/authVisibilityFilter.js'
 import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
 import { validateVariableDirective } from './directives/validateVariable.js'
 import { wipDirectiveTransformer } from './directives/wipDirectiveTransformer.js'
@@ -51,9 +52,10 @@ export async function createRawSchema(...typeDefs) {
 }
 
 /**
- * Create a schema
+ * Applies all directive transformers except the final directive-stripping/pruning steps, so
+ * callers can still inspect directives (e.g. @auth) on the result before it's finalized.
  */
-export async function createSchema(...typeDefs) {
+async function createAuthenticatedSchema(...typeDefs) {
   let schema = await createRawSchema(...typeDefs)
 
   schema = wipDirectiveTransformer(schema)
@@ -68,15 +70,33 @@ export async function createSchema(...typeDefs) {
     )
   }
 
-  schema = excludeFromListTransformer(schema)
+  return excludeFromListTransformer(schema)
+}
 
+function finalizeSchema(schema) {
   schema = filterSchema({
     schema,
     directiveFilter: (name) =>
       ['include', 'skip', 'deprecated', 'specifiedBy', 'oneOf'].includes(name)
   })
 
-  schema = pruneSchema(schema)
+  return pruneSchema(schema)
+}
 
-  return schema
+/**
+ * Create a schema
+ */
+export async function createSchema(...typeDefs) {
+  const schema = await createAuthenticatedSchema(...typeDefs)
+  return finalizeSchema(schema)
+}
+
+/**
+ * Create a schema with fields hidden that the given AuthGroup names aren't allowed to see per
+ * @auth, for use in a playground-only schema variant. @auth access is still enforced as normal
+ * at execution time - this only affects what's visible via introspection.
+ */
+export async function createSchemaForGroups(groups, ...typeDefs) {
+  const schema = await createAuthenticatedSchema(...typeDefs)
+  return finalizeSchema(restrictSchemaVisibility(schema, groups))
 }
