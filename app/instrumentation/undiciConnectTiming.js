@@ -82,9 +82,13 @@ let subscribed = false
 
 export function registerConnectTiming() {
   if (subscribed || !appConfig.get('kits.external.connectTimingEnabled')) {
+    logger.info(
+      `Not registering for diagnostics: subs ${subscribed}, enabled ${appConfig.get('kits.external.connectTimingEnabled')}`
+    )
     return
   }
   externalGatewayOrigin = originFor(new URL(appConfig.get('kits.external.gatewayUrl')))
+  logger.info(`externalGatewayOrigin=${externalGatewayOrigin}`)
   diagnosticsChannel.subscribe('undici:client:beforeConnect', onBeforeConnect)
   diagnosticsChannel.subscribe('undici:client:connected', onConnected)
   diagnosticsChannel.subscribe('undici:client:connectError', onConnectError)
