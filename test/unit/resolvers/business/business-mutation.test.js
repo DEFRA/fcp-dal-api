@@ -1,4 +1,5 @@
 import { describe, jest } from '@jest/globals'
+import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../../app/transformers/rural-payments/business.js'
 
 const mockBusinessCommonModule = {
@@ -1052,5 +1053,87 @@ describe('Business Mutation updateBusinessUnlockStatus', () => {
     expect(mockBusinessCommonModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
+  })
+})
+
+const authorisationInput = {
+  sbi: '111111111',
+  crn: '1111111100',
+  role: 'Agent',
+  permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
+}
+
+const expectedAuthorisationBody = {
+  personRoles: [
+    {
+      role: 'Agent',
+      personId: 'person-1'
+    }
+  ],
+  personPrivileges: [
+    {
+      privilegeNames: ['Full permission - business'],
+      personId: 'person-1'
+    }
+  ]
+}
+
+describe('Business Mutation createCustomerAuthorisationOnBusiness', () => {
+  it('transforms permissions to privilege names for the upstream request', async () => {
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn().mockResolvedValue('org-1'),
+        createAuthorisationForOrganisation: jest.fn().mockResolvedValue({ success: true })
+      },
+      ruralPaymentsCustomer: {
+        getPersonIdByCRN: jest.fn().mockResolvedValue('person-1')
+      },
+      permissions: new Permissions()
+    }
+
+    const response = await Mutation.createCustomerAuthorisationOnBusiness(
+      {},
+      { input: authorisationInput },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
+      '111111111'
+    )
+    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('1111111100')
+    expect(
+      dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation
+    ).toHaveBeenCalledWith('org-1', expectedAuthorisationBody)
+    expect(response).toEqual({ success: true })
+  })
+})
+
+describe('Business Mutation updateCustomerAuthorisationOnBusiness', () => {
+  it('transforms permissions to privilege names for the upstream request', async () => {
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn().mockResolvedValue('org-1'),
+        updateAuthorisationForPersonOnOrganisation: jest.fn().mockResolvedValue({ success: true })
+      },
+      ruralPaymentsCustomer: {
+        getPersonIdByCRN: jest.fn().mockResolvedValue('person-1')
+      },
+      permissions: new Permissions()
+    }
+
+    const response = await Mutation.updateCustomerAuthorisationOnBusiness(
+      {},
+      { input: authorisationInput },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
+      '111111111'
+    )
+    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('1111111100')
+    expect(
+      dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
+    ).toHaveBeenCalledWith('org-1', 'person-1', expectedAuthorisationBody)
+    expect(response).toEqual({ success: true })
   })
 })

@@ -1,0 +1,69 @@
+extend type Mutation {
+  """
+  Adds a customer to a business with the given role and permissions.
+  """
+  createCustomerAuthorisationOnBusiness(
+    # eslint-disable-next-line @graphql-eslint/input-name
+    input: CustomerAuthorisationOnBusinessInput!
+  ): AuthorisationOnBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Updates a customer's role and permissions on a business.
+
+  `permissions` replaces the customer's full permission set. Include every
+  group that should remain; any group omitted is set to `NO_ACCESS`.
+  """
+  updateCustomerAuthorisationOnBusiness(
+    # eslint-disable-next-line @graphql-eslint/input-name
+    input: CustomerAuthorisationOnBusinessInput!
+  ): AuthorisationOnBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input CustomerAuthorisationOnBusinessInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business.
+  """
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
+
+  """
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
+
+  """
+  Role of the customer on the business. For example, 'Agent' or 'Business Partner'.
+  """
+  role: String
+
+  """
+  The full set of permission groups and levels for the customer on the
+  business. This replaces any existing permissions; groups not listed are
+  set to `NO_ACCESS`. Include every group that should apply.
+  """
+  permissions: [AuthorisationCustomerPermissionInput]
+}
+
+input AuthorisationCustomerPermissionInput {
+  """
+  Permission group for the customer. For example, 'BUSINESS_DETAILS', 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS'.
+  """
+  id: PermissionGroupId!
+  """
+  Permission level customer has for the business. For example, 'VIEW', 'AMEND'.
+  """
+  level: PermissionLevel!
+}
+
+type AuthorisationOnBusinessResponse {
+  """
+  True when the authorisation was applied.
+  """
+  success: Boolean
+  """
+  Error message from the upstream service when the request is not successful.
+  """
+  errorString: String
+}
