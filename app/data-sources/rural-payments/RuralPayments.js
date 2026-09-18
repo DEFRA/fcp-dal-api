@@ -16,9 +16,24 @@ const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
 // full TCP + TLS(+mTLS) handshake instead of reusing a pooled, kept-alive connection.
 const gatewayDispatchers = new Map()
 
-function getGatewayDispatcher(route, requestTls) {
+// requestTls is fully determined by route - the gateway URL and MTLS config are both static, set
+// once at module/config load - so it's built lazily here rather than per-request.
+function buildRequestTls(route) {
+  const gatewayUrl = route === 'external' ? externalGatewayUrl : internalGatewayUrl
+  const { hostname, port } = new URL(gatewayUrl)
+  return {
+    host: hostname,
+    port,
+    servername: hostname,
+    secureContext: tls.createSecureContext(
+      route === 'external' ? appConfig.externalMTLS : appConfig.internalMTLS
+    )
+  }
+}
+
+function getGatewayDispatcher(route) {
   if (!gatewayDispatchers.has(route)) {
-    gatewayDispatchers.set(route, new EnvHttpProxyAgent({ requestTls }))
+    gatewayDispatchers.set(route, new EnvHttpProxyAgent({ requestTls: buildRequestTls(route) }))
   }
   return gatewayDispatchers.get(route)
 }
@@ -51,19 +66,7 @@ export class RuralPayments extends BaseRESTDataSource {
           signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
         })
     } else {
-      // set up mTLS config
-      const kitsURL = new URL(this.baseURL)
-      const requestTls = {
-        host: kitsURL.hostname,
-        port: kitsURL.port,
-        servername: kitsURL.hostname
-      }
-      requestTls.secureContext = this.createSecureContext()
-
-      const dispatcher = getGatewayDispatcher(
-        this.isExternalRoute() ? 'external' : 'internal',
-        requestTls
-      )
+      const dispatcher = getGatewayDispatcher(this.isExternalRoute() ? 'external' : 'internal')
 
       this.httpCache.httpFetch = (url, options = {}) =>
         // use undici fetch which supports mTLS & env proxy via agent
@@ -116,12 +119,6 @@ export class RuralPayments extends BaseRESTDataSource {
 
   getBaseURL() {
     return this.isExternalRoute() ? externalGatewayUrl : internalGatewayUrl
-  }
-
-  createSecureContext() {
-    return tls.createSecureContext(
-      this.isExternalRoute() ? appConfig.externalMTLS : appConfig.internalMTLS
-    )
   }
 
   initialiseRequest(request) {

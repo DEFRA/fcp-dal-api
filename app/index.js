@@ -5,6 +5,7 @@ import { secureContext } from '@defra/hapi-secure-context'
 
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
+import { registerConnectTiming } from './instrumentation/undiciConnectTiming.js'
 import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { mongoClient } from './mongo.js'
@@ -48,5 +49,7 @@ process.on('uncaughtException', async (error) => {
   logger.error('#DAL - uncaught exception', { error, code: DAL_UNHANDLED_ERROR_001 })
   await abort()
 })
+
+registerConnectTiming()
 
 await init()

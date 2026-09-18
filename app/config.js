@@ -194,6 +194,16 @@ export const config = convict({
         format: 'int',
         default: null,
         env: 'KIT_EXT_PERSON_ID_OVERRIDE'
+      },
+      connectTimingEnabled: {
+        doc:
+          'Enable diagnostics_channel-based instrumentation that measures undici TCP+TLS/mTLS ' +
+          'connection-establishment time for the KITS external gateway, separate from ' +
+          'request/response time. Intended for use only while actively investigating latency, ' +
+          'not left on permanently.',
+        format: Boolean,
+        default: false,
+        env: 'KITS_EXTERNAL_CONNECT_TIMING_ENABLED'
       }
     },
     disableMTLS: {
