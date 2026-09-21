@@ -141,7 +141,7 @@ describe('undiciConnectTiming', () => {
     // expect(loggerInfoSpy).not.toHaveBeenCalled()
   })
 
-  test('correlates by connectParams object identity, not content', () => {
+  test('correlates beforeConnect and connected by content, not object identity (matches real undici, which builds a fresh connectParams object literal per publish call)', () => {
     mockConfig()
     registerConnectTiming()
 
@@ -149,7 +149,10 @@ describe('undiciConnectTiming', () => {
     beforeConnectChannel.publish({ connectParams: { ...params } })
     connectedChannel.publish({ connectParams: { ...params } })
 
-    // expect(loggerInfoSpy).not.toHaveBeenCalled()
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
+      expect.stringContaining('host=kits.example.com:8443'),
+      expect.objectContaining({ code: RURALPAYMENTS_CONNECT_TIMING_001 })
+    )
   })
 
   test('registerConnectTiming is idempotent', () => {

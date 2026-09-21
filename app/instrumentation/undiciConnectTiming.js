@@ -7,11 +7,15 @@ import {
   RURALPAYMENTS_CONNECT_TIMING_002
 } from '../logger/codes.js'
 
-// connectParams is the SAME object instance undici passes to beforeConnect and to the matching
-// connected/connectError event for one connection attempt - it's the only correlation key shared
-// between the two payloads. A WeakMap means an attempt that never resolves can't leak memory:
-// once nothing else references connectParams, the entry is collected automatically.
-const connectStartTimes = new WeakMap()
+// undici builds a FRESH connectParams object literal at each of its three publish call sites
+// (client.js: beforeConnect, connected, connectError) - even for the same connection attempt,
+// they are three distinct object instances, never the same reference. So correlation can't use
+// object identity (a WeakMap keyed by connectParams never matches). Instead, since we only ever
+// track one origin (the KITS external gateway), pair events chronologically: each beforeConnect
+// for that origin pushes a start time, each connected/connectError for that origin shifts the
+// oldest pending one. This assumes connects to this single origin are handled roughly in the
+// order they start, which holds for the realistic case of a small, mostly-sequential pool.
+const pendingConnectStartTimes = []
 
 function originFor({ hostname, port }) {
   return `${hostname}:${port}`
@@ -23,9 +27,6 @@ function originFor({ hostname, port }) {
 let externalGatewayOrigin
 
 function isExternalGateway(connectParams) {
-  logger.info(
-    `isExternalGateway ${originFor(connectParams)} === ${externalGatewayOrigin} ? ${originFor(connectParams) === externalGatewayOrigin}`
-  )
   return originFor(connectParams) === externalGatewayOrigin
 }
 
@@ -33,15 +34,17 @@ export function onBeforeConnect({ connectParams }) {
   if (!isExternalGateway(connectParams)) {
     return
   }
-  connectStartTimes.set(connectParams, performance.now())
+  pendingConnectStartTimes.push(performance.now())
 }
 
 export function onConnected({ connectParams }) {
-  const startTime = connectStartTimes.get(connectParams)
-  connectStartTimes.delete(connectParams)
+  if (!isExternalGateway(connectParams)) {
+    return
+  }
+
+  const startTime = pendingConnectStartTimes.shift()
   if (startTime === undefined) {
-    // Either a different origin (filtered out at beforeConnect) or a genuinely unmatched event -
-    // either way, nothing to report.
+    // No matching beforeConnect seen - e.g. registration happened mid-connect. Nothing to report.
     return
   }
 
@@ -58,16 +61,11 @@ export function onConnected({ connectParams }) {
 }
 
 export function onConnectError({ connectParams, error }) {
-  const startTime = connectStartTimes.get(connectParams)
-  connectStartTimes.delete(connectParams)
-
-  // Unlike onConnected, a missing startTime here doesn't necessarily mean "skip" - a connect
-  // error can fire without ever having seen beforeConnect. So the origin is checked explicitly,
-  // rather than inferred from whether a start time was recorded.
   if (!isExternalGateway(connectParams)) {
     return
   }
 
+  const startTime = pendingConnectStartTimes.shift()
   const requestTimeMs = startTime === undefined ? undefined : performance.now() - startTime
 
   logger.warn(
@@ -107,5 +105,6 @@ export function unregisterConnectTiming() {
   diagnosticsChannel.unsubscribe('undici:client:beforeConnect', onBeforeConnect)
   diagnosticsChannel.unsubscribe('undici:client:connected', onConnected)
   diagnosticsChannel.unsubscribe('undici:client:connectError', onConnectError)
+  pendingConnectStartTimes.length = 0
   subscribed = false
 }
