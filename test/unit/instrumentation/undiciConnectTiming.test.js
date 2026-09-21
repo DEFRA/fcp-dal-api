@@ -14,6 +14,7 @@ import {
 const beforeConnectChannel = diagnosticsChannel.channel('undici:client:beforeConnect')
 const connectedChannel = diagnosticsChannel.channel('undici:client:connected')
 const connectErrorChannel = diagnosticsChannel.channel('undici:client:connectError')
+const proxyConnectedChannel = diagnosticsChannel.channel('undici:proxy:connected')
 
 const EXTERNAL_GATEWAY_URL = 'https://kits.example.com:8443/external'
 
@@ -86,6 +87,66 @@ describe('undiciConnectTiming', () => {
         requestTimeMs: expect.any(Number),
         error: { message: 'connect ECONNREFUSED', name: 'Error' }
       })
+    )
+  })
+
+  test('splits tunnel vs handshake time when a proxyConnected event lands between beforeConnect and connected', () => {
+    mockConfig()
+    registerConnectTiming()
+
+    const connectParams = { hostname: 'kits.example.com', port: '8443', protocol: 'https:' }
+    beforeConnectChannel.publish({ connectParams })
+    proxyConnectedChannel.publish({ connectParams: { origin: 'http://proxy.example.com:3128' } })
+    connectedChannel.publish({ connectParams })
+
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/tunnelMs=\d+(\.\d+)?, handshakeMs=\d+(\.\d+)?/),
+      expect.objectContaining({ code: RURALPAYMENTS_CONNECT_TIMING_001 })
+    )
+  })
+
+  test('omits the tunnel/handshake split when no proxyConnected event is observed (no proxy configured)', () => {
+    mockConfig()
+    registerConnectTiming()
+
+    const connectParams = { hostname: 'kits.example.com', port: '8443', protocol: 'https:' }
+    beforeConnectChannel.publish({ connectParams })
+    connectedChannel.publish({ connectParams })
+
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
+      expect.not.stringContaining('tunnelMs'),
+      expect.objectContaining({ code: RURALPAYMENTS_CONNECT_TIMING_001 })
+    )
+  })
+
+  test('ignores a proxyConnected event when no target connect is in flight', () => {
+    mockConfig()
+    registerConnectTiming()
+
+    proxyConnectedChannel.publish({ connectParams: { origin: 'http://proxy.example.com:3128' } })
+
+    const connectParams = { hostname: 'kits.example.com', port: '8443', protocol: 'https:' }
+    beforeConnectChannel.publish({ connectParams })
+    connectedChannel.publish({ connectParams })
+
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
+      expect.not.stringContaining('tunnelMs'),
+      expect.objectContaining({ code: RURALPAYMENTS_CONNECT_TIMING_001 })
+    )
+  })
+
+  test('splits tunnel vs handshake time on connectError too', () => {
+    mockConfig()
+    registerConnectTiming()
+
+    const connectParams = { hostname: 'kits.example.com', port: '8443', protocol: 'https:' }
+    beforeConnectChannel.publish({ connectParams })
+    proxyConnectedChannel.publish({ connectParams: { origin: 'http://proxy.example.com:3128' } })
+    connectErrorChannel.publish({ connectParams, error: new Error('handshake failed') })
+
+    expect(loggerWarnSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/tunnelMs=\d+(\.\d+)?, handshakeMs=\d+(\.\d+)?/),
+      expect.objectContaining({ code: RURALPAYMENTS_CONNECT_TIMING_002 })
     )
   })
 
