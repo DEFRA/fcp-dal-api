@@ -208,8 +208,10 @@ export const Mutation = {
 
   createCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
     const { sbi, crn, role, permissions } = input
-    const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
+    const [organisationId, personId] = await Promise.all([
+      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
+      retrievePersonIdByCRN(crn, dataSources)
+    ])
 
     return await dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(
       organisationId,
@@ -235,8 +237,10 @@ export const Mutation = {
 
   updateCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
     const { sbi, crn, role, permissions } = input
-    const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-    const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(crn)
+    const [organisationId, personId] = await Promise.all([
+      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
+      retrievePersonIdByCRN(crn, dataSources)
+    ])
 
     return await dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
         organisationId,

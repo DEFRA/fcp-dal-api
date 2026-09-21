@@ -130,6 +130,7 @@ export function transformPermissionGroupsToBusinessCustomerPrivileges(
   return permissions.flatMap(({ id, level }) => {
     const permissionGroup = permissionGroups.find((group) => group.id === id)
     const permission = permissionGroup?.permissions.find((perm) => perm.level === level)
+    // Privilege names ending in ' - SA' are Rural Payments service-account variants and are not sent when writing authorisations.
     return (permission?.privilegeNames ?? []).filter(
       (privilegeName) => !privilegeName.endsWith(' - SA')
     )

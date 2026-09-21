@@ -353,6 +353,76 @@ describe('createBusinessCustomerBankDetails', () => {
   })
 })
 
+const createAuthorisationMutation = gql`
+  mutation CreateCustomerAuthorisationOnBusiness($input: CustomerAuthorisationOnBusinessInput!) {
+    createCustomerAuthorisationOnBusiness(input: $input) {
+      success
+      errorString
+    }
+  }
+`
+
+const updateAuthorisationMutation = gql`
+  mutation UpdateCustomerAuthorisationOnBusiness($input: CustomerAuthorisationOnBusinessInput!) {
+    updateCustomerAuthorisationOnBusiness(input: $input) {
+      success
+      errorString
+    }
+  }
+`
+
+// CRN 2222222000 belongs to org 222222222 in the mock, so it can be linked to the
+// mutation-reserved SBI without changing the fixture data asserted for 111111111.
+const authorisationSbi = '900000001'
+const authorisationCrn = '2222222000'
+
+describe('customer authorisation on business', () => {
+  it('adds a customer to a business with the given role and permissions', async () => {
+    const response = await client.request(
+      createAuthorisationMutation,
+      {
+        input: {
+          sbi: authorisationSbi,
+          crn: authorisationCrn,
+          role: 'Agent',
+          permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
+        }
+      },
+      headers
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.createCustomerAuthorisationOnBusiness).toEqual({
+      success: true,
+      errorString: null
+    })
+  })
+
+  it('updates a customer role and permissions on a business', async () => {
+    const response = await client.request(
+      updateAuthorisationMutation,
+      {
+        input: {
+          sbi: authorisationSbi,
+          crn: authorisationCrn,
+          role: 'Business Partner',
+          permissions: [
+            { id: 'BUSINESS_DETAILS', level: 'VIEW' },
+            { id: 'LAND_DETAILS', level: 'AMEND' }
+          ]
+        }
+      },
+      headers
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.updateCustomerAuthorisationOnBusiness).toEqual({
+      success: true,
+      errorString: null
+    })
+  })
+})
+
 describe('Business Mutations - reactivate a business', () => {
   // note: sbi 920000001 is reserved for this test; it starts out locked and deactivated in the mock
   const reactivateSbi = '920000001'

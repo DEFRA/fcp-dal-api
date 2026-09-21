@@ -3,7 +3,7 @@ extend type Mutation {
   Adds a customer to a business with the given role and permissions.
   """
   createCustomerAuthorisationOnBusiness(
-    # eslint-disable-next-line @graphql-eslint/input-name
+    # eslint-disable-next-line @graphql-eslint/input-name -- shared with update; type name cannot match both mutations
     input: CustomerAuthorisationOnBusinessInput!
   ): AuthorisationOnBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
 
@@ -14,7 +14,7 @@ extend type Mutation {
   group that should remain; any group omitted is set to `NO_ACCESS`.
   """
   updateCustomerAuthorisationOnBusiness(
-    # eslint-disable-next-line @graphql-eslint/input-name
+    # eslint-disable-next-line @graphql-eslint/input-name -- shared with create; type name cannot match both mutations
     input: CustomerAuthorisationOnBusinessInput!
   ): AuthorisationOnBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
 }
