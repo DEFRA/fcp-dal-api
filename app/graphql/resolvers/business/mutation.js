@@ -5,7 +5,8 @@ import { logger } from '../../../logger/logger.js'
 import {
   transformBankChangeInputToSubmission,
   transformBusinessDetailsToOrgDetailsCreate,
-  transformOrganisationToBusiness
+  transformOrganisationToBusiness,
+  transformPermissionGroupsToBusinessCustomerPrivileges
 } from '../../../transformers/rural-payments/business.js'
 import { retrievePersonIdByCRN } from '../customer/common.js'
 import {
@@ -195,7 +196,71 @@ export const Mutation = {
   updateBusinessRegistrationNumbers: businessAdditionalDetailsUpdateResolver,
   updateBusinessAllFields: businessAllFieldsUpdateResolver,
   updateBusinessLock: businessLockResolver,
-  updateBusinessUnlock: businessUnlockResolver
+  updateBusinessUnlock: businessUnlockResolver,
+
+  createCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
+    const { sbi, crn, role, permissions } = input
+    const [organisationId, personId] = await Promise.all([
+      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
+      retrievePersonIdByCRN(crn, dataSources)
+    ])
+
+    const response = await dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(
+      organisationId,
+      {
+        personRoles: [
+          {
+            role,
+            personId
+          }
+        ],
+        personPrivileges: [
+          {
+            privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
+              permissions,
+              dataSources.permissions.getPermissionGroups()
+            ),
+            personId
+          }
+        ]
+      }
+    )
+
+    return response
+  },
+
+  updateCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
+    const { sbi, crn, role, permissions } = input
+    const [organisationId, personId] = await Promise.all([
+      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
+      retrievePersonIdByCRN(crn, dataSources)
+    ])
+
+    const response =
+      await dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
+        organisationId,
+        personId,
+        {
+          personRoles: [
+            {
+              role,
+              personId
+            }
+          ],
+          personPrivileges: [
+            {
+              privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
+                permissions,
+                dataSources.permissions.getPermissionGroups()
+              ),
+              personId
+            }
+          ]
+        }
+      )
+
+    return response
+  }
 }
 
 export const UpdateBusinessResponse = {
