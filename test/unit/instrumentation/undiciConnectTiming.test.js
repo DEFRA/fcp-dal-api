@@ -216,6 +216,46 @@ describe('undiciConnectTiming', () => {
     )
   })
 
+  test('correctly correlates two overlapping, out-of-order-completing connects (no cross-contamination)', async () => {
+    mockConfig()
+    registerConnectTiming()
+    // registerConnectTiming logs its own "externalGatewayOrigin=..." debug line - clear it so the
+    // count assertion below only reflects the two connect events themselves.
+    loggerInfoSpy.mockClear()
+
+    const attemptA = { hostname: 'kits.example.com', port: '8443', protocol: 'https:' }
+    const attemptB = { hostname: 'kits.example.com', port: '8443', protocol: 'https:' }
+
+    // beforeConnect/connected for each attempt are genuinely spread across real async ticks (via
+    // setTimeout), not called back-to-back synchronously - this is what actually exercises
+    // AsyncLocalStorage's context propagation, unlike the other tests above which publish
+    // synchronously and would pass even with the old, broken FIFO design.
+    const runAttempt = (connectParams, startDelayMs, connectDurationMs) =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          beforeConnectChannel.publish({ connectParams })
+          setTimeout(() => {
+            connectedChannel.publish({ connectParams })
+            resolve()
+          }, connectDurationMs)
+        }, startDelayMs)
+      })
+
+    // A starts first but takes much longer; B starts after A but finishes well before it -
+    // completion order differs from start order, which is exactly what broke FIFO pairing.
+    await Promise.all([runAttempt(attemptA, 0, 80), runAttempt(attemptB, 10, 5)])
+
+    expect(loggerInfoSpy).toHaveBeenCalledTimes(2)
+    const [firstLoggedDurationMs, secondLoggedDurationMs] = loggerInfoSpy.mock.calls.map(
+      ([, meta]) => meta.requestTimeMs
+    )
+    // B finishes first and logs first - it must show its own short duration, not A's much
+    // longer one (and neither should ever be negative, which is what FIFO produced in practice).
+    expect(firstLoggedDurationMs).toBeGreaterThanOrEqual(0)
+    expect(firstLoggedDurationMs).toBeLessThan(40)
+    expect(secondLoggedDurationMs).toBeGreaterThan(40)
+  })
+
   test('registerConnectTiming is idempotent', () => {
     mockConfig()
     registerConnectTiming()

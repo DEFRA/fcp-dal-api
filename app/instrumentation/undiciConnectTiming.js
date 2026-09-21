@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from 'node:async_hooks'
 import diagnosticsChannel from 'node:diagnostics_channel'
 import { performance } from 'node:perf_hooks'
 import { config as appConfig } from '../config.js'
@@ -9,23 +10,24 @@ import {
 
 // undici builds a FRESH connectParams object literal at each of its three publish call sites
 // (client.js: beforeConnect, connected, connectError) - even for the same connection attempt,
-// they are three distinct object instances, never the same reference. So correlation can't use
-// object identity (a WeakMap keyed by connectParams never matches). Instead, since we only ever
-// track one origin (the KITS external gateway), pair events chronologically: each beforeConnect
-// for that origin pushes a start time, each connected/connectError for that origin shifts the
-// oldest pending one. This assumes connects to this single origin are handled roughly in the
-// order they start, which holds for the realistic case of a small, mostly-sequential pool.
-const pendingConnectStartTimes = []
-
-// undici:proxy:connected fires once the CONNECT tunnel to the proxy itself is established, before
-// the TLS/mTLS handshake to the real target begins on top of that tunnel - splitting it out of
-// the overall connect time isolates proxy-tunnel time from handshake time. Its connectParams
-// describes the PROXY (an `origin` string, not `hostname`/`port`), so it can't be matched against
-// externalGatewayOrigin the way client-level events can. Instead, only record one while a target
-// beforeConnect is actually in flight - this can misattribute if other proxied traffic (Hitachi,
-// JWKS, DefraID) interleaves during the same window, which is an accepted imprecision for this
-// short, targeted investigative use.
-const pendingProxyConnectedTimes = []
+// they are three distinct object instances, never the same reference, so correlation can't use
+// object identity. `client[kConnector]` doesn't help either - it's the SAME shared function for
+// every socket under one dispatcher, not unique per attempt. A FIFO queue was tried instead
+// (pair chronologically, assume roughly sequential completion) but breaks under real concurrency:
+// if a later-started connect finishes before an earlier one, FIFO pairs the wrong start time with
+// the wrong completion, which is exactly how we observed an impossible negative tunnelMs.
+//
+// The fix: `channels.beforeConnect.publish(...)` and the client[kConnector](...) call that
+// actually starts the TCP/TLS connect happen synchronously, back to back, with nothing async in
+// between (see client.js's connect() function). So AsyncLocalStorage.enterWith(), called from our
+// beforeConnect handler, correctly attaches to the async operation the connector kicks off
+// immediately afterwards - and Node's async-context propagation threads that same store through
+// to wherever its callback eventually fires: connected, connectError, and undici:proxy:connected,
+// since that's published from within this same causal chain too. Reads via getStore() inside an
+// async continuation reflect the store active when THAT continuation's async resource was
+// created, not whatever's globally ambient by the time it runs - so this stays correct even with
+// genuinely concurrent, out-of-order-completing connects to this one origin.
+const connectContext = new AsyncLocalStorage()
 
 function originFor({ hostname, port }) {
   return `${hostname}:${port}`
@@ -44,31 +46,28 @@ export function onBeforeConnect({ connectParams }) {
   if (!isExternalGateway(connectParams)) {
     return
   }
-  pendingConnectStartTimes.push(performance.now())
+  connectContext.enterWith({ startTime: performance.now() })
 }
 
 export function onProxyConnected() {
-  if (pendingConnectStartTimes.length === 0) {
-    // No target connect in flight - not something we're tracking, ignore.
+  const store = connectContext.getStore()
+  if (!store || store.proxyConnectedTime !== undefined) {
+    // Not part of a connect attempt we're tracking, or already recorded one for this attempt.
     return
   }
-  pendingProxyConnectedTimes.push(performance.now())
+  store.proxyConnectedTime = performance.now()
 }
 
-// Splits an overall connect duration into proxy-tunnel time and handshake time, using a
-// proxyConnected timestamp paired the same way as pendingConnectStartTimes (FIFO, since
-// undici:proxy:connected can't be matched to a specific target by content). Returns undefined
-// for both when no proxy was involved (or none was observed), leaving requestTimeMs as the only
-// figure - which is exactly what happens when connectTimingEnabled runs with no proxy configured.
-function splitConnectDuration(startTime, endTime) {
-  const proxyConnectedTime = pendingProxyConnectedTimes.shift()
-  if (proxyConnectedTime === undefined) {
-    return { tunnelTimeMs: undefined, handshakeTimeMs: undefined }
+// Formats the proxy-tunnel/handshake split for the log message, when a proxyConnected event was
+// observed for this specific attempt (via the same async-context correlation as everything else
+// here). Empty string when no proxy was involved, leaving requestTimeMs as the only figure.
+function formatSplit(store, endTime) {
+  if (store.proxyConnectedTime === undefined) {
+    return ''
   }
-  return {
-    tunnelTimeMs: proxyConnectedTime - startTime,
-    handshakeTimeMs: endTime - proxyConnectedTime
-  }
+  const tunnelTimeMs = store.proxyConnectedTime - store.startTime
+  const handshakeTimeMs = endTime - store.proxyConnectedTime
+  return `, tunnelMs=${tunnelTimeMs}, handshakeMs=${handshakeTimeMs}`
 }
 
 export function onConnected({ connectParams }) {
@@ -76,20 +75,18 @@ export function onConnected({ connectParams }) {
     return
   }
 
-  const startTime = pendingConnectStartTimes.shift()
-  if (startTime === undefined) {
-    // No matching beforeConnect seen - e.g. registration happened mid-connect. Nothing to report.
+  const store = connectContext.getStore()
+  if (!store) {
+    // No matching beforeConnect context - e.g. registration happened mid-connect. Nothing to
+    // report.
     return
   }
 
   const now = performance.now()
-  const requestTimeMs = now - startTime
-  const { tunnelTimeMs, handshakeTimeMs } = splitConnectDuration(startTime, now)
-  const split =
-    tunnelTimeMs === undefined ? '' : `, tunnelMs=${tunnelTimeMs}, handshakeMs=${handshakeTimeMs}`
+  const requestTimeMs = now - store.startTime
 
   logger.info(
-    `#instrumentation - undici - KITS external gateway connection established (host=${originFor(connectParams)}${split})`,
+    `#instrumentation - undici - KITS external gateway connection established (host=${originFor(connectParams)}${formatSplit(store, now)})`,
     {
       type: 'http',
       code: RURALPAYMENTS_CONNECT_TIMING_001,
@@ -103,18 +100,12 @@ export function onConnectError({ connectParams, error }) {
     return
   }
 
-  const startTime = pendingConnectStartTimes.shift()
+  const store = connectContext.getStore()
   const now = performance.now()
-  const requestTimeMs = startTime === undefined ? undefined : now - startTime
-  const { tunnelTimeMs, handshakeTimeMs } =
-    startTime === undefined
-      ? { tunnelTimeMs: undefined, handshakeTimeMs: undefined }
-      : splitConnectDuration(startTime, now)
-  const split =
-    tunnelTimeMs === undefined ? '' : `, tunnelMs=${tunnelTimeMs}, handshakeMs=${handshakeTimeMs}`
+  const requestTimeMs = store ? now - store.startTime : undefined
 
   logger.warn(
-    `#instrumentation - undici - KITS external gateway connection failed (host=${originFor(connectParams)}${split})`,
+    `#instrumentation - undici - KITS external gateway connection failed (host=${originFor(connectParams)}${store ? formatSplit(store, now) : ''})`,
     {
       type: 'http',
       code: RURALPAYMENTS_CONNECT_TIMING_002,
@@ -152,7 +143,8 @@ export function unregisterConnectTiming() {
   diagnosticsChannel.unsubscribe('undici:client:connected', onConnected)
   diagnosticsChannel.unsubscribe('undici:client:connectError', onConnectError)
   diagnosticsChannel.unsubscribe('undici:proxy:connected', onProxyConnected)
-  pendingConnectStartTimes.length = 0
-  pendingProxyConnectedTimes.length = 0
+  // enterWith() doesn't auto-clear - reset explicitly so no leftover store from a connect
+  // attempt (or, in tests, a previous test case) can leak into whatever runs next.
+  connectContext.enterWith(undefined)
   subscribed = false
 }
