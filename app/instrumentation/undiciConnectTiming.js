@@ -23,6 +23,9 @@ function originFor({ hostname, port }) {
 let externalGatewayOrigin
 
 function isExternalGateway(connectParams) {
+  logger.info(
+    `isExternalGateway ${originFor(connectParams)} === ${externalGatewayOrigin} ? ${originFor(connectParams) === externalGatewayOrigin}`
+  )
   return originFor(connectParams) === externalGatewayOrigin
 }
 

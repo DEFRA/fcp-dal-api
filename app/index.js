@@ -50,6 +50,6 @@ process.on('uncaughtException', async (error) => {
   await abort()
 })
 
-await init()
-
 registerConnectTiming()
+
+await init()
