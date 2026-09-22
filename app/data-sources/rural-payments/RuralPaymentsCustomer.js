@@ -18,6 +18,28 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return response._data
   }
 
+  async confirmEmail(personId, email) {
+    const response = await this.get(`person/${personId}/${encodeURIComponent(email)}/confirm`)
+    return response._data
+  }
+
+  // Saves/replaces the pending EMAIL_VALIDATION record (customerReference, partyDigitalContactId,
+  // email, linkSentDate) that the verification link sent by sendVerificationEmail is checked
+  // against when the customer follows it.
+  saveEmailValidation({ customerReference, partyDigitalContactId, email, linkSentDate }) {
+    return this.post('external-auth/email-validation', {
+      body: { customerReference, partyDigitalContactId, email, linkSentDate },
+      headers: postPutHeaders
+    })
+  }
+
+  async sendVerificationEmail(digitalContactPartyId) {
+    const response = await this.post(`verify-email/${digitalContactPartyId}`, {
+      headers: postPutHeaders
+    })
+    return response._data
+  }
+
   async getPersonIdByCRN(crn) {
     if (this.isExternalRoute()) {
       const response = await this.getExternalPerson()

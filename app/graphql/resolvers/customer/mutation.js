@@ -1,4 +1,4 @@
-import { BadRequest } from '../../../errors/graphql.js'
+import { BadRequest, NotFound } from '../../../errors/graphql.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
 import { retrievePersonIdByCRN } from './common.js'
 
@@ -69,6 +69,42 @@ async function updateLockCustomerResolver(
       entityid: personId
     })
   }
+}
+
+async function sendConfirmEmailAddressEmailResolver(
+  _,
+  { input },
+  { dataSources, auditTrail },
+  info
+) {
+  auditTrail?.recordAccount(info, 'crn', input.crn)
+  const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(input.crn)
+  auditTrail?.recordAccount(info, 'personId', personId)
+  const person = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
+
+  if (!person.email) {
+    throw new NotFound('Customer has no email address')
+  }
+
+  const { id: digitalContactPartyId } = await dataSources.ruralPaymentsCustomer.confirmEmail(
+    personId,
+    person.email
+  )
+
+  await dataSources.ruralPaymentsCustomer.saveEmailValidation({
+    customerReference: input.crn,
+    partyDigitalContactId: digitalContactPartyId,
+    email: person.email,
+    linkSentDate: new Date().toISOString()
+  })
+
+  await dataSources.ruralPaymentsCustomer.sendVerificationEmail(digitalContactPartyId)
+
+  auditTrail?.recordEntity(info, {
+    entity: 'person',
+    action: 'sendConfirmEmailAddressEmail',
+    entityid: input.crn
+  })
 
   return {
     success: true,
@@ -84,5 +120,6 @@ export const Mutation = {
   updateCustomerPhone: updateCustomerResolver,
   updateCustomerDoNotContact: updateCustomerResolver,
   updateCustomerAllFields: updateCustomerResolver,
-  updateLockCustomer: updateLockCustomerResolver
+  updateLockCustomer: updateLockCustomerResolver,
+  sendConfirmEmailAddressEmail: sendConfirmEmailAddressEmailResolver
 }
