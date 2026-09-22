@@ -304,7 +304,7 @@ describe('Customer Mutations', () => {
       expect(saveCallOrder).toBeLessThan(sendCallOrder)
     })
 
-    test('returns success and the customer personId', async () => {
+    test('returns success', async () => {
       const result = await Mutation.sendConfirmEmailAddressEmail(
         null,
         { input },
@@ -312,8 +312,7 @@ describe('Customer Mutations', () => {
       )
 
       expect(result).toEqual({
-        success: true,
-        customer: { personId: 'currentId' }
+        success: true
       })
     })
 
