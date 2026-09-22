@@ -373,6 +373,104 @@ describe('customer mutations', () => {
     })
   })
 
+  test('sendConfirmEmailAddressEmail', async () => {
+    const kits = nock(config.get('kits.internal.gatewayUrl'))
+
+    kits
+      .post('/person/search', {
+        searchFieldType: 'CUSTOMER_REFERENCE',
+        primarySearchPhrase: '1234567890',
+        offset: 0,
+        limit: 1
+      })
+      .reply(200, { _data: [{ id: 'personId' }] })
+
+    kits
+      .get('/person/personId/summary')
+      .twice()
+      .reply(200, {
+        _data: { id: 'personId', email: 'currentEmail' }
+      })
+
+    kits.get('/person/personId/currentEmail/confirm').reply(200, {
+      _data: { id: 'digitalContactPartyId', validated: false }
+    })
+
+    kits
+      .post('/external-auth/email-validation', (body) => {
+        expect(body).toEqual({
+          customerReference: '1234567890',
+          partyDigitalContactId: 'digitalContactPartyId',
+          email: 'currentEmail',
+          linkSentDate: expect.any(String)
+        })
+        return true
+      })
+      .reply(200)
+
+    kits.post('/verify-email/digitalContactPartyId').reply(200, { _data: 'Success' })
+
+    const result = await makeTestQuery(`#graphql
+      mutation {
+        sendConfirmEmailAddressEmail(input: { crn: "1234567890" }) {
+          success
+          customer {
+            info {
+              email {
+                address
+              }
+            }
+          }
+        }
+      }
+    `)
+
+    expect(result).toEqual({
+      data: {
+        sendConfirmEmailAddressEmail: {
+          success: true,
+          customer: {
+            info: {
+              email: {
+                address: 'currentEmail'
+              }
+            }
+          }
+        }
+      }
+    })
+  })
+
+  test('sendConfirmEmailAddressEmail returns NOT_FOUND when the customer has no email address', async () => {
+    const kits = nock(config.get('kits.internal.gatewayUrl'))
+
+    kits
+      .post('/person/search', {
+        searchFieldType: 'CUSTOMER_REFERENCE',
+        primarySearchPhrase: '1234567890',
+        offset: 0,
+        limit: 1
+      })
+      .reply(200, { _data: [{ id: 'personId' }] })
+
+    kits.get('/person/personId/summary').reply(200, {
+      _data: { id: 'personId', email: null }
+    })
+
+    const result = await makeTestQuery(`#graphql
+      mutation {
+        sendConfirmEmailAddressEmail(input: { crn: "1234567890" }) {
+          success
+        }
+      }
+    `)
+
+    expect(result.errors).toHaveLength(1)
+    expect(result.errors[0].message).toBe('Customer has no email address')
+    expect(result.errors[0].extensions.code).toBe('NOT FOUND')
+    expect(result.errors[0].extensions.http.status).toBe(404)
+  })
+
   test('updateCustomerDoNotContact', async () => {
     setupNock({
       doNotContact: true

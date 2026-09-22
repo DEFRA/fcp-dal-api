@@ -57,6 +57,56 @@ describe('Rural Payments Customer', () => {
     expect(httpGet).toHaveBeenCalledWith('person/foo%2Fbar%2Bbaz%40example.com/validateEmail')
   })
 
+  test('should return the PartyDigitalContact from confirmEmail', async () => {
+    const partyDigitalContact = { id: 'digitalContactPartyId', validated: true }
+    httpGet.mockImplementationOnce(async () => ({ _data: partyDigitalContact }))
+
+    const result = await ruralPaymentsCustomer.confirmEmail('personId', 'test@test.test')
+
+    expect(result).toEqual(partyDigitalContact)
+    expect(httpGet).toHaveBeenCalledWith('person/personId/test%40test.test/confirm')
+  })
+
+  test('should URL-encode special characters in the email passed to confirmEmail', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: {} }))
+
+    await ruralPaymentsCustomer.confirmEmail('personId', 'foo/bar+baz@example.com')
+
+    expect(httpGet).toHaveBeenCalledWith('person/personId/foo%2Fbar%2Bbaz%40example.com/confirm')
+  })
+
+  test('should post the validation record to external-auth/email-validation', async () => {
+    httpPost.mockImplementationOnce(async () => ({}))
+
+    await ruralPaymentsCustomer.saveEmailValidation({
+      customerReference: '1234567890',
+      partyDigitalContactId: 'digitalContactPartyId',
+      email: 'test@test.test',
+      linkSentDate: '2026-09-22T00:00:00.000Z'
+    })
+
+    expect(httpPost).toHaveBeenCalledWith('external-auth/email-validation', {
+      body: {
+        customerReference: '1234567890',
+        partyDigitalContactId: 'digitalContactPartyId',
+        email: 'test@test.test',
+        linkSentDate: '2026-09-22T00:00:00.000Z'
+      },
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  test('should post to verify-email and return the response data from sendVerificationEmail', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: 'Success' }))
+
+    const result = await ruralPaymentsCustomer.sendVerificationEmail('digitalContactPartyId')
+
+    expect(result).toEqual('Success')
+    expect(httpPost).toHaveBeenCalledWith('verify-email/digitalContactPartyId', {
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
   test('should call getExternalPerson for external gateway', async () => {
     httpGetExt.mockImplementation(async () => ({ _data: { id: 123 } }))
     const response = await ruralPaymentsCustomerExt.getCustomerByCRN('11111111')

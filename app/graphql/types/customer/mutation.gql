@@ -31,6 +31,16 @@ extend type Mutation {
   """
   updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+  """
+  Sends a verification email to the customer's registered email address.
+
+  Error codes:
+  - `NOT FOUND`: No customer exists for the given CRN, or the customer has no
+    email address.
+  """
+  # eslint-disable-next-line @graphql-eslint/naming-convention
+  sendConfirmEmailAddressEmail(input: SendConfirmEmailAddressEmailInput!): UpdateCustomerResponse
+    @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input UpdateCustomerAddressInput {
@@ -172,4 +182,12 @@ input UpdateCustomerAllFieldsInput {
 type UpdateCustomerResponse {
   success: Boolean
   customer: Customer
+}
+
+input SendConfirmEmailAddressEmailInput {
+  """
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
 }
