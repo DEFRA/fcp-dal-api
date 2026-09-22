@@ -25,9 +25,7 @@ C4Context
 
   Boundary(cdp, "Core Development Platform (CDP)", "AWS VPC") {
     System(dal, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API")
-    System_Ext(mongo, "Mongo DB", "Caches JWKS public keys,
-      <br />
-      relations between organisation IDs / SBIs,
+    System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
       <br />
       and relations between person IDs / CRNs")
     System_Ext(squid, "Squid Proxy", "Routes all outbound requests")

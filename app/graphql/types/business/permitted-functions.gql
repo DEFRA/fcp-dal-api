@@ -1,0 +1,19 @@
+"""
+Whether the authenticated user is permitted to perform a given operation (function). For an
+external user this is scoped to a business; for an internal user it applies to the user
+themselves. The result can be used to show/hide functionality in a UI.
+
+NOTE: DAL does not enforce these permissions - the upstream systems do.
+"""
+type PermittedFunction {
+  """
+  The operation (function) name, echoing the value requested. For example, 'viewLand',
+  'amendBusinessDetails'.
+  """
+  name: String! @wip
+
+  """
+  Whether the user is permitted to perform the function.
+  """
+  permitted: Boolean! @wip
+}

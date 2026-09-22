@@ -30,6 +30,16 @@ describe('Custom GraphQL HTTP Errors', () => {
     expect(err.extensions.http).toEqual({ status: StatusCodes.BAD_REQUEST })
   })
 
+  test('BadRequest allows a custom code to be provided via options', () => {
+    const err = new BadRequest('Email address is already in use by another customer', {
+      extensions: { code: 'EMAIL_ALREADY_REGISTERED' }
+    })
+
+    expect(err).toBeInstanceOf(GraphQLError)
+    expect(err.extensions.code).toBe('EMAIL_ALREADY_REGISTERED')
+    expect(err.extensions.http).toEqual({ status: StatusCodes.BAD_REQUEST })
+  })
+
   test('HttpError sets code and http status dynamically', () => {
     const status = StatusCodes.FORBIDDEN
     const err = new HttpError(status)

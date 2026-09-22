@@ -1,10 +1,25 @@
+import { GraphQLError } from 'graphql'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
 } from '../../../transformers/rural-payments/business.js'
 
-export const businessDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+export const businessDetailsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail, defraIdContext },
+  info
+) => {
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
@@ -19,8 +34,22 @@ export const businessDetailsUpdateResolver = async (__, { input }, { dataSources
   }
 }
 
-export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { dataSources }) => {
-  const organisationId = await retrieveOrgIdBySbi(input.sbi, dataSources)
+export const businessAdditionalDetailsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail, defraIdContext },
+  info
+) => {
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
   const currentOrgDetails =
     await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
   const newOrgAdditionalDetails = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -38,17 +67,125 @@ export const businessAdditionalDetailsUpdateResolver = async (__, { input }, { d
   }
 }
 
-async function insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
+// Returns null when there is nothing to update, so consumers can distinguish "updated" from
+// "not attempted". Upstream failures propagate as standard GraphQL errors.
+const updateIfRequired = async (newDetails, update) => {
+  if (!Object.keys(newDetails).length) {
+    return null
+  }
+  await update()
+  return true
+}
+
+// A failed update nulls the whole mutation payload, so the applied/not-applied state of each
+// update travels on the error's extensions instead: true = applied, false = attempted and
+// failed, null = not attempted.
+const withUpdateStatuses = (error, statuses) => {
+  if (error instanceof GraphQLError) {
+    Object.assign(error.extensions, statuses)
+    return error
+  }
+  return new GraphQLError(error.message, { originalError: error, extensions: statuses })
+}
+
+export const businessAllFieldsUpdateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail, defraIdContext },
+  info
+) => {
+  auditTrail?.recordAccount(info, 'sbi', input.sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'updated',
+    entityid: input.sbi
+  })
+  const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
+  const currentOrgDetails =
+    await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
+
+  const newOrgDetails = transformBusinessDetailsToOrgDetailsUpdate(input)
+  const newOrgAdditionalDetails = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
+
+  const updatedOrgDetails = {
+    ...currentOrgDetails,
+    ...newOrgDetails,
+    ...newOrgAdditionalDetails
+  }
+
+  let businessDetailsUpdated = null
+  try {
+    businessDetailsUpdated = await updateIfRequired(newOrgDetails, () =>
+      dataSources.ruralPaymentsBusiness.updateOrganisationDetails(organisationId, updatedOrgDetails)
+    )
+  } catch (error) {
+    throw withUpdateStatuses(error, {
+      businessDetailsUpdated: false,
+      additionalBusinessDetailsUpdated: null
+    })
+  }
+
+  let additionalBusinessDetailsUpdated = null
+  try {
+    additionalBusinessDetailsUpdated = await updateIfRequired(newOrgAdditionalDetails, () =>
+      dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails(
+        organisationId,
+        updatedOrgDetails
+      )
+    )
+  } catch (error) {
+    throw withUpdateStatuses(error, {
+      businessDetailsUpdated,
+      additionalBusinessDetailsUpdated: false
+    })
+  }
+
+  return {
+    success: true,
+    businessDetailsUpdated,
+    additionalBusinessDetailsUpdated,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
+async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   const orgId = await ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-  await mongoBusiness.insertOrgIdBySbi(sbi, orgId)
+  await mongoBusiness.upsertOrgIdBySbi(sbi, orgId)
   return orgId
 }
 
-export async function retrieveOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
+export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
+  if (defraIdContext) {
+    // A defraIdContext is only built for externally authenticated requests, in which case the org id
+    // can be retrieved directly from the token
+    return defraIdContext.orgId(sbi)
+  }
+
+  const { mongoBusiness, ruralPaymentsBusiness } = dataSources
   return (
     (await mongoBusiness.getOrgIdBySbi(sbi)) ??
-    insertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
+    upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
   )
+}
+
+// Some fields must always be resolved against the internal gateway even when the request itself arrived with
+// external authorisation. Resolvers for those fields should call this instead of using
+// dataSources.ruralPaymentsBusiness directly.
+export function getRuralPaymentsBusinessDataSource({
+  dataSources,
+  useServiceAccountForExternal = false
+}) {
+  if (dataSources.serviceAccount.ruralPaymentsBusiness && useServiceAccountForExternal) {
+    // This is an externally routed request (service account datasource is only configured for external routes) and
+    // the resolver has explicitly asked for the service account
+    return dataSources.serviceAccount.ruralPaymentsBusiness
+  }
+  return dataSources.ruralPaymentsBusiness
 }
 
 const validateLockUnlockInput = (input) => {
@@ -57,12 +194,20 @@ const validateLockUnlockInput = (input) => {
   }
 }
 
-export const businessLockResolver = async (__, { input }, { dataSources }) => {
-  validateLockUnlockInput(input)
-
+export const businessLockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...lockBodyAttributes } = input
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'locked',
+    entityid: sbi
+  })
 
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
+  validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.lockOrganisation(organisationId, lockBodyAttributes)
 
@@ -74,12 +219,20 @@ export const businessLockResolver = async (__, { input }, { dataSources }) => {
   }
 }
 
-export const businessUnlockResolver = async (__, { input }, { dataSources }) => {
-  validateLockUnlockInput(input)
-
+export const businessUnlockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...unlockBodyAttributes } = input
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'unlocked',
+    entityid: sbi
+  })
 
   const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
+  validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.unlockOrganisation(organisationId, unlockBodyAttributes)
 

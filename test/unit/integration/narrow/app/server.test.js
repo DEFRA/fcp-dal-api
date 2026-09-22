@@ -36,7 +36,8 @@ describe('Server config and startup', () => {
   beforeEach(async () => {
     configMockPath = {
       port: '3987',
-      requestTimeoutMs: timeout
+      requestTimeoutMs: timeout,
+      serviceVersion: '1.2.3'
     }
     const originalConfig = { ...config }
     jest
@@ -74,7 +75,19 @@ describe('Server config and startup', () => {
       const routes = server.table()
       const paths = routes.map((r) => r.path)
       expect(paths).toContain('/health')
-      expect(paths).toContain('/healthy')
+    })
+  })
+
+  describe('dal-service-version response header', () => {
+    test('is set on a successful response', async () => {
+      const response = await server.inject({ method: 'GET', url: '/healthy' })
+      expect(response.headers['x-dal-service-version']).toBe('1.2.3')
+    })
+
+    test('is set on a Boom (error) response', async () => {
+      const response = await server.inject({ method: 'GET', url: '/does-not-exist' })
+      expect(response.statusCode).toBe(404)
+      expect(response.headers['x-dal-service-version']).toBe('1.2.3')
     })
   })
 
@@ -117,10 +130,57 @@ describe('Server config and startup', () => {
       )
     })
 
+    test('response event logs the requesting service as tenant.id, when the request identifies one', async () => {
+      server.ext('onRequest', (request, h) => {
+        request.requestingService = 'Grants'
+        return h.continue
+      })
+
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({ tenant: { id: 'Grants' } })
+      )
+    })
+
+    test('response event omits tenant when the request has no requesting service', async () => {
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload).not.toHaveProperty('tenant')
+    })
+
     test('response event skips metrics for health path', async () => {
       await server.inject({ method: 'GET', url: '/health' })
       expect(mockSendMetric.sendMetric).not.toHaveBeenCalled()
       expect(mockLogger.logger.info).not.toHaveBeenCalled()
+    })
+
+    test('response event does not log a negative requestTimeMs when the client aborted the response', () => {
+      // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
+      // response is never fully written (e.g. the client disconnects mid-response).
+      const abortedRequest = {
+        path: '/non-health',
+        transactionId: 'test-transaction-id',
+        traceId: 'test-trace-id',
+        method: 'get',
+        params: {},
+        payload: null,
+        body: null,
+        headers: {},
+        requestingService: undefined,
+        info: { received: Date.now(), responded: 0, remoteAddress: '127.0.0.1' },
+        response: { statusCode: 499, headers: {}, source: null }
+      }
+
+      server.events.emit('response', abortedRequest)
+
+      expect(mockSendMetric.sendMetric).not.toHaveBeenCalled()
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({ requestTimeMs: null })
+      )
     })
   })
 })

@@ -7,7 +7,6 @@ import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './log
 import { logger } from './logger/logger.js'
 import { sendMetric } from './logger/sendMetric.js'
 import { healthRoute } from './routes/health.js'
-import { healthyRoute } from './routes/healthy.js'
 
 export const server = hapi.server({
   port: config.get('port')
@@ -17,8 +16,24 @@ server.ext('onPreStart', () => {
   server.listener.setTimeout(config.get('requestTimeoutMs'))
 })
 
-const routes = [].concat(healthyRoute, healthRoute)
-server.route(routes)
+server.route([healthRoute])
+
+const SERVICE_VERSION_HEADER_NAME = 'x-dal-service-version'
+
+server.ext({
+  type: 'onPreResponse',
+  method: function (request, h) {
+    const response = request.response
+
+    if (response.isBoom) {
+      response.output.headers[SERVICE_VERSION_HEADER_NAME] = config.get('serviceVersion')
+    } else {
+      response.header(SERVICE_VERSION_HEADER_NAME, config.get('serviceVersion'))
+    }
+
+    return h.continue
+  }
+})
 
 server.ext({
   type: 'onRequest',
@@ -51,13 +66,19 @@ server.ext({
 })
 
 server.events.on('response', function (request) {
-  const requestTimeMs = request.info.responded - request.info.received
+  // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
+  // response is never fully written (e.g. the client disconnects mid-response).
+  // This produces a negative duration in the logs
+  const requestTimeMs =
+    request.info.responded === 0 ? null : request.info.responded - request.info.received
 
   if (request.path !== healthRoute.path) {
     // Only send metrics and logs for non-health check paths
-    sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
-      code: DAL_APPLICATION_REQUEST_001
-    })
+    if (requestTimeMs !== null) {
+      sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+        code: DAL_APPLICATION_REQUEST_001
+      })
+    }
 
     logger.info('FCP - Access log', {
       type: 'http',
@@ -77,7 +98,8 @@ server.events.on('response', function (request) {
       },
       response: {
         statusCode: request.response.statusCode
-      }
+      },
+      ...(request.requestingService && { tenant: { id: request.requestingService } })
     })
   }
 

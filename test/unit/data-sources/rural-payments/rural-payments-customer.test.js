@@ -12,14 +12,13 @@ describe('Rural Payments Customer', () => {
   const datasourceOptions = [
     { logger },
     {
-      gatewayType: 'internal'
+      request: { headers: { email: 'test@test.test' } }
     }
   ]
   const ruralPaymentsCustomer = new RuralPaymentsCustomer(...datasourceOptions)
   const ruralPaymentsCustomerExt = new RuralPaymentsCustomer(
     { logger },
     {
-      gatewayType: 'external',
       request: {
         headers: {
           'x-forwarded-authorization': jwt.sign({ contactId: '11111111' }, 'secret', {
@@ -32,6 +31,31 @@ describe('Rural Payments Customer', () => {
   const httpGet = jest.spyOn(ruralPaymentsCustomer, 'get')
   const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
   const httpGetExt = jest.spyOn(ruralPaymentsCustomerExt, 'get')
+
+  test('should return emailDuplicated from validateEmail', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: true } }))
+
+    const result = await ruralPaymentsCustomer.validateEmail('test@test.test')
+
+    expect(result).toEqual({ emailDuplicated: true })
+    expect(httpGet).toHaveBeenCalledWith('person/test%40test.test/validateEmail')
+  })
+
+  test('should return false when validateEmail response reports no duplicate', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: false } }))
+
+    const result = await ruralPaymentsCustomer.validateEmail('unique@test.test')
+
+    expect(result).toEqual({ emailDuplicated: false })
+  })
+
+  test('should URL-encode special characters in the email passed to validateEmail', async () => {
+    httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: false } }))
+
+    await ruralPaymentsCustomer.validateEmail('foo/bar+baz@example.com')
+
+    expect(httpGet).toHaveBeenCalledWith('person/foo%2Fbar%2Bbaz%40example.com/validateEmail')
+  })
 
   test('should call getExternalPerson for external gateway', async () => {
     httpGetExt.mockImplementation(async () => ({ _data: { id: 123 } }))
@@ -61,7 +85,7 @@ describe('Rural Payments Customer', () => {
       headers: { 'Content-Type': 'application/json' }
     })
     expect(logger.warn).toHaveBeenCalledWith(
-      '#datasource - Rural payments - Customer not found for CRN: 11111111',
+      '#datasource - Rural payments - Customer not found for CRN: ****1111',
       {
         code: 'RURALPAYMENTS_API_NOT_FOUND_001',
         crn: '11111111',
@@ -176,8 +200,8 @@ describe('Rural Payments Customer', () => {
         code: 'RURALPAYMENTS_API_NOT_FOUND_001',
         personId: 'nonexistentId',
         response: { body: {} },
-        gatewayType: 'internal',
-        request: undefined
+        gatewayType: 'rural-payments-internal',
+        request: { headers: { email: 'test@test.test' } }
       }
     )
   })
@@ -331,5 +355,36 @@ describe('Rural Payments Customer', () => {
       extensions: { response: { status: 404 } }
     })
     expect(httpGet).toHaveBeenCalledTimes(1)
+  })
+
+  describe('getInternalUserAuthorisedFunctions', () => {
+    test('requests the pipe-separated functions and returns the authorisation data', async () => {
+      const data = { viewLand: true, amendBusinessDetails: false }
+      httpGet.mockResolvedValueOnce({ data, success: true, errorString: null })
+
+      const result = await ruralPaymentsCustomer.getInternalUserAuthorisedFunctions([
+        'viewLand',
+        'amendBusinessDetails'
+      ])
+
+      expect(httpGet).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^SitiAgriApi\/authorisation\/byFunction\?functions=viewLand%7CamendBusinessDetails&module=CUST_SS_PORTAL&timestamp=\d+$/
+        )
+      )
+      expect(result).toEqual(data)
+    })
+
+    test('URL-encodes function names containing reserved characters', async () => {
+      httpGet.mockResolvedValueOnce({ data: {}, success: true, errorString: null })
+
+      await ruralPaymentsCustomer.getInternalUserAuthorisedFunctions(['viewLand', 'does#Not&Exist'])
+
+      expect(httpGet).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^SitiAgriApi\/authorisation\/byFunction\?functions=viewLand%7Cdoes%23Not%26Exist&module=CUST_SS_PORTAL&timestamp=\d+$/
+        )
+      )
+    })
   })
 })

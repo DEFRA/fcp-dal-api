@@ -16,7 +16,7 @@ The graphQL explorer should now be available, head to http://localhost:3000/grap
 > NOTE: the IDs of the available customers and businesses can be found in the [mock code](https://github.com/DEFRA/fcp-dal-upstream-mock/blob/main/src/factories/id-lookups.js), along with their corresponding CRN or SBI (respectively), as well as the relationships between entities.
 
 > NOTE: The above is a simplified setup that is intended to aid consumer development.
-> For access to the live instances, [schema availability](#the-on-directive) and [authorisation](#security) would need to be carefully considered.
+> For access to the live instances, [schema availability](#the-wip-directive) and [authorisation](#security) would need to be carefully considered.
 
 More consumer focused documentation can be found on the project [Homepage...](https://defra.github.io/fcp-dal-api/homepage)
 
@@ -133,6 +133,28 @@ To test the application run:
 npm test
 ```
 
+#### GraphQL schema coverage
+
+The acceptance test suite is checked against the GraphQL schema to ensure enough of the schema is actually exercised by tests. This runs as part of CI, but can also be run locally:
+
+```bash
+npm run test:acceptance:coverage
+```
+
+This prints the schema to `schema.graphql`, runs [`graphql-inspector coverage`](https://the-guild.dev/graphql/inspector/docs/products/cli#coverage) against the acceptance tests, and fails (via `scripts/check-schema-coverage.js`) if type or field coverage falls below a threshold (default `80%` for both, override with the `SCHEMA_TYPE_COVERAGE_THRESHOLD` and `SCHEMA_FIELD_COVERAGE_THRESHOLD` env vars). Any uncovered types and fields are listed in the output.
+
+There is also a helper script to print the current schema to `schema.graphql` on its own:
+
+```bash
+npm run schema:print
+```
+
+And one to check for structurally similar types in the schema (useful for spotting duplication):
+
+```bash
+npm run schema:type:similarity
+```
+
 ### Production
 
 To mimic the application running in `production` mode locally run:
@@ -175,25 +197,39 @@ git config --global core.autocrlf false
 | `GET: /graphql`  | The interactive GraphQL service frontend (like Swagger docs but for GraphQL 😉). |
 | `POST: /graphql` | For making GraphQL requests to the DAL API.                                      |
 
-### The `@on` directive
+### The `@wip` directive
 
-To allow for the granular release of fields as data sources become available, fields must have the custom `@on` directive set to be included when the schema is built.
-Otherwise they will NOT be available in the graphQL queries, and an error will occur.
+The `@wip` directive marks fields that are still a work in progress. It is only valid on field definitions:
 
-For example:
+```graphql
+directive @wip on FIELD_DEFINITION
+```
+
+Fields annotated with `@wip` behave differently depending on the environment:
+
+- In `dev` and `perf-test`, the fields are included in the schema but are marked as deprecated with the reason: `Work in progress — may change or be removed`.
+- In all other environments (`test`, `ext-test`, `prod`), the fields are removed entirely from the schema.
+
+> **Note:** `dev` and `perf-test` are the environments backed by the upstream mock service (rather than a real KITS or Hitachi instance). The `@wip` directive is only active in these mock-backed environments.
+
+This allows WIP functionality to be safely exercised in supported environments without exposing it to consumers elsewhere.
+
+Example usage:
 
 ```graphql
 type Query {
-  customers: [Customer] @on
+  customers: [Customer]
+  experimentalFeature: String @wip
 }
 
 type Customer {
-  id: ID! @on
-  name: String # this field is not included in the final schema
+  id: ID!
+  name: String
+  wipOnlyField: Int @wip
 }
 ```
 
-For local development and lower environments, all fields can be turned on by setting the env variable: `ALL_SCHEMA_ON=true`.
+In non-WIP environments, `Query.experimentalFeature` and `Customer.wipOnlyField` will not exist in the schema. In `dev` and `perf-test` they will be present (with the deprecation reason).
 
 ### Security
 
@@ -228,6 +264,47 @@ Modifications can be made by submitting a PR with changes to the relevant spec f
 
 The project is setup with SonarCloud to ensure certain important code quality standards are met.
 More information can be found [here](https://sonarcloud.io/project/overview?id=DEFRA_fcp-dal-api).
+
+### Publish Dev Build workflow
+
+The [`publish-dev-build`](./.github/workflows/publish-dev-build.yml) GitHub Actions workflow allows a build from any branch to be published to the `dev` environment ahead of merging to `main`, which is useful for testing changes before they are merged.
+
+For example, you might need to test logging works as expected within the cdp portal.
+
+It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) by selecting the branch to build from, and running the workflow.
+
+The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, tagging it `0.0.<run_number>` (the GitHub Actions run number), so each dispatch of the workflow produces a unique, incrementing version regardless of branch.
+
+> NOTE: this bypasses the usual release process and is intended for short-lived dev testing only, not for tracking real releases.
+
+### Publish Hot Fix workflow
+
+The [`publish-hotfix`](./.github/workflows/publish-hotfix.yml) GitHub Actions workflow publishes a patch release directly from any non-`main` branch, bypassing the normal PR-to-main release flow. This is used to ship an urgent fix to a live environment without waiting for a full release.
+
+It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-hotfix.yml) by selecting the branch to build from, and running the workflow.
+
+The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, which auto-increments the patch version using [`anothrNick/github-tag-action`](https://github.com/anothrNick/github-tag-action) (`DEFAULT_BUMP: patch`, `TAG_CONTEXT: branch`) based on the tags reachable from the branch's history.
+
+#### Working around a duplicate version number
+
+Because the next version is auto-computed from tags reachable from the branch, the computed version can collide with a tag that already exists — e.g. a release or another hotfix has been tagged since the hotfix branch diverged from `main`. When this happens, the publish fails because the version/tag already exists.
+
+To work around this, temporarily override the auto-versioning by adding a `CUSTOM_TAG` entry to the `env:` block of [`publish-hotfix.yml`](./.github/workflows/publish-hotfix.yml):
+
+```yaml
+env:
+  AWS_REGION: eu-west-2
+  AWS_ACCOUNT_ID: '094954420758'
+  CUSTOM_TAG: 2.18.2 # <-- pick the next unused version
+```
+
+Setting `CUSTOM_TAG` causes `github-tag-action` to skip auto-versioning entirely and use exactly the version provided.
+
+1. Check the version currently deployed to `prod` in the [CDP portal](https://portal.cdp-int.defra.cloud/services/fcp-dal-api) and then check the existing tags (`git tag --list --sort=-v:refname | head`) to find the next free patch version for the prod `major.minor` version
+2. Add the `CUSTOM_TAG` line above to `publish-hotfix.yml` on the hotfix branch and commit/push it.
+3. Dispatch the `Publish Hot Fix` workflow from that branch.
+
+> NOTE: this same technique (`CUSTOM_TAG`) is what the [Publish Dev Build workflow](#publish-dev-build-workflow) uses to guarantee a unique version on every dispatch.
 
 ### Dependabot - TODO!
 

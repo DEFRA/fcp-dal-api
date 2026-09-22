@@ -67,20 +67,17 @@ describe('RuralPayments Custom Fetch', () => {
     jest.restoreAllMocks()
   })
 
-  it('should initialise; fetch has INternal mTLS, gateway, & timeout', async () => {
+  it('should initialise; fetch has Internal mTLS, gateway, & timeout', async () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'internal',
-      internalGatewayDevOverrideEmail: 'override-email'
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('internal')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
+    expect(rp.isExternalRoute()).toBe(false)
     expect(rp.baseURL).toBe(fakeInternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -95,7 +92,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeInternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'internal' }
+        headers: {}
       })
     ).toBe('data')
     expect(EnvHttpProxyAgent.mockConstructorArgs).toEqual({ requestTls })
@@ -105,26 +102,41 @@ describe('RuralPayments Custom Fetch', () => {
     expect(callArgs[0]).toBe(`${fakeInternalURL}example-path`)
     expect(callArgs[1]).toMatchObject({
       method: 'GET',
-      headers: { 'Gateway-Type': 'internal' },
+      headers: {},
       signal: [timeout]
     })
     expect(callArgs[1].dispatcher).toBeDefined()
   })
 
-  it('should initialise; fetch has EXternal mTLS, gateway, & timeout', async () => {
+  it('defaults options to {} when httpFetch is called without options (mTLS)', async () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'external',
-      internalGatewayDevOverrideEmail: 'override-email'
+      request
+    })
+
+    fetch11.mockImplementationOnce(() => 'data')
+    expect(rp.httpCache.httpFetch(`${fakeInternalURL}example-path`)).toBe('data')
+
+    const callArgs = fetch11.mock.calls[0]
+    expect(callArgs[0]).toBe(`${fakeInternalURL}example-path`)
+    expect(callArgs[1]).toMatchObject({ signal: [timeout] })
+    expect(callArgs[1].dispatcher).toBeDefined()
+  })
+
+  it('should initialise; fetch has External mTLS, gateway, & timeout', async () => {
+    const { RuralPayments } = await import(
+      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
+    )
+    const request = { headers: { 'x-forwarded-authorization': 'token123' } }
+    const rp = new RuralPayments(config, {
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('external')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
+    expect(rp.isExternalRoute()).toBe(true)
     expect(rp.baseURL).toBe(fakeExternalURL)
     const requestTls = {
       host: 'rp_kits_gateway_internal_url',
@@ -139,7 +151,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeExternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'external' }
+        headers: {}
       })
     ).toBe('data')
 
@@ -148,7 +160,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(callArgs[0]).toBe(`${fakeExternalURL}example-path`)
     expect(callArgs[1]).toMatchObject({
       method: 'GET',
-      headers: { 'Gateway-Type': 'external' },
+      headers: {},
       signal: [timeout]
     })
     expect(callArgs[1].dispatcher).toBeDefined()
@@ -160,16 +172,13 @@ describe('RuralPayments Custom Fetch', () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'internal',
-      internalGatewayDevOverrideEmail: 'override-email'
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('internal')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
+    expect(rp.isExternalRoute()).toBe(false)
     expect(rp.baseURL).toBe(fakeInternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS
@@ -177,12 +186,30 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeInternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'internal' }
+        headers: {}
       })
     ).toBe('data')
     expect(fetch).toHaveBeenCalledWith(`${fakeInternalURL}example-path`, {
       method: 'GET',
-      headers: { 'Gateway-Type': 'internal' },
+      headers: {},
+      signal: [timeout]
+    })
+  })
+
+  it('defaults options to {} when httpFetch is called without options (no mTLS)', async () => {
+    configMockPath['kits.disableMTLS'] = true
+
+    const { RuralPayments } = await import(
+      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
+    )
+    const request = { headers: { email: 'test@test.test' } }
+    const rp = new RuralPayments(config, {
+      request
+    })
+
+    fetch.mockImplementationOnce(() => 'data')
+    expect(rp.httpCache.httpFetch(`${fakeInternalURL}example-path`)).toBe('data')
+    expect(fetch).toHaveBeenCalledWith(`${fakeInternalURL}example-path`, {
       signal: [timeout]
     })
   })
@@ -193,16 +220,13 @@ describe('RuralPayments Custom Fetch', () => {
     const { RuralPayments } = await import(
       `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
     )
-    const request = {}
+    const request = { headers: { 'x-forwarded-authorization': 'token123' } }
     const rp = new RuralPayments(config, {
-      request,
-      gatewayType: 'external',
-      internalGatewayDevOverrideEmail: 'override-email'
+      request
     })
 
     expect(rp.request).toBe(request)
-    expect(rp.gatewayType).toBe('external')
-    expect(rp.internalGatewayDevOverrideEmail).toBe('override-email')
+    expect(rp.isExternalRoute()).toBe(true)
     expect(rp.baseURL).toBe(fakeExternalURL)
 
     // check that the fetch works as expected with timeout, but without mTLS
@@ -210,12 +234,12 @@ describe('RuralPayments Custom Fetch', () => {
     expect(
       rp.httpCache.httpFetch(`${fakeExternalURL}example-path`, {
         method: 'GET',
-        headers: { 'Gateway-Type': 'external' }
+        headers: {}
       })
     ).toBe('data')
     expect(fetch).toHaveBeenCalledWith(`${fakeExternalURL}example-path`, {
       method: 'GET',
-      headers: { 'Gateway-Type': 'external' },
+      headers: {},
       signal: [timeout]
     })
   })

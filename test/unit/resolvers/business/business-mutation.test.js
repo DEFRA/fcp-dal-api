@@ -4,6 +4,7 @@ import { transformBusinessDetailsToOrgDetailsCreate } from '../../../../app/tran
 const mockBusinessCommonModule = {
   businessDetailsUpdateResolver: jest.fn(),
   businessAdditionalDetailsUpdateResolver: jest.fn(),
+  businessAllFieldsUpdateResolver: jest.fn(),
   retrieveOrgIdBySbi: jest.fn(),
   businessLockResolver: jest.fn(),
   businessUnlockResolver: jest.fn()
@@ -122,6 +123,16 @@ describe('Business Additional Details Mutation resolvers', () => {
       mockInfo
     )
   })
+
+  it('updateBusinessAllFields calls businessAllFieldsUpdateResolver', async () => {
+    await Mutation.updateBusinessAllFields({}, mockArgs, mockContext, mockInfo)
+    expect(mockBusinessCommonModule.businessAllFieldsUpdateResolver).toHaveBeenCalledWith(
+      {},
+      mockArgs,
+      mockContext,
+      mockInfo
+    )
+  })
 })
 
 describe('Business Mutation UpdateBusinessResponse', () => {
@@ -136,7 +147,7 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),
-        insertOrgIdBySbi: jest.fn()
+        upsertOrgIdBySbi: jest.fn()
       }
     }
   })
@@ -153,7 +164,7 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       { dataSources }
     )
 
-    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('123', dataSources)
+    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('123', { dataSources })
     expect(result).toEqual({
       land: {
         sbi: '123'
@@ -355,6 +366,56 @@ describe('Business Mutation createBusiness', () => {
       }
     })
   })
+
+  it('records the sbi/organisationId accounts and a created business entity on the audit trail', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
+    dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockResolvedValue({
+      sbi: 'sbi',
+      id: 'orgId'
+    })
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'createBusiness', typename: 'Mutation', prev: undefined } }
+
+    await Mutation.createBusiness(
+      {},
+      { input: { crn: '123', name: 'Acme Farms Ltd' } },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 'sbi')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'created',
+      entityid: 'sbi'
+    })
+  })
+
+  it('still records a created business entity, but no accounts, when the organisation creation fails', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
+    dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = { path: { key: 'createBusiness', typename: 'Mutation', prev: undefined } }
+
+    await expect(
+      Mutation.createBusiness(
+        {},
+        { input: { crn: '123', name: 'Acme Farms Ltd' } },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'created',
+      entityid: undefined
+    })
+  })
 })
 
 describe('Business Mutation createBusinessCustomerBankDetails', () => {
@@ -497,6 +558,31 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     expect(response).toEqual({ __typename: 'BankDetailsSubmitted', success: true })
   })
 
+  it('propagates the error when validateBankChange fails and does not submit', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockRejectedValue(
+      new Error('Internal Server Error')
+    )
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Internal Server Error')
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('throws and does not submit when validation returns an unexpected status', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'UNEXPECTED_STATUS',
+      attemptsRemaining: 0
+    })
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Internal Server Error')
+
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
   it('throws NotFound when the organisation has no FRN', async () => {
     dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
       id: 5583781,
@@ -508,6 +594,37 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     ).rejects.toThrow('FRN not found for business')
 
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('still records the sbi account and an attempted bank-account entity when getOrganisation fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'createBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await expect(
+      Mutation.createBusinessCustomerBankDetails(
+        {},
+        { input: baseInput },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'updated',
+      entityid: undefined
+    })
   })
 
   it('returns BankDetailsValidationFailed ', async () => {
@@ -589,6 +706,312 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
       message: 'Bank details failed validation'
     })
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('records sbi/organisationId/frn accounts and an updated bank-account entity on the audit trail', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'createBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await Mutation.createBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5583781')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', '10014489653')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'updated',
+      entityid: '10014489653'
+    })
+  })
+})
+
+describe('Business Mutation validateBusinessCustomerBankDetails', () => {
+  let dataSources
+
+  const baseInput = {
+    sbi: '110405990',
+    crn: '1100209492',
+    account: {
+      ukBusiness: {
+        accountHolderName: 'Acme Farms Ltd',
+        accountNumber: '14345678',
+        bankName: 'Acme Bank',
+        sortCode: '123456',
+        currency: 'GBP'
+      }
+    }
+  }
+
+  beforeEach(() => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockReset()
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationBySBI: jest.fn().mockResolvedValue({
+          id: 5583781,
+          businessReference: '10014489653'
+        }),
+        getBankChangeLockedStatus: jest.fn().mockResolvedValue({ locked: false }),
+        getBankChangeAccountStatus: jest.fn().mockResolvedValue({
+          editable: true,
+          submitted: false,
+          updatedRecently: false,
+          new: false
+        }),
+        validateBankChange: jest.fn().mockResolvedValue({
+          status: 'MATCH',
+          message: 'All good',
+          attemptsRemaining: 0,
+          account: { bank: { name: 'Acme Bank', sortCode: '123456' } }
+        }),
+        submitBankChange: jest.fn().mockResolvedValue({})
+      }
+    }
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
+  })
+
+  it('returns BankDetailsMatched on a full match without submitting', async () => {
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.validateBankChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organisationId: '5583781',
+        personId: '5020949',
+        sbi: '110405990',
+        frn: '10014489653',
+        crn: '1100209492'
+      })
+    )
+    expect(response).toEqual({
+      __typename: 'BankDetailsMatched',
+      message: 'All good'
+    })
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('returns BankDetailsMatched with default message when none provided', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'MATCH',
+      attemptsRemaining: 0
+    })
+
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsMatched',
+      message: 'Bank details match'
+    })
+  })
+
+  it('returns BankDetailsPartialMatch on a partial match without submitting', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'PARTIAL_MATCH',
+      message: 'Some details did not match',
+      attemptsRemaining: 0,
+      account: { bank: { name: 'Acme Bank' } }
+    })
+
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsPartialMatch',
+      message: 'Some details did not match'
+    })
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('returns BankDetailsPartialMatch with default message when none provided', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'PARTIAL_MATCH',
+      attemptsRemaining: 0
+    })
+
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsPartialMatch',
+      message: 'Bank details partially match'
+    })
+  })
+
+  it('throws when validation returns an unexpected status', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'UNEXPECTED_STATUS',
+      attemptsRemaining: 0
+    })
+
+    await expect(
+      Mutation.validateBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('Internal Server Error')
+  })
+
+  it('returns BankDetailsValidationFailed when the details do not match', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'FAILED',
+      message: "Details don't match",
+      attemptsRemaining: 2,
+      account: { bank: { sortCode: '123456' } }
+    })
+
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsValidationFailed',
+      message: "Details don't match",
+      attemptsRemaining: 2
+    })
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('returns BankDetailsLocked when no validation attempts remain', async () => {
+    dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
+      status: 'FAILED',
+      message: "Details don't match",
+      attemptsRemaining: 0
+    })
+
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: "Details don't match"
+    })
+    expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
+  })
+
+  it('returns BankDetailsLocked when the locked-status endpoint reports locked', async () => {
+    dataSources.ruralPaymentsBusiness.getBankChangeLockedStatus.mockResolvedValue({ locked: true })
+
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsLocked',
+      message: 'Bank details are locked for changes'
+    })
+    expect(dataSources.ruralPaymentsBusiness.validateBankChange).not.toHaveBeenCalled()
+  })
+
+  it('returns BankDetailsNotEditable when the account-status endpoint reports not editable', async () => {
+    dataSources.ruralPaymentsBusiness.getBankChangeAccountStatus.mockResolvedValue({
+      editable: false,
+      submitted: true,
+      updatedRecently: true,
+      new: false
+    })
+
+    const response = await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources }
+    )
+
+    expect(response).toEqual({
+      __typename: 'BankDetailsNotEditable',
+      message: 'Bank details are not currently editable',
+      submitted: true,
+      updatedRecently: true,
+      new: false
+    })
+    expect(dataSources.ruralPaymentsBusiness.validateBankChange).not.toHaveBeenCalled()
+  })
+
+  it('throws NotFound when the organisation has no FRN', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue({
+      id: 5583781,
+      businessReference: null
+    })
+
+    await expect(
+      Mutation.validateBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
+    ).rejects.toThrow('FRN not found for business')
+  })
+
+  it('still records the sbi account and an attempted bank-account entity when getOrganisation fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'validateBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await expect(
+      Mutation.validateBusinessCustomerBankDetails(
+        {},
+        { input: baseInput },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('upstream failure')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'validate',
+      entityid: undefined
+    })
+  })
+
+  it('records sbi/organisationId/frn accounts and a validate bank-account entity on the audit trail', async () => {
+    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const info = {
+      path: { key: 'validateBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
+    }
+
+    await Mutation.validateBusinessCustomerBankDetails(
+      {},
+      { input: baseInput },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', baseInput.sbi)
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5583781')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', '10014489653')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'bank-account',
+      action: 'validate',
+      entityid: '10014489653'
+    })
   })
 })
 

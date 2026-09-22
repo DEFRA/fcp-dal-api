@@ -231,17 +231,52 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        crn: 'CRN001',
-        customerReferenceNumber: 'CRN002',
+        crn: '**N001',
+        customerReferenceNumber: '**N002',
         sbi: '123456789',
-        primarySearchPhrase: 'john doe',
         searchFieldType: 'name',
         id: 'user-123',
-        nested: { crn: 'nested-crn' },
+        nested: { crn: '******-crn' },
         array: [{ id: 'allowed' }],
         other: {
           crn: null
         }
+      })
+    })
+
+    it('masks crn and customerReferenceNumber, keeping only the last 4 characters', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: {
+            crn: '1234567890',
+            customerReferenceNumber: '9876543210',
+            shortCrn: 'ab', // key not masked, but also under 4 chars — included verbatim
+            nested: { crn: '5555' } // exactly 4 chars, nothing to mask
+          }
+        }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        crn: '******7890',
+        customerReferenceNumber: '******3210',
+        nested: { crn: '5555' }
+      })
+    })
+
+    it('excludes primarySearchPhrase entirely, since it may hold a crn, name or postcode', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: {
+            sbi: '987654321',
+            primarySearchPhrase: 'jane doe',
+            allowed: 'no',
+            disallowed: 'yes'
+          }
+        }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        sbi: '987654321'
       })
     })
 
@@ -258,8 +293,51 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        sbi: '987654321',
-        primarySearchPhrase: 'jane doe'
+        sbi: '987654321'
+      })
+    })
+
+    describe('primarySearchPhrase, based on sibling searchFieldType', () => {
+      it.each(['SBI', 'VENDOR_NUMBER', 'TRADER_NUMBER', 'PERSONAL_IDENTIFIER'])(
+        'logs primarySearchPhrase when searchFieldType is %s',
+        (searchFieldType) => {
+          const result = cdpSchemaTranslator().transform({
+            request: {
+              body: { searchFieldType, primarySearchPhrase: 'ABC123' }
+            }
+          })
+
+          expect(JSON.parse(result.url.query)).toEqual({
+            searchFieldType,
+            primarySearchPhrase: 'ABC123'
+          })
+        }
+      )
+
+      it.each(['BUSINESS_NAME', 'BUSINESS_POSTCODE', 'CUSTOMER_NAME', 'CUSTOMER_POSTCODE', 'CRN'])(
+        'excludes primarySearchPhrase when searchFieldType is %s',
+        (searchFieldType) => {
+          const result = cdpSchemaTranslator().transform({
+            request: {
+              body: { searchFieldType, primarySearchPhrase: 'jane doe' }
+            }
+          })
+
+          expect(JSON.parse(result.url.query)).toEqual({ searchFieldType })
+        }
+      )
+
+      it('masks primarySearchPhrase to the last 4 digits when searchFieldType is CUSTOMER_REFERENCE (the wire-level CRN search type)', () => {
+        const result = cdpSchemaTranslator().transform({
+          request: {
+            body: { searchFieldType: 'CUSTOMER_REFERENCE', primarySearchPhrase: '1234567890' }
+          }
+        })
+
+        expect(JSON.parse(result.url.query)).toEqual({
+          searchFieldType: 'CUSTOMER_REFERENCE',
+          primarySearchPhrase: '******7890'
+        })
       })
     })
   })
@@ -350,6 +428,46 @@ describe('winstonFormatters', () => {
     it('sets url.full and url.path when request.url is a path-only string', () => {
       const result = cdpSchemaTranslator().transform({
         request: { url: '/organisation/123' }
+      })
+      expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
+    })
+
+    it('masks the crn segment of an external-auth security-answers path', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/external-auth/security-answers/1234567890' }
+      })
+      expect(result.url).toEqual({
+        full: '/external-auth/security-answers/******7890',
+        path: '/external-auth/security-answers/******7890'
+      })
+    })
+
+    it('masks the crn segment of a full external-auth security-answers URL', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: 'https://api.example.com/external-auth/security-answers/1234567890' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/external-auth/security-answers/******7890',
+        path: '/external-auth/security-answers/******7890'
+      })
+    })
+
+    it('masks the crn segment when both url and path are supplied', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          url: 'https://api.example.com/external-auth/security-answers/1234567890',
+          path: '/external-auth/security-answers/1234567890'
+        }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/external-auth/security-answers/******7890',
+        path: '/external-auth/security-answers/******7890'
+      })
+    })
+
+    it('does not affect paths that are not in the PII path pattern list', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/organisation/123' }
       })
       expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
     })

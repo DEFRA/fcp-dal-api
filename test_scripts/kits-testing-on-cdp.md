@@ -20,8 +20,6 @@ jq -r '.KITS_CONNECTION_KEY'  secrets | base64 -d > key
 jq -r '.KITS_CONNECTION_CERT' secrets | base64 -d > cert
 export key_location=key
 export cert_location=cert
-
-alias curl='curl -x "$CDP_HTTPS_PROXY" ' # sets curl to use the CPD outbound squid proxy!
 ```
 
 Now the test commands in the [`kits-gateway-test.sh`](./kits-gateway-test.sh) should work.

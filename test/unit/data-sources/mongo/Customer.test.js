@@ -9,7 +9,7 @@ const db = client.db(config.get('mongo.databaseName'))
 const mockCollection = {
   ...db.collection('customer'),
   findOne: jest.fn(),
-  insertOne: jest.fn()
+  updateOne: jest.fn()
 }
 
 const mongoCustomer = new MongoCustomer({ modelOrCollection: mockCollection })
@@ -41,20 +41,43 @@ describe('MongoCustomer', () => {
     })
   })
 
-  describe('insertPersonIdByCRN', () => {
-    it('inserts a new record with CRN as the main record key', async () => {
+  describe('upsertPersonIdByCRN', () => {
+    it('upsert a new record with CRN as the main record key', async () => {
       const dummyDate = new Date('2025-01-01')
       jest.useFakeTimers().setSystemTime(dummyDate)
-      mockCollection.insertOne.mockResolvedValue({ acknowledged: true, _id: 'personId' })
+      mockCollection.updateOne.mockResolvedValue({ acknowledged: true, upsertedId: 'personId' })
 
-      const result = await mongoCustomer.insertPersonIdByCRN('1234567890', 'personId')
-      expect(result).toEqual({ acknowledged: true, _id: 'personId' })
-      expect(mockCollection.insertOne).toHaveBeenCalledWith({
-        _id: '1234567890',
-        personId: 'personId',
-        createdAt: dummyDate,
-        updatedAt: dummyDate
-      })
+      const result = await mongoCustomer.upsertPersonIdByCRN('1234567890', 'personId')
+      expect(result).toEqual({ acknowledged: true, upsertedId: 'personId' })
+      expect(mockCollection.updateOne).toHaveBeenCalledWith(
+        { _id: '1234567890' },
+        {
+          $set: { personId: 'personId', updatedAt: dummyDate },
+          $setOnInsert: { createdAt: dummyDate }
+        },
+        { upsert: true }
+      )
+    })
+  })
+
+  describe('test concurrent writes', () => {
+    const realCollection = db.collection('customer-concurrency')
+    const realMongoCustomer = new MongoCustomer({ modelOrCollection: realCollection })
+
+    it('upsertPersonIdByCRN handles two concurrent requests for the same CRN without failing', async () => {
+      jest.useRealTimers()
+      const crn = '0987654321'
+      await realCollection.deleteMany({})
+
+      await expect(
+        Promise.all([
+          realMongoCustomer.upsertPersonIdByCRN(crn, 'personId'),
+          realMongoCustomer.upsertPersonIdByCRN(crn, 'personId')
+        ])
+      ).resolves.toHaveLength(2)
+
+      expect(await realMongoCustomer.findPersonIdByCRN(crn)).toEqual('personId')
+      expect(await realCollection.countDocuments({ _id: crn })).toEqual(1)
     })
   })
 })

@@ -14,12 +14,29 @@ services:
       - cdp-external
 
   proxy:
-    image: ubuntu/squid
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM ubuntu/squid
+        RUN apt-get update && apt-get install -y curl
     ports:
       - 3128:3128
     volumes:
       - ./test/acceptance/squid.conf:/etc/squid/squid.conf:ro
     stop_grace_period: 1s
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'curl',
+          '--proxy',
+          'http://localhost:3128',
+          '-f',
+          'http://upstream-mock:3100/health'
+        ]
+      interval: 3s
+      timeout: 2s
+      retries: 5
     networks:
       - cdp-external
       - cdp-tenant
@@ -32,7 +49,7 @@ services:
       HTTP_PROXY: http://proxy:3128
     depends_on:
       proxy:
-        condition: service_started
+        condition: service_healthy
 
 ################################################################################
 

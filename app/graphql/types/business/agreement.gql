@@ -5,42 +5,42 @@ type Agreement {
   """
   Internal SitiAgri/Portal unique identifier for the agreement.
   """
-  contractId: ID @on
+  contractId: ID
 
   """
   Name of the agreement.
   """
-  name: String @on
+  name: String
 
   """
   Status of the agreement.
   """
-  status: String @on
+  status: String
 
   """
   Type of the agreement.
   """
-  contractType: String @on
+  contractType: String
 
   """
   Year of the agreement.
   """
-  schemeYear: Int @on
+  schemeYear: Int
 
   """
   Start date of the agreement.
   """
-  startDate: Date @on
+  startDate: Date
 
   """
   End date of the agreement.
   """
-  endDate: Date @on
+  endDate: Date
 
   """
   Payment schedules for the agreement.
   """
-  paymentSchedules: [PaymentSchedule] @on
+  paymentSchedules: [PaymentSchedule]
 }
 
 """
@@ -50,65 +50,65 @@ type PaymentSchedule {
   """
   Option code for the payment schedule.
   """
-  optionCode: String @on
+  optionCode: String
 
   """
   Option description for the payment schedule.
   """
-  optionDescription: String @on
+  optionDescription: String
 
   """
   Commitment group start date for the payment schedule.
   """
-  commitmentGroupStartDate: Date @on
+  commitmentGroupStartDate: Date
 
   """
   Commitment group end date for the payment schedule.
   """
-  commitmentGroupEndDate: Date @on
+  commitmentGroupEndDate: Date
 
   """
   Year of the payment schedule.
   """
-  year: Int @on
+  year: Int
 
   """
   Sheet name for the payment schedule.
   """
-  sheetName: String @on
+  sheetName: String
 
   """
   Parcel name for the payment schedule.
   """
-  parcelName: String @on
+  parcelName: String
 
   """
   Action area - Area (in hectares) of the action.
   """
-  actionArea: Float @on
+  actionArea: Float
 
   """
   Action MTL - Length (in metres) of the action.
   """
-  actionMTL: Int @on
+  actionMTL: Int
 
   """
   Action units - Number of units of the action.
   """
-  actionUnits: Float @on
+  actionUnits: Float
 
   """
   Parcel total area - Total area (in hectares) of the parcel.
   """
-  parcelTotalArea: Float @on
+  parcelTotalArea: Float
 
   """
   Payment schedule start date for the payment schedule.
   """
-  startDate: Date @on
+  startDate: Date
 
   """
   Payment schedule end date for the payment schedule.
   """
-  endDate: Date @on
+  endDate: Date
 }

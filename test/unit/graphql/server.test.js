@@ -27,6 +27,11 @@ describe('GraphQL Dashboard test with mocks', () => {
     () => mockApolloPluginLandingPageModule
   )
 
+  const mockAuditPlugin = jest.fn()
+  jest.unstable_mockModule('../../../app/graphql/plugins/audit.js', () => ({
+    auditPlugin: mockAuditPlugin
+  }))
+
   beforeEach(() => {
     jest.resetModules()
   })
@@ -44,10 +49,13 @@ describe('GraphQL Dashboard test with mocks', () => {
     expect(mockApolloPluginDisabled).toHaveBeenCalledWith()
 
     expect(mockApolloPluginLandingPage).not.toHaveBeenCalled()
+    expect(mockAuditPlugin).toHaveBeenCalledTimes(1)
+    expect(mockAuditPlugin).toHaveBeenCalledWith()
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginDisabled()],
-      introspection: false
+      plugins: [mockApolloPluginDisabled(), mockAuditPlugin()],
+      introspection: false,
+      formatError: expect.any(Function)
     })
   })
 
@@ -66,10 +74,14 @@ describe('GraphQL Dashboard test with mocks', () => {
     expect(mockApolloPluginLandingPage).toHaveBeenCalledTimes(1)
     expect(mockApolloPluginLandingPage).toHaveBeenCalledWith()
 
+    expect(mockAuditPlugin).toHaveBeenCalledTimes(1)
+    expect(mockAuditPlugin).toHaveBeenCalledWith()
+
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginLandingPage()],
-      introspection: true
+      plugins: [mockApolloPluginLandingPage(), mockAuditPlugin()],
+      introspection: true,
+      formatError: expect.any(Function)
     })
   })
 })

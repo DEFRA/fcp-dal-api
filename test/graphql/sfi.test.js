@@ -1,12 +1,12 @@
 import { jest } from '@jest/globals'
-import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
+import { mockDefraIdJwks, signDefraIdToken } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
     query BusinessTest {
-      business(sbi: "sbi") {
+      business(sbi: "123456789") {
         organisationId
         sbi
         info {
@@ -125,20 +125,15 @@ describe('SFI Query', () => {
     const v1 = nock(config.get('kits.external.gatewayUrl'))
     setupNock(v1)
 
-    // For external requests we extract org id from token but don't verify.
-    // so any jwt with a valid relationships array works
-    const tokenValue = jwt.sign(
-      {
-        contactId: '123',
-        relationships: ['organisationId:sbi']
-      },
-      'test-secret'
-    )
+    mockDefraIdJwks()
+    const tokenValue = signDefraIdToken({
+      contactId: '123',
+      relationships: ['organisationId:123456789']
+    })
 
     const result = await makeTestQuery(
       query,
       {
-        'gateway-type': 'external',
         'x-forwarded-authorization': tokenValue
       },
       false,
@@ -150,7 +145,7 @@ describe('SFI Query', () => {
       data: {
         business: {
           organisationId: 'organisationId',
-          sbi: 'sbi',
+          sbi: '123456789',
           info: {
             name: 'name',
             address: {

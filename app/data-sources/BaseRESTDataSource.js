@@ -5,10 +5,11 @@ import { HttpError } from '../errors/graphql.js'
 import { sendMetric } from '../logger/sendMetric.js'
 
 export class BaseRESTDataSource extends RESTDataSource {
-  constructor(config, { name, code }) {
+  constructor(config, { name, code, gatewayType }) {
     super(config)
     this.name = name
     this.code = code
+    this.gatewayType = gatewayType
   }
 
   /**
@@ -108,6 +109,7 @@ export class BaseRESTDataSource extends RESTDataSource {
     this.logger.info(`#datasource - ${this.name} - response`, {
       type: 'http',
       code: this.code,
+      gatewayType: this.gatewayType,
       requestTimeMs,
       request: {
         id: request.id,
@@ -117,12 +119,12 @@ export class BaseRESTDataSource extends RESTDataSource {
       },
       response
     })
+
     this.logger.debug(`#datasource - ${this.name} - response detail`, {
       request: { ...request, url: url.toString() },
       response: {
         ...response,
-        body: result.parsedBody,
-        size: Buffer.byteLength(JSON.stringify(response.body))
+        body: result.parsedBody
       },
       code: this.code,
       requestTimeMs

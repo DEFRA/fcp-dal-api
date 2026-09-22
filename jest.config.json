@@ -1,7 +1,6 @@
 {
   "testMatch": ["<rootDir>/test/**/*.test.js"],
   "transform": {},
-  "collectCoverage": true,
   "collectCoverageFrom": ["<rootDir>/app/**/*.js"],
   "coverageDirectory": "coverage",
   "coverageReporters": ["text-summary", "lcov"],

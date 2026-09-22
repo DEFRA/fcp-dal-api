@@ -1,14 +1,23 @@
 import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
-import jwt from 'jsonwebtoken'
+import { decodeProtectedHeader, jwtVerify } from 'jose'
 import { config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
+import { maskAllButLastFour } from '../logger/utils.js'
 
 export const authGroups = config.get('auth.groups')
+
+const authGroupServiceName = {
+  [authGroups.ADMIN]: null,
+  [authGroups.CONSOLIDATED_VIEW]: 'consolidated-view',
+  [authGroups.SFI_REFORM]: 'grants-platform',
+  [authGroups.LAND_GRANTS_API]: 'land-grants-api',
+  [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door'
+}
 
 export async function getAuth(request, jwkDatasource) {
   try {
@@ -20,11 +29,13 @@ export async function getAuth(request, jwkDatasource) {
       code: DAL_REQUEST_AUTHENTICATION_001,
       request: { remoteAddress: request?.info?.remoteAddress }
     })
-    const decodedToken = jwt.decode(token, { complete: true })
+    const decodedToken = decodeProtectedHeader(token)
     const requestStart = Date.now()
-    const signingKey = await jwkDatasource.getPublicKey(decodedToken.header.kid)
+    const signingKey = await jwkDatasource.getPublicKey(decodedToken.kid)
     const requestTimeMs = Date.now() - requestStart
-    const verified = jwt.verify(token, signingKey)
+    const { payload: verified } = await jwtVerify(token, signingKey, {
+      algorithms: ['RS256']
+    })
     sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: DAL_REQUEST_AUTHENTICATION_001
     })
@@ -48,7 +59,7 @@ export async function getAuth(request, jwkDatasource) {
           sub: verified.sub,
           tid: verified.tid,
           email: verified.email?.split('@')[1],
-          contactId: verified.contactId,
+          contactId: maskAllButLastFour(verified.contactId),
           relationships: verified.relationships,
           groups: verified.groups,
           roles: verified.roles,
@@ -56,9 +67,14 @@ export async function getAuth(request, jwkDatasource) {
         })
       }
     })
+
     return verified
   } catch (error) {
-    if (error.name === 'TokenExpiredError') {
+    if (
+      error.name === 'TokenExpiredError' ||
+      error.code === 'ERR_JWT_EXPIRED' ||
+      error.name === 'JWTExpired'
+    ) {
       logger.warn('#DAL - request authentication - token expired', {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,
@@ -75,6 +91,23 @@ export async function getAuth(request, jwkDatasource) {
   }
 }
 
+/**
+ * Returns the requesting service name based on the security groups.
+ * Note: this will likely switch to using the appid see (https://eaflood.atlassian.net/browse/FCPDAL-490)
+ * however using groups for now for consistency with our permission model.
+ * @param {string[]} groups
+ * @returns the calling service or null if service wasn't identified
+ */
+export function getRequestingService(groups) {
+  // Return a placeholder service name, when auth is disabled.
+  if (config.get('auth.disabled')) {
+    return 'auth-disabled'
+  }
+  return (
+    groups.map((group) => authGroupServiceName[group]).find((serviceName) => !!serviceName) ?? null
+  )
+}
+
 export function getRequestingGroup(groups) {
   // Return mock UUID when auth is disabled in local/dev
   if (config.get('auth.disabled')) {
@@ -84,9 +117,38 @@ export function getRequestingGroup(groups) {
   return groups?.find((group) => Object.values(authGroups).includes(group))
 }
 
+/**
+ * ADMIN group membership bypasses both the @auth group check and the serviceAccountPermitted gate.
+ */
+export function isAdminCaller(requesterGroups) {
+  return requesterGroups.includes(authGroups.ADMIN)
+}
+
+/**
+ * Check if the caller is a service account.
+ * @param authContext the auth context
+ * @returns {boolean} true if the caller is a service account, false otherwise
+ */
+function isServiceAccount(authContext) {
+  return !!authContext?.serviceAccount
+}
+
+/**
+ * Mutations can't be called by service accounts, queries are permitted by service accounts and non-service accounts.
+ */
+function isServiceAccountPermitted(schema, typeName) {
+  const mutationTypeName = schema.getMutationType()?.name
+  const isMutationField = typeName === mutationTypeName
+
+  return !isMutationField
+}
+
+/**
+ * Checks that the requester's groups satisfy the given @auth allow-list.
+ * @throws {Unauthorized} if access is not granted
+ */
 export function checkAuthGroup(requesterGroups, allowedGroups) {
-  const isAdmin = requesterGroups.includes(authGroups.ADMIN)
-  if (isAdmin) {
+  if (isAdminCaller(requesterGroups)) {
     return
   } else {
     const hasAccess = allowedGroups.some((group) => {
@@ -96,6 +158,18 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
     if (!hasAccess) {
       throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
     }
+  }
+}
+
+/**
+ * A field guarded by @auth is usable by a service-account caller according to the following:
+ * - if caller has ADMIN membership, always permitted
+ * - if this is a mutation - non-service accounts are permitted, but service accounts are not permitted
+ * - if this is a query - both service accounts and non-service accounts are permitted
+ */
+export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitted, adminCaller) {
+  if (serviceAccount && !serviceAccountPermitted && !adminCaller) {
+    throw new Unauthorized('Authorization failed, this field is not available to service accounts')
   }
 }
 
@@ -113,10 +187,18 @@ export function authDirectiveTransformer(schema) {
     [MapperKind.OBJECT_FIELD](fieldConfig, _fieldName, typeName) {
       const authDirective =
         getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
+
       const { resolve = defaultFieldResolver } = fieldConfig
+
       if (authDirective) {
         fieldConfig.resolve = function (source, args, context, info) {
-          checkAuthGroup(context.auth.groups || [], authDirective.requires)
+          const requesterGroups = context.auth.groups || []
+          checkAuthGroup(requesterGroups, authDirective.requires)
+          checkServiceAccountAccess(
+            isServiceAccount(context.authContext),
+            isServiceAccountPermitted(schema, typeName),
+            isAdminCaller(requesterGroups)
+          )
           return resolve(source, args, context, info)
         }
       }

@@ -1,4 +1,9 @@
-import { Permission, Query } from '../../../app/graphql/resolvers/permissions/query.js'
+import { jest } from '@jest/globals'
+import {
+  InternalUser,
+  Permission,
+  Query
+} from '../../../app/graphql/resolvers/permissions/query.js'
 
 const organisationPeopleData = {
   _data: [
@@ -255,4 +260,86 @@ test('Permission.active', async () => {
     }
   )
   expect(response).toEqual(true)
+})
+
+test('Query.internalUser', () => {
+  expect(Query.internalUser()).toEqual({})
+})
+
+describe('InternalUser.permittedFunctions', () => {
+  const getInternalUserAuthorisedFunctions = jest.fn()
+  const internalUserDataSources = {
+    ruralPaymentsCustomer: { getInternalUserAuthorisedFunctions }
+  }
+
+  it('maps each requested function to its upstream authorisation flag, in order', async () => {
+    getInternalUserAuthorisedFunctions.mockResolvedValueOnce({
+      viewLand: true,
+      amendBusinessDetails: false
+    })
+
+    const result = await InternalUser.permittedFunctions(
+      {},
+      { functions: ['viewLand', 'amendBusinessDetails'] },
+      { dataSources: internalUserDataSources }
+    )
+
+    expect(getInternalUserAuthorisedFunctions).toHaveBeenCalledWith([
+      'viewLand',
+      'amendBusinessDetails'
+    ])
+    expect(result).toEqual([
+      { name: 'viewLand', permitted: true },
+      { name: 'amendBusinessDetails', permitted: false }
+    ])
+  })
+
+  it('defaults to not permitted when the upstream omits a requested function', async () => {
+    getInternalUserAuthorisedFunctions.mockResolvedValueOnce({
+      viewLand: true
+    })
+
+    const result = await InternalUser.permittedFunctions(
+      {},
+      { functions: ['viewLand', 'someUnknownFunction'] },
+      { dataSources: internalUserDataSources }
+    )
+
+    expect(result).toEqual([
+      { name: 'viewLand', permitted: true },
+      { name: 'someUnknownFunction', permitted: false }
+    ])
+  })
+
+  describe('audit trail', () => {
+    const info = { path: { key: 'internalUser', typename: 'Query', prev: undefined } }
+
+    it('records a permitted-function-list entity', async () => {
+      const auditTrail = { recordEntity: jest.fn() }
+      getInternalUserAuthorisedFunctions.mockResolvedValueOnce({ viewLand: true })
+
+      await InternalUser.permittedFunctions(
+        {},
+        { functions: ['viewLand'] },
+        { dataSources: internalUserDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'permitted-function-list',
+        action: 'read'
+      })
+    })
+
+    it('does not throw when no audit trail is supplied', async () => {
+      getInternalUserAuthorisedFunctions.mockResolvedValueOnce({ viewLand: true })
+
+      await InternalUser.permittedFunctions(
+        {},
+        { functions: ['viewLand'] },
+        { dataSources: internalUserDataSources },
+        info
+      )
+    })
+  })
 })

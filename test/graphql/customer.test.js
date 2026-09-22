@@ -1,9 +1,8 @@
 import { jest } from '@jest/globals'
-import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { Unauthorized } from '../../app/errors/graphql.js'
-import { mockPersonSearch } from './helpers.js'
+import { mockPersonSearch, signDefraIdToken } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 describe('Query.customer', () => {
@@ -36,7 +35,7 @@ describe('Query.customer', () => {
 
   const query = `#graphql
     query CustomerTest {
-      customer(crn: "crn") {
+      customer(crn: "1234567890") {
         crn
         personId
         authenticationQuestions {
@@ -52,7 +51,7 @@ describe('Query.customer', () => {
           name
           role
         }
-        business(sbi: "sbi") {
+        business(sbi: "123456789") {
           organisationId
           sbi
           name
@@ -85,7 +84,7 @@ describe('Query.customer', () => {
       }
     })
 
-    v1.get('/external-auth/security-answers/crn').reply(200, {
+    v1.get('/external-auth/security-answers/1234567890').reply(200, {
       memorableDate: 'memorableDate',
       memorableEvent: 'memorableEvent',
       memorableLocation: 'memorableLocation',
@@ -97,7 +96,7 @@ describe('Query.customer', () => {
         {
           id: 'organisationId',
           name: 'name',
-          sbi: 'sbi'
+          sbi: '123456789'
         }
       ]
     })
@@ -109,7 +108,7 @@ describe('Query.customer', () => {
           firstName: 'firstName',
           lastName: 'lastName',
           role: 'role',
-          customerReference: 'crn',
+          customerReference: '1234567890',
           privileges: []
         }
       ]
@@ -141,7 +140,7 @@ describe('Query.customer', () => {
     expect(result).toEqual({
       data: {
         customer: {
-          crn: 'crn',
+          crn: '1234567890',
           personId: 'personId',
           authenticationQuestions: {
             memorableDate: 'memorableDate',
@@ -151,11 +150,11 @@ describe('Query.customer', () => {
             isFound: true
           },
           businesses: [
-            { organisationId: 'organisationId', sbi: 'sbi', name: 'name', role: 'role' }
+            { organisationId: 'organisationId', sbi: '123456789', name: 'name', role: 'role' }
           ],
           business: {
             organisationId: 'organisationId',
-            sbi: 'sbi',
+            sbi: '123456789',
             name: 'name',
             role: 'role',
             messages: [
@@ -196,7 +195,7 @@ describe('Query.customer', () => {
       }
     })
 
-    v1.get('/external-auth/security-answers/crn').reply(200, {
+    v1.get('/external-auth/security-answers/1234567890').reply(200, {
       memorableDate: 'memorableDate',
       memorableEvent: 'memorableEvent',
       memorableLocation: 'memorableLocation',
@@ -208,7 +207,7 @@ describe('Query.customer', () => {
         {
           id: 'organisationId',
           name: 'name',
-          sbi: 'sbi'
+          sbi: '123456789'
         }
       ]
     })
@@ -220,7 +219,7 @@ describe('Query.customer', () => {
           firstName: 'firstName',
           lastName: 'lastName',
           role: 'role',
-          customerReference: 'crn',
+          customerReference: '1234567890',
           privileges: []
         }
       ]
@@ -248,14 +247,13 @@ describe('Query.customer', () => {
     })
 
     const result = await makeTestQuery(query, {
-      'gateway-type': 'external',
-      'x-forwarded-authorization': jwt.sign({ contactId: '123' }, 'secret', { expiresIn: '1h' })
+      'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' })
     })
 
     expect(result).toEqual({
       data: {
         customer: {
-          crn: 'crn',
+          crn: '1234567890',
           personId: 'personId',
           authenticationQuestions: {
             memorableDate: 'memorableDate',
@@ -265,11 +263,11 @@ describe('Query.customer', () => {
             isFound: true
           },
           businesses: [
-            { organisationId: 'organisationId', sbi: 'sbi', name: 'name', role: 'role' }
+            { organisationId: 'organisationId', sbi: '123456789', name: 'name', role: 'role' }
           ],
           business: {
             organisationId: 'organisationId',
-            sbi: 'sbi',
+            sbi: '123456789',
             name: 'name',
             role: 'role',
             messages: [

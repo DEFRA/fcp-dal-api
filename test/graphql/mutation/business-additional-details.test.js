@@ -1,8 +1,7 @@
-import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { transformBusinessDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
-import { mockOrganisationSearch } from '../helpers.js'
+import { mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -44,7 +43,7 @@ describe('business', () => {
 
   test('update business legal status', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       legalStatusCode: 123
     }
 
@@ -104,7 +103,7 @@ describe('business', () => {
 
   test('update business type', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       typeCode: 123
     }
 
@@ -166,7 +165,7 @@ describe('business', () => {
 
   test('update business registration numbers', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       registrationNumbers: {
         charityCommission: '0123',
         companiesHouse: '0456'
@@ -222,7 +221,7 @@ describe('business', () => {
 
   test('update business date started farming', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       // Will get converted to ISO date
       dateStartedFarming: '01-01-2020'
     }
@@ -288,15 +287,12 @@ describe('business - external', () => {
   })
 
   test('update business legal status', async () => {
-    const tokenValue = jwt.sign(
-      {
-        relationships: ['organisationId:sbi'],
-        contactId: 'crn'
-      },
-      'test-secret'
-    )
+    const tokenValue = signDefraIdToken({
+      relationships: ['organisationId:123456789'],
+      contactId: 'crn'
+    })
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       legalStatusCode: 123
     }
 
@@ -335,12 +331,9 @@ describe('business - external', () => {
         }
       }
     `
-    const result = await makeTestQuery(
-      query,
-      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' },
-      true,
-      { input }
-    )
+    const result = await makeTestQuery(query, { 'x-forwarded-authorization': tokenValue }, true, {
+      input
+    })
 
     expect(result).toEqual({
       data: {

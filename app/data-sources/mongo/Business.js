@@ -6,12 +6,15 @@ export class MongoBusiness extends MongoDataSource {
     return org?.orgId
   }
 
-  async insertOrgIdBySbi(sbi, orgId) {
-    return this.collection.insertOne({
-      _id: sbi,
-      orgId,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    })
+  async upsertOrgIdBySbi(sbi, orgId) {
+    const now = new Date()
+    return this.collection.updateOne(
+      { _id: sbi },
+      {
+        $set: { orgId, updatedAt: now },
+        $setOnInsert: { createdAt: now }
+      },
+      { upsert: true }
+    )
   }
 }

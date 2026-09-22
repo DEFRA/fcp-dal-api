@@ -1,7 +1,9 @@
 extend type Query {
-  business(sbi: ID!): Business
-    @on
-    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  """
+  Get a business by SBI (Single Business Identifier, a 9-digit number).
+  """
+  business(sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")): Business
+    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM, LAND_GRANTS_API])
 
   """
   Search for businesses by SBI, business name, or business postcode.
@@ -10,5 +12,5 @@ extend type Query {
     searchString: String!
     searchType: BusinessSearchFieldType!
     pagination: Pagination
-  ): BusinessSearchResponse @on @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  ): BusinessSearchResponse @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
 }

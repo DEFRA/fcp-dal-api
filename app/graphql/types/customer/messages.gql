@@ -7,32 +7,32 @@ type CustomerBusinessMessage {
   """
   Unique identifier of the message.
   """
-  id: ID! @on
+  id: ID!
 
   """
   Subject of the message.
   """
-  subject: String @on
+  subject: String
 
   """
   Date the message was sent.
   """
-  date: Date @on
+  date: Date
 
   """
   Body content of the message.
   """
-  body: String @on
+  body: String
 
   """
   Indicates whether the customer has read the business message.
   """
-  read: Boolean @on
+  read: Boolean
 
   """
   Indicates whether the customer has marked the business message as deleted.
   Messages in the portal are not deleted, they are moved to a deleted section
   (more akin to archiving a message).
   """
-  deleted: Boolean @on
+  deleted: Boolean
 }

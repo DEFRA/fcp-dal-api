@@ -99,6 +99,95 @@ describe('Business payments resolver', () => {
       ).rejects.toThrow('FRN not found for business')
     })
 
+    test('records the resolved FRN as an account and a payment-list entity on the audit trail', async () => {
+      const mockOrganisation = {
+        id: 12345,
+        sbi: '123456789',
+        businessReference: '6561479446',
+        name: 'Test Farm'
+      }
+      const auditTrail = {
+        recordAccount: jest.fn(),
+        recordEntity: jest.fn()
+      }
+      const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+      mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
+
+      await Business.payments(
+        { sbi: '123456789' },
+        { userIP: '192.168.1.1' },
+        { ...mockContext, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', '6561479446')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'payment-list',
+        action: 'read',
+        entityid: '6561479446'
+      })
+    })
+
+    test('still records the payment-list entity on the audit trail when the FRN cannot be found', async () => {
+      const mockOrganisation = {
+        id: 12345,
+        sbi: '123456789',
+        businessReference: null,
+        name: 'Test Farm'
+      }
+      const auditTrail = {
+        recordAccount: jest.fn(),
+        recordEntity: jest.fn()
+      }
+      const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+
+      await expect(
+        Business.payments(
+          { sbi: '123456789' },
+          { userIP: '192.168.1.1' },
+          { ...mockContext, auditTrail },
+          info
+        )
+      ).rejects.toThrow('FRN not found for business')
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'payment-list',
+        action: 'read',
+        entityid: null
+      })
+    })
+
+    test('still records an attempted payment-list entity when the organisation lookup itself fails', async () => {
+      const auditTrail = {
+        recordAccount: jest.fn(),
+        recordEntity: jest.fn()
+      }
+      const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
+
+      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+        new Error('upstream failure')
+      )
+
+      await expect(
+        Business.payments(
+          { sbi: '123456789' },
+          { userIP: '192.168.1.1' },
+          { ...mockContext, auditTrail },
+          info
+        )
+      ).rejects.toThrow('upstream failure')
+
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'payment-list',
+        action: 'read',
+        entityid: undefined
+      })
+    })
+
     test('should throw NotFound when Hitachi returns Result: false', async () => {
       const mockOrganisation = {
         id: 12345,

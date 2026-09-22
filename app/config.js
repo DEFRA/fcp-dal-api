@@ -1,8 +1,10 @@
 import convict from 'convict'
 
+export const cdpEnvironments = ['dev', 'test', 'ext-test', 'perf-test', 'prod']
+
 export const config = convict({
   nodeEnv: {
-    doc: 'The application environment.',
+    doc: 'The application environment',
     format: ['production', 'development', 'test'],
     default: 'production',
     env: 'NODE_ENV'
@@ -10,38 +12,34 @@ export const config = convict({
   cdp: {
     env: {
       doc: 'CDP environment, automatically set on CDP',
-      format: ['dev', 'test', 'ext-test', 'perf-test', 'prod'],
+      format: cdpEnvironments,
       default: null,
+      nullable: true,
       env: 'ENVIRONMENT'
     },
     httpsProxy: {
-      doc: 'CDP HTTPS proxy, automatically set on CDP',
+      doc: 'CDP HTTPS proxy, NOT automatically set on CDP (it comes from the "default" config)',
       format: String,
       default: null,
-      nullable: true,
+      // only nullable locally (no environment) or in docker acceptance tests (explicit opt out via DISABLE_PROXY)
+      nullable: !process.env.ENVIRONMENT || process.env.DISABLE_PROXY,
       env: 'HTTPS_PROXY'
     }
   },
   port: {
-    doc: 'The port to bind.',
+    doc: 'The port to bind',
     format: 'port',
     default: 3000,
     env: 'PORT'
   },
   logLevel: {
-    doc: 'The log level to use.',
+    doc: 'The log level to use',
     format: ['error', 'warn', 'info', 'debug'],
     default: 'info',
     env: 'LOG_LEVEL'
   },
-  allSchemaOn: {
-    doc: 'Enable all schema on, used for testing',
-    format: Boolean,
-    default: false,
-    env: 'ALL_SCHEMA_ON'
-  },
   graphqlDashboardEnabled: {
-    doc: 'Enable GraphQL dashboard',
+    doc: 'Enable GraphQL dashboard (the Apollo client UI)',
     format: Boolean,
     default: false,
     env: 'GRAPHQL_DASHBOARD_ENABLED'
@@ -52,9 +50,16 @@ export const config = convict({
     default: null,
     env: 'DAL_REQUEST_TIMEOUT_MS'
   },
+  serviceVersion: {
+    doc: 'The running version of the DAL service, returned in the x-dal-service-version response header',
+    format: String,
+    default: null,
+    nullable: true,
+    env: 'SERVICE_VERSION'
+  },
   oidc: {
     jwksURI: {
-      doc: 'The URL used to validate the JWT, should be entra OIDC endpoint',
+      doc: 'The URL used to validate the JWT for consumer app auth, should be entra OIDC endpoint',
       format: String,
       default: null,
       nullable: process.env.DISABLE_AUTH === 'true',
@@ -68,9 +73,29 @@ export const config = convict({
       env: 'OIDC_JWKS_TIMEOUT_MS'
     }
   },
+  defraId: {
+    wellKnownUrl: {
+      doc:
+        'The Defra Identity well known URL, used to discover the jwks_uri for verifying Defra ID ' +
+        'tokens. Required unless DISABLE_AUTH is true, in which case token verification is disabled.',
+      format: String,
+      default: null,
+      nullable: process.env.DISABLE_AUTH === 'true',
+      env: 'DEFRA_ID_WELL_KNOWN_URL'
+    },
+    timeoutMs: {
+      doc: 'Timeout of Defra ID well known/JWKS requests in milliseconds',
+      format: 'int',
+      default: null,
+      nullable: process.env.DISABLE_AUTH === 'true',
+      env: 'DEFRA_ID_TIMEOUT_MS'
+    }
+  },
   auth: {
     groups: {
       // Note must correspond to AuthGroup Enum except admin which has access to everything
+      // For groups used to identify the calling service,
+      // also need to update authGroupServiceName with the service name
       ADMIN: {
         doc: 'AD group ID for DAL Admins',
         format: String,
@@ -98,6 +123,13 @@ export const config = convict({
         default: null,
         env: 'SFI_REFORM_AD_GROUP_ID',
         nullable: true
+      },
+      LAND_GRANTS_API: {
+        doc: 'AD group ID for Land Grants API team',
+        format: String,
+        default: null,
+        env: 'LAND_GRANTS_API_AD_GROUP_ID',
+        nullable: true
       }
     },
     disabled: {
@@ -105,34 +137,6 @@ export const config = convict({
       format: Boolean,
       default: false,
       env: 'DISABLE_AUTH'
-    }
-  },
-  healthCheck: {
-    enabled: {
-      doc: 'Enable health check endpoint',
-      format: Boolean,
-      default: false,
-      env: 'HEALTH_CHECK_ENABLED'
-    },
-    ruralPaymentsPortalEmail: {
-      doc: 'Email used for Rural Payments Portal health check',
-      format: String,
-      default: null,
-      nullable: process.env.HEALTH_CHECK_ENABLED !== 'true',
-      env: 'HEALTH_CHECK_RP_PORTAL_EMAIL'
-    },
-    ruralPaymentsInternalOrganisationId: {
-      doc: 'Internal organisation ID used for Rural Payments Portal health check',
-      format: String,
-      default: null,
-      nullable: process.env.HEALTH_CHECK_ENABLED !== 'true',
-      env: 'HEALTH_CHECK_RP_INTERNAL_ORGANISATION_ID'
-    },
-    throttleTimeMs: {
-      doc: 'Throttle time in milliseconds for Rural Payments Portal health check',
-      format: 'int',
-      default: 300000,
-      env: 'HEALTH_CHECK_RP_THROTTLE_TIME_MS'
     }
   },
   kits: {
@@ -154,17 +158,10 @@ export const config = convict({
         env: 'KITS_INTERNAL_CONNECTION_KEY'
       },
       gatewayUrl: {
-        doc: 'KITS gateway internal URL',
+        doc: 'KITS internal gateway URL',
         format: String,
         default: null,
         env: 'KITS_INTERNAL_GATEWAY_URL'
-      },
-      devOverrideEmail: {
-        doc: 'Dev email address to send in the `email` header',
-        format: String,
-        env: 'KITS_INT_DEV_OVERRIDE_EMAIL',
-        nullable: true,
-        default: null
       }
     },
     external: {
@@ -185,26 +182,30 @@ export const config = convict({
         env: 'KITS_EXTERNAL_CONNECTION_KEY'
       },
       gatewayUrl: {
-        doc: 'KITS gateway external URL',
+        doc: 'KITS external gateway URL',
         format: String,
         default: null,
         env: 'KITS_EXTERNAL_GATEWAY_URL'
       },
       personIdOverride: {
-        doc: 'This is the person ID that can be used in place of an actual personId for external users and will return the data corresponding to their crn',
+        doc:
+          'Magic person ID value, used in URL path instead of target person ID which comes ' +
+          "from external user's CRN",
         format: 'int',
         default: null,
         env: 'KIT_EXT_PERSON_ID_OVERRIDE'
       }
     },
     disableMTLS: {
-      doc: 'Disables mTLS for KITS connection, used for testing',
+      doc: 'Disables mTLS for KITS connection',
       format: Boolean,
       default: false,
       env: 'KITS_DISABLE_MTLS'
     },
     caCert: {
-      doc: 'Base64 encoded CA certificate for KITS mTLS connection',
+      doc:
+        'Base64 encoded CA certificate for KITS mTLS connection, ' +
+        'used for testing self-signed certs only',
       format: String,
       default: null,
       sensitive: true,
@@ -218,10 +219,16 @@ export const config = convict({
       env: 'KITS_GATEWAY_TIMEOUT_MS'
     },
     requestPageSize: {
-      doc: 'Enable metrics reporting',
+      doc: 'Default number of responses from KITS/RP Portal search endpoints (pagination)',
       format: 'int',
       default: 100,
       env: 'KITS_REQUEST_PAGE_SIZE'
+    },
+    dalServiceAccountEmail: {
+      doc: 'Email identifying the DAL service account.',
+      format: String,
+      default: null,
+      env: 'KITS_DAL_SERVICE_ACCOUNT_EMAIL'
     }
   },
   hitachi: {
@@ -234,8 +241,7 @@ export const config = convict({
     baseUrl: {
       doc: 'Hitachi base API URL',
       format: String,
-      default: 'https://api.example.com',
-      nullable: true,
+      default: null,
       env: 'HITACHI_BASE_URL'
     },
     timeoutMs: {
@@ -269,6 +275,19 @@ export const config = convict({
       }
     }
   },
+  audit: {
+    sns: {
+      topicArn: {
+        doc:
+          'SNS topic ARN to publish FCP audit events to. If unset, no audit events are ' +
+          'published (and nothing is logged in their place, since an audit event can contain PII).',
+        format: String,
+        default: null,
+        nullable: true,
+        env: 'AUDIT_SNS_TOPIC_ARN'
+      }
+    }
+  },
   mongo: {
     mongoUrl: {
       doc: 'URL for mongodb',
@@ -277,26 +296,26 @@ export const config = convict({
       env: 'MONGO_URI'
     },
     databaseName: {
-      doc: 'database for mongodb',
+      doc: 'Database name for mongodb',
       format: String,
       default: 'fcp-dal-api',
       env: 'MONGO_DATABASE'
     },
     mongoOptions: {
       retryWrites: {
-        doc: 'enable mongo write retries',
+        doc: 'Enable mongo write retries',
         format: Boolean,
         default: true,
         env: 'MONGO_RETRY_WRITES'
       },
       readPreference: {
-        doc: 'mongo read preference',
+        doc: 'The read preference for the mongodb connection',
         format: ['primary', 'primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'],
         default: 'primary',
         env: 'MONGO_READ_PREFERENCE'
       },
       timeoutMS: {
-        doc: 'mongo operation timeout in milliseconds',
+        doc: 'Mongo operation timeout in milliseconds',
         format: 'int',
         default: 3000,
         env: 'MONGO_TIMEOUT_MS'

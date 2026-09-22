@@ -1,11 +1,10 @@
 import { StatusCodes } from 'http-status-codes'
-import jwt from 'jsonwebtoken'
-import { BadRequest, NotFound } from '../../errors/graphql.js'
+import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { formatDateAsUtcDateTime } from '../../utils/date.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
-import { RuralPayments } from './RuralPayments.js'
+import { RuralPayments, SELF_SERVICE_PORTAL_MODULE } from './RuralPayments.js'
 
 export const formatDateDDMMMYY = (date) => {
   // Convert date to 'DD-MMM-YY, e.g. 19-Jul-20
@@ -84,8 +83,8 @@ export class RuralPaymentsBusiness extends RuralPayments {
   }
 
   async getOrganisationIdBySBI(sbi) {
-    if (this.gatewayType === 'external') {
-      return this.extractOrgIdFromDefraIdToken(sbi)
+    if (this.isExternalRoute()) {
+      return this.defraIdContext.orgId(sbi)
     }
     return (await this.organisationSearchBySbi(sbi)).id
   }
@@ -163,23 +162,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response
   }
 
-  extractOrgIdFromDefraIdToken(sbi) {
-    const token = this.request.headers['x-forwarded-authorization']
-    const { payload } = jwt.decode(token, { complete: true })
-    if (payload?.relationships && Array.isArray(payload.relationships)) {
-      // Find relationship string that matches the given SBI
-      const relationship = payload.relationships.find((rel) => {
-        const [, tokenSBI] = rel.split(':')
-        return sbi === tokenSBI
-      })
-      if (relationship) {
-        const [orgId] = relationship.split(':')
-        return orgId
-      }
-    }
-    throw new BadRequest('Defra ID token is not valid for the provided SBI')
-  }
-
   async lockOrganisation(organisationId, body) {
     try {
       const response = await this.post(`organisation/${organisationId}/lock`, {
@@ -244,6 +226,22 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
   async getBankChangeAccountStatus(organisationId) {
     return this.get(`bank-change-service/v1/account-status/${organisationId}`)
+  }
+
+  async getExistingBankAccounts(frn) {
+    return this.get(`bank-change-service/v1/existing-accounts/${frn}`)
+  }
+
+  async getAuthorisedFunctionsByOrganisationId(organisationId, functions) {
+    const query = new URLSearchParams({
+      functions: functions.join('|'),
+      module: SELF_SERVICE_PORTAL_MODULE,
+      timestamp: Date.now()
+    })
+    const response = await this.get(
+      `SitiAgriApi/authorisation/organisation/${organisationId}/byFunction?${query}`
+    )
+    return response.data
   }
 
   async getLandUseByBusinessParcel(sbi, sheetId, parcelId, date = new Date()) {

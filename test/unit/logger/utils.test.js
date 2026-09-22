@@ -1,4 +1,4 @@
-import { sampleResponse } from '../../../app/logger/utils.js'
+import { maskAllButLastFour, sampleResponse } from '../../../app/logger/utils.js'
 
 describe('sampleResponse', () => {
   it('should return null for null input', () => {
@@ -64,5 +64,30 @@ describe('sampleResponse', () => {
     const inputCopy = JSON.parse(JSON.stringify(input))
     sampleResponse(input)
     expect(input).toEqual(inputCopy)
+  })
+})
+
+describe('maskAllButLastFour', () => {
+  it('masks all but the last four characters of a string', () => {
+    expect(maskAllButLastFour('1234567890')).toBe('******7890')
+  })
+
+  it('leaves a four character string unmasked', () => {
+    expect(maskAllButLastFour('1234')).toBe('1234')
+  })
+
+  it('leaves a string shorter than four characters unmasked', () => {
+    expect(maskAllButLastFour('123')).toBe('123')
+  })
+
+  it('returns an empty string unchanged', () => {
+    expect(maskAllButLastFour('')).toBe('')
+  })
+
+  it('returns non-string values unchanged', () => {
+    expect(maskAllButLastFour(1234567890)).toBe(1234567890)
+    expect(maskAllButLastFour(null)).toBeNull()
+    expect(maskAllButLastFour(undefined)).toBeUndefined()
+    expect(maskAllButLastFour({ crn: '1234567890' })).toEqual({ crn: '1234567890' })
   })
 })

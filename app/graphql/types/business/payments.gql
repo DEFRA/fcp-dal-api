@@ -1,6 +1,5 @@
 extend type Business {
   payments(fromDate: Date, toDate: Date, userIP: String!): BusinessPayments
-    @on
     @auth(requires: [CONSOLIDATED_VIEW])
 }
 

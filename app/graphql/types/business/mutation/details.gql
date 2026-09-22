@@ -18,7 +18,7 @@ input UpdateBusinessNameInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
   """
   Name of the business.
   """
@@ -32,7 +32,7 @@ input UpdateBusinessPhoneInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
   """
   Telephone number of the business.
   """
@@ -50,7 +50,7 @@ input UpdateBusinessEmailInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
   """
   Email address of the business.
   """
@@ -68,7 +68,7 @@ input UpdateBusinessAddressInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
   """
   Address of the business.
   """
@@ -84,7 +84,7 @@ input UpdateBusinessVATInput {
   A unique 9-digit number that identifies the business. There is also the Firm Reference
   Number (FRN), a unique 10-digit number, that is less well known to customers.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
   """
   VAT number of the business. (a.k.a. `taxRegistrationNumber`)
   """

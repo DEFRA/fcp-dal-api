@@ -1,4 +1,5 @@
 import { format } from 'winston'
+import { maskAllButLastFour } from './utils.js'
 
 const buildHttpDetails = (request, response, requestTimeMs) => {
   if (!request && !response && !requestTimeMs) return {}
@@ -44,14 +45,39 @@ const buildEvent = (kind, category, type, created, duration, outcome, reference,
     }
   }
 
-const ALLOWED_KEYS = new Set([
-  'crn',
-  'customerReferenceNumber',
-  'id',
-  'primarySearchPhrase',
-  'sbi',
-  'searchFieldType'
+const ALLOWED_KEYS = new Set(['crn', 'customerReferenceNumber', 'id', 'sbi', 'searchFieldType'])
+
+// primarySearchPhrase is stripped from logs by default: depending on searchFieldType it can hold
+// a crn, customer name or postcode, all of which are PII. It's logged verbatim only when the
+// sibling searchFieldType is one of the values below, which aren't personally identifying on
+// their own.
+const SEARCH_PHRASE_SAFE_FIELD_TYPES = new Set([
+  'SBI',
+  'VENDOR_NUMBER',
+  'TRADER_NUMBER',
+  'PERSONAL_IDENTIFIER'
 ])
+
+const SEARCH_PHRASE_MASKED_FIELD_TYPES = new Set(['CUSTOMER_REFERENCE'])
+
+// crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
+const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
+
+// URL paths that embed PII directly as a path segment, rather than in the body. Each pattern's
+// second capture group is the segment to mask.
+const PII_PATH_PATTERNS = [/(external-auth\/security-answers\/)([^/?]+)/]
+
+const maskPathPII = (pathStr) => {
+  for (const pattern of PII_PATH_PATTERNS) {
+    if (pattern.test(pathStr)) {
+      return pathStr.replace(
+        pattern,
+        (_, prefix, segment) => `${prefix}${maskAllButLastFour(segment)}`
+      )
+    }
+  }
+  return pathStr
+}
 
 const pickKeysForLogging = (obj) => {
   if (obj == null) return obj
@@ -67,12 +93,20 @@ const pickKeysForLogging = (obj) => {
   }
 
   const picked = {}
+  const searchPhraseSafe = SEARCH_PHRASE_SAFE_FIELD_TYPES.has(obj.searchFieldType)
+  const searchPhraseMasked = SEARCH_PHRASE_MASKED_FIELD_TYPES.has(obj.searchFieldType)
 
   for (const key of Object.keys(obj)) {
     const value = pickKeysForLogging(obj[key])
 
-    if (ALLOWED_KEYS.has(key) || (typeof value === 'object' && value !== null)) {
-      picked[key] = value
+    const isAllowed =
+      ALLOWED_KEYS.has(key) ||
+      (key === 'primarySearchPhrase' && (searchPhraseSafe || searchPhraseMasked))
+
+    if (isAllowed || (typeof value === 'object' && value !== null)) {
+      const shouldMask =
+        MASKED_KEYS.has(key) || (key === 'primarySearchPhrase' && searchPhraseMasked)
+      picked[key] = shouldMask ? maskAllButLastFour(value) : value
     }
   }
 
@@ -84,12 +118,12 @@ const buildUrl = ({ body, path, url }) => {
 
   if (url && path) {
     // Simplest case, both fields supplied, no interpretation needed
-    result.full = url
-    result.path = path
+    result.full = maskPathPII(url.toString())
+    result.path = maskPathPII(path.toString())
   } else {
     const pathToUse = url || path
     if (pathToUse) {
-      const pathStr = pathToUse.toString()
+      const pathStr = maskPathPII(pathToUse.toString())
       if (pathStr.startsWith('http')) {
         result.full = pathStr
         result.path = new URL(pathStr).pathname

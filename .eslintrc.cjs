@@ -38,7 +38,7 @@ module.exports = {
             },
             'FieldDefinition[parent.name.value=Mutation]': {
               forbiddenPrefixes: ['mutation'],
-              requiredPrefixes: ['create', 'update', 'delete'],
+              requiredPrefixes: ['create', 'update', 'delete', 'validate'],
               forbiddenSuffixes: ['Mutation', 'Create', 'Update', 'Delete']
             },
             'FieldDefinition[parent.name.value=Subscription]': {

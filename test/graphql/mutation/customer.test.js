@@ -18,7 +18,7 @@ function setupNock(update = {}) {
   kits
     .post('/person/search', {
       searchFieldType: 'CUSTOMER_REFERENCE',
-      primarySearchPhrase: 'crn',
+      primarySearchPhrase: '1234567890',
       offset: 0,
       limit: 1
     })
@@ -37,7 +37,7 @@ function setupNock(update = {}) {
     firstName: 'currentFirstName',
     middleName: 'currentMiddleName',
     lastName: 'currentLastName',
-    dateOfBirth: 1735732800,
+    dateOfBirth: 1735732800000,
     landline: 'currentLandline',
     mobile: 'currentMobile',
     email: 'currentEmail',
@@ -68,10 +68,11 @@ function setupNock(update = {}) {
     _data: person
   })
 
-  // Update
+  // Update - nock expects the milliseconds value the resolver now sends
   const updatedPerson = {
     ...person,
     ...update,
+    dateOfBirth: update.dateOfBirth || 1735732800000,
     address: {
       ...person.address,
       ...(update?.address || {})
@@ -80,24 +81,22 @@ function setupNock(update = {}) {
 
   kits.put('/person/personId', updatedPerson).reply(201)
 
-  // Post update
   kits
     .post('/person/search', {
       searchFieldType: 'CUSTOMER_REFERENCE',
-      primarySearchPhrase: 'crn',
+      primarySearchPhrase: '1234567890',
       offset: 0,
       limit: 1
     })
     .reply(200, {
-      _data: [
-        {
-          id: 'personId'
-        }
-      ]
+      _data: [{ id: 'personId' }]
     })
 
   kits.get('/person/personId/summary').reply(200, {
-    _data: updatedPerson
+    _data: {
+      ...updatedPerson,
+      dateOfBirth: updatedPerson.dateOfBirth
+    }
   })
 }
 
@@ -129,7 +128,7 @@ describe('customer mutations', () => {
       mutation {
         updateCustomerAddress(
           input: {
-            crn: "crn"
+            crn: "1234567890"
             address: {
               buildingName: "newBuildingName"
               buildingNumberRange: "newBuildingNumberRange"
@@ -218,7 +217,7 @@ describe('customer mutations', () => {
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerDateOfBirth(input: { crn: "crn", dateOfBirth: "2025-01-01" }) {
+        updateCustomerDateOfBirth(input: { crn: "1234567890", dateOfBirth: "2025-01-01" }) {
           customer {
             info {
               dateOfBirth
@@ -248,9 +247,13 @@ describe('customer mutations', () => {
       email: 'newEmail'
     })
 
+    nock(config.get('kits.internal.gatewayUrl'))
+      .get('/person/newEmail/validateEmail')
+      .reply(200, { _data: { emailDuplicated: false } })
+
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerEmail(input: { crn: "crn", email: { address: "newEmail" } }) {
+        updateCustomerEmail(input: { crn: "1234567890", email: { address: "newEmail" } }) {
           success
           customer {
             info {
@@ -292,7 +295,7 @@ describe('customer mutations', () => {
       mutation {
         updateCustomerName(
           input: {
-            crn: "crn"
+            crn: "1234567890"
             first: "newFirst"
             last: "newLast"
             middle: "newMiddle"
@@ -345,7 +348,7 @@ describe('customer mutations', () => {
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerPhone(
-          input: { crn: "crn", phone: { landline: "newLandline", mobile: "newMobile" } }
+          input: { crn: "1234567890", phone: { landline: "newLandline", mobile: "newMobile" } }
         ) {
           success
           customer {
@@ -378,7 +381,7 @@ describe('customer mutations', () => {
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerDoNotContact(
-          input: { crn: "crn", doNotContact: true }
+          input: { crn: "1234567890", doNotContact: true }
         ) {
           success
           customer {

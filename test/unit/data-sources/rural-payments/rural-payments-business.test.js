@@ -1,5 +1,4 @@
 import { describe, jest } from '@jest/globals'
-import jwt from 'jsonwebtoken'
 import {
   formatDateDDMMMYY,
   RuralPaymentsBusiness
@@ -76,26 +75,21 @@ describe('Rural Payments Business', () => {
   const datasourceOptions = [
     { logger },
     {
-      gatewayType: 'internal'
+      request: { headers: { email: 'test@test.test' } }
     }
   ]
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
 
-  const tokenValue = jwt.sign(
-    {
-      relationships: ['123:123456789']
-    },
-    'test-secret'
-  )
+  const defraIdContext = { orgId: (sbi) => (sbi === '123456789' ? '123' : undefined) }
   const ruralPaymentsBusinessExt = new RuralPaymentsBusiness(
     { logger },
     {
-      gatewayType: 'external',
       request: {
         headers: {
-          'x-forwarded-authorization': tokenValue
+          'x-forwarded-authorization': 'the-defra-id-token'
         }
-      }
+      },
+      defraIdContext
     }
   )
   const httpGet = jest.spyOn(ruralPaymentsBusiness, 'get')
@@ -687,6 +681,57 @@ describe('Rural Payments Business', () => {
 
       expect(httpGet).toHaveBeenCalledWith('bank-change-service/v1/account-status/5583781')
       expect(result).toEqual(accountStatus)
+    })
+  })
+
+  describe('getExistingBankAccounts', () => {
+    test('gets the existing bank accounts for an FRN', async () => {
+      const existingAccounts = {
+        accounts: [
+          { number: '1234', currency: 'GBP' },
+          { number: '5678', currency: 'EUR' }
+        ]
+      }
+      httpGet.mockResolvedValueOnce(existingAccounts)
+
+      const result = await ruralPaymentsBusiness.getExistingBankAccounts('10014489653')
+
+      expect(httpGet).toHaveBeenCalledWith('bank-change-service/v1/existing-accounts/10014489653')
+      expect(result).toEqual(existingAccounts)
+    })
+  })
+
+  describe('getAuthorisedFunctionsByOrganisationId', () => {
+    test('requests the pipe-separated functions and returns the authorisation data', async () => {
+      const data = { viewLand: true, amendBusinessDetails: false }
+      httpGet.mockResolvedValueOnce({ data, success: true, errorString: null })
+
+      const result = await ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(123456789, [
+        'viewLand',
+        'amendBusinessDetails'
+      ])
+
+      expect(httpGet).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^SitiAgriApi\/authorisation\/organisation\/123456789\/byFunction\?functions=viewLand%7CamendBusinessDetails&module=CUST_SS_PORTAL&timestamp=\d+$/
+        )
+      )
+      expect(result).toEqual(data)
+    })
+
+    test('URL-encodes function names containing reserved characters', async () => {
+      httpGet.mockResolvedValueOnce({ data: {}, success: true, errorString: null })
+
+      await ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(123456789, [
+        'viewLand',
+        'does#Not&Exist'
+      ])
+
+      expect(httpGet).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /^SitiAgriApi\/authorisation\/organisation\/123456789\/byFunction\?functions=viewLand%7Cdoes%23Not%26Exist&module=CUST_SS_PORTAL&timestamp=\d+$/
+        )
+      )
     })
   })
 })

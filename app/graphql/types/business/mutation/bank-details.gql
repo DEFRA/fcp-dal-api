@@ -4,7 +4,17 @@ extend type Mutation {
   """
   createBusinessCustomerBankDetails(
     input: CreateBusinessCustomerBankDetailsInput!
-  ): CreateBusinessCustomerBankDetailsResult @on @auth(requires: [SINGLE_FRONT_DOOR])
+  ): CreateBusinessCustomerBankDetailsResult @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Validates a change of bank account details for a business without updating them.
+
+  Runs the same checks as `createBusinessCustomerBankDetails` but never submits the
+  change. To update the bank details, call `createBusinessCustomerBankDetails`.
+  """
+  validateBusinessCustomerBankDetails(
+    input: ValidateBusinessCustomerBankDetailsInput!
+  ): ValidateBusinessCustomerBankDetailsResult @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input CreateBusinessCustomerBankDetailsInput {
@@ -12,12 +22,30 @@ input CreateBusinessCustomerBankDetailsInput {
   Single Business Identifier (SBI) of the business: a unique 9-digit number that
   identifies the business.
   """
-  sbi: ID!
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
 
   """
   The Customer Reference Number (CRN) of the person submitting the bank change.
   """
-  crn: ID!
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
+
+  """
+  Bank account details. Exactly one variant must be supplied.
+  """
+  account: BankAccountInput!
+}
+
+input ValidateBusinessCustomerBankDetailsInput {
+  """
+  Single Business Identifier (SBI) of the business: a unique 9-digit number that
+  identifies the business.
+  """
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
+
+  """
+  The Customer Reference Number (CRN) of the person requesting the bank change.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
 
   """
   Bank account details. Exactly one variant must be supplied.
@@ -274,50 +302,82 @@ union CreateBusinessCustomerBankDetailsResult =
   | BankDetailsLocked
   | BankDetailsNotEditable
 
+"""
+The outcome of a bank details validation request. The bank details are never updated.
+
+- `BankDetailsMatched` — The details fully match; a submission would succeed.
+- `BankDetailsPartialMatch` — The details only partially match (e.g. the account
+  number does not match the account name). A submission would still succeed, but
+  the caller may want to correct the details first.
+- `BankDetailsValidationFailed` — The details do not match.
+- `BankDetailsLocked` — The user is locked.
+- `BankDetailsNotEditable` — The organisation's bank details cannot currently be changed.
+"""
+union ValidateBusinessCustomerBankDetailsResult =
+  | BankDetailsMatched
+  | BankDetailsPartialMatch
+  | BankDetailsValidationFailed
+  | BankDetailsLocked
+  | BankDetailsNotEditable
+
+type BankDetailsMatched {
+  """
+  Confirmation that the bank account details fully match.
+  """
+  message: String!
+}
+
+type BankDetailsPartialMatch {
+  """
+  Detail of the partial match.
+  """
+  message: String!
+}
+
 type BankDetailsSubmitted {
   """
   `true` once the bank change submission has been accepted by the upstream service.
   """
-  success: Boolean! @on
+  success: Boolean!
 }
 
 type BankDetailsValidationFailed {
   """
   Detail of the error
   """
-  message: String! @on
+  message: String!
 
   """
   Number of attempts remaining.
   """
-  attemptsRemaining: Int! @on
+  attemptsRemaining: Int!
 }
 
 type BankDetailsLocked {
   """
   Lock message.
   """
-  message: String! @on
+  message: String!
 }
 
 type BankDetailsNotEditable {
   """
   Reason the bank details cannot currently be changed.
   """
-  message: String! @on
+  message: String!
 
   """
   `true` if the bank details passed validation and were submitted in the last 14 days.
   """
-  submitted: Boolean! @on
+  submitted: Boolean!
 
   """
   `true` if the bank details were updated (or an update attempted) in the last 14 days.
   """
-  updatedRecently: Boolean! @on
+  updatedRecently: Boolean!
 
   """
   `true` if the organisation was created within the last 24 hours.
   """
-  new: Boolean! @on
+  new: Boolean!
 }

@@ -8,6 +8,7 @@ import {
   transformBusinessDetailsToOrgDetailsCreate,
   transformBusinessDetailsToOrgDetailsUpdate,
   transformCountyParishHoldings,
+  transformOrganisationCustomer,
   transformOrganisationCustomers,
   transformOrganisationSearchResult
 } from '../../../../app/transformers/rural-payments/business.js'
@@ -202,6 +203,52 @@ describe('Business transformer', () => {
     })
 
     expect(transformOrganisationCustomers(customers)).toEqual(transformedCustomers)
+  })
+
+  test('#transformOrganisationCustomers threads the given sbi onto every customer', () => {
+    const customers = [
+      { id: 1, firstName: 'A', lastName: 'One', customerReference: '111', privileges: [] },
+      { id: 2, firstName: 'B', lastName: 'Two', customerReference: '222', privileges: [] }
+    ]
+
+    expect(transformOrganisationCustomers(customers, '123456789')).toEqual([
+      expect.objectContaining({ personId: 1, sbi: '123456789' }),
+      expect.objectContaining({ personId: 2, sbi: '123456789' })
+    ])
+  })
+
+  test('#transformOrganisationCustomer includes the given sbi', () => {
+    const customer = {
+      id: 1,
+      firstName: 'A',
+      lastName: 'One',
+      customerReference: '111',
+      role: 'Business Partner',
+      privileges: []
+    }
+
+    expect(transformOrganisationCustomer(customer, '123456789')).toEqual({
+      personId: 1,
+      firstName: 'A',
+      lastName: 'One',
+      crn: '111',
+      role: 'Business Partner',
+      privileges: [],
+      sbi: '123456789'
+    })
+  })
+
+  test('#transformOrganisationCustomer sbi is undefined when not provided', () => {
+    const customer = {
+      id: 1,
+      firstName: 'A',
+      lastName: 'One',
+      customerReference: '111',
+      role: 'Business Partner',
+      privileges: []
+    }
+
+    expect(transformOrganisationCustomer(customer).sbi).toBeUndefined()
   })
 
   const permissionGroups = new Permissions().getPermissionGroups()

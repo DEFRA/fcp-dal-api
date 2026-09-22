@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import { mockOrganisationSearch } from '../helpers.js'
+import { mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -80,7 +79,7 @@ describe('business', () => {
 
   test('update business name', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       name: 'new name'
     }
 
@@ -130,7 +129,7 @@ describe('business', () => {
 
   test('update business email', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       email: {
         address: 'newemail@test.com'
       }
@@ -183,7 +182,7 @@ describe('business', () => {
 
   test('update business address - withUprn', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       address: {
         withUprn: {
           buildingName: 'new buildingName',
@@ -359,7 +358,7 @@ describe('business', () => {
 
   test('update business address - withoutUprn', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       address: {
         withoutUprn: {
           buildingName: 'new buildingName',
@@ -529,7 +528,7 @@ describe('business', () => {
 
   test('update business phone', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       phone: {
         landline: 'new phone',
         mobile: 'new mobile'
@@ -595,7 +594,7 @@ describe('business', () => {
 
   test('update business vat', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       vat: '123456789'
     }
     const putPayloadOverrides = {
@@ -644,13 +643,10 @@ describe('business', () => {
 })
 
 describe('business - external gateway', () => {
-  const tokenValue = jwt.sign(
-    {
-      relationships: ['organisationId:sbi'],
-      contactId: 'crn'
-    },
-    'test-secret'
-  )
+  const tokenValue = signDefraIdToken({
+    relationships: ['organisationId:123456789'],
+    contactId: 'crn'
+  })
   afterEach(() => {
     nock.cleanAll()
     nock.enableNetConnect()
@@ -666,7 +662,7 @@ describe('business - external gateway', () => {
 
   test('update business name', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       name: 'new name'
     }
 
@@ -698,12 +694,9 @@ describe('business - external gateway', () => {
         }
       }
     `
-    const result = await makeTestQuery(
-      query,
-      { 'x-forwarded-authorization': tokenValue, 'gateway-type': 'external' },
-      true,
-      { input }
-    )
+    const result = await makeTestQuery(query, { 'x-forwarded-authorization': tokenValue }, true, {
+      input
+    })
 
     expect(result).toEqual({
       data: {

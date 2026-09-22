@@ -5,7 +5,7 @@ The <abbr title="Data Access Layer">DAL</abbr> requires multiple things to be pr
 
 ## Required for all requests
 
-- If making a request from a DEFRA environment, you will need to either be within the CDP network or request your IP to be whitelisted.  
+- If making a request from a DEFRA environment, you will need to either be within the CDP network or request your IP to be whitelisted.
   NOTE: the CDP `ext-test` and `prod` environments are externally accessible.
 - You will need a valid Entra token containing a group that has already been provided and mapped to the corresponding access in the DAL. This **POST** request shows how to get a token:
   ```shell
@@ -18,12 +18,18 @@ The <abbr title="Data Access Layer">DAL</abbr> requires multiple things to be pr
 
 ## Internal User requests
 
-- The email address of the user making the request, sent in the `email` header.  
+- The email address of the user making the request, sent in the `email` header.
   NOTE: This email must match an account on the RP portal (with the correct permissions)
 
 ## External User requests
 
-- Set `gateway-type` header to "**external**"
 - Set `x-forwarded-authorization` header to a Defra ID token that contains the relevant <abbr title="Customer Reference Number">CRN</abbr> and <abbr title="Single Business Identifier">SBI</abbr> (if requesting business data)
+
+## Service Account requests
+
+The internal and external routes above require a user to be accessing the system. If a client needs to make a DAL call when there is no user initiating the request (for example a batch), then a service account may be used.
+Please refer to the [Service Account](https://eaflood.atlassian.net/wiki/spaces/FDM/pages/6535938295/Service+account) documentation for more information.
+
+- The email address of the service account should be added to the `service-account` header.
 
 [< back to Homepage](./homepage)

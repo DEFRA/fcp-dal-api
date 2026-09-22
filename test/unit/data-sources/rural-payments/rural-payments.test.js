@@ -1,12 +1,8 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
 import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import jwt from 'jsonwebtoken'
-import {
-  RuralPayments,
-  extractCrnFromDefraIdToken
-} from '../../../../app/data-sources/rural-payments/RuralPayments.js'
-import { BadRequest, HttpError } from '../../../../app/errors/graphql.js'
+import { RuralPayments } from '../../../../app/data-sources/rural-payments/RuralPayments.js'
+import { HttpError } from '../../../../app/errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../../app/logger/codes.js'
 
 const logger = {
@@ -21,11 +17,9 @@ const datasourceOptions = [
   {
     request: {
       headers: {
-        'gateway-type': 'internal',
         email: 'test@test.test'
       }
-    },
-    gatewayType: 'internal'
+    }
   }
 ]
 
@@ -66,6 +60,8 @@ describe('RuralPayments', () => {
           })
           expect(mockFetch).toBeCalledTimes(1)
         }
+
+        // Ensure we actually ran the catch block assertions (i.e. the test did throw)
         expect.assertions(2)
       })
 
@@ -140,35 +136,150 @@ describe('RuralPayments', () => {
     })
   })
 
+  describe('gatewayType / isExternalRoute resolution', () => {
+    test('resolves to internal when an email header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        { request: { headers: { email: 'test@test.test' } } }
+      )
+
+      expect(rp.gatewayType).toBe('rural-payments-internal')
+      expect(rp.isExternalRoute()).toBe(false)
+    })
+
+    test('resolves to client-service-account when only a service-account header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        { request: { headers: { 'service-account': 'dal-service-account@example.com' } } }
+      )
+
+      expect(rp.gatewayType).toBe('rural-payments-client-service-account')
+      expect(rp.isExternalRoute()).toBe(false)
+    })
+
+    test('resolves to external when only an x-forwarded-authorization header is present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        { request: { headers: { 'x-forwarded-authorization': 'token123' } } }
+      )
+
+      expect(rp.gatewayType).toBe('rural-payments-external')
+      expect(rp.isExternalRoute()).toBe(true)
+    })
+
+    test('resolves to dal-service-account when both x-forwarded-authorization and service-account headers are present', () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          request: {
+            headers: {
+              'x-forwarded-authorization': 'token123',
+              'service-account': 'dal-service-account@example.com'
+            }
+          }
+        }
+      )
+
+      expect(rp.gatewayType).toBe('rural-payments-dal-service-account')
+      expect(rp.isExternalRoute()).toBe(false)
+    })
+
+    test('email wins over x-forwarded-authorization when both are present', () => {
+      // Both should never be present, but it would be a breaking change to throw here
+      // (an error log statement has been added when this happens so that we can get alerted and deal with this)
+      const rp = new RuralPayments(
+        { logger },
+        {
+          request: {
+            headers: {
+              email: 'test@test.test',
+              'x-forwarded-authorization': 'token123'
+            }
+          }
+        }
+      )
+
+      expect(rp.gatewayType).toBe('rural-payments-internal')
+      expect(rp.isExternalRoute()).toBe(false)
+    })
+
+    test('throws when both email and service-account headers are present', () => {
+      expect(
+        () =>
+          new RuralPayments(
+            { logger },
+            {
+              request: {
+                headers: {
+                  email: 'test@test.test',
+                  'service-account': 'dal-service-account@example.com'
+                }
+              }
+            }
+          )
+      ).toThrow('Cannot supply both email and service-account headers')
+    })
+
+    test('does not throw when none of email, x-forwarded-authorization or service-account headers are present', () => {
+      // Constructing the datasource must not require a routing header - a request that never
+      // calls upstream (e.g. a pure introspection query) has no need for one. See willSendRequest
+      // below for the deferred throw that applies once an actual upstream call is attempted.
+      const rp = new RuralPayments({ logger }, { request: { headers: {} } })
+
+      expect(rp.gatewayType).toBe('rural-payments-no-auth')
+      expect(rp.isExternalRoute()).toBe(false)
+    })
+  })
+
   describe('willSendRequest', () => {
-    test('adds email & gateway type header from request headers & gateway type for internal requests', async () => {
+    test('adds email header from request headers for internal requests', async () => {
       const rp = new RuralPayments(...datasourceOptions)
-      const request = { headers: { 'gateway-type': 'internal', email: 'test@test.test' } }
+      const request = { headers: {} }
       const path = 'test-path'
 
       await rp.willSendRequest(path, request)
 
-      expect(request.headers).toEqual({ email: 'test@test.test', 'gateway-type': 'internal' })
+      expect(request.headers).toEqual({ email: 'test@test.test' })
       expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
         request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
         code: RURALPAYMENTS_API_REQUEST_001
       })
     })
 
-    test('adds crn, Authorization & gateway type header from request headers for external requests', async () => {
-      const token = jwt.sign({ contactId: 'test-crn' }, 'secret', {
-        expiresIn: '1h'
-      })
+    test('adds service-account header from request headers for client service account requests', async () => {
       const rp = new RuralPayments(
         { logger },
         {
-          gatewayType: 'external',
           request: {
             headers: {
-              'gateway-type': 'external',
-              'x-forwarded-authorization': token
+              'service-account': 'robot-account.some-client-service@example.com'
             }
           }
+        }
+      )
+      const request = { headers: {} }
+      const path = 'test-path'
+
+      await rp.willSendRequest(path, request)
+
+      expect(request.headers).toEqual({ email: 'robot-account.some-client-service@example.com' })
+      expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
+        request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
+    })
+
+    test('adds crn & Authorization headers from x-forwarded-authorization for external requests', async () => {
+      const token = 'the-defra-id-token'
+      const rp = new RuralPayments(
+        { logger },
+        {
+          request: {
+            headers: {
+              'x-forwarded-authorization': token
+            }
+          },
+          defraIdContext: { crn: () => 'test-crn' }
         }
       )
       const request = { headers: {} }
@@ -186,103 +297,67 @@ describe('RuralPayments', () => {
       })
     })
 
-    test('throws error if external request headers are missing', () => {
+    test('adds email header from the service-account value for dal-service-account requests', async () => {
       const rp = new RuralPayments(
         { logger },
         {
-          gatewayType: 'external',
           request: {
-            headers: {}
+            headers: {
+              'x-forwarded-authorization': 'token123',
+              'service-account': 'dal-service-account@example.com'
+            }
           }
         }
       )
       const request = { headers: {} }
       const path = 'test-path'
 
-      expect(rp.willSendRequest(path, request)).rejects.toEqual(
-        new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-          extensions: {
-            message:
-              'Invalid request headers, must be either "email: {valid user email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
-          }
-        })
-      )
+      await rp.willSendRequest(path, request)
+
+      expect(request.headers).toEqual({ email: 'dal-service-account@example.com' })
+      expect(logger.debug).toHaveBeenCalledWith('#datasource - Rural payments - request', {
+        request: { ...request, url: 'https://rp_kits_gateway_internal_url/test-path' },
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
     })
 
-    test('throws error if gateway-type is not internal or external', () => {
-      const invalidDataSourceOptions = [
-        { logger },
-        {
-          gatewayType: 'unsupported',
-          request: {
-            headers: {}
-          }
-        }
-      ]
-
-      expect(() => new RuralPayments(...invalidDataSourceOptions)).toThrow(
-        new BadRequest(
-          'gateway-type header must be one of internal or external received: unsupported'
-        )
-      )
-    })
-
-    test('throws error if gateway type is internal, but no email header is present', () => {
+    test('does not throw and sends the request unauthenticated when the healthcheck header is present', async () => {
       const rp = new RuralPayments(
         { logger },
         {
-          gatewayType: 'internal',
-          request: {
-            headers: {}
-          }
-        }
-      )
-      const request = {}
-      const path = 'test-path'
-
-      expect(rp.willSendRequest(path, request)).rejects.toEqual(
-        new HttpError(StatusCodes.UNPROCESSABLE_ENTITY, {
-          extensions: {
-            message:
-              'Invalid request headers, must be either "email: {valid user email}" or "X-Forwarded-Authorization: {defra-id token}" & "gateway-type: external" headers'
-          }
-        })
-      )
-    })
-
-    test('does not throw if gateway type is internal and email header is present', () => {
-      const rp = new RuralPayments(
-        { logger },
-        {
-          gatewayType: 'internal',
           request: {
             headers: {
-              email: 'test'
+              healthcheck: true,
+              'service-account': 'dal-service-account@example.com'
             }
           }
         }
       )
-      const request = {}
+      const request = { headers: {} }
       const path = 'test-path'
 
-      expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+      await expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+      expect(request.headers).toEqual({})
     })
 
-    test('does not throw if gateway type is internal and internalGatewayDevOverrideEmail is present', () => {
-      const rp = new RuralPayments(
-        { logger },
-        {
-          gatewayType: 'internal',
-          request: {
-            headers: {}
-          },
-          internalGatewayDevOverrideEmail: 'test'
-        }
-      )
-      const request = {}
+    test('throws when an upstream call is attempted with none of email, x-forwarded-authorization or service-account headers present', async () => {
+      const rp = new RuralPayments({ logger }, { request: { headers: {} } })
+      const request = { headers: {} }
       const path = 'test-path'
 
-      expect(rp.willSendRequest(path, request)).resolves.toBeUndefined()
+      try {
+        await rp.willSendRequest(path, request)
+      } catch (thrownError) {
+        expect(thrownError).toBeInstanceOf(HttpError)
+        expect(thrownError.extensions).toMatchObject({
+          http: { status: StatusCodes.UNPROCESSABLE_ENTITY },
+          message:
+            'Invalid request headers, must be either "email: {valid user email}", "service-account: {valid service account email}" or "X-Forwarded-Authorization: {defra-id token}" headers'
+        })
+      }
+
+      // Ensure we actually ran the catch block assertions (i.e. the test did throw)
+      expect.assertions(2)
     })
   })
 
@@ -309,6 +384,7 @@ describe('RuralPayments', () => {
         expect.objectContaining({
           type: 'http',
           code: RURALPAYMENTS_API_REQUEST_001,
+          gatewayType: 'rural-payments-internal',
           request: {
             id: '123',
             method: 'GET',
@@ -327,6 +403,49 @@ describe('RuralPayments', () => {
           }),
           code: RURALPAYMENTS_API_REQUEST_001
         })
+      )
+    })
+
+    test('logs the external gatewayType', async () => {
+      const rp = new RuralPayments(
+        { logger },
+        { request: { headers: { 'x-forwarded-authorization': 'token123' } } }
+      )
+      const mockFn = jest.fn().mockResolvedValue({
+        response: { status: 200, headers: new Headers(), body: {} },
+        parsedBody: {}
+      })
+
+      await rp.trace('test-url', { id: '123', method: 'GET', headers: {} }, mockFn)
+
+      expect(logger.info).toHaveBeenCalledWith(
+        '#datasource - Rural payments - response',
+        expect.objectContaining({ gatewayType: 'rural-payments-external' })
+      )
+    })
+
+    test('logs the dal-service-account gatewayType', async () => {
+      const rp = new RuralPayments(
+        { logger },
+        {
+          request: {
+            headers: {
+              'x-forwarded-authorization': 'token123',
+              'service-account': 'dal-service-account@example.com'
+            }
+          }
+        }
+      )
+      const mockFn = jest.fn().mockResolvedValue({
+        response: { status: 200, headers: new Headers(), body: {} },
+        parsedBody: {}
+      })
+
+      await rp.trace('test-url', { id: '123', method: 'GET', headers: {} }, mockFn)
+
+      expect(logger.info).toHaveBeenCalledWith(
+        '#datasource - Rural payments - response',
+        expect.objectContaining({ gatewayType: 'rural-payments-dal-service-account' })
       )
     })
   })
@@ -397,7 +516,7 @@ describe('RuralPayments', () => {
   })
 
   describe('throwIfResponseIsError', () => {
-    test('returns NO_CONTENT status for 204 responses', () => {
+    test('throws an HttpError with response details when the response is not ok', async () => {
       const rp = new RuralPayments(...datasourceOptions)
       const options = {
         response: {
@@ -406,34 +525,24 @@ describe('RuralPayments', () => {
         }
       }
 
-      const extensions = {
-        ...options,
-        response: {
-          status: options.response?.status,
-          headers: options.response?.headers,
-          body: options.parsedBody
+      await expect(rp.throwIfResponseIsError(options)).rejects.toBeInstanceOf(HttpError)
+      await expect(rp.throwIfResponseIsError(options)).rejects.toMatchObject({
+        extensions: {
+          http: { status: StatusCodes.BAD_REQUEST },
+          response: {
+            status: StatusCodes.BAD_REQUEST,
+            headers: undefined,
+            body: undefined
+          }
         }
-      }
-      expect(rp.throwIfResponseIsError(options)).rejects.toEqual(
-        new HttpError(options.response?.status, {
-          extensions
-        })
-      )
+      })
     })
-  })
-})
 
-describe('extractCrnFromDefraIdToken', () => {
-  test('extracts crn successfully from valid token', async () => {
-    const response = extractCrnFromDefraIdToken(
-      jwt.sign({ contactId: '11111111' }, 'secret', { expiresIn: '1h' })
-    )
-    expect(response).toEqual('11111111')
-  })
-  test('Throws error when provided an invalid token', async () => {
-    const invalidToken = jwt.sign({}, 'secret', { expiresIn: '1h' })
-    expect(() => extractCrnFromDefraIdToken(invalidToken)).toThrow(
-      new BadRequest('Defra ID token does not contain crn')
-    )
+    test('does not throw when the response is ok', async () => {
+      const rp = new RuralPayments(...datasourceOptions)
+      const options = { response: { ok: true, status: StatusCodes.OK } }
+
+      await expect(rp.throwIfResponseIsError(options)).resolves.toBeUndefined()
+    })
   })
 })

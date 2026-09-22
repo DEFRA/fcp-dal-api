@@ -8,8 +8,8 @@ import { apolloServer } from './graphql/server.js'
 import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
 import { mongoClient } from './mongo.js'
-import { runHealthChecks } from './utils/health/index.js'
 import { server } from './server.js'
+import { runHealthChecks } from './utils/health/index.js'
 
 const init = async () => {
   await apolloServer.start()
@@ -45,8 +45,8 @@ process.on('unhandledRejection', async (error) => {
 })
 
 process.on('uncaughtException', async (error) => {
-  logger.error('#DAL - uncaught reception', { error, code: DAL_UNHANDLED_ERROR_001 })
+  logger.error('#DAL - uncaught exception', { error, code: DAL_UNHANDLED_ERROR_001 })
   await abort()
 })
 
-init()
+await init()

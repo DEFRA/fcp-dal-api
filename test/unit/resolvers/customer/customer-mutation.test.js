@@ -42,7 +42,8 @@ describe('Customer Mutations', () => {
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn(),
         getPersonByPersonId: jest.fn(),
-        updatePersonDetails: jest.fn()
+        updatePersonDetails: jest.fn(),
+        validateEmail: jest.fn()
       }
     }
   })
@@ -128,6 +129,135 @@ describe('Customer Mutations', () => {
         success: true,
         customer: { personId: 'currentId' }
       })
+    })
+  })
+
+  describe.each(['updateCustomerEmail', 'updateCustomerAllFields'])(
+    '%s email duplicate check',
+    (mutationName) => {
+      beforeEach(() => {
+        mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('currentId')
+        mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(mockPerson)
+      })
+
+      test('should call validateEmail with the new email address', async () => {
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+          emailDuplicated: false
+        })
+
+        await Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).toHaveBeenCalledWith(
+          'new@example.com'
+        )
+      })
+
+      test('should not update the customer and should throw when the email is a duplicate', async () => {
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+          emailDuplicated: true
+        })
+
+        await expect(
+          Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+        ).rejects.toMatchObject({
+          message: 'Email address is already in use by another customer',
+          extensions: { code: 'EMAIL_ALREADY_REGISTERED', http: { status: 400 } }
+        })
+
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).not.toHaveBeenCalled()
+      })
+
+      test('should update the customer when the email is not a duplicate', async () => {
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+          emailDuplicated: false
+        })
+
+        const result = await Mutation[mutationName](
+          null,
+          { input },
+          { dataSources: mockDataSources }
+        )
+
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).toHaveBeenCalled()
+        expect(result).toEqual({
+          success: true,
+          customer: { personId: 'currentId' }
+        })
+      })
+
+      test('should not call validateEmail when the input has no email', async () => {
+        const input = { crn: 'crn', first: 'newFirstName' }
+
+        await Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+      })
+
+      test("should not call validateEmail when the email is unchanged from the customer's current email", async () => {
+        const input = { crn: 'crn', email: { address: mockPerson.email } }
+
+        const result = await Mutation[mutationName](
+          null,
+          { input },
+          { dataSources: mockDataSources }
+        )
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).toHaveBeenCalled()
+        expect(result).toEqual({
+          success: true,
+          customer: { personId: 'currentId' }
+        })
+      })
+
+      test('should not call validateEmail when the email is unchanged except for casing', async () => {
+        const input = { crn: 'crn', email: { address: mockPerson.email.toUpperCase() } }
+
+        await Mutation[mutationName](null, { input }, { dataSources: mockDataSources })
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+      })
+    }
+  )
+
+  describe.each(updateMutations)('%s audit trail', (mutationName) => {
+    const info = { path: { key: mutationName, typename: 'Mutation', prev: undefined } }
+
+    beforeEach(() => {
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('currentId')
+      mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(mockPerson)
+    })
+
+    test('records the personId/crn accounts and an updated person entity', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { crn: 'crn' }
+
+      await Mutation[mutationName](
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'currentId')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'updated',
+        entityid: 'crn'
+      })
+    })
+
+    test('does not throw when no audit trail is supplied', async () => {
+      const input = { crn: 'crn' }
+
+      await Mutation[mutationName](null, { input }, { dataSources: mockDataSources }, info)
     })
   })
 })

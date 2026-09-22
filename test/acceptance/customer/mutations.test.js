@@ -106,9 +106,9 @@ const generateInputsForCRN = (crn) => ({
       line4: 'acceptance-line4',
       line5: 'acceptance-line5',
       pafOrganisationName: 'acceptance-pafOrganisationName',
-      postalCode: 'acceptance-postalCode',
+      postalCode: 'SW1A 2AA',
       street: 'acceptance-street',
-      uprn: 'acceptance-uprn'
+      uprn: '123456789012'
     }
   },
   dateOfBirthInput: {
@@ -122,7 +122,7 @@ const generateInputsForCRN = (crn) => ({
   emailInput: {
     crn,
     email: {
-      address: 'acceptance-email-address'
+      address: 'acceptance@example.com'
     }
   },
   nameInput: {
@@ -132,8 +132,8 @@ const generateInputsForCRN = (crn) => ({
   phoneInput: {
     crn,
     phone: {
-      landline: 'acceptance-landline',
-      mobile: 'acceptance-mobile'
+      landline: '01234 567890',
+      mobile: '07700 900000'
     }
   }
 })
@@ -195,7 +195,7 @@ const fullMutation = gql`
   }
 `
 const nameFullInput = {
-  title: 'acceptance-title-full',
+  title: 'acceptance-title-xxx',
   otherTitle: 'acceptance-otherTitle-full',
   first: 'acceptance-first-full',
   middle: 'acceptance-middle-full',
@@ -219,19 +219,19 @@ const generateFullInputForCRN = (crn) => ({
       line4: 'acceptance-line4-full',
       line5: 'acceptance-line5-full',
       pafOrganisationName: 'acceptance-pafOrganisationName-full',
-      postalCode: 'acceptance-postalCode-full',
+      postalCode: 'SW1A 2AB',
       street: 'acceptance-street-full',
-      uprn: 'acceptance-uprn-full'
+      uprn: '210987654321'
     },
     dateOfBirth: '2000-03-01', // must be a valid date string
     doNotContact: false, // must be boolean
     email: {
-      address: 'acceptance-email-address-full'
+      address: 'acceptance-full@example.com'
     },
     ...nameFullInput,
     phone: {
-      landline: 'acceptance-landline-full',
-      mobile: 'acceptance-mobile-full'
+      landline: '01234 567891',
+      mobile: '07700 900001'
     }
   }
 })
@@ -241,8 +241,7 @@ describe('Customer Mutations - as an internal user', () => {
     const inputs = generateInputsForCRN('9000000000')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(mutation, inputs, {
-      email: 'some-email',
-      'gateway-type': 'internal'
+      email: 'some-email'
     })
 
     expect(response).not.toHaveProperty('errors')
@@ -259,7 +258,7 @@ describe('Customer Mutations - as an internal user', () => {
         name: nameInput,
         dateOfBirth: '2000-02-29',
         phone: inputs.phoneInput.phone,
-        email: { ...inputs.emailInput.email, validated: false },
+        email: { ...inputs.emailInput.email, validated: true },
         status: {
           locked: true,
           confirmed: false,
@@ -267,7 +266,7 @@ describe('Customer Mutations - as an internal user', () => {
         },
         address: { ...inputs.addressInput.address, typeId: null },
         doNotContact: true,
-        personalIdentifiers: []
+        personalIdentifiers: ['1819421250', '9527746847', '3904800546']
       }
     })
   })
@@ -276,8 +275,7 @@ describe('Customer Mutations - as an internal user', () => {
     const inputs = generateFullInputForCRN('9000000000')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(fullMutation, inputs, {
-      email: 'some-email',
-      'gateway-type': 'internal'
+      email: 'some-email'
     })
 
     expect(response).not.toHaveProperty('errors')
@@ -289,7 +287,7 @@ describe('Customer Mutations - as an internal user', () => {
         name: nameFullInput,
         dateOfBirth: '2000-03-01',
         phone: inputs.allFieldsInput.phone,
-        email: { ...inputs.allFieldsInput.email, validated: false },
+        email: { ...inputs.allFieldsInput.email, validated: true },
         status: {
           locked: true,
           confirmed: false,
@@ -297,9 +295,105 @@ describe('Customer Mutations - as an internal user', () => {
         },
         address: { ...inputs.allFieldsInput.address, typeId: null },
         doNotContact: false,
-        personalIdentifiers: []
+        personalIdentifiers: ['1819421250', '9527746847', '3904800546']
       }
     })
+  })
+})
+
+describe('Customer Mutations - duplicate email handling', () => {
+  const crn = '9000000000'
+  const headers = { email: 'some-email' }
+  const duplicateEmail = 'skeleton@the-closet.net' // known duplicate, see validateCustomerEmail acceptance tests
+
+  const setEmailMutation = gql`
+    mutation SetEmail($input: UpdateCustomerEmailInput!) {
+      updateCustomerEmail(input: $input) {
+        success
+      }
+    }
+  `
+
+  const setAllFieldsEmailMutation = gql`
+    mutation SetAllFieldsEmail($input: UpdateCustomerAllFieldsInput!) {
+      updateCustomerAllFields(input: $input) {
+        success
+      }
+    }
+  `
+
+  const customerEmailQuery = gql`
+    query CustomerEmail($crn: ID!) {
+      customer(crn: $crn) {
+        info {
+          email {
+            address
+          }
+        }
+      }
+    }
+  `
+
+  it('should reject updateCustomerEmail when the email address is a known duplicate, leaving the customer unchanged', async () => {
+    const client = new GraphQLClient(targetURL)
+
+    const setup = await client.request(
+      setEmailMutation,
+      { input: { crn, email: { address: 'not-a-duplicate@example.com' } } },
+      headers
+    )
+    expect(setup.updateCustomerEmail).toEqual({ success: true })
+
+    await expect(
+      client.request(
+        setEmailMutation,
+        { input: { crn, email: { address: duplicateEmail } } },
+        headers
+      )
+    ).rejects.toMatchObject({
+      response: {
+        errors: [
+          expect.objectContaining({
+            message: 'Email address is already in use by another customer',
+            extensions: expect.objectContaining({ code: 'EMAIL_ALREADY_REGISTERED' })
+          })
+        ]
+      }
+    })
+
+    const check = await client.request(customerEmailQuery, { crn }, headers)
+    expect(check.customer.info.email.address).toBe('not-a-duplicate@example.com')
+  })
+
+  it('should reject updateCustomerAllFields when the email address is a known duplicate, leaving the customer unchanged', async () => {
+    const client = new GraphQLClient(targetURL)
+
+    const setup = await client.request(
+      setAllFieldsEmailMutation,
+      { input: { crn, email: { address: 'still-not-a-duplicate@example.com' } } },
+      headers
+    )
+    expect(setup.updateCustomerAllFields).toEqual({ success: true })
+
+    await expect(
+      client.request(
+        setAllFieldsEmailMutation,
+        { input: { crn, email: { address: duplicateEmail } } },
+        headers
+      )
+    ).rejects.toMatchObject({
+      response: {
+        errors: [
+          expect.objectContaining({
+            message: 'Email address is already in use by another customer',
+            extensions: expect.objectContaining({ code: 'EMAIL_ALREADY_REGISTERED' })
+          })
+        ]
+      }
+    })
+
+    const check = await client.request(customerEmailQuery, { crn }, headers)
+    expect(check.customer.info.email.address).toBe('still-not-a-duplicate@example.com')
   })
 })
 
@@ -316,8 +410,7 @@ describe('Customer Mutations - as an external user', () => {
     const inputs = generateInputsForCRN('9000000001')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(mutation, inputs, {
-      'x-forwarded-authorization': tokenValue,
-      'gateway-type': 'external'
+      'x-forwarded-authorization': tokenValue
     })
 
     expect(response).not.toHaveProperty('errors')
@@ -336,13 +429,13 @@ describe('Customer Mutations - as an external user', () => {
         phone: inputs.phoneInput.phone,
         email: { ...inputs.emailInput.email, validated: false },
         status: {
-          locked: true,
-          confirmed: true,
+          locked: false,
+          confirmed: false,
           deactivated: false
         },
         address: { ...inputs.addressInput.address, typeId: null },
         doNotContact: true,
-        personalIdentifiers: ['1271974984']
+        personalIdentifiers: ['8500901592', '1596460156']
       }
     })
   })
@@ -351,8 +444,7 @@ describe('Customer Mutations - as an external user', () => {
     const inputs = generateFullInputForCRN('9000000001')
     const client = new GraphQLClient(targetURL)
     const response = await client.request(fullMutation, inputs, {
-      'x-forwarded-authorization': tokenValue,
-      'gateway-type': 'external'
+      'x-forwarded-authorization': tokenValue
     })
 
     expect(response).not.toHaveProperty('errors')
@@ -366,13 +458,13 @@ describe('Customer Mutations - as an external user', () => {
         phone: inputs.allFieldsInput.phone,
         email: { ...inputs.allFieldsInput.email, validated: false },
         status: {
-          locked: true,
-          confirmed: true,
+          locked: false,
+          confirmed: false,
           deactivated: false
         },
         address: { ...inputs.allFieldsInput.address, typeId: null },
         doNotContact: false,
-        personalIdentifiers: ['1271974984']
+        personalIdentifiers: ['8500901592', '1596460156']
       }
     })
   })

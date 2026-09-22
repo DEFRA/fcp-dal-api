@@ -26,7 +26,7 @@ describe('business lock and unlock', () => {
 
   test('lock a business', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       reason: 'test'
     }
 
@@ -34,7 +34,7 @@ describe('business lock and unlock', () => {
     v1.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        sbi: 'sbi',
+        sbi: '123456789',
         locked: true
       }
     })
@@ -63,7 +63,7 @@ describe('business lock and unlock', () => {
         updateBusinessLock: {
           success: true,
           business: {
-            sbi: 'sbi',
+            sbi: '123456789',
             info: {
               status: {
                 locked: true
@@ -77,7 +77,7 @@ describe('business lock and unlock', () => {
 
   test('unlock a business', async () => {
     const input = {
-      sbi: 'sbi',
+      sbi: '123456789',
       reason: 'test'
     }
 
@@ -85,7 +85,7 @@ describe('business lock and unlock', () => {
     v1.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        sbi: 'sbi',
+        sbi: '123456789',
         locked: false
       }
     })
@@ -114,7 +114,7 @@ describe('business lock and unlock', () => {
         updateBusinessUnlock: {
           success: true,
           business: {
-            sbi: 'sbi',
+            sbi: '123456789',
             info: {
               status: {
                 locked: false

@@ -36,7 +36,6 @@ services:
     ports:
       - '3000:3000'
     environment:
-      ALL_SCHEMA_ON: true
       LOG_LEVEL: info
       NODE_ENV: development
       PORT: 3000
@@ -49,13 +48,15 @@ services:
       KITS_EXTERNAL_GATEWAY_URL: http://upstream-mock:3100/extapi/
       KITS_GATEWAY_TIMEOUT_MS: 3000
       KITS_DISABLE_MTLS: true
-      HITACHI_GATEWAY_URL: http://upstream-mock:3100/api/
+      KITS_DAL_SERVICE_ACCOUNT_EMAIL: test@example.com
+      HITACHI_BASE_URL: http://upstream-mock:3100/api/
       HITACHI_TIMEOUT_MS: 3000
       DAL_REQUEST_TIMEOUT_MS: 3000
       KIT_EXT_PERSON_ID_OVERRIDE: 3337243
       MONGO_URI: mongodb://mongodb:27017
       MONGO_DATABASE: 'fcp-dal-api'
       HITACHI_DISABLE_AUTH: true
+      SERVICE_VERSION: 0.0.0
     depends_on:
       upstream-mock:
         condition: service_healthy
