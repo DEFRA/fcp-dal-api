@@ -55,8 +55,9 @@ extend type Mutation {
     email address.
   """
   # eslint-disable-next-line @graphql-eslint/naming-convention
-  sendConfirmEmailAddressEmail(input: SendConfirmEmailAddressEmailInput!): UpdateCustomerResponse
-    @auth(requires: [SINGLE_FRONT_DOOR])
+  sendConfirmEmailAddressEmail(
+    input: SendConfirmEmailAddressEmailInput!
+  ): SendConfirmEmailAddressEmailResponse @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input UpdateLockCustomerInput {
@@ -221,4 +222,8 @@ input SendConfirmEmailAddressEmailInput {
   to identify the customer.
   """
   crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
+}
+
+type SendConfirmEmailAddressEmailResponse {
+  success: Boolean
 }

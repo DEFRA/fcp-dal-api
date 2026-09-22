@@ -493,12 +493,9 @@ describe('customer mutations', () => {
       })
       .reply(200, { _data: [{ id: 'personId' }] })
 
-    kits
-      .get('/person/personId/summary')
-      .twice()
-      .reply(200, {
-        _data: { id: 'personId', email: 'currentEmail' }
-      })
+    kits.get('/person/personId/summary').reply(200, {
+      _data: { id: 'personId', email: 'currentEmail' }
+    })
 
     kits.get('/person/personId/currentEmail/confirm').reply(200, {
       _data: { id: 'digitalContactPartyId', validated: false }
@@ -522,13 +519,6 @@ describe('customer mutations', () => {
       mutation {
         sendConfirmEmailAddressEmail(input: { crn: "1234567890" }) {
           success
-          customer {
-            info {
-              email {
-                address
-              }
-            }
-          }
         }
       }
     `)
@@ -536,14 +526,7 @@ describe('customer mutations', () => {
     expect(result).toEqual({
       data: {
         sendConfirmEmailAddressEmail: {
-          success: true,
-          customer: {
-            info: {
-              email: {
-                address: 'currentEmail'
-              }
-            }
-          }
+          success: true
         }
       }
     })

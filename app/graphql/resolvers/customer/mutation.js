@@ -107,8 +107,7 @@ async function sendConfirmEmailAddressEmailResolver(
   })
 
   return {
-    success: true,
-    customer: { personId }
+    success: true
   }
 }
 
