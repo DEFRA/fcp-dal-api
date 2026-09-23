@@ -62,6 +62,9 @@ const execCurl = (args, timeout) =>
     })
   })
 
+// The CDP log schema translator drops arbitrary metadata fields, so the curl output is carried in the message
+const formatCurlOutput = (stdout, stderr) => `stdout: ${stdout ?? ''}\nstderr:\n${stderr ?? ''}`
+
 const runCurlGatewayCheck = async (type) => {
   // Diagnostic only: calls the gateway with curl, outside the node process, to give a second view of
   // upstream connectivity (independent of undici).  Failures are logged but never fail the health check.
@@ -99,17 +102,14 @@ const runCurlGatewayCheck = async (type) => {
     args.push(config.get(`kits.${type}.gatewayUrl`))
 
     const { stdout, stderr } = await execCurl(args, config.get('kits.gatewayTimeoutMs'))
-    logger.info(`SUCCESS: curl connection to ${type} Rural Payments gateway completed`, {
-      stdout,
-      stderr
-    })
+    logger.info(
+      `SUCCESS: curl connection to ${type} Rural Payments gateway completed\n${formatCurlOutput(stdout, stderr)}`
+    )
   } catch (err) {
-    logger.error(`#DAL - curl connection to ${type} Rural Payments gateway failed`, {
-      error: err,
-      stdout: err.stdout,
-      stderr: err.stderr,
-      code: RURALPAYMENTS_API_ERROR_001
-    })
+    logger.error(
+      `#DAL - curl connection to ${type} Rural Payments gateway failed\n${formatCurlOutput(err.stdout, err.stderr)}`,
+      { error: err, code: RURALPAYMENTS_API_ERROR_001 }
+    )
   } finally {
     if (tmpDir) {
       await fs.rm(tmpDir, { recursive: true, force: true })

@@ -180,8 +180,7 @@ describe('Rural payments health check', () => {
           config.get(`kits.${type}.gatewayUrl`)
         ])
         expect(mockLogger.logger.info).toHaveBeenCalledWith(
-          `SUCCESS: curl connection to ${type} Rural Payments gateway completed`,
-          { stdout: 'HTTP 403', stderr: 'curl verbose trace' }
+          `SUCCESS: curl connection to ${type} Rural Payments gateway completed\nstdout: HTTP 403\nstderr:\ncurl verbose trace`
         )
         expect(fsMock.rm).toHaveBeenCalledWith(tmpDir, { recursive: true, force: true })
       }
@@ -229,13 +228,8 @@ describe('Rural payments health check', () => {
 
       for (const type of ['internal', 'external']) {
         expect(mockLogger.logger.error).toHaveBeenCalledWith(
-          `#DAL - curl connection to ${type} Rural Payments gateway failed`,
-          {
-            error: curlError,
-            stdout: 'HTTP 000',
-            stderr: 'curl: (35) SSL connect error',
-            code: expect.any(String)
-          }
+          `#DAL - curl connection to ${type} Rural Payments gateway failed\nstdout: HTTP 000\nstderr:\ncurl: (35) SSL connect error`,
+          { error: curlError, code: expect.any(String) }
         )
       }
       expect(fsMock.rm).toHaveBeenCalledTimes(2)
