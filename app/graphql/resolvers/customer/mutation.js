@@ -1,4 +1,5 @@
-import { BadRequest, NotFound } from '../../../errors/graphql.js'
+import { BadRequest, NotFound, Unauthorized } from '../../../errors/graphql.js'
+import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
 import { retrievePersonIdByCRN } from './common.js'
 
@@ -71,28 +72,39 @@ async function updateLockCustomerResolver(
   }
 }
 
+// Only available to external users (see the @auth userType restriction), so the customer is always
+// the one identified by the CRN in the request's Defra ID token.
 async function sendConfirmEmailAddressEmailResolver(
   _,
-  { input },
-  { dataSources, auditTrail },
+  __,
+  { dataSources, auditTrail, defraIdContext },
   info
 ) {
-  auditTrail?.recordAccount(info, 'crn', input.crn)
-  const personId = await dataSources.ruralPaymentsCustomer.getPersonIdByCRN(input.crn)
-  auditTrail?.recordAccount(info, 'personId', personId)
-  const person = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
+  if (!defraIdContext) {
+    throw new Unauthorized('A Defra ID token is required to send a confirm email address email')
+  }
+  const crn = defraIdContext.crn()
+  auditTrail?.recordAccount(info, 'crn', crn)
+  const person = await dataSources.ruralPaymentsCustomer.getExternalPerson()
+  auditTrail?.recordAccount(info, 'personId', person.id)
 
   if (!person.email) {
     throw new NotFound('Customer has no email address')
   }
 
+  if (booleanise(person.emailValidated)) {
+    throw new BadRequest('Customer email address is already verified', {
+      extensions: { code: 'EMAIL_ALREADY_VERIFIED' }
+    })
+  }
+
   const { id: digitalContactPartyId } = await dataSources.ruralPaymentsCustomer.confirmEmail(
-    personId,
+    person.id,
     person.email
   )
 
   await dataSources.ruralPaymentsCustomer.saveEmailValidation({
-    customerReference: input.crn,
+    customerReference: crn,
     partyDigitalContactId: digitalContactPartyId,
     email: person.email,
     linkSentDate: new Date().toISOString()
@@ -103,7 +115,7 @@ async function sendConfirmEmailAddressEmailResolver(
   auditTrail?.recordEntity(info, {
     entity: 'person',
     action: 'sendConfirmEmailAddressEmail',
-    entityid: input.crn
+    entityid: crn
   })
 
   return {
