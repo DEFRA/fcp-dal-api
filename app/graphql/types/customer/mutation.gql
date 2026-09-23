@@ -32,16 +32,16 @@ extend type Mutation {
   updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
   """
-  Sends a verification email to the customer's registered email address.
+  Sends a verification email to the registered email address of the external
+  customer making the request, identified by the CRN in their Defra ID token.
 
   Error codes:
-  - `NOT FOUND`: No customer exists for the given CRN, or the customer has no
-    email address.
+  - `NOT FOUND`: The customer has no email address.
+  - `EMAIL_ALREADY_VERIFIED`: The customer's email address is already verified.
   """
   # eslint-disable-next-line @graphql-eslint/naming-convention
-  sendConfirmEmailAddressEmail(
-    input: SendConfirmEmailAddressEmailInput!
-  ): SendConfirmEmailAddressEmailResponse @auth(requires: [SINGLE_FRONT_DOOR])
+  sendConfirmEmailAddressEmail: SendConfirmEmailAddressEmailResponse
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [EXTERNAL])
 }
 
 input UpdateCustomerAddressInput {
@@ -183,14 +183,6 @@ input UpdateCustomerAllFieldsInput {
 type UpdateCustomerResponse {
   success: Boolean
   customer: Customer
-}
-
-input SendConfirmEmailAddressEmailInput {
-  """
-  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
-  to identify the customer.
-  """
-  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
 }
 
 type SendConfirmEmailAddressEmailResponse {

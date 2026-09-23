@@ -1,5 +1,7 @@
+import { jest } from '@jest/globals'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
+import { mockDefraIdJwks, signDefraIdToken } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 beforeEach(() => {
@@ -373,85 +375,116 @@ describe('customer mutations', () => {
     })
   })
 
-  test('sendConfirmEmailAddressEmail', async () => {
-    const kits = nock(config.get('kits.internal.gatewayUrl'))
+  describe('sendConfirmEmailAddressEmail', () => {
+    const sendConfirmEmailAddressEmailMutation = `#graphql
+      mutation {
+        sendConfirmEmailAddressEmail {
+          success
+        }
+      }
+    `
+    const sfdGroups = () => [config.get('auth.groups.SINGLE_FRONT_DOOR')]
 
-    kits
-      .post('/person/search', {
-        searchFieldType: 'CUSTOMER_REFERENCE',
-        primarySearchPhrase: '1234567890',
-        offset: 0,
-        limit: 1
+    const makeExternalQuery = () => {
+      mockDefraIdJwks()
+      return makeTestQuery(
+        sendConfirmEmailAddressEmailMutation,
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        false,
+        {},
+        sfdGroups()
+      )
+    }
+
+    // External requests resolve the person identified by the Defra ID token via the personIdOverride
+    const mockExternalPerson = (kits, email, emailValidated = false) =>
+      kits
+        .get(`/person/${config.get('kits.external.personIdOverride')}/summary`)
+        .reply(200, { _data: { id: 'personId', email, emailValidated } })
+
+    beforeEach(() => {
+      const originalConfig = { ...config }
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) => (path === 'auth.disabled' ? false : originalConfig.get(path)))
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    test('sends the email for the external user identified by the Defra ID token', async () => {
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+      mockExternalPerson(kits, 'currentEmail')
+
+      kits.get('/person/personId/currentEmail/confirm').reply(200, {
+        _data: { id: 'digitalContactPartyId', validated: false }
       })
-      .reply(200, { _data: [{ id: 'personId' }] })
 
-    kits.get('/person/personId/summary').reply(200, {
-      _data: { id: 'personId', email: 'currentEmail' }
-    })
-
-    kits.get('/person/personId/currentEmail/confirm').reply(200, {
-      _data: { id: 'digitalContactPartyId', validated: false }
-    })
-
-    kits
-      .post('/external-auth/email-validation', (body) => {
-        expect(body).toEqual({
-          customerReference: '1234567890',
-          partyDigitalContactId: 'digitalContactPartyId',
-          email: 'currentEmail',
-          linkSentDate: expect.any(String)
+      kits
+        .post('/external-auth/email-validation', (body) => {
+          expect(body).toEqual({
+            customerReference: '1234567890',
+            partyDigitalContactId: 'digitalContactPartyId',
+            email: 'currentEmail',
+            linkSentDate: expect.any(String)
+          })
+          return true
         })
-        return true
-      })
-      .reply(200)
+        .reply(200)
 
-    kits.post('/verify-email/digitalContactPartyId').reply(200, { _data: 'Success' })
+      kits.post('/verify-email/digitalContactPartyId').reply(200, { _data: 'Success' })
 
-    const result = await makeTestQuery(`#graphql
-      mutation {
-        sendConfirmEmailAddressEmail(input: { crn: "1234567890" }) {
-          success
+      const result = await makeExternalQuery()
+
+      expect(result).toEqual({
+        data: {
+          sendConfirmEmailAddressEmail: {
+            success: true
+          }
         }
-      }
-    `)
-
-    expect(result).toEqual({
-      data: {
-        sendConfirmEmailAddressEmail: {
-          success: true
-        }
-      }
-    })
-  })
-
-  test('sendConfirmEmailAddressEmail returns NOT_FOUND when the customer has no email address', async () => {
-    const kits = nock(config.get('kits.internal.gatewayUrl'))
-
-    kits
-      .post('/person/search', {
-        searchFieldType: 'CUSTOMER_REFERENCE',
-        primarySearchPhrase: '1234567890',
-        offset: 0,
-        limit: 1
       })
-      .reply(200, { _data: [{ id: 'personId' }] })
-
-    kits.get('/person/personId/summary').reply(200, {
-      _data: { id: 'personId', email: null }
     })
 
-    const result = await makeTestQuery(`#graphql
-      mutation {
-        sendConfirmEmailAddressEmail(input: { crn: "1234567890" }) {
-          success
-        }
-      }
-    `)
+    test('returns NOT_FOUND when the customer has no email address', async () => {
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+      mockExternalPerson(kits, null)
 
-    expect(result.errors).toHaveLength(1)
-    expect(result.errors[0].message).toBe('Customer has no email address')
-    expect(result.errors[0].extensions.code).toBe('NOT FOUND')
-    expect(result.errors[0].extensions.http.status).toBe(404)
+      const result = await makeExternalQuery()
+
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].message).toBe('Customer has no email address')
+      expect(result.errors[0].extensions.code).toBe('NOT FOUND')
+      expect(result.errors[0].extensions.http.status).toBe(404)
+    })
+
+    test('returns EMAIL_ALREADY_VERIFIED when the customer email is already verified', async () => {
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+      mockExternalPerson(kits, 'currentEmail', true)
+
+      const result = await makeExternalQuery()
+
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].message).toBe('Customer email address is already verified')
+      expect(result.errors[0].extensions.code).toBe('EMAIL_ALREADY_VERIFIED')
+      expect(result.errors[0].extensions.http.status).toBe(400)
+    })
+
+    test('denies an internal user', async () => {
+      const result = await makeTestQuery(
+        sendConfirmEmailAddressEmailMutation,
+        { email: 'test@defra.gov.uk' },
+        false,
+        {},
+        sfdGroups()
+      )
+
+      expect(result.data.sendConfirmEmailAddressEmail).toBeNull()
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to this user type'
+      )
+    })
   })
 
   test('updateCustomerDoNotContact', async () => {

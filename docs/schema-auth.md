@@ -7,7 +7,7 @@ once a caller is identified, which parts of the GraphQL schema is it actually al
 ## The `@auth` directive
 
 ```graphql
-directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
+directive @auth(requires: [AuthGroup!]!, userType: [UserAccessType!]) on OBJECT | FIELD_DEFINITION
 ```
 
 `@auth` is applied to fields and types throughout the schema, e.g.:
@@ -39,6 +39,26 @@ can call it (e.g. `Query.referenceData`). A schema test
 (`test/graphql/schema.test.js` - `'ensures all sensitive top-level fields have @auth directive'`)
 guards against a new top-level field accidentally being left unprotected.
 
+### `userType` - which end-user type can call this field
+
+`userType` optionally restricts a field to `INTERNAL` or `EXTERNAL` end users (or both). This is a
+**different** check again, orthogonal to `requires`: it isn't about which system is calling, but
+about which of the [end-user identification headers](./auth) the current request carried -
+`email` (internal, Rural Payments portal user) or `x-forwarded-authorization` (external, Defra ID
+customer). It's read from `context.authContext.{internalAuthHeader,externalAuthHeader}`, populated
+by `endUserAuthContext()` in `app/auth/end-user-auth-context.js`.
+
+```graphql
+internalUser: InternalUser @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
+```
+
+A field with no `userType` argument has no end-user-type restriction (only the `requires` check
+applies). `userType: [ALL]` is equivalent, but lets a field state explicitly that it's intended for
+both internal and external users rather than relying on that default. Unlike `requires`, the
+`ADMIN` group does **not** bypass the `userType` check - it restricts the type of end user, not the
+calling system, so an `ADMIN` caller must still carry the matching header. A service account carries
+neither header, so it never satisfies an `INTERNAL` or `EXTERNAL` restriction.
+
 ### Cascading from `OBJECT` to fields
 
 `@auth` can be applied to a whole `type`, in which case it's inherited by every field on that type
@@ -69,13 +89,16 @@ admin service account can call any `@auth`-protected field, mutations included.
 
 ### What actually happens when access is denied
 
-`authDirectiveTransformer` wraps the field's resolver with two checks, in order:
+`authDirectiveTransformer` wraps the field's resolver with three checks, in order:
 
 1. `checkAuthGroup(requesterGroups, requires)` - throws `Unauthorized` if the caller isn't in
    `ADMIN` or any group in `requires`.
 2. `checkServiceAccountAccess(isServiceAccount, serviceAccountPermitted, isAdmin)` - throws
    `Unauthorized` if the caller is a service account, `serviceAccountPermitted` is `false`, and the
    caller isn't `ADMIN`.
+3. `checkUserAccess(authContext, userType)` - throws `Unauthorized` if the field has a `userType`
+   restriction and the request's end-user headers don't match any of the listed `UserAccessType`s
+   (`ADMIN` callers included).
 
 Either throw surfaces as a normal GraphQL execution error against that field - the rest of the
 query (sibling fields) still resolves normally.

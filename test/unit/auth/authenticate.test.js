@@ -14,6 +14,7 @@ const {
   authGroups,
   checkAuthGroup,
   checkServiceAccountAccess,
+  checkUserAccess,
   getAuth,
   getRequestingGroup,
   getRequestingService,
@@ -249,6 +250,43 @@ describe('authenticate', () => {
     })
   })
 
+  describe('checkUserAccess', () => {
+    const internalAuthContext = { internalAuthHeader: 'user@defra.gov.uk' }
+    const externalAuthContext = { externalAuthHeader: 'Bearer token' }
+    const serviceAccountAuthContext = { serviceAccount: 'service-account@example.com' }
+
+    it('does not throw when the field has no userType restriction', () => {
+      expect(() => checkUserAccess(internalAuthContext, undefined)).not.toThrow()
+      expect(() => checkUserAccess(externalAuthContext, [])).not.toThrow()
+    })
+
+    it('does not throw for any caller when userType allows ALL', () => {
+      expect(() => checkUserAccess(internalAuthContext, ['ALL'])).not.toThrow()
+      expect(() => checkUserAccess(externalAuthContext, ['ALL'])).not.toThrow()
+      expect(() => checkUserAccess(serviceAccountAuthContext, ['ALL'])).not.toThrow()
+    })
+
+    it('does not throw for an internal caller when userType allows INTERNAL', () => {
+      expect(() => checkUserAccess(internalAuthContext, ['INTERNAL'])).not.toThrow()
+    })
+
+    it('does not throw for an external caller when userType allows EXTERNAL', () => {
+      expect(() => checkUserAccess(externalAuthContext, ['EXTERNAL'])).not.toThrow()
+    })
+
+    it('throws Unauthorized for an internal caller when userType only allows EXTERNAL', () => {
+      expect(() => checkUserAccess(internalAuthContext, ['EXTERNAL'])).toThrow(Unauthorized)
+    })
+
+    it('throws Unauthorized for an external caller when userType only allows INTERNAL', () => {
+      expect(() => checkUserAccess(externalAuthContext, ['INTERNAL'])).toThrow(Unauthorized)
+    })
+
+    it('throws Unauthorized for a service account when the field has a userType restriction', () => {
+      expect(() => checkUserAccess(serviceAccountAuthContext, ['INTERNAL'])).toThrow(Unauthorized)
+    })
+  })
+
   describe('getRequestingGroup', () => {
     const adminGroupId = config.get('auth.groups.ADMIN')
     const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
@@ -386,6 +424,7 @@ describe('authenticate', () => {
     type Query {
       customer(crn: ID!): Customer
       gatedQueryFieldDefault: String @auth(requires: [SINGLE_FRONT_DOOR])
+      gatedQueryFieldInternalOnly: String @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
       open: String
     }
 
@@ -410,7 +449,13 @@ describe('authenticate', () => {
       SINGLE_FRONT_DOOR
     }
 
-    directive @auth(requires: [AuthRole!]! = [TEST]) on OBJECT | FIELD_DEFINITION
+    enum UserAccessType {
+      INTERNAL
+      EXTERNAL
+      ALL
+    }
+
+    directive @auth(requires: [AuthRole!]! = [TEST], userType: [UserAccessType!]) on OBJECT | FIELD_DEFINITION
   `)
 
     const originalConfig = { ...config }
@@ -486,6 +531,62 @@ describe('authenticate', () => {
         )
         expect(result.errors).toBeUndefined()
         expect(result.data.gatedMutationFieldDefault).toBe('c')
+      })
+    })
+
+    describe('user access gating', () => {
+      const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
+      const adminGroupId = config.get('auth.groups.ADMIN')
+      const rootValue = { gatedQueryFieldInternalOnly: 'a' }
+
+      const run = (contextValue) =>
+        graphql({
+          schema: authDirectiveTransformer(schema),
+          source: '{ gatedQueryFieldInternalOnly }',
+          rootValue,
+          contextValue
+        })
+
+      it('allows an internal caller', async () => {
+        const result = await run({
+          auth: { groups: [sfdGroupId] },
+          authContext: { internalAuthHeader: 'user@defra.gov.uk' }
+        })
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedQueryFieldInternalOnly).toBe('a')
+      })
+
+      it('denies an external caller', async () => {
+        const result = await run({
+          auth: { groups: [sfdGroupId] },
+          authContext: { externalAuthHeader: 'Bearer token' }
+        })
+        expect(result.errors?.[0].message).toMatch(/not available to this user type/)
+      })
+
+      it('denies a service account', async () => {
+        const result = await run({
+          auth: { groups: [sfdGroupId] },
+          authContext: { serviceAccount: 'service-account@example.com' }
+        })
+        expect(result.errors?.[0].message).toMatch(/not available to this user type/)
+      })
+
+      it('denies an ADMIN-group external caller', async () => {
+        const result = await run({
+          auth: { groups: [adminGroupId] },
+          authContext: { externalAuthHeader: 'Bearer token' }
+        })
+        expect(result.errors?.[0].message).toMatch(/not available to this user type/)
+      })
+
+      it('allows an ADMIN-group internal caller', async () => {
+        const result = await run({
+          auth: { groups: [adminGroupId] },
+          authContext: { internalAuthHeader: 'user@defra.gov.uk' }
+        })
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedQueryFieldInternalOnly).toBe('a')
       })
     })
   })

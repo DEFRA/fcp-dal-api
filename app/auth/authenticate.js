@@ -173,6 +173,39 @@ export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitte
   }
 }
 
+/**
+ * Derives the end user's access type from the request-level end-user auth context (see
+ * `app/auth/end-user-auth-context.js`): an `email` header identifies an internal (Rural Payments
+ * portal) user, an `x-forwarded-authorization` header identifies an external (Defra ID) user.
+ * @returns {'INTERNAL'|'EXTERNAL'|undefined}
+ */
+function getUserAccessType(authContext) {
+  if (authContext?.internalAuthHeader) {
+    return 'INTERNAL'
+  }
+  if (authContext?.externalAuthHeader) {
+    return 'EXTERNAL'
+  }
+  return undefined
+}
+
+/**
+ * Checks that the requester's end-user access type (internal/external) satisfies the given
+ * @auth allow-list. Unlike `checkAuthGroup`, ADMIN group membership does not bypass this check -
+ * the restriction is on the type of end user, not the calling system. A field with no `userType`
+ * restriction, or one including `ALL`, is unaffected.
+ * @throws {Unauthorized} if access is not granted
+ */
+export function checkUserAccess(authContext, allowedAccess) {
+  if (!allowedAccess?.length || allowedAccess.includes('ALL')) {
+    return
+  }
+  const userAccessType = getUserAccessType(authContext)
+  if (!userAccessType || !allowedAccess.includes(userAccessType)) {
+    throw new Unauthorized('Authorization failed, this field is not available to this user type')
+  }
+}
+
 export function authDirectiveTransformer(schema) {
   const typeDirectiveArgumentMaps = {}
   const directiveName = 'auth'
@@ -199,6 +232,7 @@ export function authDirectiveTransformer(schema) {
             isServiceAccountPermitted(schema, typeName),
             isAdminCaller(requesterGroups)
           )
+          checkUserAccess(context.authContext, authDirective.userType)
           return resolve(source, args, context, info)
         }
       }
