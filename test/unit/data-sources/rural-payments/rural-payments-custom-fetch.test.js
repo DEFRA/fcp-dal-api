@@ -32,7 +32,16 @@ const fakeExternalURL = 'https://rp_kits_gateway_external_url/v1/'
 
 describe('RuralPayments Custom Fetch', () => {
   let configMockPath
-  beforeEach(() => {
+  beforeEach(async () => {
+    // RuralPayments.js is reimported fresh per test (see the `?update=` imports below), but its
+    // static import of gateway-dispatcher.js is not - without this, a dispatcher built by an
+    // earlier test for the same route would be reused instead of reflecting this test's mocks.
+    // Imported dynamically (rather than statically at the top of the file) so it resolves through
+    // the mocked `undici` the same way RuralPayments.js's own import of it does.
+    const { resetGatewayDispatchers } =
+      await import('../../../../app/data-sources/rural-payments/gateway-dispatcher.js')
+    resetGatewayDispatchers()
+
     configMockPath = {
       'kits.gatewayTimeoutMs': timeout,
       'kits.internal.connectionCert': b64fakeCert,
@@ -121,9 +130,9 @@ describe('RuralPayments Custom Fetch', () => {
     expect(rp.isExternalRoute()).toBe(true)
     expect(rp.baseURL).toBe(fakeExternalURL)
     const requestTls = {
-      host: 'rp_kits_gateway_internal_url',
+      host: 'rp_kits_gateway_external_url',
       port: '',
-      servername: 'rp_kits_gateway_internal_url',
+      servername: 'rp_kits_gateway_external_url',
       secureContext: [{ key: fakeKey, cert: fakeCert }]
     }
     expect(EnvHttpProxyAgent.mockConstructorArgs).toEqual({ requestTls })
