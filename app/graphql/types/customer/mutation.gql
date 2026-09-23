@@ -41,6 +41,7 @@ extend type Mutation {
   """
   # eslint-disable-next-line @graphql-eslint/naming-convention
   sendConfirmEmailAddressEmail: SendConfirmEmailAddressEmailResponse
+    @wip
     @auth(requires: [SINGLE_FRONT_DOOR], userType: [EXTERNAL])
 }
 

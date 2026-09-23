@@ -389,7 +389,7 @@ describe('Customer Mutations', () => {
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'currentId')
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'person',
-        action: 'sendConfirmEmailAddressEmail',
+        action: 'verification-email-sent',
         entityid: 'crn'
       })
     })

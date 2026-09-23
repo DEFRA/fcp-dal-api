@@ -51,6 +51,11 @@ async function sendConfirmEmailAddressEmailResolver(
   }
   const crn = defraIdContext.crn()
   auditTrail?.recordAccount(info, 'crn', crn)
+  auditTrail?.recordEntity(info, {
+    entity: 'person',
+    action: 'verification-email-sent',
+    entityid: crn
+  })
   const person = await dataSources.ruralPaymentsCustomer.getExternalPerson()
   auditTrail?.recordAccount(info, 'personId', person.id)
 
@@ -77,12 +82,6 @@ async function sendConfirmEmailAddressEmailResolver(
   })
 
   await dataSources.ruralPaymentsCustomer.sendVerificationEmail(digitalContactPartyId)
-
-  auditTrail?.recordEntity(info, {
-    entity: 'person',
-    action: 'sendConfirmEmailAddressEmail',
-    entityid: crn
-  })
 
   return {
     success: true
