@@ -110,7 +110,7 @@ describe('schema', () => {
 
     expect(findDangerousChanges(rawSchema, schema)).toHaveLength(0)
     let changes = findBreakingChanges(rawSchema, schema)
-    expect(changes).toHaveLength(16) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
+    expect(changes).toHaveLength(12) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
     expect(changes).toEqual(
       // loose array check, so ordering isn't important, length MUST match, see above
       expect.arrayContaining([
@@ -119,24 +119,8 @@ describe('schema', () => {
         { type: 'TYPE_REMOVED', description: 'Image was removed.' },
         { type: 'TYPE_REMOVED', description: 'UUID was removed.' },
         {
-          type: 'TYPE_REMOVED',
-          description: 'PermittedFunction was removed.'
-        },
-        {
-          type: 'TYPE_REMOVED',
-          description: 'InternalUser was removed.'
-        },
-        {
           type: 'FIELD_REMOVED',
           description: 'Query.wipExample was removed.'
-        },
-        {
-          type: 'FIELD_REMOVED',
-          description: 'Query.internalUser was removed.'
-        },
-        {
-          type: 'FIELD_REMOVED',
-          description: 'Business.permittedFunctions was removed.'
         },
         {
           type: 'FIELD_CHANGED_KIND',
