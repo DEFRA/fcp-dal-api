@@ -163,7 +163,7 @@ const buildUrl = ({ body, path, url }) => {
 }
 
 export const cdpSchemaTranslator = format((info) => {
-  const { error, code, request, response, requestTimeMs, tenant, transactionId, traceId } = info
+  const { error, code, request, response, requestTimeMs, tenant, traceId } = info
 
   const parsedUrl = buildUrl(request || {})
   const httpDetails = buildHttpDetails(request, response, requestTimeMs)
@@ -171,7 +171,6 @@ export const cdpSchemaTranslator = format((info) => {
   return {
     level: info.level,
     message: info.message,
-    ...(transactionId && { 'transaction.id': transactionId }),
     ...(traceId && { 'span.id': traceId, 'trace.id': traceId }),
     ...buildError(error || {}, code),
     ...httpDetails,

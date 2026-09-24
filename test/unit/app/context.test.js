@@ -70,7 +70,6 @@ describe('context', () => {
       headers: {
         'x-forwarded-authorization': validDefraIdToken
       },
-      transactionId: 'tx-1',
       traceId: 'trace-1'
     }
 
@@ -78,7 +77,6 @@ describe('context', () => {
 
     expect(getAuthMock).toHaveBeenCalledWith(request, JWKSMock())
     expect(loggerMock.child).toHaveBeenCalledWith({
-      transactionId: 'tx-1',
       traceId: 'trace-1'
     })
     expect(result.auth).toEqual({ user: 'test-user' })
@@ -108,7 +106,6 @@ describe('context', () => {
     loggerChild.mockReturnValue({ log: vi.fn() })
     const request = {
       headers: { 'x-forwarded-authorization': validDefraIdToken },
-      transactionId: 'tx-1',
       traceId: 'trace-1'
     }
 
@@ -116,7 +113,6 @@ describe('context', () => {
 
     expect(getRequestingServiceMock).toHaveBeenCalledWith(['some-group'])
     expect(loggerMock.child).toHaveBeenCalledWith({
-      transactionId: 'tx-1',
       traceId: 'trace-1',
       tenant: { id: 'Grants' }
     })
@@ -135,7 +131,6 @@ describe('context', () => {
     loggerChild.mockReturnValue({ log: vi.fn() })
     const request = {
       headers: { 'x-forwarded-authorization': validDefraIdToken },
-      transactionId: 'tx-1',
       traceId: 'trace-1'
     }
 
@@ -143,7 +138,6 @@ describe('context', () => {
 
     expect(getRequestingServiceMock).toHaveBeenCalledWith([])
     expect(loggerMock.child).toHaveBeenCalledWith({
-      transactionId: 'tx-1',
       traceId: 'trace-1'
     })
     expect(request.requestingService).toBeNull()
@@ -252,7 +246,7 @@ describe('context', () => {
       expect(result.dataSources.hitachiPayments.audit.requesterId).toBeUndefined()
     })
 
-    test('Audit correlationId is extracted from request traceId', async () => {
+    test('Audit correlationId (for Hitachi) is populated from request traceId', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken },
