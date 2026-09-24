@@ -10,10 +10,10 @@ type PermittedFunction {
   The operation (function) name, echoing the value requested. For example, 'viewLand',
   'amendBusinessDetails'.
   """
-  name: String! @wip
+  name: String!
 
   """
   Whether the user is permitted to perform the function.
   """
-  permitted: Boolean! @wip
+  permitted: Boolean!
 }
