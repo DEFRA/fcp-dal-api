@@ -26,5 +26,5 @@ type InternalUser {
 
   NOTE: DAL does not enforce these permissions - the upstream systems do.
   """
-  permittedFunctions(functions: [String!]!): [PermittedFunction!] @wip
+  permittedFunctions(functions: [String!]!): [PermittedFunction!]
 }

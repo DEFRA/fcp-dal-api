@@ -4,5 +4,5 @@ extend type Query {
   """
   Get the authenticated internal user, identified by the `email` request header.
   """
-  internalUser: InternalUser @wip @auth(requires: [SINGLE_FRONT_DOOR])
+  internalUser: InternalUser @auth(requires: [SINGLE_FRONT_DOOR])
 }
