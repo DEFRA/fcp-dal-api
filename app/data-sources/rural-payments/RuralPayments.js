@@ -1,11 +1,11 @@
 import { StatusCodes } from 'http-status-codes'
-import tls from 'node:tls'
-import { EnvHttpProxyAgent, fetch as fetch11 } from 'undici'
+import { fetch as fetch11 } from 'undici'
 import { config as appConfig } from '../../config.js'
 import { HttpError } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../logger/codes.js'
 import { BaseRESTDataSource } from '../BaseRESTDataSource.js'
 import { endUserAuthContext } from '../../auth/end-user-auth-context.js'
+import { getGatewayDispatcher } from './gateway-dispatcher.js'
 
 const internalGatewayUrl = appConfig.get('kits.internal.gatewayUrl')
 const externalGatewayUrl = appConfig.get('kits.external.gatewayUrl')
@@ -38,20 +38,13 @@ export class RuralPayments extends BaseRESTDataSource {
           signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
         })
     } else {
-      // set up mTLS config
-      const kitsURL = new URL(this.baseURL)
-      const requestTls = {
-        host: kitsURL.hostname,
-        port: kitsURL.port,
-        servername: kitsURL.hostname
-      }
-      requestTls.secureContext = this.createSecureContext()
+      const dispatcher = getGatewayDispatcher(this.isExternalRoute() ? 'external' : 'internal')
 
       this.httpCache.httpFetch = (url, options = {}) =>
         // use undici fetch which supports mTLS & env proxy via agent
         fetch11(url, {
           ...options,
-          dispatcher: new EnvHttpProxyAgent({ requestTls }),
+          dispatcher,
           signal: AbortSignal.timeout(appConfig.get('kits.gatewayTimeoutMs'))
         })
     }
@@ -98,12 +91,6 @@ export class RuralPayments extends BaseRESTDataSource {
 
   getBaseURL() {
     return this.isExternalRoute() ? externalGatewayUrl : internalGatewayUrl
-  }
-
-  createSecureContext() {
-    return tls.createSecureContext(
-      this.isExternalRoute() ? appConfig.externalMTLS : appConfig.internalMTLS
-    )
   }
 
   initialiseRequest(request) {
