@@ -1,10 +1,10 @@
 import { StatusCodes } from 'http-status-codes'
-import { config } from '../../config.js'
-import { RURALPAYMENTS_API_ERROR_001 } from '../../logger/codes.js'
-import { logger } from '../../logger/logger.js'
-import { RuralPaymentsReferenceData } from '../../data-sources/rural-payments/RuralPaymentsReferenceData.js'
+import { config } from '../../../config.js'
+import { RURALPAYMENTS_API_ERROR_001 } from '../../../logger/codes.js'
+import { logger } from '../../../logger/logger.js'
+import { RuralPaymentsReferenceData } from '../../../data-sources/rural-payments/RuralPaymentsReferenceData.js'
 
-const runRuralPaymentsCheck = async (type) => {
+export const runRuralPaymentsCheck = async (type) => {
   try {
     // Rural payment requests must be initiated by a real user (external/internal) or a service-account (internal only).
     // Externally routed requests in this healthcheck will never have the credentials to successfully invoke an endpoint
@@ -45,9 +45,4 @@ const runRuralPaymentsCheck = async (type) => {
     })
     throw err
   }
-}
-
-/** Check that both internal and external Rural Payments endpoints are available */
-export const healthCheck = async () => {
-  await Promise.all([runRuralPaymentsCheck('internal'), runRuralPaymentsCheck('external')])
 }

@@ -18,7 +18,7 @@ jest.unstable_mockModule('../../../../app/utils/health/defra-id.js', () => ({
   healthCheck: mockDefraIdHealthCheck
 }))
 
-jest.unstable_mockModule('../../../../app/utils/health/rural-payments.js', () => ({
+jest.unstable_mockModule('../../../../app/utils/health/rural-payments/rural-payments.js', () => ({
   healthCheck: mockRuralPaymentsHealthCheck
 }))
 jest.unstable_mockModule('../../../../app/utils/health/audit.js', () => ({
