@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals'
+import { Unauthorized } from '../../../../app/errors/graphql.js'
 import { Mutation } from '../../../../app/graphql/resolvers/customer/mutation.js'
 
 describe('Customer Mutations', () => {
@@ -42,8 +43,12 @@ describe('Customer Mutations', () => {
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn(),
         getPersonByPersonId: jest.fn(),
+        getExternalPerson: jest.fn(),
         updatePersonDetails: jest.fn(),
-        validateEmail: jest.fn()
+        validateEmail: jest.fn(),
+        confirmEmail: jest.fn(),
+        saveEmailValidation: jest.fn(),
+        sendVerificationEmail: jest.fn()
       }
     }
   })
@@ -258,6 +263,151 @@ describe('Customer Mutations', () => {
       const input = { crn: 'crn' }
 
       await Mutation[mutationName](null, { input }, { dataSources: mockDataSources }, info)
+    })
+  })
+
+  describe('sendConfirmEmailAddressEmail', () => {
+    const defraIdContext = { crn: () => 'crn' }
+
+    beforeEach(() => {
+      mockDataSources.ruralPaymentsCustomer.getExternalPerson.mockResolvedValue(mockPerson)
+      mockDataSources.ruralPaymentsCustomer.confirmEmail.mockResolvedValue({
+        id: 'digitalContactPartyId'
+      })
+    })
+
+    test('confirms the email to obtain the digitalContactPartyId, then sends the verification email', async () => {
+      await Mutation.sendConfirmEmailAddressEmail(
+        null,
+        {},
+        { dataSources: mockDataSources, defraIdContext }
+      )
+
+      expect(mockDataSources.ruralPaymentsCustomer.confirmEmail).toHaveBeenCalledWith(
+        'currentId',
+        'currentEmail'
+      )
+      expect(mockDataSources.ruralPaymentsCustomer.sendVerificationEmail).toHaveBeenCalledWith(
+        'digitalContactPartyId'
+      )
+    })
+
+    test('saves an email validation record before sending the verification email', async () => {
+      await Mutation.sendConfirmEmailAddressEmail(
+        null,
+        {},
+        { dataSources: mockDataSources, defraIdContext }
+      )
+
+      expect(mockDataSources.ruralPaymentsCustomer.saveEmailValidation).toHaveBeenCalledWith({
+        customerReference: 'crn',
+        partyDigitalContactId: 'digitalContactPartyId',
+        email: 'currentEmail',
+        linkSentDate: expect.any(String)
+      })
+
+      const [saveCallOrder, sendCallOrder] = [
+        mockDataSources.ruralPaymentsCustomer.saveEmailValidation.mock.invocationCallOrder[0],
+        mockDataSources.ruralPaymentsCustomer.sendVerificationEmail.mock.invocationCallOrder[0]
+      ]
+      expect(saveCallOrder).toBeLessThan(sendCallOrder)
+    })
+
+    test('returns success', async () => {
+      const result = await Mutation.sendConfirmEmailAddressEmail(
+        null,
+        {},
+        { dataSources: mockDataSources, defraIdContext }
+      )
+
+      expect(result).toEqual({
+        success: true
+      })
+    })
+
+    test('throws NotFound and does not attempt to send an email when the customer has no email address', async () => {
+      mockDataSources.ruralPaymentsCustomer.getExternalPerson.mockResolvedValue({
+        ...mockPerson,
+        email: null
+      })
+
+      await expect(
+        Mutation.sendConfirmEmailAddressEmail(
+          null,
+          {},
+          { dataSources: mockDataSources, defraIdContext }
+        )
+      ).rejects.toMatchObject({
+        message: 'Customer has no email address',
+        extensions: { code: 'NOT FOUND', http: { status: 404 } }
+      })
+
+      expect(mockDataSources.ruralPaymentsCustomer.confirmEmail).not.toHaveBeenCalled()
+      expect(mockDataSources.ruralPaymentsCustomer.saveEmailValidation).not.toHaveBeenCalled()
+      expect(mockDataSources.ruralPaymentsCustomer.sendVerificationEmail).not.toHaveBeenCalled()
+    })
+
+    test.each([true, 'true'])(
+      'throws EMAIL_ALREADY_VERIFIED and does not attempt to send an email when emailValidated is %p',
+      async (emailValidated) => {
+        mockDataSources.ruralPaymentsCustomer.getExternalPerson.mockResolvedValue({
+          ...mockPerson,
+          emailValidated
+        })
+
+        await expect(
+          Mutation.sendConfirmEmailAddressEmail(
+            null,
+            {},
+            { dataSources: mockDataSources, defraIdContext }
+          )
+        ).rejects.toMatchObject({
+          message: 'Customer email address is already verified',
+          extensions: { code: 'EMAIL_ALREADY_VERIFIED', http: { status: 400 } }
+        })
+
+        expect(mockDataSources.ruralPaymentsCustomer.confirmEmail).not.toHaveBeenCalled()
+        expect(mockDataSources.ruralPaymentsCustomer.saveEmailValidation).not.toHaveBeenCalled()
+        expect(mockDataSources.ruralPaymentsCustomer.sendVerificationEmail).not.toHaveBeenCalled()
+      }
+    )
+
+    test('records the personId/crn accounts and an entity for the audit trail', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const info = {
+        path: { key: 'sendConfirmEmailAddressEmail', typename: 'Mutation', prev: undefined }
+      }
+
+      await Mutation.sendConfirmEmailAddressEmail(
+        null,
+        {},
+        { dataSources: mockDataSources, auditTrail, defraIdContext },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'currentId')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'verification-email-sent',
+        entityid: 'crn'
+      })
+    })
+
+    test('throws Unauthorized and does not look up the customer when there is no Defra ID context', async () => {
+      await expect(
+        Mutation.sendConfirmEmailAddressEmail(null, {}, { dataSources: mockDataSources })
+      ).rejects.toBeInstanceOf(Unauthorized)
+
+      expect(mockDataSources.ruralPaymentsCustomer.getExternalPerson).not.toHaveBeenCalled()
+    })
+
+    test('does not throw when no audit trail is supplied', async () => {
+      await Mutation.sendConfirmEmailAddressEmail(
+        null,
+        {},
+        { dataSources: mockDataSources, defraIdContext }
+      )
     })
   })
 })

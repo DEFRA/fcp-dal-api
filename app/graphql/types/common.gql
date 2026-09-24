@@ -184,3 +184,16 @@ enum AuthGroup {
   SFI_REFORM
   LAND_GRANTS_API
 }
+
+"""
+Identifies the type of end user making a request, derived from which request header identified
+them (see [DAL Authentication](./auth)): the `email` header for an internal (Rural Payments
+portal) user, or the `x-forwarded-authorization` header (a Defra ID token) for an external
+(customer) user.
+"""
+enum UserAccessType {
+  INTERNAL
+  EXTERNAL
+  "Either an internal or an external user - equivalent to omitting `access`, but explicit."
+  ALL
+}
