@@ -1,7 +1,6 @@
 import hapi from '@hapi/hapi'
 
 import { Unit } from 'aws-embedded-metrics'
-import { v4 as uuidv4 } from 'uuid'
 import { config } from './config.js'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
@@ -38,11 +37,7 @@ server.ext({
 server.ext({
   type: 'onRequest',
   method: function (request, h) {
-    request.transactionId =
-      request.headers['x-ms-client-request-id'] ||
-      request.headers['x-ms-client-tracking-id'] ||
-      uuidv4()
-    request.traceId = request.headers['x-cdp-request-id'] || uuidv4()
+    request.traceId = request.headers['x-cdp-request-id']
 
     logger.debug('FCP - Access log', {
       request: {
@@ -57,7 +52,6 @@ server.ext({
         remoteAddress: request.info.remoteAddress
       },
       code: DAL_APPLICATION_REQUEST_001,
-      transactionId: request.transactionId,
       traceId: request.traceId
     })
 
@@ -83,7 +77,6 @@ server.events.on('response', function (request) {
     logger.info('FCP - Access log', {
       type: 'http',
       code: DAL_APPLICATION_REQUEST_001,
-      transactionId: request.transactionId,
       traceId: request.traceId,
       requestTimeMs,
       request: {
@@ -110,7 +103,6 @@ server.events.on('response', function (request) {
       body: request.response.source
     },
     requestTimeMs,
-    transactionId: request.transactionId,
     traceId: request.traceId,
     code: DAL_APPLICATION_RESPONSE_001
   })
