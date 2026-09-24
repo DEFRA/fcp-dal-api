@@ -291,6 +291,5 @@ type Business {
   NOTE: DAL does not enforce these permissions - the upstream systems do.
   """
   permittedFunctions(functions: [String!]!): [PermittedFunction!]
-    @wip
     @auth(requires: [SINGLE_FRONT_DOOR])
 }
