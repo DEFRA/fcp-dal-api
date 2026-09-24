@@ -231,6 +231,25 @@ export const config = convict({
       env: 'KITS_DAL_SERVICE_ACCOUNT_EMAIL'
     }
   },
+  ruralPayments: {
+    customerEmailsDisabled: {
+      doc:
+        'Whether emails to customers are disabled (they are not actually sent upstream). When ' +
+        'true, the email verification link is logged instead, so it can be found in the logs.',
+      format: Boolean,
+      default: false,
+      env: 'CUSTOMER_EMAILS_DISABLED'
+    },
+    portalUrl: {
+      doc:
+        'Rural Payments portal URL, used to log the email verification link when customer ' +
+        'emails are disabled',
+      format: String,
+      default: '',
+      nullable: true,
+      env: 'RURAL_PAYMENTS_PORTAL_URL'
+    }
+  },
   hitachi: {
     disableAuth: {
       doc: 'Disable Hitachi API authentication (for environments using fcp-upstream-mock)',

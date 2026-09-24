@@ -1,6 +1,8 @@
 import { jest } from '@jest/globals'
+import { config } from '../../../../app/config.js'
 import { Unauthorized } from '../../../../app/errors/graphql.js'
 import { Mutation } from '../../../../app/graphql/resolvers/customer/mutation.js'
+import { logger } from '../../../../app/logger/logger.js'
 
 describe('Customer Mutations', () => {
   let mockDataSources
@@ -400,6 +402,58 @@ describe('Customer Mutations', () => {
       ).rejects.toBeInstanceOf(Unauthorized)
 
       expect(mockDataSources.ruralPaymentsCustomer.getExternalPerson).not.toHaveBeenCalled()
+    })
+
+    describe('email verification link logging', () => {
+      const mockConfig = (values) =>
+        jest.spyOn(config, 'get').mockImplementation((path) => values[path])
+
+      beforeEach(() => {
+        mockDataSources.ruralPaymentsCustomer.getExternalPerson.mockResolvedValue({
+          ...mockPerson,
+          email: 'test+user@example.com'
+        })
+      })
+
+      afterEach(() => {
+        jest.restoreAllMocks()
+      })
+
+      test('logs the email verification link when customer emails are disabled', async () => {
+        mockConfig({
+          'ruralPayments.customerEmailsDisabled': true,
+          'ruralPayments.portalUrl': 'https://rural-payments.example.com/'
+        })
+        const infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {})
+
+        await Mutation.sendConfirmEmailAddressEmail(
+          null,
+          {},
+          { dataSources: mockDataSources, defraIdContext }
+        )
+
+        expect(infoSpy).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'https://rural-payments.example.com/validate-email/test%2Buser%40example.com/digitalContactPartyId'
+          )
+        )
+      })
+
+      test('does not log the email verification link when customer emails are enabled', async () => {
+        mockConfig({
+          'ruralPayments.customerEmailsDisabled': false,
+          'ruralPayments.portalUrl': 'https://rural-payments.example.com'
+        })
+        const infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {})
+
+        await Mutation.sendConfirmEmailAddressEmail(
+          null,
+          {},
+          { dataSources: mockDataSources, defraIdContext }
+        )
+
+        expect(infoSpy).not.toHaveBeenCalledWith(expect.stringContaining('validate-email'))
+      })
     })
 
     test('does not throw when no audit trail is supplied', async () => {

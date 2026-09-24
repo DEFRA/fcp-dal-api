@@ -1,4 +1,6 @@
+import { config } from '../../../config.js'
 import { BadRequest, NotFound, Unauthorized } from '../../../errors/graphql.js'
+import { logger } from '../../../logger/logger.js'
 import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
 
@@ -82,6 +84,13 @@ async function sendConfirmEmailAddressEmailResolver(
   })
 
   await dataSources.ruralPaymentsCustomer.sendVerificationEmail(digitalContactPartyId)
+
+  if (config.get('ruralPayments.customerEmailsDisabled')) {
+    const portalUrl = (config.get('ruralPayments.portalUrl') ?? '').replace(/\/+$/, '')
+    logger.info(
+      `#resolver - sendConfirmEmailAddressEmail - Email verification link: ${portalUrl}/validate-email/${encodeURIComponent(person.email)}/${digitalContactPartyId}`
+    )
+  }
 
   return {
     success: true
