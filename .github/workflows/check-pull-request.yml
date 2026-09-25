@@ -113,7 +113,7 @@ jobs:
             echo -e '\n\n====> Dumping DAL logs...\n'
             docker logs fcp-dal-api-fcp-dal-api-1 | jq
             echo -e '\n\n====> Dumping upstream logs...\n'
-            docker logs fcp-dal-api-upstream-mock-1 | jq
+            docker logs fcp-dal-api-upstream-mock-1
 
             docker compose down --remove-orphans
             exit 1
