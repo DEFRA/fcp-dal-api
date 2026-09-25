@@ -112,6 +112,9 @@ jobs:
           if [ $? -ne 0 ]; then
             echo -e '\n\n====> Dumping DAL logs...\n'
             docker logs fcp-dal-api-fcp-dal-api-1 | jq
+            echo -e '\n\n====> Dumping upstream logs...\n'
+            docker logs fcp-dal-api-upstream-mock-1 | jq
+
             docker compose down --remove-orphans
             exit 1
           fi
