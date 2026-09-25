@@ -18,7 +18,7 @@ describe('Business payments resolver', () => {
       dataSources: mockDataSources,
       auth: { email: 'test@defra.gov.uk' },
       request: {
-        transactionId: 'test-correlation-id',
+        traceId: 'test-trace-id',
         info: { remoteAddress: '127.0.0.1' }
       }
     }

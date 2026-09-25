@@ -17,11 +17,9 @@ import { createAuditTrail } from '../audit/audit-trail.js'
 export async function context({ request }) {
   const auth = await getAuth(request, new JWKS())
   const requestingService = getRequestingService(auth.groups ?? [])
-  // Following the pattern used by transactionId and traceId
   request.requestingService = requestingService
 
   const requestLogger = logger.child({
-    transactionId: request.transactionId,
     traceId: request.traceId,
     ...(requestingService && { tenant: { id: requestingService } })
   })
