@@ -151,6 +151,11 @@ run_command openssl x509 -req \
     -CAserial ./mtls/ca.srl \
     -days ${TEST_ASSET_TTL}
 
+# OpenSSL 3 (e.g. on Linux CI runners) writes private keys as 0600, but the client key is
+# bind-mounted into containers (upstream-mock, proxy) whose healthchecks run as a different user.
+# These are throwaway test assets, so make the client key readable.
+chmod 644 ./mtls/client.key
+
 # tidy up - remove CSR files
 run_command rm ./mtls/*.csr
 
