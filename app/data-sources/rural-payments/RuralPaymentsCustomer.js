@@ -13,6 +13,14 @@ const KITS_CUSTOMER_SEARCH_FIELD = {
 }
 
 export class RuralPaymentsCustomer extends RuralPayments {
+  async createPerson(personDetails) {
+    const response = await this.post('person/create', {
+      body: personDetails,
+      headers: postPutHeaders
+    })
+    return response._data
+  }
+
   async validateEmail(email) {
     const response = await this.get(`person/${encodeURIComponent(email)}/validateEmail`)
     return response._data
