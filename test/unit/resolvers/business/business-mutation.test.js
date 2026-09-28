@@ -199,7 +199,7 @@ describe('Business Mutation createBusiness', () => {
       input: {
         crn: '123',
         name: 'Acme Farms Ltd',
-        vat: 'GB123456789',
+        vat: '123456789',
         traderNumber: 'TR12345',
         vendorNumber: 'VN67890',
         address: {
@@ -247,7 +247,7 @@ describe('Business Mutation createBusiness', () => {
     const mockInfo = {}
     const { crn: _, ...businessDetails } = mockArgs.input
     const orgDetailsInput = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
-    // Some additional values are returned beyoned the input
+    // Some additional values are returned beyond the input
     const orgDetails = {
       ...orgDetailsInput,
       sbi: 'sbi',
@@ -272,7 +272,7 @@ describe('Business Mutation createBusiness', () => {
         info: {
           name: 'Acme Farms Ltd',
           reference: undefined,
-          vat: 'GB123456789',
+          vat: '123456789',
           traderNumber: 'TR12345',
           vendorNumber: 'VN67890',
           address: {
