@@ -1,4 +1,6 @@
 extend type Mutation {
+  createCustomer(input: CreateCustomerInput!): UpdateCustomerResponse
+    @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerAddress(input: UpdateCustomerAddressInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDateOfBirth(input: UpdateCustomerDateOfBirthInput!): UpdateCustomerResponse
@@ -165,6 +167,52 @@ input UpdateCustomerAllFieldsInput {
   phone: PhoneInput
   """
   Do not contact status of the customer email address.
+  """
+  doNotContact: Boolean
+}
+
+"""
+Creates a customer with an email address that is not already registered.
+"""
+input CreateCustomerInput {
+  """
+  First name of the new customer.
+  """
+  first: String
+  """
+  Last name of the new customer.
+  """
+  last: String
+  """
+  Middle names of the new customer.
+  """
+  middle: String
+  """
+  The title of the new customer (e.g., Mr., Mrs., Dr.).
+  """
+  otherTitle: String
+  """
+  The title of the new customer (e.g., Mr., Mrs., Dr.).
+  """
+  title: String
+  """
+  Address of the new customer.
+  """
+  address: AddressInput
+  """
+  Date of birth of the new customer (YYYY-MM-DD).
+  """
+  dateOfBirth: Date
+  """
+  Email address for the new customer.
+  """
+  email: EmailInput!
+  """
+  Telephone number of the new customer.
+  """
+  phone: PhoneInput
+  """
+  Do not contact status of the new customer email address.
   """
   doNotContact: Boolean
 }

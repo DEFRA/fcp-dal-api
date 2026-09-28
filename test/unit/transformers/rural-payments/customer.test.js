@@ -652,6 +652,81 @@ describe('Customer transformer', () => {
       expect(result).toEqual(currentPerson)
     })
 
+    it('handles empty current person', () => {
+      const input = {
+        title: 'title',
+        otherTitle: 'otherTitle',
+        first: 'firstName',
+        middle: 'middleName',
+        last: 'lastName',
+        dateOfBirth: '2023-01-02',
+        phone: {
+          landline: 'newLandline',
+          mobile: 'newMobile'
+        },
+        email: { address: 'newEmail' },
+        doNotContact: 'newDoNotContact',
+        address: {
+          line1: 'addressLine1',
+          line2: 'addressLine2',
+          line3: 'addressLine3',
+          line4: 'addressLine4',
+          line5: 'addressLine5',
+          pafOrganisationName: 'pafOrganisationName',
+          flatName: 'flatName',
+          buildingNumberRange: 'buildingNumberRange',
+          buildingName: 'buildingName',
+          street: 'street',
+          city: 'city',
+          county: 'county',
+          postalCode: 'postalCode',
+          country: 'country',
+          uprn: 'uprn',
+          dependentLocality: 'dependentLocality',
+          doubleDependentLocality: 'doubleDependentLocality',
+          addressTypeId: 'addressTypeId'
+        }
+      }
+
+      const transformedPerson = {
+        title: 'title',
+        otherTitle: 'otherTitle',
+        firstName: 'firstName',
+        middleName: 'middleName',
+        lastName: 'lastName',
+        dateOfBirth: '2023-01-02',
+        landline: 'newLandline',
+        mobile: 'newMobile',
+        email: { address: 'newEmail' },
+        doNotContact: 'newDoNotContact',
+        email: input.email.address,
+        dateOfBirth: 1672617600000,
+        address: {
+          address1: input.address?.line1,
+          address2: input.address?.line2,
+          address3: input.address?.line3,
+          address4: input.address?.line4,
+          address5: input.address?.line5,
+          pafOrganisationName: 'pafOrganisationName',
+          flatName: 'flatName',
+          buildingNumberRange: 'buildingNumberRange',
+          buildingName: 'buildingName',
+          street: 'street',
+          city: 'city',
+          county: 'county',
+          postalCode: 'postalCode',
+          country: 'country',
+          uprn: 'uprn',
+          dependentLocality: 'dependentLocality',
+          doubleDependentLocality: 'doubleDependentLocality',
+          addressTypeId: 'addressTypeId'
+        }
+      }
+      const result = transformCustomerUpdateInputToPersonUpdate({}, input)
+
+      expect(result).toEqual(transformedPerson)
+    })
+
     it('handles date', () => {
       const input = {
         dateOfBirth: '2025-01-01'

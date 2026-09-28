@@ -43,13 +43,80 @@ describe('Customer Mutations', () => {
         getPersonIdByCRN: jest.fn(),
         getPersonByPersonId: jest.fn(),
         updatePersonDetails: jest.fn(),
-        validateEmail: jest.fn()
+        validateEmail: jest.fn(),
+        createPerson: jest.fn()
       }
     }
   })
 
   afterEach(() => {
     jest.clearAllMocks()
+  })
+
+  describe('createCustomer', () => {
+    const input = { email: { address: 'new@example.com' } }
+
+    test('creates a customer when the email address is available', async () => {
+      mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+        emailDuplicated: false
+      })
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockResolvedValue({ id: 'newPersonId' })
+
+      const result = await Mutation.createCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources }
+      )
+
+      expect(mockDataSources.ruralPaymentsCustomer.validateEmail).toHaveBeenCalledWith(
+        'new@example.com'
+      )
+      expect(mockDataSources.ruralPaymentsCustomer.createPerson).toHaveBeenCalledWith({
+        email: 'new@example.com',
+        address: {}
+      })
+      expect(result).toEqual({ success: true, customer: { id: 'newPersonId' } })
+    })
+
+    test('does not create a customer when the email address is already registered', async () => {
+      mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+        emailDuplicated: true
+      })
+
+      await expect(
+        Mutation.createCustomer(null, { input }, { dataSources: mockDataSources })
+      ).rejects.toMatchObject({
+        message: 'Email address is already in use by another customer',
+        extensions: { code: 'EMAIL_ALREADY_REGISTERED', http: { status: 400 } }
+      })
+      expect(mockDataSources.ruralPaymentsCustomer.createPerson).not.toHaveBeenCalled()
+    })
+
+    test('records the created person on the audit trail', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const info = { path: { key: 'createCustomer', typename: 'Mutation', prev: undefined } }
+      mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
+        emailDuplicated: false
+      })
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockResolvedValue({
+        id: 'newPersonId',
+        crn: 'newPersonCrn'
+      })
+
+      await Mutation.createCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'newPersonId')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'created',
+        entityid: 'newPersonCrn'
+      })
+    })
   })
 
   const updateMutations = [

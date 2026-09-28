@@ -32,6 +32,18 @@ describe('Rural Payments Customer', () => {
   const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
   const httpGetExt = jest.spyOn(ruralPaymentsCustomerExt, 'get')
 
+  test('should create a person', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: { id: 'personId' } }))
+
+    const result = await ruralPaymentsCustomer.createPerson({ email: 'test@test.test' })
+
+    expect(result).toEqual({ id: 'personId' })
+    expect(httpPost).toHaveBeenCalledWith('person/create', {
+      body: { email: 'test@test.test' },
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
   test('should return emailDuplicated from validateEmail', async () => {
     httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: true } }))
 

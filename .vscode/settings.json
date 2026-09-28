@@ -55,5 +55,6 @@
   "sonarlint.connectedMode.project": {
     "connectionId": "defra",
     "projectKey": "DEFRA_fcp-dal-api"
-  }
+  },
+  "terminal.integrated.scrollback": 10000
 }
