@@ -91,7 +91,13 @@ export const Business = {
       useServiceAccountForExternal: true
     }).getApplicationsBySBI(sbi)
 
-    return transformApplications(applications)
+    const start = performance.now()
+    const transformed = transformApplications(applications)
+    logger.info('transformApplications duration', {
+      requestTimeMs: performance.now() - start
+    })
+
+    return transformed
   },
 
   async permittedFunctions(
