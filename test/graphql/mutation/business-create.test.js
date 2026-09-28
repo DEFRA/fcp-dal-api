@@ -21,7 +21,7 @@ const setupNock = () => {
 const input = {
   crn: '1234567890',
   name: 'Acme Farms Ltd',
-  vat: 'GB123456789',
+  vat: '123456789',
   traderNumber: 'TR12345',
   vendorNumber: 'VN67890',
   address: {
@@ -230,7 +230,7 @@ describe('business', () => {
               },
               name: 'Acme Farms Ltd',
               reference: null,
-              vat: 'GB123456789',
+              vat: '123456789',
               traderNumber: 'TR12345',
               vendorNumber: 'VN67890',
               isCorrespondenceAsBusinessAddress: false,
@@ -334,7 +334,7 @@ describe('business', () => {
               },
               name: 'Acme Farms Ltd',
               reference: null,
-              vat: 'GB123456789',
+              vat: '123456789',
               traderNumber: 'TR12345',
               vendorNumber: 'VN67890',
               isCorrespondenceAsBusinessAddress: false,
