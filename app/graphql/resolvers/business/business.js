@@ -84,7 +84,7 @@ export const Business = {
   },
 
   async applications({ sbi }, _, context, info) {
-    const { auditTrail } = context
+    const { auditTrail, requestLogger = logger } = context
     auditTrail?.recordEntity(info, { entity: 'application-list', action: 'read', entityid: sbi })
     const applications = await getRuralPaymentsBusinessDataSource({
       ...context,
@@ -93,9 +93,15 @@ export const Business = {
 
     const start = performance.now()
     const transformed = transformApplications(applications)
-    logger.info('transformApplications duration', {
-      requestTimeMs: performance.now() - start
-    })
+    const requestTimeMs = performance.now() - start
+    const transitionCount = applications.reduce(
+      (count, application) => count + (application.application_history?.length ?? 0),
+      0
+    )
+    requestLogger.info(
+      `transformApplications duration: sbi=${sbi} applications=${applications.length} transitions=${transitionCount}`,
+      { requestTimeMs }
+    )
 
     return transformed
   },

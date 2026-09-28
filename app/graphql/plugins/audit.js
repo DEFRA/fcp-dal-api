@@ -93,6 +93,7 @@ export function auditPlugin({ publish = snsPublish } = {}) {
           }
 
           const requestLogger = contextValue.requestLogger
+          const auditStart = Date.now()
 
           const publishOne = async (event) => {
             try {
@@ -126,6 +127,13 @@ export function auditPlugin({ publish = snsPublish } = {}) {
                 })
                 return publishOne(event)
               })
+            )
+            requestLogger.info(
+              `#DAL - audit events published: count=${Math.max(rootKeys.length, 1)}`,
+              {
+                requestTimeMs: Date.now() - auditStart,
+                code: DAL_AUDIT_EVENT_001
+              }
             )
           } catch (error) {
             requestLogger.error('#DAL - audit event build failed', {

@@ -52,7 +52,7 @@ const baseRequest = {
 }
 
 const baseContextValue = {
-  requestLogger: { error: jest.fn() },
+  requestLogger: { error: jest.fn(), info: jest.fn() },
   request: baseRequest,
   authContext: endUserAuthContext(baseRequest),
   auth: { groups: ['group-1'] },
