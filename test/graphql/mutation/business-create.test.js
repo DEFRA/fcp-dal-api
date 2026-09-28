@@ -375,4 +375,15 @@ describe('business', () => {
     })
     expect(nock.pendingMocks()).toEqual([])
   })
+
+  test('create a business - rejects missing address', async () => {
+    const { address: _, ...inputWithoutAddress } = input
+    const result = await makeTestQuery(query, null, true, { input: inputWithoutAddress }, [], false)
+
+    expect(result.errors[0].message).toContain(
+      'Field "address" of required type "ValidAddressInput!" was not provided.'
+    )
+    expect(result.data).toBeUndefined()
+    expect(v1.isDone()).toBe(false)
+  })
 })
