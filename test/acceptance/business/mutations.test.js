@@ -115,7 +115,7 @@ const allFieldsInput = {
   address: { withUprn: address },
   correspondenceAddress: { withoutUprn: correspondenceAddress },
   isCorrespondenceAsBusinessAddress: false,
-  vat: 'GB123456789',
+  vat: '123456789',
   legalStatusCode: 102,
   typeCode: 3,
   dateStartedFarming: '2020-01-31',
@@ -144,7 +144,7 @@ describe('Business Mutations - as an internal user', () => {
         sbi,
         info: {
           name: 'acceptance-business-name',
-          vat: 'GB123456789',
+          vat: '123456789',
           email: { address: 'acceptance-business@example.com', validated: true },
           correspondenceEmail: {
             address: 'acceptance-business-corr@example.com',

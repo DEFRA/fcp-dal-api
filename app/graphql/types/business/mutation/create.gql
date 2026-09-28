@@ -16,7 +16,7 @@ input CreateBusinessInput {
   """
   VAT number of the business. (a.k.a. `taxRegistrationNumber`)
   """
-  vat: String
+  vat: String @validateVariable(pattern: "^[0-9]{9}$")
 
   """
   Trader number of the business.
