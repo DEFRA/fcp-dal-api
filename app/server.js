@@ -101,6 +101,14 @@ server.events.on('response', function (request) {
       },
       ...(request.requestingService && { tenant: { id: request.requestingService } })
     })
+
+    if (typeof request.response.source === 'string') {
+      // length of the serialised body (characters); CDP only keeps a few log fields, so it goes in the message
+      logger.info(`FCP - Response size: ${request.response.source.length} characters`, {
+        traceId: request.traceId,
+        requestTimeMs
+      })
+    }
   }
 
   logger.debug('FCP - Response log', {

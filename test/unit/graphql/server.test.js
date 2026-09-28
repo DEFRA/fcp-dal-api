@@ -32,6 +32,11 @@ describe('GraphQL Dashboard test with mocks', () => {
     auditPlugin: mockAuditPlugin
   }))
 
+  const mockTimingPlugin = jest.fn()
+  jest.unstable_mockModule('../../../app/graphql/plugins/timing.js', () => ({
+    timingPlugin: mockTimingPlugin
+  }))
+
   beforeEach(() => {
     jest.resetModules()
   })
@@ -53,7 +58,7 @@ describe('GraphQL Dashboard test with mocks', () => {
     expect(mockAuditPlugin).toHaveBeenCalledWith()
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginDisabled(), mockAuditPlugin()],
+      plugins: [mockApolloPluginDisabled(), mockAuditPlugin(), mockTimingPlugin()],
       introspection: false,
       formatError: expect.any(Function)
     })
@@ -79,7 +84,7 @@ describe('GraphQL Dashboard test with mocks', () => {
 
     expect(mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginLandingPage(), mockAuditPlugin()],
+      plugins: [mockApolloPluginLandingPage(), mockAuditPlugin(), mockTimingPlugin()],
       introspection: true,
       formatError: expect.any(Function)
     })
