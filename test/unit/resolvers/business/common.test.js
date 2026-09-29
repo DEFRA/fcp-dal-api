@@ -1,5 +1,5 @@
 import { expect, jest } from '@jest/globals'
-import { HttpError, NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, HttpError, NotFound } from '../../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
   businessAllFieldsUpdateResolver,
@@ -8,7 +8,8 @@ import {
   businessReactivateResolver,
   businessUnlockResolver,
   getRuralPaymentsBusinessDataSource,
-  retrieveOrgIdBySbi
+  retrieveOrgIdBySbi,
+  validateLegalStatusCode
 } from '../../../../app/graphql/resolvers/business/common.js'
 
 describe('retrieveOrgIdBySbi', () => {
@@ -55,6 +56,46 @@ describe('retrieveOrgIdBySbi', () => {
     expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+  })
+})
+
+describe('validateLegalStatusCode', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest.fn().mockResolvedValue({
+          _data: [
+            { id: 102108, type: 'Partnership' },
+            { id: 102111, type: 'Sole Proprietorship' }
+          ]
+        })
+      }
+    }
+  })
+
+  it('does not fetch reference data when no legal status code is provided', async () => {
+    await validateLegalStatusCode(undefined, dataSources)
+    await validateLegalStatusCode(null, dataSources)
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).not.toHaveBeenCalled()
+  })
+
+  it('accepts a legal status code that exists in the reference data', async () => {
+    await expect(validateLegalStatusCode(102111, dataSources)).resolves.toBeUndefined()
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).toHaveBeenCalledWith(
+      'legalstatus'
+    )
+  })
+
+  it('rejects a legal status code that does not exist in the reference data', async () => {
+    const error = await validateLegalStatusCode(102, dataSources).catch((e) => e)
+
+    expect(error).toBeInstanceOf(BadRequest)
+    expect(error.message).toBe('Invalid legalStatusCode: 102')
+    expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
   })
 })
 
@@ -306,6 +347,9 @@ describe('businessAllFieldsUpdateResolver', () => {
         }),
         updateOrganisationDetails: jest.fn(),
         updateOrganisationAdditionalDetails: jest.fn()
+      },
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest.fn().mockResolvedValue({ _data: [{ id: 2, type: 'Partnership' }] })
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),
