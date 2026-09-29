@@ -2,7 +2,7 @@ import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { db } from '../../../app/mongo.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
-import { mockPersonSearch } from '../helpers.js'
+import { mockLegalStatusReferenceData, mockPersonSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 import { waitFor } from '../../test-helpers/wait-for.js'
 
@@ -11,6 +11,7 @@ const v1 = nock(config.get('kits.internal.gatewayUrl'))
 const setupNock = () => {
   nock.disableNetConnect()
 
+  mockLegalStatusReferenceData(v1)
   mockPersonSearch(v1)
 
   v1.post('/organisation/create/personId').reply(200, {
@@ -54,7 +55,7 @@ const input = {
   correspondencePhone: {
     landline: '+441234567892'
   },
-  legalStatusCode: 1,
+  legalStatusCode: 102111,
   typeCode: 2,
   registrationNumbers: {
     companiesHouse: '12345678',
@@ -251,7 +252,7 @@ describe('business', () => {
                 landline: '+441234567892'
               },
               legalStatus: {
-                code: 1,
+                code: 102111,
                 type: null
               },
               type: {
@@ -355,7 +356,7 @@ describe('business', () => {
                 landline: '+441234567892'
               },
               legalStatus: {
-                code: 1,
+                code: 102111,
                 type: null
               },
               type: {
@@ -385,5 +386,24 @@ describe('business', () => {
     )
     expect(result.data).toBeUndefined()
     expect(v1.isDone()).toBe(false)
+  })
+
+  test('create a business - rejects unknown legal status code', async () => {
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, legalStatusCode: 102 } },
+      [],
+      false
+    )
+
+    expect(result.errors[0].message).toEqual('Invalid legalStatusCode: 102')
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    // Rejected before the business is created upstream
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
   })
 })

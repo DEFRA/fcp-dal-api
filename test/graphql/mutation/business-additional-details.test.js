@@ -1,7 +1,11 @@
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { transformBusinessDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
-import { mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
+import {
+  mockLegalStatusReferenceData,
+  mockOrganisationSearch,
+  signDefraIdToken
+} from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -44,7 +48,7 @@ describe('business', () => {
   test('update business legal status', async () => {
     const input = {
       sbi: '123456789',
-      legalStatusCode: 123
+      legalStatusCode: 102111
     }
 
     const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -61,11 +65,12 @@ describe('business', () => {
     v1.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        legalStatus: { id: 123, type: 'text corresponding to 123' }
+        legalStatus: { id: 102111, type: 'Sole Proprietorship' }
       }
     })
 
     mockOrganisationSearch(v1)
+    mockLegalStatusReferenceData(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
@@ -91,8 +96,8 @@ describe('business', () => {
           business: {
             info: {
               legalStatus: {
-                code: 123,
-                type: 'text corresponding to 123'
+                code: 102111,
+                type: 'Sole Proprietorship'
               }
             }
           }
@@ -270,6 +275,25 @@ describe('business', () => {
       }
     })
   })
+
+  test('update business legal status - rejects unknown legal status code', async () => {
+    mockLegalStatusReferenceData(v1)
+
+    const query = `
+      mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
+        updateBusinessLegalStatus(input: $input) {
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, {
+      input: { sbi: '123456789', legalStatusCode: 102 }
+    })
+
+    expect(result.errors[0].message).toEqual('Invalid legalStatusCode: 102')
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.updateBusinessLegalStatus).toBeNull()
+  })
 })
 
 describe('business - external', () => {
@@ -293,7 +317,7 @@ describe('business - external', () => {
     })
     const input = {
       sbi: '123456789',
-      legalStatusCode: 123
+      legalStatusCode: 102111
     }
 
     const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -310,11 +334,13 @@ describe('business - external', () => {
     v1_external.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        legalStatus: { id: 123, type: 'text corresponding to 123' }
+        legalStatus: { id: 102111, type: 'Sole Proprietorship' }
       }
     })
 
     mockOrganisationSearch(v1)
+
+    mockLegalStatusReferenceData(v1_external)
 
     const query = `
       mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
@@ -342,8 +368,8 @@ describe('business - external', () => {
           business: {
             info: {
               legalStatus: {
-                code: 123,
-                type: 'text corresponding to 123'
+                code: 102111,
+                type: 'Sole Proprietorship'
               }
             }
           }

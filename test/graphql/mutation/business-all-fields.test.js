@@ -1,6 +1,6 @@
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import { mockOrganisationSearch } from '../helpers.js'
+import { mockLegalStatusReferenceData, mockOrganisationSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -76,7 +76,7 @@ describe('updateBusinessAllFields', () => {
       email: { address: 'newemail@test.com' },
       phone: { landline: 'new phone', mobile: 'new mobile' },
       vat: '987654321',
-      legalStatusCode: 102,
+      legalStatusCode: 102108,
       typeCode: 3,
       dateStartedFarming: '2025-01-01',
       registrationNumbers: {
@@ -96,7 +96,7 @@ describe('updateBusinessAllFields', () => {
       companiesHouseRegistrationNumber: '12345678',
       charityCommissionRegistrationNumber: '87654321',
       businessType: { id: 3 },
-      legalStatus: { id: 102 },
+      legalStatus: { id: 102108 },
       dateStartedFarming: '2025-01-01T00:00:00.000Z'
     }
 
@@ -113,6 +113,7 @@ describe('updateBusinessAllFields', () => {
     )
 
     mockOrganisationSearch(v1)
+    mockLegalStatusReferenceData(v1)
 
     v1.get('/organisation/organisationId').reply(200, {
       _data: { id: 'organisationId', name: 'new name' }

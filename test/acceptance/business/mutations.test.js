@@ -116,7 +116,7 @@ const allFieldsInput = {
   correspondenceAddress: { withoutUprn: correspondenceAddress },
   isCorrespondenceAsBusinessAddress: false,
   vat: '123456789',
-  legalStatusCode: 102,
+  legalStatusCode: 102111,
   typeCode: 3,
   dateStartedFarming: '2020-01-31',
   registrationNumbers: {
@@ -155,7 +155,7 @@ describe('Business Mutations - as an internal user', () => {
           address: { ...address, typeId: null },
           correspondenceAddress,
           isCorrespondenceAsBusinessAddress: false,
-          legalStatus: { code: 102, type: 'Set from reference data' },
+          legalStatus: { code: 102111, type: 'Set from reference data' },
           type: { code: 3, type: 'Set from reference data' },
           registrationNumbers: {
             companiesHouse: '12345678',
