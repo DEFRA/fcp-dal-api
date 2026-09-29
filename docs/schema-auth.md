@@ -16,7 +16,7 @@ directive @auth(requires: [AuthGroup!]!) on OBJECT | FIELD_DEFINITION
 business(sbi: ID!): Business @auth(requires: [SINGLE_FRONT_DOOR, CONSOLIDATED_VIEW])
 ```
 
-It's implemented as a schema transformer (`authDirectiveTransformer`) in
+It is implemented as a schema transformer (`authDirectiveTransformer`) in
 [`app/auth/authenticate.js`](../app/auth/authenticate.js).
 
 ### `requires` - which consumer groups can call this field
@@ -26,23 +26,25 @@ It's implemented as a schema transformer (`authDirectiveTransformer`) in
 Entra group ID for a consuming system (Consolidated View, Single Front Door, Grants Platform, etc).
 
 This comes from a **different** header than the ones in [DAL Authentication](./auth): the caller's
-group membership is read from the `groups` claim of the Entra JWT sent in the standard
-`Authorization: Bearer <token>` header, verified by `getAuth()` in `authenticate.js`. This identifies
-_which system_ is calling the DAL. The end user is identified by one-of `email`/`x-forwarded-authorization`/
-`service-account` headers. Every field-level `@auth` check runs against `context.auth.groups`.
+group membership is read from the `groups` claim of the Entra ID JWT sent in the standard
+`Authorization: Bearer <token>` header, verified by `getAuth()` in `authenticate.js`.
+This identifies _which system_ is calling the DAL.
+The end user is identified by one-of `email`/`x-forwarded-authorization`/`service-account` headers.
+Every field-level `@auth` check runs against `context.auth.groups`.
 
-A caller in the `ADMIN` group bypasses the `requires` check entirely (and the `serviceAccountPermitted`
-check below), regardless of what groups the field lists.
+A caller in the `ADMIN` group bypasses the `requires` check entirely (and the
+`serviceAccountPermitted` check below), regardless of what groups the field lists.
 
 A field with no `@auth` directive at all has no group restriction - anyone who can reach the DAL
-can call it (e.g. `Query.referenceData`). A schema test
-(`test/graphql/schema.test.js` - `'ensures all sensitive top-level fields have @auth directive'`)
-guards against a new top-level field accidentally being left unprotected.
+can call it (e.g. `Query.referenceData`).
+A schema test (`test/graphql/schema.test.js` -
+`'ensures all sensitive top-level fields have @auth directive'`) guards against a new top-level
+field accidentally being left unprotected.
 
 ### Cascading from `OBJECT` to fields
 
-`@auth` can be applied to a whole `type`, in which case it's inherited by every field on that type
-that doesn't carry its own `@auth`:
+`@auth` can be applied to a whole `type`, in which case it is inherited by every field on that type
+that does not carry its own `@auth`:
 
 ```graphql
 type Business @auth(requires: [SINGLE_FRONT_DOOR]) {
@@ -55,9 +57,9 @@ A field-level `@auth` always overrides the type-level one for that field.
 
 ### Service account access
 
-A [service account](./auth) call carries no end-user identity - it's typically an unattended,
-batch-style caller. Service accounts are only permitted to make read-only calls to the DAL - no
-mutations are allowed.
+A [service account](./auth) call carries no end-user identity - it is typically an unattended,
+batch-style caller.
+Service accounts are only permitted to make read-only calls to the DAL - no mutations are allowed!
 
 Whether the _current_ caller is a service account is derived from the same request-level
 `authContext` that [DAL Authentication](./auth) describes (`context.authContext.serviceAccount`,
@@ -82,10 +84,13 @@ query (sibling fields) still resolves normally.
 
 ## Local development
 
-Setting `DISABLE_AUTH=true` skips `@auth` enforcement entirely (`getRequestingGroup`/
-`getRequestingService` return placeholder values, and `authDirectiveTransformer` isn't applied to
-the schema at all). This is only ever allowed when `cdp.env` is `dev` - `schema.js` throws at
-startup if auth is disabled anywhere else, so it can't be accidentally left on in a real
-environment.
+Setting `DISABLE_AUTH=true` skips `@auth` enforcement entirely
+
+- `getRequestingService` returns a placeholder value
+- a default app-reg ID is used (as there is no token to derive the `appid` claim from)
+- and `authDirectiveTransformer` is not applied to the schema at all
+
+This is only ever allowed when `cdp.env` is `dev` - `schema.js` throws at startup if auth is
+disabled anywhere else, so it can't be accidentally left on in a real environment.
 
 [< back to Homepage](./homepage)

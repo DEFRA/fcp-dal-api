@@ -2,14 +2,12 @@ import { afterEach, describe, expect, jest, test } from '@jest/globals'
 import { validateAuditEvent } from '@defra/fcp-audit-publisher'
 import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
 
-const getRequestingGroupMock = jest.fn()
 const getRequestingServiceMock = jest.fn()
 const configGetMock = jest.fn()
 const loggerMock = { error: jest.fn(), debug: jest.fn(), warn: jest.fn() }
 const snsPublishMock = jest.fn()
 
 jest.unstable_mockModule('../../../../app/auth/authenticate.js', () => ({
-  getRequestingGroup: getRequestingGroupMock,
   getRequestingService: getRequestingServiceMock
 }))
 jest.unstable_mockModule('../../../../app/config.js', () => ({
@@ -55,7 +53,7 @@ const baseContextValue = {
   requestLogger: { error: jest.fn() },
   request: baseRequest,
   authContext: endUserAuthContext(baseRequest),
-  auth: { groups: ['group-1'] },
+  auth: { appid: 'test-appid', groups: ['group-1'] },
   auditTrail: fakeAuditTrail(),
   defraIdContext: { crn: jest.fn() }
 }
@@ -67,7 +65,6 @@ describe('auditPlugin', () => {
 
   describe('publish', () => {
     test('publishes exactly one event for a root selection with a recorded entity, shaped as an AuditEventPayload', async () => {
-      getRequestingGroupMock.mockReturnValue('SOME_AD_GROUP')
       getRequestingServiceMock.mockReturnValue('Some Service Name')
       const publish = jest.fn()
       const plugin = auditPlugin({ publish })
@@ -99,7 +96,7 @@ describe('auditPlugin', () => {
               requestBody: JSON.stringify(requestPayload),
               rootField: 'business',
               sourceSystem: 'Some Service Name',
-              sourceSystemSecurityGroupId: 'SOME_AD_GROUP',
+              sourceSystemAppRegId: 'test-appid',
               errorDetails: []
             })
           })

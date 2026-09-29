@@ -19,11 +19,15 @@ const authGroupServiceName = {
   [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door'
 }
 
+const unauthedAppid = config.get('auth.disabled')
+  ? 'auth-disabled-no-appid'
+  : 'no-appid-no-auth-provided'
+
 export async function getAuth(request, jwkDatasource) {
   try {
     const token = request?.headers?.authorization?.split(' ')[1]
     if (!token) {
-      return {}
+      return { appid: unauthedAppid }
     }
     logger.debug('#DAL - Request authentication - Check verification', {
       code: DAL_REQUEST_AUTHENTICATION_001,
@@ -32,10 +36,10 @@ export async function getAuth(request, jwkDatasource) {
     const decodedToken = decodeProtectedHeader(token)
     const requestStart = Date.now()
     const signingKey = await jwkDatasource.getPublicKey(decodedToken.kid)
-    const requestTimeMs = Date.now() - requestStart
     const { payload: verified } = await jwtVerify(token, signingKey, {
       algorithms: ['RS256']
     })
+    const requestTimeMs = Date.now() - requestStart
     sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: DAL_REQUEST_AUTHENTICATION_001
     })
@@ -63,7 +67,10 @@ export async function getAuth(request, jwkDatasource) {
           relationships: verified.relationships,
           groups: verified.groups,
           roles: verified.roles,
-          azp: verified.azp
+          azp: verified.azp,
+          iat: verified.iat,
+          exp: verified.exp,
+          ver: verified.ver
         })
       }
     })
@@ -87,7 +94,7 @@ export async function getAuth(request, jwkDatasource) {
         request: { remoteAddress: request?.info?.remoteAddress }
       })
     }
-    return {}
+    return { appid: 'no-appid-token-verification-failed' }
   }
 }
 
@@ -106,15 +113,6 @@ export function getRequestingService(groups) {
   return (
     groups.map((group) => authGroupServiceName[group]).find((serviceName) => !!serviceName) ?? null
   )
-}
-
-export function getRequestingGroup(groups) {
-  // Return mock UUID when auth is disabled in local/dev
-  if (config.get('auth.disabled')) {
-    return '00000000-0000-0000-0000-000000000000'
-  }
-
-  return groups?.find((group) => Object.values(authGroups).includes(group))
 }
 
 /**
