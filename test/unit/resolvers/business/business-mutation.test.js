@@ -1080,13 +1080,11 @@ const expectedAuthorisationBody = {
 
 describe('Business Mutation createCustomerAuthorisationOnBusiness', () => {
   it('transforms permissions to privilege names for the upstream request', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
     const dataSources = {
       ruralPaymentsBusiness: {
         getOrganisationIdBySBI: jest.fn().mockResolvedValue('org-1'),
         createAuthorisationForOrganisation: jest.fn().mockResolvedValue({ success: true })
-      },
-      ruralPaymentsCustomer: {
-        getPersonIdByCRN: jest.fn().mockResolvedValue('person-1')
       },
       permissions: new Permissions()
     }
@@ -1100,7 +1098,10 @@ describe('Business Mutation createCustomerAuthorisationOnBusiness', () => {
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
       '111111111'
     )
-    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('1111111100')
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
+      '1111111100',
+      dataSources
+    )
     expect(
       dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation
     ).toHaveBeenCalledWith('org-1', expectedAuthorisationBody)
@@ -1110,13 +1111,11 @@ describe('Business Mutation createCustomerAuthorisationOnBusiness', () => {
 
 describe('Business Mutation updateCustomerAuthorisationOnBusiness', () => {
   it('transforms permissions to privilege names for the upstream request', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
     const dataSources = {
       ruralPaymentsBusiness: {
         getOrganisationIdBySBI: jest.fn().mockResolvedValue('org-1'),
         updateAuthorisationForPersonOnOrganisation: jest.fn().mockResolvedValue({ success: true })
-      },
-      ruralPaymentsCustomer: {
-        getPersonIdByCRN: jest.fn().mockResolvedValue('person-1')
       },
       permissions: new Permissions()
     }
@@ -1130,7 +1129,10 @@ describe('Business Mutation updateCustomerAuthorisationOnBusiness', () => {
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
       '111111111'
     )
-    expect(dataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('1111111100')
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
+      '1111111100',
+      dataSources
+    )
     expect(
       dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
     ).toHaveBeenCalledWith('org-1', 'person-1', expectedAuthorisationBody)
