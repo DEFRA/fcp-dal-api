@@ -1,6 +1,6 @@
 import { getEndUserIpAddress } from '../../audit/audit-ip.js'
 import { snsPublish } from '../../audit/sns-publisher.js'
-import { getRequestingGroup, getRequestingService } from '../../auth/authenticate.js'
+import { getRequestingService } from '../../auth/authenticate.js'
 import { config } from '../../config.js'
 import { DAL_AUDIT_EVENT_001 } from '../../logger/codes.js'
 
@@ -65,7 +65,7 @@ function buildEvent({ contextValue, rootSelection, errors }) {
         requestBody: JSON.stringify(contextValue.request?.payload),
         rootField: rootSelection,
         sourceSystem: getRequestingService(contextValue?.auth?.groups ?? []),
-        sourceSystemSecurityGroupId: getRequestingGroup(contextValue?.auth?.groups),
+        sourceSystemAppRegId: contextValue?.auth?.appid,
         errorDetails: mappedErrors,
         serviceAccount: contextValue.auditTrail?.serviceAccount()
       }

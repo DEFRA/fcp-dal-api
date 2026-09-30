@@ -9,8 +9,10 @@ const validDefraIdToken = jwt.sign(
   'test-secret'
 )
 
+// dummy app reg id token
+const appRegToken = jwt.sign({ appid: 'test-appid' }, 'appid-secret')
+
 const getAuthMock = jest.fn()
-const getRequestingGroupMock = jest.fn()
 const getRequestingServiceMock = jest.fn()
 const PermissionsMock = jest.fn()
 const RuralPaymentsBusinessMock = jest.fn()
@@ -23,7 +25,6 @@ const loggerMock = { child: loggerChild }
 
 jest.unstable_mockModule('../../../app/auth/authenticate.js', () => ({
   getAuth: getAuthMock,
-  getRequestingGroup: getRequestingGroupMock,
   getRequestingService: getRequestingServiceMock
 }))
 jest.unstable_mockModule('../../../app/data-sources/static/permissions.js', () => ({
@@ -268,9 +269,23 @@ describe('context', () => {
       expect(result.dataSources.hitachiPayments.audit.correlationId).toBeUndefined()
     })
 
-    test('Audit requestedSystem is extracted from requesting group response', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user', groups: ['group-1', 'group-2'] })
-      getRequestingGroupMock.mockReturnValue('SOME_AD_GROUP')
+    test('Audit requestedSystem is extracted from appid auth token claim', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user', appid: 'test-appid' })
+      const request = {
+        headers: {
+          authorization: `Bearer ${appRegToken}`,
+          'x-forwarded-authorization': validDefraIdToken
+        },
+        traceId: '111-222-333'
+      }
+
+      const result = await context({ request })
+
+      expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBe('test-appid')
+    })
+
+    test('Audit requestedSystem defaults to a placeholder when auth is disabled', async () => {
+      getAuthMock.mockResolvedValue({ user: 'test-user', appid: 'auth-disabled-no-appid' })
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'
@@ -278,13 +293,13 @@ describe('context', () => {
 
       const result = await context({ request })
 
-      expect(getRequestingGroupMock).toHaveBeenCalledWith(['group-1', 'group-2'])
-      expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBe('SOME_AD_GROUP')
+      expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBe(
+        'auth-disabled-no-appid'
+      )
     })
 
     test('Audit requestedSystem is undefined if no requesting group returned', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
-      getRequestingGroupMock.mockReturnValue(undefined)
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'
