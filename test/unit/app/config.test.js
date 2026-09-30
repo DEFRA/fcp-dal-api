@@ -65,7 +65,6 @@ describe('config', () => {
     process.env.HTTPS_PROXY = 'http://proxy.example.com'
     process.env.PORT = '4000'
     process.env.LOG_LEVEL = 'debug'
-    process.env.ALL_SCHEMA_ON = 'true'
     process.env.GRAPHQL_DASHBOARD_ENABLED = 'true'
     process.env.DAL_REQUEST_TIMEOUT_MS = '1500'
     process.env.SERVICE_VERSION = '1.2.3'
