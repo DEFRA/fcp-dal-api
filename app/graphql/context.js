@@ -1,4 +1,4 @@
-import { getAuth, getRequestingGroup, getRequestingService } from '../auth/authenticate.js'
+import { getAuth, getRequestingService } from '../auth/authenticate.js'
 import { defraIdContext } from '../auth/defra-id.js'
 import { config } from '../config.js'
 import { HitachiPayments } from '../data-sources/hitachi/HitachiPayments.js'
@@ -16,6 +16,10 @@ import { createAuditTrail } from '../audit/audit-trail.js'
 
 export async function context({ request }) {
   const auth = await getAuth(request, new JWKS())
+
+  // normalise the appid claim (translate azp v2.0 token field to v1.0 for consistency)
+  auth.appid = auth.appid ?? auth.azp
+
   const requestingService = getRequestingService(auth.groups ?? [])
   // Following the pattern used by transactionId and traceId
   request.requestingService = requestingService
@@ -70,7 +74,7 @@ export async function context({ request }) {
       hitachiPayments: new HitachiPayments({
         logger: requestLogger,
         audit: {
-          requestedSystem: getRequestingGroup(auth.groups),
+          requestedSystem: auth.appid,
           requesterId: request.headers.email,
           correlationId: request.traceId
         }
@@ -82,9 +86,10 @@ export async function context({ request }) {
         modelOrCollection: db.collection('businesses')
       }),
       serviceAccount: {
-        // Service account only currently supported for ruralPaymentsBusiness.  Other ruralPayments datasources
-        // should be added here too if the need arises, alongside a getXXXDataSource-style helper (see
-        // getRuralPaymentsBusinessDataSource in resolvers/business/common.js) for resolvers to pick the right instance.
+        // Service account only currently supported for ruralPaymentsBusiness.
+        // Other ruralPayments datasources should be added here too if the need arises,
+        // alongside a getXXXDataSource-style helper (see getRuralPaymentsBusinessDataSource in
+        // resolvers/business/common.js) for resolvers to pick the right instance.
         ruralPaymentsBusiness: standardAuthRuralPaymentsBusiness.isExternalRoute()
           ? new RuralPaymentsBusiness(...internalServiceAccountDatasourceOptions)
           : null

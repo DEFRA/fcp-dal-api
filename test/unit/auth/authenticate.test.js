@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, jest, test } from '@jest/globals'
-import { buildSchema, findBreakingChanges, graphql } from 'graphql'
+import { buildSchema, findBreakingChanges, graphql, GraphQLError } from 'graphql'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
 import { config } from '../../../app/config.js'
@@ -15,23 +15,22 @@ const {
   checkAuthGroup,
   checkServiceAccountAccess,
   getAuth,
-  getRequestingGroup,
   getRequestingService,
   isAdminCaller
 } = await import('../../../app/auth/authenticate.js')
 
 const tokenPayload = {
-  aud: 'api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
-  iss: 'https://sts.windows.net/2d731eb1-6721-4349-9cb2-8fe9b0ab53a2/',
+  aud: 'api://appid',
+  iss: 'https://sts.windows.net/appid/',
   aio: 'aio',
-  appid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  appid: 'appid',
   appidacr: '1',
-  groups: ['2d731eb1-6721-4349-9cb2-8fe9b0ab53a2'],
-  idp: 'https://sts.windows.net/2d731eb1-6721-4349-9cb2-8fe9b0ab53a2/',
-  oid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  groups: ['appid'],
+  idp: 'https://sts.windows.net/appid/',
+  oid: 'oid',
   rh: 'rh',
-  sub: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
-  tid: '2d731eb1-6721-4349-9cb2-8fe9b0ab53a2',
+  sub: 'sub',
+  tid: 'tid',
   uti: 'uti',
   ver: '1.0',
   serviceId: 'service-id',
@@ -78,97 +77,118 @@ describe('authenticate', () => {
       jest.clearAllMocks()
     })
 
-    test('should return an empty object when no authHeader is provided', async () => {
-      expect(await getAuth({})).toEqual({})
+    describe('when auth is disabled', () => {
+      test('should return an object with default appid when request has no auth', async () => {
+        expect(await getAuth({})).toEqual({ appid: 'auth-disabled-no-appid' })
+      })
     })
 
-    describe('with a valid token', () => {
-      test('should return decoded token, and log payload details', async () => {
-        mockPublicKeyFunc.mockResolvedValue(publicKey)
-        const tokenPayload = await getAuth(mockRequest(token), mockJWKSDataSource)
+    describe('when auth is enabled', () => {
+      it('should return an object with default appid when request has no auth', async () => {
+        config.set('auth.disabled', false) // temporarily set auth to enabled for this test
+        const { getAuth } = await import('../../../app/auth/authenticate.js?r=3')
+        config.set('auth.disabled', true) // reset to original state after import
 
-        expect(tokenPayload).toEqual(decodedToken)
-        expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-        expect(info).toHaveBeenCalledTimes(1)
-        expect(info.mock.calls[0]).toEqual([
-          '#DAL Request authentication - JWT verified',
-          {
-            type: 'http',
-            code: 'DAL_REQUEST_AUTHENTICATION_001',
-            requestTimeMs: expect.any(Number),
-            request: requestInfo,
-            tenant: {
-              message:
-                '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-                '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-                '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
-                '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
-                '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-                '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","email":"defra.gov.uk",' +
-                '"contactId":"******t-id","relationships":["orgId:sbi:company name:"],' +
-                '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
-                '"roles":["role-id"],"azp":"azp-id"}'
-            }
-          }
-        ])
+        expect(await getAuth({})).toEqual({ appid: 'no-appid-no-auth-provided' })
       })
 
-      test('should return decoded token, and log payload details (no email check)', async () => {
-        mockPublicKeyFunc.mockResolvedValue(publicKey)
-        const tokenNoEmail = jwt.sign(tokenPayload, privateKey, {
-          algorithm: 'RS256',
-          expiresIn: '1h',
-          keyid: 'mock-key-id-123'
+      describe('with a valid token', () => {
+        test('should return decoded token, and log payload details', async () => {
+          mockPublicKeyFunc.mockResolvedValue(publicKey)
+          const tokenPayload = await getAuth(mockRequest(token), mockJWKSDataSource)
+
+          expect(tokenPayload).toEqual(decodedToken)
+          expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+          expect(info).toHaveBeenCalledTimes(1)
+          expect(info.mock.calls[0]).toEqual([
+            '#DAL Request authentication - JWT verified',
+            {
+              type: 'http',
+              code: 'DAL_REQUEST_AUTHENTICATION_001',
+              requestTimeMs: expect.any(Number),
+              request: requestInfo,
+              tenant: {
+                message: expect.stringMatching(
+                  new RegExp(
+                    '{"appid":"appid","aud":"api://appid","oid":"oid",' +
+                      '"serviceId":"service-id","correlationId":"correlation-id",' +
+                      '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
+                      '"sub":"sub","tid":"tid","email":"defra.gov.uk",' +
+                      '"contactId":"\\*\\*\\*\\*\\*\\*t-id",' +
+                      '"relationships":\\["orgId:sbi:company name:"\\],' +
+                      '"groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
+                      '"iat":[0-9]+,"exp":[0-9]+,"ver":"1\\.0"}'
+                  )
+                )
+              }
+            }
+          ])
         })
 
-        expect(await getAuth(mockRequest(tokenNoEmail), mockJWKSDataSource)).toEqual(
-          jwt.decode(tokenNoEmail)
-        )
-        expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-        expect(info).toHaveBeenCalledTimes(1)
-        expect(info.mock.calls[0]).toEqual([
-          '#DAL Request authentication - JWT verified',
-          {
-            type: 'http',
-            code: 'DAL_REQUEST_AUTHENTICATION_001',
-            requestTimeMs: expect.any(Number),
-            request: requestInfo,
-            tenant: {
-              message:
-                '{"appid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-                '"aud":"api://2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-                '"oid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","serviceId":"service-id",' +
-                '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
-                '"sessionId":"session-id","sub":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2",' +
-                '"tid":"2d731eb1-6721-4349-9cb2-8fe9b0ab53a2","contactId":"******t-id",' +
-                '"relationships":["orgId:sbi:company name:"],' +
-                '"groups":["2d731eb1-6721-4349-9cb2-8fe9b0ab53a2"],' +
-                '"roles":["role-id"],"azp":"azp-id"}'
+        test('should return decoded token, and log payload details (no email check)', async () => {
+          mockPublicKeyFunc.mockResolvedValue(publicKey)
+          const tokenNoEmail = jwt.sign(tokenPayload, privateKey, {
+            algorithm: 'RS256',
+            expiresIn: '1h',
+            keyid: 'mock-key-id-123'
+          })
+
+          expect(await getAuth(mockRequest(tokenNoEmail), mockJWKSDataSource)).toEqual(
+            jwt.decode(tokenNoEmail)
+          )
+          expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+          expect(info).toHaveBeenCalledTimes(1)
+          expect(info.mock.calls[0]).toEqual([
+            '#DAL Request authentication - JWT verified',
+            {
+              type: 'http',
+              code: 'DAL_REQUEST_AUTHENTICATION_001',
+              requestTimeMs: expect.any(Number),
+              request: requestInfo,
+              tenant: {
+                message: expect.stringMatching(
+                  new RegExp(
+                    '{"appid":"appid","aud":"api://appid","oid":"oid",' +
+                      '"serviceId":"service-id","correlationId":"correlation-id",' +
+                      '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
+                      '"sub":"sub","tid":"tid","contactId":"\\*\\*\\*\\*\\*\\*t-id",' +
+                      '"relationships":\\["orgId:sbi:company name:"\\],' +
+                      '"groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
+                      '"iat":[0-9]+,"exp":[0-9]+,"ver":"1\\.0"}'
+                  )
+                )
+              }
             }
-          }
-        ])
+          ])
+        })
       })
-    })
 
-    test('should return an empty object when token cannot be decoded', async () => {
-      expect(await getAuth(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({})
-      expect(mockPublicKeyFunc).not.toHaveBeenCalled()
-    })
-
-    test('should return an empty object when token verification fails, due to incorrect signing key', async () => {
-      mockPublicKeyFunc.mockResolvedValue(publicKey)
-      expect(await getAuth(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual({})
-      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-    })
-
-    test('should return an empty object when token verification fails, due to token expiry', async () => {
-      const error = new Error('TokenExpiredError')
-      error.name = 'TokenExpiredError'
-      mockPublicKeyFunc.mockImplementation(() => {
-        throw error
+      test('returns a no-appid object if token cannot be decoded', async () => {
+        expect(await getAuth(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({
+          appid: 'no-appid-token-verification-failed'
+        })
+        expect(mockPublicKeyFunc).not.toHaveBeenCalled()
       })
-      expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual({})
-      expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+
+      test('returns a no-appid object if verification fails with incorrect key', async () => {
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+        expect(await getAuth(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual({
+          appid: 'no-appid-token-verification-failed'
+        })
+        expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+      })
+
+      test('returns a no-appid object if verification fails with token expiry', async () => {
+        const error = new Error('TokenExpiredError')
+        error.name = 'TokenExpiredError'
+        mockPublicKeyFunc.mockImplementation(() => {
+          throw error
+        })
+        expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual({
+          appid: 'no-appid-token-verification-failed'
+        })
+        expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+      })
     })
   })
 
@@ -246,60 +266,6 @@ describe('authenticate', () => {
 
     it('throws Unauthorized for a service account on a field with serviceAccountPermitted: false', () => {
       expect(() => checkServiceAccountAccess(true, false, false)).toThrow(Unauthorized)
-    })
-  })
-
-  describe('getRequestingGroup', () => {
-    const adminGroupId = config.get('auth.groups.ADMIN')
-    const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
-
-    describe('when auth is disabled', () => {
-      const originalConfig = { ...config }
-      const configMockPath = {
-        'auth.disabled': true
-      }
-
-      beforeEach(() => {
-        jest
-          .spyOn(config, 'get')
-          .mockImplementation((path) =>
-            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-          )
-      })
-
-      it('should return the mock UUID when auth is disabled, regardless of groups', () => {
-        expect(getRequestingGroup([adminGroupId])).toBe('00000000-0000-0000-0000-000000000000')
-        expect(getRequestingGroup([])).toBe('00000000-0000-0000-0000-000000000000')
-        expect(getRequestingGroup(undefined)).toBe('00000000-0000-0000-0000-000000000000')
-      })
-    })
-
-    describe('when auth is enabled', () => {
-      const originalConfig = { ...config }
-      const configMockPath = {
-        'auth.disabled': false
-      }
-
-      beforeEach(() => {
-        jest
-          .spyOn(config, 'get')
-          .mockImplementation((path) =>
-            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-          )
-      })
-
-      it('should return the first matching group when user has authorized groups', () => {
-        expect(getRequestingGroup([adminGroupId, 'other-group'])).toBe(adminGroupId)
-        expect(getRequestingGroup([consolidatedViewGroupId, adminGroupId])).toBe(
-          consolidatedViewGroupId
-        )
-      })
-
-      it('should return undefined when user has no authorized groups', () => {
-        expect(getRequestingGroup(['unauthorized-group'])).toBeUndefined()
-        expect(getRequestingGroup([])).toBeUndefined()
-        expect(getRequestingGroup(undefined)).toBeUndefined()
-      })
     })
   })
 
@@ -453,6 +419,17 @@ describe('authenticate', () => {
       const serviceAccountContext = (groups) => ({
         auth: { groups },
         authContext: { serviceAccount: 'service-account@example.com' }
+      })
+
+      it('denies a caller with no groups claim', async () => {
+        const result = await run('gatedQueryFieldDefault', {
+          auth: { appid: 'some-appid' },
+          authContext: {}
+        })
+        expect(result.errors).toEqual([
+          new GraphQLError('Authorization failed, you are not in the correct AD groups')
+        ])
+        expect(result.data.gatedQueryFieldDefault).toBeNull()
       })
 
       it('allows a non-service-account caller in the required group', async () => {
