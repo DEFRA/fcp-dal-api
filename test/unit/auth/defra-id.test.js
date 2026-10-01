@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
-import { generateKeyPairSync } from 'node:crypto'
 import jwt from 'jsonwebtoken'
+import { generateKeyPairSync } from 'node:crypto'
 import { config } from '../../../app/config.js'
 import { BadRequest, Unauthorized } from '../../../app/errors/graphql.js'
 
@@ -19,10 +19,11 @@ describe('defraIdContext', () => {
 
   const jwksDataSource = () => ({ getPublicKey: jest.fn().mockResolvedValue(publicKey) })
 
+  const traceId = 'trace-id'
+
   let configGetSpy
 
   beforeEach(() => {
-    jest.clearAllMocks()
     configGetSpy = jest.spyOn(config, 'get').mockReturnValue(false)
   })
 
@@ -36,7 +37,7 @@ describe('defraIdContext', () => {
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
-        { jwksDataSource: jwksDataSource() }
+        { traceId, jwksDataSource: jwksDataSource() }
       )
 
       expect(ctx.crn()).toEqual('11111111')
@@ -47,7 +48,7 @@ describe('defraIdContext', () => {
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
-        { jwksDataSource: jwksDataSource() }
+        { traceId, jwksDataSource: jwksDataSource() }
       )
 
       expect(() => ctx.crn()).toThrow(new BadRequest('Defra ID token does not contain crn'))
@@ -57,7 +58,7 @@ describe('defraIdContext', () => {
       const token = signToken({ contactId: '11111111' }, wrongPrivateKey)
 
       await expect(
-        defraIdContext({ externalAuthHeader: token }, { jwksDataSource: jwksDataSource() })
+        defraIdContext({ externalAuthHeader: token }, { traceId, jwksDataSource: jwksDataSource() })
       ).rejects.toThrow(new Unauthorized('Defra ID token failed verification'))
     })
   })
@@ -68,7 +69,7 @@ describe('defraIdContext', () => {
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
-        { jwksDataSource: jwksDataSource() }
+        { traceId, jwksDataSource: jwksDataSource() }
       )
 
       expect(ctx.orgId('123456789')).toBe('orgId2')
@@ -79,7 +80,7 @@ describe('defraIdContext', () => {
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
-        { jwksDataSource: jwksDataSource() }
+        { traceId, jwksDataSource: jwksDataSource() }
       )
 
       expect(() => ctx.orgId('000000000')).toThrow(BadRequest)
@@ -90,7 +91,7 @@ describe('defraIdContext', () => {
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
-        { jwksDataSource: jwksDataSource() }
+        { traceId, jwksDataSource: jwksDataSource() }
       )
 
       expect(() => ctx.orgId('123456789')).toThrow(BadRequest)
@@ -101,7 +102,7 @@ describe('defraIdContext', () => {
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
-        { jwksDataSource: jwksDataSource() }
+        { traceId, jwksDataSource: jwksDataSource() }
       )
 
       expect(() => ctx.orgId('123456789')).toThrow(BadRequest)
@@ -111,7 +112,7 @@ describe('defraIdContext', () => {
       const token = signToken({ relationships: ['orgId2:123456789'] }, wrongPrivateKey)
 
       await expect(
-        defraIdContext({ externalAuthHeader: token }, { jwksDataSource: jwksDataSource() })
+        defraIdContext({ externalAuthHeader: token }, { traceId, jwksDataSource: jwksDataSource() })
       ).rejects.toThrow(Unauthorized)
     })
   })
@@ -119,7 +120,10 @@ describe('defraIdContext', () => {
   test('resolves to undefined, without attempting verification, when no externalAuthHeader is supplied', async () => {
     const jwks = jwksDataSource()
 
-    const ctx = await defraIdContext({ externalAuthHeader: undefined }, { jwksDataSource: jwks })
+    const ctx = await defraIdContext(
+      { externalAuthHeader: undefined },
+      { traceId, jwksDataSource: jwks }
+    )
 
     expect(ctx).toBeUndefined()
     expect(jwks.getPublicKey).not.toHaveBeenCalled()
@@ -141,7 +145,7 @@ describe('defraIdContext', () => {
 
     await defraIdContext(
       { externalAuthHeader: token },
-      { traceId: 'trace-id', jwksDataSource: jwksDataSource() }
+      { traceId, jwksDataSource: jwksDataSource() }
     )
 
     expect(info).toHaveBeenCalledTimes(1)
@@ -170,7 +174,10 @@ describe('defraIdContext', () => {
     const jwks = jwksDataSource()
     const token = signToken({ contactId: '11111111', relationships: ['orgId2:123456789'] })
 
-    const ctx = await defraIdContext({ externalAuthHeader: token }, { jwksDataSource: jwks })
+    const ctx = await defraIdContext(
+      { externalAuthHeader: token },
+      { traceId, jwksDataSource: jwks }
+    )
     ctx.crn()
     ctx.crn()
     ctx.orgId('123456789')
@@ -192,28 +199,30 @@ describe('defraIdContext', () => {
         wrongPrivateKey
       )
 
-      const ctx = await defraIdContext({ externalAuthHeader: token }, { jwksDataSource: jwks })
+      const ctx = await defraIdContext(
+        { externalAuthHeader: token },
+        { traceId, jwksDataSource: jwks }
+      )
 
       expect(ctx.crn()).toEqual('11111111')
       expect(ctx.orgId('123456789')).toEqual('orgId2')
       expect(jwks.getPublicKey).not.toHaveBeenCalled()
     })
 
-    test('can be called without options, logging an undefined traceId', async () => {
+    test('can be called without a jwksDataSource', async () => {
       const token = signToken({ contactId: '11111111' })
 
-      const ctx = await defraIdContext({ externalAuthHeader: token })
+      const ctx = await defraIdContext({ externalAuthHeader: token }, { traceId })
 
       expect(ctx.crn()).toEqual('11111111')
-      expect(info).toHaveBeenCalledWith(
-        '#DAL Request authentication - Defra ID token decoded',
-        expect.objectContaining({ traceId: undefined })
-      )
     })
 
     test('throws Unauthorized if the token cannot be decoded at all', async () => {
       await expect(
-        defraIdContext({ externalAuthHeader: 'not-a-jwt' }, { jwksDataSource: jwksDataSource() })
+        defraIdContext(
+          { externalAuthHeader: 'not-a-jwt' },
+          { traceId, jwksDataSource: jwksDataSource() }
+        )
       ).rejects.toThrow(Unauthorized)
     })
   })
