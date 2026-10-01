@@ -155,8 +155,9 @@ mutation CreateBusiness($input: CreateBusinessInput!) {
 `
 
 // retrievePersonIdByCRN fires a MongoDB insert without awaiting it to avoid slowing down the
-// request. In tests this means a potential race condition between the insert and the database cleanup.
-// For safety, we should wait for the insert complete  (allowing the db to be torn down in the afterEach)
+// request. In tests this means a potential race condition between the insert and the database
+// cleanup. For safety, we should wait for the insert complete  (allowing the db to be torn down in
+// the afterEach)
 const waitForPersonIdToBeCachedInMongo = async () => {
   await waitFor(async () => {
     const cached = await db.collection('customers').findOne({ _id: '1234567890' })

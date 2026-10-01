@@ -185,8 +185,8 @@ describe('RuralPayments', () => {
     })
 
     test('email wins over x-forwarded-authorization when both are present', () => {
-      // Both should never be present, but it would be a breaking change to throw here
-      // (an error log statement has been added when this happens so that we can get alerted and deal with this)
+      // Both should never be present, but it would be a breaking change to throw here (an error log
+      // statement has been added when this happens so that we can get alerted and deal with this)
       const rp = new RuralPayments(
         { logger },
         {

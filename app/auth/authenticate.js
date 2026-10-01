@@ -132,7 +132,8 @@ function isServiceAccount(authContext) {
 }
 
 /**
- * Mutations can't be called by service accounts, queries are permitted by service accounts and non-service accounts.
+ * Mutations can't be called by service accounts, queries are permitted by service accounts and
+ * non-service accounts.
  */
 function isServiceAccountPermitted(schema, typeName) {
   const mutationTypeName = schema.getMutationType()?.name
@@ -162,7 +163,8 @@ export function checkAuthGroup(requesterGroups, allowedGroups) {
 /**
  * A field guarded by @auth is usable by a service-account caller according to the following:
  * - if caller has ADMIN membership, always permitted
- * - if this is a mutation - non-service accounts are permitted, but service accounts are not permitted
+ * - if this is a mutation - non-service accounts are permitted, but service accounts are not
+ *   permitted
  * - if this is a query - both service accounts and non-service accounts are permitted
  */
 export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitted, adminCaller) {

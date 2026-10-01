@@ -50,9 +50,11 @@ function buildEvent({ contextValue, rootSelection, errors }) {
     version: AUDIT_EVENT_SCHEMA_VERSION,
     user: endUser(contextValue),
     ip: getEndUserIpAddress(contextValue.request),
-    // This is either the 'x-cdp-request-id' header or a new uuid generated at the start of this request
+    // This is either the 'x-cdp-request-id' header or a new uuid generated at the start of this
+    // request
     correlationid: contextValue.request.traceId,
-    // request.info.received is when Hapi received the request, not when this event is built/published.
+    // request.info.received is when Hapi received the request, not when this event is
+    // built/published.
     datetime: new Date(contextValue.request.info.received).toISOString(),
     environment: ENVIRONMENT_NAME,
     application: APPLICATION,
@@ -74,13 +76,13 @@ function buildEvent({ contextValue, rootSelection, errors }) {
 }
 
 /**
- * Emits one audit event per root selection touched by the query, from whatever contextValue.auditTrail
- * (see app/audit/audit-trail.js) recorded against it - resolvers record what they touched
- * (recordEntity/recordAccount) as they run, and this plugin reads it back once the response is
- * ready, rather than deriving it from the query document itself.
+ * Emits one audit event per root selection touched by the query, from whatever
+ * contextValue.auditTrail (see app/audit/audit-trail.js) recorded against it - resolvers record
+ * what they touched (recordEntity/recordAccount) as they run, and this plugin reads it back once
+ * the response is ready, rather than deriving it from the query document itself.
  *
- * If a root selection has nothing recorded against it, then an audit event is still created, so that nothing
- * is left un-audited .
+ * If a root selection has nothing recorded against it, then an audit event is still created, so
+ * that nothing is left un-audited .
  */
 export function auditPlugin({ publish = snsPublish } = {}) {
   return {
