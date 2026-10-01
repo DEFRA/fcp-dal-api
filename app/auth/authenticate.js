@@ -7,7 +7,6 @@ import { Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
-import { maskAllButLastFour } from '../logger/utils.js'
 
 export const authGroups = config.get('auth.groups')
 
@@ -47,6 +46,7 @@ export async function getAuth(request, jwkDatasource) {
     logger.info('#DAL Request authentication - JWT verified', {
       type: 'http',
       code: DAL_REQUEST_AUTHENTICATION_001,
+      traceId: request?.traceId,
       requestTimeMs,
       request: {
         remoteAddress: request?.info?.remoteAddress
@@ -56,15 +56,8 @@ export async function getAuth(request, jwkDatasource) {
           appid: verified.appid,
           aud: verified.aud,
           oid: verified.oid,
-          serviceId: verified.serviceId,
-          correlationId: verified.correlationId,
-          currentRelationshipId: verified.currentRelationshipId,
-          sessionId: verified.sessionId,
           sub: verified.sub,
           tid: verified.tid,
-          email: verified.email?.split('@')[1],
-          contactId: maskAllButLastFour(verified.contactId),
-          relationships: verified.relationships,
           groups: verified.groups,
           roles: verified.roles,
           azp: verified.azp,
