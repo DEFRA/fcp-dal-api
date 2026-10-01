@@ -151,6 +151,44 @@ describe('Server config and startup', () => {
       expect(loggedPayload).not.toHaveProperty('tenant')
     })
 
+    test('response event logs the email header in tenant.message', async () => {
+      await server.inject({
+        method: 'GET',
+        url: '/non-health',
+        headers: { email: 'user@defra.gov.uk' }
+      })
+
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({
+          tenant: { message: JSON.stringify({ email: 'user@defra.gov.uk' }) }
+        })
+      )
+    })
+
+    test('response event logs the service-account header in tenant.message, alongside tenant.id', async () => {
+      server.ext('onRequest', (request, h) => {
+        request.requestingService = 'Grants'
+        return h.continue
+      })
+
+      await server.inject({
+        method: 'GET',
+        url: '/non-health',
+        headers: { 'service-account': 'robot-account.dal@defra.gov.uk' }
+      })
+
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({
+          tenant: {
+            id: 'Grants',
+            message: JSON.stringify({ serviceAccount: 'robot-account.dal@defra.gov.uk' })
+          }
+        })
+      )
+    })
+
     test('response event skips metrics for health path', async () => {
       await server.inject({ method: 'GET', url: '/health' })
       expect(mockSendMetric.sendMetric).not.toHaveBeenCalled()
