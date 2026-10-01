@@ -75,7 +75,7 @@ server.events.on('response', function (request) {
   if (request.path !== healthRoute.path) {
     // Only send metrics and logs for non-health check paths
     if (requestTimeMs !== null) {
-      sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+      void sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
         code: DAL_APPLICATION_REQUEST_001
       })
     }
