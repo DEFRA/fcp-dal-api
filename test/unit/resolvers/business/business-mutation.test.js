@@ -264,7 +264,8 @@ describe('Business Mutation createBusiness', () => {
       orgDetailsInput
     )
     expect(response).toEqual({
-      // Response is nearly identical to the input just with undefined in unprovided values and typeCode and legalStatusCode are mapped to return objects
+      // Response is nearly identical to the input just with undefined in unprovided values and
+      // typeCode and legalStatusCode are mapped to return objects
       success: true,
       business: {
         info: {

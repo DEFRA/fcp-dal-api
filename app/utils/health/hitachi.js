@@ -6,9 +6,9 @@ import { logger } from '../../logger/logger.js'
 /**
  * Checks that the Hitachi Payments upstream is reachable and authenticating requests.
  *
- * A real request is made using a dummy FRN that is not expected to exist. A "*** FRN does not exist"
- * response still means the upstream responded and the request was authenticated, so
- * it is treated as a pass (mirroring the rural-payments health check's handling of a 403).
+ * A real request is made using a dummy FRN that is not expected to exist. A "*** FRN does not
+ * exist" response still means the upstream responded and the request was authenticated, so it is
+ * treated as a pass (mirroring the rural-payments health check's handling of a 403).
  */
 export const healthCheck = async () => {
   try {

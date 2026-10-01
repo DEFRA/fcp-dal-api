@@ -58,7 +58,8 @@ const buildEvent = (details) => {
   }
 }
 
-// crn/customerReferenceNumber is used as a login username, so we don't want to log the full number for security reasons.
+// crn/customerReferenceNumber is used as a login username, so we don't want to log the full number
+// for security reasons.
 const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
 
 const pick = (obj, key, searchPhraseSafe, searchPhraseMasked, picked) => {
@@ -181,7 +182,8 @@ export const cdpSchemaTranslator = format((info) => {
       created: info['@timestamp'],
       duration: requestTimeMs,
       outcome: httpDetails.http?.response?.status_code,
-      // The URL path is mapped onto the event reference field, which is used in Grafana dashboard queries
+      // The URL path is mapped onto the event reference field, which is used in Grafana dashboard
+      // queries
       reference: parsedUrl?.url?.path,
       action: info?.gatewayType
     }),

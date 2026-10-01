@@ -16,7 +16,8 @@ async function verifyDefraIdToken(token, jwksDataSource) {
   }
 }
 
-// When DISABLE_AUTH is true, token verification is disabled and the token should just be decoded instead.
+// When DISABLE_AUTH is true, token verification is disabled and the token should just be decoded
+// instead.
 function decodeUnverifiedDefraIdToken(token) {
   try {
     return decodeJwt(token)
@@ -48,9 +49,10 @@ function extractOrgIdFromDefraIdToken(sbi, payload) {
 }
 
 /**
- * Verifies the Defra ID token. Verification is only attempted when authContext.externalAuthHeader is set - a request
- * authenticated another way (internal email/service-account headers) carries no Defra ID token at all, so this
- * resolves to undefined. When the header is present, a failed verification/decode throws an Unauthorized error
+ * Verifies the Defra ID token. Verification is only attempted when authContext.externalAuthHeader
+ * is set - a request authenticated another way (internal email/service-account headers) carries no
+ * Defra ID token at all, so this resolves to undefined. When the header is present, a failed
+ * verification/decode throws an Unauthorized error
  *
  * @param {{ externalAuthHeader?: string }} authContext
  * @param {DefraIdJWKS} [jwksDataSource]

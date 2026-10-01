@@ -175,9 +175,10 @@ query BusinessTest {
 `
 
 const setupNock = (upstream, headers) => {
-  // Headers should either be a single email header (internal route) or an Authorization/CRN combination (external)
-  // Calling match header directly on 'upstream' applies the match to every interceptor registered on it, so this only needs
-  // setting once rather than on each individual .get() call below.
+  // Headers should either be a single email header (internal route) or an Authorization/CRN
+  // combination (external).
+  // Calling match header directly on 'upstream' applies the match to every interceptor registered
+  // on it, so this only needs setting once rather than on each individual .get() call below.
   Object.entries(headers).forEach(([name, value]) => upstream.matchHeader(name, value))
 
   upstream.get('/organisation/organisationId').reply(200, {
@@ -280,9 +281,10 @@ const setupNock = (upstream, headers) => {
   ])
 }
 
-// The fields backed by the queries below use getRuralPaymentsBusinessDataSource (see resolvers/business/common.js), so they
-// are always resolved against the internal gateway.  The email param will always be either the calling user's
-// email address for internal requests, or the dal service account for external requests that have been re-routed
+// The fields backed by the queries below use getRuralPaymentsBusinessDataSource (see
+// resolvers/business/common.js), so they are always resolved against the internal gateway.  The
+// email param will always be either the calling user's email address for internal requests, or the
+// dal service account for external requests that have been re-routed
 const setupAnnotatedFieldsNock = (internalUpstream, email) => {
   // All requests should have an email header
   internalUpstream.matchHeader('email', email)
@@ -637,8 +639,8 @@ describe('Query.business internal', () => {
   test('authenticated internal', async () => {
     const internalKitsGateway = nock(config.get('kits.internal.gatewayUrl'))
     setupNock(internalKitsGateway, { email: 'test@defra.gov.uk' })
-    // Internal requests also route the annotated fields to the internal gateway, but using the caller's own identity
-    // (no service-account swap - the directive is a no-op here).
+    // Internal requests also route the annotated fields to the internal gateway, but using the
+    // caller's own identity (no service-account swap - the directive is a no-op here).
     setupAnnotatedFieldsNock(internalKitsGateway, 'test@defra.gov.uk')
     mockOrganisationSearch(internalKitsGateway)
 

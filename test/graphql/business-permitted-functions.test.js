@@ -21,7 +21,8 @@ const query = `#graphql
 const authorisationPath =
   /^\/SitiAgriApi\/authorisation\/organisation\/organisationId\/byFunction\?functions=.+&module=CUST_SS_PORTAL&timestamp=\d+$/
 
-// The `functions` query parameter is present but empty when no (non-empty) function names are requested
+// The `functions` query parameter is present but empty when no (non-empty) function names are
+// requested
 const emptyFunctionsAuthorisationPath =
   /^\/SitiAgriApi\/authorisation\/organisation\/organisationId\/byFunction\?functions=&module=CUST_SS_PORTAL&timestamp=\d+$/
 

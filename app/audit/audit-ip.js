@@ -31,8 +31,8 @@ export const getClientIp = (xForwardedFor) => {
  */
 function sanitiseIp(raw) {
   if (!raw) {
-    // The Audit IP field must not be null, so even if we can't determine an IP address, at least return an
-    // empty string
+    // The Audit IP field must not be null, so even if we can't determine an IP address, at least
+    // return an empty string
     return ''
   }
   let ip = raw.split(',')[0].trim().split('%')[0]

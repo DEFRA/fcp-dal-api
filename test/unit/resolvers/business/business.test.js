@@ -633,13 +633,13 @@ describe('Business', () => {
   })
 
   describe('permittedFunctions', () => {
+    const { getAuthorisedFunctionsByOrganisationId } = dataSources.ruralPaymentsBusiness
+
     it('maps each requested function to its upstream authorisation flag, in order', async () => {
-      dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce(
-        {
-          viewLand: true,
-          amendBusinessDetails: false
-        }
-      )
+      getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce({
+        viewLand: true,
+        amendBusinessDetails: false
+      })
 
       const result = await Business.permittedFunctions(
         { organisationId: 'mockId' },
@@ -647,9 +647,10 @@ describe('Business', () => {
         { dataSources }
       )
 
-      expect(
-        dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId
-      ).toHaveBeenCalledWith('mockId', ['viewLand', 'amendBusinessDetails'])
+      expect(getAuthorisedFunctionsByOrganisationId).toHaveBeenCalledWith('mockId', [
+        'viewLand',
+        'amendBusinessDetails'
+      ])
       expect(result).toEqual([
         { name: 'viewLand', permitted: true },
         { name: 'amendBusinessDetails', permitted: false }
@@ -657,11 +658,9 @@ describe('Business', () => {
     })
 
     it('defaults to not permitted when the upstream omits a requested function', async () => {
-      dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce(
-        {
-          viewLand: true
-        }
-      )
+      getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce({
+        viewLand: true
+      })
 
       const result = await Business.permittedFunctions(
         { organisationId: 'mockId' },
@@ -840,9 +839,8 @@ describe('Business', () => {
 
     it('permittedFunctions records a permitted-function-list entity keyed by sbi', async () => {
       const auditTrail = { recordEntity: jest.fn() }
-      dataSources.ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce(
-        { viewLand: true }
-      )
+      const { getAuthorisedFunctionsByOrganisationId } = dataSources.ruralPaymentsBusiness
+      getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce({ viewLand: true })
 
       await Business.permittedFunctions(
         mockBusiness,

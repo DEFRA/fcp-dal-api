@@ -14,6 +14,18 @@ module.exports = {
         varsIgnorePattern: '^_',
         argsIgnorePattern: '^_'
       }
+    ],
+    // Matches prettier printWidth; prettier can't wrap comments, strings or single-specifier imports
+    'max-len': [
+      'error',
+      {
+        code: 100,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreRegExpLiterals: true,
+        ignorePattern: String.raw`^import\s.+\sfrom\s.+;?$`
+      }
     ]
   },
   extends: ['eslint:recommended'],

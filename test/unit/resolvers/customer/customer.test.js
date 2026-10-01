@@ -541,41 +541,41 @@ describe('CustomerBusiness', () => {
   })
 
   describe('CustomerBusiness.messages', () => {
+    const { getNotificationsByOrganisationIdAndPersonId } = dataSources.ruralPaymentsCustomer
+
     beforeEach(() => {
       jest.clearAllMocks()
 
-      dataSources.ruralPaymentsCustomer.getNotificationsByOrganisationIdAndPersonId.mockImplementation(
-        () => [
-          {
-            id: 'mockId1',
-            personId: 'mockPersonId1',
-            organisationId: 'mockOrganisationId1',
-            messageId: 'mockMessageId1',
-            readAt: null,
-            archivedAt: new Date(Date.parse('2024-01-01')),
-            archive: null,
-            createdAt: new Date(Date.parse('2024-01-01')),
-            title: 'Mock Title 1',
-            body: 'Mock Body 1',
-            category: 'Mock Category 1',
-            bespokeNotificationId: null
-          },
-          {
-            id: 'mockId2',
-            personId: 'mockPersonId2',
-            organisationId: 'mockOrganisationId2',
-            messageId: 'mockMessageId2',
-            readAt: null,
-            archivedAt: new Date(Date.parse('2025-01-01')),
-            archive: null,
-            createdAt: new Date(Date.parse('2025-01-01')),
-            title: 'Mock Title 2',
-            body: 'Mock Body 2',
-            category: 'Mock Category 2',
-            bespokeNotificationId: null
-          }
-        ]
-      )
+      getNotificationsByOrganisationIdAndPersonId.mockImplementation(() => [
+        {
+          id: 'mockId1',
+          personId: 'mockPersonId1',
+          organisationId: 'mockOrganisationId1',
+          messageId: 'mockMessageId1',
+          readAt: null,
+          archivedAt: new Date(Date.parse('2024-01-01')),
+          archive: null,
+          createdAt: new Date(Date.parse('2024-01-01')),
+          title: 'Mock Title 1',
+          body: 'Mock Body 1',
+          category: 'Mock Category 1',
+          bespokeNotificationId: null
+        },
+        {
+          id: 'mockId2',
+          personId: 'mockPersonId2',
+          organisationId: 'mockOrganisationId2',
+          messageId: 'mockMessageId2',
+          readAt: null,
+          archivedAt: new Date(Date.parse('2025-01-01')),
+          archive: null,
+          createdAt: new Date(Date.parse('2025-01-01')),
+          title: 'Mock Title 2',
+          body: 'Mock Body 2',
+          category: 'Mock Category 2',
+          bespokeNotificationId: null
+        }
+      ])
     })
 
     test('get all messages', async () => {
