@@ -199,6 +199,18 @@ describe('defraIdContext', () => {
       expect(jwks.getPublicKey).not.toHaveBeenCalled()
     })
 
+    test('can be called without options, logging an undefined traceId', async () => {
+      const token = signToken({ contactId: '11111111' })
+
+      const ctx = await defraIdContext({ externalAuthHeader: token })
+
+      expect(ctx.crn()).toEqual('11111111')
+      expect(info).toHaveBeenCalledWith(
+        '#DAL Request authentication - Defra ID token decoded',
+        expect.objectContaining({ traceId: undefined })
+      )
+    })
+
     test('throws Unauthorized if the token cannot be decoded at all', async () => {
       await expect(
         defraIdContext({ externalAuthHeader: 'not-a-jwt' }, { jwksDataSource: jwksDataSource() })
