@@ -260,4 +260,102 @@ describe('Customer Mutations', () => {
       await Mutation[mutationName](null, { input }, { dataSources: mockDataSources }, info)
     })
   })
+
+  describe('updateLockCustomer', () => {
+    test('locks a customer through the GraphQL mutation', async () => {
+      const mockLockPerson = jest.fn()
+      mockDataSources.ruralPaymentsCustomer.lockPerson = mockLockPerson
+      mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue({
+        ...mockPerson,
+        customerReferenceNumber: 'crn'
+      })
+
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { personId: 'personId', reason: 'my reason', note: 'my note' }
+
+      await Mutation.updateLockCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        { path: { key: 'updateLockCustomer' } }
+      )
+
+      expect(mockLockPerson).toHaveBeenCalledWith('personId', 'my reason', 'my note')
+    })
+
+    test('throws an error if no reason or note is provided', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { personId: 'personId' }
+
+      await expect(
+        Mutation.updateLockCustomer(
+          null,
+          { input },
+          { dataSources: mockDataSources, auditTrail },
+          { path: { key: 'updateLockCustomer' } }
+        )
+      ).rejects.toThrow('At least one of reason or note must be provided')
+    })
+
+    test('throws an error if empty reason or note is provided', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { personId: 'personId', note: '', reason: '' }
+
+      await expect(
+        Mutation.updateLockCustomer(
+          null,
+          { input },
+          { dataSources: mockDataSources, auditTrail },
+          { path: { key: 'updateLockCustomer' } }
+        )
+      ).rejects.toThrow('At least one of reason or note must be provided')
+    })
+
+    test('throws 404 if the person is not found', async () => {
+      const mockLockPerson = jest.fn().mockImplementation(() => {
+        throw new Error('Not Found')
+      })
+      mockDataSources.ruralPaymentsCustomer.lockPerson = mockLockPerson
+
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { personId: 'personId', reason: 'my reason' }
+
+      await expect(
+        Mutation.updateLockCustomer(
+          null,
+          { input },
+          { dataSources: mockDataSources, auditTrail },
+          { path: { key: 'updateLockCustomer' } }
+        )
+      ).rejects.toThrow('Not Found')
+    })
+
+    test('records the personId account and a locked person entity', async () => {
+      const mockLockPerson = jest.fn()
+      mockDataSources.ruralPaymentsCustomer.lockPerson = mockLockPerson
+      mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue({
+        ...mockPerson,
+        customerReferenceNumber: 'crn'
+      })
+
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { personId: 'personId', reason: 'my reason', note: 'my note' }
+      const info = { path: { key: 'updateLockCustomer' } }
+
+      await Mutation.updateLockCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'locked',
+        entityid: 'personId'
+      })
+    })
+  })
 })
