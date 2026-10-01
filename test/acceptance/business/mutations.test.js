@@ -115,8 +115,8 @@ const allFieldsInput = {
   address: { withUprn: address },
   correspondenceAddress: { withoutUprn: correspondenceAddress },
   isCorrespondenceAsBusinessAddress: false,
-  vat: 'GB123456789',
-  legalStatusCode: 102,
+  vat: '123456789',
+  legalStatusCode: 102111,
   typeCode: 3,
   dateStartedFarming: '2020-01-31',
   registrationNumbers: {
@@ -144,7 +144,7 @@ describe('Business Mutations - as an internal user', () => {
         sbi,
         info: {
           name: 'acceptance-business-name',
-          vat: 'GB123456789',
+          vat: '123456789',
           email: { address: 'acceptance-business@example.com', validated: true },
           correspondenceEmail: {
             address: 'acceptance-business-corr@example.com',
@@ -155,7 +155,7 @@ describe('Business Mutations - as an internal user', () => {
           address: { ...address, typeId: null },
           correspondenceAddress,
           isCorrespondenceAsBusinessAddress: false,
-          legalStatus: { code: 102, type: 'Set from reference data' },
+          legalStatus: { code: 102111, type: 'Set from reference data' },
           type: { code: 3, type: 'Set from reference data' },
           registrationNumbers: {
             companiesHouse: '12345678',
@@ -349,6 +349,317 @@ describe('createBusinessCustomerBankDetails', () => {
     expect(response.createBusinessCustomerBankDetails).toEqual({
       __typename: 'BankDetailsSubmitted',
       success: true
+    })
+  })
+})
+
+const updateBusinessNameMutation = gql`
+  mutation UpdateBusinessName($input: UpdateBusinessNameInput!) {
+    updateBusinessName(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          name
+        }
+      }
+    }
+  }
+`
+
+const updateBusinessEmailMutation = gql`
+  mutation UpdateBusinessEmail($input: UpdateBusinessEmailInput!) {
+    updateBusinessEmail(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          email {
+            address
+          }
+          correspondenceEmail {
+            address
+          }
+        }
+      }
+    }
+  }
+`
+
+const updateBusinessPhoneMutation = gql`
+  mutation UpdateBusinessPhone($input: UpdateBusinessPhoneInput!) {
+    updateBusinessPhone(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          phone {
+            mobile
+            landline
+          }
+          correspondencePhone {
+            mobile
+            landline
+          }
+        }
+      }
+    }
+  }
+`
+
+const updateBusinessAddressMutation = gql`
+  mutation UpdateBusinessAddress($input: UpdateBusinessAddressInput!) {
+    updateBusinessAddress(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          address {
+            pafOrganisationName
+            line1
+            line2
+            line3
+            line4
+            line5
+            buildingNumberRange
+            buildingName
+            flatName
+            street
+            city
+            county
+            postalCode
+            country
+            uprn
+            dependentLocality
+            doubleDependentLocality
+          }
+          correspondenceAddress {
+            line1
+            city
+            postalCode
+            country
+          }
+          isCorrespondenceAsBusinessAddress
+        }
+      }
+    }
+  }
+`
+
+const updateBusinessVATMutation = gql`
+  mutation UpdateBusinessVAT($input: UpdateBusinessVATInput!) {
+    updateBusinessVAT(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          vat
+        }
+      }
+    }
+  }
+`
+
+describe('Business Mutations - individual field updates', () => {
+  it('updateBusinessName updates the business name', async () => {
+    const response = await client.request(
+      updateBusinessNameMutation,
+      { input: { sbi, name: 'acceptance-updated-name' } },
+      headers
+    )
+
+    expect(response.updateBusinessName).toEqual({
+      success: true,
+      business: { sbi, info: { name: 'acceptance-updated-name' } }
+    })
+  })
+
+  it('updateBusinessEmail updates the business and correspondence emails', async () => {
+    const email = { address: 'acceptance-updated@example.com' }
+    const correspondenceEmail = { address: 'acceptance-updated-corr@example.com' }
+    const response = await client.request(
+      updateBusinessEmailMutation,
+      { input: { sbi, email, correspondenceEmail } },
+      headers
+    )
+
+    expect(response.updateBusinessEmail).toEqual({
+      success: true,
+      business: { sbi, info: { email, correspondenceEmail } }
+    })
+  })
+
+  it('updateBusinessPhone updates the business and correspondence phones', async () => {
+    const phone = { landline: '01234 567896', mobile: '07700 900006' }
+    const correspondencePhone = { landline: '01234 567897', mobile: '07700 900007' }
+    const response = await client.request(
+      updateBusinessPhoneMutation,
+      { input: { sbi, phone, correspondencePhone } },
+      headers
+    )
+
+    expect(response.updateBusinessPhone).toEqual({
+      success: true,
+      business: { sbi, info: { phone, correspondencePhone } }
+    })
+  })
+
+  it('updateBusinessAddress updates the business and correspondence addresses', async () => {
+    const updatedAddress = { ...address, line1: 'acceptance-updated-line1', uprn: '100023336956' }
+    const updatedCorrespondenceAddress = {
+      ...correspondenceAddress,
+      line1: 'acceptance-updated-corr-line1'
+    }
+    const response = await client.request(
+      updateBusinessAddressMutation,
+      {
+        input: {
+          sbi,
+          address: { withUprn: updatedAddress },
+          correspondenceAddress: { withoutUprn: updatedCorrespondenceAddress },
+          isCorrespondenceAsBusinessAddress: false
+        }
+      },
+      headers
+    )
+
+    expect(response.updateBusinessAddress).toEqual({
+      success: true,
+      business: {
+        sbi,
+        info: {
+          address: updatedAddress,
+          correspondenceAddress: updatedCorrespondenceAddress,
+          isCorrespondenceAsBusinessAddress: false
+        }
+      }
+    })
+  })
+
+  it('updateBusinessVAT updates the business VAT number', async () => {
+    const response = await client.request(
+      updateBusinessVATMutation,
+      { input: { sbi, vat: '555555555' } },
+      headers
+    )
+
+    expect(response.updateBusinessVAT).toEqual({
+      success: true,
+      business: { sbi, info: { vat: '555555555' } }
+    })
+  })
+})
+
+const createBusinessMutation = gql`
+  mutation CreateBusiness($input: CreateBusinessInput!) {
+    createBusiness(input: $input) {
+      success
+      business {
+        sbi
+        organisationId
+        info {
+          name
+          vat
+          email {
+            address
+          }
+          phone {
+            mobile
+            landline
+          }
+          address {
+            line1
+            city
+            postalCode
+            country
+            uprn
+          }
+          correspondenceAddress {
+            line1
+            city
+            postalCode
+            country
+          }
+          legalStatus {
+            code
+          }
+          type {
+            code
+          }
+        }
+      }
+    }
+  }
+`
+
+// NOTE: creating a business links it to the person, so use the CRN reserved for
+// mutation tests; other suites assert the original businesses for CRN 1111111100!
+const createBusinessInput = {
+  crn: '9000000000',
+  name: 'acceptance-created-business',
+  vat: '987654321',
+  email: { address: 'acceptance-created-business@example.com' },
+  correspondenceEmail: { address: 'acceptance-created-business-corr@example.com' },
+  phone: { landline: '01234 567894', mobile: '07700 900004' },
+  correspondencePhone: { landline: '01234 567895', mobile: '07700 900005' },
+  address: { withUprn: address },
+  correspondenceAddress: { withoutUprn: correspondenceAddress },
+  isCorrespondenceAsBusinessAddress: false,
+  legalStatusCode: 102111,
+  typeCode: 3,
+  registrationNumbers: {
+    companiesHouse: '87654321',
+    charityCommission: '12345678'
+  },
+  landConfirmed: true,
+  dateStartedFarming: '2021-05-27'
+}
+
+describe('createBusiness', () => {
+  it('creates a business for the given person', async () => {
+    const response = await client.request(
+      createBusinessMutation,
+      { input: createBusinessInput },
+      headers
+    )
+
+    expect(response.createBusiness.success).toBe(true)
+    expect(response.createBusiness.business.sbi).toEqual(expect.any(String))
+    expect(response.createBusiness.business.organisationId).toEqual(expect.any(String))
+    expect(response.createBusiness.business.info).toEqual({
+      name: 'acceptance-created-business',
+      vat: '987654321',
+      email: { address: 'acceptance-created-business@example.com' },
+      phone: createBusinessInput.phone,
+      address: {
+        line1: address.line1,
+        city: address.city,
+        postalCode: address.postalCode,
+        country: address.country,
+        uprn: address.uprn
+      },
+      correspondenceAddress,
+      legalStatus: { code: 102111 },
+      type: { code: 3 }
+    })
+  })
+
+  it('rejects a business name longer than 160 characters', async () => {
+    await expect(
+      client.request(
+        createBusinessMutation,
+        { input: { ...createBusinessInput, name: 'a'.repeat(161) } },
+        headers
+      )
+    ).rejects.toMatchObject({
+      response: {
+        errors: [
+          expect.objectContaining({
+            message: "variable 'input.name' must match pattern ^.{0,160}$",
+            extensions: expect.objectContaining({ code: 'BAD_USER_INPUT' })
+          })
+        ]
+      }
     })
   })
 })

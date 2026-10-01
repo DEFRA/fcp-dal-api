@@ -199,7 +199,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street',
           uprn: 'new uprn'
         }
@@ -220,7 +220,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street',
           uprn: 'new uprn'
         }
@@ -242,7 +242,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         uprn: 'new uprn',
         dependentLocality: 'new dependentLocality',
@@ -262,7 +262,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         uprn: 'new uprn',
         dependentLocality: 'new dependentLocality',
@@ -375,7 +375,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street'
         }
       },
@@ -395,7 +395,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street'
         }
       },
@@ -416,7 +416,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
@@ -435,7 +435,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
@@ -640,6 +640,23 @@ describe('business', () => {
       }
     })
   })
+
+  test.each(['GB123456789', '12345678', '1234567890', '12345678A'])(
+    'update business vat - rejects invalid vat %s',
+    async (vat) => {
+      const query = `
+        mutation UpdateBusinessVAT($input: UpdateBusinessVATInput!) {
+          updateBusinessVAT(input: $input) {
+            success
+          }
+        }
+      `
+      const result = await makeTestQuery(query, null, true, { input: { sbi: '123456789', vat } })
+
+      expect(result.errors[0].message).toEqual("variable 'input.vat' must match pattern ^[0-9]{9}$")
+      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    }
+  )
 })
 
 describe('business - external gateway', () => {

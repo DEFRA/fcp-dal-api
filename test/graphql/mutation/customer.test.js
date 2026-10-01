@@ -116,7 +116,7 @@ describe('customer mutations', () => {
         street: 'newStreet',
         city: 'newCity',
         county: 'newCounty',
-        postalCode: 'newPostalCode',
+        postalCode: 'NE1 2PC',
         country: 'newCountry',
         uprn: 'newUprn',
         dependentLocality: 'newDependentLocality',
@@ -144,7 +144,7 @@ describe('customer mutations', () => {
               line4: "newLine4"
               line5: "newLine5"
               pafOrganisationName: "newPafOrganisationName"
-              postalCode: "newPostalCode"
+              postalCode: "NE1 2PC"
               street: "newStreet"
               uprn: "newUprn"
             }
@@ -197,7 +197,7 @@ describe('customer mutations', () => {
                 street: 'newStreet',
                 city: 'newCity',
                 county: 'newCounty',
-                postalCode: 'newPostalCode',
+                postalCode: 'NE1 2PC',
                 country: 'newCountry',
                 uprn: 'newUprn',
                 dependentLocality: 'newDependentLocality',

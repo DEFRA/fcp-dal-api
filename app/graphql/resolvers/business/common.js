@@ -1,8 +1,30 @@
 import { GraphQLError } from 'graphql'
+import { BadRequest } from '../../../errors/graphql.js'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
 } from '../../../transformers/rural-payments/business.js'
+
+/**
+ * Rural Payments responds with an unexplained 500 for an unknown legal status, so check the code
+ * against its reference data first
+ * @param {number | null | undefined} legalStatusCode the legal status code from the mutation input
+ * @param {{ ruralPaymentsReferenceData: import('../../../data-sources/rural-payments/RuralPaymentsReferenceData.js').RuralPaymentsReferenceData }} dataSources
+ * @returns {Promise<void>}
+ * @throws {BadRequest} if the code is not a known legal status
+ */
+export const validateLegalStatusCode = async (legalStatusCode, dataSources) => {
+  if (legalStatusCode === undefined || legalStatusCode === null) {
+    return
+  }
+  const { _data: legalStatuses } =
+    await dataSources.ruralPaymentsReferenceData.getReferenceData('legalstatus')
+  if (!legalStatuses.some(({ id }) => id === legalStatusCode)) {
+    throw new BadRequest(`Invalid legalStatusCode: ${legalStatusCode}`, {
+      extensions: { code: 'BAD_USER_INPUT' }
+    })
+  }
+}
 
 export const businessDetailsUpdateResolver = async (
   __,
@@ -46,6 +68,7 @@ export const businessAdditionalDetailsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
+  await validateLegalStatusCode(input.legalStatusCode, dataSources)
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
@@ -100,6 +123,7 @@ export const businessAllFieldsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
+  await validateLegalStatusCode(input.legalStatusCode, dataSources)
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
