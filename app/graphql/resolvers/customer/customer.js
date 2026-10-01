@@ -36,7 +36,9 @@ export const Customer = {
       summary
     )
 
-    auditTrail?.recordAccount(info, 'organisationId', transformedBusiness.organisationId)
+    if (transformedBusiness?.organisationId) {
+      auditTrail?.recordAccount(info, 'organisationId', transformedBusiness?.organisationId)
+    }
     return transformedBusiness
   },
 
