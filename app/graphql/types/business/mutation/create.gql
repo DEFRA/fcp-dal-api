@@ -11,7 +11,7 @@ input CreateBusinessInput {
   """
   Name of the business.
   """
-  name: String
+  name: String! @validateVariable(pattern: "^.{0,160}$")
 
   """
   VAT number of the business. (a.k.a. `taxRegistrationNumber`)
@@ -21,12 +21,12 @@ input CreateBusinessInput {
   """
   Trader number of the business.
   """
-  traderNumber: String
+  traderNumber: String @deprecated(reason: "This field does not get saved")
 
   """
   Vendor number of the business.
   """
-  vendorNumber: String
+  vendorNumber: String @deprecated(reason: "This field does not get saved")
 
   """
   Address of the business.

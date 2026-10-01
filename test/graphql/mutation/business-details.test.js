@@ -199,7 +199,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street',
           uprn: 'new uprn'
         }
@@ -220,7 +220,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street',
           uprn: 'new uprn'
         }
@@ -242,7 +242,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         uprn: 'new uprn',
         dependentLocality: 'new dependentLocality',
@@ -262,7 +262,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         uprn: 'new uprn',
         dependentLocality: 'new dependentLocality',
@@ -375,7 +375,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street'
         }
       },
@@ -395,7 +395,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street'
         }
       },
@@ -416,7 +416,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
@@ -435,7 +435,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',

@@ -8,72 +8,72 @@ input AddressInput {
   """
   First line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line1: String
+  line1: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Second line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line2: String
+  line2: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Third line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line3: String
+  line3: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Fourth line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line4: String
+  line4: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Fifth line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line5: String
+  line5: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Building number range of the address
   """
-  buildingNumberRange: String
+  buildingNumberRange: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Building name of the address
   """
-  buildingName: String
+  buildingName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Flat name of the address
   """
-  flatName: String
+  flatName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Street of the address
   """
-  street: String
+  street: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Locality of the address
   """
-  city: String
+  city: String @validateVariable(pattern: "^.{0,60}$")
 
   """
   County of the address
   """
-  county: String
+  county: String @validateVariable(pattern: "^.{0,60}$")
 
   """
   Postal code of the address
   """
-  postalCode: String
+  postalCode: String @validateVariable(pattern: "^.{0,8}$")
 
   """
   Country of the address
   """
-  country: String
+  country: String @validateVariable(pattern: "^.{0,100}$")
 
   """
   UPRN of the address
   """
-  uprn: String
+  uprn: String @validateVariable(pattern: "^.{0,12}$")
 
   """
   Dependant locality of the address
@@ -100,72 +100,72 @@ input AddressInputWithUprn {
   """
   First line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line1: String
+  line1: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Second line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line2: String
+  line2: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Third line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line3: String
+  line3: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Fourth line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line4: String
+  line4: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Fifth line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line5: String
+  line5: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Building number range of the address
   """
-  buildingNumberRange: String
+  buildingNumberRange: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Building name of the address
   """
-  buildingName: String
+  buildingName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Flat name of the address
   """
-  flatName: String
+  flatName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Street of the address
   """
-  street: String
+  street: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Locality of the address
   """
-  city: String
+  city: String @validateVariable(pattern: "^.{0,60}$")
 
   """
   County of the address
   """
-  county: String
+  county: String @validateVariable(pattern: "^.{0,60}$")
 
   """
   Postal code of the address
   """
-  postalCode: String
+  postalCode: String @validateVariable(pattern: "^.{0,8}$")
 
   """
   Country of the address
   """
-  country: String
+  country: String @validateVariable(pattern: "^.{0,100}$")
 
   """
   UPRN of the address
   """
-  uprn: String!
+  uprn: String! @validateVariable(pattern: "^.{0,12}$")
 
   """
   Dependant locality of the address
@@ -187,72 +187,72 @@ input AddressInputWithoutUprn {
   """
   First line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line1: String!
+  line1: String! @validateVariable(pattern: "^.{0,240}$")
 
   """
   Second line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line2: String
+  line2: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Third line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line3: String
+  line3: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Fourth line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line4: String
+  line4: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Fifth line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line5: String
+  line5: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Building number range of the address
   """
-  buildingNumberRange: String
+  buildingNumberRange: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Building name of the address
   """
-  buildingName: String
+  buildingName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Flat name of the address
   """
-  flatName: String
+  flatName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Street of the address
   """
-  street: String
+  street: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Locality of the address
   """
-  city: String!
+  city: String! @validateVariable(pattern: "^.{0,60}$")
 
   """
   County of the address
   """
-  county: String
+  county: String @validateVariable(pattern: "^.{0,60}$")
 
   """
   Postal code of the address
   """
-  postalCode: String!
+  postalCode: String! @validateVariable(pattern: "^.{0,8}$")
 
   """
   Country of the address
   """
-  country: String!
+  country: String! @validateVariable(pattern: "^.{0,100}$")
 
   """
   UPRN of the address
   """
-  uprn: String
+  uprn: String @validateVariable(pattern: "^.{0,12}$")
 
   """
   Dependant locality of the address
@@ -270,12 +270,12 @@ input PhoneInput {
   """
   Mobile number of the customer or business
   """
-  mobile: String
+  mobile: String @validateVariable(pattern: "^.{0,50}$")
 
   """
   Landline number of the customer or business
   """
-  landline: String
+  landline: String @validateVariable(pattern: "^.{0,50}$")
 }
 
 "Represents data about a customers or business email details"
@@ -283,5 +283,5 @@ input EmailInput {
   """
   Email address of the customer or business
   """
-  address: String!
+  address: String! @validateVariable(pattern: "^.{0,254}$")
 }
