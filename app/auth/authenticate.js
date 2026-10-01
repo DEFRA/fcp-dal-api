@@ -78,12 +78,14 @@ export async function getAuth(request, jwkDatasource) {
       logger.warn('#DAL - request authentication - token expired', {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,
+        traceId: request?.traceId,
         request: { remoteAddress: request?.info?.remoteAddress }
       })
     } else {
       logger.error('#DAL - request authentication - Error verifying jwt', {
         error,
         code: DAL_REQUEST_AUTHENTICATION_001,
+        traceId: request?.traceId,
         request: { remoteAddress: request?.info?.remoteAddress }
       })
     }
