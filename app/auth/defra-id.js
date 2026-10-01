@@ -58,13 +58,10 @@ function extractOrgIdFromDefraIdToken(sbi, payload) {
  * verification/decode throws an Unauthorized error
  *
  * @param {{ externalAuthHeader?: string }} authContext
- * @param {{ traceId?: string, jwksDataSource?: DefraIdJWKS }} [options]
+ * @param {{ traceId: string, jwksDataSource?: DefraIdJWKS }} options
  * @returns {Promise<{ crn: () => string, orgId: (sbi: string) => string } | undefined>}
  */
-export const defraIdContext = async (
-  authContext,
-  { traceId, jwksDataSource = defraIdJWKS } = {}
-) => {
+export const defraIdContext = async (authContext, { traceId, jwksDataSource = defraIdJWKS }) => {
   if (!authContext.externalAuthHeader) {
     return undefined
   }

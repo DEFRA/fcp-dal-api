@@ -151,19 +151,15 @@ describe('Server config and startup', () => {
       expect(loggedPayload).not.toHaveProperty('tenant')
     })
 
-    test('response event logs the email header in tenant.message', async () => {
+    test('response event does not log the email header in tenant', async () => {
       await server.inject({
         method: 'GET',
         url: '/non-health',
         headers: { email: 'user@defra.gov.uk' }
       })
 
-      expect(mockLogger.logger.info).toHaveBeenCalledWith(
-        'FCP - Access log',
-        expect.objectContaining({
-          tenant: { message: JSON.stringify({ email: 'user@defra.gov.uk' }) }
-        })
-      )
+      const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload).not.toHaveProperty('tenant')
     })
 
     test('response event logs the service-account header in tenant.message, alongside tenant.id', async () => {
