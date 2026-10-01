@@ -65,7 +65,8 @@ const mockRequest = (token) => ({
   headers: {
     authorization: `Bearer ${token}`
   },
-  info: requestInfo
+  info: requestInfo,
+  traceId: 'trace-id'
 })
 const decodedToken = jwt.decode(token)
 const mockPublicKeyFunc = jest.fn()
@@ -105,18 +106,14 @@ describe('authenticate', () => {
             {
               type: 'http',
               code: 'DAL_REQUEST_AUTHENTICATION_001',
+              traceId: 'trace-id',
               requestTimeMs: expect.any(Number),
               request: requestInfo,
               tenant: {
                 message: expect.stringMatching(
                   new RegExp(
                     '{"appid":"appid","aud":"api://appid","oid":"oid",' +
-                      '"serviceId":"service-id","correlationId":"correlation-id",' +
-                      '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-                      '"sub":"sub","tid":"tid","email":"defra.gov.uk",' +
-                      '"contactId":"\\*\\*\\*\\*\\*\\*t-id",' +
-                      '"relationships":\\["orgId:sbi:company name:"\\],' +
-                      '"groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
+                      '"sub":"sub","tid":"tid","groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
                       '"iat":[0-9]+,"exp":[0-9]+,"ver":"1\\.0"}'
                   )
                 )
@@ -143,17 +140,14 @@ describe('authenticate', () => {
             {
               type: 'http',
               code: 'DAL_REQUEST_AUTHENTICATION_001',
+              traceId: 'trace-id',
               requestTimeMs: expect.any(Number),
               request: requestInfo,
               tenant: {
                 message: expect.stringMatching(
                   new RegExp(
                     '{"appid":"appid","aud":"api://appid","oid":"oid",' +
-                      '"serviceId":"service-id","correlationId":"correlation-id",' +
-                      '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-                      '"sub":"sub","tid":"tid","contactId":"\\*\\*\\*\\*\\*\\*t-id",' +
-                      '"relationships":\\["orgId:sbi:company name:"\\],' +
-                      '"groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
+                      '"sub":"sub","tid":"tid","groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
                       '"iat":[0-9]+,"exp":[0-9]+,"ver":"1\\.0"}'
                   )
                 )
