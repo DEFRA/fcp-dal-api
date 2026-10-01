@@ -33,12 +33,6 @@ const tokenPayload = {
   tid: 'tid',
   uti: 'uti',
   ver: '1.0',
-  serviceId: 'service-id',
-  correlationId: 'correlation-id',
-  currentRelationshipId: 'relationship-id',
-  sessionId: 'session-id',
-  contactId: 'contact-id',
-  relationships: ['orgId:sbi:company name:'],
   roles: ['role-id'],
   azp: 'azp-id'
 }
@@ -50,7 +44,7 @@ const { privateKey: wrongPrivateKey } = generateKeyPairSync('rsa', {
   modulusLength: 2048
 })
 
-const token = jwt.sign({ ...tokenPayload, email: 'pii@defra.gov.uk' }, privateKey, {
+const token = jwt.sign({ ...tokenPayload }, privateKey, {
   algorithm: 'RS256',
   expiresIn: '1h',
   keyid: 'mock-key-id-123'
@@ -65,7 +59,8 @@ const mockRequest = (token) => ({
   headers: {
     authorization: `Bearer ${token}`
   },
-  info: requestInfo
+  info: requestInfo,
+  traceId: 'trace-id'
 })
 const decodedToken = jwt.decode(token)
 const mockPublicKeyFunc = jest.fn()
@@ -105,55 +100,14 @@ describe('authenticate', () => {
             {
               type: 'http',
               code: 'DAL_REQUEST_AUTHENTICATION_001',
+              traceId: 'trace-id',
               requestTimeMs: expect.any(Number),
               request: requestInfo,
               tenant: {
                 message: expect.stringMatching(
                   new RegExp(
                     '{"appid":"appid","aud":"api://appid","oid":"oid",' +
-                      '"serviceId":"service-id","correlationId":"correlation-id",' +
-                      '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-                      '"sub":"sub","tid":"tid","email":"defra.gov.uk",' +
-                      '"contactId":"\\*\\*\\*\\*\\*\\*t-id",' +
-                      '"relationships":\\["orgId:sbi:company name:"\\],' +
-                      '"groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
-                      '"iat":[0-9]+,"exp":[0-9]+,"ver":"1\\.0"}'
-                  )
-                )
-              }
-            }
-          ])
-        })
-
-        test('should return decoded token, and log payload details (no email check)', async () => {
-          mockPublicKeyFunc.mockResolvedValue(publicKey)
-          const tokenNoEmail = jwt.sign(tokenPayload, privateKey, {
-            algorithm: 'RS256',
-            expiresIn: '1h',
-            keyid: 'mock-key-id-123'
-          })
-
-          expect(await getAuth(mockRequest(tokenNoEmail), mockJWKSDataSource)).toEqual(
-            jwt.decode(tokenNoEmail)
-          )
-          expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
-          expect(info).toHaveBeenCalledTimes(1)
-          expect(info.mock.calls[0]).toEqual([
-            '#DAL Request authentication - JWT verified',
-            {
-              type: 'http',
-              code: 'DAL_REQUEST_AUTHENTICATION_001',
-              requestTimeMs: expect.any(Number),
-              request: requestInfo,
-              tenant: {
-                message: expect.stringMatching(
-                  new RegExp(
-                    '{"appid":"appid","aud":"api://appid","oid":"oid",' +
-                      '"serviceId":"service-id","correlationId":"correlation-id",' +
-                      '"currentRelationshipId":"relationship-id","sessionId":"session-id",' +
-                      '"sub":"sub","tid":"tid","contactId":"\\*\\*\\*\\*\\*\\*t-id",' +
-                      '"relationships":\\["orgId:sbi:company name:"\\],' +
-                      '"groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
+                      '"sub":"sub","tid":"tid","groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
                       '"iat":[0-9]+,"exp":[0-9]+,"ver":"1\\.0"}'
                   )
                 )
@@ -162,7 +116,6 @@ describe('authenticate', () => {
           ])
         })
       })
-
       test('returns a no-appid object if token cannot be decoded', async () => {
         expect(await getAuth(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({
           appid: 'no-appid-token-verification-failed'

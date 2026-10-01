@@ -65,6 +65,18 @@ server.ext({
   }
 })
 
+// tenant.id identifies the calling service, tenant.message identifies the service account (from
+// the service-account header) the request was made on behalf of. The email header is deliberately
+// not logged, as it identifies an end user.
+const buildAccessLogTenant = (request) => {
+  const serviceAccount = request.headers?.['service-account']
+  const tenant = {
+    ...(request.requestingService && { id: request.requestingService }),
+    ...(serviceAccount && { message: JSON.stringify({ serviceAccount }) })
+  }
+  return Object.keys(tenant).length ? { tenant } : {}
+}
+
 server.events.on('response', function (request) {
   // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
   // response is never fully written (e.g. the client disconnects mid-response).
@@ -99,7 +111,7 @@ server.events.on('response', function (request) {
       response: {
         statusCode: request.response.statusCode
       },
-      ...(request.requestingService && { tenant: { id: request.requestingService } })
+      ...buildAccessLogTenant(request)
     })
   }
 
