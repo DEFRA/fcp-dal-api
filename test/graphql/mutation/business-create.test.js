@@ -406,4 +406,151 @@ describe('business', () => {
       expect.stringContaining('/organisation/create/personId')
     )
   })
+
+  test('create a business - rejects missing name', async () => {
+    const { name: _, ...inputWithoutName } = input
+    const result = await makeTestQuery(query, null, true, { input: inputWithoutName }, [], false)
+
+    expect(result.errors[0].message).toContain(
+      'Field "name" of required type "String!" was not provided.'
+    )
+    expect(result.data).toBeUndefined()
+    expect(v1.isDone()).toBe(false)
+  })
+
+  test('create a business - rejects name longer than 160 characters', async () => {
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, name: 'a'.repeat(161) } },
+      [],
+      false
+    )
+
+    expect(result.errors[0].message).toEqual("variable 'input.name' must match pattern ^.{0,160}$")
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
+  })
+
+  test('create a business - accepts name of exactly 160 characters', async () => {
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, name: 'a'.repeat(160) } },
+      [],
+      false
+    )
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data.createBusiness.success).toBe(true)
+  })
+
+  test('create a business - rejects email address longer than 254 characters', async () => {
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, email: { address: `${'a'.repeat(243)}@example.com` } } },
+      [],
+      false
+    )
+
+    expect(result.errors[0].message).toEqual(
+      "variable 'input.email.address' must match pattern ^.{0,254}$"
+    )
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
+  })
+
+  test.each(['mobile', 'landline'])(
+    'create a business - rejects phone %s longer than 50 characters',
+    async (field) => {
+      const result = await makeTestQuery(
+        query,
+        null,
+        true,
+        { input: { ...input, phone: { ...input.phone, [field]: `+44${'1'.repeat(48)}` } } },
+        [],
+        false
+      )
+
+      expect(result.errors[0].message).toEqual(
+        `variable 'input.phone.${field}' must match pattern ^.{0,50}$`
+      )
+      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+      expect(result.data.createBusiness).toBeNull()
+      expect(nock.pendingMocks()).toContainEqual(
+        expect.stringContaining('/organisation/create/personId')
+      )
+    }
+  )
+
+  test('create a business - rejects uprn longer than 12 characters', async () => {
+    const address = { withUprn: { ...input.address.withoutUprn, uprn: '1234567890123' } }
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, address } },
+      [],
+      false
+    )
+
+    expect(result.errors[0].message).toEqual(
+      "variable 'input.address.withUprn.uprn' must match pattern ^.{0,12}$"
+    )
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
+  })
+
+  test.each([
+    ['line1', 240],
+    ['line2', 240],
+    ['line3', 240],
+    ['line4', 240],
+    ['line5', 240],
+    ['buildingNumberRange', 240],
+    ['buildingName', 240],
+    ['flatName', 240],
+    ['street', 240],
+    ['city', 60],
+    ['county', 60],
+    ['postalCode', 8],
+    ['country', 100]
+  ])(
+    'create a business - rejects address %s longer than %i characters',
+    async (field, maxLength) => {
+      const address = {
+        withoutUprn: { ...input.address.withoutUprn, [field]: 'a'.repeat(maxLength + 1) }
+      }
+      const result = await makeTestQuery(
+        query,
+        null,
+        true,
+        { input: { ...input, address } },
+        [],
+        false
+      )
+
+      expect(result.errors[0].message).toEqual(
+        `variable 'input.address.withoutUprn.${field}' must match pattern ^.{0,${maxLength}}$`
+      )
+      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+      expect(result.data.createBusiness).toBeNull()
+      expect(nock.pendingMocks()).toContainEqual(
+        expect.stringContaining('/organisation/create/personId')
+      )
+    }
+  )
 })
