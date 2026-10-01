@@ -141,7 +141,8 @@ export class RuralPaymentsCustomer extends RuralPayments {
       // Combine new notifications with existing ones
       const allNotificationsSoFar = [...accumulatedNotifications, ...newNotifications]
 
-      // If dateFrom is provided and not all notifications from this page are included, stop recursion
+      // If dateFrom is provided and not all notifications from this page are included, stop
+      // recursion
       if (dateFrom && newNotifications.length < currentPageNotifications.length) {
         return allNotificationsSoFar
       }

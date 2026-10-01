@@ -161,8 +161,8 @@ async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
 
 export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
   if (defraIdContext) {
-    // A defraIdContext is only built for externally authenticated requests, in which case the org id
-    // can be retrieved directly from the token
+    // A defraIdContext is only built for externally authenticated requests, in which case the org
+    // id can be retrieved directly from the token
     return defraIdContext.orgId(sbi)
   }
 
@@ -173,16 +173,16 @@ export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
   )
 }
 
-// Some fields must always be resolved against the internal gateway even when the request itself arrived with
-// external authorisation. Resolvers for those fields should call this instead of using
+// Some fields must always be resolved against the internal gateway even when the request itself
+// arrived with external authorisation. Resolvers for those fields should call this instead of using
 // dataSources.ruralPaymentsBusiness directly.
 export function getRuralPaymentsBusinessDataSource({
   dataSources,
   useServiceAccountForExternal = false
 }) {
   if (dataSources.serviceAccount.ruralPaymentsBusiness && useServiceAccountForExternal) {
-    // This is an externally routed request (service account datasource is only configured for external routes) and
-    // the resolver has explicitly asked for the service account
+    // This is an externally routed request (service account datasource is only configured for
+    // external routes) and the resolver has explicitly asked for the service account
     return dataSources.serviceAccount.ruralPaymentsBusiness
   }
   return dataSources.ruralPaymentsBusiness

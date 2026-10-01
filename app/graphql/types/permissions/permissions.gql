@@ -19,7 +19,8 @@ enum PermissionGroupId {
 
 type ActivePermissionGroup {
   """
-  Permission group for the customer. For example, 'BUSINESS_DETAILS', 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS'.
+  Permission group for the customer. For example, 'BUSINESS_DETAILS',
+  'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS'.
   """
   id: PermissionGroupId!
 

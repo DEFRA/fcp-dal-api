@@ -169,7 +169,8 @@ type BusinessRegistrationNumbers {
 }
 
 """
-Type of the business represented by a code/description pair. For example, used for business type and legal status.
+Type of the business represented by a code/description pair. For example, used for business type
+and legal status.
 """ # eslint-disable-next-line @graphql-eslint/naming-convention
 type BusinessType {
   """
@@ -278,15 +279,15 @@ type Business {
 
   The known external-user functions are: addOrRemoveOrTransferLand, addRoleOrPrivilege,
   amendApplication, amendBankAccountDetails, amendBusinessDetails, amendControlledBusinessInfo,
-  amendELMApplications, amendEntitlements, amendLegallyResponsiblePeople, amendNewYoungFarmerProcess,
-  applyForBPS, closeBusiness, confirmBusiness, deleteBusiness, modifyRoleOrPrivilege,
-  removeRoleOrPrivilege, submitApplication, submitELMApplications, updateLandUse, viewApplication,
-  viewBusinessBankAccount, viewBusinessDetails, viewCPH, viewCSAgreements, viewCSApplications,
-  viewCSClaims, viewCountrysideStewardship, viewELMApplications, viewEntitlements, viewLand,
-  viewLegallyResponsiblePeople. The above list is not exhaustive - names added to the upstream
-  but not yet listed here may also be supplied. If the upstream recognises a requested function
-  name, the appropriate true/false value for the user is returned; otherwise the function is
-  still included in the response, with `permitted` set to false.
+  amendELMApplications, amendEntitlements, amendLegallyResponsiblePeople,
+  amendNewYoungFarmerProcess, applyForBPS, closeBusiness, confirmBusiness, deleteBusiness,
+  modifyRoleOrPrivilege, removeRoleOrPrivilege, submitApplication, submitELMApplications,
+  updateLandUse, viewApplication, viewBusinessBankAccount, viewBusinessDetails, viewCPH,
+  viewCSAgreements, viewCSApplications, viewCSClaims, viewCountrysideStewardship,
+  viewELMApplications, viewEntitlements, viewLand, viewLegallyResponsiblePeople. The above list is
+  not exhaustive - names added to the upstream but not yet listed here may also be supplied. If the
+  upstream recognises a requested function name, the appropriate true/false value for the user is
+  returned; otherwise the function is still included in the response, with `permitted` set to false.
 
   NOTE: DAL does not enforce these permissions - the upstream systems do.
   """
