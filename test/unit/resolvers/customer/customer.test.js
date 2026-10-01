@@ -426,6 +426,28 @@ describe('Customer', () => {
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', '5625145')
     })
 
+    it('business returns null without throwing when the customer is not linked to the sbi', async () => {
+      dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
+        personBusinessesFixture
+      )
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      const response = await Customer.business(
+        { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
+        { sbi: 107183280 },
+        { dataSources, auditTrail },
+        info
+      )
+
+      expect(response).toBeNull()
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', 107183280)
+      expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+        info,
+        'organisationId',
+        expect.anything()
+      )
+    })
+
     it('authenticationQuestions records an authenticate-question entity keyed by crn', async () => {
       const auditTrail = { recordEntity: jest.fn() }
 
