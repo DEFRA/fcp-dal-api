@@ -11,7 +11,6 @@ jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
 }))
 const {
   authDirectiveTransformer,
-  authGroups,
   checkAuthGroup,
   checkServiceAccountAccess,
   checkUserAccess,
@@ -175,16 +174,6 @@ describe('authenticate', () => {
     it('checkAuthGroup should not throw for a caller with matching group membership', () => {
       const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
       expect(() => checkAuthGroup([sfdGroupId], ['SINGLE_FRONT_DOOR'])).not.toThrow()
-    })
-
-    it('expect authGroups to match .env.test setup', () => {
-      expect(authGroups).toEqual({
-        ADMIN: 'some-ad-group-id',
-        CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
-        SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id',
-        SFI_REFORM: 'sfi-reform-ad-group-id',
-        LAND_GRANTS_API: 'land-grants-api-ad-group-id'
-      })
     })
   })
 

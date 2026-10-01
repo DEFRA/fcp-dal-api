@@ -2,21 +2,11 @@ import { getDirective, MapperKind, mapSchema } from '@graphql-tools/utils'
 import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
 import { decodeProtectedHeader, jwtVerify } from 'jose'
-import { config } from '../config.js'
+import { authGroups, authGroupServiceName, config } from '../config.js'
 import { Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
-
-export const authGroups = config.get('auth.groups')
-
-const authGroupServiceName = {
-  [authGroups.ADMIN]: null,
-  [authGroups.CONSOLIDATED_VIEW]: 'consolidated-view',
-  [authGroups.SFI_REFORM]: 'grants-platform',
-  [authGroups.LAND_GRANTS_API]: 'land-grants-api',
-  [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door'
-}
 
 const unauthedAppid = config.get('auth.disabled')
   ? 'auth-disabled-no-appid'
@@ -28,6 +18,7 @@ export async function getAuth(request, jwkDatasource) {
     if (!token) {
       return { appid: unauthedAppid }
     }
+
     logger.debug('#DAL - Request authentication - Check verification', {
       code: DAL_REQUEST_AUTHENTICATION_001,
       request: { remoteAddress: request?.info?.remoteAddress }
