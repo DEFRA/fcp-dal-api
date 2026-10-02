@@ -22,7 +22,7 @@ input UpdateBusinessNameInput {
   """
   Name of the business.
   """
-  name: String!
+  name: String! @validateVariable(pattern: "^.{0,160}$")
 }
 
 input UpdateBusinessPhoneInput {

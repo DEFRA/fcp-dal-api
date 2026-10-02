@@ -26,6 +26,20 @@ export const validateLegalStatusCode = async (legalStatusCode, dataSources) => {
   }
 }
 
+/**
+ * GraphQL cannot express "at least one of" on an input type, so check that a phone has a number
+ * @param {{ mobile?: string | null, landline?: string | null }} phone the phone from the input
+ * @returns {void}
+ * @throws {BadRequest} if neither a mobile nor a landline number is given
+ */
+export const validatePhoneHasNumber = (phone) => {
+  if (!phone?.mobile?.trim() && !phone?.landline?.trim()) {
+    throw new BadRequest('phone must include at least one of mobile or landline', {
+      extensions: { code: 'BAD_USER_INPUT' }
+    })
+  }
+}
+
 export const businessDetailsUpdateResolver = async (
   __,
   { input },

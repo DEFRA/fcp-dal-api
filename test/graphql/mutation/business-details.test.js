@@ -127,6 +127,50 @@ describe('business', () => {
     })
   })
 
+  test('update business name - rejects name longer than 160 characters', async () => {
+    const query = `
+      mutation Mutation($input: UpdateBusinessNameInput!) {
+        updateBusinessName(input: $input) {
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, {
+      input: { sbi: '123456789', name: 'a'.repeat(161) }
+    })
+
+    expect(result.errors[0].message).toEqual("variable 'input.name' must match pattern ^.{0,160}$")
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.updateBusinessName).toBeNull()
+  })
+
+  test('update business name - accepts name of exactly 160 characters', async () => {
+    const name = 'a'.repeat(160)
+
+    v1.put('/organisation/organisationId/business-details', {
+      ...orgDetailsUpdatePayload,
+      name
+    }).reply(204)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', name }
+    })
+
+    mockOrganisationSearch(v1)
+
+    const query = `
+      mutation Mutation($input: UpdateBusinessNameInput!) {
+        updateBusinessName(input: $input) {
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, { input: { sbi: '123456789', name } })
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data.updateBusinessName.success).toBe(true)
+  })
+
   test('update business email', async () => {
     const input = {
       sbi: '123456789',

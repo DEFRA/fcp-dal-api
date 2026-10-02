@@ -54,9 +54,9 @@ input CreateBusinessInput {
   correspondenceEmail: EmailInput
 
   """
-  Telephone numbers of the business.
+  Telephone numbers of the business. At least one of `mobile` or `landline` is required.
   """
-  phone: PhoneInput
+  phone: PhoneInput!
 
   """
   Correspondence telephone numbers of the business.

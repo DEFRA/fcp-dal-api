@@ -388,6 +388,35 @@ describe('business', () => {
     expect(v1.isDone()).toBe(false)
   })
 
+  test('create a business - rejects missing phone', async () => {
+    const { phone: _, ...inputWithoutPhone } = input
+    const result = await makeTestQuery(query, null, true, { input: inputWithoutPhone }, [], false)
+
+    expect(result.errors[0].message).toContain(
+      'Field "phone" of required type "PhoneInput!" was not provided.'
+    )
+    expect(result.data).toBeUndefined()
+    expect(v1.isDone()).toBe(false)
+  })
+
+  test.each([
+    ['empty', {}],
+    ['null numbers', { mobile: null, landline: null }],
+    ['blank numbers', { mobile: ' ', landline: '' }]
+  ])('create a business - rejects phone with %s', async (_, phone) => {
+    const result = await makeTestQuery(query, null, true, { input: { ...input, phone } }, [], false)
+
+    expect(result.errors[0].message).toEqual(
+      'phone must include at least one of mobile or landline'
+    )
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    // Rejected before the business is created upstream
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
+  })
+
   test('create a business - rejects unknown legal status code', async () => {
     const result = await makeTestQuery(
       query,
