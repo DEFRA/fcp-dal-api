@@ -2,7 +2,7 @@ import { BadRequest } from '../errors/graphql.js'
 
 export function validateDateInput(dateString) {
   const dateObject = new Date(dateString)
-  if (isNaN(dateObject.getTime())) {
+  if (Number.isNaN(dateObject.getTime())) {
     throw new BadRequest(
       `Invalid date format: "${
         dateString

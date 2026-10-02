@@ -102,7 +102,7 @@ export class BaseRESTDataSource extends RESTDataSource {
       body: result.response?.body
     }
 
-    sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+    void sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: this.code
     })
 
