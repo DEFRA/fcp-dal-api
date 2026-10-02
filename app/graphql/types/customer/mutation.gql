@@ -42,7 +42,7 @@ extend type Mutation {
 
   Error codes:
   - `REASON_OR_NOTE_REQUIRED`: At least one of reason or note must be provided
-  - `NOT FOUND`: No customer exists for the given personId.
+  - `NOT FOUND`: No customer exists for the given CRN.
   """
   updateLockCustomer(input: UpdateLockCustomerInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
@@ -50,9 +50,9 @@ extend type Mutation {
 
 input UpdateLockCustomerInput {
   """
-  Person ID of the customer.
+  CRN of the customer.
   """
-  personId: ID!
+  crn: String!
   """
   Reason for locking the customer's account.
   """

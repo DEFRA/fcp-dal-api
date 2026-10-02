@@ -1,5 +1,6 @@
 import { BadRequest } from '../../../errors/graphql.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
+import { retrievePersonIdByCRN } from './common.js'
 
 async function updateCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
   auditTrail?.recordAccount(info, 'crn', input.crn)
@@ -39,7 +40,7 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
 
 async function updateLockCustomerResolver(
   _,
-  { input: { personId, reason, note } },
+  { input: { crn, reason, note } },
   { dataSources, auditTrail },
   info
 ) {
@@ -55,11 +56,11 @@ async function updateLockCustomerResolver(
   const normalisedReason = hasReason ? reason.trim() : undefined
   const normalisedNote = hasNote ? note.trim() : undefined
 
-  const person = await dataSources.ruralPaymentsCustomer.getPersonByPersonId(personId)
+  const personId = await retrievePersonIdByCRN(crn, dataSources)
   await dataSources.ruralPaymentsCustomer.lockPerson(personId, normalisedReason, normalisedNote)
 
   auditTrail?.recordAccount(info, 'personId', personId)
-  auditTrail?.recordAccount(info, 'crn', person.customerReferenceNumber)
+  auditTrail?.recordAccount(info, 'crn', crn)
   auditTrail?.recordEntity(info, {
     entity: 'person',
     action: 'locked',

@@ -1,8 +1,20 @@
+import { jest } from '@jest/globals'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import { makeTestQuery } from '../makeTestQuery.js'
+
+const mockCustomerCommonModule = {
+  retrievePersonIdByCRN: jest.fn().mockResolvedValue('personId')
+}
+
+jest.unstable_mockModule(
+  '../../../app/graphql/resolvers/customer/common.js',
+  () => mockCustomerCommonModule
+)
+
+const { makeTestQuery } = await import('../makeTestQuery.js')
 
 beforeEach(() => {
+  mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
   nock.disableNetConnect()
 })
 
@@ -119,7 +131,7 @@ describe('customer mutations', () => {
 
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateLockCustomer(input: { personId: "personId", reason: "my reason" }) {
+          updateLockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
             success
             customer {
               info {
@@ -151,7 +163,7 @@ describe('customer mutations', () => {
     test('throws an error if no reason or note is provided', async () => {
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateLockCustomer(input: { personId: "personId" }) {
+          updateLockCustomer(input: { crn: "1234567890" }) {
             success
             customer {
               info {
@@ -169,13 +181,20 @@ describe('customer mutations', () => {
 
     test('throws 404 if the person is not found', async () => {
       nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/lock', {
+          reason: 'my reason',
+          partyNoteType: 'LockPerson'
+        })
+        .reply(204)
+
+      nock(config.get('kits.internal.gatewayUrl'))
         .get('/person/personId/summary')
         .times(2)
         .reply(404, { message: 'Person not found' })
 
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateLockCustomer(input: { personId: "personId", reason: "my reason" }) {
+          updateLockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
             success
             customer {
               info {
