@@ -11,7 +11,8 @@ const mockBusinessCommonModule = {
   businessReactivateResolver: jest.fn(),
   businessDeactivateResolver: jest.fn(),
   validateLegalStatusCode: jest.fn(),
-  validatePhoneHasNumber: jest.fn()
+  validatePhoneHasNumber: jest.fn(),
+  validateTypeCode: jest.fn()
 }
 const mockCustomerCommonModule = {
   retrievePersonIdByCRN: jest.fn()
@@ -266,6 +267,7 @@ describe('Business Mutation createBusiness', () => {
       mockArgs.input.phone
     )
     expect(mockBusinessCommonModule.validateLegalStatusCode).toHaveBeenCalledWith(1, dataSources)
+    expect(mockBusinessCommonModule.validateTypeCode).toHaveBeenCalledWith(2, dataSources)
     expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith('123', dataSources)
     expect(dataSources.ruralPaymentsBusiness.createOrganisationByPersonId).toHaveBeenCalledWith(
       'personId',
