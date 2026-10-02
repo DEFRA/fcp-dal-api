@@ -39,11 +39,19 @@ describe('Customer Mutations', () => {
 
   beforeEach(() => {
     mockDataSources = {
+      mongoCustomer: {
+        findPersonIdByCRN: jest.fn(),
+        upsertPersonIdByCRN: jest.fn()
+      },
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn(),
         getPersonByPersonId: jest.fn(),
         updatePersonDetails: jest.fn(),
-        validateEmail: jest.fn()
+        validateEmail: jest.fn(),
+        lockPerson: jest.fn(),
+        logger: { warn: jest.fn() },
+        gatewayType: 'ruralPayments',
+        request: {}
       }
     }
   })
@@ -263,15 +271,10 @@ describe('Customer Mutations', () => {
 
   describe('updateLockCustomer', () => {
     test('locks a customer through the GraphQL mutation', async () => {
-      const mockLockPerson = jest.fn()
-      mockDataSources.ruralPaymentsCustomer.lockPerson = mockLockPerson
-      mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue({
-        ...mockPerson,
-        customerReferenceNumber: 'crn'
-      })
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
 
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
-      const input = { personId: 'personId', reason: 'my reason', note: 'my note' }
+      const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
 
       await Mutation.updateLockCustomer(
         null,
@@ -280,12 +283,17 @@ describe('Customer Mutations', () => {
         { path: { key: 'updateLockCustomer' } }
       )
 
-      expect(mockLockPerson).toHaveBeenCalledWith('personId', 'my reason', 'my note')
+      expect(mockDataSources.ruralPaymentsCustomer.lockPerson).toHaveBeenCalledWith(
+        'personId',
+        'my reason',
+        'my note'
+      )
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith('crn')
     })
 
     test('throws an error if no reason or note is provided', async () => {
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
-      const input = { personId: 'personId' }
+      const input = { crn: 'crn' }
 
       await expect(
         Mutation.updateLockCustomer(
@@ -299,7 +307,7 @@ describe('Customer Mutations', () => {
 
     test('throws an error if empty reason or note is provided', async () => {
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
-      const input = { personId: 'personId', note: '', reason: '' }
+      const input = { crn: 'crn', note: '', reason: '' }
 
       await expect(
         Mutation.updateLockCustomer(
@@ -312,13 +320,13 @@ describe('Customer Mutations', () => {
     })
 
     test('throws 404 if the person is not found', async () => {
-      const mockLockPerson = jest.fn().mockImplementation(() => {
-        throw new Error('Not Found')
-      })
-      mockDataSources.ruralPaymentsCustomer.lockPerson = mockLockPerson
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockRejectedValue(new Error('Not Found'))
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
+        new Error('Not Found')
+      )
 
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
-      const input = { personId: 'personId', reason: 'my reason' }
+      const input = { crn: 'crn', reason: 'my reason' }
 
       await expect(
         Mutation.updateLockCustomer(
@@ -331,15 +339,10 @@ describe('Customer Mutations', () => {
     })
 
     test('records the personId account and a locked person entity', async () => {
-      const mockLockPerson = jest.fn()
-      mockDataSources.ruralPaymentsCustomer.lockPerson = mockLockPerson
-      mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue({
-        ...mockPerson,
-        customerReferenceNumber: 'crn'
-      })
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
 
       const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
-      const input = { personId: 'personId', reason: 'my reason', note: 'my note' }
+      const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
       const info = { path: { key: 'updateLockCustomer' } }
 
       await Mutation.updateLockCustomer(
