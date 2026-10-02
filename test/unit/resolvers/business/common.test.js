@@ -9,7 +9,8 @@ import {
   businessUnlockResolver,
   getRuralPaymentsBusinessDataSource,
   retrieveOrgIdBySbi,
-  validateLegalStatusCode
+  validateLegalStatusCode,
+  validatePhoneHasNumber
 } from '../../../../app/graphql/resolvers/business/common.js'
 
 describe('retrieveOrgIdBySbi', () => {
@@ -95,6 +96,34 @@ describe('validateLegalStatusCode', () => {
 
     expect(error).toBeInstanceOf(BadRequest)
     expect(error.message).toBe('Invalid legalStatusCode: 102')
+    expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
+  })
+})
+
+describe('validatePhoneHasNumber', () => {
+  it.each([
+    ['a mobile', { mobile: '07700 900000' }],
+    ['a landline', { landline: '01234 567890' }],
+    ['both', { mobile: '07700 900000', landline: '01234 567890' }]
+  ])('accepts a phone with %s', (_, phone) => {
+    expect(() => validatePhoneHasNumber(phone)).not.toThrow()
+  })
+
+  it.each([
+    ['undefined', undefined],
+    ['empty', {}],
+    ['null numbers', { mobile: null, landline: null }],
+    ['blank numbers', { mobile: ' ', landline: '' }]
+  ])('rejects a phone that is %s', (_, phone) => {
+    let error
+    try {
+      validatePhoneHasNumber(phone)
+    } catch (e) {
+      error = e
+    }
+
+    expect(error).toBeInstanceOf(BadRequest)
+    expect(error.message).toBe('phone must include at least one of mobile or landline')
     expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
   })
 })
