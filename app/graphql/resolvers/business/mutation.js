@@ -16,7 +16,8 @@ import {
   businessReactivateResolver,
   businessUnlockResolver,
   validateLegalStatusCode,
-  validatePhoneHasNumber
+  validatePhoneHasNumber,
+  validateTypeCode
 } from './common.js'
 import { Query } from './query.js'
 
@@ -104,7 +105,13 @@ export const Mutation = {
     let business
     try {
       validatePhoneHasNumber(businessDetails.phone)
-      await validateLegalStatusCode(businessDetails.legalStatusCode, dataSources)
+      const validateLegalStatusCodePromise = validateLegalStatusCode(
+        businessDetails.legalStatusCode,
+        dataSources
+      )
+      const validateTypeCodePromise = validateTypeCode(businessDetails.typeCode, dataSources)
+      await validateLegalStatusCodePromise
+      await validateTypeCodePromise
       const personId = await retrievePersonIdByCRN(crn, dataSources)
       const orgDetails = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
       const response = await dataSources.ruralPaymentsBusiness.createOrganisationByPersonId(

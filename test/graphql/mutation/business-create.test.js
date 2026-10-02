@@ -2,7 +2,11 @@ import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { db } from '../../../app/mongo.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
-import { mockLegalStatusReferenceData, mockPersonSearch } from '../helpers.js'
+import {
+  mockBusinessTypeReferenceData,
+  mockLegalStatusReferenceData,
+  mockPersonSearch
+} from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 import { waitFor } from '../../test-helpers/wait-for.js'
 
@@ -12,6 +16,7 @@ const setupNock = () => {
   nock.disableNetConnect()
 
   mockLegalStatusReferenceData(v1)
+  mockBusinessTypeReferenceData(v1)
   mockPersonSearch(v1)
 
   v1.post('/organisation/create/personId').reply(200, {
@@ -428,6 +433,25 @@ describe('business', () => {
     )
 
     expect(result.errors[0].message).toEqual('Invalid legalStatusCode: 102')
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    // Rejected before the business is created upstream
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
+  })
+
+  test('create a business - rejects unknown type code', async () => {
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, typeCode: 123 } },
+      [],
+      false
+    )
+
+    expect(result.errors[0].message).toEqual('Invalid typeCode: 123')
     expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
     expect(result.data.createBusiness).toBeNull()
     // Rejected before the business is created upstream

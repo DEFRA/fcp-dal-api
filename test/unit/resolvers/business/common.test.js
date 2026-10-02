@@ -10,7 +10,8 @@ import {
   getRuralPaymentsBusinessDataSource,
   retrieveOrgIdBySbi,
   validateLegalStatusCode,
-  validatePhoneHasNumber
+  validatePhoneHasNumber,
+  validateTypeCode
 } from '../../../../app/graphql/resolvers/business/common.js'
 
 describe('retrieveOrgIdBySbi', () => {
@@ -96,6 +97,46 @@ describe('validateLegalStatusCode', () => {
 
     expect(error).toBeInstanceOf(BadRequest)
     expect(error.message).toBe('Invalid legalStatusCode: 102')
+    expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
+  })
+})
+
+describe('validateTypeCode', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest.fn().mockResolvedValue({
+          _data: [
+            { id: 2, type: 'Business type 2' },
+            { id: 3, type: 'Business type 3' }
+          ]
+        })
+      }
+    }
+  })
+
+  it('does not fetch reference data when no type code is provided', async () => {
+    await validateTypeCode(undefined, dataSources)
+    await validateTypeCode(null, dataSources)
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).not.toHaveBeenCalled()
+  })
+
+  it('accepts a type code that exists in the reference data', async () => {
+    await expect(validateTypeCode(3, dataSources)).resolves.toBeUndefined()
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).toHaveBeenCalledWith(
+      'business-types'
+    )
+  })
+
+  it('rejects a type code that does not exist in the reference data', async () => {
+    const error = await validateTypeCode(123, dataSources).catch((e) => e)
+
+    expect(error).toBeInstanceOf(BadRequest)
+    expect(error.message).toBe('Invalid typeCode: 123')
     expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
   })
 })
@@ -378,7 +419,9 @@ describe('businessAllFieldsUpdateResolver', () => {
         updateOrganisationAdditionalDetails: jest.fn()
       },
       ruralPaymentsReferenceData: {
-        getReferenceData: jest.fn().mockResolvedValue({ _data: [{ id: 2, type: 'Partnership' }] })
+        getReferenceData: jest
+          .fn()
+          .mockResolvedValue({ _data: [{ id: 2, type: 'Partnership' }, { id: 3 }] })
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),

@@ -78,3 +78,12 @@ export const mockLegalStatusReferenceData = (nockInstance) => {
     ]
   })
 }
+
+export const mockBusinessTypeReferenceData = (nockInstance) => {
+  nockInstance.get('/reference/business-types').reply(200, {
+    _data: [
+      { id: 2, type: 'Business type 2' },
+      { id: 3, type: 'Business type 3' }
+    ]
+  })
+}
