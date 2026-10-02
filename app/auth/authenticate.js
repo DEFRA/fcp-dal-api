@@ -40,7 +40,7 @@ export async function getAuth(request, jwkDatasource) {
       algorithms: ['RS256']
     })
     const requestTimeMs = Date.now() - requestStart
-    sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+    void sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
       code: DAL_REQUEST_AUTHENTICATION_001
     })
 
