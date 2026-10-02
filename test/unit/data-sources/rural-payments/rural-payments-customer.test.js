@@ -387,4 +387,43 @@ describe('Rural Payments Customer', () => {
       )
     })
   })
+
+  describe('lockPerson', () => {
+    test('should send a POST request to lock the person and return the response data', async () => {
+      const mockResponse = { success: true, message: 'Person locked successfully' }
+      httpPost.mockResolvedValueOnce({ _data: mockResponse })
+
+      const personId = '12345'
+      const result = await ruralPaymentsCustomer.lockPerson(personId, 'my-reason', 'my-note')
+
+      expect(httpPost).toHaveBeenCalledWith(`person/${personId}/lock`, {
+        body: JSON.stringify({
+          reason: 'my-reason',
+          note: 'my-note',
+          partyNoteType: 'LockPerson'
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      expect(result).toEqual(mockResponse)
+    })
+
+    test('should throw an error if the POST request fails', async () => {
+      const mockError = new Error('Network error')
+      httpPost.mockRejectedValueOnce(mockError)
+
+      const personId = '12345'
+      await expect(
+        ruralPaymentsCustomer.lockPerson(personId, 'my-reason', 'my-note')
+      ).rejects.toThrow('Network error')
+
+      expect(httpPost).toHaveBeenCalledWith(`person/${personId}/lock`, {
+        body: JSON.stringify({
+          reason: 'my-reason',
+          note: 'my-note',
+          partyNoteType: 'LockPerson'
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+    })
+  })
 })

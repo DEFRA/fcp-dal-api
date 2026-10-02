@@ -1,8 +1,20 @@
+import { jest } from '@jest/globals'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import { makeTestQuery } from '../makeTestQuery.js'
+
+const mockCustomerCommonModule = {
+  retrievePersonIdByCRN: jest.fn().mockResolvedValue('personId')
+}
+
+jest.unstable_mockModule(
+  '../../../app/graphql/resolvers/customer/common.js',
+  () => mockCustomerCommonModule
+)
+
+const { makeTestQuery } = await import('../makeTestQuery.js')
 
 beforeEach(() => {
+  mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
   nock.disableNetConnect()
 })
 
@@ -101,6 +113,104 @@ function setupNock(update = {}) {
 }
 
 describe('customer mutations', () => {
+  describe('updateLockCustomer', () => {
+    test('locks a customer through the GraphQL mutation', async () => {
+      nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/lock', {
+          reason: 'my reason',
+          partyNoteType: 'LockPerson'
+        })
+        .reply(204)
+
+      nock(config.get('kits.internal.gatewayUrl'))
+        .get('/person/personId/summary')
+        .times(2)
+        .reply(200, {
+          _data: { id: 'personId', locked: true, customerReferenceNumber: 'crn' }
+        })
+
+      const result = await makeTestQuery(`#graphql
+        mutation {
+          updateLockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+            success
+            customer {
+              info {
+                status {
+                  locked
+                }
+              }
+            }
+          }
+        }
+      `)
+
+      expect(result).toEqual({
+        data: {
+          updateLockCustomer: {
+            success: true,
+            customer: {
+              info: {
+                status: {
+                  locked: true
+                }
+              }
+            }
+          }
+        }
+      })
+    })
+
+    test('throws an error if no reason or note is provided', async () => {
+      const result = await makeTestQuery(`#graphql
+        mutation {
+          updateLockCustomer(input: { crn: "1234567890" }) {
+            success
+            customer {
+              info {
+                status {
+                  locked
+                }
+              }
+            }
+          }
+        }
+      `)
+
+      expect(result.errors[0].message).toBe('At least one of reason or note must be provided')
+    })
+
+    test('throws 404 if the person is not found', async () => {
+      nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/lock', {
+          reason: 'my reason',
+          partyNoteType: 'LockPerson'
+        })
+        .reply(204)
+
+      nock(config.get('kits.internal.gatewayUrl'))
+        .get('/person/personId/summary')
+        .times(2)
+        .reply(404, { message: 'Person not found' })
+
+      const result = await makeTestQuery(`#graphql
+        mutation {
+          updateLockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+            success
+            customer {
+              info {
+                status {
+                  locked
+                }
+              }
+            }
+          }
+        }
+      `)
+
+      expect(result.errors[0].message).toBe('Not Found')
+    })
+  })
+
   test('updateCustomerAddress', async () => {
     setupNock({
       address: {

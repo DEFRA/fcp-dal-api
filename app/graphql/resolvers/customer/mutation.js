@@ -1,5 +1,6 @@
 import { BadRequest } from '../../../errors/graphql.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
+import { retrievePersonIdByCRN } from './common.js'
 
 async function updateCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
   auditTrail?.recordAccount(info, 'crn', input.crn)
@@ -37,6 +38,41 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
   }
 }
 
+async function updateLockCustomerResolver(
+  _,
+  { input: { crn, reason, note } },
+  { dataSources, auditTrail },
+  info
+) {
+  const hasReason = typeof reason === 'string' && reason.trim().length > 0
+  const hasNote = typeof note === 'string' && note.trim().length > 0
+
+  if (!hasReason && !hasNote) {
+    throw new BadRequest('At least one of reason or note must be provided', {
+      extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
+    })
+  }
+
+  const normalisedReason = hasReason ? reason.trim() : undefined
+  const normalisedNote = hasNote ? note.trim() : undefined
+
+  const personId = await retrievePersonIdByCRN(crn, dataSources)
+  await dataSources.ruralPaymentsCustomer.lockPerson(personId, normalisedReason, normalisedNote)
+
+  auditTrail?.recordAccount(info, 'personId', personId)
+  auditTrail?.recordAccount(info, 'crn', crn)
+  auditTrail?.recordEntity(info, {
+    entity: 'person',
+    action: 'locked',
+    entityid: personId
+  })
+
+  return {
+    success: true,
+    customer: { personId }
+  }
+}
+
 export const Mutation = {
   updateCustomerAddress: updateCustomerResolver,
   updateCustomerDateOfBirth: updateCustomerResolver,
@@ -44,5 +80,6 @@ export const Mutation = {
   updateCustomerName: updateCustomerResolver,
   updateCustomerPhone: updateCustomerResolver,
   updateCustomerDoNotContact: updateCustomerResolver,
-  updateCustomerAllFields: updateCustomerResolver
+  updateCustomerAllFields: updateCustomerResolver,
+  updateLockCustomer: updateLockCustomerResolver
 }

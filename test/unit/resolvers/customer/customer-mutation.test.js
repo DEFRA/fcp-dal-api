@@ -39,11 +39,19 @@ describe('Customer Mutations', () => {
 
   beforeEach(() => {
     mockDataSources = {
+      mongoCustomer: {
+        findPersonIdByCRN: jest.fn(),
+        upsertPersonIdByCRN: jest.fn()
+      },
       ruralPaymentsCustomer: {
         getPersonIdByCRN: jest.fn(),
         getPersonByPersonId: jest.fn(),
         updatePersonDetails: jest.fn(),
-        validateEmail: jest.fn()
+        validateEmail: jest.fn(),
+        lockPerson: jest.fn(),
+        logger: { warn: jest.fn() },
+        gatewayType: 'ruralPayments',
+        request: {}
       }
     }
   })
@@ -258,6 +266,99 @@ describe('Customer Mutations', () => {
       const input = { crn: 'crn' }
 
       await Mutation[mutationName](null, { input }, { dataSources: mockDataSources }, info)
+    })
+  })
+
+  describe('updateLockCustomer', () => {
+    test('locks a customer through the GraphQL mutation', async () => {
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
+
+      await Mutation.updateLockCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        { path: { key: 'updateLockCustomer' } }
+      )
+
+      expect(mockDataSources.ruralPaymentsCustomer.lockPerson).toHaveBeenCalledWith(
+        'personId',
+        'my reason',
+        'my note'
+      )
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith('crn')
+    })
+
+    test('throws an error if no reason or note is provided', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { crn: 'crn' }
+
+      await expect(
+        Mutation.updateLockCustomer(
+          null,
+          { input },
+          { dataSources: mockDataSources, auditTrail },
+          { path: { key: 'updateLockCustomer' } }
+        )
+      ).rejects.toThrow('At least one of reason or note must be provided')
+    })
+
+    test('throws an error if empty reason or note is provided', async () => {
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { crn: 'crn', note: '', reason: '' }
+
+      await expect(
+        Mutation.updateLockCustomer(
+          null,
+          { input },
+          { dataSources: mockDataSources, auditTrail },
+          { path: { key: 'updateLockCustomer' } }
+        )
+      ).rejects.toThrow('At least one of reason or note must be provided')
+    })
+
+    test('throws 404 if the person is not found', async () => {
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockRejectedValue(new Error('Not Found'))
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
+        new Error('Not Found')
+      )
+
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { crn: 'crn', reason: 'my reason' }
+
+      await expect(
+        Mutation.updateLockCustomer(
+          null,
+          { input },
+          { dataSources: mockDataSources, auditTrail },
+          { path: { key: 'updateLockCustomer' } }
+        )
+      ).rejects.toThrow('Not Found')
+    })
+
+    test('records the personId account and a locked person entity', async () => {
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
+      const info = { path: { key: 'updateLockCustomer' } }
+
+      await Mutation.updateLockCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'locked',
+        entityid: 'personId'
+      })
     })
   })
 })

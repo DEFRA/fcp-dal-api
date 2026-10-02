@@ -180,4 +180,17 @@ export class RuralPaymentsCustomer extends RuralPayments {
     const response = await this.get(`SitiAgriApi/authorisation/byFunction?${query}`)
     return response.data
   }
+
+  async lockPerson(personId, reason, note) {
+    const body = JSON.stringify({
+      reason,
+      note,
+      partyNoteType: 'LockPerson'
+    })
+    const response = await this.post(`person/${personId}/lock`, {
+      body,
+      headers: postPutHeaders
+    })
+    return response._data
+  }
 }
