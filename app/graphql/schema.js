@@ -1,10 +1,10 @@
-import { loadFiles } from '@graphql-tools/load-files'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { filterSchema, pruneSchema } from '@graphql-tools/utils'
 import { IBANTypeDefinition } from 'graphql-scalars'
+import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { fileURLToPath } from 'node:url'
 import { authDirectiveTransformer } from '../auth/authenticate.js'
 import { config } from '../config.js'
 import { excludeFromListTransformer } from './directives/excludeFromListTransformer.js'
@@ -23,10 +23,11 @@ import * as ReferenceDataQuery from './resolvers/reference-data/query.js'
 import * as Scalars from './resolvers/scalars.js'
 
 async function getFiles(path) {
-  return loadFiles(join(dirname(fileURLToPath(import.meta.url)), path), {
-    recursive: true,
-    requireMethod: async (filePath) => import(pathToFileURL(filePath))
-  })
+  const dir = join(dirname(fileURLToPath(import.meta.url)), path)
+  const files = (await readdir(dir, { recursive: true }))
+    .filter((file) => file.endsWith('.gql'))
+    .sort((a, b) => a.localeCompare(b))
+  return Promise.all(files.map((file) => readFile(join(dir, file), 'utf8')))
 }
 
 /**

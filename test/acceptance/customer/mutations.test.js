@@ -258,7 +258,7 @@ describe('Customer Mutations - as an internal user', () => {
         name: nameInput,
         dateOfBirth: '2000-02-29',
         phone: inputs.phoneInput.phone,
-        email: { ...inputs.emailInput.email, validated: true },
+        email: { ...inputs.emailInput.email, validated: false },
         status: {
           locked: true,
           confirmed: false,
@@ -287,7 +287,7 @@ describe('Customer Mutations - as an internal user', () => {
         name: nameFullInput,
         dateOfBirth: '2000-03-01',
         phone: inputs.allFieldsInput.phone,
-        email: { ...inputs.allFieldsInput.email, validated: true },
+        email: { ...inputs.allFieldsInput.email, validated: false },
         status: {
           locked: true,
           confirmed: false,
