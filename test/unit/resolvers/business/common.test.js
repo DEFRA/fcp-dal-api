@@ -9,6 +9,7 @@ import {
   businessUnlockResolver,
   getRuralPaymentsBusinessDataSource,
   retrieveOrgIdBySbi,
+  validateBusinessReferenceDataCodes,
   validateLegalStatusCode,
   validatePhoneHasNumber,
   validateTypeCode
@@ -138,6 +139,53 @@ describe('validateTypeCode', () => {
     expect(error).toBeInstanceOf(BadRequest)
     expect(error.message).toBe('Invalid typeCode: 123')
     expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
+  })
+})
+
+describe('validateBusinessReferenceDataCodes', () => {
+  const referenceData = {
+    legalstatus: [{ id: 102111, type: 'Sole Proprietorship' }],
+    'business-types': [{ id: 3, type: 'Business type 3' }]
+  }
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest.fn((type) => Promise.resolve({ _data: referenceData[type] }))
+      }
+    }
+  })
+
+  it('accepts known legal status and type codes', async () => {
+    await expect(
+      validateBusinessReferenceDataCodes({ legalStatusCode: 102111, typeCode: 3 }, dataSources)
+    ).resolves.toBeUndefined()
+  })
+
+  it('rejects when both codes are unknown', async () => {
+    await expect(
+      validateBusinessReferenceDataCodes({ legalStatusCode: 102, typeCode: 123 }, dataSources)
+    ).rejects.toThrow(BadRequest)
+  })
+
+  it('rejects with the type code error when it fails while the legal status check is pending', async () => {
+    let resolveLegalStatus
+    dataSources.ruralPaymentsReferenceData.getReferenceData.mockImplementation((type) =>
+      type === 'legalstatus'
+        ? new Promise((resolve) => {
+            resolveLegalStatus = resolve
+          })
+        : Promise.resolve({ _data: referenceData[type] })
+    )
+
+    const result = validateBusinessReferenceDataCodes(
+      { legalStatusCode: 102111, typeCode: 123 },
+      dataSources
+    )
+
+    await expect(result).rejects.toThrow('Invalid typeCode: 123')
+    resolveLegalStatus({ _data: referenceData.legalstatus })
   })
 })
 
