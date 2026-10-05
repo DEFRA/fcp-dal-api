@@ -124,7 +124,6 @@ describe('customer mutations', () => {
 
       nock(config.get('kits.internal.gatewayUrl'))
         .get('/person/personId/summary')
-        .times(2)
         .reply(200, {
           _data: { id: 'personId', locked: true, customerReferenceNumber: 'crn' }
         })
@@ -189,7 +188,6 @@ describe('customer mutations', () => {
 
       nock(config.get('kits.internal.gatewayUrl'))
         .get('/person/personId/summary')
-        .times(2)
         .reply(404, { message: 'Person not found' })
 
       const result = await makeTestQuery(`#graphql

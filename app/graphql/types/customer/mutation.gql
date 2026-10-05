@@ -56,11 +56,11 @@ input UpdateLockCustomerInput {
   """
   Reason for locking the customer's account.
   """
-  reason: String
+  reason: String @validateVariable(pattern: "^.{0,100}$")
   """
   Note for locking the customer's account.
   """
-  note: String
+  note: String @validateVariable(pattern: "^.{0,100}$")
 }
 
 input UpdateCustomerAddressInput {

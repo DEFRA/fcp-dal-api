@@ -29,9 +29,9 @@
     "test:local": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config",
     "test:local-dev-check": "NODE_OPTIONS=--experimental-vm-modules jest --coverage false test/acceptance/local-dev-check.test.js",
     "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config",
+    "test:unit:watch": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/unit --runInBand --watch --watchPathIgnorePatterns='globalConfig\\.json$' --detectOpenHandles --setupFiles dotenv/config",
     "test:graphql": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern=test/graphql --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config",
-    "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern='test/(unit|graphql)' --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern='test/(unit|graphql)' --runInBand --watch --watchPathIgnorePatterns='globalConfig\\.json$' --detectOpenHandles --setupFiles dotenv/config"
+    "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPattern='test/(unit|graphql)' --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config"
   },
   "author": "Defra",
   "contributors": [],
@@ -74,9 +74,9 @@
     "eslint-plugin-jest": "^28.9.0",
     "graphql-request": "^7.4.0",
     "husky": "^9.1.7",
-    "jest": "^29.7.0",
+    "jest": "30.5.2",
     "nock": "^14.0.2",
-    "nodemon": "^3.1.9",
+    "nodemon": "1.14.10",
     "prettier": "^3.4.2",
     "winston-transport": "^4.9.0"
   },

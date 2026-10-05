@@ -44,28 +44,31 @@ async function updateLockCustomerResolver(
   { dataSources, auditTrail },
   info
 ) {
-  const hasReason = typeof reason === 'string' && reason.trim().length > 0
-  const hasNote = typeof note === 'string' && note.trim().length > 0
+  let personId
+  try {
+    const hasReason = typeof reason === 'string' && reason.trim().length > 0
+    const hasNote = typeof note === 'string' && note.trim().length > 0
 
-  if (!hasReason && !hasNote) {
-    throw new BadRequest('At least one of reason or note must be provided', {
-      extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
+    if (!hasReason && !hasNote) {
+      throw new BadRequest('At least one of reason or note must be provided', {
+        extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
+      })
+    }
+
+    const normalisedReason = hasReason ? reason.trim() : undefined
+    const normalisedNote = hasNote ? note.trim() : undefined
+
+    personId = await retrievePersonIdByCRN(crn, dataSources)
+    await dataSources.ruralPaymentsCustomer.lockPerson(personId, normalisedReason, normalisedNote)
+  } finally {
+    auditTrail?.recordAccount(info, 'personId', personId)
+    auditTrail?.recordAccount(info, 'crn', crn)
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'locked',
+      entityid: personId
     })
   }
-
-  const normalisedReason = hasReason ? reason.trim() : undefined
-  const normalisedNote = hasNote ? note.trim() : undefined
-
-  const personId = await retrievePersonIdByCRN(crn, dataSources)
-  await dataSources.ruralPaymentsCustomer.lockPerson(personId, normalisedReason, normalisedNote)
-
-  auditTrail?.recordAccount(info, 'personId', personId)
-  auditTrail?.recordAccount(info, 'crn', crn)
-  auditTrail?.recordEntity(info, {
-    entity: 'person',
-    action: 'locked',
-    entityid: personId
-  })
 
   return {
     success: true,
