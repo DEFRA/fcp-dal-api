@@ -45,7 +45,6 @@
     "@defra/fcp-audit-publisher": "^1.0.9",
     "@defra/hapi-secure-context": "^0.3.0",
     "@elastic/ecs-winston-format": "^1.5.3",
-    "@graphql-inspector/cli": "^6.0.8",
     "@graphql-tools/load-files": "^7.0.1",
     "@graphql-tools/merge": "^9.0.17",
     "@graphql-tools/schema": "^10.0.16",
@@ -66,6 +65,7 @@
   },
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "^4.4.0",
+    "@graphql-inspector/cli": "^6.0.8",
     "@jest/globals": "^29.7.0",
     "@shelf/jest-mongodb": "^6.0.2",
     "dotenv": "^17.2.3",
