@@ -226,6 +226,41 @@ describe('business', () => {
     })
   })
 
+  test.each([
+    ['companiesHouse', 8],
+    ['charityCommission', 10]
+  ])(
+    'update business registration numbers - rejects %s longer than %i characters',
+    async (field, maxLength) => {
+      const query = `
+        mutation Mutation($input: UpdateBusinessRegistrationNumbersInput!) {
+          updateBusinessRegistrationNumbers(input: $input) {
+            success
+          }
+        }
+      `
+      const result = await makeTestQuery(
+        query,
+        null,
+        true,
+        {
+          input: {
+            sbi: '123456789',
+            registrationNumbers: { [field]: '1'.repeat(maxLength + 1) }
+          }
+        },
+        [],
+        false
+      )
+
+      expect(result.errors[0].message).toEqual(
+        `variable 'input.registrationNumbers.${field}' must match pattern ^.{0,${maxLength}}$`
+      )
+      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+      expect(result.data.updateBusinessRegistrationNumbers).toBeNull()
+    }
+  )
+
   test('update business date started farming', async () => {
     const input = {
       sbi: '123456789',
