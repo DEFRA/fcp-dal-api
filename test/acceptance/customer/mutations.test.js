@@ -469,3 +469,36 @@ describe('Customer Mutations - as an external user', () => {
     })
   })
 })
+
+describe('Customer Mutations - lock a customer', () => {
+  const lockCustomerMutation = gql`
+    mutation LockCustomer($input: UpdateLockCustomerInput!) {
+      lockCustomer(input: $input, reason: $reason) {
+        success
+      }
+    }
+  `
+
+  const customerLockStatusQuery = gql`
+    query CustomerLockStatus($crn: ID!) {
+      customer(crn: $crn) {
+        info {
+          status {
+            locked
+          }
+        }
+      }
+    }
+  `
+  it('should lock the customer', async () => {
+    const client = new GraphQLClient(targetURL)
+
+    const setup = await client.request(lockCustomerMutation, {
+      input: { crn: '9000000000', reason: 'Customer requested lock' }
+    })
+    expect(setup.lockCustomer).toEqual({ success: true })
+
+    const check = await client.request(customerLockStatusQuery, { crn: '9000000000' })
+    expect(check.customer.info.status.locked).toBe(true)
+  })
+})
