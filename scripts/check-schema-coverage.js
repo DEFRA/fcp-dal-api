@@ -17,15 +17,7 @@ if (!Number.isFinite(typeThreshold)) {
 }
 
 const report = JSON.parse(await readFile(coveragePath, 'utf8'))
-const { types } = report
-const typeEntries = Object.entries(types)
-const fields = typeEntries.flatMap(([, type]) => Object.values(type.children ?? {}))
-const stats = {
-  numTypes: typeEntries.length,
-  numTypesCovered: typeEntries.filter(([, type]) => type.hits).length,
-  numFields: fields.length,
-  numFieldsCovered: fields.filter((field) => field.hits).length
-}
+const { stats, types } = report
 
 const percentage = (covered, total) => (total > 0 ? (covered / total) * 100 : 100)
 
