@@ -108,11 +108,8 @@ export const businessAdditionalDetailsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
-  const validateLegalStatusCodePromise = validateLegalStatusCode(
-    businessDetails.legalStatusCode,
-    dataSources
-  )
-  const validateTypeCodePromise = validateTypeCode(businessDetails.typeCode, dataSources)
+  const validateLegalStatusCodePromise = validateLegalStatusCode(input.legalStatusCode, dataSources)
+  const validateTypeCodePromise = validateTypeCode(input.typeCode, dataSources)
   await validateLegalStatusCodePromise
   await validateTypeCodePromise
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
@@ -169,11 +166,8 @@ export const businessAllFieldsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
-  const validateLegalStatusCodePromise = validateLegalStatusCode(
-    businessDetails.legalStatusCode,
-    dataSources
-  )
-  const validateTypeCodePromise = validateTypeCode(businessDetails.typeCode, dataSources)
+  const validateLegalStatusCodePromise = validateLegalStatusCode(input.legalStatusCode, dataSources)
+  const validateTypeCodePromise = validateTypeCode(input.typeCode, dataSources)
   await validateLegalStatusCodePromise
   await validateTypeCodePromise
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })

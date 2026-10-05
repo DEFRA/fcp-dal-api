@@ -117,7 +117,7 @@ const allFieldsInput = {
   isCorrespondenceAsBusinessAddress: false,
   vat: '123456789',
   legalStatusCode: 102111,
-  typeCode: 3,
+  typeCode: 101404,
   dateStartedFarming: '2020-01-31',
   registrationNumbers: {
     companiesHouse: '12345678',
@@ -156,7 +156,7 @@ describe('Business Mutations - as an internal user', () => {
           correspondenceAddress,
           isCorrespondenceAsBusinessAddress: false,
           legalStatus: { code: 102111, type: 'Set from reference data' },
-          type: { code: 3, type: 'Set from reference data' },
+          type: { code: 101404, type: 'Set from reference data' },
           registrationNumbers: {
             companiesHouse: '12345678',
             charityCommission: '87654321'
@@ -504,6 +504,71 @@ const updateBusinessVATMutation = gql`
   }
 `
 
+const updateBusinessLegalStatusMutation = gql`
+  mutation UpdateBusinessLegalStatus($input: UpdateBusinessLegalStatusInput!) {
+    updateBusinessLegalStatus(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          legalStatus {
+            code
+            type
+          }
+        }
+      }
+    }
+  }
+`
+
+const updateBusinessDateStartedFarmingMutation = gql`
+  mutation UpdateBusinessDateStartedFarming($input: UpdateBusinessDateStartedFarmingInput!) {
+    updateBusinessDateStartedFarming(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          dateStartedFarming
+        }
+      }
+    }
+  }
+`
+
+const updateBusinessTypeMutation = gql`
+  mutation UpdateBusinessType($input: UpdateBusinessTypeInput!) {
+    updateBusinessType(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          type {
+            code
+            type
+          }
+        }
+      }
+    }
+  }
+`
+
+const updateBusinessRegistrationNumbersMutation = gql`
+  mutation UpdateBusinessRegistrationNumbers($input: UpdateBusinessRegistrationNumbersInput!) {
+    updateBusinessRegistrationNumbers(input: $input) {
+      success
+      business {
+        sbi
+        info {
+          registrationNumbers {
+            companiesHouse
+            charityCommission
+          }
+        }
+      }
+    }
+  }
+`
+
 describe('Business Mutations - individual field updates', () => {
   it('updateBusinessName updates the business name', async () => {
     const response = await client.request(
@@ -592,6 +657,62 @@ describe('Business Mutations - individual field updates', () => {
       business: { sbi, info: { vat: '555555555' } }
     })
   })
+
+  it('updateBusinessLegalStatus updates the business legal status', async () => {
+    const response = await client.request(
+      updateBusinessLegalStatusMutation,
+      { input: { sbi, legalStatusCode: 102108 } },
+      headers
+    )
+
+    expect(response.updateBusinessLegalStatus).toEqual({
+      success: true,
+      business: {
+        sbi,
+        info: { legalStatus: { code: 102108, type: 'Set from reference data' } }
+      }
+    })
+  })
+
+  it('updateBusinessDateStartedFarming updates the date the business started farming', async () => {
+    const response = await client.request(
+      updateBusinessDateStartedFarmingMutation,
+      { input: { sbi, dateStartedFarming: '2019-06-15' } },
+      headers
+    )
+
+    expect(response.updateBusinessDateStartedFarming).toEqual({
+      success: true,
+      business: { sbi, info: { dateStartedFarming: '2019-06-15T00:00:00.000Z' } }
+    })
+  })
+
+  it('updateBusinessType updates the business type', async () => {
+    const response = await client.request(
+      updateBusinessTypeMutation,
+      { input: { sbi, typeCode: 101417 } },
+      headers
+    )
+
+    expect(response.updateBusinessType).toEqual({
+      success: true,
+      business: { sbi, info: { type: { code: 101417, type: 'Set from reference data' } } }
+    })
+  })
+
+  it('updateBusinessRegistrationNumbers updates the business registration numbers', async () => {
+    const registrationNumbers = { companiesHouse: '11223344', charityCommission: '44332211' }
+    const response = await client.request(
+      updateBusinessRegistrationNumbersMutation,
+      { input: { sbi, registrationNumbers } },
+      headers
+    )
+
+    expect(response.updateBusinessRegistrationNumbers).toEqual({
+      success: true,
+      business: { sbi, info: { registrationNumbers } }
+    })
+  })
 })
 
 const createBusinessMutation = gql`
@@ -650,7 +771,7 @@ const createBusinessInput = {
   correspondenceAddress: { withoutUprn: correspondenceAddress },
   isCorrespondenceAsBusinessAddress: false,
   legalStatusCode: 102111,
-  typeCode: 3,
+  typeCode: 101404,
   registrationNumbers: {
     companiesHouse: '87654321',
     charityCommission: '12345678'
@@ -684,7 +805,7 @@ describe('createBusiness', () => {
       },
       correspondenceAddress,
       legalStatus: { code: 102111 },
-      type: { code: 3 }
+      type: { code: 101404 }
     })
   })
 
