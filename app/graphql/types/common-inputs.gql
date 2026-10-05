@@ -3,7 +3,7 @@ input AddressInput {
   """
   PAF organisation name
   """
-  pafOrganisationName: String
+  pafOrganisationName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   First line of a non-PAF address (maybe duplicated in the named fields, but not always)
@@ -78,12 +78,12 @@ input AddressInput {
   """
   Dependant locality of the address
   """
-  dependentLocality: String
+  dependentLocality: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Double dependant locality of the address
   """
-  doubleDependentLocality: String
+  doubleDependentLocality: String @validateVariable(pattern: "^.{0,240}$")
 }
 
 input ValidAddressInput @oneOf {
@@ -95,7 +95,7 @@ input AddressInputWithUprn {
   """
   PAF organisation name
   """
-  pafOrganisationName: String
+  pafOrganisationName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   First line of a non-PAF address (maybe duplicated in the named fields, but not always)
@@ -170,19 +170,19 @@ input AddressInputWithUprn {
   """
   Dependant locality of the address
   """
-  dependentLocality: String
+  dependentLocality: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Double dependant locality of the address
   """
-  doubleDependentLocality: String
+  doubleDependentLocality: String @validateVariable(pattern: "^.{0,240}$")
 }
 
 input AddressInputWithoutUprn {
   """
   PAF organisation name
   """
-  pafOrganisationName: String
+  pafOrganisationName: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   First line of a non-PAF address (maybe duplicated in the named fields, but not always)
@@ -257,12 +257,12 @@ input AddressInputWithoutUprn {
   """
   Dependant locality of the address
   """
-  dependentLocality: String
+  dependentLocality: String @validateVariable(pattern: "^.{0,240}$")
 
   """
   Double dependant locality of the address
   """
-  doubleDependentLocality: String
+  doubleDependentLocality: String @validateVariable(pattern: "^.{0,240}$")
 }
 
 "Represents data about a customers or business mobile/landline details"
