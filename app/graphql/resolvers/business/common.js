@@ -53,6 +53,24 @@ export const validateTypeCode = (typeCode, dataSources) =>
   validateReferenceDataCode('typeCode', 'business-types', typeCode, dataSources)
 
 /**
+ * Check the legal status and business type codes together. Promise.all keeps a rejection
+ * from either check handled, as an unhandled rejection shuts down the server
+ * @param {{ legalStatusCode?: number | null, typeCode?: number | null }} input the mutation input
+ * @param {ReferenceDataSources} dataSources
+ * @returns {Promise<void>}
+ * @throws {BadRequest} if either code is not in its reference data
+ */
+export const validateBusinessReferenceDataCodes = async (
+  { legalStatusCode, typeCode },
+  dataSources
+) => {
+  await Promise.all([
+    validateLegalStatusCode(legalStatusCode, dataSources),
+    validateTypeCode(typeCode, dataSources)
+  ])
+}
+
+/**
  * GraphQL cannot express "at least one of" on an input type, so check that a phone has a number
  * @param {{ mobile?: string | null, landline?: string | null }} phone the phone from the input
  * @returns {void}
@@ -108,10 +126,7 @@ export const businessAdditionalDetailsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
-  const validateLegalStatusCodePromise = validateLegalStatusCode(input.legalStatusCode, dataSources)
-  const validateTypeCodePromise = validateTypeCode(input.typeCode, dataSources)
-  await validateLegalStatusCodePromise
-  await validateTypeCodePromise
+  await validateBusinessReferenceDataCodes(input, dataSources)
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
@@ -166,10 +181,7 @@ export const businessAllFieldsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
-  const validateLegalStatusCodePromise = validateLegalStatusCode(input.legalStatusCode, dataSources)
-  const validateTypeCodePromise = validateTypeCode(input.typeCode, dataSources)
-  await validateLegalStatusCodePromise
-  await validateTypeCodePromise
+  await validateBusinessReferenceDataCodes(input, dataSources)
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)

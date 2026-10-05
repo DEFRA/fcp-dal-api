@@ -460,6 +460,25 @@ describe('business', () => {
     )
   })
 
+  test('create a business - rejects unknown legal status and type codes', async () => {
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, legalStatusCode: 102, typeCode: 123 } },
+      [],
+      false
+    )
+
+    expect(result.errors[0].message).toMatch(/^Invalid (legalStatusCode: 102|typeCode: 123)$/)
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    // Rejected before the business is created upstream
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
+  })
+
   test('create a business - rejects missing name', async () => {
     const { name: _, ...inputWithoutName } = input
     const result = await makeTestQuery(query, null, true, { input: inputWithoutName }, [], false)
