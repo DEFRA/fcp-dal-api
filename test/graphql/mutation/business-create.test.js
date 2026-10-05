@@ -503,6 +503,58 @@ describe('business', () => {
     expect(result.data.createBusiness.success).toBe(true)
   })
 
+  const addressFieldsLimitedTo240 = [
+    'pafOrganisationName',
+    'dependentLocality',
+    'doubleDependentLocality'
+  ]
+
+  test.each(addressFieldsLimitedTo240)(
+    'create a business - rejects address %s longer than 240 characters',
+    async (field) => {
+      const address = {
+        withoutUprn: { ...input.address.withoutUprn, [field]: 'a'.repeat(241) }
+      }
+      const result = await makeTestQuery(
+        query,
+        null,
+        true,
+        { input: { ...input, address } },
+        [],
+        false
+      )
+
+      expect(result.errors[0].message).toEqual(
+        `variable 'input.address.withoutUprn.${field}' must match pattern ^.{0,240}$`
+      )
+      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+      expect(result.data.createBusiness).toBeNull()
+      expect(nock.pendingMocks()).toContainEqual(
+        expect.stringContaining('/organisation/create/personId')
+      )
+    }
+  )
+
+  test.each(addressFieldsLimitedTo240)(
+    'create a business - accepts address %s of exactly 240 characters',
+    async (field) => {
+      const address = {
+        withoutUprn: { ...input.address.withoutUprn, [field]: 'a'.repeat(240) }
+      }
+      const result = await makeTestQuery(
+        query,
+        null,
+        true,
+        { input: { ...input, address } },
+        [],
+        false
+      )
+
+      expect(result.errors).toBeUndefined()
+      expect(result.data.createBusiness.success).toBe(true)
+    }
+  )
+
   test('create a business - rejects email address longer than 254 characters', async () => {
     const result = await makeTestQuery(
       query,
