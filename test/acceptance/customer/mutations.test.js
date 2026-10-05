@@ -236,13 +236,13 @@ const generateFullInputForCRN = (crn) => ({
   }
 })
 
+const headers = { email: 'some-email' }
+
 describe('Customer Mutations - as an internal user', () => {
   it('should update the customer details', async () => {
     const inputs = generateInputsForCRN('9000000000')
     const client = new GraphQLClient(targetURL)
-    const response = await client.request(mutation, inputs, {
-      email: 'some-email'
-    })
+    const response = await client.request(mutation, inputs, headers)
 
     expect(response).not.toHaveProperty('errors')
     expect(response.updateCustomerAddress.success).toBe(true)
@@ -274,9 +274,7 @@ describe('Customer Mutations - as an internal user', () => {
   it('should update all the customer details', async () => {
     const inputs = generateFullInputForCRN('9000000000')
     const client = new GraphQLClient(targetURL)
-    const response = await client.request(fullMutation, inputs, {
-      email: 'some-email'
-    })
+    const response = await client.request(fullMutation, inputs, headers)
 
     expect(response).not.toHaveProperty('errors')
     expect(response.updateCustomerAllFields.success).toBe(true)
@@ -303,7 +301,6 @@ describe('Customer Mutations - as an internal user', () => {
 
 describe('Customer Mutations - duplicate email handling', () => {
   const crn = '9000000000'
-  const headers = { email: 'some-email' }
   const duplicateEmail = 'skeleton@the-closet.net' // known duplicate, see validateCustomerEmail acceptance tests
 
   const setEmailMutation = gql`
@@ -472,8 +469,8 @@ describe('Customer Mutations - as an external user', () => {
 
 describe('Customer Mutations - lock a customer', () => {
   const lockCustomerMutation = gql`
-    mutation LockCustomer($input: UpdateLockCustomerInput!) {
-      lockCustomer(input: $input, reason: $reason) {
+    mutation updateLockCustomer($input: UpdateLockCustomerInput!) {
+      updateLockCustomer(input: $input) {
         success
       }
     }
@@ -493,12 +490,14 @@ describe('Customer Mutations - lock a customer', () => {
   it('should lock the customer', async () => {
     const client = new GraphQLClient(targetURL)
 
-    const setup = await client.request(lockCustomerMutation, {
-      input: { crn: '9000000000', reason: 'Customer requested lock' }
-    })
-    expect(setup.lockCustomer).toEqual({ success: true })
+    const setup = await client.request(
+      lockCustomerMutation,
+      { input: { crn: '1111111800', reason: 'Customer requested lock' } },
+      headers
+    )
+    expect(setup.updateLockCustomer).toEqual({ success: true })
 
-    const check = await client.request(customerLockStatusQuery, { crn: '9000000000' })
+    const check = await client.request(customerLockStatusQuery, { crn: '1111111800' }, headers)
     expect(check.customer.info.status.locked).toBe(true)
   })
 })
