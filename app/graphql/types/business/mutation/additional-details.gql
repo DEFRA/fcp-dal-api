@@ -112,14 +112,14 @@ input UpdateBusinessRegistrationNumbersInput {
 
 input BusinessRegistrationNumbersInput {
   """
-  Charity comission registration number to set.
+  Charity commission registration number to set.
   """
-  charityCommission: String
+  charityCommission: String @validateVariable(pattern: "^.{0,10}$")
 
   """
-  Charity comission registration number to set.
+  Companies House registration number to set.
   """
-  companiesHouse: String
+  companiesHouse: String @validateVariable(pattern: "^.{0,8}$")
 }
 
 input UpdateBusinessLockUnlockInput {
