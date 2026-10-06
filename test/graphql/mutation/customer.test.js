@@ -2,7 +2,6 @@ import { jest } from '@jest/globals'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { mockDefraIdJwks, signDefraIdToken } from '../helpers.js'
-import { makeTestQuery } from '../makeTestQuery.js'
 
 const mockCustomerCommonModule = {
   retrievePersonIdByCRN: jest.fn().mockResolvedValue('personId')
@@ -504,7 +503,7 @@ describe('customer mutations', () => {
       )
     }
 
-    // External requests resolve the person identified by the Defra ID token via the personIdOverride
+    // External requests resolve the person identified by the Defra ID token via personIdOverride
     const mockExternalPerson = (kits, email, emailValidated = false) =>
       kits
         .get(`/person/${config.get('kits.external.personIdOverride')}/summary`)

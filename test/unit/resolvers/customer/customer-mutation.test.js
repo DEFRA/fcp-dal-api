@@ -356,7 +356,7 @@ describe('Customer Mutations', () => {
         null,
         { input },
         { dataSources: mockDataSources, auditTrail },
-        { path: { key: 'updateLockCustomer' } }
+        info
       )
 
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
@@ -365,6 +365,34 @@ describe('Customer Mutations', () => {
         entity: 'person',
         action: 'locked',
         entityid: 'personId'
+      })
+    })
+
+    test('throws 404 and records undefined personId if the person is not found', async () => {
+      const info = { path: { key: 'updateLockCustomer' } }
+      const input = { crn: 'crn', reason: 'my reason' }
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockRejectedValue(new Error('Not Found'))
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
+        new Error('Not Found')
+      )
+
+      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+
+      await expect(
+        Mutation.updateLockCustomer(
+          null,
+          { input },
+          { dataSources: mockDataSources, auditTrail },
+          { path: { key: 'updateLockCustomer' } }
+        )
+      ).rejects.toThrow('Not Found')
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', undefined)
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'locked',
+        entityid: undefined
       })
     })
   })
@@ -488,40 +516,12 @@ describe('Customer Mutations', () => {
         info
       )
 
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'currentId')
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'person',
         action: 'verification-email-sent',
         entityid: 'crn'
-      })
-    })
-
-    test('throws 404 and records undefined personId if the person is not found', async () => {
-      const info = { path: { key: 'updateLockCustomer' } }
-      const input = { crn: 'crn', reason: 'my reason' }
-      mockDataSources.mongoCustomer.findPersonIdByCRN.mockRejectedValue(new Error('Not Found'))
-      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
-        new Error('Not Found')
-      )
-
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
-
-      await expect(
-        Mutation.updateLockCustomer(
-          null,
-          { input },
-          { dataSources: mockDataSources, auditTrail },
-          { path: { key: 'updateLockCustomer' } }
-        )
-      ).rejects.toThrow('Not Found')
-
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', undefined)
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
-      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
-        entity: 'person',
-        action: 'locked',
-        entityid: undefined
       })
     })
 

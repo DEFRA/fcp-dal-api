@@ -72,6 +72,11 @@ async function updateLockCustomerResolver(
       entityid: personId
     })
   }
+
+  return {
+    success: true,
+    customer: { personId }
+  }
 }
 
 // Only available to external users (see the @auth userType restriction), so the customer is always

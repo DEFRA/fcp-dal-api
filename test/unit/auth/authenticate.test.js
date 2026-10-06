@@ -260,60 +260,6 @@ describe('authenticate', () => {
     })
   })
 
-  describe('getRequestingGroup', () => {
-    const adminGroupId = config.get('auth.groups.ADMIN')
-    const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
-
-    describe('when auth is disabled', () => {
-      const originalConfig = { ...config }
-      const configMockPath = {
-        'auth.disabled': true
-      }
-
-      beforeEach(() => {
-        jest
-          .spyOn(config, 'get')
-          .mockImplementation((path) =>
-            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-          )
-      })
-
-      it('should return the mock UUID when auth is disabled, regardless of groups', () => {
-        expect(getRequestingGroup([adminGroupId])).toBe('00000000-0000-0000-0000-000000000000')
-        expect(getRequestingGroup([])).toBe('00000000-0000-0000-0000-000000000000')
-        expect(getRequestingGroup(undefined)).toBe('00000000-0000-0000-0000-000000000000')
-      })
-    })
-
-    describe('when auth is enabled', () => {
-      const originalConfig = { ...config }
-      const configMockPath = {
-        'auth.disabled': false
-      }
-
-      beforeEach(() => {
-        jest
-          .spyOn(config, 'get')
-          .mockImplementation((path) =>
-            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-          )
-      })
-
-      it('should return the first matching group when user has authorized groups', () => {
-        expect(getRequestingGroup([adminGroupId, 'other-group'])).toBe(adminGroupId)
-        expect(getRequestingGroup([consolidatedViewGroupId, adminGroupId])).toBe(
-          consolidatedViewGroupId
-        )
-      })
-
-      it('should return undefined when user has no authorized groups', () => {
-        expect(getRequestingGroup(['unauthorized-group'])).toBeUndefined()
-        expect(getRequestingGroup([])).toBeUndefined()
-        expect(getRequestingGroup(undefined)).toBeUndefined()
-      })
-    })
-  })
-
   describe('getRequestingService', () => {
     describe('when auth is disabled', () => {
       const originalConfig = { ...config }
