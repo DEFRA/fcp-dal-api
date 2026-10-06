@@ -151,15 +151,54 @@ describe('Server config and startup', () => {
       expect(loggedPayload).not.toHaveProperty('tenant')
     })
 
-    test('response event does not log the email header in tenant', async () => {
+    test('response event logs only the domain of the email header in tenant.message', async () => {
       await server.inject({
         method: 'GET',
         url: '/non-health',
         headers: { email: 'user@defra.gov.uk' }
       })
 
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({
+          tenant: { message: JSON.stringify({ emailDomain: 'defra.gov.uk' }) }
+        })
+      )
       const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
-      expect(loggedPayload).not.toHaveProperty('tenant')
+      expect(loggedPayload.tenant.message).not.toContain('user@')
+    })
+
+    test.each(['user', 'user@'])(
+      'response event omits tenant when the email header (%s) has no domain',
+      async (email) => {
+        await server.inject({ method: 'GET', url: '/non-health', headers: { email } })
+
+        const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+        expect(loggedPayload).not.toHaveProperty('tenant')
+      }
+    )
+
+    test('response event logs both the email domain and service-account header in tenant.message', async () => {
+      await server.inject({
+        method: 'GET',
+        url: '/non-health',
+        headers: {
+          email: 'user@defra.gov.uk',
+          'service-account': 'robot-account.dal@defra.gov.uk'
+        }
+      })
+
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({
+          tenant: {
+            message: JSON.stringify({
+              emailDomain: 'defra.gov.uk',
+              serviceAccount: 'robot-account.dal@defra.gov.uk'
+            })
+          }
+        })
+      )
     })
 
     test('response event logs the service-account header in tenant.message, alongside tenant.id', async () => {

@@ -66,13 +66,21 @@ server.ext({
 })
 
 // tenant.id identifies the calling service, tenant.message identifies the service account (from
-// the service-account header) the request was made on behalf of. The email header is deliberately
-// not logged, as it identifies an end user.
+// the service-account header) and/or the domain of the email header the request was made on behalf
+// of. Only the domain of the email is logged, as the full address identifies an end user.
+const getEmailDomain = (email) => {
+  const atIndex = email?.lastIndexOf('@') ?? -1
+  return atIndex === -1 ? undefined : email.slice(atIndex + 1) || undefined
+}
+
 const buildAccessLogTenant = (request) => {
+  const emailDomain = getEmailDomain(request.headers?.email)
   const serviceAccount = request.headers?.['service-account']
   const tenant = {
     ...(request.requestingService && { id: request.requestingService }),
-    ...(serviceAccount && { message: JSON.stringify({ serviceAccount }) })
+    ...((emailDomain || serviceAccount) && {
+      message: JSON.stringify({ emailDomain, serviceAccount })
+    })
   }
   return Object.keys(tenant).length ? { tenant } : {}
 }
