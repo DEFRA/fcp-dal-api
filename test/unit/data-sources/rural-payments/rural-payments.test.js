@@ -41,7 +41,7 @@ describe('RuralPayments', () => {
       mockFetch.mockResolvedValueOnce('data')
 
       expect(await rp.fetch('path', dummyRequest)).toBe('data')
-      expect(mockFetch).toBeCalledTimes(1)
+      expect(mockFetch).toHaveBeenCalledTimes(1)
     })
 
     describe('throws upstream errors from RPP', () => {
@@ -58,7 +58,7 @@ describe('RuralPayments', () => {
           expect(thrownError.extensions).toMatchObject({
             response: { status: StatusCodes.INTERNAL_SERVER_ERROR }
           })
-          expect(mockFetch).toBeCalledTimes(1)
+          expect(mockFetch).toHaveBeenCalledTimes(1)
         }
 
         // Ensure we actually ran the catch block assertions (i.e. the test did throw)
@@ -70,7 +70,7 @@ describe('RuralPayments', () => {
 
         const rp = new RuralPayments(...datasourceOptions)
         await expect(rp.fetch('path', dummyRequest)).rejects.toThrow(new Error('ECONNREFUSED'))
-        expect(mockFetch).toBeCalledTimes(1)
+        expect(mockFetch).toHaveBeenCalledTimes(1)
       })
     })
   })
