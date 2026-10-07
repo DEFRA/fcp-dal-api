@@ -283,5 +283,11 @@ input EmailInput {
   """
   Email address of the customer or business
   """
-  address: String! @validateVariable(pattern: "^.{0,254}$")
+  # WHATWG "valid email address" regex, as used by the graphql-scalars EmailAddress scalar:
+  # https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
+  # Adds a 1-254 character length lookahead, and uses [.] in place of \. to avoid escaping.
+  address: String!
+    @validateVariable(
+      pattern: "^(?=.{1,254}$)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:[.][a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+    )
 }

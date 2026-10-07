@@ -10,6 +10,9 @@ import {
 import { makeTestQuery } from '../makeTestQuery.js'
 import { waitFor } from '../../test-helpers/wait-for.js'
 
+const EMAIL_PATTERN =
+  "^(?=.{1,254}$)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:[.][a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const setupNock = () => {
@@ -574,18 +577,26 @@ describe('business', () => {
     }
   )
 
-  test('create a business - rejects email address longer than 254 characters', async () => {
+  test.each([
+    ['longer than 254 characters', `${'a'.repeat(243)}@example.com`],
+    ['without an @', 'not-an-email'],
+    ['with nothing before the @', '@example.com'],
+    ['with nothing after the @', 'someone@'],
+    ['containing a space', 'some one@example.com'],
+    ['with a trailing space', 'someone@example.com '],
+    ['with an invalid domain', 'someone@-example.com']
+  ])('create a business - rejects email address %s', async (_, address) => {
     const result = await makeTestQuery(
       query,
       null,
       true,
-      { input: { ...input, email: { address: `${'a'.repeat(243)}@example.com` } } },
+      { input: { ...input, email: { address } } },
       [],
       false
     )
 
     expect(result.errors[0].message).toEqual(
-      "variable 'input.email.address' must match pattern ^.{0,254}$"
+      `variable 'input.email.address' must match pattern ${EMAIL_PATTERN}`
     )
     expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
     expect(result.data.createBusiness).toBeNull()
