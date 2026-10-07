@@ -19,18 +19,20 @@ business(sbi: ID!): Business @auth(requires: [SINGLE_FRONT_DOOR, CONSOLIDATED_VI
 It is implemented as a schema transformer (`authDirectiveTransformer`) in
 [`app/auth/authenticate.js`](../app/auth/authenticate.js).
 
-### `requires` - which consumer groups can call this field
+### `requires` - which consumer entities can call this field
 
 `requires` names one or more of the AD groups configured in `app/config.js`
 (`auth.groups.{ADMIN,CONSOLIDATED_VIEW,SINGLE_FRONT_DOOR,SFI_REFORM}`), each mapping to an Azure AD
-Entra group ID for a consuming system (Consolidated View, Single Front Door, Grants Platform, etc).
+Entra group ID / entity ID for a consuming system (Consolidated View, Single Front Door, Grants
+Platform, etc).
 
 This comes from a **different** header than the ones in [DAL Authentication](./auth): the caller's
 group membership is read from the `groups` claim of the Entra ID JWT sent in the standard
 `Authorization: Bearer <token>` header, verified by `getAuth()` in `authenticate.js`.
-This identifies _which system_ is calling the DAL.
+Authorization first compares the token's `appid` claim to the configured IDs, then falls back to the
+existing `groups` claim check. This identifies _which system_ is calling the DAL.
 The end user is identified by one-of `email`/`x-forwarded-authorization`/`service-account` headers.
-Every field-level `@auth` check runs against `context.auth.groups`.
+Every field-level `@auth` check runs against the `appid` and `groups` claims in `context.auth`.
 
 A caller in the `ADMIN` group bypasses the `requires` check entirely (and the
 `serviceAccountPermitted` check below), regardless of what groups the field lists.
@@ -93,8 +95,8 @@ admin service account can call any `@auth`-protected field, mutations included.
 
 `authDirectiveTransformer` wraps the field's resolver with three checks, in order:
 
-1. `checkAuthGroup(requesterGroups, requires)` - throws `Unauthorized` if the caller isn't in
-   `ADMIN` or any group in `requires`.
+1. `checkAuthEntity(auth, requires)` - throws `Unauthorized` if the token's `appid` does not match
+   an allowed entity and the caller isn't in `ADMIN` or any group in `requires`.
 2. `checkServiceAccountAccess(isServiceAccount, serviceAccountPermitted, isAdmin)` - throws
    `Unauthorized` if the caller is a service account, `serviceAccountPermitted` is `false`, and the
    caller isn't `ADMIN`.

@@ -104,8 +104,8 @@ export function getRequestingService(groups) {
 /**
  * ADMIN group membership bypasses both the @auth group check and the serviceAccountPermitted gate.
  */
-export function isAdminCaller(requesterGroups) {
-  return requesterGroups.includes(authGroups.ADMIN)
+export function isAdminCaller({ appid, groups = [] }) {
+  return appid === authGroups.ADMIN || groups.includes(authGroups.ADMIN)
 }
 
 /**
@@ -129,20 +129,26 @@ function isServiceAccountPermitted(schema, typeName) {
 }
 
 /**
- * Checks that the requester's groups satisfy the given @auth allow-list.
+ * Checks that the requester's appid or groups satisfy the given @auth allow-list.
  * @throws {Unauthorized} if access is not granted
  */
-export function checkAuthGroup(requesterGroups, allowedGroups) {
-  if (isAdminCaller(requesterGroups)) {
+export function checkAuthEntity({ appid, groups = [] }, allowedEntities) {
+  if (isAdminCaller({ appid, groups })) {
     return
-  } else {
-    const hasAccess = allowedGroups.some((group) => {
-      const authGroupValue = authGroups[group]
-      return authGroupValue && requesterGroups.includes(authGroupValue)
-    })
-    if (!hasAccess) {
-      throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
-    }
+  }
+
+  // the allowedEntities are human-readable names for the AD app or group IDs,
+  // so we need to map them to the actual IDs for comparison
+  const allowedEntityIds = allowedEntities.map((entity) => authGroups[entity])
+
+  if (allowedEntityIds.includes(appid)) {
+    return
+  }
+
+  // check if the requester's groups intersect with the allowed groups
+  const hasAccess = allowedEntityIds.some((entityId) => entityId && groups.includes(entityId))
+  if (!hasAccess) {
+    throw new Unauthorized('Authorization failed, you are not in the correct AD groups')
   }
 }
 
@@ -211,12 +217,13 @@ export function authDirectiveTransformer(schema) {
 
       if (authDirective) {
         fieldConfig.resolve = function (source, args, context, info) {
-          const requesterGroups = context.auth.groups || []
-          checkAuthGroup(requesterGroups, authDirective.requires)
+          const auth = context.auth
+          const requesterGroups = auth.groups || []
+          checkAuthEntity(auth, authDirective.requires)
           checkServiceAccountAccess(
             isServiceAccount(context.authContext),
             isServiceAccountPermitted(schema, typeName),
-            isAdminCaller(requesterGroups)
+            isAdminCaller({ appid: auth.appid, groups: requesterGroups })
           )
           checkUserAccess(context.authContext, authDirective.userType)
           return resolve(source, args, context, info)
