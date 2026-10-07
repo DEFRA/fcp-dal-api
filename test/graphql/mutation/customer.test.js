@@ -255,51 +255,77 @@ describe('customer mutations', () => {
       expect(kits.isDone()).toBe(true)
     })
 
-    test.each(['reason', 'note'])('refuses a request with no %s', async (field) => {
+    test.each([
+      ['a reason', { reason: 'my reason' }],
+      ['a note', { note: 'my note' }]
+    ])('deactivates with only %s, sending only that to KITS', async (_, fields) => {
       // arrange
-      const kits = nockDeactivate()
-      const input = { ...validInput }
-      delete input[field]
-
-      // act
-      const result = await makeTestQuery(deactivateMutation, null, true, { input })
-
-      // assert
-      expect(result.errors[0].message).toContain(
-        `Field "${field}" of required type "String!" was not provided`
-      )
-      expect(kits.isDone()).toBe(false)
-    })
-
-    test('refuses a blank reason with REASON_AND_NOTE_REQUIRED', async () => {
-      // arrange
-      const kits = nockDeactivate()
+      const kits = nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/deactivate', { partyNoteType: 'DeactivatePerson', ...fields })
+        .reply(204)
 
       // act
       const result = await makeTestQuery(deactivateMutation, null, true, {
-        input: { ...validInput, reason: '  ' }
+        input: { crn: '1234567890', ...fields }
       })
 
       // assert
-      expect(result.errors[0].message).toBe('Both reason and note must be provided')
-      expect(result.errors[0].extensions.code).toBe('REASON_AND_NOTE_REQUIRED')
-      expect(kits.isDone()).toBe(false)
+      expect(result).toEqual({ data: { updateDeactivateCustomer: { success: true } } })
+      expect(kits.isDone()).toBe(true)
     })
 
-    test.each(['reason', 'note'])('refuses a %s longer than 100 characters', async (field) => {
+    test.each([
+      ['neither reason nor note is given', {}],
+      ['reason and note are only spaces', { reason: '  ', note: ' ' }]
+    ])('refuses with REASON_OR_NOTE_REQUIRED when %s', async (_, fields) => {
       // arrange
       const kits = nockDeactivate()
 
       // act
       const result = await makeTestQuery(deactivateMutation, null, true, {
-        input: { ...validInput, [field]: 'x'.repeat(101) }
+        input: { crn: '1234567890', ...fields }
+      })
+
+      // assert
+      expect(result.errors[0].message).toBe('At least one of reason or note must be provided')
+      expect(result.errors[0].extensions.code).toBe('REASON_OR_NOTE_REQUIRED')
+      expect(kits.isDone()).toBe(false)
+    })
+
+    test.each([
+      ['reason', 101, '^.{0,100}$'],
+      ['note', 4001, '^.{0,4000}$']
+    ])('refuses a %s of %i characters', async (field, length, pattern) => {
+      // arrange
+      const kits = nockDeactivate()
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, {
+        input: { ...validInput, [field]: 'x'.repeat(length) }
       })
 
       // assert
       expect(result.errors[0].message).toBe(
-        `variable 'input.${field}' must match pattern ^.{0,100}$`
+        `variable 'input.${field}' must match pattern ${pattern}`
       )
       expect(kits.isDone()).toBe(false)
+    })
+
+    test('accepts a note of 4000 characters', async () => {
+      // arrange
+      const note = 'x'.repeat(4000)
+      const kits = nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/deactivate', { partyNoteType: 'DeactivatePerson', note })
+        .reply(204)
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, {
+        input: { crn: '1234567890', note }
+      })
+
+      // assert
+      expect(result.errors).toBeUndefined()
+      expect(kits.isDone()).toBe(true)
     })
 
     test('returns Not Found when KITS cannot find the person', async () => {

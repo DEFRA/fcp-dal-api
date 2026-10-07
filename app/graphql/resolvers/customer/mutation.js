@@ -85,11 +85,11 @@ async function updateDeactivateCustomerResolver(
   auditTrail?.recordAccount(info, 'crn', crn)
   auditTrail?.recordEntity(info, { entity: 'person', action: 'deactivated', entityid: crn })
 
-  const trimmedReason = reason.trim()
-  const trimmedNote = note.trim()
-  if (!trimmedReason || !trimmedNote) {
-    throw new BadRequest('Both reason and note must be provided', {
-      extensions: { code: 'REASON_AND_NOTE_REQUIRED' }
+  const trimmedReason = reason?.trim() || undefined
+  const trimmedNote = note?.trim() || undefined
+  if (!trimmedReason && !trimmedNote) {
+    throw new BadRequest('At least one of reason or note must be provided', {
+      extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
     })
   }
 

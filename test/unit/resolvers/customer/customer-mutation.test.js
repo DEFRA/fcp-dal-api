@@ -425,17 +425,35 @@ describe('Customer Mutations', () => {
     })
 
     test.each([
-      ['reason is empty', { reason: '', note: 'my note' }],
-      ['note is empty', { reason: 'my reason', note: '' }],
-      ['reason is only spaces', { reason: '   ', note: 'my note' }],
-      ['note is only spaces', { reason: 'my reason', note: '   ' }]
+      ['only a reason is given', { reason: 'my reason' }, ['my reason', undefined]],
+      ['only a note is given', { note: 'my note' }, [undefined, 'my note']],
+      ['the note is only spaces', { reason: 'my reason', note: '  ' }, ['my reason', undefined]],
+      ['the reason is empty', { reason: '', note: 'my note' }, [undefined, 'my note']]
+    ])('deactivates when %s, sending only what was given', async (_, fields, expected) => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      // act
+      await deactivate({ crn: 'crn', ...fields })
+
+      // assert
+      expect(mockDataSources.ruralPaymentsCustomer.deactivatePerson).toHaveBeenCalledWith(
+        'personId',
+        ...expected
+      )
+    })
+
+    test.each([
+      ['neither is given', {}],
+      ['both are empty', { reason: '', note: '' }],
+      ['both are only spaces', { reason: '   ', note: '  ' }]
     ])('refuses without calling upstream when %s', async (_, fields) => {
       // arrange / act
       const error = await deactivate({ crn: 'crn', ...fields }).catch((e) => e)
 
       // assert
-      expect(error.message).toBe('Both reason and note must be provided')
-      expect(error.extensions.code).toBe('REASON_AND_NOTE_REQUIRED')
+      expect(error.message).toBe('At least one of reason or note must be provided')
+      expect(error.extensions.code).toBe('REASON_OR_NOTE_REQUIRED')
       expect(mockDataSources.mongoCustomer.findPersonIdByCRN).not.toHaveBeenCalled()
       expect(mockDataSources.ruralPaymentsCustomer.deactivatePerson).not.toHaveBeenCalled()
     })
@@ -472,7 +490,7 @@ describe('Customer Mutations', () => {
 
     test('audits the crn when the reason or note is refused', async () => {
       // arrange / act
-      await deactivate({ crn: 'crn', reason: '', note: 'my note' }).catch(() => {})
+      await deactivate({ crn: 'crn', reason: '', note: '' }).catch(() => {})
 
       // assert
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
