@@ -78,7 +78,7 @@ describe('updateBusinessAllFields', () => {
       sbi: '123456789',
       name: 'new name',
       email: { address: 'newemail@test.com' },
-      phone: { landline: 'new phone', mobile: 'new mobile' },
+      phone: { landline: '01234 567890', mobile: '07123 456789' },
       vat: '987654321',
       legalStatusCode: 102108,
       typeCode: 3,
@@ -92,8 +92,8 @@ describe('updateBusinessAllFields', () => {
     const detailsPutPayloadOverrides = {
       name: 'new name',
       email: 'newemail@test.com',
-      landline: 'new phone',
-      mobile: 'new mobile',
+      landline: '01234 567890',
+      mobile: '07123 456789',
       taxRegistrationNumber: '987654321'
     }
     const additionalDetailsPutPayloadOverrides = {

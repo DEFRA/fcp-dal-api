@@ -272,12 +272,12 @@ input PhoneInput {
   """
   Mobile number of the customer or business
   """
-  mobile: String @validateVariable(pattern: "^.{0,50}$")
+  mobile: String @validateVariable(pattern: "^(?:|(?=.{10,50}$)[+]?[0-9 ()]*)$")
 
   """
   Landline number of the customer or business
   """
-  landline: String @validateVariable(pattern: "^.{0,50}$")
+  landline: String @validateVariable(pattern: "^(?:|(?=.{10,50}$)[+]?[0-9 ()]*)$")
 }
 
 "Represents data about a customers or business email details"

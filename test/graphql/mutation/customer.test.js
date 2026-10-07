@@ -834,14 +834,14 @@ describe('customer mutations', () => {
 
   test('updateCustomerPhone', async () => {
     setupNock({
-      landline: 'newLandline',
-      mobile: 'newMobile'
+      landline: '(01234) 567890',
+      mobile: '+44 7123 456789'
     })
 
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerPhone(
-          input: { crn: "1234567890", phone: { landline: "newLandline", mobile: "newMobile" } }
+          input: { crn: "1234567890", phone: { landline: "(01234) 567890", mobile: "+44 7123 456789" } }
         ) {
           success
           customer {
@@ -860,7 +860,7 @@ describe('customer mutations', () => {
       data: {
         updateCustomerPhone: {
           success: true,
-          customer: { info: { phone: { mobile: 'newMobile', landline: 'newLandline' } } }
+          customer: { info: { phone: { mobile: '+44 7123 456789', landline: '(01234) 567890' } } }
         }
       }
     })
