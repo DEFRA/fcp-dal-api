@@ -209,6 +209,101 @@ describe('customer mutations', () => {
       expect(result.errors[0].message).toBe('Not Found')
     })
   })
+  describe('updateUnlockCustomer', () => {
+    test('unlocks a customer through the GraphQL mutation', async () => {
+      nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/unlock', {
+          reason: 'my reason',
+          partyNoteType: 'UnlockPerson'
+        })
+        .reply(204)
+
+      nock(config.get('kits.internal.gatewayUrl'))
+        .get('/person/personId/summary')
+        .reply(200, {
+          _data: { id: 'personId', locked: true, customerReferenceNumber: 'crn' }
+        })
+
+      const result = await makeTestQuery(`#graphql
+        mutation {
+          updateUnlockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+            success
+            customer {
+              info {
+                status {
+                  locked
+                }
+              }
+            }
+          }
+        }
+      `)
+
+      expect(result).toEqual({
+        data: {
+          updateUnlockCustomer: {
+            success: true,
+            customer: {
+              info: {
+                status: {
+                  locked: true
+                }
+              }
+            }
+          }
+        }
+      })
+    })
+
+    test('throws an error if no reason or note is provided', async () => {
+      const result = await makeTestQuery(`#graphql
+        mutation {
+          updateUnlockCustomer(input: { crn: "1234567890" }) {
+            success
+            customer {
+              info {
+                status {
+                  locked
+                }
+              }
+            }
+          }
+        }
+      `)
+
+      expect(result.errors[0].message).toBe('At least one of reason or note must be provided')
+    })
+
+    test('throws 404 if the person is not found', async () => {
+      nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/unlock', {
+          reason: 'my reason',
+          partyNoteType: 'UnlockPerson'
+        })
+        .reply(204)
+
+      nock(config.get('kits.internal.gatewayUrl'))
+        .get('/person/personId/summary')
+        .reply(404, { message: 'Person not found' })
+
+      const result = await makeTestQuery(`#graphql
+        mutation {
+          updateUnlockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+            success
+            customer {
+              info {
+                status {
+                  locked
+                }
+              }
+            }
+          }
+        }
+      `)
+
+      expect(result.errors[0].message).toBe('Not Found')
+    })
+  })
 
   describe('updateDeactivateCustomer', () => {
     const deactivateMutation = `#graphql
