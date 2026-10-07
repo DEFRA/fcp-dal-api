@@ -187,7 +187,7 @@ input AddressInputWithoutUprn {
   """
   First line of a non-PAF address (maybe duplicated in the named fields, but not always)
   """
-  line1: String! @validateVariable(pattern: "^.{0,240}$")
+  line1: String! @validateVariable(pattern: "^.{1,240}$")
 
   """
   Second line of a non-PAF address (maybe duplicated in the named fields, but not always)
@@ -232,7 +232,7 @@ input AddressInputWithoutUprn {
   """
   Locality of the address
   """
-  city: String! @validateVariable(pattern: "^.{0,60}$")
+  city: String! @validateVariable(pattern: "^.{1,60}$")
 
   """
   County of the address
@@ -242,12 +242,12 @@ input AddressInputWithoutUprn {
   """
   Postal code of the address
   """
-  postalCode: String! @validateVariable(pattern: "^.{0,8}$")
+  postalCode: String! @validateVariable(pattern: "^.{1,8}$")
 
   """
   Country of the address
   """
-  country: String! @validateVariable(pattern: "^.{0,100}$")
+  country: String! @validateVariable(pattern: "^.{1,100}$")
 
   """
   UPRN of the address
