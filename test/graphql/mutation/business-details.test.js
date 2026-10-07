@@ -245,7 +245,7 @@ describe('business', () => {
           pafOrganisationName: 'new pafOrganisationName',
           postalCode: 'NE1 2PC',
           street: 'new street',
-          uprn: 'new uprn'
+          uprn: '100080429521'
         }
       },
       correspondenceAddress: {
@@ -266,7 +266,7 @@ describe('business', () => {
           pafOrganisationName: 'new pafOrganisationName',
           postalCode: 'NE1 2PC',
           street: 'new street',
-          uprn: 'new uprn'
+          uprn: '100080429521'
         }
       },
       isCorrespondenceAsBusinessAddress: true
@@ -288,7 +288,7 @@ describe('business', () => {
         county: 'new county',
         postalCode: 'NE1 2PC',
         country: 'new country',
-        uprn: 'new uprn',
+        uprn: '100080429521',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
         addressTypeId: undefined
@@ -308,7 +308,7 @@ describe('business', () => {
         county: 'new county',
         postalCode: 'NE1 2PC',
         country: 'new country',
-        uprn: 'new uprn',
+        uprn: '100080429521',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
         addressTypeId: undefined

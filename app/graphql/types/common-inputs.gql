@@ -73,7 +73,7 @@ input AddressInput {
   """
   UPRN of the address
   """
-  uprn: String @validateVariable(pattern: "^.{0,12}$")
+  uprn: String @validateVariable(pattern: "^[0-9]{0,12}$")
 
   """
   Dependant locality of the address
@@ -165,7 +165,7 @@ input AddressInputWithUprn {
   """
   UPRN of the address
   """
-  uprn: String! @validateVariable(pattern: "^.{0,12}$")
+  uprn: String! @validateVariable(pattern: "^[0-9]{0,12}$")
 
   """
   Dependant locality of the address
@@ -252,7 +252,7 @@ input AddressInputWithoutUprn {
   """
   UPRN of the address
   """
-  uprn: String @validateVariable(pattern: "^.{0,12}$")
+  uprn: String @validateVariable(pattern: "^[0-9]{0,12}$")
 
   """
   Dependant locality of the address

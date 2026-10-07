@@ -617,8 +617,11 @@ describe('business', () => {
     }
   )
 
-  test('create a business - rejects uprn longer than 12 characters', async () => {
-    const address = { withUprn: { ...input.address.withoutUprn, uprn: '1234567890123' } }
+  test.each([
+    ['longer than 12 characters', '1234567890123'],
+    ['containing non-digit characters', '12345678901A']
+  ])('create a business - rejects uprn %s', async (_, uprn) => {
+    const address = { withUprn: { ...input.address.withoutUprn, uprn } }
     const result = await makeTestQuery(
       query,
       null,
@@ -629,7 +632,7 @@ describe('business', () => {
     )
 
     expect(result.errors[0].message).toEqual(
-      "variable 'input.address.withUprn.uprn' must match pattern ^.{0,12}$"
+      "variable 'input.address.withUprn.uprn' must match pattern ^[0-9]{0,12}$"
     )
     expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
     expect(result.data.createBusiness).toBeNull()
