@@ -13,6 +13,8 @@ import { waitFor } from '../../test-helpers/wait-for.js'
 const EMAIL_PATTERN =
   "^(?=.{1,254}$)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:[.][a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 
+const PHONE_PATTERN = '^(?:|(?=.{10,50}$)[+]?[0-9 ()]*)$'
+
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const setupNock = () => {
@@ -410,7 +412,7 @@ describe('business', () => {
   test.each([
     ['empty', {}],
     ['null numbers', { mobile: null, landline: null }],
-    ['blank numbers', { mobile: ' ', landline: '' }]
+    ['blank numbers', { mobile: '', landline: '' }]
   ])('create a business - rejects phone with %s', async (_, phone) => {
     const result = await makeTestQuery(query, null, true, { input: { ...input, phone } }, [], false)
 
@@ -605,28 +607,52 @@ describe('business', () => {
     )
   })
 
-  test.each(['mobile', 'landline'])(
-    'create a business - rejects phone %s longer than 50 characters',
-    async (field) => {
-      const result = await makeTestQuery(
-        query,
-        null,
-        true,
-        { input: { ...input, phone: { ...input.phone, [field]: `+44${'1'.repeat(48)}` } } },
-        [],
-        false
-      )
+  test.each(
+    ['mobile', 'landline'].flatMap((field) => [
+      [field, 'longer than 50 characters', `+44${'1'.repeat(48)}`],
+      [field, 'shorter than 10 characters', '012345678'],
+      [field, 'of only a space', ' '],
+      [field, 'containing letters', '01234 56789O'],
+      [field, 'containing a hyphen', '01234-567890'],
+      [field, 'containing an extension', '01234 567890 ext 12'],
+      [field, 'containing a full stop', '01234.567890'],
+      [field, 'with + after the start', '44+1234567890'],
+      [field, 'with + at the end', '01234567890+'],
+      [field, 'with more than one +', '++441234567890'],
+      [field, 'with a space before the +', ' +441234567890']
+    ])
+  )('create a business - rejects phone %s %s', async (field, _, number) => {
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, phone: { ...input.phone, [field]: number } } },
+      [],
+      false
+    )
 
-      expect(result.errors[0].message).toEqual(
-        `variable 'input.phone.${field}' must match pattern ^.{0,50}$`
-      )
-      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
-      expect(result.data.createBusiness).toBeNull()
-      expect(nock.pendingMocks()).toContainEqual(
-        expect.stringContaining('/organisation/create/personId')
-      )
-    }
-  )
+    expect(result.errors[0].message).toEqual(
+      `variable 'input.phone.${field}' must match pattern ${PHONE_PATTERN}`
+    )
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.createBusiness).toBeNull()
+    expect(nock.pendingMocks()).toContainEqual(
+      expect.stringContaining('/organisation/create/personId')
+    )
+  })
+
+  test.each([
+    ['digits only', { landline: '01234567890' }],
+    ['exactly 10 characters', { landline: '0123456789' }],
+    ['a blank landline alongside a mobile', { mobile: '07123456789', landline: '' }],
+    ['spaces', { landline: '01234 567 890' }],
+    ['brackets', { landline: '(01234) 567890' }],
+    ['international prefix', { mobile: '+44 (0)7123 456789' }]
+  ])('create a business - accepts phone with %s', async (_, phone) => {
+    const result = await makeTestQuery(query, null, true, { input: { ...input, phone } }, [], false)
+
+    expect(result.errors?.[0]?.message ?? '').not.toContain('must match pattern')
+  })
 
   test.each([
     ['longer than 12 characters', '1234567890123'],

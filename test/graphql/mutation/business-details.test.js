@@ -574,19 +574,19 @@ describe('business', () => {
     const input = {
       sbi: '123456789',
       phone: {
-        landline: 'new phone',
-        mobile: 'new mobile'
+        landline: '01234 567890',
+        mobile: '07123 456789'
       },
       correspondencePhone: {
-        landline: 'new correspondence phone',
-        mobile: 'new correspondence mobile'
+        landline: '01234 567892',
+        mobile: '07123 456781'
       }
     }
     const putPayloadOverrides = {
-      landline: 'new phone',
-      mobile: 'new mobile',
-      correspondenceLandline: 'new correspondence phone',
-      correspondenceMobile: 'new correspondence mobile'
+      landline: '01234 567890',
+      mobile: '07123 456789',
+      correspondenceLandline: '01234 567892',
+      correspondenceMobile: '07123 456781'
     }
     const { sbi: _, ...queryReturn } = input
 
