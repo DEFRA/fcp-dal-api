@@ -65,6 +65,26 @@ server.ext({
   }
 })
 
+// tenant.id identifies the calling service, tenant.message identifies the service account (from
+// the service-account header) and/or the domain of the email header the request was made on behalf
+// of. Only the domain of the email is logged, as the full address identifies an end user.
+const getEmailDomain = (email) => {
+  const atIndex = email?.lastIndexOf('@') ?? -1
+  return atIndex === -1 ? undefined : email.slice(atIndex + 1) || undefined
+}
+
+const buildAccessLogTenant = (request) => {
+  const emailDomain = getEmailDomain(request.headers?.email)
+  const serviceAccount = request.headers?.['service-account']
+  const tenant = {
+    ...(request.requestingService && { id: request.requestingService }),
+    ...((emailDomain || serviceAccount) && {
+      message: JSON.stringify({ emailDomain, serviceAccount })
+    })
+  }
+  return Object.keys(tenant).length ? { tenant } : {}
+}
+
 server.events.on('response', function (request) {
   // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
   // response is never fully written (e.g. the client disconnects mid-response).
@@ -99,7 +119,7 @@ server.events.on('response', function (request) {
       response: {
         statusCode: request.response.statusCode
       },
-      ...(request.requestingService && { tenant: { id: request.requestingService } })
+      ...buildAccessLogTenant(request)
     })
   }
 
