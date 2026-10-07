@@ -76,6 +76,34 @@ async function updateLockCustomerResolver(
   }
 }
 
+async function updateDeactivateCustomerResolver(
+  _,
+  { input: { crn, reason, note } },
+  { dataSources, auditTrail },
+  info
+) {
+  auditTrail?.recordAccount(info, 'crn', crn)
+  auditTrail?.recordEntity(info, { entity: 'person', action: 'deactivated', entityid: crn })
+
+  const trimmedReason = reason.trim()
+  const trimmedNote = note.trim()
+  if (!trimmedReason || !trimmedNote) {
+    throw new BadRequest('Both reason and note must be provided', {
+      extensions: { code: 'REASON_AND_NOTE_REQUIRED' }
+    })
+  }
+
+  const personId = await retrievePersonIdByCRN(crn, dataSources)
+  auditTrail?.recordAccount(info, 'personId', personId)
+
+  await dataSources.ruralPaymentsCustomer.deactivatePerson(personId, trimmedReason, trimmedNote)
+
+  return {
+    success: true,
+    customer: { personId }
+  }
+}
+
 export const Mutation = {
   updateCustomerAddress: updateCustomerResolver,
   updateCustomerDateOfBirth: updateCustomerResolver,
@@ -84,5 +112,6 @@ export const Mutation = {
   updateCustomerPhone: updateCustomerResolver,
   updateCustomerDoNotContact: updateCustomerResolver,
   updateCustomerAllFields: updateCustomerResolver,
-  updateLockCustomer: updateLockCustomerResolver
+  updateLockCustomer: updateLockCustomerResolver,
+  updateDeactivateCustomer: updateDeactivateCustomerResolver
 }

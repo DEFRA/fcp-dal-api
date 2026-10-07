@@ -426,4 +426,34 @@ describe('Rural Payments Customer', () => {
       })
     })
   })
+
+  describe('deactivatePerson', () => {
+    test('sends the reason and note to the deactivate endpoint for the person', async () => {
+      // arrange
+      httpPost.mockResolvedValueOnce({ status: 204 })
+
+      // act
+      await ruralPaymentsCustomer.deactivatePerson('12345', 'my-reason', 'my-note')
+
+      // assert
+      expect(httpPost).toHaveBeenCalledWith('person/12345/deactivate', {
+        body: JSON.stringify({
+          reason: 'my-reason',
+          note: 'my-note',
+          partyNoteType: 'DeactivatePerson'
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+    })
+
+    test('passes on an error from the upstream', async () => {
+      // arrange
+      httpPost.mockRejectedValueOnce(new Error('Network error'))
+
+      // act / assert
+      await expect(
+        ruralPaymentsCustomer.deactivatePerson('12345', 'my-reason', 'my-note')
+      ).rejects.toThrow('Network error')
+    })
+  })
 })

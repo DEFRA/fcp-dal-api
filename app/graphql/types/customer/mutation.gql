@@ -46,6 +46,33 @@ extend type Mutation {
   """
   updateLockCustomer(input: UpdateLockCustomerInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Deactivates (soft deletes) a customer's account.
+
+  Note that both the reason and note must be provided.
+
+  Error codes:
+  - `REASON_AND_NOTE_REQUIRED`: Both reason and note must be provided
+  - `NOT FOUND`: No customer exists for the given CRN.
+  """
+  updateDeactivateCustomer(input: UpdateDeactivateCustomerInput!): UpdateCustomerResponse
+    @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input UpdateDeactivateCustomerInput {
+  """
+  CRN of the customer.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
+  """
+  Reason for deactivating the customer's account.
+  """
+  reason: String! @validateVariable(pattern: "^.{0,100}$")
+  """
+  Note for deactivating the customer's account.
+  """
+  note: String! @validateVariable(pattern: "^.{0,100}$")
 }
 
 input UpdateLockCustomerInput {

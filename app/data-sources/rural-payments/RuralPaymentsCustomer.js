@@ -193,4 +193,16 @@ export class RuralPaymentsCustomer extends RuralPayments {
     })
     return response._data
   }
+
+  async deactivatePerson(personId, reason, note) {
+    const body = JSON.stringify({
+      reason,
+      note,
+      partyNoteType: 'DeactivatePerson'
+    })
+    await this.post(`person/${personId}/deactivate`, {
+      body,
+      headers: postPutHeaders
+    })
+  }
 }

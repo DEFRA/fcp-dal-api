@@ -49,6 +49,7 @@ describe('Customer Mutations', () => {
         updatePersonDetails: jest.fn(),
         validateEmail: jest.fn(),
         lockPerson: jest.fn(),
+        deactivatePerson: jest.fn(),
         logger: { warn: jest.fn() },
         gatewayType: 'ruralPayments',
         request: {}
@@ -387,6 +388,130 @@ describe('Customer Mutations', () => {
         action: 'locked',
         entityid: undefined
       })
+    })
+  })
+
+  describe('updateDeactivateCustomer', () => {
+    const info = { path: { key: 'updateDeactivateCustomer' } }
+    let auditTrail
+
+    beforeEach(() => {
+      auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    })
+
+    const deactivate = (input) =>
+      Mutation.updateDeactivateCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+    test('deactivates the person found for the crn', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      // act
+      const result = await deactivate({ crn: 'crn', reason: 'my reason', note: 'my note' })
+
+      // assert
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith('crn')
+      expect(mockDataSources.ruralPaymentsCustomer.deactivatePerson).toHaveBeenCalledWith(
+        'personId',
+        'my reason',
+        'my note'
+      )
+      expect(result).toEqual({ success: true, customer: { personId: 'personId' } })
+    })
+
+    test.each([
+      ['reason is empty', { reason: '', note: 'my note' }],
+      ['note is empty', { reason: 'my reason', note: '' }],
+      ['reason is only spaces', { reason: '   ', note: 'my note' }],
+      ['note is only spaces', { reason: 'my reason', note: '   ' }]
+    ])('refuses without calling upstream when %s', async (_, fields) => {
+      // arrange / act
+      const error = await deactivate({ crn: 'crn', ...fields }).catch((e) => e)
+
+      // assert
+      expect(error.message).toBe('Both reason and note must be provided')
+      expect(error.extensions.code).toBe('REASON_AND_NOTE_REQUIRED')
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).not.toHaveBeenCalled()
+      expect(mockDataSources.ruralPaymentsCustomer.deactivatePerson).not.toHaveBeenCalled()
+    })
+
+    test('sends the reason and note without surrounding spaces', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      // act
+      await deactivate({ crn: 'crn', reason: '  my reason ', note: ' my note  ' })
+
+      // assert
+      expect(mockDataSources.ruralPaymentsCustomer.deactivatePerson).toHaveBeenCalledWith(
+        'personId',
+        'my reason',
+        'my note'
+      )
+    })
+
+    const deactivatedPersonEntity = { entity: 'person', action: 'deactivated', entityid: 'crn' }
+
+    test('audits the crn, the personId and a deactivated person', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      // act
+      await deactivate({ crn: 'crn', reason: 'my reason', note: 'my note' })
+
+      // assert
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, deactivatedPersonEntity)
+    })
+
+    test('audits the crn when the reason or note is refused', async () => {
+      // arrange / act
+      await deactivate({ crn: 'crn', reason: '', note: 'my note' }).catch(() => {})
+
+      // assert
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, deactivatedPersonEntity)
+    })
+
+    test('audits the crn but no personId when the person is not found', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(null)
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
+        new Error('Not Found')
+      )
+
+      // act
+      const error = await deactivate({ crn: 'crn', reason: 'r', note: 'n' }).catch((e) => e)
+
+      // assert
+      expect(error.message).toBe('Not Found')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(info, 'personId', expect.anything())
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, deactivatedPersonEntity)
+      expect(mockDataSources.ruralPaymentsCustomer.deactivatePerson).not.toHaveBeenCalled()
+    })
+
+    test('audits the crn and personId when the upstream deactivate fails', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+      mockDataSources.ruralPaymentsCustomer.deactivatePerson.mockRejectedValue(
+        new Error('Upstream error')
+      )
+
+      // act
+      const error = await deactivate({ crn: 'crn', reason: 'r', note: 'n' }).catch((e) => e)
+
+      // assert
+      expect(error.message).toBe('Upstream error')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, deactivatedPersonEntity)
     })
   })
 })
