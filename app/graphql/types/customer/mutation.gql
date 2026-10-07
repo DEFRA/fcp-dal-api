@@ -46,6 +46,25 @@ extend type Mutation {
   """
   updateLockCustomer(input: UpdateLockCustomerInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Sends a verification email to the registered email address of the external
+  customer making the request, identified by the CRN in their Defra ID token.
+
+  In environments where customer emails are disabled (emails are only sent in
+  `prod` and `ext-test`), the email verification link is logged instead, so it
+  can be found by searching the DAL logs for `Email verification link`. The
+  link has the format:
+  `<rural payments portal url>/validate-email/<url-encoded email address>/<digital contact id>`
+
+  Error codes:
+  - `NOT FOUND`: The customer has no email address.
+  - `EMAIL_ALREADY_VERIFIED`: The customer's email address is already verified.
+  """
+  # eslint-disable-next-line @graphql-eslint/naming-convention
+  sendConfirmEmailAddressEmail: SendConfirmEmailAddressEmailResponse
+    @wip
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [EXTERNAL])
 }
 
 input UpdateLockCustomerInput {
@@ -202,4 +221,8 @@ input UpdateCustomerAllFieldsInput {
 type UpdateCustomerResponse {
   success: Boolean
   customer: Customer
+}
+
+type SendConfirmEmailAddressEmailResponse {
+  success: Boolean
 }
