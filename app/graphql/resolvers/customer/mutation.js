@@ -125,7 +125,7 @@ async function sendConfirmEmailAddressEmailResolver(
   await dataSources.ruralPaymentsCustomer.sendVerificationEmail(digitalContactPartyId)
 
   if (config.get('ruralPayments.customerEmailsDisabled')) {
-    const portalUrl = (config.get('ruralPayments.portalUrl') ?? '').replace(/\/+$/, '')
+    const portalUrl = config.get('ruralPayments.portalUrl')
     logger.info(
       `#resolver - sendConfirmEmailAddressEmail - Email verification link: ${portalUrl}/validate-email/${encodeURIComponent(person.email)}/${digitalContactPartyId}`
     )

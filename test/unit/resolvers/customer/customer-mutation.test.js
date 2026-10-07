@@ -551,7 +551,7 @@ describe('Customer Mutations', () => {
       test('logs the email verification link when customer emails are disabled', async () => {
         mockConfig({
           'ruralPayments.customerEmailsDisabled': true,
-          'ruralPayments.portalUrl': 'https://rural-payments.example.com/'
+          'ruralPayments.portalUrl': 'https://rural-payments.example.com'
         })
         const infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {})
 

@@ -246,8 +246,8 @@ export const config = convict({
         'Rural Payments portal URL, used to log the email verification link when customer ' +
         'emails are disabled',
       format: String,
-      default: '',
-      nullable: true,
+      default: null,
+      nullable: process.env.CUSTOMER_EMAILS_DISABLED !== 'true',
       env: 'RURAL_PAYMENTS_PORTAL_URL'
     }
   },
