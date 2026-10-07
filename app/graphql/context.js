@@ -31,7 +31,7 @@ export async function context({ request }) {
   })
 
   const authContext = endUserAuthContext(request)
-  const defraIdCtx = await defraIdContext(authContext)
+  const defraIdCtx = await defraIdContext(authContext, { traceId: request.traceId })
   const auditTrail = createAuditTrail(authContext)
 
   const datasourceOptions = [

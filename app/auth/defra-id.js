@@ -1,7 +1,10 @@
 import { decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
 import { config } from '../config.js'
-import { BadRequest, Unauthorized } from '../errors/graphql.js'
 import { DefraIdJWKS } from '../data-sources/DefraIdJWKS.js'
+import { BadRequest, Unauthorized } from '../errors/graphql.js'
+import { DAL_REQUEST_AUTHENTICATION_DEFRA_ID_001 } from '../logger/codes.js'
+import { logger } from '../logger/logger.js'
+import { maskAllButLastFour } from '../logger/utils.js'
 
 const defraIdJWKS = new DefraIdJWKS()
 
@@ -55,10 +58,10 @@ function extractOrgIdFromDefraIdToken(sbi, payload) {
  * verification/decode throws an Unauthorized error
  *
  * @param {{ externalAuthHeader?: string }} authContext
- * @param {DefraIdJWKS} [jwksDataSource]
+ * @param {{ traceId: string, jwksDataSource?: DefraIdJWKS }} options
  * @returns {Promise<{ crn: () => string, orgId: (sbi: string) => string } | undefined>}
  */
-export const defraIdContext = async (authContext, jwksDataSource = defraIdJWKS) => {
+export const defraIdContext = async (authContext, { traceId, jwksDataSource = defraIdJWKS }) => {
   if (!authContext.externalAuthHeader) {
     return undefined
   }
@@ -66,6 +69,29 @@ export const defraIdContext = async (authContext, jwksDataSource = defraIdJWKS) 
   const tokenPayload = config.get('auth.disabled')
     ? decodeUnverifiedDefraIdToken(authContext.externalAuthHeader)
     : await verifyDefraIdToken(authContext.externalAuthHeader, jwksDataSource)
+
+  logger.info('#DAL Request authentication - Defra ID token decoded', {
+    type: 'http',
+    code: DAL_REQUEST_AUTHENTICATION_DEFRA_ID_001,
+    traceId,
+    tenant: {
+      message: JSON.stringify({
+        aud: tokenPayload.aud,
+        sub: tokenPayload.sub,
+        serviceId: tokenPayload.serviceId,
+        correlationId: tokenPayload.correlationId,
+        currentRelationshipId: tokenPayload.currentRelationshipId,
+        sessionId: tokenPayload.sessionId,
+        email: tokenPayload.email?.split('@')[1],
+        // contactId is crn which is considered PII
+        contactId: maskAllButLastFour(tokenPayload.contactId),
+        relationships: tokenPayload.relationships,
+        roles: tokenPayload.roles,
+        iat: tokenPayload.iat,
+        exp: tokenPayload.exp
+      })
+    }
+  })
 
   return {
     crn: () => {

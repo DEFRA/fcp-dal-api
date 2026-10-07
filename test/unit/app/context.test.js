@@ -21,7 +21,7 @@ const MongoCustomerMock = jest.fn()
 const MongoBusinessMock = jest.fn()
 const JWKSMock = jest.fn()
 const loggerChild = jest.fn()
-const loggerMock = { child: loggerChild }
+const loggerMock = { child: loggerChild, info: jest.fn() }
 
 jest.unstable_mockModule('../../../app/auth/authenticate.js', () => ({
   getAuth: getAuthMock,
