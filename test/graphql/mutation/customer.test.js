@@ -1004,16 +1004,16 @@ describe('customer mutations', () => {
 
   test('updateCustomerEmail', async () => {
     setupNock({
-      email: 'newEmail'
+      email: 'new.email@example.com'
     })
 
     nock(config.get('kits.internal.gatewayUrl'))
-      .get('/person/newEmail/validateEmail')
+      .get('/person/new.email%40example.com/validateEmail')
       .reply(200, { _data: { emailDuplicated: false } })
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerEmail(input: { crn: "1234567890", email: { address: "newEmail" } }) {
+        updateCustomerEmail(input: { crn: "1234567890", email: { address: "new.email@example.com" } }) {
           success
           customer {
             info {
@@ -1033,7 +1033,7 @@ describe('customer mutations', () => {
           customer: {
             info: {
               email: {
-                address: 'newEmail'
+                address: 'new.email@example.com'
               }
             }
           }
