@@ -513,7 +513,6 @@ describe('Customer Mutations - deactivate a customer', () => {
       }
     }
   `
-
   const customerDeactivatedStatusQuery = gql`
     query CustomerDeactivatedStatus($crn: ID!) {
       customer(crn: $crn) {
@@ -543,5 +542,41 @@ describe('Customer Mutations - deactivate a customer', () => {
     expect(result.updateDeactivateCustomer).toEqual({ success: true })
     const after = await client.request(customerDeactivatedStatusQuery, { crn }, headers)
     expect(after.customer.info.status.deactivated).toBe(true)
+  })
+})
+
+describe('Customer Mutations - unlock a customer', () => {
+  const unlockCustomerMutation = gql`
+    mutation updateUnlockCustomer($input: UpdateUnlockCustomerInput!) {
+      updateUnlockCustomer(input: $input) {
+        success
+      }
+    }
+  `
+
+  const customerLockStatusQuery = gql`
+    query CustomerLockStatus($crn: ID!) {
+      customer(crn: $crn) {
+        info {
+          status {
+            locked
+          }
+        }
+      }
+    }
+  `
+
+  it('should unlock the customer', async () => {
+    const client = new GraphQLClient(targetURL)
+
+    const setup = await client.request(
+      unlockCustomerMutation,
+      { input: { crn: '1111111800', reason: 'Customer requested unlock' } },
+      headers
+    )
+    expect(setup.updateUnlockCustomer).toEqual({ success: true })
+
+    const check = await client.request(customerLockStatusQuery, { crn: '1111111800' }, headers)
+    expect(check.customer.info.status.locked).toBe(false)
   })
 })

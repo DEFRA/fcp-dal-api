@@ -506,4 +506,43 @@ describe('Rural Payments Customer', () => {
       ).rejects.toThrow('Network error')
     })
   })
+
+  describe('unlockPerson', () => {
+    test('should send a POST request to unlock the person and return the response data', async () => {
+      const mockResponse = { success: true, message: 'Person unlocked successfully' }
+      httpPost.mockResolvedValueOnce({ _data: mockResponse })
+
+      const personId = '12345'
+      const result = await ruralPaymentsCustomer.unlockPerson(personId, 'my-reason', 'my-note')
+
+      expect(httpPost).toHaveBeenCalledWith(`person/${personId}/unlock`, {
+        body: JSON.stringify({
+          reason: 'my-reason',
+          note: 'my-note',
+          partyNoteType: 'UnlockPerson'
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      expect(result).toEqual(mockResponse)
+    })
+
+    test('should throw an error if the POST request fails', async () => {
+      const mockError = new Error('Network error')
+      httpPost.mockRejectedValueOnce(mockError)
+
+      const personId = '12345'
+      await expect(
+        ruralPaymentsCustomer.unlockPerson(personId, 'my-reason', 'my-note')
+      ).rejects.toThrow('Network error')
+
+      expect(httpPost).toHaveBeenCalledWith(`person/${personId}/unlock`, {
+        body: JSON.stringify({
+          reason: 'my-reason',
+          note: 'my-note',
+          partyNoteType: 'UnlockPerson'
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+    })
+  })
 })
