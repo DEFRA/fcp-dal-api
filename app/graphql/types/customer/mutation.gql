@@ -65,6 +65,35 @@ extend type Mutation {
   sendConfirmEmailAddressEmail: SendConfirmEmailAddressEmailResponse
     @wip
     @auth(requires: [SINGLE_FRONT_DOOR], userType: [EXTERNAL])
+
+  """
+  Deactivates (soft deletes) a customer's account.
+
+  Note that at least one of the reason or note must be provided.
+
+  Note the request won't fail if the customer is already deactivated.
+
+  Error codes:
+  - `REASON_OR_NOTE_REQUIRED`: At least one of reason or note must be provided
+  - `NOT FOUND`: No customer exists for the given CRN.
+  """
+  updateDeactivateCustomer(input: UpdateDeactivateCustomerInput!): UpdateCustomerResponse
+    @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input UpdateDeactivateCustomerInput {
+  """
+  CRN of the customer.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
+  """
+  Reason for deactivating the customer's account.
+  """
+  reason: String @validateVariable(pattern: "^.{0,100}$")
+  """
+  Note for deactivating the customer's account.
+  """
+  note: String @validateVariable(pattern: "^.{0,4000}$")
 }
 
 input UpdateLockCustomerInput {

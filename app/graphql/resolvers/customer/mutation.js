@@ -136,6 +136,34 @@ async function sendConfirmEmailAddressEmailResolver(
   }
 }
 
+async function updateDeactivateCustomerResolver(
+  _,
+  { input: { crn, reason, note } },
+  { dataSources, auditTrail },
+  info
+) {
+  auditTrail?.recordAccount(info, 'crn', crn)
+  auditTrail?.recordEntity(info, { entity: 'person', action: 'deactivated', entityid: crn })
+
+  const trimmedReason = reason?.trim() || undefined
+  const trimmedNote = note?.trim() || undefined
+  if (!trimmedReason && !trimmedNote) {
+    throw new BadRequest('At least one of reason or note must be provided', {
+      extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
+    })
+  }
+
+  const personId = await retrievePersonIdByCRN(crn, dataSources)
+  auditTrail?.recordAccount(info, 'personId', personId)
+
+  await dataSources.ruralPaymentsCustomer.deactivatePerson(personId, trimmedReason, trimmedNote)
+
+  return {
+    success: true,
+    customer: { personId }
+  }
+}
+
 export const Mutation = {
   updateCustomerAddress: updateCustomerResolver,
   updateCustomerDateOfBirth: updateCustomerResolver,
@@ -145,5 +173,6 @@ export const Mutation = {
   updateCustomerDoNotContact: updateCustomerResolver,
   updateCustomerAllFields: updateCustomerResolver,
   updateLockCustomer: updateLockCustomerResolver,
-  sendConfirmEmailAddressEmail: sendConfirmEmailAddressEmailResolver
+  sendConfirmEmailAddressEmail: sendConfirmEmailAddressEmailResolver,
+  updateDeactivateCustomer: updateDeactivateCustomerResolver
 }
