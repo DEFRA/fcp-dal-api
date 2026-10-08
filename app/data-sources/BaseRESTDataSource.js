@@ -86,10 +86,11 @@ export class BaseRESTDataSource extends RESTDataSource {
   async trace(url, request, fn) {
     const requestStart = Date.now()
     let result
+    let requestTimeMs
     try {
       result = await fn()
     } catch (error) {
-      const requestTimeMs = Date.now() - requestStart
+      requestTimeMs = Date.now() - requestStart
 
       void sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
         code: this.code
@@ -106,7 +107,7 @@ export class BaseRESTDataSource extends RESTDataSource {
 
       throw error
     }
-    const requestTimeMs = Date.now() - requestStart
+    requestTimeMs = Date.now() - requestStart
 
     const response = {
       status: result.response?.status,
