@@ -45,17 +45,6 @@ export class BaseRESTDataSource extends RESTDataSource {
     }
   }
 
-  didEncounterError(error, request, url) {
-    request.url = url
-
-    this.logger.error(`#datasource - ${this.name} - request error`, {
-      error: this.prepareErrorForLogging(error),
-      request,
-      response: { ...error?.extensions?.response },
-      code: this.code
-    })
-  }
-
   async throwIfResponseIsError(options) {
     if (options.response?.ok) {
       return
@@ -91,9 +80,32 @@ export class BaseRESTDataSource extends RESTDataSource {
   }
 
   // override trace function to avoid unnecessary logging
+  // Note: request errors are logged here rather than in `didEncounterError`, as that hook is
+  // invoked from within `fn` and so has no access to the request timing.  Failures (including
+  // timeouts) must be included in the request time metric, otherwise averages are skewed.
   async trace(url, request, fn) {
     const requestStart = Date.now()
-    const result = await fn()
+    let result
+    try {
+      result = await fn()
+    } catch (error) {
+      const requestTimeMs = Date.now() - requestStart
+
+      void sendMetric('RequestTime', requestTimeMs, Unit.Milliseconds, {
+        code: this.code
+      })
+
+      this.logger.error(`#datasource - ${this.name} - request error`, {
+        error: this.prepareErrorForLogging(error),
+        gatewayType: this.gatewayType,
+        requestTimeMs,
+        request: { ...request, url: url.toString() },
+        response: { ...error?.extensions?.response },
+        code: this.code
+      })
+
+      throw error
+    }
     const requestTimeMs = Date.now() - requestStart
 
     const response = {

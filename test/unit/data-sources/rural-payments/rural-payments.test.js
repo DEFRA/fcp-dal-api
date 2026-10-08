@@ -75,67 +75,6 @@ describe('RuralPayments', () => {
     })
   })
 
-  describe('didEncounterError', () => {
-    test('handles errors', () => {
-      const rp = new RuralPayments(...datasourceOptions)
-
-      const error = new Error('test error')
-      error.extensions = { response: { status: 400, headers: { get: () => 'text/html' } } }
-      const request = {}
-      const url = 'test url'
-
-      rp.didEncounterError(error, request, url)
-
-      expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
-        error: expect.objectContaining({ message: 'test error' }),
-        request,
-        response: error.extensions.response,
-        code: RURALPAYMENTS_API_REQUEST_001
-      })
-    })
-
-    test('handles complex errors with causes', () => {
-      const rp = new RuralPayments(...datasourceOptions)
-
-      const error = new Error('test error')
-      const intermediateError = new TypeError('intermediate cause')
-      intermediateError.cause = new Error('root cause error')
-      error.cause = intermediateError
-      error.extensions = { response: { status: 500 } }
-      const request = {}
-      const url = 'test url'
-
-      rp.didEncounterError(error, request, url)
-
-      expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
-        error: expect.objectContaining({
-          message:
-            'test error | Caused by TypeError: intermediate cause | Caused by Error: root cause error'
-        }),
-        request,
-        response: error.extensions.response,
-        code: RURALPAYMENTS_API_REQUEST_001
-      })
-    })
-
-    test('handles unknown errors', () => {
-      const rp = new RuralPayments(...datasourceOptions)
-
-      const error = undefined
-      const request = {}
-      const url = 'test url'
-
-      rp.didEncounterError(error, request, url)
-
-      expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
-        error: { message: 'unknown/empty error while trying to fetch upstream data' },
-        request,
-        response: {},
-        code: RURALPAYMENTS_API_REQUEST_001
-      })
-    })
-  })
-
   describe('gatewayType / isExternalRoute resolution', () => {
     test('resolves to internal when an email header is present', () => {
       const rp = new RuralPayments(
@@ -447,6 +386,31 @@ describe('RuralPayments', () => {
         '#datasource - Rural payments - response',
         expect.objectContaining({ gatewayType: 'rural-payments-dal-service-account' })
       )
+    })
+
+    test('logs errors with request timing and rethrows', async () => {
+      const rp = new RuralPayments(...datasourceOptions)
+      const error = new Error('test error')
+      const intermediateError = new TypeError('intermediate cause')
+      intermediateError.cause = new Error('root cause error')
+      error.cause = intermediateError
+      error.extensions = { response: { status: 500 } }
+      const request = { id: '123', method: 'GET', headers: {} }
+      const mockFn = jest.fn().mockRejectedValue(error)
+
+      await expect(rp.trace('test-url', request, mockFn)).rejects.toBe(error)
+
+      expect(logger.error).toHaveBeenCalledWith('#datasource - Rural payments - request error', {
+        error: expect.objectContaining({
+          message:
+            'test error | Caused by TypeError: intermediate cause | Caused by Error: root cause error'
+        }),
+        gatewayType: 'rural-payments-internal',
+        requestTimeMs: expect.any(Number),
+        request: { ...request, url: 'test-url' },
+        response: error.extensions.response,
+        code: RURALPAYMENTS_API_REQUEST_001
+      })
     })
   })
 
