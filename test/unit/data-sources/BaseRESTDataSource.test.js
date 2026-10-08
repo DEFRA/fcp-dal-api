@@ -1,6 +1,5 @@
 import { jest } from '@jest/globals'
 import StatusCodes from 'http-status-codes'
-import { BaseRESTDataSource } from '../../../app/data-sources/BaseRESTDataSource.js'
 
 // Mock the logger
 const mockLogger = {
@@ -10,15 +9,20 @@ const mockLogger = {
 }
 
 // Mock sendMetric
-jest.mock('../../../app/logger/sendMetric.js', () => ({
-  sendMetric: jest.fn()
-}))
+const mockSendMetric = { sendMetric: jest.fn() }
+jest.unstable_mockModule('../../../app/logger/sendMetric.js', () => mockSendMetric)
+
+const { BaseRESTDataSource } = await import('../../../app/data-sources/BaseRESTDataSource.js')
 
 describe('BaseRESTDataSource', () => {
   let dataSource
 
   beforeEach(() => {
-    dataSource = new BaseRESTDataSource({}, { name: 'Test DataSource', code: 'TEST_001' })
+    jest.clearAllMocks()
+    dataSource = new BaseRESTDataSource(
+      {},
+      { name: 'Test DataSource', code: 'TEST_001', gatewayType: 'test-gateway' }
+    )
     dataSource.logger = mockLogger
   })
 
@@ -32,51 +36,113 @@ describe('BaseRESTDataSource', () => {
     })
   })
 
-  describe('didEncounterError', () => {
-    test('should set request.url and log prepared error', () => {
-      const mockError = new Error('Test error')
-      const mockRequest = { headers: {} }
-      const mockUrl = 'https://api.example.com/test'
+  describe('trace', () => {
+    const url = new URL('https://api.example.com/test')
+    const request = { id: '123', method: 'get', headers: {} }
 
-      dataSource.didEncounterError(mockError, mockRequest, mockUrl)
+    test('should log and send request time metric for successful responses', async () => {
+      const mockResult = {
+        response: { status: 200, headers: new Headers(), body: 'body' },
+        parsedBody: { data: 'test' }
+      }
 
-      expect(mockRequest.url).toBe(mockUrl)
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        '#datasource - Test DataSource - request error',
+      const result = await dataSource.trace(url, request, async () => mockResult)
+
+      expect(result).toBe(mockResult)
+      expect(mockSendMetric.sendMetric).toHaveBeenCalledWith(
+        'RequestTime',
+        expect.any(Number),
+        'Milliseconds',
+        { code: 'TEST_001' }
+      )
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        '#datasource - Test DataSource - response',
         expect.objectContaining({
-          error: expect.objectContaining({ message: 'Test error' }),
-          request: mockRequest,
-          code: 'TEST_001'
+          code: 'TEST_001',
+          gatewayType: 'test-gateway',
+          requestTimeMs: expect.any(Number),
+          request: expect.objectContaining({ method: 'GET', url: url.toString() }),
+          response: expect.objectContaining({ status: 200 })
         })
       )
+      expect(mockLogger.error).not.toHaveBeenCalled()
     })
 
-    test('should log the upstream response status code from error extensions', () => {
+    test('should log the error with request timing and rethrow', async () => {
       const mockError = new Error('Upstream error')
       mockError.extensions = { response: { status: 503 } }
-      const mockRequest = { headers: {} }
 
-      dataSource.didEncounterError(mockError, mockRequest, 'https://api.example.com/test')
+      await expect(
+        dataSource.trace(url, request, async () => {
+          throw mockError
+        })
+      ).rejects.toBe(mockError)
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({ response: { status: 503 } })
+        '#datasource - Test DataSource - request error',
+        {
+          error: expect.objectContaining({ message: 'Upstream error' }),
+          gatewayType: 'test-gateway',
+          requestTimeMs: expect.any(Number),
+          request: { ...request, url: url.toString() },
+          response: { status: 503 },
+          code: 'TEST_001'
+        }
+      )
+      expect(mockLogger.info).not.toHaveBeenCalled()
+    })
+
+    test('should send request time metric for failed requests', async () => {
+      const timeoutError = new DOMException(
+        'The operation was aborted due to timeout',
+        'TimeoutError'
+      )
+
+      await expect(
+        dataSource.trace(url, request, async () => {
+          throw timeoutError
+        })
+      ).rejects.toBe(timeoutError)
+
+      expect(mockSendMetric.sendMetric).toHaveBeenCalledWith(
+        'RequestTime',
+        expect.any(Number),
+        'Milliseconds',
+        { code: 'TEST_001' }
       )
     })
 
-    test('should handle null error and log default message', () => {
-      const mockRequest = { headers: {} }
-      const mockUrl = 'https://api.example.com/test'
+    test('should include time elapsed before the failure in requestTimeMs', async () => {
+      const nowSpy = jest.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(1250)
 
-      dataSource.didEncounterError(null, mockRequest, mockUrl)
+      await expect(
+        dataSource.trace(url, request, async () => {
+          throw new Error('Timed out')
+        })
+      ).rejects.toThrow('Timed out')
 
-      expect(mockRequest.url).toBe(mockUrl)
+      expect(mockSendMetric.sendMetric).toHaveBeenCalledWith('RequestTime', 250, 'Milliseconds', {
+        code: 'TEST_001'
+      })
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({ requestTimeMs: 250 })
+      )
+      nowSpy.mockRestore()
+    })
+
+    test('should handle null error and log default message', async () => {
+      await expect(
+        dataSource.trace(url, request, async () => {
+          throw null
+        })
+      ).rejects.toBeNull()
+
       expect(mockLogger.error).toHaveBeenCalledWith(
         '#datasource - Test DataSource - request error',
         expect.objectContaining({
-          error: expect.objectContaining({
-            message: 'unknown/empty error while trying to fetch upstream data'
-          }),
+          error: { message: 'unknown/empty error while trying to fetch upstream data' },
+          response: {},
           code: 'TEST_001'
         })
       )
