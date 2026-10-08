@@ -210,6 +210,191 @@ describe('customer mutations', () => {
     })
   })
 
+  describe('updateDeactivateCustomer', () => {
+    const deactivateMutation = `#graphql
+      mutation Deactivate($input: UpdateDeactivateCustomerInput!) {
+        updateDeactivateCustomer(input: $input) {
+          success
+        }
+      }
+    `
+    const validInput = { crn: '1234567890', reason: 'my reason', note: 'my note' }
+    let configMockPath
+
+    beforeEach(() => {
+      configMockPath = {}
+      const originalConfig = { ...config }
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    const nockDeactivate = (status = 204) =>
+      nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/deactivate', {
+          reason: 'my reason',
+          note: 'my note',
+          partyNoteType: 'DeactivatePerson'
+        })
+        .reply(status)
+
+    test('deactivates the customer in KITS', async () => {
+      // arrange
+      const kits = nockDeactivate()
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, { input: validInput })
+
+      // assert
+      expect(result).toEqual({ data: { updateDeactivateCustomer: { success: true } } })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test.each([
+      ['a reason', { reason: 'my reason' }],
+      ['a note', { note: 'my note' }]
+    ])('deactivates with only %s, sending only that to KITS', async (_, fields) => {
+      // arrange
+      const kits = nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/deactivate', { partyNoteType: 'DeactivatePerson', ...fields })
+        .reply(204)
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, {
+        input: { crn: '1234567890', ...fields }
+      })
+
+      // assert
+      expect(result).toEqual({ data: { updateDeactivateCustomer: { success: true } } })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test.each([
+      ['neither reason nor note is given', {}],
+      ['reason and note are only spaces', { reason: '  ', note: ' ' }]
+    ])('refuses with REASON_OR_NOTE_REQUIRED when %s', async (_, fields) => {
+      // arrange
+      const kits = nockDeactivate()
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, {
+        input: { crn: '1234567890', ...fields }
+      })
+
+      // assert
+      expect(result.errors[0].message).toBe('At least one of reason or note must be provided')
+      expect(result.errors[0].extensions.code).toBe('REASON_OR_NOTE_REQUIRED')
+      expect(kits.isDone()).toBe(false)
+    })
+
+    test.each([
+      ['reason', 101, '^.{0,100}$'],
+      ['note', 4001, '^.{0,4000}$']
+    ])('refuses a %s of %i characters', async (field, length, pattern) => {
+      // arrange
+      const kits = nockDeactivate()
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, {
+        input: { ...validInput, [field]: 'x'.repeat(length) }
+      })
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        `variable 'input.${field}' must match pattern ${pattern}`
+      )
+      expect(kits.isDone()).toBe(false)
+    })
+
+    test('accepts a note of 4000 characters', async () => {
+      // arrange
+      const note = 'x'.repeat(4000)
+      const kits = nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/personId/deactivate', { partyNoteType: 'DeactivatePerson', note })
+        .reply(204)
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, {
+        input: { crn: '1234567890', note }
+      })
+
+      // assert
+      expect(result.errors).toBeUndefined()
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test('returns Not Found when KITS cannot find the person', async () => {
+      // arrange
+      nockDeactivate(404)
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, true, { input: validInput })
+
+      // assert
+      expect(result.errors[0].message).toBe('Not Found')
+      expect(result.data.updateDeactivateCustomer).toBeNull()
+    })
+
+    test('allows callers in the SINGLE_FRONT_DOOR group', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      const kits = nockDeactivate()
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, false, { input: validInput }, [
+        config.get('auth.groups.SINGLE_FRONT_DOOR')
+      ])
+
+      // assert
+      expect(result.errors).toBeUndefined()
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test('blocks callers outside the SINGLE_FRONT_DOOR group', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      const kits = nockDeactivate()
+
+      // act
+      const result = await makeTestQuery(deactivateMutation, null, false, { input: validInput }, [
+        config.get('auth.groups.CONSOLIDATED_VIEW')
+      ])
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, you are not in the correct AD groups'
+      )
+      expect(kits.isDone()).toBe(false)
+    })
+
+    test('blocks service accounts', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      const kits = nockDeactivate()
+
+      // act
+      const result = await makeTestQuery(
+        deactivateMutation,
+        { 'service-account': 'service@defra.gov.uk' },
+        false,
+        { input: validInput },
+        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+      )
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to service accounts'
+      )
+      expect(kits.isDone()).toBe(false)
+    })
+  })
+
   test('updateCustomerAddress', async () => {
     setupNock({
       address: {

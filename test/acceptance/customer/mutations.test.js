@@ -501,3 +501,47 @@ describe('Customer Mutations - lock a customer', () => {
     expect(check.customer.info.status.locked).toBe(true)
   })
 })
+
+describe('Customer Mutations - deactivate a customer', () => {
+  // note: crn 1111111901 is reserved for this test; it starts out not deactivated in the mock
+  const crn = '1111111901'
+
+  const deactivateCustomerMutation = gql`
+    mutation updateDeactivateCustomer($input: UpdateDeactivateCustomerInput!) {
+      updateDeactivateCustomer(input: $input) {
+        success
+      }
+    }
+  `
+
+  const customerDeactivatedStatusQuery = gql`
+    query CustomerDeactivatedStatus($crn: ID!) {
+      customer(crn: $crn) {
+        info {
+          status {
+            deactivated
+          }
+        }
+      }
+    }
+  `
+
+  it('should deactivate the customer', async () => {
+    // arrange
+    const client = new GraphQLClient(targetURL)
+    const before = await client.request(customerDeactivatedStatusQuery, { crn }, headers)
+    expect(before.customer.info.status.deactivated).toBe(false)
+
+    // act
+    const result = await client.request(
+      deactivateCustomerMutation,
+      { input: { crn, reason: 'Customer deceased', note: 'Confirmed by next of kin' } },
+      headers
+    )
+
+    // assert
+    expect(result.updateDeactivateCustomer).toEqual({ success: true })
+    const after = await client.request(customerDeactivatedStatusQuery, { crn }, headers)
+    expect(after.customer.info.status.deactivated).toBe(true)
+  })
+})
