@@ -41,44 +41,6 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
   }
 }
 
-async function updateLockCustomerResolver(
-  _,
-  { input: { crn, reason, note } },
-  { dataSources, auditTrail },
-  info
-) {
-  let personId
-  try {
-    const hasReason = typeof reason === 'string' && reason.trim().length > 0
-    const hasNote = typeof note === 'string' && note.trim().length > 0
-
-    if (!hasReason && !hasNote) {
-      throw new BadRequest('At least one of reason or note must be provided', {
-        extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
-      })
-    }
-
-    const normalisedReason = hasReason ? reason.trim() : undefined
-    const normalisedNote = hasNote ? note.trim() : undefined
-
-    personId = await retrievePersonIdByCRN(crn, dataSources)
-    await dataSources.ruralPaymentsCustomer.lockPerson(personId, normalisedReason, normalisedNote)
-  } finally {
-    auditTrail?.recordAccount(info, 'personId', personId)
-    auditTrail?.recordAccount(info, 'crn', crn)
-    auditTrail?.recordEntity(info, {
-      entity: 'person',
-      action: 'locked',
-      entityid: personId
-    })
-  }
-
-  return {
-    success: true,
-    customer: { personId }
-  }
-}
-
 // Only available to external users (see the @auth userType restriction), so the customer is always
 // the one identified by the CRN in the request's Defra ID token.
 async function sendConfirmEmailAddressEmailResolver(
@@ -136,6 +98,62 @@ async function sendConfirmEmailAddressEmailResolver(
   }
 }
 
+async function updateLockCustomerResolver(
+  _,
+  { input: { crn, reason, note } },
+  { dataSources, auditTrail },
+  info
+) {
+  let personId
+  try {
+    const { reason: trimmedReason, note: trimmedNote } = validateReasonOrNote(reason, note)
+
+    personId = await retrievePersonIdByCRN(crn, dataSources)
+    await dataSources.ruralPaymentsCustomer.lockPerson(personId, trimmedReason, trimmedNote)
+  } finally {
+    auditTrail?.recordAccount(info, 'personId', personId)
+    auditTrail?.recordAccount(info, 'crn', crn)
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'locked',
+      entityid: personId
+    })
+  }
+
+  return {
+    success: true,
+    customer: { personId }
+  }
+}
+
+async function updateUnlockCustomerResolver(
+  _,
+  { input: { crn, reason, note } },
+  { dataSources, auditTrail },
+  info
+) {
+  let personId
+  try {
+    const { reason: trimmedReason, note: trimmedNote } = validateReasonOrNote(reason, note)
+
+    personId = await retrievePersonIdByCRN(crn, dataSources)
+    await dataSources.ruralPaymentsCustomer.unlockPerson(personId, trimmedReason, trimmedNote)
+  } finally {
+    auditTrail?.recordAccount(info, 'personId', personId)
+    auditTrail?.recordAccount(info, 'crn', crn)
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'unlocked',
+      entityid: personId
+    })
+  }
+
+  return {
+    success: true,
+    customer: { personId }
+  }
+}
+
 async function updateDeactivateCustomerResolver(
   _,
   { input: { crn, reason, note } },
@@ -145,13 +163,7 @@ async function updateDeactivateCustomerResolver(
   auditTrail?.recordAccount(info, 'crn', crn)
   auditTrail?.recordEntity(info, { entity: 'person', action: 'deactivated', entityid: crn })
 
-  const trimmedReason = reason?.trim() || undefined
-  const trimmedNote = note?.trim() || undefined
-  if (!trimmedReason && !trimmedNote) {
-    throw new BadRequest('At least one of reason or note must be provided', {
-      extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
-    })
-  }
+  const { reason: trimmedReason, note: trimmedNote } = validateReasonOrNote(reason, note)
 
   const personId = await retrievePersonIdByCRN(crn, dataSources)
   auditTrail?.recordAccount(info, 'personId', personId)
@@ -164,6 +176,19 @@ async function updateDeactivateCustomerResolver(
   }
 }
 
+function validateReasonOrNote(reason, note) {
+  const hasReason = typeof reason === 'string' && reason.trim().length > 0
+  const hasNote = typeof note === 'string' && note.trim().length > 0
+
+  if (!hasReason && !hasNote) {
+    throw new BadRequest('At least one of reason or note must be provided', {
+      extensions: { code: 'REASON_OR_NOTE_REQUIRED' }
+    })
+  }
+
+  return { reason: hasReason ? reason.trim() : undefined, note: hasNote ? note.trim() : undefined }
+}
+
 export const Mutation = {
   updateCustomerAddress: updateCustomerResolver,
   updateCustomerDateOfBirth: updateCustomerResolver,
@@ -173,6 +198,7 @@ export const Mutation = {
   updateCustomerDoNotContact: updateCustomerResolver,
   updateCustomerAllFields: updateCustomerResolver,
   updateLockCustomer: updateLockCustomerResolver,
+  updateUnlockCustomer: updateUnlockCustomerResolver,
   sendConfirmEmailAddressEmail: sendConfirmEmailAddressEmailResolver,
   updateDeactivateCustomer: updateDeactivateCustomerResolver
 }

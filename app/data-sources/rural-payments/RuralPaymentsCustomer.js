@@ -216,6 +216,19 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return response._data
   }
 
+  async unlockPerson(personId, reason, note) {
+    const body = JSON.stringify({
+      reason,
+      note,
+      partyNoteType: 'UnlockPerson'
+    })
+    const response = await this.post(`person/${personId}/unlock`, {
+      body,
+      headers: postPutHeaders
+    })
+    return response._data
+  }
+
   async deactivatePerson(personId, reason, note) {
     const body = JSON.stringify({
       reason,
