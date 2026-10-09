@@ -2,16 +2,15 @@ import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { db } from '../../../app/mongo.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
+import { waitFor } from '../../test-helpers/wait-for.js'
 import {
   mockBusinessTypeReferenceData,
   mockLegalStatusReferenceData,
   mockPersonSearch
 } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
-import { waitFor } from '../../test-helpers/wait-for.js'
 
-const EMAIL_PATTERN =
-  "^(?=.{1,254}$)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:[.][a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+const EMAIL_PATTERN = '^(?=.{6,254}$)[^@\\s]+@[^@\\s]+[.][^@\\s]+$'
 
 const PHONE_PATTERN = '^(?:|(?=.{10,50}$)[+]?[0-9 ()]*)$'
 
@@ -584,9 +583,13 @@ describe('business', () => {
     ['without an @', 'not-an-email'],
     ['with nothing before the @', '@example.com'],
     ['with nothing after the @', 'someone@'],
+    ['shorter than 6 characters', 'a@b.c'],
+    ['with more than one @', 'some@one@example.com'],
+    ['without a . after the @', 'someone@example'],
+    ['with nothing after the final .', 'someone@example.'],
     ['containing a space', 'some one@example.com'],
     ['with a trailing space', 'someone@example.com '],
-    ['with an invalid domain', 'someone@-example.com']
+    ['containing a tab', 'someone@exam\tple.com']
   ])('create a business - rejects email address %s', async (_, address) => {
     const result = await makeTestQuery(
       query,

@@ -285,11 +285,8 @@ input EmailInput {
   """
   Email address of the customer or business
   """
-  # WHATWG "valid email address" regex, as used by the graphql-scalars EmailAddress scalar:
-  # https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
-  # Adds a 1-254 character length lookahead, and uses [.] in place of \. to avoid escaping.
-  address: String!
-    @validateVariable(
-      pattern: "^(?=.{1,254}$)[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:[.][a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
-    )
+  # Permissive email check: 6-254 characters, exactly one @, no whitespace, and a . somewhere after the @.
+  # This is not an attempt to cover every possible email rule, but a general sanity check to catch more obvious errors.
+  # The email validation email process prevent a user getting a validated email address with an incorrect email.
+  address: String! @validateVariable(pattern: "^(?=.{6,254}$)[^@\\s]+@[^@\\s]+[.][^@\\s]+$")
 }
