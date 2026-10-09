@@ -346,6 +346,15 @@ export const config = convict({
 
 config.validate({ allowed: 'strict' })
 
+export const authGroups = config.get('auth.groups')
+export const authGroupServiceName = {
+  [authGroups.ADMIN]: null,
+  [authGroups.CONSOLIDATED_VIEW]: 'consolidated-view',
+  [authGroups.LAND_GRANTS_API]: 'land-grants-api',
+  [authGroups.SFI_REFORM]: 'grants-platform',
+  [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door'
+}
+
 export const decodeBase64Config = (value) => Buffer.from(value, 'base64').toString('utf-8').trim()
 
 if (!config.get('kits.disableMTLS')) {

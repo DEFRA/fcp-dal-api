@@ -11,8 +11,7 @@ jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
 }))
 const {
   authDirectiveTransformer,
-  authGroups,
-  checkAuthGroup,
+  checkAuthEntity,
   checkServiceAccountAccess,
   checkUserAccess,
   getAuth,
@@ -146,45 +145,52 @@ describe('authenticate', () => {
     })
   })
 
-  describe('checkAuthGroup', () => {
+  describe('checkAuthEntity', () => {
     const adminGroupId = config.get('auth.groups.ADMIN')
 
-    it('checkAuthGroup should not throw an error for admins with correct group', () => {
-      expect(() => checkAuthGroup([adminGroupId], [adminGroupId])).not.toThrow()
+    it('allows an appid that matches an allowed entity', () => {
+      const entityId = config.get('auth.groups.SINGLE_FRONT_DOOR')
+      expect(() =>
+        checkAuthEntity({ appid: entityId, groups: [] }, ['SINGLE_FRONT_DOOR'])
+      ).not.toThrow()
     })
 
-    it('checkAuthGroup should throw Unauthorized when user is not in AD groups', () => {
+    it('throws Unauthorized when the appid and groups do not match an allowed entity', () => {
       const testGroup = 'ADMIN'
-      expect(() => checkAuthGroup([], [testGroup])).toThrow(Unauthorized)
+      expect(() => checkAuthEntity({ appid: 'unknown-app', groups: [] }, [testGroup])).toThrow(
+        Unauthorized
+      )
     })
 
-    it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
+    it('throws Unauthorized when the caller is not in an allowed AD group', () => {
       const testGroup = 'NON_EXISTENT_GROUP'
-      expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
+      expect(() =>
+        checkAuthEntity({ appid: 'unknown-app', groups: [testGroup] }, [adminGroupId])
+      ).toThrow(Unauthorized)
     })
 
-    it('checkAuthGroup should throw Unauthorized when AD group is null in token', () => {
+    it('throws Unauthorized when AD group is null in token', () => {
       const testGroup = null
-      expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
+      expect(() =>
+        checkAuthEntity({ appid: 'unknown-app', groups: [testGroup] }, [adminGroupId])
+      ).toThrow(Unauthorized)
     })
 
-    it('checkAuthGroup should not throw for an ADMIN caller regardless of the allow-list', () => {
-      expect(() => checkAuthGroup([adminGroupId], ['SOME_GROUP'])).not.toThrow()
+    it('allows a caller im the ADMIN group regardless of the allow-list', () => {
+      expect(() =>
+        checkAuthEntity({ appid: 'unknown-app', groups: [adminGroupId] }, ['SOME_GROUP'])
+      ).not.toThrow()
     })
 
-    it('checkAuthGroup should not throw for a caller with matching group membership', () => {
+    it('allows an ADMIN app caller regardless of the allow-list', () => {
+      expect(() => checkAuthEntity({ appid: adminGroupId }, ['SOME_GROUP'])).not.toThrow()
+    })
+
+    it('allows a caller with matching group membership when appid does not match', () => {
       const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
-      expect(() => checkAuthGroup([sfdGroupId], ['SINGLE_FRONT_DOOR'])).not.toThrow()
-    })
-
-    it('expect authGroups to match .env.test setup', () => {
-      expect(authGroups).toEqual({
-        ADMIN: 'some-ad-group-id',
-        CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
-        SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id',
-        SFI_REFORM: 'sfi-reform-ad-group-id',
-        LAND_GRANTS_API: 'land-grants-api-ad-group-id'
-      })
+      expect(() =>
+        checkAuthEntity({ appid: 'unknown-app', groups: [sfdGroupId] }, ['SINGLE_FRONT_DOOR'])
+      ).not.toThrow()
     })
   })
 
@@ -192,16 +198,14 @@ describe('authenticate', () => {
     const adminGroupId = config.get('auth.groups.ADMIN')
     const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
 
-    it('returns true when ADMIN is among the requester groups', () => {
-      expect(isAdminCaller([sfdGroupId, adminGroupId])).toBe(true)
-    })
-
-    it('returns false when ADMIN is not among the requester groups', () => {
-      expect(isAdminCaller([sfdGroupId])).toBe(false)
-    })
-
-    it('returns false for an empty group list', () => {
-      expect(isAdminCaller([])).toBe(false)
+    it.each([
+      ['ADMIN is the appid', adminGroupId, [], true],
+      ['ADMIN is among the requester groups', undefined, [sfdGroupId, adminGroupId], true],
+      ['ADMIN is not the appid or among the requester groups', undefined, [sfdGroupId], false],
+      ['no appid and an empty group list is provided', undefined, [], false],
+      ['no appid and no group list is provided', undefined, undefined, false]
+    ])('returns correctly when %s', (_description, appid, groups, expected) => {
+      expect(isAdminCaller({ appid, groups })).toBe(expected)
     })
   })
 
@@ -414,8 +418,8 @@ describe('authenticate', () => {
           contextValue
         })
 
-      const serviceAccountContext = (groups) => ({
-        auth: { groups },
+      const serviceAccountContext = ({ appid, groups }) => ({
+        auth: { appid, groups },
         authContext: { serviceAccount: 'service-account@example.com' }
       })
 
@@ -432,7 +436,7 @@ describe('authenticate', () => {
 
       it('allows a non-service-account caller in the required group', async () => {
         const result = await run('gatedQueryFieldDefault', {
-          auth: { groups: [sfdGroupId] },
+          auth: { appid: 'some-appid', groups: [sfdGroupId] },
           authContext: {}
         })
         expect(result.errors).toBeUndefined()
@@ -440,15 +444,22 @@ describe('authenticate', () => {
       })
 
       it('allows a service account on a Query field ', async () => {
-        const result = await run('gatedQueryFieldDefault', serviceAccountContext([sfdGroupId]))
+        const result = await run(
+          'gatedQueryFieldDefault',
+          serviceAccountContext({ groups: [sfdGroupId] })
+        )
         expect(result.errors).toBeUndefined()
         expect(result.data.gatedQueryFieldDefault).toBe('a')
       })
 
       it('denies a service account access to Mutations', async () => {
-        const result = await run('gatedMutationFieldDefault', serviceAccountContext([sfdGroupId]), {
-          mutation: true
-        })
+        const result = await run(
+          'gatedMutationFieldDefault',
+          serviceAccountContext({ groups: [sfdGroupId] }),
+          {
+            mutation: true
+          }
+        )
         expect(result.errors?.[0]).toBeInstanceOf(Object)
         expect(result.errors[0].message).toMatch(/not available to service accounts/)
       })
@@ -456,7 +467,17 @@ describe('authenticate', () => {
       it('allows an ADMIN-group service account on a Mutation field', async () => {
         const result = await run(
           'gatedMutationFieldDefault',
-          serviceAccountContext([adminGroupId]),
+          serviceAccountContext({ groups: [adminGroupId] }),
+          { mutation: true }
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedMutationFieldDefault).toBe('c')
+      })
+
+      it('allows an ADMIN app service account on a Mutation field', async () => {
+        const result = await run(
+          'gatedMutationFieldDefault',
+          serviceAccountContext({ appid: adminGroupId }),
           { mutation: true }
         )
         expect(result.errors).toBeUndefined()
