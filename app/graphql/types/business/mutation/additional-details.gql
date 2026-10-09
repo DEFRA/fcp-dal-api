@@ -42,11 +42,12 @@ extend type Mutation {
   """
   Reactivate a deactivated business.
 
+  Only internal users can reactivate a business.
   At least one of reason or note must be provided.
   The business must be locked and deactivated.
   """
   updateBusinessReactivate(input: UpdateBusinessReactivateInput!): UpdateBusinessResponse
-    @auth(requires: [SINGLE_FRONT_DOOR])
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
 }
 
 input UpdateBusinessLegalStatusInput {
