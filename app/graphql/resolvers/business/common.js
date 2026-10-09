@@ -243,3 +243,36 @@ export const businessUnlockResolver = async (__, { input }, { dataSources, audit
     }
   }
 }
+
+export const businessReactivateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
+  const { sbi, ...reactivateBodyAttributes } = input
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'reactivated',
+    entityid: sbi
+  })
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
+  validateLockUnlockInput(input)
+
+  await dataSources.ruralPaymentsBusiness.reactivateOrganisation(
+    organisationId,
+    reactivateBodyAttributes
+  )
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}

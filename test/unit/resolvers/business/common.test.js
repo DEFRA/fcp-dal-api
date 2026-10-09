@@ -5,6 +5,7 @@ import {
   businessAllFieldsUpdateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
+  businessReactivateResolver,
   businessUnlockResolver,
   getRuralPaymentsBusinessDataSource,
   retrieveOrgIdBySbi
@@ -841,5 +842,108 @@ describe('businessUnlockResolver', () => {
     dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
 
     await businessUnlockResolver(null, { input: { sbi: '123', reason: 'test' } }, { dataSources })
+  })
+})
+
+describe('businessReactivateResolver', () => {
+  let dataSources
+  let auditTrail
+  const info = { path: { key: 'reactivateBusiness', typename: 'Mutation', prev: undefined } }
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn(),
+        reactivateOrganisation: jest.fn()
+      }
+    }
+    auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+  })
+
+  it('reactivates the organisation with the reason and note', async () => {
+    // arrange
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    const input = { sbi: '123', reason: 'test reason', note: 'test note' }
+
+    // act
+    const result = await businessReactivateResolver(null, { input }, { dataSources }, info)
+
+    // assert
+    expect(result).toEqual({ success: true, business: { sbi: '123' } })
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.reactivateOrganisation).toHaveBeenCalledWith('orgId', {
+      reason: 'test reason',
+      note: 'test note'
+    })
+  })
+
+  it('throws when neither reason nor note is provided', async () => {
+    // arrange
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    const input = { sbi: '123' }
+
+    // act / assert
+    await expect(
+      businessReactivateResolver(null, { input }, { dataSources }, info)
+    ).rejects.toThrow('Reason and/or note are required')
+    expect(dataSources.ruralPaymentsBusiness.reactivateOrganisation).not.toHaveBeenCalled()
+  })
+
+  it('records the sbi/organisationId accounts and a reactivated business entity on the audit trail', async () => {
+    // arrange
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    const input = { sbi: '123', reason: 'test' }
+
+    // act
+    await businessReactivateResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    // assert
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'reactivated',
+      entityid: '123'
+    })
+  })
+
+  it('records the audit trail when the reactivate request fails', async () => {
+    // arrange
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.reactivateOrganisation.mockRejectedValue(
+      new Error('Business is not deactivated')
+    )
+    const input = { sbi: '123', reason: 'test' }
+
+    // act / assert
+    await expect(
+      businessReactivateResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('Business is not deactivated')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'reactivated',
+      entityid: '123'
+    })
+  })
+
+  it('records the sbi account when the organisation lookup fails', async () => {
+    // arrange
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const input = { sbi: '123', reason: 'test' }
+
+    // act / assert
+    await expect(
+      businessReactivateResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('upstream failure')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(dataSources.ruralPaymentsBusiness.reactivateOrganisation).not.toHaveBeenCalled()
   })
 })

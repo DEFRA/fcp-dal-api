@@ -555,6 +555,73 @@ describe('Rural Payments Business', () => {
     })
   })
 
+  describe('reactivateOrganisation', () => {
+    test('should call post endpoint and return successful response', async () => {
+      // arrange
+      const fakeResponse = {
+        response: 'success'
+      }
+      httpPost.mockImplementationOnce(async () => fakeResponse)
+
+      // act
+      const response = await ruralPaymentsBusiness.reactivateOrganisation('orgId', {
+        reason: 'test'
+      })
+
+      // assert
+      expect(httpPost).toHaveBeenCalledWith('organisation/orgId/reactivate', {
+        body: { partyNoteType: 'ReactivateOrganisation', reason: 'test' },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      expect(response).toEqual(fakeResponse)
+    })
+
+    test('should fail if error is thrown by post request', async () => {
+      // arrange
+      const mockError = new Error('fetch error')
+      httpPost.mockRejectedValueOnce(mockError)
+
+      // act / assert
+      await expect(
+        ruralPaymentsBusiness.reactivateOrganisation('123', { reason: 'test' })
+      ).rejects.toThrow(mockError)
+      expect(httpPost).toHaveBeenCalledWith('organisation/123/reactivate', {
+        body: { partyNoteType: 'ReactivateOrganisation', reason: 'test' },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    test('should throw error when business is not deactivated', async () => {
+      // arrange
+      const mockError = new Error('fetch error')
+      mockError.extensions = { http: { status: 500 } }
+      httpPost.mockRejectedValueOnce(mockError)
+      httpGet.mockImplementationOnce(async () => ({ _data: { id: '123', deactivated: false } }))
+
+      // act / assert
+      await expect(
+        ruralPaymentsBusiness.reactivateOrganisation('123', { reason: 'test' })
+      ).rejects.toThrow('Business is not deactivated')
+    })
+
+    test('should rethrow the upstream error when business is deactivated', async () => {
+      // arrange
+      const mockError = new Error('fetch error')
+      mockError.extensions = { http: { status: 500 } }
+      httpPost.mockRejectedValueOnce(mockError)
+      httpGet.mockImplementationOnce(async () => ({ _data: { id: '123', deactivated: true } }))
+
+      // act / assert
+      await expect(
+        ruralPaymentsBusiness.reactivateOrganisation('123', { reason: 'test' })
+      ).rejects.toThrow(mockError)
+    })
+  })
+
   describe('getLandUseByBusinessParcel', () => {
     test('should return land use by business parcel without date', async () => {
       const mockResponse = { data: 'mockData' }
