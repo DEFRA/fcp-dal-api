@@ -36,6 +36,8 @@ extend type Mutation {
   Locks a customer's account with an optional reason and note.
   The effect is that the customer will not be able to log in.
 
+  Only internal users can lock a customer.
+
   Note that at least one of the reason or note must be provided.
 
   Note the request won't fail if the customer is already locked.
@@ -45,7 +47,7 @@ extend type Mutation {
   - `NOT FOUND`: No customer exists for the given CRN.
   """
   updateLockCustomer(input: UpdateLockCustomerInput!): UpdateCustomerResponse
-    @auth(requires: [SINGLE_FRONT_DOOR])
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
 
   """
   Sends a verification email to the registered email address of the external
@@ -86,6 +88,8 @@ extend type Mutation {
   Unlocks a customer's account with an optional reason and note.
   The effect is that the customer will be able to log in.
 
+  Only internal users can unlock a customer.
+
   Note that at least one of the reason or note must be provided.
 
   Note the request won't fail if the customer is already unlocked.
@@ -95,7 +99,7 @@ extend type Mutation {
   - `NOT FOUND`: No customer exists for the given CRN.
   """
   updateUnlockCustomer(input: UpdateUnlockCustomerInput!): UpdateCustomerResponse
-    @auth(requires: [SINGLE_FRONT_DOOR])
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
 }
 
 input UpdateDeactivateCustomerInput {
