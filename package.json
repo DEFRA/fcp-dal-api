@@ -41,7 +41,7 @@
     "@apollo/server": "^5.0.0",
     "@as-integrations/hapi": "^2.0.2",
     "@aws-sdk/client-sns": "^3.1105.0",
-    "@aws-sdk/credential-providers": "^3.1030.0",
+    "@aws-sdk/credential-providers": "^3.1145.0",
     "@azure/msal-node": "^5.1.0",
     "@defra/fcp-audit-publisher": "^1.0.9",
     "@defra/hapi-secure-context": "^0.3.0",
