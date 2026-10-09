@@ -1,6 +1,10 @@
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import { mockOrganisationSearch } from '../helpers.js'
+import {
+  mockBusinessTypeReferenceData,
+  mockLegalStatusReferenceData,
+  mockOrganisationSearch
+} from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -74,9 +78,9 @@ describe('updateBusinessAllFields', () => {
       sbi: '123456789',
       name: 'new name',
       email: { address: 'newemail@test.com' },
-      phone: { landline: 'new phone', mobile: 'new mobile' },
+      phone: { landline: '01234 567890', mobile: '07123 456789' },
       vat: '987654321',
-      legalStatusCode: 102,
+      legalStatusCode: 102108,
       typeCode: 3,
       dateStartedFarming: '2025-01-01',
       registrationNumbers: {
@@ -88,15 +92,15 @@ describe('updateBusinessAllFields', () => {
     const detailsPutPayloadOverrides = {
       name: 'new name',
       email: 'newemail@test.com',
-      landline: 'new phone',
-      mobile: 'new mobile',
+      landline: '01234 567890',
+      mobile: '07123 456789',
       taxRegistrationNumber: '987654321'
     }
     const additionalDetailsPutPayloadOverrides = {
       companiesHouseRegistrationNumber: '12345678',
       charityCommissionRegistrationNumber: '87654321',
       businessType: { id: 3 },
-      legalStatus: { id: 102 },
+      legalStatus: { id: 102108 },
       dateStartedFarming: '2025-01-01T00:00:00.000Z'
     }
 
@@ -113,6 +117,8 @@ describe('updateBusinessAllFields', () => {
     )
 
     mockOrganisationSearch(v1)
+    mockLegalStatusReferenceData(v1)
+    mockBusinessTypeReferenceData(v1)
 
     v1.get('/organisation/organisationId').reply(200, {
       _data: { id: 'organisationId', name: 'new name' }
@@ -178,6 +184,8 @@ describe('updateBusinessAllFields', () => {
       typeCode: 3
     }
 
+    mockBusinessTypeReferenceData(v1)
+
     const expectedPutPayload = {
       ...orgDetailsUpdatePayload,
       name: 'new name',
@@ -214,6 +222,8 @@ describe('updateBusinessAllFields', () => {
       typeCode: 3
     }
 
+    mockBusinessTypeReferenceData(v1)
+
     const expectedPutPayload = {
       ...orgDetailsUpdatePayload,
       name: 'new name',
@@ -243,6 +253,8 @@ describe('updateBusinessAllFields', () => {
       sbi: '123456789',
       typeCode: 3
     }
+
+    mockBusinessTypeReferenceData(v1)
 
     v1.put('/organisation/organisationId/additional-business-details', {
       ...orgDetailsUpdatePayload,

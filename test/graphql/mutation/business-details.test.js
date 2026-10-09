@@ -127,6 +127,50 @@ describe('business', () => {
     })
   })
 
+  test('update business name - rejects name longer than 160 characters', async () => {
+    const query = `
+      mutation Mutation($input: UpdateBusinessNameInput!) {
+        updateBusinessName(input: $input) {
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, {
+      input: { sbi: '123456789', name: 'a'.repeat(161) }
+    })
+
+    expect(result.errors[0].message).toEqual("variable 'input.name' must match pattern ^.{0,160}$")
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.updateBusinessName).toBeNull()
+  })
+
+  test('update business name - accepts name of exactly 160 characters', async () => {
+    const name = 'a'.repeat(160)
+
+    v1.put('/organisation/organisationId/business-details', {
+      ...orgDetailsUpdatePayload,
+      name
+    }).reply(204)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', name }
+    })
+
+    mockOrganisationSearch(v1)
+
+    const query = `
+      mutation Mutation($input: UpdateBusinessNameInput!) {
+        updateBusinessName(input: $input) {
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, { input: { sbi: '123456789', name } })
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data.updateBusinessName.success).toBe(true)
+  })
+
   test('update business email', async () => {
     const input = {
       sbi: '123456789',
@@ -199,9 +243,9 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street',
-          uprn: 'new uprn'
+          uprn: '100080429521'
         }
       },
       correspondenceAddress: {
@@ -220,9 +264,9 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street',
-          uprn: 'new uprn'
+          uprn: '100080429521'
         }
       },
       isCorrespondenceAsBusinessAddress: true
@@ -242,9 +286,9 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
-        uprn: 'new uprn',
+        uprn: '100080429521',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
         addressTypeId: undefined
@@ -262,9 +306,9 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
-        uprn: 'new uprn',
+        uprn: '100080429521',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
         addressTypeId: undefined
@@ -375,7 +419,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street'
         }
       },
@@ -395,7 +439,7 @@ describe('business', () => {
           line4: 'new line4',
           line5: 'new line5',
           pafOrganisationName: 'new pafOrganisationName',
-          postalCode: 'new postalCode',
+          postalCode: 'NE1 2PC',
           street: 'new street'
         }
       },
@@ -416,7 +460,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
@@ -435,7 +479,7 @@ describe('business', () => {
         street: 'new street',
         city: 'new city',
         county: 'new county',
-        postalCode: 'new postalCode',
+        postalCode: 'NE1 2PC',
         country: 'new country',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
@@ -530,19 +574,19 @@ describe('business', () => {
     const input = {
       sbi: '123456789',
       phone: {
-        landline: 'new phone',
-        mobile: 'new mobile'
+        landline: '01234 567890',
+        mobile: '07123 456789'
       },
       correspondencePhone: {
-        landline: 'new correspondence phone',
-        mobile: 'new correspondence mobile'
+        landline: '01234 567892',
+        mobile: '07123 456781'
       }
     }
     const putPayloadOverrides = {
-      landline: 'new phone',
-      mobile: 'new mobile',
-      correspondenceLandline: 'new correspondence phone',
-      correspondenceMobile: 'new correspondence mobile'
+      landline: '01234 567890',
+      mobile: '07123 456789',
+      correspondenceLandline: '01234 567892',
+      correspondenceMobile: '07123 456781'
     }
     const { sbi: _, ...queryReturn } = input
 
@@ -640,6 +684,23 @@ describe('business', () => {
       }
     })
   })
+
+  test.each(['GB123456789', '12345678', '1234567890', '12345678A'])(
+    'update business vat - rejects invalid vat %s',
+    async (vat) => {
+      const query = `
+        mutation UpdateBusinessVAT($input: UpdateBusinessVATInput!) {
+          updateBusinessVAT(input: $input) {
+            success
+          }
+        }
+      `
+      const result = await makeTestQuery(query, null, true, { input: { sbi: '123456789', vat } })
+
+      expect(result.errors[0].message).toEqual("variable 'input.vat' must match pattern ^[0-9]{9}$")
+      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    }
+  )
 })
 
 describe('business - external gateway', () => {

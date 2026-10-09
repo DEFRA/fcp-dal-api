@@ -69,3 +69,21 @@ export const mockPersonSearch = (nockInstance, crn = '1234567890') => {
       ]
     })
 }
+
+export const mockLegalStatusReferenceData = (nockInstance) => {
+  nockInstance.get('/reference/legalstatus').reply(200, {
+    _data: [
+      { id: 102108, type: 'Partnership' },
+      { id: 102111, type: 'Sole Proprietorship' }
+    ]
+  })
+}
+
+export const mockBusinessTypeReferenceData = (nockInstance) => {
+  nockInstance.get('/reference/business-types').reply(200, {
+    _data: [
+      { id: 2, type: 'Business type 2' },
+      { id: 3, type: 'Business type 3' }
+    ]
+  })
+}

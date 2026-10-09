@@ -1,7 +1,12 @@
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { transformBusinessDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
-import { mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
+import {
+  mockBusinessTypeReferenceData,
+  mockLegalStatusReferenceData,
+  mockOrganisationSearch,
+  signDefraIdToken
+} from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -44,7 +49,7 @@ describe('business', () => {
   test('update business legal status', async () => {
     const input = {
       sbi: '123456789',
-      legalStatusCode: 123
+      legalStatusCode: 102111
     }
 
     const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -61,11 +66,12 @@ describe('business', () => {
     v1.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        legalStatus: { id: 123, type: 'text corresponding to 123' }
+        legalStatus: { id: 102111, type: 'Sole Proprietorship' }
       }
     })
 
     mockOrganisationSearch(v1)
+    mockLegalStatusReferenceData(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
@@ -91,8 +97,8 @@ describe('business', () => {
           business: {
             info: {
               legalStatus: {
-                code: 123,
-                type: 'text corresponding to 123'
+                code: 102111,
+                type: 'Sole Proprietorship'
               }
             }
           }
@@ -104,7 +110,7 @@ describe('business', () => {
   test('update business type', async () => {
     const input = {
       sbi: '123456789',
-      typeCode: 123
+      typeCode: 3
     }
 
     const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -121,13 +127,14 @@ describe('business', () => {
       _data: {
         id: 'organisationId',
         businessType: {
-          id: 123,
-          type: 'type corresponding to 123'
+          id: 3,
+          type: 'Business type 3'
         }
       }
     })
 
     mockOrganisationSearch(v1)
+    mockBusinessTypeReferenceData(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessTypeInput!) {
@@ -153,8 +160,8 @@ describe('business', () => {
           business: {
             info: {
               type: {
-                code: 123,
-                type: 'type corresponding to 123'
+                code: 3,
+                type: 'Business type 3'
               }
             }
           }
@@ -219,6 +226,41 @@ describe('business', () => {
     })
   })
 
+  test.each([
+    ['companiesHouse', 8],
+    ['charityCommission', 10]
+  ])(
+    'update business registration numbers - rejects %s longer than %i characters',
+    async (field, maxLength) => {
+      const query = `
+        mutation Mutation($input: UpdateBusinessRegistrationNumbersInput!) {
+          updateBusinessRegistrationNumbers(input: $input) {
+            success
+          }
+        }
+      `
+      const result = await makeTestQuery(
+        query,
+        null,
+        true,
+        {
+          input: {
+            sbi: '123456789',
+            registrationNumbers: { [field]: '1'.repeat(maxLength + 1) }
+          }
+        },
+        [],
+        false
+      )
+
+      expect(result.errors[0].message).toEqual(
+        `variable 'input.registrationNumbers.${field}' must match pattern ^.{0,${maxLength}}$`
+      )
+      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+      expect(result.data.updateBusinessRegistrationNumbers).toBeNull()
+    }
+  )
+
   test('update business date started farming', async () => {
     const input = {
       sbi: '123456789',
@@ -270,6 +312,44 @@ describe('business', () => {
       }
     })
   })
+
+  test('update business legal status - rejects unknown legal status code', async () => {
+    mockLegalStatusReferenceData(v1)
+
+    const query = `
+      mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
+        updateBusinessLegalStatus(input: $input) {
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, {
+      input: { sbi: '123456789', legalStatusCode: 102 }
+    })
+
+    expect(result.errors[0].message).toEqual('Invalid legalStatusCode: 102')
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.updateBusinessLegalStatus).toBeNull()
+  })
+
+  test('update business type - rejects unknown type code', async () => {
+    mockBusinessTypeReferenceData(v1)
+
+    const query = `
+      mutation Mutation($input: UpdateBusinessTypeInput!) {
+        updateBusinessType(input: $input) {
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, {
+      input: { sbi: '123456789', typeCode: 123 }
+    })
+
+    expect(result.errors[0].message).toEqual('Invalid typeCode: 123')
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+    expect(result.data.updateBusinessType).toBeNull()
+  })
 })
 
 describe('business - external', () => {
@@ -293,7 +373,7 @@ describe('business - external', () => {
     })
     const input = {
       sbi: '123456789',
-      legalStatusCode: 123
+      legalStatusCode: 102111
     }
 
     const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
@@ -310,11 +390,13 @@ describe('business - external', () => {
     v1_external.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        legalStatus: { id: 123, type: 'text corresponding to 123' }
+        legalStatus: { id: 102111, type: 'Sole Proprietorship' }
       }
     })
 
     mockOrganisationSearch(v1)
+
+    mockLegalStatusReferenceData(v1_external)
 
     const query = `
       mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
@@ -342,8 +424,8 @@ describe('business - external', () => {
           business: {
             info: {
               legalStatus: {
-                code: 123,
-                type: 'text corresponding to 123'
+                code: 102111,
+                type: 'Sole Proprietorship'
               }
             }
           }

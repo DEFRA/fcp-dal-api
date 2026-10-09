@@ -14,7 +14,9 @@ import {
   businessDetailsUpdateResolver,
   businessLockResolver,
   businessReactivateResolver,
-  businessUnlockResolver
+  businessUnlockResolver,
+  validateBusinessReferenceDataCodes,
+  validatePhoneHasNumber
 } from './common.js'
 import { Query } from './query.js'
 
@@ -101,6 +103,8 @@ export const Mutation = {
     const { crn, ...businessDetails } = input
     let business
     try {
+      validatePhoneHasNumber(businessDetails.phone)
+      await validateBusinessReferenceDataCodes(businessDetails, dataSources)
       const personId = await retrievePersonIdByCRN(crn, dataSources)
       const orgDetails = transformBusinessDetailsToOrgDetailsCreate(businessDetails)
       const response = await dataSources.ruralPaymentsBusiness.createOrganisationByPersonId(

@@ -82,7 +82,7 @@ input UpdateBusinessAllFieldsInput {
   """
   VAT number of the business. (a.k.a. `taxRegistrationNumber`)
   """
-  vat: String
+  vat: String @validateVariable(pattern: "^[0-9]{9}$")
   """
   Legal status object to update business with.
   """

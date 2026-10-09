@@ -1,8 +1,88 @@
 import { GraphQLError } from 'graphql'
+import { BadRequest } from '../../../errors/graphql.js'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
 } from '../../../transformers/rural-payments/business.js'
+
+/**
+ * @typedef {import('../../../data-sources/rural-payments/RuralPaymentsReferenceData.js')
+ *   .RuralPaymentsReferenceData} RuralPaymentsReferenceData
+ * @typedef {{ ruralPaymentsReferenceData: RuralPaymentsReferenceData }} ReferenceDataSources
+ */
+
+/**
+ * Rural Payments responds with an unexplained 500 for an unknown reference data code, so check the
+ * code against its reference data first
+ * @param {string} field the name of the input field, used in the error message
+ * @param {string} referenceType the Rural Payments reference data type to check against
+ * @param {number | null | undefined} code the code from the mutation input
+ * @param {ReferenceDataSources} dataSources
+ * @returns {Promise<void>}
+ * @throws {BadRequest} if the code is not in the reference data
+ */
+const validateReferenceDataCode = async (field, referenceType, code, dataSources) => {
+  if (code === undefined || code === null) {
+    return
+  }
+  const { _data: referenceData } =
+    await dataSources.ruralPaymentsReferenceData.getReferenceData(referenceType)
+  if (!referenceData.some(({ id }) => id === code)) {
+    throw new BadRequest(`Invalid ${field}: ${code}`, {
+      extensions: { code: 'BAD_USER_INPUT' }
+    })
+  }
+}
+
+/**
+ * @param {number | null | undefined} legalStatusCode the legal status code from the mutation input
+ * @param {ReferenceDataSources} dataSources
+ * @returns {Promise<void>}
+ * @throws {BadRequest} if the code is not a known legal status
+ */
+export const validateLegalStatusCode = (legalStatusCode, dataSources) =>
+  validateReferenceDataCode('legalStatusCode', 'legalstatus', legalStatusCode, dataSources)
+
+/**
+ * @param {number | null | undefined} typeCode the business type code from the mutation input
+ * @param {ReferenceDataSources} dataSources
+ * @returns {Promise<void>}
+ * @throws {BadRequest} if the code is not a known business type
+ */
+export const validateTypeCode = (typeCode, dataSources) =>
+  validateReferenceDataCode('typeCode', 'business-types', typeCode, dataSources)
+
+/**
+ * Check the legal status and business type codes together. Promise.all keeps a rejection
+ * from either check handled, as an unhandled rejection shuts down the server
+ * @param {{ legalStatusCode?: number | null, typeCode?: number | null }} input the mutation input
+ * @param {ReferenceDataSources} dataSources
+ * @returns {Promise<void>}
+ * @throws {BadRequest} if either code is not in its reference data
+ */
+export const validateBusinessReferenceDataCodes = async (
+  { legalStatusCode, typeCode },
+  dataSources
+) => {
+  await Promise.all([
+    validateLegalStatusCode(legalStatusCode, dataSources),
+    validateTypeCode(typeCode, dataSources)
+  ])
+}
+
+/**
+ * GraphQL cannot express "at least one of" on an input type, so check that a phone has a number
+ * @param {{ mobile?: string | null, landline?: string | null }} phone the phone from the input
+ * @returns {void}
+ * @throws {BadRequest} if neither a mobile nor a landline number is given
+ */
+export const validatePhoneHasNumber = (phone) => {
+  if (!phone?.mobile?.trim() && !phone?.landline?.trim()) {
+    throw new BadRequest('phone must include at least one of mobile or landline', {
+      extensions: { code: 'BAD_USER_INPUT' }
+    })
+  }
+}
 
 export const businessDetailsUpdateResolver = async (
   __,
@@ -46,6 +126,7 @@ export const businessAdditionalDetailsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
+  await validateBusinessReferenceDataCodes(input, dataSources)
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
@@ -100,6 +181,7 @@ export const businessAllFieldsUpdateResolver = async (
     action: 'updated',
     entityid: input.sbi
   })
+  await validateBusinessReferenceDataCodes(input, dataSources)
   const organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)

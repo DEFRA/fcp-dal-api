@@ -1,5 +1,5 @@
 import { expect, jest } from '@jest/globals'
-import { HttpError, NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, HttpError, NotFound } from '../../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
   businessAllFieldsUpdateResolver,
@@ -8,7 +8,11 @@ import {
   businessReactivateResolver,
   businessUnlockResolver,
   getRuralPaymentsBusinessDataSource,
-  retrieveOrgIdBySbi
+  retrieveOrgIdBySbi,
+  validateBusinessReferenceDataCodes,
+  validateLegalStatusCode,
+  validatePhoneHasNumber,
+  validateTypeCode
 } from '../../../../app/graphql/resolvers/business/common.js'
 
 describe('retrieveOrgIdBySbi', () => {
@@ -55,6 +59,161 @@ describe('retrieveOrgIdBySbi', () => {
     expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+  })
+})
+
+describe('validateLegalStatusCode', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest.fn().mockResolvedValue({
+          _data: [
+            { id: 102108, type: 'Partnership' },
+            { id: 102111, type: 'Sole Proprietorship' }
+          ]
+        })
+      }
+    }
+  })
+
+  it('does not fetch reference data when no legal status code is provided', async () => {
+    await validateLegalStatusCode(undefined, dataSources)
+    await validateLegalStatusCode(null, dataSources)
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).not.toHaveBeenCalled()
+  })
+
+  it('accepts a legal status code that exists in the reference data', async () => {
+    await expect(validateLegalStatusCode(102111, dataSources)).resolves.toBeUndefined()
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).toHaveBeenCalledWith(
+      'legalstatus'
+    )
+  })
+
+  it('rejects a legal status code that does not exist in the reference data', async () => {
+    const error = await validateLegalStatusCode(102, dataSources).catch((e) => e)
+
+    expect(error).toBeInstanceOf(BadRequest)
+    expect(error.message).toBe('Invalid legalStatusCode: 102')
+    expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
+  })
+})
+
+describe('validateTypeCode', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest.fn().mockResolvedValue({
+          _data: [
+            { id: 2, type: 'Business type 2' },
+            { id: 3, type: 'Business type 3' }
+          ]
+        })
+      }
+    }
+  })
+
+  it('does not fetch reference data when no type code is provided', async () => {
+    await validateTypeCode(undefined, dataSources)
+    await validateTypeCode(null, dataSources)
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).not.toHaveBeenCalled()
+  })
+
+  it('accepts a type code that exists in the reference data', async () => {
+    await expect(validateTypeCode(3, dataSources)).resolves.toBeUndefined()
+
+    expect(dataSources.ruralPaymentsReferenceData.getReferenceData).toHaveBeenCalledWith(
+      'business-types'
+    )
+  })
+
+  it('rejects a type code that does not exist in the reference data', async () => {
+    const error = await validateTypeCode(123, dataSources).catch((e) => e)
+
+    expect(error).toBeInstanceOf(BadRequest)
+    expect(error.message).toBe('Invalid typeCode: 123')
+    expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
+  })
+})
+
+describe('validateBusinessReferenceDataCodes', () => {
+  const referenceData = {
+    legalstatus: [{ id: 102111, type: 'Sole Proprietorship' }],
+    'business-types': [{ id: 3, type: 'Business type 3' }]
+  }
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest.fn((type) => Promise.resolve({ _data: referenceData[type] }))
+      }
+    }
+  })
+
+  it('accepts known legal status and type codes', async () => {
+    await expect(
+      validateBusinessReferenceDataCodes({ legalStatusCode: 102111, typeCode: 3 }, dataSources)
+    ).resolves.toBeUndefined()
+  })
+
+  it('rejects when both codes are unknown', async () => {
+    await expect(
+      validateBusinessReferenceDataCodes({ legalStatusCode: 102, typeCode: 123 }, dataSources)
+    ).rejects.toThrow(BadRequest)
+  })
+
+  it('rejects with the type code error when it fails while the legal status check is pending', async () => {
+    let resolveLegalStatus
+    dataSources.ruralPaymentsReferenceData.getReferenceData.mockImplementation((type) =>
+      type === 'legalstatus'
+        ? new Promise((resolve) => {
+            resolveLegalStatus = resolve
+          })
+        : Promise.resolve({ _data: referenceData[type] })
+    )
+
+    const result = validateBusinessReferenceDataCodes(
+      { legalStatusCode: 102111, typeCode: 123 },
+      dataSources
+    )
+
+    await expect(result).rejects.toThrow('Invalid typeCode: 123')
+    resolveLegalStatus({ _data: referenceData.legalstatus })
+  })
+})
+
+describe('validatePhoneHasNumber', () => {
+  it.each([
+    ['a mobile', { mobile: '07700 900000' }],
+    ['a landline', { landline: '01234 567890' }],
+    ['both', { mobile: '07700 900000', landline: '01234 567890' }]
+  ])('accepts a phone with %s', (_, phone) => {
+    expect(() => validatePhoneHasNumber(phone)).not.toThrow()
+  })
+
+  it.each([
+    ['undefined', undefined],
+    ['empty', {}],
+    ['null numbers', { mobile: null, landline: null }],
+    ['blank numbers', { mobile: ' ', landline: '' }]
+  ])('rejects a phone that is %s', (_, phone) => {
+    let error
+    try {
+      validatePhoneHasNumber(phone)
+    } catch (e) {
+      error = e
+    }
+
+    expect(error).toBeInstanceOf(BadRequest)
+    expect(error.message).toBe('phone must include at least one of mobile or landline')
+    expect(error.extensions).toEqual({ code: 'BAD_USER_INPUT', http: { status: 400 } })
   })
 })
 
@@ -306,6 +465,11 @@ describe('businessAllFieldsUpdateResolver', () => {
         }),
         updateOrganisationDetails: jest.fn(),
         updateOrganisationAdditionalDetails: jest.fn()
+      },
+      ruralPaymentsReferenceData: {
+        getReferenceData: jest
+          .fn()
+          .mockResolvedValue({ _data: [{ id: 2, type: 'Partnership' }, { id: 3 }] })
       },
       mongoBusiness: {
         getOrgIdBySbi: jest.fn(),

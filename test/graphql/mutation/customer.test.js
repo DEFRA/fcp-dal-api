@@ -609,9 +609,9 @@ describe('customer mutations', () => {
         street: 'newStreet',
         city: 'newCity',
         county: 'newCounty',
-        postalCode: 'newPostalCode',
+        postalCode: 'NE1 2PC',
         country: 'newCountry',
-        uprn: 'newUprn',
+        uprn: '100080429522',
         dependentLocality: 'newDependentLocality',
         doubleDependentLocality: 'newDoubleDependentLocality'
       }
@@ -637,9 +637,9 @@ describe('customer mutations', () => {
               line4: "newLine4"
               line5: "newLine5"
               pafOrganisationName: "newPafOrganisationName"
-              postalCode: "newPostalCode"
+              postalCode: "NE1 2PC"
               street: "newStreet"
-              uprn: "newUprn"
+              uprn: "100080429522"
             }
           }
         ) {
@@ -690,9 +690,9 @@ describe('customer mutations', () => {
                 street: 'newStreet',
                 city: 'newCity',
                 county: 'newCounty',
-                postalCode: 'newPostalCode',
+                postalCode: 'NE1 2PC',
                 country: 'newCountry',
-                uprn: 'newUprn',
+                uprn: '100080429522',
                 dependentLocality: 'newDependentLocality',
                 doubleDependentLocality: 'newDoubleDependentLocality'
               }
@@ -737,16 +737,16 @@ describe('customer mutations', () => {
 
   test('updateCustomerEmail', async () => {
     setupNock({
-      email: 'newEmail'
+      email: 'new.email@example.com'
     })
 
     nock(config.get('kits.internal.gatewayUrl'))
-      .get('/person/newEmail/validateEmail')
+      .get('/person/new.email%40example.com/validateEmail')
       .reply(200, { _data: { emailDuplicated: false } })
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerEmail(input: { crn: "1234567890", email: { address: "newEmail" } }) {
+        updateCustomerEmail(input: { crn: "1234567890", email: { address: "new.email@example.com" } }) {
           success
           customer {
             info {
@@ -766,7 +766,7 @@ describe('customer mutations', () => {
           customer: {
             info: {
               email: {
-                address: 'newEmail'
+                address: 'new.email@example.com'
               }
             }
           }
@@ -834,14 +834,14 @@ describe('customer mutations', () => {
 
   test('updateCustomerPhone', async () => {
     setupNock({
-      landline: 'newLandline',
-      mobile: 'newMobile'
+      landline: '(01234) 567890',
+      mobile: '+44 7123 456789'
     })
 
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerPhone(
-          input: { crn: "1234567890", phone: { landline: "newLandline", mobile: "newMobile" } }
+          input: { crn: "1234567890", phone: { landline: "(01234) 567890", mobile: "+44 7123 456789" } }
         ) {
           success
           customer {
@@ -860,7 +860,7 @@ describe('customer mutations', () => {
       data: {
         updateCustomerPhone: {
           success: true,
-          customer: { info: { phone: { mobile: 'newMobile', landline: 'newLandline' } } }
+          customer: { info: { phone: { mobile: '+44 7123 456789', landline: '(01234) 567890' } } }
         }
       }
     })
