@@ -285,8 +285,11 @@ input EmailInput {
   """
   Email address of the customer or business
   """
-  # Permissive email check: 6-254 characters, exactly one @, no whitespace, and a . somewhere after the @.
-  # This is not an attempt to cover every possible email rule, but a general sanity check to catch more obvious errors.
-  # The email validation email process prevent a user getting a validated email address with an incorrect email.
+  # Permissive email check: 6-254 characters, exactly one @, no whitespace,
+  # and a . somewhere after the @.
+  # This is not an attempt to cover every possible email rule, but a general
+  # sanity check to catch more obvious errors.
+  # The email validation process prevents a user getting a validated email
+  # address with an incorrect email.
   address: String! @validateVariable(pattern: "^(?=.{6,254}$)[^@\\s]+@[^@\\s]+[.][^@\\s]+$")
 }
