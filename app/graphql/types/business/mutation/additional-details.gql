@@ -38,6 +38,16 @@ extend type Mutation {
   # eslint-disable-next-line @graphql-eslint/input-name
   updateBusinessUnlock(input: UpdateBusinessLockUnlockInput!): UpdateBusinessResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Reactivate a deactivated business.
+
+  Only internal users can reactivate a business.
+  At least one of reason or note must be provided.
+  The business must be locked and deactivated.
+  """
+  updateBusinessReactivate(input: UpdateBusinessReactivateInput!): UpdateBusinessResponse
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
 }
 
 input UpdateBusinessLegalStatusInput {
@@ -125,6 +135,23 @@ input UpdateBusinessLockUnlockInput {
 
   """
   Note for locking the business.
+  """
+  note: String
+}
+
+input UpdateBusinessReactivateInput {
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
+
+  """
+  Reason for reactivating the business.
+  """
+  reason: String
+
+  """
+  Note for reactivating the business.
   """
   note: String
 }

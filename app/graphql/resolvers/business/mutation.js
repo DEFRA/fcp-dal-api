@@ -13,6 +13,7 @@ import {
   businessAllFieldsUpdateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
+  businessReactivateResolver,
   businessUnlockResolver
 } from './common.js'
 import { Query } from './query.js'
@@ -195,7 +196,8 @@ export const Mutation = {
   updateBusinessRegistrationNumbers: businessAdditionalDetailsUpdateResolver,
   updateBusinessAllFields: businessAllFieldsUpdateResolver,
   updateBusinessLock: businessLockResolver,
-  updateBusinessUnlock: businessUnlockResolver
+  updateBusinessUnlock: businessUnlockResolver,
+  updateBusinessReactivate: businessReactivateResolver
 }
 
 export const UpdateBusinessResponse = {
