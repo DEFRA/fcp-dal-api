@@ -125,4 +125,62 @@ describe('business lock and unlock', () => {
       }
     })
   })
+
+  test('reactivate a business', async () => {
+    // arrange
+    const input = {
+      sbi: '123456789',
+      reason: 'test'
+    }
+
+    v1.post('/organisation/organisationId/reactivate', {
+      partyNoteType: 'ReactivateOrganisation',
+      reason: 'test'
+    }).reply(204)
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: {
+        id: 'organisationId',
+        sbi: '123456789',
+        locked: true,
+        deactivated: false
+      }
+    })
+
+    const query = `
+      mutation ReactivateBusiness ($input: UpdateBusinessReactivateInput!) {
+          updateBusinessReactivate(input: $input) {
+              success
+              business {
+                  sbi
+                  info {
+                      status {
+                          deactivated
+                      }
+                  }
+              }
+          }
+      }
+    `
+
+    // act
+    const result = await makeTestQuery(query, null, true, { input })
+
+    // assert
+    expect(nock.isDone()).toBe(true)
+    expect(result).toEqual({
+      data: {
+        updateBusinessReactivate: {
+          success: true,
+          business: {
+            sbi: '123456789',
+            info: {
+              status: {
+                deactivated: false
+              }
+            }
+          }
+        }
+      }
+    })
+  })
 })

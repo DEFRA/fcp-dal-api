@@ -352,3 +352,47 @@ describe('createBusinessCustomerBankDetails', () => {
     })
   })
 })
+
+describe('Business Mutations - reactivate a business', () => {
+  // note: sbi 920000001 is reserved for this test; it starts out locked and deactivated in the mock
+  const reactivateSbi = '920000001'
+
+  const reactivateBusinessMutation = gql`
+    mutation updateBusinessReactivate($input: UpdateBusinessReactivateInput!) {
+      updateBusinessReactivate(input: $input) {
+        success
+      }
+    }
+  `
+  const businessStatusQuery = gql`
+    query BusinessStatus($sbi: ID!) {
+      business(sbi: $sbi) {
+        info {
+          status {
+            locked
+            deactivated
+          }
+        }
+      }
+    }
+  `
+
+  it('should reactivate the business', async () => {
+    // arrange
+    const client = new GraphQLClient(targetURL)
+    const before = await client.request(businessStatusQuery, { sbi: reactivateSbi }, headers)
+    expect(before.business.info.status).toEqual({ locked: true, deactivated: true })
+
+    // act
+    const result = await client.request(
+      reactivateBusinessMutation,
+      { input: { sbi: reactivateSbi, reason: 'Business Structure Changes', note: 'Reopened' } },
+      headers
+    )
+
+    // assert
+    expect(result.updateBusinessReactivate).toEqual({ success: true })
+    const after = await client.request(businessStatusQuery, { sbi: reactivateSbi }, headers)
+    expect(after.business.info.status.deactivated).toBe(false)
+  })
+})
