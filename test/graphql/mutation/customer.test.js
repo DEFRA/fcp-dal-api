@@ -488,6 +488,31 @@ describe('customer mutations', () => {
       )
       expect(kits.isDone()).toBe(false)
     })
+
+    test('blocks external users', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      mockDefraIdJwks()
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+        .post(/\/person\/.*\/deactivate/)
+        .reply(204)
+
+      // act
+      const result = await makeTestQuery(
+        deactivateMutation,
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        false,
+        { input: validInput },
+        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+      )
+
+      // assert
+      expect(result.data.updateDeactivateCustomer).toBeNull()
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to this user type'
+      )
+      expect(kits.isDone()).toBe(false)
+    })
   })
 
   test('updateCustomerAddress', async () => {
