@@ -116,7 +116,7 @@ async function updateLockCustomerResolver(
     auditTrail?.recordEntity(info, {
       entity: 'person',
       action: 'locked',
-      entityid: personId
+      entityid: crn
     })
   }
 
@@ -144,7 +144,7 @@ async function updateUnlockCustomerResolver(
     auditTrail?.recordEntity(info, {
       entity: 'person',
       action: 'unlocked',
-      entityid: personId
+      entityid: crn
     })
   }
 

@@ -366,7 +366,7 @@ describe('Customer Mutations', () => {
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'person',
         action: 'locked',
-        entityid: 'personId'
+        entityid: 'crn'
       })
     })
 
@@ -394,7 +394,7 @@ describe('Customer Mutations', () => {
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'person',
         action: 'locked',
-        entityid: undefined
+        entityid: 'crn'
       })
     })
   })
@@ -684,7 +684,7 @@ describe('Customer Mutations', () => {
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'person',
         action: 'unlocked',
-        entityid: 'personId'
+        entityid: 'crn'
       })
     })
 
@@ -712,7 +712,7 @@ describe('Customer Mutations', () => {
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'person',
         action: 'unlocked',
-        entityid: undefined
+        entityid: 'crn'
       })
     })
   })
