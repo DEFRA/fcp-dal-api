@@ -35,7 +35,7 @@ jobs:
           npm test
 
       - name: Publish Dev Build
-        uses: DEFRA/cdp-build-action/build-hotfix@f13fc42004f99a1df2e21ce1ff488cc72c897e40 # 17 Jul 2026
+        uses: DEFRA/cdp-build-action/build-hotfix@5ff8be1833b05bfdbe396b3e46e0802822b94615 # 17 Jul 2026
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
