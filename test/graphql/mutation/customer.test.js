@@ -305,6 +305,85 @@ describe('customer mutations', () => {
     })
   })
 
+  describe.each([
+    ['updateLockCustomer', 'UpdateLockCustomerInput', 'lock', 'LockPerson'],
+    ['updateUnlockCustomer', 'UpdateUnlockCustomerInput', 'unlock', 'UnlockPerson']
+  ])('%s access', (mutationName, inputType, action, partyNoteType) => {
+    const mutation = `#graphql
+      mutation ($input: ${inputType}!) {
+        ${mutationName}(input: $input) {
+          success
+        }
+      }
+    `
+    const input = { crn: '1234567890', reason: 'my reason' }
+    let configMockPath
+
+    beforeEach(() => {
+      configMockPath = { 'auth.disabled': false }
+      const originalConfig = { ...config }
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    const nockAction = (gateway) =>
+      nock(config.get(`kits.${gateway}.gatewayUrl`))
+        .post(`/person/personId/${action}`, { reason: 'my reason', partyNoteType })
+        .reply(204)
+
+    const externalHeaders = () => {
+      mockDefraIdJwks()
+      return { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) }
+    }
+
+    test('allows an internal user in the SINGLE_FRONT_DOOR group', async () => {
+      // arrange
+      const kits = nockAction('internal')
+
+      // act
+      const result = await makeTestQuery(
+        mutation,
+        { email: 'test@defra.gov.uk' },
+        false,
+        { input },
+        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+      )
+
+      // assert
+      expect(result).toEqual({ data: { [mutationName]: { success: true } } })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test.each([
+      ['SINGLE_FRONT_DOOR', 'auth.groups.SINGLE_FRONT_DOOR'],
+      ['ADMIN', 'auth.groups.ADMIN']
+    ])('blocks an external user calling as %s', async (_, group) => {
+      // arrange
+      const internalKits = nockAction('internal')
+      const externalKits = nockAction('external')
+
+      // act
+      const result = await makeTestQuery(mutation, externalHeaders(), false, { input }, [
+        config.get(group)
+      ])
+
+      // assert
+      expect(result.data[mutationName]).toBeNull()
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to this user type'
+      )
+      expect(internalKits.isDone()).toBe(false)
+      expect(externalKits.isDone()).toBe(false)
+    })
+  })
+
   describe('updateDeactivateCustomer', () => {
     const deactivateMutation = `#graphql
       mutation Deactivate($input: UpdateDeactivateCustomerInput!) {
