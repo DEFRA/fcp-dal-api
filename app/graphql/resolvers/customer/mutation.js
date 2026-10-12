@@ -1,5 +1,5 @@
 import { config } from '../../../config.js'
-import { BadRequest, NotFound, Unauthorized } from '../../../errors/graphql.js'
+import { BadRequest, Forbidden, NotFound, Unauthorized } from '../../../errors/graphql.js'
 import { logger } from '../../../logger/logger.js'
 import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
@@ -176,6 +176,39 @@ async function updateDeactivateCustomerResolver(
   }
 }
 
+async function updateCustomerAuthenticationQuestionsResolver(
+  _,
+  { input: { crn, memorableDate, memorableEvent, memorableLocation } },
+  { dataSources, auditTrail, defraIdContext },
+  info
+) {
+  auditTrail?.recordAccount(info, 'crn', crn)
+  auditTrail?.recordEntity(info, {
+    entity: 'authenticate-question',
+    action: 'updated',
+    entityid: crn
+  })
+
+  // A defraIdContext is only built for external users, who may only update their own answers
+  if (defraIdContext && defraIdContext.crn() !== crn) {
+    throw new Forbidden('Defra ID token is not valid for the provided CRN')
+  }
+
+  const personId = await retrievePersonIdByCRN(crn, dataSources)
+  auditTrail?.recordAccount(info, 'personId', personId)
+
+  await dataSources.ruralPaymentsCustomer.saveAuthenticateAnswersByCRN(crn, {
+    memorableDate,
+    memorableEvent,
+    memorableLocation
+  })
+
+  return {
+    success: true,
+    customer: { crn, personId }
+  }
+}
+
 function validateReasonOrNote(reason, note) {
   const hasReason = typeof reason === 'string' && reason.trim().length > 0
   const hasNote = typeof note === 'string' && note.trim().length > 0
@@ -200,5 +233,6 @@ export const Mutation = {
   updateLockCustomer: updateLockCustomerResolver,
   updateUnlockCustomer: updateUnlockCustomerResolver,
   sendConfirmEmailAddressEmail: sendConfirmEmailAddressEmailResolver,
-  updateDeactivateCustomer: updateDeactivateCustomerResolver
+  updateDeactivateCustomer: updateDeactivateCustomerResolver,
+  updateCustomerAuthenticationQuestions: updateCustomerAuthenticationQuestionsResolver
 }

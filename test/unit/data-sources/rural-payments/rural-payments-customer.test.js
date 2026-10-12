@@ -507,6 +507,57 @@ describe('Rural Payments Customer', () => {
     })
   })
 
+  describe('saveAuthenticateAnswersByCRN', () => {
+    test('sends the answers to the security answers endpoint for the crn', async () => {
+      // arrange
+      httpPost.mockResolvedValueOnce({ status: 200 })
+
+      // act
+      await ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('1234567890', {
+        memorableDate: 'my date',
+        memorableEvent: 'my event',
+        memorableLocation: 'my location'
+      })
+
+      // assert
+      expect(httpPost).toHaveBeenCalledWith('external-auth/security-answers/1234567890', {
+        body: JSON.stringify({ date: 'my date', event: 'my event', location: 'my location' }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+    })
+
+    test('leaves null and missing answers out of the request', async () => {
+      // arrange
+      httpPost.mockResolvedValueOnce({ status: 200 })
+
+      // act
+      await ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('1234567890', {
+        memorableDate: null,
+        memorableEvent: 'my event'
+      })
+
+      // assert
+      expect(httpPost).toHaveBeenCalledWith('external-auth/security-answers/1234567890', {
+        body: JSON.stringify({ event: 'my event' }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+    })
+
+    test('passes on an error from the upstream', async () => {
+      // arrange
+      httpPost.mockRejectedValueOnce(new Error('Network error'))
+
+      // act / assert
+      await expect(
+        ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('1234567890', {
+          memorableDate: 'my date',
+          memorableEvent: 'my event',
+          memorableLocation: 'my location'
+        })
+      ).rejects.toThrow('Network error')
+    })
+  })
+
   describe('unlockPerson', () => {
     test('should send a POST request to unlock the person and return the response data', async () => {
       const mockResponse = { success: true, message: 'Person unlocked successfully' }

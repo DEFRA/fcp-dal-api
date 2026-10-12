@@ -1,6 +1,12 @@
 import { GraphQLError } from 'graphql'
 import StatusCodes from 'http-status-codes'
-import { BadRequest, HttpError, NotFound, Unauthorized } from '../../../app/errors/graphql.js'
+import {
+  BadRequest,
+  Forbidden,
+  HttpError,
+  NotFound,
+  Unauthorized
+} from '../../../app/errors/graphql.js'
 
 describe('Custom GraphQL HTTP Errors', () => {
   test('Unauthorized error sets correct code and http status', () => {
@@ -10,6 +16,15 @@ describe('Custom GraphQL HTTP Errors', () => {
     expect(err.message).toBe('Unauthorized access')
     expect(err.extensions.code).toBe('UNAUTHORIZED')
     expect(err.extensions.http).toEqual({ status: StatusCodes.UNAUTHORIZED })
+  })
+
+  test('Forbidden error sets correct code and http status', () => {
+    const err = new Forbidden('Access denied')
+
+    expect(err).toBeInstanceOf(GraphQLError)
+    expect(err.message).toBe('Access denied')
+    expect(err.extensions.code).toBe('FORBIDDEN')
+    expect(err.extensions.http).toEqual({ status: StatusCodes.FORBIDDEN })
   })
 
   test('NotFound error sets correct code and http status', () => {

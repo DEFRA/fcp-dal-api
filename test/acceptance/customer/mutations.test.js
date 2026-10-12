@@ -580,3 +580,49 @@ describe('Customer Mutations - unlock a customer', () => {
     expect(check.customer.info.status.locked).toBe(false)
   })
 })
+
+describe('Customer Mutations - update authentication questions', () => {
+  // note: crn 1111111902 is reserved for this test
+  const crn = '1111111902'
+
+  const updateAuthenticationQuestionsMutation = gql`
+    mutation updateCustomerAuthenticationQuestions(
+      $input: UpdateCustomerAuthenticationQuestionsInput!
+    ) {
+      updateCustomerAuthenticationQuestions(input: $input) {
+        success
+        customer {
+          authenticationQuestions {
+            memorableDate
+            memorableEvent
+            memorableLocation
+            isFound
+          }
+        }
+      }
+    }
+  `
+
+  it('should update the authentication questions of the customer', async () => {
+    // arrange
+    const client = new GraphQLClient(targetURL)
+    const answers = {
+      memorableDate: `date ${Date.now()}`,
+      memorableEvent: 'First tractor',
+      memorableLocation: 'Shrewsbury'
+    }
+
+    // act
+    const result = await client.request(
+      updateAuthenticationQuestionsMutation,
+      { input: { crn, ...answers } },
+      headers
+    )
+
+    // assert
+    expect(result.updateCustomerAuthenticationQuestions).toEqual({
+      success: true,
+      customer: { authenticationQuestions: { ...answers, isFound: true } }
+    })
+  })
+})
