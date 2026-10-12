@@ -40,6 +40,16 @@ extend type Mutation {
     @auth(requires: [SINGLE_FRONT_DOOR])
 
   """
+  Deactivate a locked business.
+
+  Only internal users can reactivate a business.
+  At least one of reason or note must be provided.
+  The business must be locked.
+  """
+  updateBusinessDeactivate(input: UpdateBusinessDeactivateInput!): UpdateBusinessResponse
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
+
+  """
   Reactivate a deactivated business.
 
   Only internal users can reactivate a business.
@@ -152,6 +162,23 @@ input UpdateBusinessReactivateInput {
 
   """
   Note for reactivating the business.
+  """
+  note: String
+}
+
+input UpdateBusinessDeactivateInput {
+  """
+  Single Business Identifier (SBI) of the business.
+  """
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
+
+  """
+  Reason for deactivating the business.
+  """
+  reason: String
+
+  """
+  Note for deactivating the business.
   """
   note: String
 }

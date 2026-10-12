@@ -8,7 +8,8 @@ const mockBusinessCommonModule = {
   retrieveOrgIdBySbi: jest.fn(),
   businessLockResolver: jest.fn(),
   businessUnlockResolver: jest.fn(),
-  businessReactivateResolver: jest.fn()
+  businessReactivateResolver: jest.fn(),
+  businessDeactivateResolver: jest.fn()
 }
 const mockCustomerCommonModule = {
   retrievePersonIdByCRN: jest.fn()
@@ -1075,6 +1076,27 @@ describe('Business Mutation updateBusinessReactivate', () => {
 
     // assert
     expect(mockBusinessCommonModule.businessReactivateResolver).toHaveBeenCalledWith({}, mockArgs, {
+      dataSources
+    })
+  })
+})
+
+describe('Business Mutation updateBusinessDeactivate', () => {
+  const mockArgs = { input: { sbi: '123', reason: 'test' } }
+
+  let dataSources
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn().mockResolvedValue('123')
+      }
+    }
+  })
+
+  it('updateBusinessDeactivate', async () => {
+    await Mutation.updateBusinessDeactivate({}, mockArgs, { dataSources })
+
+    expect(mockBusinessCommonModule.businessDeactivateResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
   })

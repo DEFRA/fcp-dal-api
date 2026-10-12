@@ -396,3 +396,61 @@ describe('Business Mutations - reactivate a business', () => {
     expect(after.business.info.status.deactivated).toBe(false)
   })
 })
+
+describe('Business Mutations - deactivate a business', () => {
+  // note: sbi 920000001 is reserved for this test;
+  // it resumes previously locked and not deactivated org in the mock
+  const deactivateSbi = '920000001'
+
+  const deactivateBusinessMutation = gql`
+    mutation updateBusinessDeactivate($input: UpdateBusinessDeactivateInput!) {
+      updateBusinessDeactivate(input: $input) {
+        success
+      }
+    }
+  `
+  const businessStatusQuery = gql`
+    query BusinessStatus($sbi: ID!) {
+      business(sbi: $sbi) {
+        info {
+          status {
+            locked
+            deactivated
+          }
+        }
+      }
+    }
+  `
+
+  it('should deactivate the business', async () => {
+    const client = new GraphQLClient(targetURL)
+    const before = await client.request(businessStatusQuery, { sbi: deactivateSbi }, headers)
+    expect(before.business.info.status).toEqual({ locked: true, deactivated: false })
+
+    const result = await client.request(
+      deactivateBusinessMutation,
+      { input: { sbi: deactivateSbi, reason: 'Business Structure Changes', note: 'Reopened' } },
+      headers
+    )
+
+    expect(result.updateBusinessDeactivate).toEqual({ success: true })
+    const after = await client.request(businessStatusQuery, { sbi: deactivateSbi }, headers)
+    expect(after.business.info.status.deactivated).toBe(true)
+  })
+
+  it('should not throw an error if business is already deactivated', async () => {
+    const client = new GraphQLClient(targetURL)
+    const before = await client.request(businessStatusQuery, { sbi: deactivateSbi }, headers)
+    expect(before.business.info.status).toEqual({ locked: true, deactivated: true })
+
+    const result = await client.request(
+      deactivateBusinessMutation,
+      { input: { sbi: deactivateSbi, reason: 'Business Structure Changes', note: 'Reopened' } },
+      headers
+    )
+
+    expect(result.updateBusinessDeactivate).toEqual({ success: true })
+    const after = await client.request(businessStatusQuery, { sbi: deactivateSbi }, headers)
+    expect(after.business.info.status.deactivated).toBe(true)
+  })
+})

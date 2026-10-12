@@ -11,6 +11,7 @@ import { retrievePersonIdByCRN } from '../customer/common.js'
 import {
   businessAdditionalDetailsUpdateResolver,
   businessAllFieldsUpdateResolver,
+  businessDeactivateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
   businessReactivateResolver,
@@ -197,7 +198,8 @@ export const Mutation = {
   updateBusinessAllFields: businessAllFieldsUpdateResolver,
   updateBusinessLock: businessLockResolver,
   updateBusinessUnlock: businessUnlockResolver,
-  updateBusinessReactivate: businessReactivateResolver
+  updateBusinessReactivate: businessReactivateResolver,
+  updateBusinessDeactivate: businessDeactivateResolver
 }
 
 export const UpdateBusinessResponse = {

@@ -228,6 +228,30 @@ export class RuralPaymentsBusiness extends RuralPayments {
     }
   }
 
+  async deactivateOrganisation(organisationId, body) {
+    try {
+      const response = await this.post(`organisation/${organisationId}/deactivate`, {
+        body: {
+          partyNoteType: 'DeactivateOrganisation',
+          ...body
+        },
+        headers: postPutHeaders
+      })
+
+      return response
+    } catch (error) {
+      if (error?.extensions?.http?.status === StatusCodes.INTERNAL_SERVER_ERROR) {
+        const organisation = await this.getOrganisationById(organisationId)
+        if (!organisation.locked) {
+          throw new Error(
+            'Business deactivation failed. Business status is not in lock state or business does not exist'
+          )
+        }
+      }
+      throw error
+    }
+  }
+
   async submitBankChange(submission) {
     return this.post('bank-change-service/v1/submit', {
       body: submission,

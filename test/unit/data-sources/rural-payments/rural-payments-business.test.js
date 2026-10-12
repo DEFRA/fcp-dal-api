@@ -622,6 +622,55 @@ describe('Rural Payments Business', () => {
     })
   })
 
+  describe('deactivateOrganisation', () => {
+    test('should call post endpoint and return successful response', async () => {
+      const fakeResponse = {
+        response: 'success'
+      }
+      httpPost.mockImplementationOnce(async () => fakeResponse)
+
+      const response = await ruralPaymentsBusiness.deactivateOrganisation('orgId', {
+        reason: 'test'
+      })
+
+      expect(httpPost).toHaveBeenCalledWith('organisation/orgId/deactivate', {
+        body: { partyNoteType: 'DeactivateOrganisation', reason: 'test' },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      expect(response).toEqual(fakeResponse)
+    })
+
+    test('should fail if error is thrown by post request', async () => {
+      const mockError = new Error('fetch error')
+      httpPost.mockRejectedValueOnce(mockError)
+
+      await expect(
+        ruralPaymentsBusiness.deactivateOrganisation('123', { reason: 'test' })
+      ).rejects.toThrow(mockError)
+      expect(httpPost).toHaveBeenCalledWith('organisation/123/deactivate', {
+        body: { partyNoteType: 'DeactivateOrganisation', reason: 'test' },
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+    })
+
+    test('should throw when business is not locked', async () => {
+      const mockError = new Error('fetch error')
+      mockError.extensions = { http: { status: 500 } }
+      httpPost.mockRejectedValueOnce(mockError)
+      httpGet.mockImplementationOnce(async () => ({ _data: { id: '123', locked: false } }))
+
+      await expect(
+        ruralPaymentsBusiness.deactivateOrganisation('123', { reason: 'test' })
+      ).rejects.toThrow(
+        'Business deactivation failed. Business status is not in lock state or business does not exist'
+      )
+    })
+  })
+
   describe('getLandUseByBusinessParcel', () => {
     test('should return land use by business parcel without date', async () => {
       const mockResponse = { data: 'mockData' }
