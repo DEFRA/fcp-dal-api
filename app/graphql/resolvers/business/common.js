@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql'
+import { BadRequest } from '../../../errors/graphql.js'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
@@ -190,7 +191,7 @@ export function getRuralPaymentsBusinessDataSource({
 
 const validateLockUnlockInput = (input) => {
   if (!input.reason && !input.note) {
-    throw new Error('Reason and/or note are required')
+    throw new BadRequest('Reason and/or note are required')
   }
 }
 
@@ -265,6 +266,39 @@ export const businessReactivateResolver = async (
   validateLockUnlockInput(input)
 
   await dataSources.ruralPaymentsBusiness.reactivateOrganisation(
+    organisationId,
+    reactivateBodyAttributes
+  )
+
+  return {
+    success: true,
+    business: {
+      sbi: input.sbi
+    }
+  }
+}
+
+export const businessDeactivateResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail },
+  info
+) => {
+  const { sbi, ...reactivateBodyAttributes } = input
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordEntity(info, {
+    entity: 'business',
+    action: 'deactivate',
+    entityid: sbi
+  })
+
+  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+
+  auditTrail?.recordAccount(info, 'organisationId', organisationId)
+
+  validateLockUnlockInput(input)
+
+  await dataSources.ruralPaymentsBusiness.deactivateOrganisation(
     organisationId,
     reactivateBodyAttributes
   )

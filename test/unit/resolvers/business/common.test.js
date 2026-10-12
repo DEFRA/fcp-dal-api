@@ -3,6 +3,7 @@ import { HttpError, NotFound } from '../../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
   businessAllFieldsUpdateResolver,
+  businessDeactivateResolver,
   businessDetailsUpdateResolver,
   businessLockResolver,
   businessReactivateResolver,
@@ -945,5 +946,95 @@ describe('businessReactivateResolver', () => {
       expect.anything()
     )
     expect(dataSources.ruralPaymentsBusiness.reactivateOrganisation).not.toHaveBeenCalled()
+  })
+})
+describe('businessDeactivateResolver', () => {
+  let dataSources
+  let auditTrail
+  const info = { path: { key: 'deactivateBusiness', typename: 'Mutation', prev: undefined } }
+
+  beforeEach(() => {
+    dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: jest.fn(),
+        deactivateOrganisation: jest.fn()
+      }
+    }
+    auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+  })
+
+  it('deactivates the organisation with the reason and note', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    const input = { sbi: '123', reason: 'test reason', note: 'test note' }
+
+    const result = await businessDeactivateResolver(null, { input }, { dataSources }, info)
+
+    expect(result).toEqual({ success: true, business: { sbi: '123' } })
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.deactivateOrganisation).toHaveBeenCalledWith('orgId', {
+      reason: 'test reason',
+      note: 'test note'
+    })
+  })
+
+  it('throws when neither reason nor note is provided', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    const input = { sbi: '123' }
+
+    await expect(
+      businessDeactivateResolver(null, { input }, { dataSources }, info)
+    ).rejects.toThrow('Reason and/or note are required')
+    expect(dataSources.ruralPaymentsBusiness.deactivateOrganisation).not.toHaveBeenCalled()
+  })
+
+  it('audits sbi and organisationId when request is successful', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    const input = { sbi: '123', reason: 'test' }
+
+    await businessDeactivateResolver(null, { input }, { dataSources, auditTrail }, info)
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'deactivate',
+      entityid: '123'
+    })
+  })
+
+  it('audits the organisationId when the request fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.deactivateOrganisation.mockRejectedValue(
+      new Error('Business is not deactivated')
+    )
+    const input = { sbi: '123', reason: 'test' }
+
+    await expect(
+      businessDeactivateResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('Business is not deactivated')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'orgId')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'business',
+      action: 'deactivate',
+      entityid: '123'
+    })
+  })
+
+  it('audits sbi when the organisation lookup fails', async () => {
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+      new Error('upstream failure')
+    )
+    const input = { sbi: '123', reason: 'test' }
+
+    await expect(
+      businessDeactivateResolver(null, { input }, { dataSources, auditTrail }, info)
+    ).rejects.toThrow('upstream failure')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(dataSources.ruralPaymentsBusiness.deactivateOrganisation).not.toHaveBeenCalled()
   })
 })

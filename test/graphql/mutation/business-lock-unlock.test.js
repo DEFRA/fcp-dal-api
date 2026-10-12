@@ -17,7 +17,7 @@ const setupNock = () => {
 }
 
 //  Nock is setup separately in each test to ensure the order and number of requests is as expected
-describe('business lock and unlock', () => {
+describe('business state mutations', () => {
   afterEach(() => {
     jest.restoreAllMocks()
     nock.cleanAll()
@@ -128,97 +128,188 @@ describe('business lock and unlock', () => {
     })
   })
 
-  test('reactivate a business', async () => {
-    // arrange
-    const input = {
-      sbi: '123456789',
-      reason: 'test'
-    }
-
-    v1.post('/organisation/organisationId/reactivate', {
-      partyNoteType: 'ReactivateOrganisation',
-      reason: 'test'
-    }).reply(204)
-    v1.get('/organisation/organisationId').reply(200, {
-      _data: {
-        id: 'organisationId',
+  describe('Reactivate a business', () => {
+    test('reactivate a business', async () => {
+      // arrange
+      const input = {
         sbi: '123456789',
-        locked: true,
-        deactivated: false
+        reason: 'test'
       }
-    })
 
-    const query = `
-      mutation ReactivateBusiness ($input: UpdateBusinessReactivateInput!) {
-          updateBusinessReactivate(input: $input) {
-              success
-              business {
-                  sbi
-                  info {
-                      status {
-                          deactivated
-                      }
-                  }
-              }
-          }
-      }
-    `
+      v1.post('/organisation/organisationId/reactivate', {
+        partyNoteType: 'ReactivateOrganisation',
+        reason: 'test'
+      }).reply(204)
+      v1.get('/organisation/organisationId').reply(200, {
+        _data: {
+          id: 'organisationId',
+          sbi: '123456789',
+          locked: true,
+          deactivated: false
+        }
+      })
 
-    // act
-    const result = await makeTestQuery(query, null, true, { input })
+      const query = `
+        mutation ReactivateBusiness ($input: UpdateBusinessReactivateInput!) {
+            updateBusinessReactivate(input: $input) {
+                success
+                business {
+                    sbi
+                    info {
+                        status {
+                            deactivated
+                        }
+                    }
+                }
+            }
+        }
+      `
 
-    // assert
-    expect(nock.isDone()).toBe(true)
-    expect(result).toEqual({
-      data: {
-        updateBusinessReactivate: {
-          success: true,
-          business: {
-            sbi: '123456789',
-            info: {
-              status: {
-                deactivated: false
+      // act
+      const result = await makeTestQuery(query, null, true, { input })
+
+      // assert
+      expect(nock.isDone()).toBe(true)
+      expect(result).toEqual({
+        data: {
+          updateBusinessReactivate: {
+            success: true,
+            business: {
+              sbi: '123456789',
+              info: {
+                status: {
+                  deactivated: false
+                }
               }
             }
           }
         }
-      }
+      })
+    })
+
+    test('reactivate a business is refused for external users', async () => {
+      // arrange
+      const originalGet = config.get.bind(config)
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) => (path === 'auth.disabled' ? false : originalGet(path)))
+      nock.cleanAll()
+      mockDefraIdJwks()
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+        .post(/\/organisation\/.*\/reactivate/)
+        .reply(204)
+      const query = `
+        mutation ReactivateBusiness ($input: UpdateBusinessReactivateInput!) {
+            updateBusinessReactivate(input: $input) {
+                success
+            }
+        }
+      `
+
+      // act
+      const result = await makeTestQuery(
+        query,
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        false,
+        { input: { sbi: '123456789', reason: 'test' } },
+        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+      )
+
+      // assert
+      expect(result.data.updateBusinessReactivate).toBeNull()
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to this user type'
+      )
+      expect(kits.isDone()).toBe(false)
     })
   })
-
-  test('reactivate a business is refused for external users', async () => {
-    // arrange
-    const originalGet = config.get.bind(config)
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) => (path === 'auth.disabled' ? false : originalGet(path)))
-    nock.cleanAll()
-    mockDefraIdJwks()
-    const kits = nock(config.get('kits.external.gatewayUrl'))
-      .post(/\/organisation\/.*\/reactivate/)
-      .reply(204)
-    const query = `
-      mutation ReactivateBusiness ($input: UpdateBusinessReactivateInput!) {
-          updateBusinessReactivate(input: $input) {
-              success
-          }
+  describe('Deactivate a business', () => {
+    test('deactivate a business', async () => {
+      const input = {
+        sbi: '123456789',
+        reason: 'test'
       }
-    `
 
-    // act
-    const result = await makeTestQuery(
-      query,
-      { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
-      false,
-      { input: { sbi: '123456789', reason: 'test' } },
-      [config.get('auth.groups.SINGLE_FRONT_DOOR')]
-    )
+      v1.post('/organisation/organisationId/deactivate', {
+        partyNoteType: 'DeactivateOrganisation',
+        reason: 'test'
+      }).reply(204)
+      v1.get('/organisation/organisationId').reply(200, {
+        _data: {
+          id: 'organisationId',
+          sbi: '123456789',
+          locked: true,
+          deactivated: false
+        }
+      })
 
-    // assert
-    expect(result.data.updateBusinessReactivate).toBeNull()
-    expect(result.errors[0].message).toBe(
-      'Authorization failed, this field is not available to this user type'
-    )
-    expect(kits.isDone()).toBe(false)
+      const query = `
+        mutation DeactivateBusiness ($input: UpdateBusinessDeactivateInput!) {
+            updateBusinessDeactivate(input: $input) {
+                success
+                business {
+                    sbi
+                    info {
+                        status {
+                            deactivated
+                        }
+                    }
+                }
+            }
+        }
+      `
+
+      const result = await makeTestQuery(query, null, true, { input })
+
+      expect(nock.isDone()).toBe(true)
+      expect(result).toEqual({
+        data: {
+          updateBusinessDeactivate: {
+            success: true,
+            business: {
+              sbi: '123456789',
+              info: {
+                status: {
+                  deactivated: false
+                }
+              }
+            }
+          }
+        }
+      })
+    })
+
+    test('deactivate a business is refused for external users', async () => {
+      const originalGet = config.get.bind(config)
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) => (path === 'auth.disabled' ? false : originalGet(path)))
+      nock.cleanAll()
+      mockDefraIdJwks()
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+        .post(/\/organisation\/.*\/deactivate/)
+        .reply(204)
+      const query = `
+        mutation DeactivateBusiness ($input: UpdateBusinessDeactivateInput!) {
+            updateBusinessDeactivate(input: $input) {
+                success
+            }
+        }
+      `
+
+      const result = await makeTestQuery(
+        query,
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        false,
+        { input: { sbi: '123456789', reason: 'test' } },
+        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+      )
+
+      expect(result.data.updateBusinessDeactivate).toBeNull()
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to this user type'
+      )
+      expect(kits.isDone()).toBe(false)
+    })
   })
 })
