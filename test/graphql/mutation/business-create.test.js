@@ -12,7 +12,7 @@ import { makeTestQuery } from '../makeTestQuery.js'
 
 const EMAIL_PATTERN = '^(?=.{6,254}$)[^@\\s]+@[^@\\s]+[.][^@\\s]+$'
 
-const PHONE_PATTERN = '^(?:|(?=.{10,50}$)[+]?[0-9 ()]*)$'
+const PHONE_PATTERN = '^(?:|(?=.{10,50}$)\\+?(?=[\\d ()]*\\d)[\\d ()]*)$'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
@@ -615,6 +615,8 @@ describe('business', () => {
       [field, 'longer than 50 characters', `+44${'1'.repeat(48)}`],
       [field, 'shorter than 10 characters', '012345678'],
       [field, 'of only a space', ' '],
+      [field, 'of only spaces', ' '.repeat(10)],
+      [field, 'of only brackets', '()()()()()'],
       [field, 'containing letters', '01234 56789O'],
       [field, 'containing a hyphen', '01234-567890'],
       [field, 'containing an extension', '01234 567890 ext 12'],

@@ -194,6 +194,7 @@ describe('validatePhoneHasNumber', () => {
   it.each([
     ['a mobile', { mobile: '07700 900000' }],
     ['a landline', { landline: '01234 567890' }],
+    ['a landline and null mobile', { landline: '01234 567890', mobile: null }],
     ['both', { mobile: '07700 900000', landline: '01234 567890' }]
   ])('accepts a phone with %s', (_, phone) => {
     expect(() => validatePhoneHasNumber(phone)).not.toThrow()
