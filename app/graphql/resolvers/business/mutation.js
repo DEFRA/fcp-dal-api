@@ -213,26 +213,23 @@ export const Mutation = {
       retrievePersonIdByCRN(crn, dataSources)
     ])
 
-    return await dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(
-      organisationId,
-      {
-        personRoles: [
-          {
-            role,
-            personId
-          }
-        ],
-        personPrivileges: [
-          {
-            privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
-              permissions,
-              dataSources.permissions.getPermissionGroups()
-            ),
-            personId
-          }
-        ]
-      }
-    )
+    return dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(organisationId, {
+      personRoles: [
+        {
+          role,
+          personId
+        }
+      ],
+      personPrivileges: [
+        {
+          privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
+            permissions,
+            dataSources.permissions.getPermissionGroups()
+          ),
+          personId
+        }
+      ]
+    })
   },
 
   updateCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
@@ -242,7 +239,7 @@ export const Mutation = {
       retrievePersonIdByCRN(crn, dataSources)
     ])
 
-    return await dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
+    return dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
       organisationId,
       personId,
       {
