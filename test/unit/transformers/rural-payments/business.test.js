@@ -887,7 +887,7 @@ describe('#transformBusinessDetailsToOrgDetailsCreate', () => {
   const businessCreateInput = {
     name: 'Acme Farms Ltd',
     reference: undefined,
-    vat: 'GB123456789',
+    vat: '123456789',
     traderNumber: 'TR12345',
     vendorNumber: 'VN67890',
     address: {
@@ -1039,7 +1039,7 @@ describe('#transformBusinessDetailsToOrgDetailsCreate', () => {
       landConfirmed: true,
       traderNumber: 'TR12345',
       vendorNumber: 'VN67890',
-      taxRegistrationNumber: 'GB123456789'
+      taxRegistrationNumber: '123456789'
     })
   })
 })
