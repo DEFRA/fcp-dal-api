@@ -243,26 +243,26 @@ export const Mutation = {
     ])
 
     return await dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
-        organisationId,
-        personId,
-        {
-          personRoles: [
-            {
-              role,
-              personId
-            }
-          ],
-          personPrivileges: [
-            {
-              privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
-                permissions,
-                dataSources.permissions.getPermissionGroups()
-              ),
-              personId
-            }
-          ]
-        }
-      )
+      organisationId,
+      personId,
+      {
+        personRoles: [
+          {
+            role,
+            personId
+          }
+        ],
+        personPrivileges: [
+          {
+            privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
+              permissions,
+              dataSources.permissions.getPermissionGroups()
+            ),
+            personId
+          }
+        ]
+      }
+    )
   }
 }
 
