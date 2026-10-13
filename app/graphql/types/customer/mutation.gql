@@ -100,6 +100,42 @@ extend type Mutation {
   """
   updateUnlockCustomer(input: UpdateUnlockCustomerInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
+
+  """
+  Sets the customer's authentication questions (memorable date, event and
+  location), replacing any existing answers. An answer that is null or not
+  given is cleared.
+
+  External users can only update their own authentication questions, so the
+  CRN must match the one in their Defra ID token.
+
+  Error codes:
+  - `FORBIDDEN`: The CRN does not match the external user's Defra ID token.
+  - `NOT FOUND`: No customer exists for the given CRN.
+  """
+  updateCustomerAuthenticationQuestions(
+    input: UpdateCustomerAuthenticationQuestionsInput!
+  ): UpdateCustomerResponse @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input UpdateCustomerAuthenticationQuestionsInput {
+  """
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
+  """
+  Memorable date answer of the customer.
+  """
+  memorableDate: String @validateVariable(pattern: "^.{1,256}$")
+  """
+  Memorable event answer of the customer.
+  """
+  memorableEvent: String @validateVariable(pattern: "^.{1,256}$")
+  """
+  Memorable location answer of the customer.
+  """
+  memorableLocation: String @validateVariable(pattern: "^.{1,256}$")
 }
 
 input UpdateDeactivateCustomerInput {

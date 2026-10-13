@@ -594,6 +594,273 @@ describe('customer mutations', () => {
     })
   })
 
+  describe('updateCustomerAuthenticationQuestions', () => {
+    const authenticationQuestionsMutation = `#graphql
+      mutation UpdateAuthenticationQuestions($input: UpdateCustomerAuthenticationQuestionsInput!) {
+        updateCustomerAuthenticationQuestions(input: $input) {
+          success
+          customer {
+            crn
+            authenticationQuestions {
+              memorableDate
+              memorableEvent
+              memorableLocation
+            }
+          }
+        }
+      }
+    `
+    const validInput = {
+      crn: '1234567890',
+      memorableDate: 'my date',
+      memorableEvent: 'my event',
+      memorableLocation: 'my location'
+    }
+    let configMockPath
+
+    beforeEach(() => {
+      configMockPath = {}
+      const originalConfig = { ...config }
+      jest
+        .spyOn(config, 'get')
+        .mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    const nockSaveAnswers = (status = 200) =>
+      nock(config.get('kits.internal.gatewayUrl'))
+        .post('/external-auth/security-answers/1234567890', {
+          date: 'my date',
+          event: 'my event',
+          location: 'my location'
+        })
+        .reply(status)
+
+    test('saves the answers in KITS and returns the updated customer', async () => {
+      // arrange
+      const kits = nockSaveAnswers()
+      kits.get('/external-auth/security-answers/1234567890').reply(200, {
+        customerReference: '1234567890',
+        memorableDate: 'my date',
+        memorableEvent: 'my event',
+        memorableLocation: 'my location',
+        lastUpdatedOn: '2026-10-12T09:00:00.000Z'
+      })
+
+      // act
+      const result = await makeTestQuery(authenticationQuestionsMutation, null, true, {
+        input: validInput
+      })
+
+      // assert
+      expect(result).toEqual({
+        data: {
+          updateCustomerAuthenticationQuestions: {
+            success: true,
+            customer: {
+              crn: '1234567890',
+              authenticationQuestions: {
+                memorableDate: 'my date',
+                memorableEvent: 'my event',
+                memorableLocation: 'my location'
+              }
+            }
+          }
+        }
+      })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test.each(['memorableDate', 'memorableEvent', 'memorableLocation'])(
+      'refuses an empty %s',
+      async (field) => {
+        // arrange
+        const kits = nockSaveAnswers()
+
+        // act
+        const result = await makeTestQuery(authenticationQuestionsMutation, null, true, {
+          input: { ...validInput, [field]: '' }
+        })
+
+        // assert
+        expect(result.errors[0].message).toBe(
+          `variable 'input.${field}' must match pattern ^.{1,256}$`
+        )
+        expect(kits.isDone()).toBe(false)
+      }
+    )
+
+    test.each([
+      ['null', { memorableDate: null, memorableEvent: null, memorableLocation: null }],
+      ['not given', {}]
+    ])('clears the answers in KITS when they are %s', async (_, answers) => {
+      // arrange
+      const kits = nock(config.get('kits.internal.gatewayUrl'))
+        .post('/external-auth/security-answers/1234567890', {})
+        .reply(200)
+
+      // act
+      const result = await makeTestQuery(
+        `#graphql
+          mutation UpdateAuthenticationQuestions($input: UpdateCustomerAuthenticationQuestionsInput!) {
+            updateCustomerAuthenticationQuestions(input: $input) {
+              success
+            }
+          }
+        `,
+        null,
+        true,
+        { input: { crn: '1234567890', ...answers } }
+      )
+
+      // assert
+      expect(result).toEqual({ data: { updateCustomerAuthenticationQuestions: { success: true } } })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test('refuses an answer longer than 256 characters', async () => {
+      // arrange
+      const kits = nockSaveAnswers()
+
+      // act
+      const result = await makeTestQuery(authenticationQuestionsMutation, null, true, {
+        input: { ...validInput, memorableEvent: 'x'.repeat(257) }
+      })
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        "variable 'input.memorableEvent' must match pattern ^.{1,256}$"
+      )
+      expect(kits.isDone()).toBe(false)
+    })
+
+    test('accepts an answer of 256 characters', async () => {
+      // arrange
+      const memorableEvent = 'x'.repeat(256)
+      const kits = nock(config.get('kits.internal.gatewayUrl'))
+        .post('/external-auth/security-answers/1234567890', {
+          date: 'my date',
+          event: memorableEvent,
+          location: 'my location'
+        })
+        .reply(200)
+
+      // act
+      const result = await makeTestQuery(
+        `#graphql
+          mutation UpdateAuthenticationQuestions($input: UpdateCustomerAuthenticationQuestionsInput!) {
+            updateCustomerAuthenticationQuestions(input: $input) {
+              success
+            }
+          }
+        `,
+        null,
+        true,
+        { input: { ...validInput, memorableEvent } }
+      )
+
+      // assert
+      expect(result).toEqual({ data: { updateCustomerAuthenticationQuestions: { success: true } } })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test('returns Not Found when KITS cannot find the person', async () => {
+      // arrange
+      nockSaveAnswers(404)
+
+      // act
+      const result = await makeTestQuery(authenticationQuestionsMutation, null, true, {
+        input: validInput
+      })
+
+      // assert
+      expect(result.errors[0].message).toBe('Not Found')
+      expect(result.data.updateCustomerAuthenticationQuestions).toBeNull()
+    })
+
+    test('blocks callers outside the SINGLE_FRONT_DOOR group', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      const kits = nockSaveAnswers()
+
+      // act
+      const result = await makeTestQuery(
+        authenticationQuestionsMutation,
+        null,
+        false,
+        { input: validInput },
+        [config.get('auth.groups.CONSOLIDATED_VIEW')]
+      )
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, you are not in the correct AD groups'
+      )
+      expect(kits.isDone()).toBe(false)
+    })
+
+    test('allows an external user to update their own answers', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      mockDefraIdJwks()
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+        .post('/external-auth/security-answers/1234567890', {
+          date: 'my date',
+          event: 'my event',
+          location: 'my location'
+        })
+        .reply(200)
+
+      // act
+      const result = await makeTestQuery(
+        `#graphql
+          mutation UpdateAuthenticationQuestions($input: UpdateCustomerAuthenticationQuestionsInput!) {
+            updateCustomerAuthenticationQuestions(input: $input) {
+              success
+            }
+          }
+        `,
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        false,
+        { input: validInput },
+        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+      )
+
+      // assert
+      expect(result).toEqual({ data: { updateCustomerAuthenticationQuestions: { success: true } } })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test("refuses an external user updating another customer's answers", async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      mockDefraIdJwks()
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+        .post(/\/external-auth\/security-answers\/.*/)
+        .reply(200)
+
+      // act
+      const result = await makeTestQuery(
+        authenticationQuestionsMutation,
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1111111111' }) },
+        false,
+        { input: validInput },
+        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+      )
+
+      // assert
+      expect(result.data.updateCustomerAuthenticationQuestions).toBeNull()
+      expect(result.errors[0].message).toBe('Defra ID token is not valid for the provided CRN')
+      expect(result.errors[0].extensions.code).toBe('FORBIDDEN')
+      expect(kits.isDone()).toBe(false)
+    })
+  })
+
   test('updateCustomerAddress', async () => {
     setupNock({
       address: {

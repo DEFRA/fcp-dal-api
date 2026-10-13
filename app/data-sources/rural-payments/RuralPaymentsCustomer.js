@@ -186,6 +186,31 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return response
   }
 
+  /**
+   * Saves the customer's authentication question answers (memorable words), replacing all existing
+   * answers. A null or undefined answer is left out of the request, which upstream saves as null.
+   *
+   * @param {string} crn - Customer Reference Number (CRN) of the customer.
+   * @param {object} answers - The authentication question answers to save.
+   * @param {string | null} [answers.memorableDate] - Memorable date answer.
+   * @param {string | null} [answers.memorableEvent] - Memorable event answer.
+   * @param {string | null} [answers.memorableLocation] - Memorable location answer.
+   * @returns {Promise<void>} Resolves once the answers are saved.
+   * @throws {HttpError} When the upstream request fails, e.g. a 404 when no customer exists for
+   * the CRN.
+   */
+  async saveAuthenticateAnswersByCRN(crn, { memorableDate, memorableEvent, memorableLocation }) {
+    await this.post(`external-auth/security-answers/${crn}`, {
+      // upstream only accepts strings, so a cleared answer is omitted rather than sent as null
+      body: JSON.stringify({
+        date: memorableDate ?? undefined,
+        event: memorableEvent ?? undefined,
+        location: memorableLocation ?? undefined
+      }),
+      headers: postPutHeaders
+    })
+  }
+
   updatePersonDetails(personId, personDetails) {
     return this.put(`person/${personId}`, {
       body: personDetails,

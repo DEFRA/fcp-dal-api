@@ -54,6 +54,7 @@ describe('Customer Mutations', () => {
         validateEmail: jest.fn(),
         lockPerson: jest.fn(),
         deactivatePerson: jest.fn(),
+        saveAuthenticateAnswersByCRN: jest.fn(),
         unlockPerson: jest.fn(),
         logger: { warn: jest.fn() },
         gatewayType: 'ruralPayments',
@@ -856,6 +857,111 @@ describe('Customer Mutations', () => {
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
       expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, deactivatedPersonEntity)
+    })
+  })
+
+  describe('updateCustomerAuthenticationQuestions', () => {
+    const info = { path: { key: 'updateCustomerAuthenticationQuestions' } }
+    const answers = {
+      memorableDate: 'my date',
+      memorableEvent: 'my event',
+      memorableLocation: 'my location'
+    }
+    let auditTrail
+
+    beforeEach(() => {
+      auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    })
+
+    const updateAuthenticationQuestions = (input, defraIdContext) =>
+      Mutation.updateCustomerAuthenticationQuestions(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail, defraIdContext },
+        info
+      )
+
+    test('saves the answers for the crn and returns the customer', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      // act
+      const result = await updateAuthenticationQuestions({ crn: 'crn', ...answers })
+
+      // assert
+      expect(
+        mockDataSources.ruralPaymentsCustomer.saveAuthenticateAnswersByCRN
+      ).toHaveBeenCalledWith('crn', answers)
+      expect(result).toEqual({ success: true, customer: { crn: 'crn', personId: 'personId' } })
+    })
+
+    test('audits the crn, the personId and an updated authenticate question', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+
+      // act
+      await updateAuthenticationQuestions({ crn: 'crn', ...answers })
+
+      // assert
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'personId')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'authenticate-question',
+        action: 'updated',
+        entityid: 'crn'
+      })
+    })
+
+    test('saves the answers when an external user gives the crn in their token', async () => {
+      // arrange
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
+      const defraIdContext = { crn: () => 'crn' }
+
+      // act
+      const result = await updateAuthenticationQuestions({ crn: 'crn', ...answers }, defraIdContext)
+
+      // assert
+      expect(
+        mockDataSources.ruralPaymentsCustomer.saveAuthenticateAnswersByCRN
+      ).toHaveBeenCalledWith('crn', answers)
+      expect(result).toEqual({ success: true, customer: { crn: 'crn', personId: 'personId' } })
+    })
+
+    test('refuses an external user giving a crn other than the one in their token', async () => {
+      // arrange
+      const defraIdContext = { crn: () => 'own-crn' }
+
+      // act
+      const error = await updateAuthenticationQuestions(
+        { crn: 'crn', ...answers },
+        defraIdContext
+      ).catch((e) => e)
+
+      // assert
+      expect(error.message).toBe('Defra ID token is not valid for the provided CRN')
+      expect(error.extensions.code).toBe('FORBIDDEN')
+      expect(error.extensions.http).toEqual({ status: 403 })
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).not.toHaveBeenCalled()
+      expect(
+        mockDataSources.ruralPaymentsCustomer.saveAuthenticateAnswersByCRN
+      ).not.toHaveBeenCalled()
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
+    })
+
+    test('does not save the answers when the customer is not found', async () => {
+      // arrange
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
+        new Error('Not Found')
+      )
+
+      // act / assert
+      await expect(updateAuthenticationQuestions({ crn: 'crn', ...answers })).rejects.toThrow(
+        'Not Found'
+      )
+      expect(
+        mockDataSources.ruralPaymentsCustomer.saveAuthenticateAnswersByCRN
+      ).not.toHaveBeenCalled()
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'crn')
     })
   })
 })
