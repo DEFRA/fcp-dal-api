@@ -376,9 +376,10 @@ const updateAuthorisationMutation = gql`
 const authorisationSbi = '900000001'
 const authorisationCrn = '2222222000'
 
-// Skipped until DEFRA/fcp-dal-upstream-mock#120 is published. Schema coverage still
-// counts the operations above; the current mock image 404s the write endpoints.
-describe.skip('customer authorisation on business', () => {
+// NOTE: the create test fails on a second run against the same mock (409 Conflict) as the
+// DAL cannot yet unlink a customer from a business. Once FCPDAL-318 is played, add an
+// afterAll that unlinks the customer so the suite can be re-run.
+describe('customer authorisation on business', () => {
   it('adds a customer to a business with the given role and permissions', async () => {
     const response = await client.request(
       createAuthorisationMutation,
