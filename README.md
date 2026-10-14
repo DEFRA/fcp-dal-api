@@ -283,28 +283,16 @@ The [`publish-hotfix`](./.github/workflows/publish-hotfix.yml) GitHub Actions wo
 
 It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-hotfix.yml) by selecting the branch to build from, and running the workflow.
 
-The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, which auto-increments the patch version using [`anothrNick/github-tag-action`](https://github.com/anothrNick/github-tag-action) (`DEFAULT_BUMP: patch`, `TAG_CONTEXT: branch`) based on the tags reachable from the branch's history.
+The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, which auto-versions the build using [`anothrNick/github-tag-action`](https://github.com/anothrNick/github-tag-action) (`DEFAULT_BUMP: patch`, `TAG_CONTEXT: branch`, `PRERELEASE: true`) based on the tags reachable from the branch's history.
 
-#### Working around a duplicate version number
+Hotfixes are tagged as semver prereleases, with the prerelease suffix derived from the branch name (lower-cased, with any run of characters other than `a-z` and `0-9` collapsed to a single `-`). For example, dispatching from `hotfix/fix-login` when the latest release reachable from the branch is `2.45.1` produces:
 
-Because the next version is auto-computed from tags reachable from the branch, the computed version can collide with a tag that already exists — e.g. a release or another hotfix has been tagged since the hotfix branch diverged from `main`. When this happens, the publish fails because the version/tag already exists.
+- `2.45.2-hotfix-fix-login.0` on the first dispatch
+- `2.45.2-hotfix-fix-login.1` on the next dispatch after a new commit to the branch
 
-To work around this, temporarily override the auto-versioning by adding a `CUSTOM_TAG` entry to the `env:` block of [`publish-hotfix.yml`](./.github/workflows/publish-hotfix.yml):
+Because the suffix is unique per branch, two hotfix branches cut from the same release get distinct tags (e.g. `2.45.2-hotfix-a.0` and `2.45.2-hotfix-b.0`), and a hotfix can no longer collide with a plain release tag such as `2.45.2`.
 
-```yaml
-env:
-  AWS_REGION: eu-west-2
-  AWS_ACCOUNT_ID: '094954420758'
-  CUSTOM_TAG: 2.18.2 # <-- pick the next unused version
-```
-
-Setting `CUSTOM_TAG` causes `github-tag-action` to skip auto-versioning entirely and use exactly the version provided.
-
-1. Check the version currently deployed to `prod` in the [CDP portal](https://portal.cdp-int.defra.cloud/services/fcp-dal-api) and then check the existing tags (`git tag --list --sort=-v:refname | head`) to find the next free patch version for the prod `major.minor` version
-2. Add the `CUSTOM_TAG` line above to `publish-hotfix.yml` on the hotfix branch and commit/push it.
-3. Dispatch the `Publish Hot Fix` workflow from that branch.
-
-> NOTE: this same technique (`CUSTOM_TAG`) is what the [Publish Dev Build workflow](#publish-dev-build-workflow) uses to guarantee a unique version on every dispatch.
+> NOTE: re-dispatching the workflow without a new commit on the branch reuses the existing tag rather than producing a new one, so push a commit if you need a fresh version.
 
 ### Dependabot - TODO!
 
