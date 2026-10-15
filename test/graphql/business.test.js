@@ -425,6 +425,7 @@ describe('Query.business internal', () => {
 
   afterEach(() => {
     jest.restoreAllMocks()
+    nock.cleanAll()
   })
 
   test('authenticated external', async () => {
@@ -1010,31 +1011,34 @@ describe('Query.business internal', () => {
     )
   })
 
-  test.each(['CONSOLIDATED_VIEW', 'SINGLE_FRONT_DOOR', 'SFI_REFORM', 'LAND_GRANTS_API'])(
-    'allows users in the %s group to query business',
-    async (group) => {
-      configMockPath['auth.disabled'] = false
+  test.each([
+    'CONSOLIDATED_VIEW',
+    'SINGLE_FRONT_DOOR',
+    'SFI_REFORM',
+    'LAND_GRANTS_API',
+    'LAND_APP_TECH_SPIKES_API'
+  ])('allows users in the %s group to query business', async (group) => {
+    configMockPath['auth.disabled'] = false
 
-      const internalKitsGateway = nock(config.get('kits.internal.gatewayUrl'))
-      mockOrganisationSearch(internalKitsGateway)
+    const internalKitsGateway = nock(config.get('kits.internal.gatewayUrl'))
+    mockOrganisationSearch(internalKitsGateway)
 
-      const result = await makeTestQuery(
-        `#graphql
+    const result = await makeTestQuery(
+      `#graphql
           query BusinessAuthTest {
             business(sbi: "123456789") {
               sbi
             }
           }
         `,
-        null,
-        false,
-        {},
-        [config.get(`auth.groups.${group}`)]
-      )
+      null,
+      false,
+      {},
+      [config.get(`auth.groups.${group}`)]
+    )
 
-      expect(internalKitsGateway.isDone()).toBe(true)
-      expect(result.errors).toBeUndefined()
-      expect(result.data.business.sbi).toBe('123456789')
-    }
-  )
+    expect(internalKitsGateway.isDone()).toBe(true)
+    expect(result.errors).toBeUndefined()
+    expect(result.data.business.sbi).toBe('123456789')
+  })
 })

@@ -78,6 +78,7 @@ describe('config', () => {
     process.env.SINGLE_FRONT_DOOR_AD_GROUP_ID = 'single-front-door-group-id'
     process.env.SFI_REFORM_AD_GROUP_ID = 'sfi-reform-group-id'
     process.env.LAND_GRANTS_API_AD_GROUP_ID = 'land-grants-api-group-id'
+    process.env.LAND_APP_TECH_SPIKES_AD_GROUP_ID = 'land-app-tech-spikes-api-group-id'
     process.env.KITS_INTERNAL_CONNECTION_CERT = 'internal-cert-value'
     process.env.KITS_INTERNAL_CONNECTION_KEY = 'internal-key-value'
     process.env.KITS_INTERNAL_GATEWAY_URL = 'https://internal.example.com'
@@ -122,6 +123,9 @@ describe('config', () => {
     expect(config.get('auth.groups.SINGLE_FRONT_DOOR')).toBe('single-front-door-group-id')
     expect(config.get('auth.groups.SFI_REFORM')).toBe('sfi-reform-group-id')
     expect(config.get('auth.groups.LAND_GRANTS_API')).toBe('land-grants-api-group-id')
+    expect(config.get('auth.groups.LAND_APP_TECH_SPIKES_API')).toBe(
+      'land-app-tech-spikes-api-group-id'
+    )
     expect(config.get('kits.internal.connectionCert')).toBe('internal-cert-value')
     expect(config.get('kits.internal.connectionKey')).toBe('internal-key-value')
     expect(config.get('kits.internal.gatewayUrl')).toBe('https://internal.example.com')

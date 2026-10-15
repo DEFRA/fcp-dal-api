@@ -30,7 +30,7 @@ extend type Mutation {
     another customer. The customer record is left unchanged.
   """
   updateCustomerAllFields(input: UpdateCustomerAllFieldsInput!): UpdateCustomerResponse
-    @auth(requires: [SINGLE_FRONT_DOOR])
+    @auth(requires: [SINGLE_FRONT_DOOR, LAND_APP_TECH_SPIKES_API])
 
   """
   Locks a customer's account with an optional reason and note.

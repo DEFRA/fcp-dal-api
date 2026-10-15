@@ -12,7 +12,7 @@ extend type Mutation {
   Retrying the same request is safe.
   """
   updateBusinessAllFields(input: UpdateBusinessAllFieldsInput!): UpdateBusinessAllFieldsResponse
-    @auth(requires: [SINGLE_FRONT_DOOR])
+    @auth(requires: [SINGLE_FRONT_DOOR, LAND_APP_TECH_SPIKES_API])
 }
 
 type UpdateBusinessAllFieldsResponse {

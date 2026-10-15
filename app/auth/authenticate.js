@@ -15,7 +15,8 @@ const authGroupServiceName = {
   [authGroups.CONSOLIDATED_VIEW]: 'consolidated-view',
   [authGroups.SFI_REFORM]: 'grants-platform',
   [authGroups.LAND_GRANTS_API]: 'land-grants-api',
-  [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door'
+  [authGroups.SINGLE_FRONT_DOOR]: 'single-front-door',
+  [authGroups.LAND_APP_TECH_SPIKES_API]: 'land-app-tech-spikes-api'
 }
 
 const unauthedAppid = config.get('auth.disabled')

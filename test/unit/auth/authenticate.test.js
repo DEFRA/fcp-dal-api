@@ -183,7 +183,8 @@ describe('authenticate', () => {
         CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
         SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id',
         SFI_REFORM: 'sfi-reform-ad-group-id',
-        LAND_GRANTS_API: 'land-grants-api-ad-group-id'
+        LAND_GRANTS_API: 'land-grants-api-ad-group-id',
+        LAND_APP_TECH_SPIKES_API: 'land-app-tech-spikes-api-ad-group-id'
       })
     })
   })
@@ -299,12 +300,14 @@ describe('authenticate', () => {
       const sfiReformGroupId = config.get('auth.groups.SFI_REFORM')
       const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
       const landGrantsApiGroupId = config.get('auth.groups.LAND_GRANTS_API')
+      const landAppTechSpikesApiGroupId = config.get('auth.groups.LAND_APP_TECH_SPIKES_API')
 
       it('should return the service name for a single recognised group', () => {
         expect(getRequestingService([consolidatedViewGroupId])).toBe('consolidated-view')
         expect(getRequestingService([sfiReformGroupId])).toBe('grants-platform')
         expect(getRequestingService([singleFrontDoorGroupId])).toBe('single-front-door')
         expect(getRequestingService([landGrantsApiGroupId])).toBe('land-grants-api')
+        expect(getRequestingService([landAppTechSpikesApiGroupId])).toBe('land-app-tech-spikes-api')
       })
 
       it('should return null when the only group present is ADMIN', () => {

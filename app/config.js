@@ -131,6 +131,13 @@ export const config = convict({
         default: null,
         env: 'LAND_GRANTS_API_AD_GROUP_ID',
         nullable: true
+      },
+      LAND_APP_TECH_SPIKES_API: {
+        doc: 'AD group ID for Land App Tech Spikes API team',
+        format: String,
+        default: null,
+        env: 'LAND_APP_TECH_SPIKES_AD_GROUP_ID',
+        nullable: true
       }
     },
     disabled: {

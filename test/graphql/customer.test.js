@@ -31,6 +31,7 @@ describe('Query.customer', () => {
 
   afterEach(() => {
     jest.restoreAllMocks()
+    nock.cleanAll()
   })
 
   const query = `#graphql
