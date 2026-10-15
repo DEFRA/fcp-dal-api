@@ -11,6 +11,7 @@ import {
   transformOrganisationCustomers,
   transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
+import { validateDateInput } from '../../../utils/date.js'
 import { getRuralPaymentsBusinessDataSource } from './common.js'
 
 export const Business = {
@@ -135,6 +136,10 @@ export const Business = {
   },
 
   async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources, auditTrail }, info) {
+    // the Date scalar is passed through as a string, so convert it before use
+    fromDate = fromDate && validateDateInput(fromDate)
+    toDate = toDate && validateDateInput(toDate)
+
     let frn
     try {
       const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
