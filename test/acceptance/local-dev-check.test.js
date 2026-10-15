@@ -595,7 +595,7 @@ const businessQuery = gql`
         }
       }
       land {
-        summary {
+        summary(date: $date) {
           arableLandArea
           permanentCropsArea
           permanentGrasslandArea
