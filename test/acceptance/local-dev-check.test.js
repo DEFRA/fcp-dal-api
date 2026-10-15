@@ -83,6 +83,7 @@ const business = {
   info: {
     name: 'Bechtelar - Stamm',
     reference: '2760178899',
+    frn: '2760178899',
     vat: '997364387',
     traderNumber: '535182',
     vendorNumber: null,
@@ -413,6 +414,19 @@ const business = {
         code: '131',
         isBpsEligible: true
       }
+    ],
+    parcelLandUses: [
+      {
+        code: 'WO25',
+        type: 'RESIDENTIAL',
+        campaign: 2021,
+        startDate: '2021-02-23T04:59:10.102Z',
+        endDate: '2030-09-04T18:01:24.737Z',
+        insertDate: '2021-03-04T10:07:29.703Z',
+        deleteDate: '2021-03-05T01:34:05.836Z',
+        area: 0.0361,
+        length: 868
+      }
     ]
   },
   agreements: expect.arrayContaining(agreement),
@@ -468,6 +482,7 @@ const businessQuery = gql`
       info {
         name
         reference
+        frn
         vat
         traderNumber
         vendorNumber
@@ -612,6 +627,8 @@ const businessQuery = gql`
         }
         parcelLandUses(sheetId: $sheetId, parcelId: $parcelId, date: $date) {
           code
+          type
+          campaign
           startDate
           endDate
           insertDate

@@ -57,6 +57,7 @@ const customerQuery = gql`
         name
         organisationId
         sbi
+        role
       }
       business(sbi: $sbi) {
         organisationId
@@ -140,7 +141,8 @@ const customer = {
     {
       name: 'Bechtelar - Stamm',
       organisationId: '111111111',
-      sbi: '111111111'
+      sbi: '111111111',
+      role: 'Key Contact'
     }
   ],
   business: {
