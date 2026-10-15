@@ -455,6 +455,139 @@ describe('Business Mutations - deactivate a business', () => {
   })
 })
 
+describe('Business Mutations - lock and unlock a business', () => {
+  // note: sbi 920000002 is reserved for these tests; it starts out unlocked in the mock
+  const lockSbi = '920000002'
+
+  const lockBusinessMutation = gql`
+    mutation UpdateBusinessLock($input: UpdateBusinessLockUnlockInput!) {
+      updateBusinessLock(input: $input) {
+        success
+        business {
+          sbi
+          info {
+            status {
+              locked
+            }
+          }
+        }
+      }
+    }
+  `
+  const unlockBusinessMutation = gql`
+    mutation UpdateBusinessUnlock($input: UpdateBusinessLockUnlockInput!) {
+      updateBusinessUnlock(input: $input) {
+        success
+        business {
+          sbi
+          info {
+            status {
+              locked
+            }
+          }
+        }
+      }
+    }
+  `
+  const businessLockedQuery = gql`
+    query BusinessLocked($sbi: ID!) {
+      business(sbi: $sbi) {
+        info {
+          status {
+            locked
+          }
+        }
+      }
+    }
+  `
+  const getLocked = async () => {
+    const response = await client.request(businessLockedQuery, { sbi: lockSbi }, headers)
+    return response.business.info.status.locked
+  }
+  const missingReasonAndNoteError = {
+    response: {
+      errors: [
+        expect.objectContaining({
+          message: 'Reason and/or note are required',
+          extensions: expect.objectContaining({ code: 'BAD REQUEST' })
+        })
+      ]
+    }
+  }
+
+  it('should lock the business', async () => {
+    expect(await getLocked()).toBe(false)
+
+    const response = await client.request(
+      lockBusinessMutation,
+      { input: { sbi: lockSbi, reason: 'Business Structure Changes', note: 'Locked' } },
+      headers
+    )
+
+    expect(response.updateBusinessLock).toEqual({
+      success: true,
+      business: { sbi: lockSbi, info: { status: { locked: true } } }
+    })
+  })
+
+  it('should not throw an error if business is already locked', async () => {
+    expect(await getLocked()).toBe(true)
+
+    const response = await client.request(
+      lockBusinessMutation,
+      { input: { sbi: lockSbi, note: 'Locked again' } },
+      headers
+    )
+
+    expect(response.updateBusinessLock).toEqual({
+      success: true,
+      business: { sbi: lockSbi, info: { status: { locked: true } } }
+    })
+  })
+
+  it('should unlock the business', async () => {
+    expect(await getLocked()).toBe(true)
+
+    const response = await client.request(
+      unlockBusinessMutation,
+      { input: { sbi: lockSbi, reason: 'Business Structure Changes', note: 'Unlocked' } },
+      headers
+    )
+
+    expect(response.updateBusinessUnlock).toEqual({
+      success: true,
+      business: { sbi: lockSbi, info: { status: { locked: false } } }
+    })
+  })
+
+  it('should not throw an error if business is already unlocked', async () => {
+    expect(await getLocked()).toBe(false)
+
+    const response = await client.request(
+      unlockBusinessMutation,
+      { input: { sbi: lockSbi, reason: 'Business Structure Changes' } },
+      headers
+    )
+
+    expect(response.updateBusinessUnlock).toEqual({
+      success: true,
+      business: { sbi: lockSbi, info: { status: { locked: false } } }
+    })
+  })
+
+  it('should reject a lock without a reason or note', async () => {
+    await expect(
+      client.request(lockBusinessMutation, { input: { sbi: lockSbi } }, headers)
+    ).rejects.toMatchObject(missingReasonAndNoteError)
+  })
+
+  it('should reject an unlock without a reason or note', async () => {
+    await expect(
+      client.request(unlockBusinessMutation, { input: { sbi: lockSbi } }, headers)
+    ).rejects.toMatchObject(missingReasonAndNoteError)
+  })
+})
+
 const updateBusinessNameMutation = gql`
   mutation UpdateBusinessName($input: UpdateBusinessNameInput!) {
     updateBusinessName(input: $input) {
