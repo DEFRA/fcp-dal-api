@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 const mockLogger = {
   logger: {
     error: vi.fn(),
@@ -24,10 +24,6 @@ describe('Hitachi payments health check', () => {
       return { getSupplierPayments: getSupplierPaymentsMock }
     })
     getSupplierPaymentsMock.mockResolvedValue()
-  })
-
-  afterEach(() => {
-    vi.clearAllMocks()
   })
 
   it('should log success when Hitachi payments connects', async () => {

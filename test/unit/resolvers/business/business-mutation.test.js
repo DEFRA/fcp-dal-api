@@ -444,7 +444,6 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
   }
 
   beforeEach(() => {
-    mockCustomerCommonModule.retrievePersonIdByCRN.mockReset()
     dataSources = {
       ruralPaymentsBusiness: {
         getOrganisationBySBI: vi.fn().mockResolvedValue({
@@ -758,7 +757,6 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
   }
 
   beforeEach(() => {
-    mockCustomerCommonModule.retrievePersonIdByCRN.mockReset()
     dataSources = {
       ruralPaymentsBusiness: {
         getOrganisationBySBI: vi.fn().mockResolvedValue({

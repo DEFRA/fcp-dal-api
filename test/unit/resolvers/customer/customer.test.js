@@ -201,10 +201,6 @@ const dataSources = {
 }
 
 describe('Customer', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   test('Query.customer.personId', async () => {
     dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('internal person id')
     const response = await Query.customer(
@@ -543,8 +539,6 @@ describe('CustomerBusiness', () => {
     const { getNotificationsByOrganisationIdAndPersonId } = dataSources.ruralPaymentsCustomer
 
     beforeEach(() => {
-      vi.clearAllMocks()
-
       getNotificationsByOrganisationIdAndPersonId.mockImplementation(() => [
         {
           id: 'mockId1',

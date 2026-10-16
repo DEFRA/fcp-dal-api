@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
 import { BadRequest, Unauthorized } from '../../../app/errors/graphql.js'
 

@@ -33,7 +33,6 @@ vi.mock('../../../app/graphql/plugins/audit.js', () => ({
 describe('GraphQL Dashboard test with mocks', () => {
   beforeEach(() => {
     vi.resetModules()
-    vi.resetAllMocks()
   })
 
   it('expect ApolloServer to have been called with correct args to disable landing page', async () => {

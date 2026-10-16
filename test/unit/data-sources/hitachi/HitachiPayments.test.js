@@ -63,9 +63,6 @@ describe('HitachiPayments', () => {
     })
     dataSource.logger = mockLogger
     dataSource.post = mockPost
-
-    // Reset mocks
-    vi.clearAllMocks()
   })
 
   describe('addAuthentication', () => {

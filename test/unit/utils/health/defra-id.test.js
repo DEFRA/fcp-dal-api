@@ -55,9 +55,6 @@ describe('Defra ID health check', () => {
   })
 
   afterEach(() => {
-    mockGetPublicKey.mockReset()
-    mockLogger.logger.error.mockReset()
-    mockLogger.logger.info.mockReset()
     global.fetch = originalFetch
     configGetSpy.mockRestore()
     vi.restoreAllMocks()

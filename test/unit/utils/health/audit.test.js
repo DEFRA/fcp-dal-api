@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { DAL_HEALTH_CHECK_001 } from '../../../../app/logger/codes.js'
 
 const mockLogger = {
@@ -16,10 +16,6 @@ vi.doMock('../../../../app/audit/sns-publisher.js', () => ({
 const { healthCheck } = await import('../../../../app/utils/health/audit.js')
 
 describe('audit startup health check', () => {
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('publishes a dummy audit event when SNS is configured', async () => {
     const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => {

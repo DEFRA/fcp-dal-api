@@ -34,9 +34,6 @@ describe('JWKS health check', () => {
   })
 
   afterEach(() => {
-    mockGetPublicKey.mockReset()
-    mockLogger.logger.error.mockReset()
-    mockLogger.logger.info.mockReset()
     global.fetch = originalFetch
     vi.restoreAllMocks()
   })

@@ -66,10 +66,6 @@ describe('Customer Mutations', () => {
     }
   })
 
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
-
   const updateMutations = [
     'updateCustomerAddress',
     'updateCustomerDateOfBirth',

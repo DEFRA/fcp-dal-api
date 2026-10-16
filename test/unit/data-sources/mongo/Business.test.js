@@ -1,5 +1,5 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { MongoClient } from 'mongodb'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { config } from '../../../../app/config.js'
 import { MongoBusiness } from '../../../../app/data-sources/mongo/Business.js'
 

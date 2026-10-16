@@ -1,6 +1,6 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { gql } from 'graphql-request'
 import nock from 'nock'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../app/config.js'
 import { makeTestQuery } from './makeTestQuery.js'
 

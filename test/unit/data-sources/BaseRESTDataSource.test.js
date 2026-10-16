@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
 import StatusCodes from 'http-status-codes'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 // Mock the logger
 const mockLogger = {
@@ -18,7 +18,6 @@ describe('BaseRESTDataSource', () => {
   let dataSource
 
   beforeEach(() => {
-    vi.clearAllMocks()
     dataSource = new BaseRESTDataSource(
       {},
       { name: 'Test DataSource', code: 'TEST_001', gatewayType: 'test-gateway' }

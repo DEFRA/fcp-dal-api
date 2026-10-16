@@ -1,5 +1,5 @@
-import { GraphQLClient } from 'graphql-request'
 import { getIntrospectionQuery } from 'graphql'
+import { GraphQLClient } from 'graphql-request'
 import { describe, expect, it } from 'vitest'
 const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'
 

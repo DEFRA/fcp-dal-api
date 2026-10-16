@@ -22,6 +22,7 @@ export default defineConfig({
       provider: 'v8',
       include: ['app/**/*.js'],
       reportsDirectory: 'coverage',
+      reportOnFailure: true,
       reporter: ['text-summary', 'lcov', 'json-summary', 'json'],
       thresholds: {
         branches: 95,
