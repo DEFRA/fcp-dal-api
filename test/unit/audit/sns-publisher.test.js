@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { DAL_AUDIT_VALIDATION_ERROR_001 } from '../../../app/logger/codes.js'
 
 const mockSNSClient = vi.fn(function () {
@@ -29,10 +29,6 @@ describe('sns-publisher', () => {
 
   beforeEach(() => {
     requestLogger = { error: vi.fn() }
-  })
-
-  afterEach(() => {
-    vi.clearAllMocks()
   })
 
   test('publishes a valid event via publishAuditEvent', async () => {

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { config } from '../../../../app/config.js'
 
 const mockLogger = {
@@ -25,10 +25,6 @@ describe('Rural payments health check', () => {
       return { getReferenceData: getReferenceDataMock }
     })
     getReferenceDataMock.mockResolvedValue()
-  })
-
-  afterEach(() => {
-    vi.clearAllMocks()
   })
 
   it('should log success when rural payments connects for both internal and external gateways', async () => {

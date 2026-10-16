@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DAL_HEALTH_CHECK_001 } from '../../../../app/logger/codes.js'
 
 const mockLogger = {
@@ -28,10 +28,6 @@ describe('metrics startup health check', () => {
       putMetric: mockPutMetric,
       flush: mockFlush
     })
-  })
-
-  afterEach(() => {
-    vi.clearAllMocks()
   })
 
   it('publishes a dummy metric in production', async () => {

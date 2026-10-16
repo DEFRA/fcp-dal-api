@@ -1,5 +1,5 @@
 import { validateAuditEvent } from '@defra/fcp-audit-publisher'
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { describe, expect, test, vi } from 'vitest'
 import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
 
 const getRequestingServiceMock = vi.fn()
@@ -59,10 +59,6 @@ const baseContextValue = {
 }
 
 describe('auditPlugin', () => {
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
-
   describe('publish', () => {
     test('publishes exactly one event for a root selection with a recorded entity, shaped as an AuditEventPayload', async () => {
       getRequestingServiceMock.mockReturnValue('Some Service Name')

@@ -69,10 +69,6 @@ const mockJWKSDataSource = { getPublicKey: mockPublicKeyFunc }
 
 describe('authenticate', () => {
   describe('getAuth', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
     describe('when auth is disabled', () => {
       test('should return an object with default appid when request has no auth', async () => {
         expect(await getAuth({})).toEqual({ appid: 'auth-disabled-no-appid' })

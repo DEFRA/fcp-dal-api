@@ -18,7 +18,6 @@ describe('BaseRESTDataSource', () => {
   let dataSource
 
   beforeEach(() => {
-    vi.clearAllMocks()
     dataSource = new BaseRESTDataSource(
       {},
       { name: 'Test DataSource', code: 'TEST_001', gatewayType: 'test-gateway' }

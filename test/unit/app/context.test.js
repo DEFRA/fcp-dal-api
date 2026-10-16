@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
 
 // A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only
@@ -55,10 +55,6 @@ describe('context', () => {
     RuralPaymentsBusinessMock.mockImplementation(function () {
       return { isExternalRoute: () => false }
     })
-  })
-
-  afterEach(() => {
-    vi.clearAllMocks()
   })
 
   test('should build context with correct properties', async () => {
