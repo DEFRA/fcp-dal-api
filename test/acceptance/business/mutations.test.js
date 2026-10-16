@@ -426,6 +426,64 @@ describe('customer permissions on business', () => {
       errorString: null
     })
   })
+
+  const invalidInputError = (message) => ({
+    response: {
+      errors: [
+        expect.objectContaining({
+          message: expect.stringMatching(message),
+          extensions: expect.objectContaining({ code: 'BAD_USER_INPUT' })
+        })
+      ]
+    }
+  })
+
+  it.each([
+    ['addCustomerToBusiness', addCustomerToBusinessMutation],
+    [
+      'updateCustomerPermissionsAndRelationshipToBusiness',
+      updateCustomerPermissionsAndRelationshipToBusiness
+    ]
+  ])('%s rejects a request without a role', async (_, mutation) => {
+    await expect(
+      client.request(
+        mutation,
+        {
+          input: {
+            sbi: customerPermissionsSbi,
+            crn: customerPermissionsCrn,
+            permissions: [{ id: 'BUSINESS_DETAILS', level: 'VIEW' }]
+          }
+        },
+        headers
+      )
+    ).rejects.toMatchObject(
+      invalidInputError(/Field "role" of required type "String!" was not provided/)
+    )
+  })
+
+  it.each([
+    ['addCustomerToBusiness', addCustomerToBusinessMutation],
+    [
+      'updateCustomerPermissionsAndRelationshipToBusiness',
+      updateCustomerPermissionsAndRelationshipToBusiness
+    ]
+  ])('%s rejects a null permission entry', async (_, mutation) => {
+    await expect(
+      client.request(
+        mutation,
+        {
+          input: {
+            sbi: customerPermissionsSbi,
+            crn: customerPermissionsCrn,
+            role: 'Agent',
+            permissions: [null]
+          }
+        },
+        headers
+      )
+    ).rejects.toMatchObject(invalidInputError(/Expected non-nullable type/))
+  })
 })
 
 describe('Business Mutations - reactivate a business', () => {

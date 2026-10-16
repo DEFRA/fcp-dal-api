@@ -129,7 +129,7 @@ describe.each(mutations)('$name', ({ name, query, mockUpstream }) => {
     [
       'permissions is missing',
       { permissions: undefined },
-      /Field "permissions" of required type "\[CustomerPermissionsInput!\]!" was not provided/
+      /Field "permissions" of required type "\[CustomerPermissionsInput!]!" was not provided/
     ],
     ['permissions is null', { permissions: null }, /Expected non-nullable type/],
     ['permissions contains null', { permissions: [null] }, /Expected non-nullable type/]
