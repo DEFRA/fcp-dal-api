@@ -35,7 +35,7 @@
     "test:unit": "DOTENV_CONFIG_PATH=./.env.test vitest run test/unit --coverage",
     "test:unit:watch": "DOTENV_CONFIG_PATH=./.env.test vitest test/unit",
     "test:graphql": "DOTENV_CONFIG_PATH=./.env.test vitest run test/graphql",
-    "test": "npm run test:unit && npm run test:graphql"
+    "test": "DOTENV_CONFIG_PATH=./.env.test vitest run test/unit test/graphql --coverage"
   },
   "author": "Defra",
   "contributors": [],
