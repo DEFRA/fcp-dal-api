@@ -43,14 +43,14 @@ input CustomerPermissionsAndRelationshipToBusinessInput {
   """
   Role of the customer on the business. For example, 'Agent' or 'Business Partner'.
   """
-  role: String
+  role: String!
 
   """
   The full set of permission groups and levels for the customer on the
   business. This replaces any existing permissions. Include every group
-  that should apply.
+  that should apply. An empty list removes all permissions.
   """
-  permissions: [CustomerPermissionsInput]
+  permissions: [CustomerPermissionsInput!]!
 }
 
 input CustomerPermissionsInput {
