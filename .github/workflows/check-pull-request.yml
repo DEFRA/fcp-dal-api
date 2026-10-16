@@ -72,17 +72,18 @@ jobs:
           fi
 
       - name: Run unit + graphql tests with coverage
+        id: tests
         run: npm test
 
       - name: Vitest Coverage Comment (with base snapshot)
-        if: steps.base-cov.outputs.available == 'true'
-        uses: davelosert/vitest-coverage-report-action@v2
+        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' && steps.base-cov.outputs.available == 'true' }}
+        uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2.13.1
         with:
           json-summary-compare-path: base-coverage/coverage-summary.json
 
       - name: Vitest Coverage Comment (no base snapshot)
-        if: steps.base-cov.outputs.available != 'true'
-        uses: davelosert/vitest-coverage-report-action@v2
+        if: ${{ !cancelled() && steps.tests.outcome != 'skipped' && steps.base-cov.outputs.available != 'true' }}
+        uses: davelosert/vitest-coverage-report-action@8f86cfb56ed6d5613ea8cdc5259f207fbfd51ece # v2.13.1
 
       - name: Acceptance & environment emulation tests
         # the script is basically `npm run test:acceptance:docker && npm run test:acceptance:proxy
