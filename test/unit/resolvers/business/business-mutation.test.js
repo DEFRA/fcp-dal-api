@@ -1089,8 +1089,8 @@ describe('Business Mutation addCustomerToBusiness', () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
     const dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn().mockResolvedValue('org-1'),
-        createAuthorisationForOrganisation: jest.fn().mockResolvedValue({ success: true })
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        createAuthorisationForOrganisation: vi.fn().mockResolvedValue({ success: true })
       },
       permissions: new Permissions()
     }
@@ -1120,8 +1120,8 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
     const dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn().mockResolvedValue('org-1'),
-        updateAuthorisationForPersonOnOrganisation: jest.fn().mockResolvedValue({ success: true })
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        updateAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
       },
       permissions: new Permissions()
     }
