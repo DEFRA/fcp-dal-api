@@ -206,7 +206,7 @@ export const Mutation = {
   updateBusinessReactivate: businessReactivateResolver,
   updateBusinessDeactivate: businessDeactivateResolver,
 
-  createCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
+  addCustomerToBusiness: async (_, { input }, { dataSources }) => {
     const { sbi, crn, role, permissions } = input
     const [organisationId, personId] = await Promise.all([
       dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
@@ -232,7 +232,7 @@ export const Mutation = {
     })
   },
 
-  updateCustomerAuthorisationOnBusiness: async (_, { input }, { dataSources }) => {
+  updateCustomerPermissionsAndRelationshipToBusiness: async (_, { input }, { dataSources }) => {
     const { sbi, crn, role, permissions } = input
     const [organisationId, personId] = await Promise.all([
       dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),

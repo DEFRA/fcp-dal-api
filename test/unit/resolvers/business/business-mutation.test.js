@@ -1062,14 +1062,14 @@ describe('Business Mutation updateBusinessUnlockStatus', () => {
   })
 })
 
-const authorisationInput = {
+const mutateCustomerPermissionsAndRelationshipToBusinessInput = {
   sbi: '111111111',
   crn: '1111111100',
   role: 'Agent',
   permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
 }
 
-const expectedAuthorisationBody = {
+const expectedMutateCustomerPermissionsAndRelationshipToBusinessBody = {
   personRoles: [
     {
       role: 'Agent',
@@ -1084,7 +1084,7 @@ const expectedAuthorisationBody = {
   ]
 }
 
-describe('Business Mutation createCustomerAuthorisationOnBusiness', () => {
+describe('Business Mutation addCustomerToBusiness', () => {
   it('transforms permissions to privilege names for the upstream request', async () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
     const dataSources = {
@@ -1095,9 +1095,9 @@ describe('Business Mutation createCustomerAuthorisationOnBusiness', () => {
       permissions: new Permissions()
     }
 
-    const response = await Mutation.createCustomerAuthorisationOnBusiness(
+    const response = await Mutation.addCustomerToBusiness(
       {},
-      { input: authorisationInput },
+      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
       { dataSources }
     )
 
@@ -1110,12 +1110,12 @@ describe('Business Mutation createCustomerAuthorisationOnBusiness', () => {
     )
     expect(
       dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation
-    ).toHaveBeenCalledWith('org-1', expectedAuthorisationBody)
+    ).toHaveBeenCalledWith('org-1', expectedMutateCustomerPermissionsAndRelationshipToBusinessBody)
     expect(response).toEqual({ success: true })
   })
 })
 
-describe('Business Mutation updateCustomerAuthorisationOnBusiness', () => {
+describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness', () => {
   it('transforms permissions to privilege names for the upstream request', async () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
     const dataSources = {
@@ -1126,9 +1126,9 @@ describe('Business Mutation updateCustomerAuthorisationOnBusiness', () => {
       permissions: new Permissions()
     }
 
-    const response = await Mutation.updateCustomerAuthorisationOnBusiness(
+    const response = await Mutation.updateCustomerPermissionsAndRelationshipToBusiness(
       {},
-      { input: authorisationInput },
+      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
       { dataSources }
     )
 
@@ -1141,7 +1141,11 @@ describe('Business Mutation updateCustomerAuthorisationOnBusiness', () => {
     )
     expect(
       dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
-    ).toHaveBeenCalledWith('org-1', 'person-1', expectedAuthorisationBody)
+    ).toHaveBeenCalledWith(
+      'org-1',
+      'person-1',
+      expectedMutateCustomerPermissionsAndRelationshipToBusinessBody
+    )
     expect(response).toEqual({ success: true })
   })
 })

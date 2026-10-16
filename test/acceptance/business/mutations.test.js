@@ -353,18 +353,20 @@ describe('createBusinessCustomerBankDetails', () => {
   })
 })
 
-const createAuthorisationMutation = gql`
-  mutation CreateCustomerAuthorisationOnBusiness($input: CustomerAuthorisationOnBusinessInput!) {
-    createCustomerAuthorisationOnBusiness(input: $input) {
+const addCustomerToBusinessMutation = gql`
+  mutation AddCustomerToBusiness($input: CustomerPermissionsAndRelationshipToBusinessInput!) {
+    addCustomerToBusiness(input: $input) {
       success
       errorString
     }
   }
 `
 
-const updateAuthorisationMutation = gql`
-  mutation UpdateCustomerAuthorisationOnBusiness($input: CustomerAuthorisationOnBusinessInput!) {
-    updateCustomerAuthorisationOnBusiness(input: $input) {
+const updateCustomerPermissionsAndRelationshipToBusiness = gql`
+  mutation UpdateCustomerPermissionsAndRelationshipToBusiness(
+    $input: CustomerPermissionsAndRelationshipToBusinessInput!
+  ) {
+    updateCustomerPermissionsAndRelationshipToBusiness(input: $input) {
       success
       errorString
     }
@@ -373,20 +375,20 @@ const updateAuthorisationMutation = gql`
 
 // CRN 2222222000 belongs to org 222222222 in the mock, so it can be linked to the
 // mutation-reserved SBI without changing the fixture data asserted for 111111111.
-const authorisationSbi = '900000001'
-const authorisationCrn = '2222222000'
+const customerPermissionsSbi = '900000001'
+const customerPermissionsCrn = '2222222000'
 
 // NOTE: the create test fails on a second run against the same mock (409 Conflict) as the
 // DAL cannot yet unlink a customer from a business. Once FCPDAL-318 is played, add an
 // afterAll that unlinks the customer so the suite can be re-run.
-describe('customer authorisation on business', () => {
+describe('customer permissions on business', () => {
   it('adds a customer to a business with the given role and permissions', async () => {
     const response = await client.request(
-      createAuthorisationMutation,
+      addCustomerToBusinessMutation,
       {
         input: {
-          sbi: authorisationSbi,
-          crn: authorisationCrn,
+          sbi: customerPermissionsSbi,
+          crn: customerPermissionsCrn,
           role: 'Agent',
           permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
         }
@@ -395,7 +397,7 @@ describe('customer authorisation on business', () => {
     )
 
     expect(response).not.toHaveProperty('errors')
-    expect(response.createCustomerAuthorisationOnBusiness).toEqual({
+    expect(response.addCustomerToBusiness).toEqual({
       success: true,
       errorString: null
     })
@@ -403,11 +405,11 @@ describe('customer authorisation on business', () => {
 
   it('updates a customer role and permissions on a business', async () => {
     const response = await client.request(
-      updateAuthorisationMutation,
+      updateCustomerPermissionsAndRelationshipToBusiness,
       {
         input: {
-          sbi: authorisationSbi,
-          crn: authorisationCrn,
+          sbi: customerPermissionsSbi,
+          crn: customerPermissionsCrn,
           role: 'Business Partner',
           permissions: [
             { id: 'BUSINESS_DETAILS', level: 'VIEW' },
@@ -419,7 +421,7 @@ describe('customer authorisation on business', () => {
     )
 
     expect(response).not.toHaveProperty('errors')
-    expect(response.updateCustomerAuthorisationOnBusiness).toEqual({
+    expect(response.updateCustomerPermissionsAndRelationshipToBusiness).toEqual({
       success: true,
       errorString: null
     })
