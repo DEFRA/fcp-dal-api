@@ -97,7 +97,12 @@ describe('Rural Payments Business', () => {
   const httpPut = vi.spyOn(ruralPaymentsBusiness, 'put')
 
   beforeEach(() => {
-    vi.clearAllMocks()
+    // mockReset vitest config already restores the real method before each test, so default to
+    // rejecting to make a test that forgets to mock the HTTP call fail instead of hitting the
+    // network
+    for (const spy of [httpGet, httpPost, httpPut]) {
+      spy.mockRejectedValue(new Error('unmocked HTTP call'))
+    }
   })
 
   describe('getOrganisationById', () => {

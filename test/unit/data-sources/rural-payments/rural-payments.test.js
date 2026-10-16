@@ -29,7 +29,10 @@ describe('RuralPayments', () => {
     const dummyRequest = { method: 'POST' }
 
     beforeEach(() => {
-      mockFetch.mockReset()
+      // mockReset vitest config already restores the real method before each test, so default to
+      // rejecting to make a test that forgets to mock the HTTP call fail instead of hitting the
+      // network
+      mockFetch.mockRejectedValue(new Error('unmocked HTTP call'))
     })
     afterAll(() => {
       mockFetch.mockRestore()

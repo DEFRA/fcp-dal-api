@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 
@@ -31,6 +31,15 @@ describe('Rural Payments Customer', () => {
   const httpGet = vi.spyOn(ruralPaymentsCustomer, 'get')
   const httpPost = vi.spyOn(ruralPaymentsCustomer, 'post')
   const httpGetExt = vi.spyOn(ruralPaymentsCustomerExt, 'get')
+
+  beforeEach(() => {
+    // mockReset vitest config already restores the real method before each test, so default to
+    // rejecting to make a test that forgets to mock the HTTP call fail instead of hitting the
+    // network
+    for (const spy of [httpGet, httpPost, httpGetExt]) {
+      spy.mockRejectedValue(new Error('unmocked HTTP call'))
+    }
+  })
 
   test('should return emailDuplicated from validateEmail', async () => {
     httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: true } }))
