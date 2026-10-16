@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { gql, GraphQLClient } from 'graphql-request'
 
 const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'

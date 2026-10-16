@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
 const mocks = vi.hoisted(() => {
   const mockApolloServer = vi.fn()
   const mockSchemaModule = { createSchema: vi.fn() }

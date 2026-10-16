@@ -1,4 +1,4 @@
-import { vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Query } from '../../../../app/graphql/resolvers/customer/query.js'
 
 describe('Customer Query Resolver', () => {

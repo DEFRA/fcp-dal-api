@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, vi, test } from 'vitest'
+import { beforeEach, describe, expect, it, test, vi } from 'vitest'
 import { buildSchema, findBreakingChanges, graphql } from 'graphql'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'

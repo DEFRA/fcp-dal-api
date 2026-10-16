@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { cdpSchemaTranslator } from '../../../app/logger/winstonFormatters'
 
 const params = new URLSearchParams([

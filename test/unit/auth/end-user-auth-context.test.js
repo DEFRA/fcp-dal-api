@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, vi, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { endUserAuthContext } from '../../../app/auth/end-user-auth-context.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../../../app/logger/codes.js'

@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { createAuditTrail, rootKeyFromInfoPath } from '../../../app/audit/audit-trail.js'
 
 const pathTo = (key, prev) => ({ key, typename: undefined, prev })

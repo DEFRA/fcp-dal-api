@@ -1,6 +1,6 @@
 import hapiApollo from '@as-integrations/hapi'
 import { secureContext } from '@defra/hapi-secure-context'
-import { expect, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { apolloServer } from '../../../app/graphql/server.js'
 import { mongoClient } from '../../../app/mongo.js'
 

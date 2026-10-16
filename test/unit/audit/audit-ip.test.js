@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { getClientIp, getEndUserIpAddress } from '../../../app/audit/audit-ip.js'
 
 const request = (xForwardedFor, remoteAddress = '10.0.0.1') => ({

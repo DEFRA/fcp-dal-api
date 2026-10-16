@@ -1,6 +1,5 @@
 import { gql, GraphQLClient } from 'graphql-request'
 import { describe, expect, it } from 'vitest'
-
 const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'
 
 // NOTE: SBI 900000001 is reserved for mutation tests; other suites assert the

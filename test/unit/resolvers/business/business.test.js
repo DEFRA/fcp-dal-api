@@ -1,6 +1,5 @@
-import { expect, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createRequire } from 'node:module'
-import { describe } from 'node:test'
 import { NotFound } from '../../../../app/errors/graphql.js'
 import { Business, BusinessCustomer } from '../../../../app/graphql/resolvers/business/business.js'
 import {

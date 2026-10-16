@@ -1,3 +1,4 @@
+import { describe, expect, it, test } from 'vitest'
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import {
   ruralPaymentsPortalCustomerTransformer,

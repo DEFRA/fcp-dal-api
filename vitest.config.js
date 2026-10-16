@@ -2,7 +2,6 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    globals: true,
     setupFiles: ['dotenv/config', './test/setup.js'],
     globalSetup: ['./test/vitest-global-setup.js'],
     mockReset: true,
