@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
 import { validateAuditEvent } from '@defra/fcp-audit-publisher'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
 
 const getRequestingServiceMock = vi.fn()

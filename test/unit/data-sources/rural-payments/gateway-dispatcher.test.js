@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import tls from 'tls'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('undici', async () => {
   const actual = await vi.importActual('undici')

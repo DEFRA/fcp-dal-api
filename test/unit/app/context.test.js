@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import jwt from 'jsonwebtoken'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
 
 // A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only

@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from 'vitest'
 import jwt from 'jsonwebtoken'
+import { describe, expect, test, vi } from 'vitest'
 import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 

@@ -1,6 +1,6 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import net from 'node:net'
 import { setTimeout } from 'node:timers/promises'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../../../app/config.js'
 
 const mockSendMetric = { sendMetric: vi.fn() }

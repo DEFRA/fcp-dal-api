@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest'
 import StatusCodes from 'http-status-codes'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 // Mock the logger
 const mockLogger = {

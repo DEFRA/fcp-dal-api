@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, test, vi } from 'vitest'
 import { buildSchema, findBreakingChanges, graphql } from 'graphql'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
+import { beforeEach, describe, expect, it, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
