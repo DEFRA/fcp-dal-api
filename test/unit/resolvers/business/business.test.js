@@ -1,6 +1,5 @@
-import { expect, jest } from '@jest/globals'
+import { describe, expect, it, vi } from 'vitest'
 import { createRequire } from 'node:module'
-import { describe } from 'node:test'
 import { NotFound } from '../../../../app/errors/graphql.js'
 import { Business, BusinessCustomer } from '../../../../app/graphql/resolvers/business/business.js'
 import {
@@ -14,7 +13,7 @@ const permissionGroups = createRequire(import.meta.url)(
 )
 
 const logger = {
-  warn: jest.fn()
+  warn: vi.fn()
 }
 
 const dataSources = {
@@ -138,12 +137,12 @@ const dataSources = {
         }
       ]
     },
-    getCountyParishHoldingsBySBI: jest.fn(),
-    getAgreementsBySBI: jest.fn(),
-    getApplicationsBySBI: jest.fn(),
-    getAuthorisedFunctionsByOrganisationId: jest.fn(),
-    getOrganisationById: jest.fn(),
-    getExistingBankAccounts: jest.fn()
+    getCountyParishHoldingsBySBI: vi.fn(),
+    getAgreementsBySBI: vi.fn(),
+    getApplicationsBySBI: vi.fn(),
+    getAuthorisedFunctionsByOrganisationId: vi.fn(),
+    getOrganisationById: vi.fn(),
+    getExistingBankAccounts: vi.fn()
   },
 
   ruralPaymentsPortalApi: {
@@ -217,8 +216,8 @@ const dataSources = {
     }
   },
   mongoBusiness: {
-    getOrgIdBySbi: jest.fn(),
-    upsertOrgIdBySbi: jest.fn()
+    getOrgIdBySbi: vi.fn(),
+    upsertOrgIdBySbi: vi.fn()
   },
   serviceAccount: {
     ruralPaymentsBusiness: null
@@ -679,7 +678,7 @@ describe('Business', () => {
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
     it('info records a business entity keyed by sbi', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
         id: '1',
         name: 'Test Farm'
@@ -695,7 +694,7 @@ describe('Business', () => {
     })
 
     it('info does not record anything when a pre-resolved business info is already present', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await Business.info(
         { ...mockBusiness, info: { name: 'already resolved' } },
@@ -709,7 +708,7 @@ describe('Business', () => {
     })
 
     it('countyParishHoldings records a cph-list entity keyed by sbi', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
       dataSources.ruralPaymentsBusiness.getCountyParishHoldingsBySBI.mockResolvedValueOnce([])
 
       await Business.countyParishHoldings(
@@ -727,7 +726,7 @@ describe('Business', () => {
     })
 
     it('customers records a person-list entity keyed by sbi', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await Business.customers(mockBusiness, null, { dataSources, auditTrail }, info)
 
@@ -739,7 +738,7 @@ describe('Business', () => {
     })
 
     it('agreements records an agreement-list entity keyed by sbi', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
       dataSources.ruralPaymentsBusiness.getAgreementsBySBI.mockResolvedValueOnce([])
 
       await Business.agreements({ sbi: 'mockSbi' }, undefined, { dataSources, auditTrail }, info)
@@ -752,7 +751,7 @@ describe('Business', () => {
     })
 
     it('applications records an application-list entity keyed by sbi', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
       dataSources.ruralPaymentsBusiness.getApplicationsBySBI.mockResolvedValueOnce([])
 
       await Business.applications({ sbi: 'mockSbi' }, undefined, { dataSources, auditTrail }, info)
@@ -765,7 +764,7 @@ describe('Business', () => {
     })
 
     it('bankAccounts records the FRN as an account and a bank-account entity', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
         businessReference: 'mockFrn'
       })
@@ -784,7 +783,7 @@ describe('Business', () => {
     })
 
     it('bankAccounts still records the attempted bank-account entity when the FRN cannot be found', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
         businessReference: null
       })
@@ -801,7 +800,7 @@ describe('Business', () => {
     })
 
     it('bankAccounts still records an attempted bank-account entity when the organisation lookup itself fails', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValueOnce(
         new Error('upstream failure')
       )
@@ -818,7 +817,7 @@ describe('Business', () => {
     })
 
     it('customer records a person-list entity keyed by sbi and crn/personId accounts', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
 
       const result = await Business.customer(
         mockBusiness,
@@ -838,7 +837,7 @@ describe('Business', () => {
     })
 
     it('permittedFunctions records a permitted-function-list entity keyed by sbi', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
       const { getAuthorisedFunctionsByOrganisationId } = dataSources.ruralPaymentsBusiness
       getAuthorisedFunctionsByOrganisationId.mockResolvedValueOnce({ viewLand: true })
 
@@ -1001,7 +1000,7 @@ describe('BusinessCustomer', () => {
   })
 
   it('permissionGroups records a permission-list entity without duplicating account fields recorded by Business.customer', async () => {
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
     await BusinessCustomer.permissionGroups(

@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { buildSchema, graphql } from 'graphql'
 import { validateVariableDirective } from '../../../app/graphql/directives/validateVariable.js'
 

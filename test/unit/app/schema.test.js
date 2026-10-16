@@ -1,3 +1,4 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { config } from '../../../app/config.js'
 import { createSchema } from '../../../app/graphql/schema.js'
 

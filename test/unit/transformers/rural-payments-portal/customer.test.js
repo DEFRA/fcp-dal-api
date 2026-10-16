@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { transformAuthenticateQuestionsAnswers } from '../../../../app/transformers/authenticate/question-answers.js'
 import {
   transformNotificationsToMessages,

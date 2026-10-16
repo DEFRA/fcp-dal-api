@@ -24,7 +24,6 @@ updates:
       tools:
         patterns:
           - 'husky'
-          - 'jest'
           - 'nodemon'
 
       types:

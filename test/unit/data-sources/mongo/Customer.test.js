@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { MongoClient } from 'mongodb'
 import { config } from '../../../../app/config.js'
 import { MongoCustomer } from '../../../../app/data-sources/mongo/Customer.js'
@@ -8,19 +8,19 @@ client.connect()
 const db = client.db(config.get('mongo.databaseName'))
 const mockCollection = {
   ...db.collection('customer'),
-  findOne: jest.fn(),
-  updateOne: jest.fn()
+  findOne: vi.fn(),
+  updateOne: vi.fn()
 }
 
 const mongoCustomer = new MongoCustomer({ modelOrCollection: mockCollection })
 
 describe('MongoCustomer', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   describe('getPersonIdByCRN', () => {
@@ -44,7 +44,7 @@ describe('MongoCustomer', () => {
   describe('upsertPersonIdByCRN', () => {
     it('upsert a new record with CRN as the main record key', async () => {
       const dummyDate = new Date('2025-01-01')
-      jest.useFakeTimers().setSystemTime(dummyDate)
+      vi.useFakeTimers().setSystemTime(dummyDate)
       mockCollection.updateOne.mockResolvedValue({ acknowledged: true, upsertedId: 'personId' })
 
       const result = await mongoCustomer.upsertPersonIdByCRN('1234567890', 'personId')
@@ -65,7 +65,7 @@ describe('MongoCustomer', () => {
     const realMongoCustomer = new MongoCustomer({ modelOrCollection: realCollection })
 
     it('upsertPersonIdByCRN handles two concurrent requests for the same CRN without failing', async () => {
-      jest.useRealTimers()
+      vi.useRealTimers()
       const crn = '0987654321'
       await realCollection.deleteMany({})
 

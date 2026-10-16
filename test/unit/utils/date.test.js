@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { BadRequest } from '../../../app/errors/graphql.js'
 import {
   formatDateAsUtcDateTime,

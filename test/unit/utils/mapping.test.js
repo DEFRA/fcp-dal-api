@@ -1,4 +1,4 @@
-import { expect } from '@jest/globals'
+import { describe, expect, test } from 'vitest'
 import { dalAddressToKitsAddress } from '../../../app/transformers/common.js'
 import { transformMapping } from '../../../app/utils/mapping.js'
 

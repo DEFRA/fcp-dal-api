@@ -52,7 +52,7 @@ C4Context
 The rest of this document explains how the DAL and associated components are configured to mimic the live CDP environments using `docker compose`, to give developers greater confidence when making changes...
 
 Generally the project aims to _"shift-left"_ (in line with the Platform and Programme expectations).
-High unit test coverage is maintained and a [threshold set at 95%](../jest.config.json#L10), which helps assure the proper function of the app code. However there is only so much that can be practically tested at the unit level; the following describes the resources and routes to more fully test configuration and [virtualised] infrastructure.
+High unit test coverage is maintained and a [threshold set at 95%](../vitest.config.js), which helps assure the proper function of the app code. However there is only so much that can be practically tested at the unit level; the following describes the resources and routes to more fully test configuration and [virtualised] infrastructure.
 
 ### Acceptance testing
 
@@ -86,7 +86,7 @@ C4Context
       and relations between person IDs / CRNs")
   }
 
-  Boundary(jest, "Jest tests (npm)", "") {
+  Boundary(vitest, "Vitest tests (npm)", "") {
     System(tests, "Acceptance tests", "Runs broad queries and mutations to cover the graphQL schema")
   }
 
@@ -123,7 +123,7 @@ C4Context
   Rel(dal-api, dal-mock, "REST")
 ```
 
-Again the acceptance tests can be run against this setup (as before) by running `jest`:
+Again the acceptance tests can be run against this setup with:
 
 ```shell
 npm run test:acceptance
@@ -141,7 +141,7 @@ C4Context
       and relations between person IDs / CRNs")
   }
 
-  Boundary(jest, "Jest tests (npm)", "") {
+  Boundary(vitest, "Vitest tests (npm)", "") {
     System(tests, "Acceptance tests", "Runs broad queries and mutations
       <br />
       to cover the graphQL schema")

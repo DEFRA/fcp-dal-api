@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { maskAllButLastFour, sampleResponse } from '../../../app/logger/utils.js'
 
 describe('sampleResponse', () => {

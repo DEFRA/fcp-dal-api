@@ -1,11 +1,10 @@
-import { jest } from '@jest/globals'
-
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 describe('config', () => {
   describe('ruralPayments.portalUrl', () => {
     const originalEnv = process.env
 
     const importConfig = async () => {
-      jest.resetModules()
+      vi.resetModules()
       const { config } = await import('../../app/config.js')
       return config
     }

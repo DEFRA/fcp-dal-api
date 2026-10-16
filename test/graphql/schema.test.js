@@ -1,5 +1,4 @@
-import { beforeEach, jest } from '@jest/globals'
-
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   findBreakingChanges,
   findDangerousChanges,
@@ -40,7 +39,7 @@ function getUnprotectedFields(schema) {
   return unprotected
 }
 
-const mockEnv = jest.fn()
+const mockEnv = vi.fn()
 
 const originalConfig = { ...config }
 
@@ -48,7 +47,7 @@ describe('schema', () => {
   beforeEach(() => {
     mockEnv.mockReturnValue('dev')
 
-    jest.spyOn(config, 'get').mockImplementation((path) => {
+    vi.spyOn(config, 'get').mockImplementation((path) => {
       if (path === 'cdp.env') {
         return mockEnv()
       }

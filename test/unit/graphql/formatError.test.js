@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest'
 import { GraphQLError, locatedError } from 'graphql'
 import { formatError } from '../../../app/graphql/formatError.js'
 import { BadRequest, HttpError, NotFound, Unauthorized } from '../../../app/errors/graphql.js'

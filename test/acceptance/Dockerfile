@@ -4,5 +4,5 @@ USER node
 
 WORKDIR /app
 RUN npm install --ignore-scripts --save-exact --min-release-age=7 \
-     graphql-request@7.4.0 jest@29.7.0 jsonwebtoken@9.0.2 \
- && npm pkg set type=module "scripts.test"="NODE_OPTIONS=--experimental-vm-modules jest"
+     graphql-request@7.4.0 vitest@4.1.11 jsonwebtoken@9.0.2 \
+ && npm pkg set type=module "scripts.test"="vitest run"

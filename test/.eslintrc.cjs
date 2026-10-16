@@ -1,9 +1,7 @@
 module.exports = {
   env: {
     node: true,
-    es2021: true,
-    jest: true
+    es2021: true
   },
-  extends: ['../.eslintrc.cjs'], // Inherit from root config
-  plugins: ['jest']
+  extends: ['../.eslintrc.cjs']
 }

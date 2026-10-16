@@ -28,11 +28,11 @@ jobs:
           npm ci --ignore-scripts
           npm run postinstall
       - name: Run unit + graphql tests with coverage
-        run: npm test -- --ci --json --testLocationInResults --outputFile=report.json
+        run: npm test
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: coverage-report-main
-          path: report.json
+          path: coverage/coverage-summary.json
           retention-days: 30
 
   build:
