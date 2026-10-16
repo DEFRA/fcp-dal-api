@@ -32,6 +32,31 @@ const getOrganisation = async (dataSources, sbi) => {
   return organisation
 }
 
+const buildCustomerAuthorisationRequest = async (input, dataSources) => {
+  const { sbi, crn, role, permissions } = input
+  const [organisationId, personId] = await Promise.all([
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
+    retrievePersonIdByCRN(crn, dataSources)
+  ])
+
+  return {
+    organisationId,
+    personId,
+    body: {
+      personRoles: [{ role, personId }],
+      personPrivileges: [
+        {
+          privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
+            permissions,
+            dataSources.permissions.getPermissionGroups()
+          ),
+          personId
+        }
+      ]
+    }
+  }
+}
+
 const validateBankChangeRequest = async (input, dataSources, organisation) => {
   const { crn } = input
   const { ruralPaymentsBusiness } = dataSources
@@ -207,58 +232,24 @@ export const Mutation = {
   updateBusinessDeactivate: businessDeactivateResolver,
 
   addCustomerToBusiness: async (_, { input }, { dataSources }) => {
-    const { sbi, crn, role, permissions } = input
-    const [organisationId, personId] = await Promise.all([
-      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
-      retrievePersonIdByCRN(crn, dataSources)
-    ])
+    const { organisationId, body } = await buildCustomerAuthorisationRequest(input, dataSources)
 
-    return dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(organisationId, {
-      personRoles: [
-        {
-          role,
-          personId
-        }
-      ],
-      personPrivileges: [
-        {
-          privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
-            permissions,
-            dataSources.permissions.getPermissionGroups()
-          ),
-          personId
-        }
-      ]
-    })
+    return dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(
+      organisationId,
+      body
+    )
   },
 
   updateCustomerPermissionsAndRelationshipToBusiness: async (_, { input }, { dataSources }) => {
-    const { sbi, crn, role, permissions } = input
-    const [organisationId, personId] = await Promise.all([
-      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
-      retrievePersonIdByCRN(crn, dataSources)
-    ])
+    const { organisationId, personId, body } = await buildCustomerAuthorisationRequest(
+      input,
+      dataSources
+    )
 
     return dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
       organisationId,
       personId,
-      {
-        personRoles: [
-          {
-            role,
-            personId
-          }
-        ],
-        personPrivileges: [
-          {
-            privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
-              permissions,
-              dataSources.permissions.getPermissionGroups()
-            ),
-            personId
-          }
-        ]
-      }
+      body
     )
   }
 }

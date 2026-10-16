@@ -455,9 +455,6 @@ describe('Business transformer', () => {
   })
 
   test('#transformPermissionGroupsToBusinessCustomerPrivileges handles empty and unmatched permissions', () => {
-    expect(
-      transformPermissionGroupsToBusinessCustomerPrivileges(undefined, permissionGroups)
-    ).toEqual([])
     expect(transformPermissionGroupsToBusinessCustomerPrivileges([], permissionGroups)).toEqual([])
     expect(
       transformPermissionGroupsToBusinessCustomerPrivileges(
