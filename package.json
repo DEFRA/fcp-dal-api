@@ -75,7 +75,7 @@
     "mongodb-memory-server": "10.4.3",
     "nock": "^14.0.2",
     "nodemon": "^3.1.9",
-    "prettier": "^3.4.2",
+    "prettier": "^3.9.9",
     "semver": "7.8.5",
     "vitest": "4.1.11",
     "winston-transport": "^4.9.0"
