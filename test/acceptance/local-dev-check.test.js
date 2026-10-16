@@ -1,6 +1,8 @@
 import { GraphQLClient, gql } from 'graphql-request'
 import jwt from 'jsonwebtoken'
 
+import { describe, expect, it } from 'vitest'
+
 const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'
 
 const parcels = [

@@ -4,7 +4,6 @@ services:
     build:
       context: ./test/acceptance
     environment:
-      NODE_OPTIONS: --experimental-vm-modules
       TARGET_URL: http://fcp-dal-api:3000/graphql
     working_dir: /app
     command: npm test
