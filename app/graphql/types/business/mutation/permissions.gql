@@ -1,0 +1,77 @@
+extend type Mutation {
+  """
+  Adds a customer to a business with the given relationship (role) and permissions. If the customer
+  is already linked to the business, then this request will be rejected.
+  """
+  addCustomerToBusiness(
+    # shared with update; type name cannot match both mutations
+    # eslint-disable-next-line @graphql-eslint/input-name
+    input: CustomerPermissionsAndRelationshipToBusinessInput!
+  ): CustomerPermissionsAndRelationshipToBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Updates a customer's relationship to the business (role) and any permissions that the
+  customer should have on the business.
+
+  Permissions are replaced, not merged. The permissions list must contain the customer's complete
+  set of permissions for the business. Any existing permissions not included will be removed.
+
+  If the supplied customer is not already linked to this business, then the customer
+  is added to the business (i.e. behaves the same as addCustomerToBusiness for an unlinked customer)
+  """
+  updateCustomerPermissionsAndRelationshipToBusiness(
+    # shared with add; type name cannot match both mutations
+    # eslint-disable-next-line @graphql-eslint/input-name
+    input: CustomerPermissionsAndRelationshipToBusinessInput!
+  ): CustomerPermissionsAndRelationshipToBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input CustomerPermissionsAndRelationshipToBusinessInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business.
+  """
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
+
+  """
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
+
+  """
+  Role of the customer on the business. For example, 'Agent' or 'Business Partner'.
+  """
+  role: String!
+
+  """
+  The full set of permission groups and levels for the customer on the
+  business. This replaces any existing permissions. Include every group
+  that should apply. An empty list removes all permissions.
+  """
+  permissions: [CustomerPermissionsInput!]!
+}
+
+input CustomerPermissionsInput {
+  """
+  Permission group for the customer. For example,
+     'BUSINESS_DETAILS', 'COUNTRYSIDE_STEWARDSHIP_AGREEMENTS'.
+  """
+  id: PermissionGroupId!
+  """
+  Permission level customer has for the business. For example, 'VIEW', 'AMEND'.
+  """
+  level: PermissionLevel!
+}
+
+type CustomerPermissionsAndRelationshipToBusinessResponse {
+  """
+  True when the change was applied.
+  """
+  success: Boolean
+  """
+  Error message from the upstream service when the request is not successful.
+  """
+  errorString: String
+}

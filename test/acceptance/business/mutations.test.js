@@ -353,6 +353,139 @@ describe('createBusinessCustomerBankDetails', () => {
   })
 })
 
+const addCustomerToBusinessMutation = gql`
+  mutation AddCustomerToBusiness($input: CustomerPermissionsAndRelationshipToBusinessInput!) {
+    addCustomerToBusiness(input: $input) {
+      success
+      errorString
+    }
+  }
+`
+
+const updateCustomerPermissionsAndRelationshipToBusiness = gql`
+  mutation UpdateCustomerPermissionsAndRelationshipToBusiness(
+    $input: CustomerPermissionsAndRelationshipToBusinessInput!
+  ) {
+    updateCustomerPermissionsAndRelationshipToBusiness(input: $input) {
+      success
+      errorString
+    }
+  }
+`
+
+// CRN 2222222000 belongs to org 222222222 in the mock, so it can be linked to the
+// mutation-reserved SBI without changing the fixture data asserted for 111111111.
+const customerPermissionsSbi = '900000001'
+const customerPermissionsCrn = '2222222000'
+
+// NOTE: the create test fails on a second run against the same mock (409 Conflict) as the
+// DAL cannot yet unlink a customer from a business. Once FCPDAL-318 is played, add an
+// afterAll that unlinks the customer so the suite can be re-run.
+describe('customer permissions on business', () => {
+  it('adds a customer to a business with the given role and permissions', async () => {
+    const response = await client.request(
+      addCustomerToBusinessMutation,
+      {
+        input: {
+          sbi: customerPermissionsSbi,
+          crn: customerPermissionsCrn,
+          role: 'Agent',
+          permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
+        }
+      },
+      headers
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.addCustomerToBusiness).toEqual({
+      success: true,
+      errorString: null
+    })
+  })
+
+  it('updates a customer role and permissions on a business', async () => {
+    const response = await client.request(
+      updateCustomerPermissionsAndRelationshipToBusiness,
+      {
+        input: {
+          sbi: customerPermissionsSbi,
+          crn: customerPermissionsCrn,
+          role: 'Business Partner',
+          permissions: [
+            { id: 'BUSINESS_DETAILS', level: 'VIEW' },
+            { id: 'LAND_DETAILS', level: 'AMEND' }
+          ]
+        }
+      },
+      headers
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.updateCustomerPermissionsAndRelationshipToBusiness).toEqual({
+      success: true,
+      errorString: null
+    })
+  })
+
+  const invalidInputError = (message) => ({
+    response: {
+      errors: [
+        expect.objectContaining({
+          message: expect.stringMatching(message),
+          extensions: expect.objectContaining({ code: 'BAD_USER_INPUT' })
+        })
+      ]
+    }
+  })
+
+  it.each([
+    ['addCustomerToBusiness', addCustomerToBusinessMutation],
+    [
+      'updateCustomerPermissionsAndRelationshipToBusiness',
+      updateCustomerPermissionsAndRelationshipToBusiness
+    ]
+  ])('%s rejects a request without a role', async (_, mutation) => {
+    await expect(
+      client.request(
+        mutation,
+        {
+          input: {
+            sbi: customerPermissionsSbi,
+            crn: customerPermissionsCrn,
+            permissions: [{ id: 'BUSINESS_DETAILS', level: 'VIEW' }]
+          }
+        },
+        headers
+      )
+    ).rejects.toMatchObject(
+      invalidInputError(/Field "role" of required type "String!" was not provided/)
+    )
+  })
+
+  it.each([
+    ['addCustomerToBusiness', addCustomerToBusinessMutation],
+    [
+      'updateCustomerPermissionsAndRelationshipToBusiness',
+      updateCustomerPermissionsAndRelationshipToBusiness
+    ]
+  ])('%s rejects a null permission entry', async (_, mutation) => {
+    await expect(
+      client.request(
+        mutation,
+        {
+          input: {
+            sbi: customerPermissionsSbi,
+            crn: customerPermissionsCrn,
+            role: 'Agent',
+            permissions: [null]
+          }
+        },
+        headers
+      )
+    ).rejects.toMatchObject(invalidInputError(/Expected non-nullable type/))
+  })
+})
+
 describe('Business Mutations - reactivate a business', () => {
   // note: sbi 920000001 is reserved for this test; it starts out locked and deactivated in the mock
   const reactivateSbi = '920000001'
