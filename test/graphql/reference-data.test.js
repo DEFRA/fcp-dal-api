@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { gql } from 'graphql-request'
 import nock from 'nock'
 import { config } from '../../app/config.js'
@@ -40,15 +40,13 @@ describe('referenceData', () => {
       'auth.disabled': true
     }
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
   })
   afterEach(() => {
     nock.cleanAll()
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('countriesCurrencies', () => {

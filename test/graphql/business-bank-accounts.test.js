@@ -1,7 +1,6 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import nock from 'nock'
 import { config } from '../../app/config.js'
-import { Unauthorized } from '../../app/errors/graphql.js'
 import { mockOrganisationSearch } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
@@ -44,15 +43,13 @@ describe('business bankAccounts', () => {
   beforeEach(() => {
     configMockPath = {}
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
     nock.cleanAll()
   })
 
@@ -160,8 +157,9 @@ describe('business bankAccounts', () => {
     expect(result.data.business.sbi).toBe('123456789')
     expect(result.data.business.bankAccounts).toBeNull()
     expect(result.errors).toHaveLength(1)
-    expect(result.errors[0]).toEqual(
-      new Unauthorized('Authorization failed, you are not in the correct AD groups')
-    )
+    expect(result.errors[0]).toMatchObject({
+      message: 'Authorization failed, you are not in the correct AD groups',
+      extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
+    })
   })
 })

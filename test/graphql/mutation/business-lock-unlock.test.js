@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { mockDefraIdJwks, mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
@@ -19,7 +19,7 @@ const setupNock = () => {
 //  Nock is setup separately in each test to ensure the order and number of requests is as expected
 describe('business state mutations', () => {
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
     nock.cleanAll()
     nock.enableNetConnect()
   })
@@ -190,9 +190,9 @@ describe('business state mutations', () => {
     test('reactivate a business is refused for external users', async () => {
       // arrange
       const originalGet = config.get.bind(config)
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) => (path === 'auth.disabled' ? false : originalGet(path)))
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        path === 'auth.disabled' ? false : originalGet(path)
+      )
       nock.cleanAll()
       mockDefraIdJwks()
       const kits = nock(config.get('kits.external.gatewayUrl'))
@@ -281,9 +281,9 @@ describe('business state mutations', () => {
 
     test('deactivate a business is refused for external users', async () => {
       const originalGet = config.get.bind(config)
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) => (path === 'auth.disabled' ? false : originalGet(path)))
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        path === 'auth.disabled' ? false : originalGet(path)
+      )
       nock.cleanAll()
       mockDefraIdJwks()
       const kits = nock(config.get('kits.external.gatewayUrl'))

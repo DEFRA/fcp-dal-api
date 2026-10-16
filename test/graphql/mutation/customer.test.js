@@ -1,16 +1,13 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { mockDefraIdJwks, signDefraIdToken } from '../helpers.js'
 
 const mockCustomerCommonModule = {
-  retrievePersonIdByCRN: jest.fn().mockResolvedValue('personId')
+  retrievePersonIdByCRN: vi.fn().mockResolvedValue('personId')
 }
 
-jest.unstable_mockModule(
-  '../../../app/graphql/resolvers/customer/common.js',
-  () => mockCustomerCommonModule
-)
+vi.doMock('../../../app/graphql/resolvers/customer/common.js', () => mockCustomerCommonModule)
 
 const { makeTestQuery } = await import('../makeTestQuery.js')
 
@@ -322,15 +319,13 @@ describe('customer mutations', () => {
     beforeEach(() => {
       configMockPath = { 'auth.disabled': false }
       const originalConfig = { ...config }
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
     })
 
     afterEach(() => {
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
     })
 
     const nockAction = (gateway) =>
@@ -398,15 +393,13 @@ describe('customer mutations', () => {
     beforeEach(() => {
       configMockPath = {}
       const originalConfig = { ...config }
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
     })
 
     afterEach(() => {
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
     })
 
     const nockDeactivate = (status = 204) =>
@@ -621,15 +614,13 @@ describe('customer mutations', () => {
     beforeEach(() => {
       configMockPath = {}
       const originalConfig = { ...config }
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
     })
 
     afterEach(() => {
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
     })
 
     const nockSaveAnswers = (status = 200) =>
@@ -1162,13 +1153,13 @@ describe('customer mutations', () => {
 
     beforeEach(() => {
       const originalConfig = { ...config }
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) => (path === 'auth.disabled' ? false : originalConfig.get(path)))
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        path === 'auth.disabled' ? false : originalConfig.get(path)
+      )
     })
 
     afterEach(() => {
-      jest.restoreAllMocks()
+      vi.restoreAllMocks()
     })
 
     test('sends the email for the external user identified by the Defra ID token', async () => {

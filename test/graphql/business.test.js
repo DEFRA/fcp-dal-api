@@ -1,7 +1,6 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import nock from 'nock'
 import { config } from '../../app/config.js'
-import { Unauthorized } from '../../app/errors/graphql.js'
 import { mockOrganisationSearch, signDefraIdToken } from './helpers.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
@@ -416,15 +415,13 @@ describe('Query.business internal', () => {
       'auth.disabled': true
     }
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
     nock.cleanAll()
   })
 
@@ -1006,9 +1003,10 @@ describe('Query.business internal', () => {
 
     expect(result.data.business).toBeNull()
     expect(result.errors).toHaveLength(1)
-    expect(result.errors[0]).toEqual(
-      new Unauthorized('Authorization failed, you are not in the correct AD groups')
-    )
+    expect(result.errors[0]).toMatchObject({
+      message: 'Authorization failed, you are not in the correct AD groups',
+      extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
+    })
   })
 
   test.each([

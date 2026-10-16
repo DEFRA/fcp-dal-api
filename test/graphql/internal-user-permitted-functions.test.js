@@ -1,7 +1,6 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import nock from 'nock'
 import { config } from '../../app/config.js'
-import { Unauthorized } from '../../app/errors/graphql.js'
 import { makeTestQuery } from './makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -34,7 +33,7 @@ describe('internalUser.permittedFunctions', () => {
   afterEach(() => {
     nock.cleanAll()
     nock.enableNetConnect()
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   test('returns whether the internal user is permitted each requested function', async () => {
@@ -134,9 +133,9 @@ describe('internalUser.permittedFunctions', () => {
 
   const enableAuth = () => {
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) => (path === 'auth.disabled' ? false : originalConfig.get(path)))
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      path === 'auth.disabled' ? false : originalConfig.get(path)
+    )
   }
 
   test('unauthenticated - the internalUser query is blocked', async () => {
@@ -148,9 +147,10 @@ describe('internalUser.permittedFunctions', () => {
 
     expect(result.data.internalUser).toBeNull()
     expect(result.errors).toHaveLength(1)
-    expect(result.errors[0]).toEqual(
-      new Unauthorized('Authorization failed, you are not in the correct AD groups')
-    )
+    expect(result.errors[0]).toMatchObject({
+      message: 'Authorization failed, you are not in the correct AD groups',
+      extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
+    })
   })
 
   test('authenticated but not in the SFD group - the internalUser query is blocked', async () => {
@@ -163,8 +163,9 @@ describe('internalUser.permittedFunctions', () => {
 
     expect(result.data.internalUser).toBeNull()
     expect(result.errors).toHaveLength(1)
-    expect(result.errors[0]).toEqual(
-      new Unauthorized('Authorization failed, you are not in the correct AD groups')
-    )
+    expect(result.errors[0]).toMatchObject({
+      message: 'Authorization failed, you are not in the correct AD groups',
+      extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
+    })
   })
 })

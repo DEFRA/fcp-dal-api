@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import nock from 'nock'
 import { config } from '../../app/config.js'
 import { mockDefraIdJwks, signDefraIdToken } from './helpers.js'
@@ -110,15 +110,13 @@ describe('SFI Query', () => {
       'auth.disabled': false
     }
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   test('business - authenticated external', async () => {
