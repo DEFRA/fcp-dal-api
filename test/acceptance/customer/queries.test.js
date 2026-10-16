@@ -57,6 +57,7 @@ const customerQuery = gql`
         name
         organisationId
         sbi
+        role
       }
       business(sbi: $sbi) {
         organisationId
@@ -140,7 +141,8 @@ const customer = {
     {
       name: 'Bechtelar - Stamm',
       organisationId: '111111111',
-      sbi: '111111111'
+      sbi: '111111111',
+      role: 'Key Contact'
     }
   ],
   business: {
@@ -327,5 +329,34 @@ describe('Customer Queries', () => {
       ...customer,
       business: { ...customer.business, messages: expect.arrayContaining(messages) }
     })
+  })
+
+  it('should only return business messages on or after fromDate', async () => {
+    const client = new GraphQLClient(targetURL)
+    const response = await client.request(
+      gql`
+        query CustomerBusinessMessages($crn: ID!, $sbi: ID!, $fromDate: Date) {
+          customer(crn: $crn) {
+            business(sbi: $sbi) {
+              messages(fromDate: $fromDate) {
+                id
+                date
+              }
+            }
+          }
+        }
+      `,
+      { crn: '1111111100', sbi: '111111111', fromDate: '2024-01-01' },
+      { email: 'some-email' }
+    )
+
+    expect(response.customer.business.messages).toEqual([
+      { id: '2023306539', date: '2024-08-29T06:53:08.606Z' },
+      { id: '5514348645', date: '2024-01-30T00:16:20.757Z' },
+      { id: '9983911729', date: '2024-03-02T21:09:31.939Z' },
+      { id: '747808064', date: '2024-06-21T12:43:47.401Z' },
+      { id: '9194806935', date: '2024-10-21T18:43:25.491Z' },
+      { id: '4175223768', date: '2024-06-18T07:16:11.729Z' }
+    ])
   })
 })
