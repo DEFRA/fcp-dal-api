@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import nock from 'nock'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
 import { mockDefraIdJwks, mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'

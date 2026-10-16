@@ -1,4 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   findBreakingChanges,
   findDangerousChanges,
@@ -6,6 +5,7 @@ import {
   graphql,
   isObjectType
 } from 'graphql'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { cdpEnvironments, config } from '../../app/config.js'
 import { wipEnabledEnvironments } from '../../app/graphql/directives/wipDirectiveTransformer.js'
 import { createRawSchema, createSchema } from '../../app/graphql/schema.js'
