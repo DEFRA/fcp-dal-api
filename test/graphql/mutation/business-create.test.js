@@ -526,6 +526,31 @@ describe('business', () => {
     expect(result.data.createBusiness.success).toBe(true)
   })
 
+  test('create a business - sends empty vat upstream', async () => {
+    let createBody
+    v1.on('request', (req, _, body) => {
+      if (req.path === '/organisation/create/personId') {
+        createBody = JSON.parse(body)
+      }
+    })
+
+    const result = await makeTestQuery(
+      query,
+      null,
+      true,
+      { input: { ...input, vat: '' } },
+      [],
+      false
+    )
+
+    v1.removeAllListeners('request')
+    await waitForPersonIdToBeCachedInMongo()
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data.createBusiness.success).toBe(true)
+    expect(createBody.taxRegistrationNumber).toBe('')
+  })
+
   const addressFieldsLimitedTo240 = [
     'pafOrganisationName',
     'dependentLocality',

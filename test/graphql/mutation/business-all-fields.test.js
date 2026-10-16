@@ -177,6 +177,41 @@ describe('updateBusinessAllFields', () => {
     })
   })
 
+  test('allows an empty vat to clear the vat number', async () => {
+    const input = {
+      sbi: '123456789',
+      vat: ''
+    }
+
+    v1.put('/organisation/organisationId/business-details', {
+      ...orgDetailsUpdatePayload,
+      taxRegistrationNumber: ''
+    }).reply(204)
+
+    mockOrganisationSearch(v1)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', name: 'HADLEY FARMS LTD 2' }
+    })
+
+    const result = await makeTestQuery(query, null, true, { input })
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessAllFields: {
+          success: true,
+          businessDetailsUpdated: true,
+          additionalBusinessDetailsUpdated: null,
+          business: {
+            info: {
+              name: 'HADLEY FARMS LTD 2'
+            }
+          }
+        }
+      }
+    })
+  })
+
   test('returns a GraphQL error when the additional business details update fails', async () => {
     const input = {
       sbi: '123456789',

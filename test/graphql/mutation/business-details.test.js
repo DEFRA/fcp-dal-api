@@ -697,10 +697,61 @@ describe('business', () => {
       `
       const result = await makeTestQuery(query, null, true, { input: { sbi: '123456789', vat } })
 
-      expect(result.errors[0].message).toEqual("variable 'input.vat' must match pattern ^[0-9]{9}$")
+      expect(result.errors[0].message).toEqual(
+        "variable 'input.vat' must match pattern ^(?:|[0-9]{9})$"
+      )
       expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
     }
   )
+
+  test('update business vat - allows empty string to clear vat', async () => {
+    const input = {
+      sbi: '123456789',
+      vat: ''
+    }
+    const putPayloadOverrides = {
+      taxRegistrationNumber: ''
+    }
+    const { sbi: _, ...queryReturn } = input
+
+    const expectedPutPayload = {
+      ...orgDetailsUpdatePayload,
+      ...putPayloadOverrides
+    }
+
+    v1.put('/organisation/organisationId/business-details', expectedPutPayload).reply(204)
+
+    mockOrganisationSearch(v1)
+
+    v1.get('/organisation/organisationId').reply(200, {
+      _data: { id: 'organisationId', ...putPayloadOverrides }
+    })
+
+    const query = `
+      mutation UpdateBusinessVAT($input: UpdateBusinessVATInput!) {
+        updateBusinessVAT(input: $input) {
+          business {
+            info {
+              vat
+            }
+          }
+          success
+        }
+      }
+    `
+    const result = await makeTestQuery(query, null, true, { input })
+
+    expect(result).toEqual({
+      data: {
+        updateBusinessVAT: {
+          success: true,
+          business: {
+            info: queryReturn
+          }
+        }
+      }
+    })
+  })
 })
 
 describe('business - external gateway', () => {
