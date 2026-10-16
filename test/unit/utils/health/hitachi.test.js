@@ -1,18 +1,18 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 
 const mockLogger = {
   logger: {
-    error: jest.fn(),
-    info: jest.fn()
+    error: vi.fn(),
+    info: vi.fn()
   }
 }
 
-const HitachiPaymentsMock = jest.fn()
-const getSupplierPaymentsMock = jest.fn()
+const HitachiPaymentsMock = vi.fn()
+const getSupplierPaymentsMock = vi.fn()
 
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../../app/logger/logger.js', () => mockLogger)
 
-jest.unstable_mockModule('../../../../app/data-sources/hitachi/HitachiPayments.js', () => ({
+vi.doMock('../../../../app/data-sources/hitachi/HitachiPayments.js', () => ({
   HitachiPayments: HitachiPaymentsMock
 }))
 
@@ -21,14 +21,14 @@ const { healthCheck } = await import('../../../../app/utils/health/hitachi.js')
 
 describe('Hitachi payments health check', () => {
   beforeEach(() => {
-    HitachiPaymentsMock.mockImplementation(() => ({
-      getSupplierPayments: getSupplierPaymentsMock
-    }))
+    HitachiPaymentsMock.mockImplementation(function () {
+      return { getSupplierPayments: getSupplierPaymentsMock }
+    })
     getSupplierPaymentsMock.mockResolvedValue()
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should log success when Hitachi payments connects', async () => {

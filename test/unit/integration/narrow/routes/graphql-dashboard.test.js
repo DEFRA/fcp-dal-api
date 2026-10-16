@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { config } from '../../../../../app/config.js'
 import { apolloServer, enableApolloLandingPage } from '../../../../../app/graphql/server.js'
 
@@ -8,15 +8,13 @@ describe('GraphQL Dashboard test', () => {
   beforeEach(async () => {
     configMockPath = {}
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
   })
 
   afterEach(async () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
   it('expects graphql dashboard to be enabled when GRAPHQL_DASHBOARD_ENABLED is set in .env.test', async () => {
     expect(apolloServer.internals.plugins.length).toBe(2)

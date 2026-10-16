@@ -1,20 +1,20 @@
 import hapiApollo from '@as-integrations/hapi'
 import { secureContext } from '@defra/hapi-secure-context'
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { apolloServer } from '../../../app/graphql/server.js'
 import { mongoClient } from '../../../app/mongo.js'
 
 const mockLogger = {
   logger: {
-    error: jest.fn(),
-    info: jest.fn()
+    error: vi.fn(),
+    info: vi.fn()
   }
 }
 
-const mockRunHealthChecks = jest.fn()
+const mockRunHealthChecks = vi.fn()
 
-jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
-jest.unstable_mockModule('../../../app/utils/health/index.js', () => ({
+vi.doMock('../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../app/utils/health/index.js', () => ({
   runHealthChecks: mockRunHealthChecks
 }))
 
@@ -22,19 +22,19 @@ const { server } = await import('../../../app/server.js')
 
 describe('App initialization', () => {
   beforeEach(() => {
-    jest.spyOn(apolloServer, 'start').mockResolvedValue()
-    jest.spyOn(server, 'register').mockResolvedValue()
-    jest.spyOn(server, 'start').mockResolvedValue()
-    jest.spyOn(server, 'stop').mockResolvedValue()
-    jest.spyOn(mongoClient, 'close').mockResolvedValue()
+    vi.spyOn(apolloServer, 'start').mockResolvedValue()
+    vi.spyOn(server, 'register').mockResolvedValue()
+    vi.spyOn(server, 'start').mockResolvedValue()
+    vi.spyOn(server, 'stop').mockResolvedValue()
+    vi.spyOn(mongoClient, 'close').mockResolvedValue()
     mockRunHealthChecks.mockResolvedValue()
-    jest.spyOn(process, 'exit').mockReturnValue(1)
+    vi.spyOn(process, 'exit').mockReturnValue(1)
 
     server.info = { uri: 'http://localhost:3000' }
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('should initialize the application successfully', async () => {

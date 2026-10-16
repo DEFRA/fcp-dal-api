@@ -65,26 +65,24 @@ jobs:
           if [ -n "$RUN_ID" ]; then
             gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" -n coverage-report-main -D base-coverage || true
           fi
-          if [ -f base-coverage/report.json ]; then
+          if [ -f base-coverage/coverage-summary.json ]; then
             echo "available=true" >> "$GITHUB_OUTPUT"
           else
             echo "available=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Jest Coverage Comment (with base snapshot)
-        if: steps.base-cov.outputs.available == 'true'
-        uses: ArtiomTr/jest-coverage-report-action@v2
-        # NOTE: need to switch to vitest!
-        with:
-          test-script: npm test
-          base-coverage-file: base-coverage/report.json
+      - name: Run unit + graphql tests with coverage
+        run: npm test
 
-      - name: Jest Coverage Comment (no base snapshot)
-        if: steps.base-cov.outputs.available != 'true'
-        uses: ArtiomTr/jest-coverage-report-action@v2
-        # NOTE: need to switch to vitest!
+      - name: Vitest Coverage Comment (with base snapshot)
+        if: steps.base-cov.outputs.available == 'true'
+        uses: davelosert/vitest-coverage-report-action@v2
         with:
-          test-script: npm test
+          json-summary-compare-path: base-coverage/coverage-summary.json
+
+      - name: Vitest Coverage Comment (no base snapshot)
+        if: steps.base-cov.outputs.available != 'true'
+        uses: davelosert/vitest-coverage-report-action@v2
 
       - name: Acceptance & environment emulation tests
         # the script is basically `npm run test:acceptance:docker && npm run test:acceptance:proxy

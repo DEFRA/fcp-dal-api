@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import {
   BusinessLand,
   BusinessLandSummary
@@ -180,7 +180,7 @@ describe('BusinessLand', () => {
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
     it('summary records a land-summary entity keyed by sbi', () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       BusinessLand.summary({ ...mockBusiness, sbi: 'mockSbi' }, mockArguments, { auditTrail }, info)
 
@@ -192,7 +192,7 @@ describe('BusinessLand', () => {
     })
 
     it('parcel records a parcel entity keyed by sheetId-parcelId', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await BusinessLand.parcel(
         { ...mockBusiness, sbi: 'mockSbi' },
@@ -209,7 +209,7 @@ describe('BusinessLand', () => {
     })
 
     it('parcels records a parcel-list entity keyed by sbi', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await BusinessLand.parcels(
         { ...mockBusiness, sbi: 'mockSbi' },
@@ -226,7 +226,7 @@ describe('BusinessLand', () => {
     })
 
     it('parcelCovers records a land-cover-list entity keyed by sheetId-parcelId', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await BusinessLand.parcelCovers(
         mockBusiness,
@@ -243,7 +243,7 @@ describe('BusinessLand', () => {
     })
 
     it('parcelLandUses records a land-use-list entity keyed by sheetId-parcelId', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await BusinessLand.parcelLandUses(
         { sbi: 'mockSbi' },

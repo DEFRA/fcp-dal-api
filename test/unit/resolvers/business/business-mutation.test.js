@@ -1,31 +1,25 @@
-import { describe, jest } from '@jest/globals'
+import { describe, vi } from 'vitest'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../../app/transformers/rural-payments/business.js'
 
 const mockBusinessCommonModule = {
-  businessDetailsUpdateResolver: jest.fn(),
-  businessAdditionalDetailsUpdateResolver: jest.fn(),
-  businessAllFieldsUpdateResolver: jest.fn(),
-  retrieveOrgIdBySbi: jest.fn(),
-  businessLockResolver: jest.fn(),
-  businessUnlockResolver: jest.fn(),
-  businessReactivateResolver: jest.fn(),
-  businessDeactivateResolver: jest.fn(),
-  validateLegalStatusCode: jest.fn(),
-  validatePhoneHasNumber: jest.fn(),
-  validateTypeCode: jest.fn(),
-  validateBusinessReferenceDataCodes: jest.fn()
+  businessDetailsUpdateResolver: vi.fn(),
+  businessAdditionalDetailsUpdateResolver: vi.fn(),
+  businessAllFieldsUpdateResolver: vi.fn(),
+  retrieveOrgIdBySbi: vi.fn(),
+  businessLockResolver: vi.fn(),
+  businessUnlockResolver: vi.fn(),
+  businessReactivateResolver: vi.fn(),
+  businessDeactivateResolver: vi.fn(),
+  validateLegalStatusCode: vi.fn(),
+  validatePhoneHasNumber: vi.fn(),
+  validateTypeCode: vi.fn(),
+  validateBusinessReferenceDataCodes: vi.fn()
 }
 const mockCustomerCommonModule = {
-  retrievePersonIdByCRN: jest.fn()
+  retrievePersonIdByCRN: vi.fn()
 }
-jest.unstable_mockModule(
-  '../../../../app/graphql/resolvers/business/common.js',
-  () => mockBusinessCommonModule
-)
-jest.unstable_mockModule(
-  '../../../../app/graphql/resolvers/customer/common.js',
-  () => mockCustomerCommonModule
-)
+vi.doMock('../../../../app/graphql/resolvers/business/common.js', () => mockBusinessCommonModule)
+vi.doMock('../../../../app/graphql/resolvers/customer/common.js', () => mockCustomerCommonModule)
 const { Mutation, UpdateBusinessResponse } =
   await import('../../../../app/graphql/resolvers/business/mutation.js')
 
@@ -147,13 +141,13 @@ describe('Business Mutation UpdateBusinessResponse', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        updateBusinessBySBI: jest.fn(),
-        getOrganisationById: jest.fn(),
-        getOrganisationIdBySBI: jest.fn()
+        updateBusinessBySBI: vi.fn(),
+        getOrganisationById: vi.fn(),
+        getOrganisationIdBySBI: vi.fn()
       },
       mongoBusiness: {
-        getOrgIdBySbi: jest.fn(),
-        upsertOrgIdBySbi: jest.fn()
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
       }
     }
   })
@@ -190,10 +184,10 @@ describe('Business Mutation createBusiness', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        createOrganisationByPersonId: jest.fn()
+        createOrganisationByPersonId: vi.fn()
       },
       ruralPaymentsCustomer: {
-        getPersonIdByCRN: jest.fn()
+        getPersonIdByCRN: vi.fn()
       }
     }
   })
@@ -387,7 +381,7 @@ describe('Business Mutation createBusiness', () => {
       sbi: 'sbi',
       id: 'orgId'
     })
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'createBusiness', typename: 'Mutation', prev: undefined } }
 
     await Mutation.createBusiness(
@@ -411,7 +405,7 @@ describe('Business Mutation createBusiness', () => {
     dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockRejectedValue(
       new Error('upstream failure')
     )
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'createBusiness', typename: 'Mutation', prev: undefined } }
 
     await expect(
@@ -453,24 +447,24 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockReset()
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationBySBI: jest.fn().mockResolvedValue({
+        getOrganisationBySBI: vi.fn().mockResolvedValue({
           id: 5583781,
           businessReference: '10014489653'
         }),
-        getBankChangeLockedStatus: jest.fn().mockResolvedValue({ locked: false }),
-        getBankChangeAccountStatus: jest.fn().mockResolvedValue({
+        getBankChangeLockedStatus: vi.fn().mockResolvedValue({ locked: false }),
+        getBankChangeAccountStatus: vi.fn().mockResolvedValue({
           editable: true,
           submitted: false,
           updatedRecently: false,
           new: false
         }),
-        validateBankChange: jest.fn().mockResolvedValue({
+        validateBankChange: vi.fn().mockResolvedValue({
           status: 'MATCH',
           message: 'All good',
           attemptsRemaining: 0,
           account: { bank: { name: 'Acme Bank', sortCode: '123456' } }
         }),
-        submitBankChange: jest.fn().mockResolvedValue({})
+        submitBankChange: vi.fn().mockResolvedValue({})
       }
     }
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
@@ -614,7 +608,7 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
       new Error('upstream failure')
     )
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: { key: 'createBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
     }
@@ -723,7 +717,7 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
   })
 
   it('records sbi/organisationId/frn accounts and an updated bank-account entity on the audit trail', async () => {
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: { key: 'createBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
     }
@@ -767,24 +761,24 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockReset()
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationBySBI: jest.fn().mockResolvedValue({
+        getOrganisationBySBI: vi.fn().mockResolvedValue({
           id: 5583781,
           businessReference: '10014489653'
         }),
-        getBankChangeLockedStatus: jest.fn().mockResolvedValue({ locked: false }),
-        getBankChangeAccountStatus: jest.fn().mockResolvedValue({
+        getBankChangeLockedStatus: vi.fn().mockResolvedValue({ locked: false }),
+        getBankChangeAccountStatus: vi.fn().mockResolvedValue({
           editable: true,
           submitted: false,
           updatedRecently: false,
           new: false
         }),
-        validateBankChange: jest.fn().mockResolvedValue({
+        validateBankChange: vi.fn().mockResolvedValue({
           status: 'MATCH',
           message: 'All good',
           attemptsRemaining: 0,
           account: { bank: { name: 'Acme Bank', sortCode: '123456' } }
         }),
-        submitBankChange: jest.fn().mockResolvedValue({})
+        submitBankChange: vi.fn().mockResolvedValue({})
       }
     }
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
@@ -978,7 +972,7 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     dataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
       new Error('upstream failure')
     )
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: { key: 'validateBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
     }
@@ -1006,7 +1000,7 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
   })
 
   it('records sbi/organisationId/frn accounts and a validate bank-account entity on the audit trail', async () => {
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: { key: 'validateBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
     }
@@ -1036,7 +1030,7 @@ describe('Business Mutation updateBusinessLockStatus', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn().mockResolvedValue('123')
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('123')
       }
     }
   })
@@ -1056,7 +1050,7 @@ describe('Business Mutation updateBusinessUnlockStatus', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn().mockResolvedValue('123')
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('123')
       }
     }
   })
@@ -1076,7 +1070,7 @@ describe('Business Mutation updateBusinessReactivate', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn().mockResolvedValue('123')
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('123')
       }
     }
   })
@@ -1099,7 +1093,7 @@ describe('Business Mutation updateBusinessDeactivate', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn().mockResolvedValue('123')
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('123')
       }
     }
   })

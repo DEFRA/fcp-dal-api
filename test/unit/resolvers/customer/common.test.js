@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { retrievePersonIdByCRN } from '../../../../app/graphql/resolvers/customer/common.js'
 
 describe('retrievePersonIdByCRN', () => {
@@ -7,12 +7,12 @@ describe('retrievePersonIdByCRN', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsCustomer: {
-        getPersonIdByCRN: jest.fn(),
-        logger: { warn: jest.fn() }
+        getPersonIdByCRN: vi.fn(),
+        logger: { warn: vi.fn() }
       },
       mongoCustomer: {
-        findPersonIdByCRN: jest.fn(),
-        upsertPersonIdByCRN: jest.fn()
+        findPersonIdByCRN: vi.fn(),
+        upsertPersonIdByCRN: vi.fn()
       }
     }
   })

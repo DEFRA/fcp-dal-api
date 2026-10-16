@@ -1,13 +1,13 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import jwt from 'jsonwebtoken'
 import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
 import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 
 describe('Rural Payments Customer', () => {
   const logger = {
-    error: jest.fn(),
-    warn: jest.fn(),
-    debug: jest.fn()
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn()
   }
   const datasourceOptions = [
     { logger },
@@ -28,9 +28,9 @@ describe('Rural Payments Customer', () => {
       }
     }
   )
-  const httpGet = jest.spyOn(ruralPaymentsCustomer, 'get')
-  const httpPost = jest.spyOn(ruralPaymentsCustomer, 'post')
-  const httpGetExt = jest.spyOn(ruralPaymentsCustomerExt, 'get')
+  const httpGet = vi.spyOn(ruralPaymentsCustomer, 'get')
+  const httpPost = vi.spyOn(ruralPaymentsCustomer, 'post')
+  const httpGetExt = vi.spyOn(ruralPaymentsCustomerExt, 'get')
 
   test('should return emailDuplicated from validateEmail', async () => {
     httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: true } }))

@@ -1,59 +1,60 @@
-import { jest } from '@jest/globals'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+const mocks = vi.hoisted(() => {
+  const mockApolloServer = vi.fn()
+  const mockSchemaModule = { createSchema: vi.fn() }
+  const mockApolloPluginDisabled = vi.fn()
+  const mockApolloPluginLandingPage = vi.fn()
+  const mockAuditPlugin = vi.fn()
+
+  return {
+    mockApolloServer,
+    mockSchemaModule,
+    mockApolloPluginDisabled,
+    mockApolloPluginLandingPage,
+    mockAuditPlugin,
+    mockApolloModule: { ApolloServer: mockApolloServer },
+    mockApolloPluginDisabledModule: {
+      ApolloServerPluginLandingPageDisabled: mockApolloPluginDisabled
+    },
+    mockApolloPluginLandingPageModule: {
+      ApolloServerPluginLandingPageLocalDefault: mockApolloPluginLandingPage
+    }
+  }
+})
+
+vi.mock('@apollo/server', () => mocks.mockApolloModule)
+vi.mock('../../../app/graphql/schema.js', () => mocks.mockSchemaModule)
+vi.mock('@apollo/server/plugin/disabled', () => mocks.mockApolloPluginDisabledModule)
+vi.mock('@apollo/server/plugin/landingPage/default', () => mocks.mockApolloPluginLandingPageModule)
+vi.mock('../../../app/graphql/plugins/audit.js', () => ({
+  auditPlugin: mocks.mockAuditPlugin
+}))
 
 describe('GraphQL Dashboard test with mocks', () => {
-  const mockApolloServer = jest.fn()
-  const mockApolloModule = {
-    ApolloServer: mockApolloServer
-  }
-  jest.unstable_mockModule('@apollo/server', () => mockApolloModule)
-
-  const mockSchemaModule = {
-    createSchema: jest.fn()
-  }
-  jest.unstable_mockModule('../../../app/graphql/schema.js', () => mockSchemaModule)
-
-  const mockApolloPluginDisabled = jest.fn()
-  const mockApolloPluginDisabledModule = {
-    ApolloServerPluginLandingPageDisabled: mockApolloPluginDisabled
-  }
-  jest.unstable_mockModule('@apollo/server/plugin/disabled', () => mockApolloPluginDisabledModule)
-
-  const mockApolloPluginLandingPage = jest.fn()
-  const mockApolloPluginLandingPageModule = {
-    ApolloServerPluginLandingPageLocalDefault: mockApolloPluginLandingPage
-  }
-  jest.unstable_mockModule(
-    '@apollo/server/plugin/landingPage/default',
-    () => mockApolloPluginLandingPageModule
-  )
-
-  const mockAuditPlugin = jest.fn()
-  jest.unstable_mockModule('../../../app/graphql/plugins/audit.js', () => ({
-    auditPlugin: mockAuditPlugin
-  }))
-
   beforeEach(() => {
-    jest.resetModules()
+    vi.resetModules()
+    vi.resetAllMocks()
   })
 
   it('expect ApolloServer to have been called with correct args to disable landing page', async () => {
     process.env.GRAPHQL_DASHBOARD_ENABLED = 'false'
-    mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
+    mocks.mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
     const { apolloServer } = await import('../../../app/graphql/server.js')
 
     expect(apolloServer).toBeDefined()
-    expect(mockSchemaModule.createSchema).toHaveBeenCalledTimes(1)
-    expect(mockSchemaModule.createSchema).toHaveBeenCalledWith()
+    expect(mocks.mockSchemaModule.createSchema).toHaveBeenCalledTimes(1)
+    expect(mocks.mockSchemaModule.createSchema).toHaveBeenCalledWith()
 
-    expect(mockApolloPluginDisabled).toHaveBeenCalledTimes(1)
-    expect(mockApolloPluginDisabled).toHaveBeenCalledWith()
+    expect(mocks.mockApolloPluginDisabled).toHaveBeenCalledTimes(1)
+    expect(mocks.mockApolloPluginDisabled).toHaveBeenCalledWith()
 
-    expect(mockApolloPluginLandingPage).not.toHaveBeenCalled()
-    expect(mockAuditPlugin).toHaveBeenCalledTimes(1)
-    expect(mockAuditPlugin).toHaveBeenCalledWith()
-    expect(mockApolloServer).toHaveBeenCalledWith({
+    expect(mocks.mockApolloPluginLandingPage).not.toHaveBeenCalled()
+    expect(mocks.mockAuditPlugin).toHaveBeenCalledTimes(1)
+    expect(mocks.mockAuditPlugin).toHaveBeenCalledWith()
+    expect(mocks.mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginDisabled(), mockAuditPlugin()],
+      plugins: [mocks.mockApolloPluginDisabled(), mocks.mockAuditPlugin()],
       introspection: false,
       formatError: expect.any(Function)
     })
@@ -61,25 +62,25 @@ describe('GraphQL Dashboard test with mocks', () => {
 
   it('expect ApolloServer to have been called with correct args to enable landing page', async () => {
     process.env.GRAPHQL_DASHBOARD_ENABLED = 'true'
-    mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
+    mocks.mockSchemaModule.createSchema.mockReturnValue('mockCreateSchemaRV')
     const { apolloServer } = await import('../../../app/graphql/server.js')
 
     expect(apolloServer).toBeDefined()
 
-    expect(mockSchemaModule.createSchema).toHaveBeenCalledTimes(1)
-    expect(mockSchemaModule.createSchema).toHaveBeenCalledWith()
+    expect(mocks.mockSchemaModule.createSchema).toHaveBeenCalledTimes(1)
+    expect(mocks.mockSchemaModule.createSchema).toHaveBeenCalledWith()
 
-    expect(mockApolloPluginDisabled).not.toHaveBeenCalled()
+    expect(mocks.mockApolloPluginDisabled).not.toHaveBeenCalled()
 
-    expect(mockApolloPluginLandingPage).toHaveBeenCalledTimes(1)
-    expect(mockApolloPluginLandingPage).toHaveBeenCalledWith()
+    expect(mocks.mockApolloPluginLandingPage).toHaveBeenCalledTimes(1)
+    expect(mocks.mockApolloPluginLandingPage).toHaveBeenCalledWith()
 
-    expect(mockAuditPlugin).toHaveBeenCalledTimes(1)
-    expect(mockAuditPlugin).toHaveBeenCalledWith()
+    expect(mocks.mockAuditPlugin).toHaveBeenCalledTimes(1)
+    expect(mocks.mockAuditPlugin).toHaveBeenCalledWith()
 
-    expect(mockApolloServer).toHaveBeenCalledWith({
+    expect(mocks.mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mockApolloPluginLandingPage(), mockAuditPlugin()],
+      plugins: [mocks.mockApolloPluginLandingPage(), mocks.mockAuditPlugin()],
       introspection: true,
       formatError: expect.any(Function)
     })

@@ -1,16 +1,16 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { config } from '../../../../app/config.js'
 
-const mockGetPublicKey = jest.fn()
+const mockGetPublicKey = vi.fn()
 const mockLogger = {
   logger: {
-    error: jest.fn(),
-    info: jest.fn()
+    error: vi.fn(),
+    info: vi.fn()
   }
 }
 
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => mockLogger)
-jest.unstable_mockModule('../../../../app/data-sources/DefraIdJWKS.js', () => ({
+vi.doMock('../../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../../app/data-sources/DefraIdJWKS.js', () => ({
   DefraIdJWKS: class {
     getPublicKey = mockGetPublicKey
   }
@@ -24,7 +24,7 @@ describe('Defra ID health check', () => {
   let configGetSpy
 
   beforeEach(() => {
-    configGetSpy = jest.spyOn(config, 'get').mockImplementation((key) => {
+    configGetSpy = vi.spyOn(config, 'get').mockImplementation((key) => {
       if (key === 'auth.disabled') {
         return false
       }
@@ -38,18 +38,18 @@ describe('Defra ID health check', () => {
     })
 
     mockGetPublicKey.mockResolvedValue('public-key')
-    global.fetch = jest.fn().mockImplementation((url) => {
+    global.fetch = vi.fn().mockImplementation((url) => {
       if (url === wellKnownUrl) {
         return Promise.resolve({
           ok: true,
           status: 200,
-          json: jest.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
+          json: vi.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
         })
       }
       return Promise.resolve({
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ keys: [{ kid: 'mock-defra-id-key-id' }] })
+        json: vi.fn().mockResolvedValue({ keys: [{ kid: 'mock-defra-id-key-id' }] })
       })
     })
   })
@@ -60,7 +60,7 @@ describe('Defra ID health check', () => {
     mockLogger.logger.info.mockReset()
     global.fetch = originalFetch
     configGetSpy.mockRestore()
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('should skip the health check when auth is disabled', async () => {
@@ -87,7 +87,7 @@ describe('Defra ID health check', () => {
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 429,
-      text: jest.fn().mockResolvedValue('some upstream error')
+      text: vi.fn().mockResolvedValue('some upstream error')
     })
 
     await expect(healthCheck()).rejects.toThrow(
@@ -107,7 +107,7 @@ describe('Defra ID health check', () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: jest.fn().mockResolvedValue({})
+      json: vi.fn().mockResolvedValue({})
     })
 
     await expect(healthCheck()).rejects.toThrow(
@@ -124,13 +124,13 @@ describe('Defra ID health check', () => {
       Promise.resolve({
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
+        json: vi.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
       })
     )
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 500,
-      text: jest.fn().mockResolvedValue('some upstream error')
+      text: vi.fn().mockResolvedValue('some upstream error')
     })
 
     await expect(healthCheck()).rejects.toThrow('Problem fetching Defra ID JWKS keys, status: 500')
@@ -149,13 +149,13 @@ describe('Defra ID health check', () => {
       Promise.resolve({
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
+        json: vi.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
       })
     )
     global.fetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: jest.fn().mockResolvedValue({})
+      json: vi.fn().mockResolvedValue({})
     })
 
     await expect(healthCheck()).rejects.toThrow('Problem inspecting Defra ID JWKS keys response')
@@ -173,13 +173,13 @@ describe('Defra ID health check', () => {
       Promise.resolve({
         ok: true,
         status: 200,
-        json: jest.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
+        json: vi.fn().mockResolvedValue({ jwks_uri: 'https://defra-id.example/keys' })
       })
     )
     global.fetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: jest.fn().mockResolvedValue({ keys: [] })
+      json: vi.fn().mockResolvedValue({ keys: [] })
     })
 
     await expect(healthCheck()).rejects.toThrow('Missing Defra ID JWKS keys')

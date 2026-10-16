@@ -1,24 +1,24 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { mongoClient } from '../../../../app/mongo.js'
 
 const mockLogger = {
   logger: {
-    error: jest.fn(),
-    info: jest.fn()
+    error: vi.fn(),
+    info: vi.fn()
   }
 }
 
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../../app/logger/logger.js', () => mockLogger)
 
 const { healthCheck } = await import('../../../../app/utils/health/mongo.js')
 
 describe('Mongo health check', () => {
   beforeEach(() => {
-    jest.spyOn(mongoClient, 'connect').mockResolvedValue()
+    vi.spyOn(mongoClient, 'connect').mockResolvedValue()
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('should log success when MongoDB connects', async () => {

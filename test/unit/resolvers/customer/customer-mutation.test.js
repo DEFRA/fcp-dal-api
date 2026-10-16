@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { config } from '../../../../app/config.js'
 import { Unauthorized } from '../../../../app/errors/graphql.js'
 import { Mutation } from '../../../../app/graphql/resolvers/customer/mutation.js'
@@ -43,31 +43,31 @@ describe('Customer Mutations', () => {
   beforeEach(() => {
     mockDataSources = {
       mongoCustomer: {
-        findPersonIdByCRN: jest.fn(),
-        upsertPersonIdByCRN: jest.fn()
+        findPersonIdByCRN: vi.fn(),
+        upsertPersonIdByCRN: vi.fn()
       },
       ruralPaymentsCustomer: {
-        getPersonIdByCRN: jest.fn(),
-        getPersonByPersonId: jest.fn(),
-        getExternalPerson: jest.fn(),
-        updatePersonDetails: jest.fn(),
-        validateEmail: jest.fn(),
-        lockPerson: jest.fn(),
-        deactivatePerson: jest.fn(),
-        saveAuthenticateAnswersByCRN: jest.fn(),
-        unlockPerson: jest.fn(),
-        logger: { warn: jest.fn() },
+        getPersonIdByCRN: vi.fn(),
+        getPersonByPersonId: vi.fn(),
+        getExternalPerson: vi.fn(),
+        updatePersonDetails: vi.fn(),
+        validateEmail: vi.fn(),
+        lockPerson: vi.fn(),
+        deactivatePerson: vi.fn(),
+        saveAuthenticateAnswersByCRN: vi.fn(),
+        unlockPerson: vi.fn(),
+        logger: { warn: vi.fn() },
         gatewayType: 'ruralPayments',
         request: {},
-        confirmEmail: jest.fn(),
-        saveEmailValidation: jest.fn(),
-        sendVerificationEmail: jest.fn()
+        confirmEmail: vi.fn(),
+        saveEmailValidation: vi.fn(),
+        sendVerificationEmail: vi.fn()
       }
     }
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   const updateMutations = [
@@ -253,7 +253,7 @@ describe('Customer Mutations', () => {
     })
 
     test('records the personId/crn accounts and an updated person entity', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn' }
 
       await Mutation[mutationName](
@@ -283,7 +283,7 @@ describe('Customer Mutations', () => {
     test('locks a customer through the GraphQL mutation', async () => {
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
 
       await Mutation.updateLockCustomer(
@@ -302,7 +302,7 @@ describe('Customer Mutations', () => {
     })
 
     test('throws an error if no reason or note is provided', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn' }
 
       await expect(
@@ -316,7 +316,7 @@ describe('Customer Mutations', () => {
     })
 
     test('throws an error if empty reason or note is provided', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', note: '', reason: '' }
 
       await expect(
@@ -335,7 +335,7 @@ describe('Customer Mutations', () => {
         new Error('Not Found')
       )
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', reason: 'my reason' }
 
       await expect(
@@ -351,7 +351,7 @@ describe('Customer Mutations', () => {
     test('records the personId account and a locked person entity', async () => {
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
       const info = { path: { key: 'updateLockCustomer' } }
 
@@ -379,7 +379,7 @@ describe('Customer Mutations', () => {
         new Error('Not Found')
       )
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
 
       await expect(
         Mutation.updateLockCustomer(
@@ -507,7 +507,7 @@ describe('Customer Mutations', () => {
     )
 
     test('records the personId/crn accounts and an entity for the audit trail', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const info = {
         path: { key: 'sendConfirmEmailAddressEmail', typename: 'Mutation', prev: undefined }
       }
@@ -538,7 +538,7 @@ describe('Customer Mutations', () => {
 
     describe('email verification link logging', () => {
       const mockConfig = (values) =>
-        jest.spyOn(config, 'get').mockImplementation((path) => values[path])
+        vi.spyOn(config, 'get').mockImplementation((path) => values[path])
 
       beforeEach(() => {
         mockDataSources.ruralPaymentsCustomer.getExternalPerson.mockResolvedValue({
@@ -548,7 +548,7 @@ describe('Customer Mutations', () => {
       })
 
       afterEach(() => {
-        jest.restoreAllMocks()
+        vi.restoreAllMocks()
       })
 
       test('logs the email verification link when customer emails are disabled', async () => {
@@ -556,7 +556,7 @@ describe('Customer Mutations', () => {
           'ruralPayments.customerEmailsDisabled': true,
           'ruralPayments.portalUrl': 'https://rural-payments.example.com'
         })
-        const infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {})
+        const infoSpy = vi.spyOn(logger, 'info').mockImplementation(() => {})
 
         await Mutation.sendConfirmEmailAddressEmail(
           null,
@@ -576,7 +576,7 @@ describe('Customer Mutations', () => {
           'ruralPayments.customerEmailsDisabled': false,
           'ruralPayments.portalUrl': 'https://rural-payments.example.com'
         })
-        const infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {})
+        const infoSpy = vi.spyOn(logger, 'info').mockImplementation(() => {})
 
         await Mutation.sendConfirmEmailAddressEmail(
           null,
@@ -601,7 +601,7 @@ describe('Customer Mutations', () => {
     test('unlocks a customer through the GraphQL mutation', async () => {
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
 
       await Mutation.updateUnlockCustomer(
@@ -620,7 +620,7 @@ describe('Customer Mutations', () => {
     })
 
     test('throws an error if no reason or note is provided', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn' }
 
       await expect(
@@ -634,7 +634,7 @@ describe('Customer Mutations', () => {
     })
 
     test('throws an error if empty reason or note is provided', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', note: '', reason: '' }
 
       await expect(
@@ -653,7 +653,7 @@ describe('Customer Mutations', () => {
         new Error('Not Found')
       )
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', reason: 'my reason' }
 
       await expect(
@@ -669,7 +669,7 @@ describe('Customer Mutations', () => {
     test('records the personId account and a unlocked person entity', async () => {
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('personId')
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const input = { crn: 'crn', reason: 'my reason', note: 'my note' }
       const info = { path: { key: 'updateUnlockCustomer' } }
 
@@ -697,7 +697,7 @@ describe('Customer Mutations', () => {
         new Error('Not Found')
       )
 
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
 
       await expect(
         Mutation.updateUnlockCustomer(
@@ -723,7 +723,7 @@ describe('Customer Mutations', () => {
     let auditTrail
 
     beforeEach(() => {
-      auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     })
 
     const deactivate = (input) =>
@@ -870,7 +870,7 @@ describe('Customer Mutations', () => {
     let auditTrail
 
     beforeEach(() => {
-      auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     })
 
     const updateAuthenticationQuestions = (input, defraIdContext) =>

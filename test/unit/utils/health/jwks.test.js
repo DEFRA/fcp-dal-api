@@ -1,16 +1,16 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { config } from '../../../../app/config.js'
 
-const mockGetPublicKey = jest.fn()
+const mockGetPublicKey = vi.fn()
 const mockLogger = {
   logger: {
-    error: jest.fn(),
-    info: jest.fn()
+    error: vi.fn(),
+    info: vi.fn()
   }
 }
 
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => mockLogger)
-jest.unstable_mockModule('../../../../app/data-sources/JWKS.js', () => ({
+vi.doMock('../../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../../app/data-sources/JWKS.js', () => ({
   JWKS: class {
     getPublicKey = mockGetPublicKey
   }
@@ -23,10 +23,10 @@ describe('JWKS health check', () => {
 
   beforeEach(() => {
     mockGetPublicKey.mockResolvedValue('public-key')
-    global.fetch = jest.fn().mockResolvedValue({
+    global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: jest.fn().mockResolvedValue({
+      json: vi.fn().mockResolvedValue({
         keys: [{ kid: 'mock-key-id-123' }]
       })
     })
@@ -38,7 +38,7 @@ describe('JWKS health check', () => {
     mockLogger.logger.error.mockReset()
     mockLogger.logger.info.mockReset()
     global.fetch = originalFetch
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('should fetch JWKS keys and resolve a public key', async () => {
@@ -57,7 +57,7 @@ describe('JWKS health check', () => {
     global.fetch.mockResolvedValueOnce({
       ok: false,
       status: 429,
-      text: jest.fn().mockResolvedValue('some upstream error')
+      text: vi.fn().mockResolvedValue('some upstream error')
     })
 
     await expect(healthCheck()).rejects.toThrow('Problem fetching JWKS keys, status: 429')
@@ -72,7 +72,7 @@ describe('JWKS health check', () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: jest.fn().mockResolvedValue({})
+      json: vi.fn().mockResolvedValue({})
     })
 
     await expect(healthCheck()).rejects.toThrow('Problem inspecting JWKS keys response')
@@ -86,7 +86,7 @@ describe('JWKS health check', () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: jest.fn().mockResolvedValue({ keys: [] })
+      json: vi.fn().mockResolvedValue({ keys: [] })
     })
 
     await expect(healthCheck()).rejects.toThrow('Missing JWKS keys')

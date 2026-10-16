@@ -1,35 +1,34 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { config } from '../../../../app/config.js'
 
 const mockLogger = {
   logger: {
-    error: jest.fn(),
-    info: jest.fn()
+    error: vi.fn(),
+    info: vi.fn()
   }
 }
 
-const RuralPaymentsReferenceDataMock = jest.fn()
-const getReferenceDataMock = jest.fn()
+const RuralPaymentsReferenceDataMock = vi.fn()
+const getReferenceDataMock = vi.fn()
 
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../../app/logger/logger.js', () => mockLogger)
 
-jest.unstable_mockModule(
-  '../../../../app/data-sources/rural-payments/RuralPaymentsReferenceData.js',
-  () => ({ RuralPaymentsReferenceData: RuralPaymentsReferenceDataMock })
-)
+vi.doMock('../../../../app/data-sources/rural-payments/RuralPaymentsReferenceData.js', () => ({
+  RuralPaymentsReferenceData: RuralPaymentsReferenceDataMock
+}))
 
 const { healthCheck } = await import('../../../../app/utils/health/rural-payments.js')
 
 describe('Rural payments health check', () => {
   beforeEach(() => {
-    RuralPaymentsReferenceDataMock.mockImplementation(() => ({
-      getReferenceData: getReferenceDataMock
-    }))
+    RuralPaymentsReferenceDataMock.mockImplementation(function () {
+      return { getReferenceData: getReferenceDataMock }
+    })
     getReferenceDataMock.mockResolvedValue()
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should log success when rural payments connects for both internal and external gateways', async () => {

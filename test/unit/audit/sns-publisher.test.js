@@ -1,38 +1,38 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { DAL_AUDIT_VALIDATION_ERROR_001 } from '../../../app/logger/codes.js'
 
-const mockSNSClient = jest.fn()
-jest.unstable_mockModule('@aws-sdk/client-sns', () => ({
+const mockSNSClient = vi.fn(function () {
+  return { marker: 'sns-client-instance' }
+})
+vi.doMock('@aws-sdk/client-sns', () => ({
   SNSClient: mockSNSClient
 }))
 
-const mockValidateAuditEvent = jest.fn()
-const mockPublishAuditEvent = jest.fn()
-jest.unstable_mockModule('@defra/fcp-audit-publisher', () => ({
+const mockValidateAuditEvent = vi.fn()
+const mockPublishAuditEvent = vi.fn()
+vi.doMock('@defra/fcp-audit-publisher', () => ({
   validateAuditEvent: mockValidateAuditEvent,
   publishAuditEvent: mockPublishAuditEvent
 }))
 
-const mockConfigGet = jest.fn()
-jest.unstable_mockModule('../../../app/config.js', () => ({
+const mockConfigGet = vi.fn()
+vi.doMock('../../../app/config.js', () => ({
   config: { get: mockConfigGet }
 }))
 
 const TOPIC_ARN = 'arn:aws:sns:eu-west-2:000000000000:audit-topic'
 mockConfigGet.mockReturnValue(TOPIC_ARN)
-mockSNSClient.mockImplementation(() => ({ marker: 'sns-client-instance' }))
-
 const { snsPublish } = await import('../../../app/audit/sns-publisher.js')
 
 describe('sns-publisher', () => {
   let requestLogger
 
   beforeEach(() => {
-    requestLogger = { error: jest.fn() }
+    requestLogger = { error: vi.fn() }
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   test('publishes a valid event via publishAuditEvent', async () => {
@@ -95,7 +95,7 @@ describe('sns-publisher', () => {
 
     beforeEach(async () => {
       mockConfigGet.mockReturnValue(null)
-      jest.resetModules()
+      vi.resetModules()
       const imported = await import('../../../app/audit/sns-publisher.js')
       unconfiguredSnsPublish = imported.snsPublish
       mockConfigGet.mockReturnValue(TOPIC_ARN)

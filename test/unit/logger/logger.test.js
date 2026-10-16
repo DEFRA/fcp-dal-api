@@ -1,11 +1,12 @@
-import { jest } from '@jest/globals'
-import { v4 as uuidv4 } from 'uuid'
+import { vi } from 'vitest'
 import { createLogger, format, transports } from 'winston'
 import ConsoleTransportInstance from 'winston-transport'
 import { config } from '../../../app/config.js'
 
 const loadFreshLogger = async () => {
-  return await import(`../../../app/logger/logger.js?version=${uuidv4()}`)
+  vi.resetModules()
+  vi.doMock('../../../app/config.js', () => ({ config }))
+  return await import('../../../app/logger/logger.js')
 }
 
 describe('logger', () => {
@@ -14,15 +15,13 @@ describe('logger', () => {
   beforeEach(async () => {
     configMockPath = {}
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
   })
 
   afterEach(async () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('Single default log transport enabled', async () => {
@@ -45,7 +44,7 @@ describe('logger', () => {
 
   it('should close transports on process exit', async () => {
     const { logger } = await loadFreshLogger()
-    logger.transports[0].close = jest.fn()
+    logger.transports[0].close = vi.fn()
     process.emit('exit')
     expect(logger.transports[0].close).toHaveBeenCalled()
   })
@@ -58,7 +57,7 @@ describe('logger', () => {
       // Winston falls back to this exact format when `createLogger` is given no `format`
       // option (see node_modules/winston/lib/winston/logger.js), stringifying the whole
       // info object on every log call - including ones a transport will end up dropping.
-      jsonTransformSpy = jest.spyOn(format.json.Format.prototype, 'transform')
+      jsonTransformSpy = vi.spyOn(format.json.Format.prototype, 'transform')
     })
 
     it('does not fall back to winston default JSON formatting', async () => {

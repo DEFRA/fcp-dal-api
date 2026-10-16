@@ -1,20 +1,20 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { config } from '../../../app/config.js'
 import { DAL_METRICS_ERROR_001 } from '../../../app/logger/codes.js'
 
 const mockStorageResolution = { Standard: 'Standard', High: 'High' }
 const mockUnits = { Count: 'Count', Seconds: 'Seconds' }
 
-const mockPutMetric = jest.fn()
-const mockSetDimensions = jest.fn()
-const mockFlush = jest.fn()
+const mockPutMetric = vi.fn()
+const mockSetDimensions = vi.fn()
+const mockFlush = vi.fn()
 const mockMetricsLoggerReturnValue = {
   putMetric: mockPutMetric,
   setDimensions: mockSetDimensions,
   flush: mockFlush
 }
 
-const mockCreateMetricsLogger = jest.fn()
+const mockCreateMetricsLogger = vi.fn()
 const mockawsEmbeddedReturnValue = {
   createMetricsLogger: mockCreateMetricsLogger,
   StorageResolution: mockStorageResolution,
@@ -32,10 +32,10 @@ const errorMockMetricsLoggerReturnValue = {
 
 const mockLogger = {
   logger: {
-    error: jest.fn()
+    error: vi.fn()
   }
 }
-jest.unstable_mockModule('../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../app/logger/logger.js', () => mockLogger)
 
 describe('sendMetric - with NODE_ENV=production', () => {
   let configMockPath
@@ -46,19 +46,17 @@ describe('sendMetric - with NODE_ENV=production', () => {
       nodeEnv: 'production'
     }
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
 
-    jest.unstable_mockModule('aws-embedded-metrics', () => mockawsEmbeddedReturnValue)
+    vi.doMock('aws-embedded-metrics', () => mockawsEmbeddedReturnValue)
     const importedSendMetric = await import('../../../app/logger/sendMetric.js')
     sendMetric = importedSendMetric.sendMetric
   })
 
   afterEach(async () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('logs a metric with default values and no dimensions', async () => {

@@ -1,4 +1,4 @@
-import { describe, jest } from '@jest/globals'
+import { describe, vi } from 'vitest'
 import { RuralPaymentsReferenceData } from '../../../../app/data-sources/rural-payments/RuralPaymentsReferenceData.js'
 
 describe('RuralPaymentsReferenceData', () => {
@@ -6,10 +6,10 @@ describe('RuralPaymentsReferenceData', () => {
     { logger: console },
     { request: { headers: { email: 'test@test.test' } } }
   )
-  const httpGet = jest.spyOn(ruralPaymentsReferenceData, 'get')
+  const httpGet = vi.spyOn(ruralPaymentsReferenceData, 'get')
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('getCountryCodes', () => {

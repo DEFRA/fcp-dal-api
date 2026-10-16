@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 
 import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import { Customer, CustomerBusiness } from '../../../../app/graphql/resolvers/customer/customer.js'
@@ -62,12 +62,12 @@ const personBusinessesFixture = [
 
 const dataSources = {
   ruralPaymentsCustomer: {
-    getPersonIdByCRN: jest.fn(),
-    getExternalPerson: jest.fn(),
-    getCustomerByCRN: jest.fn(),
-    getPersonByPersonId: jest.fn(),
-    getPersonBusinessesByPersonId: jest.fn(),
-    getNotificationsByOrganisationIdAndPersonId: jest.fn(),
+    getPersonIdByCRN: vi.fn(),
+    getExternalPerson: vi.fn(),
+    getCustomerByCRN: vi.fn(),
+    getPersonByPersonId: vi.fn(),
+    getPersonBusinessesByPersonId: vi.fn(),
+    getNotificationsByOrganisationIdAndPersonId: vi.fn(),
     getAuthenticateAnswersByCRN() {
       return {
         memorableDate: 'some date',
@@ -193,17 +193,17 @@ const dataSources = {
     }
   },
   mongoCustomer: {
-    findPersonIdByCRN: jest.fn()
+    findPersonIdByCRN: vi.fn()
   },
   mongoBusiness: {
-    getOrgIdBySbi: jest.fn()
+    getOrgIdBySbi: vi.fn()
   },
   permissions: new Permissions()
 }
 
 describe('Customer', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   test('Query.customer.personId', async () => {
@@ -351,7 +351,7 @@ describe('Customer', () => {
 
     it('info records a person entity keyed by the resolved customer reference number', async () => {
       dataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(personFixture)
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await Customer.info(
         { personId: personFixture.id },
@@ -371,7 +371,7 @@ describe('Customer', () => {
       dataSources.ruralPaymentsCustomer.getPersonByPersonId.mockRejectedValue(
         new Error('upstream failure')
       )
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await expect(
         Customer.info({ personId: personFixture.id }, undefined, { dataSources, auditTrail }, info)
@@ -388,7 +388,7 @@ describe('Customer', () => {
       dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
         personBusinessesFixture
       )
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await Customer.businesses(
         { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
@@ -408,7 +408,7 @@ describe('Customer', () => {
       dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
         personBusinessesFixture
       )
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
 
       await Customer.business(
         { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
@@ -430,7 +430,7 @@ describe('Customer', () => {
       dataSources.ruralPaymentsCustomer.getPersonBusinessesByPersonId.mockResolvedValue(
         personBusinessesFixture
       )
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
 
       const response = await Customer.business(
         { crn: personFixture.customerReferenceNumber, personId: personFixture.id },
@@ -449,7 +449,7 @@ describe('Customer', () => {
     })
 
     it('authenticationQuestions records an authenticate-question entity keyed by crn', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await Customer.authenticationQuestions(
         { crn: 'mockCustomerCRN' },
@@ -507,7 +507,7 @@ describe('CustomerBusiness', () => {
   })
 
   test('CustomerBusiness.role does not record any audit trail (fully duplicative of Customer.business)', async () => {
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
 
     await CustomerBusiness.role(
@@ -522,7 +522,7 @@ describe('CustomerBusiness', () => {
   })
 
   test('CustomerBusiness.permissionGroups records a permission-list entity without duplicating account fields recorded by Customer.business', async () => {
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
 
     await CustomerBusiness.permissionGroups(
@@ -544,7 +544,7 @@ describe('CustomerBusiness', () => {
     const { getNotificationsByOrganisationIdAndPersonId } = dataSources.ruralPaymentsCustomer
 
     beforeEach(() => {
-      jest.clearAllMocks()
+      vi.clearAllMocks()
 
       getNotificationsByOrganisationIdAndPersonId.mockImplementation(() => [
         {
@@ -657,7 +657,7 @@ describe('CustomerBusiness', () => {
     })
 
     test('records a message-list entity without duplicating account fields recorded by Customer.business', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
 
       await CustomerBusiness.messages(

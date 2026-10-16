@@ -1,20 +1,20 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { DAL_HEALTH_CHECK_001 } from '../../../../app/logger/codes.js'
 
 const mockLogger = {
-  info: jest.fn(),
-  error: jest.fn()
+  info: vi.fn(),
+  error: vi.fn()
 }
 
-const mockPutMetric = jest.fn()
-const mockFlush = jest.fn()
-const mockCreateMetricsLogger = jest.fn(() => ({
+const mockPutMetric = vi.fn()
+const mockFlush = vi.fn()
+const mockCreateMetricsLogger = vi.fn(() => ({
   putMetric: mockPutMetric,
   flush: mockFlush
 }))
 
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => ({ logger: mockLogger }))
-jest.unstable_mockModule('aws-embedded-metrics', () => ({
+vi.doMock('../../../../app/logger/logger.js', () => ({ logger: mockLogger }))
+vi.doMock('aws-embedded-metrics', () => ({
   createMetricsLogger: mockCreateMetricsLogger,
   StorageResolution: { Standard: 'Standard' },
   Unit: { Count: 'Count' }
@@ -31,11 +31,11 @@ describe('metrics startup health check', () => {
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('publishes a dummy metric in production', async () => {
-    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => (key === 'nodeEnv' ? 'production' : undefined))
 
     await healthCheck()
@@ -49,7 +49,7 @@ describe('metrics startup health check', () => {
   })
 
   it('skips in non-production environments', async () => {
-    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => (key === 'nodeEnv' ? 'development' : undefined))
 
     await healthCheck()
@@ -60,7 +60,7 @@ describe('metrics startup health check', () => {
   })
 
   it('logs and rethrows when metric publishing fails', async () => {
-    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => (key === 'nodeEnv' ? 'production' : undefined))
 
     const error = new Error('Metrics publish failed')
@@ -68,7 +68,7 @@ describe('metrics startup health check', () => {
       putMetric: () => {
         throw error
       },
-      flush: jest.fn()
+      flush: vi.fn()
     }))
 
     await expect(healthCheck()).rejects.toThrow('Metrics publish failed')

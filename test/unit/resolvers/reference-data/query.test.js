@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { Query, ReferenceData } from '../../../../app/graphql/resolvers/reference-data/query.js'
 
 describe('Reference Data Query Resolver', () => {
@@ -13,8 +13,8 @@ describe('ReferenceData', () => {
   beforeEach(() => {
     mockDataSources = {
       ruralPaymentsReferenceData: {
-        getCountryCodes: jest.fn(),
-        getReferenceData: jest.fn()
+        getCountryCodes: vi.fn(),
+        getReferenceData: vi.fn()
       }
     }
   })
@@ -47,7 +47,7 @@ describe('ReferenceData', () => {
     })
 
     it('records a reference-data entity for countries/currencies', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await ReferenceData.countriesCurrencies(
         null,
@@ -95,7 +95,7 @@ describe('ReferenceData', () => {
     })
 
     it('records a reference-data entity for the business legal statuses', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
 
       await ReferenceData.legalStatuses(
         null,

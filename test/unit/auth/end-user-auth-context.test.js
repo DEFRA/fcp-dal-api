@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, jest, test } from '@jest/globals'
+import { afterEach, beforeEach, describe, expect, vi, test } from 'vitest'
 import { endUserAuthContext } from '../../../app/auth/end-user-auth-context.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../../../app/logger/codes.js'
@@ -8,7 +8,7 @@ describe('endUserAuthContext', () => {
   let loggerErrorSpy
 
   beforeEach(() => {
-    loggerErrorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {})
+    loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {

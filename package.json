@@ -1,6 +1,6 @@
 {
   "name": "fcp-dal-api",
-  "version": "2.45.7",
+  "version": "2.46.0",
   "description": "Customer Registry GraphQL Service",
   "homepage": "https://github.com/DEFRA/fcp-data-access-layer-api",
   "main": "app/index.js",
@@ -21,17 +21,17 @@
     "schema:print": "node -r dotenv/config scripts/print-schema.js",
     "schema:type:similarity": "npm run schema:print && graphql-inspector similar ./schema.graphql",
     "test:acceptance:coverage": "export DOTENV_CONFIG_PATH=./.env.test && npm run schema:print && graphql-inspector coverage 'test/acceptance/**/*.js' ./schema.graphql -w schema-coverage.json && node scripts/check-schema-coverage.js schema-coverage.json",
-    "test:acceptance": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPatterns=test/acceptance --coverage false",
+    "test:acceptance": "vitest run --config vitest.acceptance.config.js",
     "test:acceptance:docker": "docker compose -f compose.yml -f test/acceptance/compose.yml run --rm --build --pull always --quiet-pull test && docker compose down --remove-orphans",
     "test:acceptance:proxy": "docker compose -f compose.yml -f test/acceptance/compose.yml -f test/acceptance/cdp-mock-check.yml run --rm --build --pull always --quiet-pull test && docker compose down --remove-orphans",
     "test:acceptance:proxy:mtls": "./test/acceptance/emulate-full-cdp.sh test",
-    "test:changedsince": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --changedSince=dev --coverage --onlyChanged --setupFiles dotenv/config --detectOpenHandles",
-    "test:local": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config",
-    "test:local-dev-check": "NODE_OPTIONS=--experimental-vm-modules jest --coverage false test/acceptance/local-dev-check.test.js",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPatterns=test/unit --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config",
-    "test:unit:watch": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPatterns=test/unit --runInBand --watch --watchPathIgnorePatterns='globalConfig\\.json$' --detectOpenHandles --setupFiles dotenv/config",
-    "test:graphql": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPatterns=test/graphql --runInBand --forceExit --detectOpenHandles --setupFiles dotenv/config",
-    "test": "NODE_OPTIONS=--experimental-vm-modules DOTENV_CONFIG_PATH=./.env.test jest --testPathPatterns='test/(unit|graphql)' --runInBand --coverage --forceExit --detectOpenHandles --setupFiles dotenv/config"
+    "test:changedsince": "DOTENV_CONFIG_PATH=./.env.test vitest run --changed=dev test/unit test/graphql --coverage --passWithNoTests && DOTENV_CONFIG_PATH=./.env.test vitest run --config vitest.acceptance.config.js --changed=dev --passWithNoTests",
+    "test:local": "npm test && DOTENV_CONFIG_PATH=./.env.test npm run test:acceptance",
+    "test:local-dev-check": "vitest run --config vitest.acceptance.config.js test/acceptance/local-dev-check.test.js",
+    "test:unit": "DOTENV_CONFIG_PATH=./.env.test vitest run test/unit --coverage",
+    "test:unit:watch": "DOTENV_CONFIG_PATH=./.env.test vitest test/unit",
+    "test:graphql": "DOTENV_CONFIG_PATH=./.env.test vitest run test/graphql",
+    "test": "npm run test:unit && npm run test:graphql"
   },
   "author": "Defra",
   "contributors": [],
@@ -66,25 +66,23 @@
   "devDependencies": {
     "@graphql-eslint/eslint-plugin": "4.4.2",
     "@graphql-inspector/cli": "7.0.1",
-    "@jest/globals": "30.5.2",
-    "@shelf/jest-mongodb": "^6.0.2",
+    "@vitest/coverage-v8": "4.1.11",
     "dotenv": "^17.2.3",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jest": "^28.9.0",
     "graphql-request": "^7.4.0",
     "husky": "^9.1.7",
-    "jest": "30.5.2",
+    "mongodb-memory-server": "10.4.3",
     "nock": "^14.0.2",
     "nodemon": "^3.1.9",
     "prettier": "^3.4.2",
     "semver": "7.8.5",
+    "vitest": "4.1.11",
     "winston-transport": "^4.9.0"
   },
   "eslintConfig": {
     "extends": [
-      "eslint-plugin-import",
-      "eslint-plugin-jest"
+      "eslint-plugin-import"
     ]
   },
   "overrides": {

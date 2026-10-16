@@ -1,22 +1,22 @@
-import { afterEach, describe, expect, jest, test } from '@jest/globals'
+import { afterEach, describe, expect, vi, test } from 'vitest'
 import { validateAuditEvent } from '@defra/fcp-audit-publisher'
 import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
 
-const getRequestingServiceMock = jest.fn()
-const configGetMock = jest.fn()
-const loggerMock = { error: jest.fn(), debug: jest.fn(), warn: jest.fn() }
-const snsPublishMock = jest.fn()
+const getRequestingServiceMock = vi.fn()
+const configGetMock = vi.fn()
+const loggerMock = { error: vi.fn(), debug: vi.fn(), warn: vi.fn() }
+const snsPublishMock = vi.fn()
 
-jest.unstable_mockModule('../../../../app/auth/authenticate.js', () => ({
+vi.doMock('../../../../app/auth/authenticate.js', () => ({
   getRequestingService: getRequestingServiceMock
 }))
-jest.unstable_mockModule('../../../../app/config.js', () => ({
+vi.doMock('../../../../app/config.js', () => ({
   config: { get: configGetMock }
 }))
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => ({
+vi.doMock('../../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
-jest.unstable_mockModule('../../../../app/audit/sns-publisher.js', () => ({
+vi.doMock('../../../../app/audit/sns-publisher.js', () => ({
   snsPublish: snsPublishMock
 }))
 
@@ -29,9 +29,9 @@ configGetMock.mockImplementation((path) => configMockPath[path])
 const { auditPlugin } = await import('../../../../app/graphql/plugins/audit.js')
 
 const fakeAuditTrail = (byRoot = {}) => ({
-  rootKeys: jest.fn(() => Object.keys(byRoot)),
-  getForRoot: jest.fn((rootKey) => byRoot[rootKey] ?? {}),
-  serviceAccount: jest.fn(() => undefined)
+  rootKeys: vi.fn(() => Object.keys(byRoot)),
+  getForRoot: vi.fn((rootKey) => byRoot[rootKey] ?? {}),
+  serviceAccount: vi.fn(() => undefined)
 })
 
 const requestPayload = {
@@ -50,23 +50,23 @@ const baseRequest = {
 }
 
 const baseContextValue = {
-  requestLogger: { error: jest.fn() },
+  requestLogger: { error: vi.fn() },
   request: baseRequest,
   authContext: endUserAuthContext(baseRequest),
   auth: { appid: 'test-appid', groups: ['group-1'] },
   auditTrail: fakeAuditTrail(),
-  defraIdContext: { crn: jest.fn() }
+  defraIdContext: { crn: vi.fn() }
 }
 
 describe('auditPlugin', () => {
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('publish', () => {
     test('publishes exactly one event for a root selection with a recorded entity, shaped as an AuditEventPayload', async () => {
       getRequestingServiceMock.mockReturnValue('Some Service Name')
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -106,7 +106,7 @@ describe('auditPlugin', () => {
     })
 
     test('publishes a synthetic audit event when no explicit entities have been tracked for a root selection', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -132,7 +132,7 @@ describe('auditPlugin', () => {
     })
 
     test('publishes one event per root selection when the query aliases the same root field twice', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -180,7 +180,7 @@ describe('auditPlugin', () => {
     })
 
     test('publishes a single fallback event for the request when the audit trail has no root selections (e.g. a parse/validation error)', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
@@ -212,7 +212,7 @@ describe('auditPlugin', () => {
     })
 
     test('publishes nothing when contextValue has no auditTrail at all', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const listener = await plugin.requestDidStart()
@@ -228,7 +228,7 @@ describe('auditPlugin', () => {
 
   describe('user', () => {
     test('uses the internal auth header when present', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const request = {
@@ -258,7 +258,7 @@ describe('auditPlugin', () => {
     })
 
     test('uses the service account when there is no internal auth header', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const request = {
@@ -288,7 +288,7 @@ describe('auditPlugin', () => {
     })
 
     test('falls back to the DefraID CRN, prefixed IDM/, when there is neither an internal auth header nor a service account', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const request = {
@@ -302,7 +302,7 @@ describe('auditPlugin', () => {
         auditTrail: fakeAuditTrail({
           business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
         }),
-        defraIdContext: { crn: jest.fn().mockReturnValue('crn-123') }
+        defraIdContext: { crn: vi.fn().mockReturnValue('crn-123') }
       }
       const listener = await plugin.requestDidStart()
       const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
@@ -316,7 +316,7 @@ describe('auditPlugin', () => {
     })
 
     test('falls back to "unknown" (and still publishes) when the Defra ID token cannot be verified', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const request = {
@@ -331,7 +331,7 @@ describe('auditPlugin', () => {
           business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
         }),
         defraIdContext: {
-          crn: jest.fn(() => {
+          crn: vi.fn(() => {
             throw new Error('Defra ID token failed verification')
           })
         }
@@ -353,11 +353,11 @@ describe('auditPlugin', () => {
       // ENVIRONMENT_NAME is fixed at module-load time, so the only way to observe the 'local'
       // fallback branch is to reset the module registry and re-import with the mock changed first.
       configGetMock.mockReturnValue(null)
-      jest.resetModules()
+      vi.resetModules()
       const { auditPlugin: freshAuditPlugin } =
         await import('../../../../app/graphql/plugins/audit.js')
 
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = freshAuditPlugin({ publish })
 
       const contextValue = {
@@ -379,7 +379,7 @@ describe('auditPlugin', () => {
 
   describe('correlationId', () => {
     test('is sourced from request.traceId', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -402,7 +402,7 @@ describe('auditPlugin', () => {
 
   describe('datetime', () => {
     test('is sourced from request.info.received, not from when the event is built', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -431,7 +431,7 @@ describe('auditPlugin', () => {
 
   describe('accounts', () => {
     test('includes accounts recorded for the root selection', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -455,7 +455,7 @@ describe('auditPlugin', () => {
       )
     })
     test('omits accounts entirely when nothing was recorded for the root selection', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -476,7 +476,7 @@ describe('auditPlugin', () => {
 
   describe('requestBody', () => {
     test('is the JSON-stringified GraphQL request payload, not the raw request object', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -498,7 +498,7 @@ describe('auditPlugin', () => {
     })
 
     test('is undefined-stringified when the request has no payload', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -525,7 +525,7 @@ describe('auditPlugin', () => {
 
   describe('sourceSystem', () => {
     test('passes an empty array to getRequestingService, not undefined, when auth has no groups', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -543,7 +543,7 @@ describe('auditPlugin', () => {
     })
 
     test('passes an empty array to getRequestingService, not undefined, when auth itself is missing', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const { auth: _auth, ...contextValueWithoutAuth } = baseContextValue
@@ -563,13 +563,13 @@ describe('auditPlugin', () => {
 
   describe('serviceAccount', () => {
     test('includes the recorded service account in details when present', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const auditTrail = fakeAuditTrail({
         business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
       })
-      auditTrail.serviceAccount = jest.fn(() => 'service-account@example.com')
+      auditTrail.serviceAccount = vi.fn(() => 'service-account@example.com')
       const contextValue = { ...baseContextValue, auditTrail }
       const listener = await plugin.requestDidStart()
       const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
@@ -588,7 +588,7 @@ describe('auditPlugin', () => {
 
   describe('errors', () => {
     test('reports audit status as failure when the root selection has errors', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -619,7 +619,7 @@ describe('auditPlugin', () => {
       )
     })
     test('attributes execution errors to the root selection they occurred under', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -667,7 +667,7 @@ describe('auditPlugin', () => {
       )
     })
     test('logs and swallows an error thrown by publish for one root selection, still publishing the others', async () => {
-      const publish = jest
+      const publish = vi
         .fn()
         .mockRejectedValueOnce(new Error('publish failed'))
         .mockResolvedValueOnce()
@@ -692,11 +692,11 @@ describe('auditPlugin', () => {
       )
     })
     test('logs and swallows an error thrown while building/publishing events, without throwing', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const auditTrail = {
-        rootKeys: jest.fn(() => {
+        rootKeys: vi.fn(() => {
           throw new Error('boom')
         })
       }
@@ -741,7 +741,7 @@ describe('auditPlugin', () => {
 
   describe('schema conformance', () => {
     test('a built event with a recorded entity passes real @defra/fcp-audit-publisher schema validation', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = {
@@ -762,7 +762,7 @@ describe('auditPlugin', () => {
     })
 
     test('the synthetic audit/created fallback event also passes real schema validation', async () => {
-      const publish = jest.fn()
+      const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
       const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }

@@ -1,18 +1,18 @@
-import { describe, expect, jest } from '@jest/globals'
+import { describe, expect, vi } from 'vitest'
 import net from 'node:net'
 import { setTimeout } from 'node:timers/promises'
 import { config } from '../../../../../app/config.js'
 
-const mockSendMetric = { sendMetric: jest.fn() }
+const mockSendMetric = { sendMetric: vi.fn() }
 const mockLogger = {
   logger: {
-    debug: jest.fn(),
-    info: jest.fn()
+    debug: vi.fn(),
+    info: vi.fn()
   }
 }
 
-jest.unstable_mockModule('../../../../../app/logger/sendMetric.js', () => mockSendMetric)
-jest.unstable_mockModule('../../../../../app/logger/logger.js', () => mockLogger)
+vi.doMock('../../../../../app/logger/sendMetric.js', () => mockSendMetric)
+vi.doMock('../../../../../app/logger/logger.js', () => mockLogger)
 
 const timeout = 20
 const buffer = 10
@@ -40,18 +40,18 @@ describe('Server config and startup', () => {
       serviceVersion: '1.2.3'
     }
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
-    const { server: _server } = await import(`../../../../../app/server.js?update=${Date.now()}`)
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
+    vi.resetModules()
+    vi.doMock('../../../../../app/config.js', () => ({ config }))
+    const { server: _server } = await import('../../../../../app/server.js')
     server = _server
     await server.start()
   })
 
   afterEach(async () => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
     await server.stop()
   })
 

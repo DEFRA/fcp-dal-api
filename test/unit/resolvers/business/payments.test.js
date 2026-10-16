@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { Business } from '../../../../app/graphql/resolvers/business/business.js'
 
 describe('Business payments resolver', () => {
@@ -8,10 +8,10 @@ describe('Business payments resolver', () => {
   beforeEach(() => {
     mockDataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationBySBI: jest.fn()
+        getOrganisationBySBI: vi.fn()
       },
       hitachiPayments: {
-        getSupplierPayments: jest.fn()
+        getSupplierPayments: vi.fn()
       }
     }
     mockContext = {
@@ -118,8 +118,8 @@ describe('Business payments resolver', () => {
         name: 'Test Farm'
       }
       const auditTrail = {
-        recordAccount: jest.fn(),
-        recordEntity: jest.fn()
+        recordAccount: vi.fn(),
+        recordEntity: vi.fn()
       }
       const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
@@ -149,8 +149,8 @@ describe('Business payments resolver', () => {
         name: 'Test Farm'
       }
       const auditTrail = {
-        recordAccount: jest.fn(),
-        recordEntity: jest.fn()
+        recordAccount: vi.fn(),
+        recordEntity: vi.fn()
       }
       const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
@@ -174,8 +174,8 @@ describe('Business payments resolver', () => {
 
     test('still records an attempted payment-list entity when the organisation lookup itself fails', async () => {
       const auditTrail = {
-        recordAccount: jest.fn(),
-        recordEntity: jest.fn()
+        recordAccount: vi.fn(),
+        recordEntity: vi.fn()
       }
       const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 

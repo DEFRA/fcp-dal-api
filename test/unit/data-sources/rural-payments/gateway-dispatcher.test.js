@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, jest } from '@jest/globals'
+import { beforeEach, describe, expect, vi } from 'vitest'
 import tls from 'tls'
 
-jest.mock('undici', () => {
-  const actual = jest.requireActual('undici')
+vi.mock('undici', async () => {
+  const actual = await vi.importActual('undici')
   function EnvHttpProxyAgentMock(opts) {
     this.opts = opts
   }
@@ -33,30 +33,28 @@ describe('gateway-dispatcher', () => {
       'kits.external.gatewayUrl': fakeExternalURL
     }
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
 
     config.internalMTLS = { key: fakeKey, cert: fakeCert }
     config.externalMTLS = { key: fakeKey, cert: fakeCert }
 
-    jest.spyOn(tls, 'createSecureContext').mockImplementation((...args) => args)
+    vi.spyOn(tls, 'createSecureContext').mockImplementation((...args) => args)
   })
 
   afterEach(() => {
     delete config.internalMTLS
     delete config.externalMTLS
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   // Each test dynamically reimports the module (rather than calling resetGatewayDispatchers) to
   // get a fully fresh dispatcher cache, isolated from every other test in this file.
   async function freshModule() {
-    return import(
-      `../../../../app/data-sources/rural-payments/gateway-dispatcher.js?update=${Date.now()}-${Math.random()}`
-    )
+    vi.resetModules()
+    vi.doMock('../../../../app/config.js', () => ({ config }))
+    return import('../../../../app/data-sources/rural-payments/gateway-dispatcher.js')
   }
 
   it('builds requestTls from the internal gateway config for the internal route', async () => {

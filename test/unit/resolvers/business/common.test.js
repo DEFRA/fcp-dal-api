@@ -1,4 +1,4 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { BadRequest, HttpError, NotFound } from '../../../../app/errors/graphql.js'
 import {
   businessAdditionalDetailsUpdateResolver,
@@ -22,11 +22,11 @@ describe('retrieveOrgIdBySbi', () => {
   beforeEach(() => {
     dataSources = {
       mongoBusiness: {
-        getOrgIdBySbi: jest.fn(),
-        upsertOrgIdBySbi: jest.fn()
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn()
+        getOrganisationIdBySBI: vi.fn()
       }
     }
   })
@@ -52,7 +52,7 @@ describe('retrieveOrgIdBySbi', () => {
   })
 
   it('reads the orgId from the Defra ID token, without touching mongo or upstream, when a defraIdContext is present', async () => {
-    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
 
     const result = await retrieveOrgIdBySbi('123', { dataSources, defraIdContext })
 
@@ -69,7 +69,7 @@ describe('validateLegalStatusCode', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsReferenceData: {
-        getReferenceData: jest.fn().mockResolvedValue({
+        getReferenceData: vi.fn().mockResolvedValue({
           _data: [
             { id: 102108, type: 'Partnership' },
             { id: 102111, type: 'Sole Proprietorship' }
@@ -109,7 +109,7 @@ describe('validateTypeCode', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsReferenceData: {
-        getReferenceData: jest.fn().mockResolvedValue({
+        getReferenceData: vi.fn().mockResolvedValue({
           _data: [
             { id: 2, type: 'Business type 2' },
             { id: 3, type: 'Business type 3' }
@@ -153,7 +153,7 @@ describe('validateBusinessReferenceDataCodes', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsReferenceData: {
-        getReferenceData: jest.fn((type) => Promise.resolve({ _data: referenceData[type] }))
+        getReferenceData: vi.fn((type) => Promise.resolve({ _data: referenceData[type] }))
       }
     }
   })
@@ -226,17 +226,17 @@ describe('businessDetailsUpdateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn(),
-        getOrganisationById: jest.fn(),
-        updateOrganisationDetails: jest.fn()
+        getOrganisationIdBySBI: vi.fn(),
+        getOrganisationById: vi.fn(),
+        updateOrganisationDetails: vi.fn()
       },
       mongoBusiness: {
-        getOrgIdBySbi: jest.fn(),
-        upsertOrgIdBySbi: jest.fn()
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
       }
     }
     logger = {
-      warn: jest.fn()
+      warn: vi.fn()
     }
   })
 
@@ -282,7 +282,7 @@ describe('businessDetailsUpdateResolver', () => {
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
     dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'updateBusinessName', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123', name: 'Test' }
 
@@ -315,7 +315,7 @@ describe('businessDetailsUpdateResolver', () => {
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
     dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
 
-    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
     const input = { sbi: '123', name: 'Test' }
 
     await businessDetailsUpdateResolver(null, { input }, { dataSources, defraIdContext })
@@ -336,17 +336,17 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn(),
-        getOrganisationById: jest.fn(),
-        updateOrganisationAdditionalDetails: jest.fn()
+        getOrganisationIdBySBI: vi.fn(),
+        getOrganisationById: vi.fn(),
+        updateOrganisationAdditionalDetails: vi.fn()
       },
       mongoBusiness: {
-        getOrgIdBySbi: jest.fn(),
-        upsertOrgIdBySbi: jest.fn()
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
       }
     }
     logger = {
-      warn: jest.fn()
+      warn: vi.fn()
     }
   })
 
@@ -398,7 +398,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     })
     dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: { key: 'updateBusinessLegalStatus', typename: 'Mutation', prev: undefined }
     }
@@ -440,7 +440,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     })
     dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
 
-    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
     const input = { sbi: '123', dateStartedFarming: '01-01-2025' }
 
     await businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, defraIdContext })
@@ -460,22 +460,22 @@ describe('businessAllFieldsUpdateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn().mockResolvedValue('orgId'),
-        getOrganisationById: jest.fn().mockResolvedValue({
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('orgId'),
+        getOrganisationById: vi.fn().mockResolvedValue({
           name: 'org name',
           legalStatus: { id: 1 }
         }),
-        updateOrganisationDetails: jest.fn(),
-        updateOrganisationAdditionalDetails: jest.fn()
+        updateOrganisationDetails: vi.fn(),
+        updateOrganisationAdditionalDetails: vi.fn()
       },
       ruralPaymentsReferenceData: {
-        getReferenceData: jest
+        getReferenceData: vi
           .fn()
           .mockResolvedValue({ _data: [{ id: 2, type: 'Partnership' }, { id: 3 }] })
       },
       mongoBusiness: {
-        getOrgIdBySbi: jest.fn(),
-        upsertOrgIdBySbi: jest.fn()
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
       }
     }
   })
@@ -643,7 +643,7 @@ describe('businessAllFieldsUpdateResolver', () => {
   })
 
   it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'updateBusinessAllFields', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123', name: 'Test' }
 
@@ -665,7 +665,7 @@ describe('businessAllFieldsUpdateResolver', () => {
   })
 
   it('retrieves the organisationId from the Defra ID token when a defraIdContext is present', async () => {
-    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
     const input = { sbi: '123', name: 'Test' }
 
     await businessAllFieldsUpdateResolver(null, { input }, { dataSources, defraIdContext })
@@ -686,12 +686,12 @@ describe('businessLockResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn(),
-        lockOrganisation: jest.fn()
+        getOrganisationIdBySBI: vi.fn(),
+        lockOrganisation: vi.fn()
       }
     }
     logger = {
-      warn: jest.fn()
+      warn: vi.fn()
     }
   })
 
@@ -749,7 +749,7 @@ describe('businessLockResolver', () => {
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
     dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123', reason: 'test' }
 
@@ -767,7 +767,7 @@ describe('businessLockResolver', () => {
   it('records the audit trail even when input validation subsequently fails', async () => {
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123' }
 
@@ -788,7 +788,7 @@ describe('businessLockResolver', () => {
       new Error('upstream failure')
     )
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123', reason: 'test' }
 
@@ -818,8 +818,8 @@ describe('businessLockResolver', () => {
 })
 
 describe('getRuralPaymentsBusinessDataSource', () => {
-  const standardDataSource = { getAgreementsBySBI: jest.fn() }
-  const serviceAccountDataSource = { getAgreementsBySBI: jest.fn() }
+  const standardDataSource = { getAgreementsBySBI: vi.fn() }
+  const serviceAccountDataSource = { getAgreementsBySBI: vi.fn() }
 
   it('returns the standard data source when useServiceAccountForExternal is not provided', () => {
     const dataSources = {
@@ -880,12 +880,12 @@ describe('businessUnlockResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn(),
-        unlockOrganisation: jest.fn()
+        getOrganisationIdBySBI: vi.fn(),
+        unlockOrganisation: vi.fn()
       }
     }
     logger = {
-      warn: jest.fn()
+      warn: vi.fn()
     }
   })
 
@@ -943,7 +943,7 @@ describe('businessUnlockResolver', () => {
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
     dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123', reason: 'test' }
 
@@ -961,7 +961,7 @@ describe('businessUnlockResolver', () => {
   it('records the audit trail even when input validation subsequently fails', async () => {
     dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123' }
 
@@ -982,7 +982,7 @@ describe('businessUnlockResolver', () => {
       new Error('upstream failure')
     )
 
-    const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
     const input = { sbi: '123', reason: 'test' }
 
@@ -1019,11 +1019,11 @@ describe('businessReactivateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn(),
-        reactivateOrganisation: jest.fn()
+        getOrganisationIdBySBI: vi.fn(),
+        reactivateOrganisation: vi.fn()
       }
     }
-    auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
   })
 
   it('reactivates the organisation with the reason and note', async () => {
@@ -1121,11 +1121,11 @@ describe('businessDeactivateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn(),
-        deactivateOrganisation: jest.fn()
+        getOrganisationIdBySBI: vi.fn(),
+        deactivateOrganisation: vi.fn()
       }
     }
-    auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+    auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
   })
 
   it('deactivates the organisation with the reason and note', async () => {

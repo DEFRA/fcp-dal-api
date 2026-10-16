@@ -1,15 +1,15 @@
 import { RESTDataSource } from '@apollo/datasource-rest'
-import { afterAll, beforeEach, describe, expect, jest, test } from '@jest/globals'
+import { afterAll, beforeEach, describe, expect, vi, test } from 'vitest'
 import StatusCodes from 'http-status-codes'
 import { RuralPayments } from '../../../../app/data-sources/rural-payments/RuralPayments.js'
 import { HttpError } from '../../../../app/errors/graphql.js'
 import { RURALPAYMENTS_API_REQUEST_001 } from '../../../../app/logger/codes.js'
 
 const logger = {
-  error: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn()
+  error: vi.fn(),
+  warn: vi.fn(),
+  debug: vi.fn(),
+  info: vi.fn()
 }
 
 const datasourceOptions = [
@@ -25,7 +25,7 @@ const datasourceOptions = [
 
 describe('RuralPayments', () => {
   describe('fetch', () => {
-    const mockFetch = jest.spyOn(RESTDataSource.prototype, 'fetch')
+    const mockFetch = vi.spyOn(RESTDataSource.prototype, 'fetch')
     const dummyRequest = { method: 'POST' }
 
     beforeEach(() => {
@@ -313,7 +313,7 @@ describe('RuralPayments', () => {
         },
         parsedBody: { data: 'test' }
       }
-      const mockFn = jest.fn().mockResolvedValue(mockResult)
+      const mockFn = vi.fn().mockResolvedValue(mockResult)
 
       const result = await rp.trace(url, request, mockFn)
 
@@ -350,7 +350,7 @@ describe('RuralPayments', () => {
         { logger },
         { request: { headers: { 'x-forwarded-authorization': 'token123' } } }
       )
-      const mockFn = jest.fn().mockResolvedValue({
+      const mockFn = vi.fn().mockResolvedValue({
         response: { status: 200, headers: new Headers(), body: {} },
         parsedBody: {}
       })
@@ -375,7 +375,7 @@ describe('RuralPayments', () => {
           }
         }
       )
-      const mockFn = jest.fn().mockResolvedValue({
+      const mockFn = vi.fn().mockResolvedValue({
         response: { status: 200, headers: new Headers(), body: {} },
         parsedBody: {}
       })
@@ -396,7 +396,7 @@ describe('RuralPayments', () => {
       error.cause = intermediateError
       error.extensions = { response: { status: 500 } }
       const request = { id: '123', method: 'GET', headers: {} }
-      const mockFn = jest.fn().mockRejectedValue(error)
+      const mockFn = vi.fn().mockRejectedValue(error)
 
       await expect(rp.trace('test-url', request, mockFn)).rejects.toBe(error)
 
@@ -451,7 +451,7 @@ describe('RuralPayments', () => {
           'Content-Type': 'application/json',
           'Content-Length': '20'
         }),
-        json: jest.fn().mockResolvedValue(mockJson)
+        json: vi.fn().mockResolvedValue(mockJson)
       }
 
       const result = await rp.parseBody(response)
@@ -469,7 +469,7 @@ describe('RuralPayments', () => {
           'Content-Type': 'text/plain',
           'Content-Length': '20'
         }),
-        text: jest.fn().mockResolvedValue(mockText)
+        text: vi.fn().mockResolvedValue(mockText)
       }
 
       const result = await rp.parseBody(response)

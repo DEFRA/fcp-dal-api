@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import {
   InternalUser,
   Permission,
@@ -267,7 +267,7 @@ test('Query.internalUser', () => {
 })
 
 describe('InternalUser.permittedFunctions', () => {
-  const getInternalUserAuthorisedFunctions = jest.fn()
+  const getInternalUserAuthorisedFunctions = vi.fn()
   const internalUserDataSources = {
     ruralPaymentsCustomer: { getInternalUserAuthorisedFunctions }
   }
@@ -315,7 +315,7 @@ describe('InternalUser.permittedFunctions', () => {
     const info = { path: { key: 'internalUser', typename: 'Query', prev: undefined } }
 
     it('records a permitted-function-list entity', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
       getInternalUserAuthorisedFunctions.mockResolvedValueOnce({ viewLand: true })
 
       await InternalUser.permittedFunctions(

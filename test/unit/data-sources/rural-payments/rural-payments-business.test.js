@@ -1,4 +1,4 @@
-import { describe, jest } from '@jest/globals'
+import { describe, vi } from 'vitest'
 import {
   formatDateDDMMMYY,
   RuralPaymentsBusiness
@@ -69,8 +69,8 @@ const orgDetailsUpdatePayload = transformBusinessDetailsToOrgDetailsUpdate(
 
 describe('Rural Payments Business', () => {
   const logger = {
-    error: jest.fn(),
-    warn: jest.fn()
+    error: vi.fn(),
+    warn: vi.fn()
   }
   const datasourceOptions = [
     { logger },
@@ -92,12 +92,12 @@ describe('Rural Payments Business', () => {
       defraIdContext
     }
   )
-  const httpGet = jest.spyOn(ruralPaymentsBusiness, 'get')
-  const httpPost = jest.spyOn(ruralPaymentsBusiness, 'post')
-  const httpPut = jest.spyOn(ruralPaymentsBusiness, 'put')
+  const httpGet = vi.spyOn(ruralPaymentsBusiness, 'get')
+  const httpPost = vi.spyOn(ruralPaymentsBusiness, 'post')
+  const httpPut = vi.spyOn(ruralPaymentsBusiness, 'put')
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('getOrganisationById', () => {
@@ -377,15 +377,15 @@ describe('Rural Payments Business', () => {
 
   describe('getCountyParishHoldingsBySBI', () => {
     beforeAll(() => {
-      jest.useFakeTimers()
+      vi.useFakeTimers()
     })
 
     afterAll(() => {
-      jest.useRealTimers()
+      vi.useRealTimers()
     })
 
     test('should return county parish holdings list', async () => {
-      jest.setSystemTime(new Date('2025-01-01T13:35:25'))
+      vi.setSystemTime(new Date('2025-01-01T13:35:25'))
 
       const mockResponse = { data: 'mockData' }
       httpGet.mockImplementationOnce(async () => mockResponse)

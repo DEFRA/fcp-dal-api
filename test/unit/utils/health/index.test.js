@@ -1,34 +1,34 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 
-const mockMongoHealthCheck = jest.fn()
-const mockRuralPaymentsHealthCheck = jest.fn()
-const mockJwksHealthCheck = jest.fn()
-const mockDefraIdHealthCheck = jest.fn()
-const mockHitachiHealthCheck = jest.fn()
-const mockAuditHealthCheck = jest.fn()
-const mockMetricsHealthCheck = jest.fn()
+const mockMongoHealthCheck = vi.fn()
+const mockRuralPaymentsHealthCheck = vi.fn()
+const mockJwksHealthCheck = vi.fn()
+const mockDefraIdHealthCheck = vi.fn()
+const mockHitachiHealthCheck = vi.fn()
+const mockAuditHealthCheck = vi.fn()
+const mockMetricsHealthCheck = vi.fn()
 
-jest.unstable_mockModule('../../../../app/utils/health/mongo.js', () => ({
+vi.doMock('../../../../app/utils/health/mongo.js', () => ({
   healthCheck: mockMongoHealthCheck
 }))
-jest.unstable_mockModule('../../../../app/utils/health/jwks.js', () => ({
+vi.doMock('../../../../app/utils/health/jwks.js', () => ({
   healthCheck: mockJwksHealthCheck
 }))
-jest.unstable_mockModule('../../../../app/utils/health/defra-id.js', () => ({
+vi.doMock('../../../../app/utils/health/defra-id.js', () => ({
   healthCheck: mockDefraIdHealthCheck
 }))
 
-jest.unstable_mockModule('../../../../app/utils/health/rural-payments.js', () => ({
+vi.doMock('../../../../app/utils/health/rural-payments.js', () => ({
   healthCheck: mockRuralPaymentsHealthCheck
 }))
-jest.unstable_mockModule('../../../../app/utils/health/audit.js', () => ({
+vi.doMock('../../../../app/utils/health/audit.js', () => ({
   healthCheck: mockAuditHealthCheck
 }))
-jest.unstable_mockModule('../../../../app/utils/health/metrics.js', () => ({
+vi.doMock('../../../../app/utils/health/metrics.js', () => ({
   healthCheck: mockMetricsHealthCheck
 }))
 
-jest.unstable_mockModule('../../../../app/utils/health/hitachi.js', () => ({
+vi.doMock('../../../../app/utils/health/hitachi.js', () => ({
   healthCheck: mockHitachiHealthCheck
 }))
 
@@ -43,11 +43,11 @@ describe('runHealthChecks', () => {
     mockHitachiHealthCheck.mockResolvedValue(undefined)
     mockAuditHealthCheck.mockResolvedValue(undefined)
     mockMetricsHealthCheck.mockResolvedValue(undefined)
-    jest.spyOn(process, 'exit').mockReturnValue(1)
+    vi.spyOn(process, 'exit').mockReturnValue(1)
   })
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('should run all registered health checks', async () => {

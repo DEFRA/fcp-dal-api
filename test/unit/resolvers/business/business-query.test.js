@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { Query } from '../../../../app/graphql/resolvers/business/query.js'
 
 describe('Business Query Resolver', () => {
@@ -8,14 +8,14 @@ describe('Business Query Resolver', () => {
   beforeEach(() => {
     mockDataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: jest.fn(),
-        getOrganisationById: jest.fn(),
-        extractOrgIdFromDefraIdToken: jest.fn(),
-        organisationSearch: jest.fn()
+        getOrganisationIdBySBI: vi.fn(),
+        getOrganisationById: vi.fn(),
+        extractOrgIdFromDefraIdToken: vi.fn(),
+        organisationSearch: vi.fn()
       },
       mongoBusiness: {
-        getOrgIdBySbi: jest.fn(),
-        upsertOrgIdBySbi: jest.fn()
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
       }
     }
   })
@@ -47,7 +47,7 @@ describe('Business Query Resolver', () => {
 
   it('records the organisationId and sbi as accounts on the audit trail', async () => {
     const sbi = '123456789'
-    const auditTrail = { recordAccount: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn() }
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
     mockDataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(1)
@@ -61,7 +61,7 @@ describe('Business Query Resolver', () => {
 
   it('still records the sbi account when the organisationId lookup itself fails', async () => {
     const sbi = '123456789'
-    const auditTrail = { recordAccount: jest.fn() }
+    const auditTrail = { recordAccount: vi.fn() }
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
     mockDataSources.mongoBusiness.getOrgIdBySbi.mockRejectedValue(new Error('upstream failure'))
@@ -87,7 +87,7 @@ describe('Business Query Resolver', () => {
 
   it('retrieves the organisationId from the Defra ID token when a defraIdContext is present', async () => {
     const sbi = '123456789'
-    const defraIdContext = { orgId: jest.fn().mockReturnValue('orgIdFromToken') }
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
 
     const result = await Query.business(
       null,
@@ -170,7 +170,7 @@ describe('Business Query Resolver', () => {
     })
 
     it('records the sbi as an account and an entity when searching by SBI', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
 
       await Query.businessSearch(
         null,
@@ -188,7 +188,7 @@ describe('Business Query Resolver', () => {
     })
 
     it('does not record an sbi account or an entityid when searching by a non-SBI type', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
 
       await Query.businessSearch(
         null,

@@ -1,20 +1,24 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { HitachiPayments } from '../../../../app/data-sources/hitachi/HitachiPayments.js'
 import { HITACHI_API_NOT_FOUND_001, HITACHI_API_REQUEST_001 } from '../../../../app/logger/codes.js'
 
+const { mockConfidentialClientApplication } = vi.hoisted(() => {
+  const acquireTokenByClientCredential = vi.fn()
+  const mockConfidentialClientApplication = vi.fn().mockImplementation(function () {
+    return { acquireTokenByClientCredential }
+  })
+  return { mockConfidentialClientApplication }
+})
+
 // Mock MSAL
-const acquireTokenByClientCredential = jest.fn()
-const mockConfidentialClientApplication = jest.fn().mockImplementation(() => ({
-  acquireTokenByClientCredential
-}))
-jest.mock('@azure/msal-node', () => ({
+vi.mock('@azure/msal-node', () => ({
   ConfidentialClientApplication: mockConfidentialClientApplication
 }))
 
 // Mock config
-jest.mock('../../../../app/config.js', () => ({
+vi.mock('../../../../app/config.js', () => ({
   config: {
-    get: jest.fn((key) => {
+    get: vi.fn((key) => {
       const values = {
         'hitachi.disableAuth': false,
         'hitachi.entra.clientId': '12345678-1234-1234-1234-123456789012',
@@ -28,26 +32,9 @@ jest.mock('../../../../app/config.js', () => ({
 }))
 
 // Mock sendMetric
-jest.mock('../../../../app/logger/sendMetric.js', () => ({
-  sendMetric: jest.fn()
+vi.mock('../../../../app/logger/sendMetric.js', () => ({
+  sendMetric: vi.fn()
 }))
-
-// Mock the getMsalClient function in the HitachiPayments module
-jest.mock('../../../../app/data-sources/hitachi/HitachiPayments.js', () => {
-  const originalModule = jest.requireActual(
-    '../../../../app/data-sources/hitachi/HitachiPayments.js'
-  )
-
-  // Mock the getMsalClient function
-  const mockGetMsalClient = jest.fn(() => ({
-    acquireTokenByClientCredential
-  }))
-
-  // Replace the getMsalClient in the module
-  originalModule.getMsalClient = mockGetMsalClient
-
-  return originalModule
-})
 
 describe('HitachiPayments', () => {
   let dataSource
@@ -57,14 +44,14 @@ describe('HitachiPayments', () => {
   beforeEach(() => {
     // Mock logger
     mockLogger = {
-      error: jest.fn(),
-      info: jest.fn(),
-      debug: jest.fn(),
-      warn: jest.fn()
+      error: vi.fn(),
+      info: vi.fn(),
+      debug: vi.fn(),
+      warn: vi.fn()
     }
 
     // Mock post method
-    mockPost = jest.fn()
+    mockPost = vi.fn()
 
     // Create instance
     dataSource = new HitachiPayments({
@@ -78,14 +65,14 @@ describe('HitachiPayments', () => {
     dataSource.post = mockPost
 
     // Reset mocks
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   describe('addAuthentication', () => {
     test('should set placeholder token when auth is disabled', async () => {
       // Mock config to return true for disableAuth
       const { config } = await import('../../../../app/config.js')
-      config.get = jest.fn((key) => {
+      config.get = vi.fn((key) => {
         if (key === 'hitachi.disableAuth') return true
         return 'mock-value'
       })
@@ -99,7 +86,7 @@ describe('HitachiPayments', () => {
     test('should handle token acquisition errors', async () => {
       // Mock config to return false for disableAuth
       const { config } = await import('../../../../app/config.js')
-      config.get = jest.fn((key) => {
+      config.get = vi.fn((key) => {
         if (key === 'hitachi.disableAuth') return false
         return 'mock-value'
       })

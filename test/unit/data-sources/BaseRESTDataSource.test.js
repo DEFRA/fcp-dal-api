@@ -1,16 +1,16 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import StatusCodes from 'http-status-codes'
 
 // Mock the logger
 const mockLogger = {
-  error: jest.fn(),
-  info: jest.fn(),
-  debug: jest.fn()
+  error: vi.fn(),
+  info: vi.fn(),
+  debug: vi.fn()
 }
 
 // Mock sendMetric
-const mockSendMetric = { sendMetric: jest.fn() }
-jest.unstable_mockModule('../../../app/logger/sendMetric.js', () => mockSendMetric)
+const mockSendMetric = { sendMetric: vi.fn() }
+vi.doMock('../../../app/logger/sendMetric.js', () => mockSendMetric)
 
 const { BaseRESTDataSource } = await import('../../../app/data-sources/BaseRESTDataSource.js')
 
@@ -18,7 +18,7 @@ describe('BaseRESTDataSource', () => {
   let dataSource
 
   beforeEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
     dataSource = new BaseRESTDataSource(
       {},
       { name: 'Test DataSource', code: 'TEST_001', gatewayType: 'test-gateway' }
@@ -113,7 +113,7 @@ describe('BaseRESTDataSource', () => {
     })
 
     test('should include time elapsed before the failure in requestTimeMs', async () => {
-      const nowSpy = jest.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(1250)
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValueOnce(1000).mockReturnValueOnce(1250)
 
       await expect(
         dataSource.trace(url, request, async () => {
@@ -169,7 +169,7 @@ describe('BaseRESTDataSource', () => {
           ['Content-Type', 'application/json'],
           ['Content-Length', '123']
         ]),
-        json: jest.fn().mockResolvedValue(mockJsonData)
+        json: vi.fn().mockResolvedValue(mockJsonData)
       }
 
       const result = await dataSource.parseBody(mockResponse)
@@ -186,7 +186,7 @@ describe('BaseRESTDataSource', () => {
           ['Content-Type', 'application/vnd.api+json'],
           ['Content-Length', '123']
         ]),
-        json: jest.fn().mockResolvedValue(mockJsonData)
+        json: vi.fn().mockResolvedValue(mockJsonData)
       }
 
       const result = await dataSource.parseBody(mockResponse)
@@ -203,7 +203,7 @@ describe('BaseRESTDataSource', () => {
           ['Content-Type', 'text/plain'],
           ['Content-Length', '123']
         ]),
-        text: jest.fn().mockResolvedValue(mockTextData)
+        text: vi.fn().mockResolvedValue(mockTextData)
       }
 
       const result = await dataSource.parseBody(mockResponse)
@@ -217,7 +217,7 @@ describe('BaseRESTDataSource', () => {
       const mockResponse = {
         status: 200,
         headers: new Map([['Content-Length', '123']]),
-        text: jest.fn().mockResolvedValue(mockTextData)
+        text: vi.fn().mockResolvedValue(mockTextData)
       }
 
       const result = await dataSource.parseBody(mockResponse)
@@ -234,7 +234,7 @@ describe('BaseRESTDataSource', () => {
           ['Content-Type', 'application/json'],
           ['Content-Length', '0']
         ]),
-        text: jest.fn().mockResolvedValue(mockTextData)
+        text: vi.fn().mockResolvedValue(mockTextData)
       }
 
       const result = await dataSource.parseBody(mockResponse)
@@ -248,7 +248,7 @@ describe('BaseRESTDataSource', () => {
       const mockResponse = {
         status: 200,
         headers: new Map([['Content-Type', 'text/xml']]),
-        text: jest.fn().mockResolvedValue(mockTextData)
+        text: vi.fn().mockResolvedValue(mockTextData)
       }
 
       const result = await dataSource.parseBody(mockResponse)

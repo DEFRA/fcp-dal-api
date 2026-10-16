@@ -1,8 +1,8 @@
-import { beforeAll } from '@jest/globals'
-import { generateKeyPairSync } from 'node:crypto'
 import { jwtVerify } from 'jose'
 import jwt from 'jsonwebtoken'
 import nock from 'nock'
+import { generateKeyPairSync } from 'node:crypto'
+import { beforeAll } from 'vitest'
 import { config } from '../../../app/config.js'
 const { JWKS } = await import('../../../app/data-sources/JWKS.js')
 

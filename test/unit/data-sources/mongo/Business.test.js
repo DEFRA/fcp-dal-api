@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, expect, jest } from '@jest/globals'
+import { afterAll, beforeAll, expect, vi } from 'vitest'
 import { MongoClient } from 'mongodb'
 import { config } from '../../../../app/config.js'
 import { MongoBusiness } from '../../../../app/data-sources/mongo/Business.js'
@@ -8,18 +8,18 @@ client.connect()
 const db = client.db(config.get('mongo.databaseName'))
 const mockCollection = {
   ...db.collection('business'),
-  findOne: jest.fn(),
-  updateOne: jest.fn()
+  findOne: vi.fn(),
+  updateOne: vi.fn()
 }
 const mongoBusiness = new MongoBusiness({ modelOrCollection: mockCollection })
 
 describe('MongoBusiness', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
   })
 
   afterAll(() => {
-    jest.useRealTimers()
+    vi.useRealTimers()
   })
 
   it('getOrgIdBySbi sbi doesnt exist', async () => {
@@ -40,7 +40,7 @@ describe('MongoBusiness', () => {
 
   it('upsertOrgIdBySbi', async () => {
     const dummyDate = new Date('2025-01-01')
-    jest.useFakeTimers().setSystemTime(dummyDate)
+    vi.useFakeTimers().setSystemTime(dummyDate)
     mockCollection.updateOne.mockResolvedValue({ acknowledged: true, upsertedId: 'orgId' })
 
     const result = await mongoBusiness.upsertOrgIdBySbi('1234567890', 'orgId')
@@ -60,7 +60,7 @@ describe('MongoBusiness', () => {
     const realMongoBusiness = new MongoBusiness({ modelOrCollection: realCollection })
 
     it('upsertOrgIdBySbi handles two concurrent requests for the same SBI without failing', async () => {
-      jest.useRealTimers()
+      vi.useRealTimers()
       const sbi = '1234567890'
       await realCollection.deleteMany({})
 

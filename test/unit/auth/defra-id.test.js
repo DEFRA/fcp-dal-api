@@ -1,12 +1,12 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
 import { config } from '../../../app/config.js'
 import { BadRequest, Unauthorized } from '../../../app/errors/graphql.js'
 
-const info = jest.fn()
-jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
-  logger: { info, debug: jest.fn(), warn: jest.fn(), error: jest.fn() }
+const info = vi.fn()
+vi.doMock('../../../app/logger/logger.js', () => ({
+  logger: { info, debug: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 const { defraIdContext } = await import('../../../app/auth/defra-id.js')
 
@@ -17,14 +17,14 @@ describe('defraIdContext', () => {
   const signToken = (payload, key = privateKey) =>
     jwt.sign(payload, key, { algorithm: 'RS256', expiresIn: '1h' })
 
-  const jwksDataSource = () => ({ getPublicKey: jest.fn().mockResolvedValue(publicKey) })
+  const jwksDataSource = () => ({ getPublicKey: vi.fn().mockResolvedValue(publicKey) })
 
   const traceId = 'trace-id'
 
   let configGetSpy
 
   beforeEach(() => {
-    configGetSpy = jest.spyOn(config, 'get').mockReturnValue(false)
+    configGetSpy = vi.spyOn(config, 'get').mockReturnValue(false)
   })
 
   afterEach(() => {

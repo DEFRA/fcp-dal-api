@@ -1,4 +1,4 @@
-import { describe, expect, jest } from '@jest/globals'
+import { describe, expect, vi } from 'vitest'
 import jwt from 'jsonwebtoken'
 import { config } from '../../../app/config.js'
 
@@ -12,64 +12,64 @@ const validDefraIdToken = jwt.sign(
 // dummy app reg id token
 const appRegToken = jwt.sign({ appid: 'test-appid' }, 'appid-secret')
 
-const getAuthMock = jest.fn()
-const getRequestingServiceMock = jest.fn()
-const PermissionsMock = jest.fn()
-const RuralPaymentsBusinessMock = jest.fn()
-const RuralPaymentsCustomerMock = jest.fn()
-const MongoCustomerMock = jest.fn()
-const MongoBusinessMock = jest.fn()
-const JWKSMock = jest.fn()
-const loggerChild = jest.fn()
-const loggerMock = { child: loggerChild, info: jest.fn() }
+const getAuthMock = vi.fn()
+const getRequestingServiceMock = vi.fn()
+const PermissionsMock = vi.fn()
+const RuralPaymentsBusinessMock = vi.fn()
+const RuralPaymentsCustomerMock = vi.fn()
+const MongoCustomerMock = vi.fn()
+const MongoBusinessMock = vi.fn()
+const JWKSMock = vi.fn()
+const loggerChild = vi.fn()
+const loggerMock = { child: loggerChild, info: vi.fn() }
 
-jest.unstable_mockModule('../../../app/auth/authenticate.js', () => ({
+vi.doMock('../../../app/auth/authenticate.js', () => ({
   getAuth: getAuthMock,
   getRequestingService: getRequestingServiceMock
 }))
-jest.unstable_mockModule('../../../app/data-sources/static/permissions.js', () => ({
+vi.doMock('../../../app/data-sources/static/permissions.js', () => ({
   Permissions: PermissionsMock
 }))
-jest.unstable_mockModule(
-  '../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js',
-  () => ({
-    RuralPaymentsBusiness: RuralPaymentsBusinessMock
-  })
-)
-jest.unstable_mockModule(
-  '../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js',
-  () => ({
-    RuralPaymentsCustomer: RuralPaymentsCustomerMock
-  })
-)
-jest.unstable_mockModule('../../../app/data-sources/mongo/Business.js', () => ({
+vi.doMock('../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js', () => ({
+  RuralPaymentsBusiness: RuralPaymentsBusinessMock
+}))
+vi.doMock('../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js', () => ({
+  RuralPaymentsCustomer: RuralPaymentsCustomerMock
+}))
+vi.doMock('../../../app/data-sources/mongo/Business.js', () => ({
   MongoBusiness: MongoBusinessMock
 }))
-jest.unstable_mockModule('../../../app/data-sources/mongo/Customer.js', () => ({
+vi.doMock('../../../app/data-sources/mongo/Customer.js', () => ({
   MongoCustomer: MongoCustomerMock
 }))
-jest.unstable_mockModule('../../../app/data-sources/JWKS.js', () => ({
+vi.doMock('../../../app/data-sources/JWKS.js', () => ({
   JWKS: JWKSMock
 }))
-jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
+vi.doMock('../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
 const { context } = await import('../../../app/graphql/context.js')
 
 describe('context', () => {
   beforeEach(() => {
-    RuralPaymentsBusinessMock.mockImplementation(() => ({ isExternalRoute: () => false }))
+    RuralPaymentsBusinessMock.mockImplementation(function () {
+      return { isExternalRoute: () => false }
+    })
   })
 
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   test('should build context with correct properties', async () => {
     getAuthMock.mockResolvedValue({ user: 'test-user' })
-    PermissionsMock.mockImplementation(() => ({ type: 'Permissions' }))
-    JWKSMock.mockImplementation(() => ({}))
-    loggerChild.mockReturnValue({ log: jest.fn() })
+    PermissionsMock.mockImplementation(function () {
+      return { type: 'Permissions' }
+    })
+    JWKSMock.mockImplementation(function () {
+      return {}
+    })
+    loggerChild.mockReturnValue({ log: vi.fn() })
     const request = {
       headers: {
         'x-forwarded-authorization': validDefraIdToken
@@ -103,9 +103,13 @@ describe('context', () => {
   test('binds the requesting service onto the request logger and the request itself, when one is identified', async () => {
     getAuthMock.mockResolvedValue({ user: 'test-user', groups: ['some-group'] })
     getRequestingServiceMock.mockReturnValue('Grants')
-    PermissionsMock.mockImplementation(() => ({ type: 'Permissions' }))
-    JWKSMock.mockImplementation(() => ({}))
-    loggerChild.mockReturnValue({ log: jest.fn() })
+    PermissionsMock.mockImplementation(function () {
+      return { type: 'Permissions' }
+    })
+    JWKSMock.mockImplementation(function () {
+      return {}
+    })
+    loggerChild.mockReturnValue({ log: vi.fn() })
     const request = {
       headers: { 'x-forwarded-authorization': validDefraIdToken },
       transactionId: 'tx-1',
@@ -126,9 +130,13 @@ describe('context', () => {
   test('omits tenant from the request logger bindings when no requesting service is identified', async () => {
     getAuthMock.mockResolvedValue({ user: 'test-user' })
     getRequestingServiceMock.mockReturnValue(null)
-    PermissionsMock.mockImplementation(() => ({ type: 'Permissions' }))
-    JWKSMock.mockImplementation(() => ({}))
-    loggerChild.mockReturnValue({ log: jest.fn() })
+    PermissionsMock.mockImplementation(function () {
+      return { type: 'Permissions' }
+    })
+    JWKSMock.mockImplementation(function () {
+      return {}
+    })
+    loggerChild.mockReturnValue({ log: vi.fn() })
     const request = {
       headers: { 'x-forwarded-authorization': validDefraIdToken },
       transactionId: 'tx-1',
@@ -148,19 +156,19 @@ describe('context', () => {
   describe('serviceAccount', () => {
     test('constructs a service-account RuralPaymentsBusiness instance, injecting the configured DAL email as the "service-account" header, when the standard instance is on the external route', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
-      loggerChild.mockReturnValue({ log: jest.fn() })
-      const configGetSpy = jest.spyOn(config, 'get').mockImplementation((path) => {
+      loggerChild.mockReturnValue({ log: vi.fn() })
+      const configGetSpy = vi.spyOn(config, 'get').mockImplementation((path) => {
         if (path === 'kits.dalServiceAccountEmail') return 'dal-service-account@example.com'
         // Decode-only mode, so the Defra ID token below is accepted without a real JWKS lookup.
         if (path === 'auth.disabled') return true
         return undefined
       })
-      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
-        isExternalRoute: () => true
-      }))
-      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
-        marker: 'service-account-instance'
-      }))
+      RuralPaymentsBusinessMock.mockImplementationOnce(function () {
+        return { isExternalRoute: () => true }
+      })
+      RuralPaymentsBusinessMock.mockImplementationOnce(function () {
+        return { marker: 'service-account-instance' }
+      })
       const request = { headers: { 'x-forwarded-authorization': validDefraIdToken } }
 
       const result = await context({ request })
@@ -185,10 +193,10 @@ describe('context', () => {
 
     test('does not construct a service-account data source when the standard instance is not on the external route', async () => {
       getAuthMock.mockResolvedValue({ user: 'test-user' })
-      loggerChild.mockReturnValue({ log: jest.fn() })
-      RuralPaymentsBusinessMock.mockImplementationOnce(() => ({
-        isExternalRoute: () => false
-      }))
+      loggerChild.mockReturnValue({ log: vi.fn() })
+      RuralPaymentsBusinessMock.mockImplementationOnce(function () {
+        return { isExternalRoute: () => false }
+      })
       const request = { headers: { email: 'user@example.com' } }
 
       const result = await context({ request })

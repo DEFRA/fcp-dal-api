@@ -1,13 +1,13 @@
-import { beforeEach, describe, expect, jest, test } from '@jest/globals'
-import { buildSchema, findBreakingChanges, graphql, GraphQLError } from 'graphql'
+import { beforeEach, describe, expect, vi, test } from 'vitest'
+import { buildSchema, findBreakingChanges, graphql } from 'graphql'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
 import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
-const info = jest.fn()
-jest.unstable_mockModule('../../../app/logger/logger.js', () => ({
-  logger: { info, debug: jest.fn(), warn: jest.fn(), error: jest.fn() }
+const info = vi.fn()
+vi.doMock('../../../app/logger/logger.js', () => ({
+  logger: { info, debug: vi.fn(), warn: vi.fn(), error: vi.fn() }
 }))
 const {
   authDirectiveTransformer,
@@ -64,13 +64,13 @@ const mockRequest = (token) => ({
   traceId: 'trace-id'
 })
 const decodedToken = jwt.decode(token)
-const mockPublicKeyFunc = jest.fn()
+const mockPublicKeyFunc = vi.fn()
 const mockJWKSDataSource = { getPublicKey: mockPublicKeyFunc }
 
 describe('authenticate', () => {
   describe('getAuth', () => {
     beforeEach(() => {
-      jest.clearAllMocks()
+      vi.clearAllMocks()
     })
 
     describe('when auth is disabled', () => {
@@ -269,11 +269,9 @@ describe('authenticate', () => {
       }
 
       beforeEach(() => {
-        jest
-          .spyOn(config, 'get')
-          .mockImplementation((path) =>
-            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-          )
+        vi.spyOn(config, 'get').mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
       })
 
       it('should return Auth Disabled', () => {
@@ -288,11 +286,9 @@ describe('authenticate', () => {
       }
 
       beforeEach(() => {
-        jest
-          .spyOn(config, 'get')
-          .mockImplementation((path) =>
-            configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-          )
+        vi.spyOn(config, 'get').mockImplementation((path) =>
+          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+        )
       })
 
       const adminGroupId = config.get('auth.groups.ADMIN')
@@ -386,11 +382,9 @@ describe('authenticate', () => {
     }
 
     beforeEach(() => {
-      jest
-        .spyOn(config, 'get')
-        .mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
     })
 
     it('authDirectiveTransformer should not impact output schema', async () => {
@@ -427,9 +421,11 @@ describe('authenticate', () => {
           auth: { appid: 'some-appid' },
           authContext: {}
         })
-        expect(result.errors).toEqual([
-          new GraphQLError('Authorization failed, you are not in the correct AD groups')
-        ])
+        expect(result.errors).toHaveLength(1)
+        expect(result.errors[0]).toMatchObject({
+          message: 'Authorization failed, you are not in the correct AD groups',
+          extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
+        })
         expect(result.data.gatedQueryFieldDefault).toBeNull()
       })
 

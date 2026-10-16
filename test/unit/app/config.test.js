@@ -1,10 +1,11 @@
-import { v4 as uuidv4 } from 'uuid'
+import { vi } from 'vitest'
 import { decodeBase64Config } from '../../../app/config.js'
 
 const existingEnvVars = process.env
 
 const loadFreshConfig = async () => {
-  return await import(`../../../app/config.js?update=${uuidv4()}`)
+  vi.resetModules()
+  return await import('../../../app/config.js')
 }
 
 describe('config', () => {

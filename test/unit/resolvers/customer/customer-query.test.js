@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals'
+import { vi } from 'vitest'
 import { Query } from '../../../../app/graphql/resolvers/customer/query.js'
 
 describe('Customer Query Resolver', () => {
@@ -8,13 +8,13 @@ describe('Customer Query Resolver', () => {
   beforeEach(() => {
     mockDataSources = {
       ruralPaymentsCustomer: {
-        getPersonIdByCRN: jest.fn(),
-        personSearch: jest.fn(),
-        validateEmail: jest.fn()
+        getPersonIdByCRN: vi.fn(),
+        personSearch: vi.fn(),
+        validateEmail: vi.fn()
       },
       mongoCustomer: {
-        findPersonIdByCRN: jest.fn(),
-        upsertPersonIdByCRN: jest.fn()
+        findPersonIdByCRN: vi.fn(),
+        upsertPersonIdByCRN: vi.fn()
       }
     }
   })
@@ -121,7 +121,7 @@ describe('Customer Query Resolver', () => {
 
     it('customer records the personId and crn as accounts', async () => {
       const crn = '1234567890'
-      const auditTrail = { recordAccount: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn() }
 
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
 
@@ -133,7 +133,7 @@ describe('Customer Query Resolver', () => {
 
     it('still records the crn account when the personId lookup itself fails', async () => {
       const crn = '1234567890'
-      const auditTrail = { recordAccount: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn() }
 
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(null)
       mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(
@@ -155,7 +155,7 @@ describe('Customer Query Resolver', () => {
     })
 
     it('customerSearch records the crn as an account and an entity when searching by CRN', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
         data: [],
         page: { number: 1, size: 20, totalPages: 0, totalElements: 0 }
@@ -177,7 +177,7 @@ describe('Customer Query Resolver', () => {
     })
 
     it('isCustomerEmailRegistered records a person entity keyed by email', async () => {
-      const auditTrail = { recordEntity: jest.fn() }
+      const auditTrail = { recordEntity: vi.fn() }
       mockDataSources.ruralPaymentsCustomer.validateEmail.mockResolvedValue({
         emailDuplicated: true
       })
@@ -197,7 +197,7 @@ describe('Customer Query Resolver', () => {
     })
 
     it('does not record a crn account or an entityid when searching by a non-CRN type', async () => {
-      const auditTrail = { recordAccount: jest.fn(), recordEntity: jest.fn() }
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
       mockDataSources.ruralPaymentsCustomer.personSearch.mockResolvedValue({
         data: [],
         page: { number: 1, size: 20, totalPages: 0, totalElements: 0 }

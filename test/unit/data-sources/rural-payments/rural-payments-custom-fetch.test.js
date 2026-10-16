@@ -1,22 +1,25 @@
-import { beforeEach, describe, expect, jest } from '@jest/globals'
+import { beforeEach, describe, expect, vi } from 'vitest'
 import tls from 'tls'
 
-const fetch11 = jest.fn()
-// Ensure undici's fetch and EnvHttpProxyAgent are mocked so calls can be inspected in tests.
-jest.mock('undici', () => {
-  const actual = jest.requireActual('undici')
-  function EnvHttpProxyAgentMock(opts) {
+const mocks = vi.hoisted(() => {
+  const EnvHttpProxyAgent = vi.fn(function (opts) {
     EnvHttpProxyAgent.mockConstructorArgs = opts
     return { isMockAgent: true }
-  }
+  })
+  return { fetch11: vi.fn(), EnvHttpProxyAgent }
+})
+
+// Ensure undici's fetch and EnvHttpProxyAgent are mocked so calls can be inspected in tests.
+vi.mock('undici', async () => {
+  const actual = await vi.importActual('undici')
   return {
     ...actual,
-    EnvHttpProxyAgent: EnvHttpProxyAgentMock,
-    fetch: (...args) => fetch11(...args)
+    EnvHttpProxyAgent: mocks.EnvHttpProxyAgent,
+    fetch: (...args) => mocks.fetch11(...args)
   }
 })
 
-const { EnvHttpProxyAgent } = jest.requireMock('undici')
+const { EnvHttpProxyAgent } = await vi.importMock('undici')
 
 import { config } from '../../../../app/config.js'
 
@@ -33,11 +36,12 @@ const fakeExternalURL = 'https://rp_kits_gateway_external_url/v1/'
 describe('RuralPayments Custom Fetch', () => {
   let configMockPath
   beforeEach(async () => {
-    // RuralPayments.js is reimported fresh per test (see the `?update=` imports below), but its
-    // static import of gateway-dispatcher.js is not - without this, a dispatcher built by an
-    // earlier test for the same route would be reused instead of reflecting this test's mocks.
+    // A fresh RuralPayments module still shares gateway-dispatcher.js unless the module cache is
+    // reset first; clear that dispatcher's cache before each test.
     // Imported dynamically (rather than statically at the top of the file) so it resolves through
     // the mocked `undici` the same way RuralPayments.js's own import of it does.
+    vi.resetModules()
+    vi.doMock('../../../../app/config.js', () => ({ config }))
     const { resetGatewayDispatchers } =
       await import('../../../../app/data-sources/rural-payments/gateway-dispatcher.js')
     resetGatewayDispatchers()
@@ -53,33 +57,35 @@ describe('RuralPayments Custom Fetch', () => {
       'kits.external.gatewayUrl': fakeExternalURL
     }
     const originalConfig = { ...config }
-    jest
-      .spyOn(config, 'get')
-      .mockImplementation((path) =>
-        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-      )
+    vi.spyOn(config, 'get').mockImplementation((path) =>
+      configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+    )
 
     // ensure decoded MTLS objects are present on the config for constructor to pick up
     config.internalMTLS = { key: fakeKey, cert: fakeCert }
     config.externalMTLS = { key: fakeKey, cert: fakeCert }
 
-    jest.spyOn(global, 'fetch').mockImplementation((...args) => args)
-    // EnvHttpProxyAgent is mocked at module-level (see jest.mock above) so constructor args will be
+    vi.spyOn(global, 'fetch').mockImplementation((...args) => args)
+    // EnvHttpProxyAgent is mocked at module-level (see vi.mock above) so constructor args will be
     // available on EnvHttpProxyAgent.mockConstructorArgs.
-    jest.spyOn(tls, 'createSecureContext').mockImplementation((...args) => args)
-    jest.spyOn(AbortSignal, 'timeout').mockReturnValue([timeout])
+    vi.spyOn(tls, 'createSecureContext').mockImplementation((...args) => args)
+    vi.spyOn(AbortSignal, 'timeout').mockReturnValue([timeout])
   })
+
+  async function importRuralPayments() {
+    vi.resetModules()
+    vi.doMock('../../../../app/config.js', () => ({ config }))
+    return import('../../../../app/data-sources/rural-payments/RuralPayments.js')
+  }
 
   afterEach(() => {
     delete config.internalMTLS
     delete config.externalMTLS
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   it('should initialise; fetch has Internal mTLS, gateway, & timeout', async () => {
-    const { RuralPayments } = await import(
-      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
-    )
+    const { RuralPayments } = await importRuralPayments()
     const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
       request
@@ -97,7 +103,7 @@ describe('RuralPayments Custom Fetch', () => {
 
     // check that the fetch works as expected with mTLS and timeout and that the EnvHttpProxyAgent
     // constructor gets the decoded credentials when the fetch is invoked
-    fetch11.mockImplementationOnce(() => 'data')
+    mocks.fetch11.mockImplementationOnce(() => 'data')
     expect(
       rp.httpCache.httpFetch(`${fakeInternalURL}example-path`, {
         method: 'GET',
@@ -106,8 +112,8 @@ describe('RuralPayments Custom Fetch', () => {
     ).toBe('data')
     expect(EnvHttpProxyAgent.mockConstructorArgs).toEqual({ requestTls })
 
-    expect(fetch11.mock.calls.length).toBe(1)
-    const callArgs = fetch11.mock.calls[0]
+    expect(mocks.fetch11.mock.calls.length).toBe(1)
+    const callArgs = mocks.fetch11.mock.calls[0]
     expect(callArgs[0]).toBe(`${fakeInternalURL}example-path`)
     expect(callArgs[1]).toMatchObject({
       method: 'GET',
@@ -118,27 +124,23 @@ describe('RuralPayments Custom Fetch', () => {
   })
 
   it('defaults options to {} when httpFetch is called without options (mTLS)', async () => {
-    const { RuralPayments } = await import(
-      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
-    )
+    const { RuralPayments } = await importRuralPayments()
     const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
       request
     })
 
-    fetch11.mockImplementationOnce(() => 'data')
+    mocks.fetch11.mockImplementationOnce(() => 'data')
     expect(rp.httpCache.httpFetch(`${fakeInternalURL}example-path`)).toBe('data')
 
-    const callArgs = fetch11.mock.calls[0]
+    const callArgs = mocks.fetch11.mock.calls[0]
     expect(callArgs[0]).toBe(`${fakeInternalURL}example-path`)
     expect(callArgs[1]).toMatchObject({ signal: [timeout] })
     expect(callArgs[1].dispatcher).toBeDefined()
   })
 
   it('should initialise; fetch has External mTLS, gateway, & timeout', async () => {
-    const { RuralPayments } = await import(
-      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
-    )
+    const { RuralPayments } = await importRuralPayments()
     const request = { headers: { 'x-forwarded-authorization': 'token123' } }
     const rp = new RuralPayments(config, {
       request
@@ -156,7 +158,7 @@ describe('RuralPayments Custom Fetch', () => {
     expect(EnvHttpProxyAgent.mockConstructorArgs).toEqual({ requestTls })
 
     // check that the fetch works as expected with mTLS and timeout
-    fetch11.mockImplementationOnce(() => 'data')
+    mocks.fetch11.mockImplementationOnce(() => 'data')
     expect(
       rp.httpCache.httpFetch(`${fakeExternalURL}example-path`, {
         method: 'GET',
@@ -164,8 +166,8 @@ describe('RuralPayments Custom Fetch', () => {
       })
     ).toBe('data')
 
-    expect(fetch11.mock.calls.length).toBe(1)
-    const callArgs = fetch11.mock.calls[0]
+    expect(mocks.fetch11.mock.calls.length).toBe(1)
+    const callArgs = mocks.fetch11.mock.calls[0]
     expect(callArgs[0]).toBe(`${fakeExternalURL}example-path`)
     expect(callArgs[1]).toMatchObject({
       method: 'GET',
@@ -178,9 +180,7 @@ describe('RuralPayments Custom Fetch', () => {
   it('should initialise; fetch has internal URL, a timeout, but no mTLS', async () => {
     configMockPath['kits.disableMTLS'] = true
 
-    const { RuralPayments } = await import(
-      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
-    )
+    const { RuralPayments } = await importRuralPayments()
     const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
       request
@@ -208,9 +208,7 @@ describe('RuralPayments Custom Fetch', () => {
   it('defaults options to {} when httpFetch is called without options (no mTLS)', async () => {
     configMockPath['kits.disableMTLS'] = true
 
-    const { RuralPayments } = await import(
-      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
-    )
+    const { RuralPayments } = await importRuralPayments()
     const request = { headers: { email: 'test@test.test' } }
     const rp = new RuralPayments(config, {
       request
@@ -226,9 +224,7 @@ describe('RuralPayments Custom Fetch', () => {
   it('should initialise; fetch has external URL, a timeout, but no mTLS', async () => {
     configMockPath['kits.disableMTLS'] = true
 
-    const { RuralPayments } = await import(
-      `../../../../app/data-sources/rural-payments/RuralPayments.js?update=${Date.now()}`
-    )
+    const { RuralPayments } = await importRuralPayments()
     const request = { headers: { 'x-forwarded-authorization': 'token123' } }
     const rp = new RuralPayments(config, {
       request

@@ -1,15 +1,15 @@
-import { expect, jest } from '@jest/globals'
+import { expect, vi } from 'vitest'
 import { DAL_HEALTH_CHECK_001 } from '../../../../app/logger/codes.js'
 
 const mockLogger = {
-  info: jest.fn(),
-  error: jest.fn()
+  info: vi.fn(),
+  error: vi.fn()
 }
 
-const mockSnsPublish = jest.fn()
+const mockSnsPublish = vi.fn()
 
-jest.unstable_mockModule('../../../../app/logger/logger.js', () => ({ logger: mockLogger }))
-jest.unstable_mockModule('../../../../app/audit/sns-publisher.js', () => ({
+vi.doMock('../../../../app/logger/logger.js', () => ({ logger: mockLogger }))
+vi.doMock('../../../../app/audit/sns-publisher.js', () => ({
   snsPublish: mockSnsPublish
 }))
 
@@ -17,11 +17,11 @@ const { healthCheck } = await import('../../../../app/utils/health/audit.js')
 
 describe('audit startup health check', () => {
   afterEach(() => {
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('publishes a dummy audit event when SNS is configured', async () => {
-    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => {
       if (key === 'audit.sns.topicArn')
         return 'arn:aws:sns:eu-west-2:000000000000:startup-audit-topic'
@@ -44,7 +44,7 @@ describe('audit startup health check', () => {
   })
 
   it('sets a cdp-prefixed environment when cdp.env is configured', async () => {
-    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => {
       if (key === 'audit.sns.topicArn')
         return 'arn:aws:sns:eu-west-2:000000000000:startup-audit-topic'
@@ -61,7 +61,7 @@ describe('audit startup health check', () => {
   })
 
   it('skips publication when no SNS topic is configured', async () => {
-    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => {
       if (key === 'audit.sns.topicArn') return null
       return null
@@ -75,7 +75,7 @@ describe('audit startup health check', () => {
   })
 
   it('logs and rethrows when SNS publishing fails', async () => {
-    const configGet = jest.spyOn((await import('../../../../app/config.js')).config, 'get')
+    const configGet = vi.spyOn((await import('../../../../app/config.js')).config, 'get')
     configGet.mockImplementation((key) => {
       if (key === 'audit.sns.topicArn')
         return 'arn:aws:sns:eu-west-2:000000000000:startup-audit-topic'
