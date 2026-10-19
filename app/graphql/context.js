@@ -21,11 +21,9 @@ export async function context({ request }) {
   auth.appid = auth.appid ?? auth.azp
 
   const requestingService = getRequestingService(auth.groups ?? [])
-  // Following the pattern used by transactionId and traceId
   request.requestingService = requestingService
 
   const requestLogger = logger.child({
-    transactionId: request.transactionId,
     traceId: request.traceId,
     ...(requestingService && { tenant: { id: requestingService } })
   })

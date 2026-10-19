@@ -34,8 +34,7 @@ const fixture = {
       'content-type': 'application/json',
       Authorization: 'Bearer token',
       email: 'probably.should@redacted.be',
-      'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
-      'x-ms-client-request-id': 'power-apps-req-id'
+      'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
     },
     retryCount: 1,
     params,
@@ -50,7 +49,6 @@ const fixture = {
   requestTimeMs: 100,
   tenant: { id: 'tenant-id', message: 'some tenant info' },
   otherItems: 'will be omitted', // because they will be pruned by CDP's log processing
-  transactionId: 'transaction-id',
   traceId: 'trace-id'
 }
 
@@ -70,7 +68,6 @@ describe('winstonFormatters', () => {
       expect(result).toEqual({
         message: '#datasource - Rural payments - request',
         level: 'info',
-        'transaction.id': 'transaction-id',
         'trace.id': 'trace-id',
         'span.id': 'trace-id',
         // NOTE: this example was built based on the CDP source schema config, found at:
@@ -99,8 +96,7 @@ describe('winstonFormatters', () => {
               'content-type': 'application/json',
               Authorization: 'Bearer token',
               email: 'probably.should@redacted.be',
-              'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
-              'x-ms-client-request-id': 'power-apps-req-id'
+              'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
             }
           },
           response: {
@@ -139,8 +135,7 @@ describe('winstonFormatters', () => {
             'content-type': 'application/json',
             Authorization: 'Bearer token',
             email: 'probably.should@redacted.be',
-            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000',
-            'x-ms-client-request-id': 'power-apps-req-id'
+            'x-cdp-request-id': '00000000-0000-0000-0000-000000000000'
           }
         }
       },
