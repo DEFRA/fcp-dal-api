@@ -1113,6 +1113,71 @@ describe('Business Mutation addCustomerToBusiness', () => {
     ).toHaveBeenCalledWith('org-1', expectedMutateCustomerPermissionsAndRelationshipToBusinessBody)
     expect(response).toEqual({ success: true })
   })
+
+  it('records audit entity and accounts', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        createAuthorisationForOrganisation: vi.fn().mockResolvedValue({ success: true })
+      },
+      permissions: new Permissions()
+    }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+    const info = { path: { key: 'addCustomerToBusiness', typename: 'Mutation', prev: undefined } }
+
+    await Mutation.addCustomerToBusiness(
+      {},
+      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'org-1')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'person-1')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission',
+      action: 'created',
+      entityid: '111111111-1111111100'
+    })
+  })
+
+  it('records audit entity even when organisation lookup fails', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockRejectedValue(new Error('not found')),
+        createAuthorisationForOrganisation: vi.fn()
+      },
+      permissions: new Permissions()
+    }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+    const info = { path: { key: 'addCustomerToBusiness', typename: 'Mutation', prev: undefined } }
+
+    await expect(
+      Mutation.addCustomerToBusiness(
+        {},
+        { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('not found')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission',
+      action: 'created',
+      entityid: '111111111-1111111100'
+    })
+  })
 })
 
 describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness', () => {
@@ -1147,6 +1212,83 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
       expectedMutateCustomerPermissionsAndRelationshipToBusinessBody
     )
     expect(response).toEqual({ success: true })
+  })
+
+  it('records audit entity and accounts', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        updateAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
+      },
+      permissions: new Permissions()
+    }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+    const info = {
+      path: {
+        key: 'updateCustomerPermissionsAndRelationshipToBusiness',
+        typename: 'Mutation',
+        prev: undefined
+      }
+    }
+
+    await Mutation.updateCustomerPermissionsAndRelationshipToBusiness(
+      {},
+      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'org-1')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'person-1')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission',
+      action: 'updated',
+      entityid: '111111111-1111111100'
+    })
+  })
+
+  it('records audit entity even when organisation lookup fails', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockRejectedValue(new Error('not found')),
+        updateAuthorisationForPersonOnOrganisation: vi.fn()
+      },
+      permissions: new Permissions()
+    }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+    const info = {
+      path: {
+        key: 'updateCustomerPermissionsAndRelationshipToBusiness',
+        typename: 'Mutation',
+        prev: undefined
+      }
+    }
+
+    await expect(
+      Mutation.updateCustomerPermissionsAndRelationshipToBusiness(
+        {},
+        { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('not found')
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission',
+      action: 'updated',
+      entityid: '111111111-1111111100'
+    })
   })
 })
 
