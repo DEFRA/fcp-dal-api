@@ -109,6 +109,17 @@ describe('Server config and startup', () => {
       )
     })
 
+    test('onRequest defines a traceId when x-cdp-request-id header is absent', async () => {
+      await server.inject({ method: 'GET', url: '/healthy' })
+
+      expect(mockLogger.logger.debug).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({
+          traceId: expect.any(String)
+        })
+      )
+    })
+
     test('response event logs and sends metrics (non-health path)', async () => {
       await server.inject({
         method: 'GET',

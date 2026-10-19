@@ -1,6 +1,7 @@
 import hapi from '@hapi/hapi'
 
 import { Unit } from 'aws-embedded-metrics'
+import { v4 as uuidv4 } from 'uuid'
 import { config } from './config.js'
 import { DAL_APPLICATION_REQUEST_001, DAL_APPLICATION_RESPONSE_001 } from './logger/codes.js'
 import { logger } from './logger/logger.js'
@@ -37,7 +38,9 @@ server.ext({
 server.ext({
   type: 'onRequest',
   method: function (request, h) {
-    request.traceId = request.headers['x-cdp-request-id']
+    // CDP always sets x-cdp-request-id; fall back to a uuid so downstream consumers (audit
+    // correlationid, Hitachi correlationId) always have a value outside CDP
+    request.traceId = request.headers['x-cdp-request-id'] || uuidv4()
 
     logger.debug('FCP - Access log', {
       request: {
