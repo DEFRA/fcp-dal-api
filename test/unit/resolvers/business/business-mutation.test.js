@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { Permissions } from '../../../../app/data-sources/static/permissions.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../../app/transformers/rural-payments/business.js'
 
 const mockBusinessCommonModule = {
@@ -1058,6 +1059,94 @@ describe('Business Mutation updateBusinessUnlockStatus', () => {
     expect(mockBusinessCommonModule.businessUnlockResolver).toHaveBeenCalledWith({}, mockArgs, {
       dataSources
     })
+  })
+})
+
+const mutateCustomerPermissionsAndRelationshipToBusinessInput = {
+  sbi: '111111111',
+  crn: '1111111100',
+  role: 'Agent',
+  permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
+}
+
+const expectedMutateCustomerPermissionsAndRelationshipToBusinessBody = {
+  personRoles: [
+    {
+      role: 'Agent',
+      personId: 'person-1'
+    }
+  ],
+  personPrivileges: [
+    {
+      privilegeNames: ['Full permission - business'],
+      personId: 'person-1'
+    }
+  ]
+}
+
+describe('Business Mutation addCustomerToBusiness', () => {
+  it('transforms permissions to privilege names for the upstream request', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        createAuthorisationForOrganisation: vi.fn().mockResolvedValue({ success: true })
+      },
+      permissions: new Permissions()
+    }
+
+    const response = await Mutation.addCustomerToBusiness(
+      {},
+      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
+      '111111111'
+    )
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
+      '1111111100',
+      dataSources
+    )
+    expect(
+      dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation
+    ).toHaveBeenCalledWith('org-1', expectedMutateCustomerPermissionsAndRelationshipToBusinessBody)
+    expect(response).toEqual({ success: true })
+  })
+})
+
+describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness', () => {
+  it('transforms permissions to privilege names for the upstream request', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        updateAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
+      },
+      permissions: new Permissions()
+    }
+
+    const response = await Mutation.updateCustomerPermissionsAndRelationshipToBusiness(
+      {},
+      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
+      '111111111'
+    )
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
+      '1111111100',
+      dataSources
+    )
+    expect(
+      dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
+    ).toHaveBeenCalledWith(
+      'org-1',
+      'person-1',
+      expectedMutateCustomerPermissionsAndRelationshipToBusinessBody
+    )
+    expect(response).toEqual({ success: true })
   })
 })
 

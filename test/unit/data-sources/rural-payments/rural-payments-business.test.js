@@ -674,6 +674,17 @@ describe('Rural Payments Business', () => {
         'Business deactivation failed. Business status is not in lock state or business does not exist'
       )
     })
+
+    test('should rethrow the upstream error when business is locked', async () => {
+      const mockError = new Error('fetch error')
+      mockError.extensions = { http: { status: 500 } }
+      httpPost.mockRejectedValueOnce(mockError)
+      httpGet.mockImplementationOnce(async () => ({ _data: { id: '123', locked: true } }))
+
+      await expect(
+        ruralPaymentsBusiness.deactivateOrganisation('123', { reason: 'test' })
+      ).rejects.toThrow(mockError)
+    })
   })
 
   describe('getLandUseByBusinessParcel', () => {
@@ -853,6 +864,52 @@ describe('Rural Payments Business', () => {
           /^SitiAgriApi\/authorisation\/organisation\/123456789\/byFunction\?functions=viewLand%7Cdoes%23Not%26Exist&module=CUST_SS_PORTAL&timestamp=\d+$/
         )
       )
+    })
+  })
+
+  describe('createAuthorisationForOrganisation', () => {
+    test('should call post endpoint and return response', async () => {
+      const fakeResponse = { success: true }
+      const body = { personId: 'personId', roleId: 'roleId' }
+      httpPost.mockImplementationOnce(async () => fakeResponse)
+
+      const response = await ruralPaymentsBusiness.createAuthorisationForOrganisation('orgId', body)
+
+      expect(httpPost).toHaveBeenCalledWith(
+        'SitiAgriApi/authorisation/organisation/orgId/authorisation',
+        {
+          body,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      expect(response).toEqual(fakeResponse)
+    })
+  })
+
+  describe('updateAuthorisationForPersonOnOrganisation', () => {
+    test('should call put endpoint and return response', async () => {
+      const fakeResponse = { success: true }
+      const body = { roleId: 'roleId' }
+      httpPut.mockImplementationOnce(async () => fakeResponse)
+
+      const response = await ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
+        'orgId',
+        'personId',
+        body
+      )
+
+      expect(httpPut).toHaveBeenCalledWith(
+        'SitiAgriApi/authorisation/organisation/orgId/authorisation/person/personId',
+        {
+          body,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+      expect(response).toEqual(fakeResponse)
     })
   })
 })

@@ -5,7 +5,8 @@ import { logger } from '../../../logger/logger.js'
 import {
   transformBankChangeInputToSubmission,
   transformBusinessDetailsToOrgDetailsCreate,
-  transformOrganisationToBusiness
+  transformOrganisationToBusiness,
+  transformPermissionGroupsToBusinessCustomerPrivileges
 } from '../../../transformers/rural-payments/business.js'
 import { retrievePersonIdByCRN } from '../customer/common.js'
 import {
@@ -29,6 +30,31 @@ const getOrganisation = async (dataSources, sbi) => {
     throw new NotFound('FRN not found for business')
   }
   return organisation
+}
+
+const buildCustomerAuthorisationRequest = async (input, dataSources) => {
+  const { sbi, crn, role, permissions } = input
+  const [organisationId, personId] = await Promise.all([
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
+    retrievePersonIdByCRN(crn, dataSources)
+  ])
+
+  return {
+    organisationId,
+    personId,
+    body: {
+      personRoles: [{ role, personId }],
+      personPrivileges: [
+        {
+          privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
+            permissions,
+            dataSources.permissions.getPermissionGroups()
+          ),
+          personId
+        }
+      ]
+    }
+  }
 }
 
 const validateBankChangeRequest = async (input, dataSources, organisation) => {
@@ -203,7 +229,29 @@ export const Mutation = {
   updateBusinessLock: businessLockResolver,
   updateBusinessUnlock: businessUnlockResolver,
   updateBusinessReactivate: businessReactivateResolver,
-  updateBusinessDeactivate: businessDeactivateResolver
+  updateBusinessDeactivate: businessDeactivateResolver,
+
+  addCustomerToBusiness: async (_, { input }, { dataSources }) => {
+    const { organisationId, body } = await buildCustomerAuthorisationRequest(input, dataSources)
+
+    return dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(
+      organisationId,
+      body
+    )
+  },
+
+  updateCustomerPermissionsAndRelationshipToBusiness: async (_, { input }, { dataSources }) => {
+    const { organisationId, personId, body } = await buildCustomerAuthorisationRequest(
+      input,
+      dataSources
+    )
+
+    return dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
+      organisationId,
+      personId,
+      body
+    )
+  }
 }
 
 export const UpdateBusinessResponse = {
