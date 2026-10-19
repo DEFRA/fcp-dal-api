@@ -48,13 +48,13 @@ const buildCustomerAuthorisationRequest = async ({
     entityid: `${sbi}-${crn}`
   })
   const [organisationId, personId] = await Promise.all([
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi).then((organisationId) => {
-      auditTrail?.recordAccount(info, 'organisationId', organisationId)
-      return organisationId
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi).then((id) => {
+      auditTrail?.recordAccount(info, 'organisationId', id)
+      return id
     }),
-    retrievePersonIdByCRN(crn, dataSources).then((personId) => {
-      auditTrail?.recordAccount(info, 'personId', personId)
-      return personId
+    retrievePersonIdByCRN(crn, dataSources).then((id) => {
+      auditTrail?.recordAccount(info, 'personId', id)
+      return id
     })
   ])
 
