@@ -5,7 +5,6 @@ export default defineConfig({
     setupFiles: ['dotenv/config', './test/setup.js'],
     globalSetup: ['./test/vitest-global-setup.js'],
     mockReset: true,
-    fileParallelism: false,
     server: {
       deps: {
         inline: [
