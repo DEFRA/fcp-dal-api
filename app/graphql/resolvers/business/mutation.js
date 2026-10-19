@@ -32,11 +32,30 @@ const getOrganisation = async (dataSources, sbi) => {
   return organisation
 }
 
-const buildCustomerAuthorisationRequest = async (input, dataSources) => {
+const buildCustomerAuthorisationRequest = async ({
+  input,
+  dataSources,
+  auditTrail,
+  info,
+  action
+}) => {
   const { sbi, crn, role, permissions } = input
+  auditTrail?.recordAccount(info, 'sbi', sbi)
+  auditTrail?.recordAccount(info, 'crn', crn)
+  auditTrail?.recordEntity(info, {
+    entity: 'permission',
+    action,
+    entityid: `${sbi}-${crn}`
+  })
   const [organisationId, personId] = await Promise.all([
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi),
-    retrievePersonIdByCRN(crn, dataSources)
+    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi).then((organisationId) => {
+      auditTrail?.recordAccount(info, 'organisationId', organisationId)
+      return organisationId
+    }),
+    retrievePersonIdByCRN(crn, dataSources).then((personId) => {
+      auditTrail?.recordAccount(info, 'personId', personId)
+      return personId
+    })
   ])
 
   return {
@@ -231,8 +250,14 @@ export const Mutation = {
   updateBusinessReactivate: businessReactivateResolver,
   updateBusinessDeactivate: businessDeactivateResolver,
 
-  addCustomerToBusiness: async (_, { input }, { dataSources }) => {
-    const { organisationId, body } = await buildCustomerAuthorisationRequest(input, dataSources)
+  addCustomerToBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
+    const { organisationId, body } = await buildCustomerAuthorisationRequest({
+      input,
+      dataSources,
+      auditTrail,
+      info,
+      action: 'created'
+    })
 
     return dataSources.ruralPaymentsBusiness.createAuthorisationForOrganisation(
       organisationId,
@@ -240,11 +265,19 @@ export const Mutation = {
     )
   },
 
-  updateCustomerPermissionsAndRelationshipToBusiness: async (_, { input }, { dataSources }) => {
-    const { organisationId, personId, body } = await buildCustomerAuthorisationRequest(
+  updateCustomerPermissionsAndRelationshipToBusiness: async (
+    _,
+    { input },
+    { dataSources, auditTrail },
+    info
+  ) => {
+    const { organisationId, personId, body } = await buildCustomerAuthorisationRequest({
       input,
-      dataSources
-    )
+      dataSources,
+      auditTrail,
+      info,
+      action: 'updated'
+    })
 
     return dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
       organisationId,
