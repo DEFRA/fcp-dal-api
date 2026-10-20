@@ -53,6 +53,9 @@ extend type Mutation {
   Sends a verification email to the registered email address of the external
   customer making the request, identified by the CRN in their Defra ID token.
 
+  If `input.email` is given, the verification email is sent to that address instead,
+  and the customer's email address is updated to it once it is validated.
+
   In environments where customer emails are disabled (emails are only sent in
   `prod` and `ext-test`), the email verification link is logged instead, so it
   can be found by searching the DAL logs for `Email verification link`. The
@@ -60,11 +63,15 @@ extend type Mutation {
   `<rural payments portal url>/validate-email/<url-encoded email address>/<digital contact id>`
 
   Error codes:
-  - `NOT FOUND`: The customer has no email address.
-  - `EMAIL_ALREADY_VERIFIED`: The customer's email address is already verified.
+  - `CUSTOMER_MISSING_EMAIL`: The customer has no email address, even if
+    `input.email` is given.
+  - `EMAIL_ALREADY_VERIFIED`: The email address to confirm is the customer's
+    current email address, and it is already verified.
   """
   # eslint-disable-next-line @graphql-eslint/naming-convention
-  sendConfirmEmailAddressEmail: SendConfirmEmailAddressEmailResponse
+  sendConfirmEmailAddressEmail(
+    input: SendConfirmEmailAddressEmailInput
+  ): SendConfirmEmailAddressEmailResponse
     @wip
     @auth(requires: [SINGLE_FRONT_DOOR], userType: [EXTERNAL])
 
@@ -322,6 +329,15 @@ input UpdateCustomerAllFieldsInput {
 type UpdateCustomerResponse {
   success: Boolean
   customer: Customer
+}
+
+input SendConfirmEmailAddressEmailInput {
+  """
+  Email address to confirm. If given, the customer's email address is updated
+  to it once it is validated. Defaults to the customer's current email address.
+  """
+  # Same permissive email check as EmailInput.address
+  email: String @validateVariable(pattern: "^(?=.{6,254}$)[^@\\s]+@[^@\\s]+[.][^@\\s]+$")
 }
 
 type SendConfirmEmailAddressEmailResponse {

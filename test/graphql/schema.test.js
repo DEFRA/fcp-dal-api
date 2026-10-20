@@ -109,13 +109,14 @@ describe('schema', () => {
 
     expect(findDangerousChanges(rawSchema, schema)).toHaveLength(0)
     let changes = findBreakingChanges(rawSchema, schema)
-    expect(changes).toHaveLength(15) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
+    expect(changes).toHaveLength(16) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
     expect(changes).toEqual(
       // loose array check, so ordering isn't important, length MUST match, see above
       expect.arrayContaining([
         { type: 'TYPE_REMOVED', description: 'AuthGroup was removed.' },
         { type: 'TYPE_REMOVED', description: 'UserAccessType was removed.' },
         { type: 'TYPE_REMOVED', description: 'SendConfirmEmailAddressEmailResponse was removed.' },
+        { type: 'TYPE_REMOVED', description: 'SendConfirmEmailAddressEmailInput was removed.' },
         { type: 'TYPE_REMOVED', description: 'Numeric was removed.' },
         { type: 'TYPE_REMOVED', description: 'Image was removed.' },
         { type: 'TYPE_REMOVED', description: 'UUID was removed.' },

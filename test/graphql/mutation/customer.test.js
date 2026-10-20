@@ -1126,21 +1126,21 @@ describe('customer mutations', () => {
 
   describe('sendConfirmEmailAddressEmail', () => {
     const sendConfirmEmailAddressEmailMutation = `#graphql
-      mutation {
-        sendConfirmEmailAddressEmail {
+      mutation SendConfirmEmailAddressEmail($input: SendConfirmEmailAddressEmailInput) {
+        sendConfirmEmailAddressEmail(input: $input) {
           success
         }
       }
     `
     const sfdGroups = () => [config.get('auth.groups.SINGLE_FRONT_DOOR')]
 
-    const makeExternalQuery = () => {
+    const makeExternalQuery = (variables = {}) => {
       mockDefraIdJwks()
       return makeTestQuery(
         sendConfirmEmailAddressEmailMutation,
         { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
         false,
-        {},
+        variables,
         sfdGroups()
       )
     }
@@ -1195,7 +1195,55 @@ describe('customer mutations', () => {
       })
     })
 
-    test('returns NOT_FOUND when the customer has no email address', async () => {
+    test('sends the email to the given email address', async () => {
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+      mockExternalPerson(kits, 'currentEmail', true)
+
+      kits.get('/person/personId/new%40example.com/confirm').reply(200, {
+        _data: { id: 'digitalContactPartyId', validated: false }
+      })
+
+      kits
+        .post('/external-auth/email-validation', (body) => {
+          expect(body).toEqual({
+            customerReference: '1234567890',
+            partyDigitalContactId: 'digitalContactPartyId',
+            email: 'new@example.com',
+            linkSentDate: expect.any(String)
+          })
+          return true
+        })
+        .reply(200)
+
+      kits.post('/verify-email/digitalContactPartyId').reply(200, { _data: 'Success' })
+
+      const result = await makeExternalQuery({ input: { email: 'new@example.com' } })
+
+      expect(result).toEqual({ data: { sendConfirmEmailAddressEmail: { success: true } } })
+      expect(kits.isDone()).toBe(true)
+    })
+
+    test.each([
+      '',
+      'a@b.c',
+      'no-at-sign.com',
+      'two@@example.com',
+      'has space@example.com',
+      'no@dot'
+    ])('refuses an invalid email address %p', async (email) => {
+      const kits = nock(config.get('kits.external.gatewayUrl'))
+      mockExternalPerson(kits, 'currentEmail')
+
+      const result = await makeExternalQuery({ input: { email } })
+
+      expect(result.errors).toHaveLength(1)
+      expect(result.errors[0].message).toBe(
+        "variable 'input.email' must match pattern ^(?=.{6,254}$)[^@\\s]+@[^@\\s]+[.][^@\\s]+$"
+      )
+      expect(kits.isDone()).toBe(false)
+    })
+
+    test('returns CUSTOMER_MISSING_EMAIL when the customer has no email address', async () => {
       const kits = nock(config.get('kits.external.gatewayUrl'))
       mockExternalPerson(kits, null)
 
@@ -1203,8 +1251,8 @@ describe('customer mutations', () => {
 
       expect(result.errors).toHaveLength(1)
       expect(result.errors[0].message).toBe('Customer has no email address')
-      expect(result.errors[0].extensions.code).toBe('NOT FOUND')
-      expect(result.errors[0].extensions.http.status).toBe(404)
+      expect(result.errors[0].extensions.code).toBe('CUSTOMER_MISSING_EMAIL')
+      expect(result.errors[0].extensions.http.status).toBe(400)
     })
 
     test('returns EMAIL_ALREADY_VERIFIED when the customer email is already verified', async () => {
