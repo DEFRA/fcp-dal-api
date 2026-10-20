@@ -70,7 +70,7 @@ describe('sendConfirmEmailAddressEmail Mutation', () => {
         errors: [
           expect.objectContaining({
             message: 'Customer has no email address',
-            extensions: expect.objectContaining({ code: 'NOT FOUND' })
+            extensions: expect.objectContaining({ code: 'CUSTOMER_MISSING_EMAIL' })
           })
         ]
       }
