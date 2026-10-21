@@ -50,10 +50,14 @@ if (typesCoveredPct < typeThreshold) {
 
 if (fieldsCoveredPct < fieldThreshold) {
   failed = true
+  // Field arguments count towards the field total, so list uncovered arguments as `Type.field(arg)`
   const uncovered = Object.entries(types).flatMap(([typeName, type]) =>
-    Object.entries(type.children ?? {})
-      .filter(([, field]) => !field.hits)
-      .map(([fieldName]) => `${typeName}.${fieldName}`)
+    Object.entries(type.children ?? {}).flatMap(([fieldName, field]) => [
+      ...(field.hits ? [] : [`${typeName}.${fieldName}`]),
+      ...Object.entries(field.children ?? {})
+        .filter(([, arg]) => !arg.hits)
+        .map(([argName]) => `${typeName}.${fieldName}(${argName})`)
+    ])
   )
 
   console.error(
