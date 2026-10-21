@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../../app/config.js'
-import { Unauthorized } from '../../../../app/errors/graphql.js'
+import { HttpError, Unauthorized } from '../../../../app/errors/graphql.js'
 import { Mutation } from '../../../../app/graphql/resolvers/customer/mutation.js'
 import { logger } from '../../../../app/logger/logger.js'
 
@@ -418,7 +418,8 @@ describe('Customer Mutations', () => {
         'currentEmail'
       )
       expect(mockDataSources.ruralPaymentsCustomer.sendVerificationEmail).toHaveBeenCalledWith(
-        'digitalContactPartyId'
+        'digitalContactPartyId',
+        'currentEmail'
       )
     })
 
@@ -502,6 +503,37 @@ describe('Customer Mutations', () => {
       }
     )
 
+    test('throws EMAIL_ALREADY_REGISTERED and does not attempt to send an email when confirmEmail returns a 409', async () => {
+      mockDataSources.ruralPaymentsCustomer.confirmEmail.mockRejectedValue(new HttpError(409))
+
+      await expect(
+        Mutation.sendConfirmEmailAddressEmail(
+          null,
+          { input: { email: 'new@example.com' } },
+          { dataSources: mockDataSources, defraIdContext }
+        )
+      ).rejects.toMatchObject({
+        message: 'Email address is already in use by another customer',
+        extensions: { code: 'EMAIL_ALREADY_REGISTERED', http: { status: 400 } }
+      })
+
+      expect(mockDataSources.ruralPaymentsCustomer.saveEmailValidation).not.toHaveBeenCalled()
+      expect(mockDataSources.ruralPaymentsCustomer.sendVerificationEmail).not.toHaveBeenCalled()
+    })
+
+    test('rethrows other errors from confirmEmail', async () => {
+      const error = new HttpError(500)
+      mockDataSources.ruralPaymentsCustomer.confirmEmail.mockRejectedValue(error)
+
+      await expect(
+        Mutation.sendConfirmEmailAddressEmail(
+          null,
+          {},
+          { dataSources: mockDataSources, defraIdContext }
+        )
+      ).rejects.toBe(error)
+    })
+
     describe('when an email is given', () => {
       test('confirms and saves the email validation against the given email', async () => {
         await Mutation.sendConfirmEmailAddressEmail(
@@ -521,7 +553,8 @@ describe('Customer Mutations', () => {
           linkSentDate: expect.any(String)
         })
         expect(mockDataSources.ruralPaymentsCustomer.sendVerificationEmail).toHaveBeenCalledWith(
-          'digitalContactPartyId'
+          'digitalContactPartyId',
+          'new@example.com'
         )
       })
 

@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes'
 import { config } from '../../../config.js'
 import { BadRequest, Forbidden, Unauthorized } from '../../../errors/graphql.js'
 import { logger } from '../../../logger/logger.js'
@@ -79,10 +80,20 @@ async function sendConfirmEmailAddressEmailResolver(
     })
   }
 
-  const { id: digitalContactPartyId } = await dataSources.ruralPaymentsCustomer.confirmEmail(
-    person.id,
-    emailToConfirm
-  )
+  let digitalContact
+  try {
+    digitalContact = await dataSources.ruralPaymentsCustomer.confirmEmail(person.id, emailToConfirm)
+  } catch (error) {
+    // The customer's own verified email is rejected above, so a 409 means another customer has
+    // already verified this email address
+    if (error?.extensions?.http?.status === StatusCodes.CONFLICT) {
+      throw new BadRequest('Email address is already in use by another customer', {
+        extensions: { code: 'EMAIL_ALREADY_REGISTERED' }
+      })
+    }
+    throw error
+  }
+  const { id: digitalContactPartyId } = digitalContact
 
   await dataSources.ruralPaymentsCustomer.saveEmailValidation({
     customerReference: crn,
@@ -91,7 +102,10 @@ async function sendConfirmEmailAddressEmailResolver(
     linkSentDate: new Date().toISOString()
   })
 
-  await dataSources.ruralPaymentsCustomer.sendVerificationEmail(digitalContactPartyId)
+  await dataSources.ruralPaymentsCustomer.sendVerificationEmail(
+    digitalContactPartyId,
+    emailToConfirm
+  )
 
   if (config.get('ruralPayments.customerEmailsDisabled')) {
     const portalUrl = config.get('ruralPayments.portalUrl')

@@ -18,14 +18,38 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return response._data
   }
 
+  /**
+   * Gets the party digital contact for an email address the person wants to verify, which is then
+   * used to save the email validation and send the verification email. The email can be the
+   * person's current email address or a new one that replaces it once validated.
+   *
+   * @param {string | number} personId - Rural payments ID of the person.
+   * @param {string} email - The email address to confirm.
+   * @returns {Promise<object>} The party digital contact for the email, including its `id`
+   * (partyDigitalContactId), `digitalAddress` and `validated` status. Note that `validated` is
+   * for the person's current email address, not the supplied email address.
+   * @throws {HttpError} When the upstream request fails, e.g. a 409 when the email is already
+   * verified (by this or another person), or a 404 when the person has no email address.
+   */
   async confirmEmail(personId, email) {
     const response = await this.get(`person/${personId}/${encodeURIComponent(email)}/confirm`)
     return response._data
   }
 
-  // Saves/replaces the pending EMAIL_VALIDATION record (customerReference, partyDigitalContactId,
-  // email, linkSentDate) that the verification link sent by sendVerificationEmail is checked
-  // against when the customer follows it.
+  /**
+   * Saves or replaces the pending EMAIL_VALIDATION record that the verification link sent by
+   * sendVerificationEmail is checked against when the customer follows it.
+   *
+   * @param {object} emailValidation - The email validation to save.
+   * @param {string} emailValidation.customerReference - Customer Reference Number (CRN) of the
+   * customer.
+   * @param {string | number} emailValidation.partyDigitalContactId - ID of the party digital
+   * contact returned by confirmEmail.
+   * @param {string} emailValidation.email - The email address being verified.
+   * @param {string} emailValidation.linkSentDate - ISO 8601 date the verification link was sent.
+   * @returns {Promise<object>} The upstream response.
+   * @throws {HttpError} When the upstream request fails.
+   */
   saveEmailValidation({ customerReference, partyDigitalContactId, email, linkSentDate }) {
     return this.post('external-auth/email-validation', {
       body: { customerReference, partyDigitalContactId, email, linkSentDate },
@@ -33,9 +57,21 @@ export class RuralPaymentsCustomer extends RuralPayments {
     })
   }
 
-  async sendVerificationEmail(digitalContactPartyId) {
+  /**
+   * Sends the customer an email with a link to verify their email address, which is checked
+   * against the EMAIL_VALIDATION record saved by saveEmailValidation when the customer follows it.
+   *
+   * @param {string | number} digitalContactPartyId - ID of the party digital contact returned by
+   * confirmEmail.
+   * @param {string} email - The email address to verify, sent as the plain text request body.
+   * @returns {Promise<string>} The upstream response data, e.g. `Success`.
+   * @throws {HttpError} When the upstream request fails, e.g. a 500 when the email is missing or
+   * empty.
+   */
+  async sendVerificationEmail(digitalContactPartyId, email) {
     const response = await this.post(`verify-email/${digitalContactPartyId}`, {
-      headers: postPutHeaders
+      body: email,
+      headers: { 'Content-Type': 'text/plain' }
     })
     return response._data
   }

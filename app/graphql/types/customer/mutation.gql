@@ -67,6 +67,8 @@ extend type Mutation {
     `input.email` is given.
   - `EMAIL_ALREADY_VERIFIED`: The email address to confirm is the customer's
     current email address, and it is already verified.
+  - `EMAIL_ALREADY_REGISTERED`: The email address to confirm is already verified
+    by another customer. No email is sent.
   """
   # eslint-disable-next-line @graphql-eslint/naming-convention
   sendConfirmEmailAddressEmail(

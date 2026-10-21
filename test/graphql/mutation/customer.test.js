@@ -1182,7 +1182,9 @@ describe('customer mutations', () => {
         })
         .reply(200)
 
-      kits.post('/verify-email/digitalContactPartyId').reply(200, { _data: 'Success' })
+      kits
+        .post('/verify-email/digitalContactPartyId', 'currentEmail')
+        .reply(200, { _data: 'Success' })
 
       const result = await makeExternalQuery()
 
@@ -1215,7 +1217,9 @@ describe('customer mutations', () => {
         })
         .reply(200)
 
-      kits.post('/verify-email/digitalContactPartyId').reply(200, { _data: 'Success' })
+      kits
+        .post('/verify-email/digitalContactPartyId', 'new@example.com')
+        .reply(200, { _data: 'Success' })
 
       const result = await makeExternalQuery({ input: { email: 'new@example.com' } })
 
