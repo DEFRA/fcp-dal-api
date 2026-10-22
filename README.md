@@ -24,7 +24,7 @@ More consumer focused documentation can be found on the project [Homepage...](ht
 
 - ### Node.js
 
-  The service is built in JavaScript code and requires [Node.js](http://nodejs.org/) `v22` or later, and [npm](https://nodejs.org/) `v11` or later (older versions will likely work, but are unsupported).
+  The service is built in JavaScript code and requires the [Node.js](http://nodejs.org/) version specified in [`.nvmrc`](.nvmrc) (run `nvm use` to switch to it), and [npm](https://nodejs.org/) `v11` or later (older versions will likely work, but are unsupported).
 
 - ### Docker
 
