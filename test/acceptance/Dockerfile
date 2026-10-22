@@ -1,4 +1,4 @@
-FROM defradigital/node-development:latest-24
+FROM defradigital/node-development:3.2.4-node24.22.1
 
 USER node
 
