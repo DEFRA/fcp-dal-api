@@ -12,6 +12,10 @@ import { validatePastDateInput } from '../../../utils/date.js'
 const BUSINESS_LIST_ENTITY = 'business-list'
 
 export const Customer = {
+  async crn({ crn }) {
+    return crn
+  },
+
   async info({ personId }, __, { dataSources, auditTrail }, info) {
     let response
     try {

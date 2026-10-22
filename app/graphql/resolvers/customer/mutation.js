@@ -5,6 +5,38 @@ import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
 import { retrievePersonIdByCRN } from './common.js'
 
+async function createCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
+  const email = input.email.address
+  const { emailDuplicated } = await dataSources.ruralPaymentsCustomer.validateEmail(email)
+
+  if (emailDuplicated) {
+    throw new BadRequest('Email address is already in use by another customer', {
+      extensions: { code: 'EMAIL_ALREADY_REGISTERED' }
+    })
+  }
+
+  const transformedPerson = transformCustomerUpdateInputToPersonUpdate({}, input)
+  logger.info(`the person transformedPerson is: ${JSON.stringify(transformedPerson, null, 2)}`)
+
+  const person = await dataSources.ruralPaymentsCustomer.createPerson(transformedPerson)
+  logger.info(
+    `the person created ${person.customerReferenceNumber} is: ${JSON.stringify(person, null, 2)}`
+  )
+  const personId = `${person.id}`
+
+  auditTrail?.recordAccount(info, 'personId', personId)
+  auditTrail?.recordEntity(info, {
+    entity: 'person',
+    action: 'created',
+    entityid: person.customerReferenceNumber
+  })
+
+  return {
+    success: true,
+    customer: { personId: person.id, crn: person.customerReferenceNumber }
+  }
+}
+
 async function updateCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
   auditTrail?.recordAccount(info, 'crn', input.crn)
   auditTrail?.recordEntity(info, {
@@ -223,6 +255,7 @@ function validateReasonOrNote(reason, note) {
 }
 
 export const Mutation = {
+  createCustomer: createCustomerResolver,
   updateCustomerAddress: updateCustomerResolver,
   updateCustomerDateOfBirth: updateCustomerResolver,
   updateCustomerEmail: updateCustomerResolver,
