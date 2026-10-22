@@ -8,8 +8,6 @@
 .eslintcache
 .idea
 .npm/
-# cspell:disable-next-line
-.nvmrc
 *.tgz
 .vscode/**/*
 !.vscode/settings.json
