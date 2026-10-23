@@ -11,6 +11,14 @@ const sendConfirmEmailAddressEmailMutation = gql`
   }
 `
 
+const sendConfirmNewEmailAddressEmailMutation = gql`
+  mutation SendConfirmNewEmailAddressEmail($input: SendConfirmEmailAddressEmailInput) {
+    sendConfirmEmailAddressEmail(input: $input) {
+      success
+    }
+  }
+`
+
 const externalUserHeaders = (contactId) => ({
   'x-forwarded-authorization': jwt.sign({ contactId, relationships: [] }, 'test-secret')
 })
@@ -59,6 +67,63 @@ describe('sendConfirmEmailAddressEmail Mutation', () => {
     })
   })
 
+  it('should send a verification email for a new email address to a customer whose email address is already verified', async () => {
+    // person 11111119 (CRN 9111111900) has a validated email address in the mock
+    const client = new GraphQLClient(targetURL)
+    const response = await client.request(
+      sendConfirmNewEmailAddressEmailMutation,
+      { input: { email: 'new-email@example.com' } },
+      externalUserHeaders('9111111900')
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.sendConfirmEmailAddressEmail.success).toBe(true)
+  })
+
+  it("should reject a new email address that is the customer's current verified email address, regardless of case", async () => {
+    // person 11111119 (CRN 9111111900) has the validated email address skeleton@the-closet.net
+    const client = new GraphQLClient(targetURL)
+
+    await expect(
+      client.request(
+        sendConfirmNewEmailAddressEmailMutation,
+        { input: { email: 'SKELETON@the-closet.NET' } },
+        externalUserHeaders('9111111900')
+      )
+    ).rejects.toMatchObject({
+      response: {
+        errors: [
+          expect.objectContaining({
+            message: 'Customer email address is already verified',
+            extensions: expect.objectContaining({ code: 'EMAIL_ALREADY_VERIFIED' })
+          })
+        ]
+      }
+    })
+  })
+
+  it('should reject a new email address that is already verified by another customer', async () => {
+    // skeleton@the-closet.net is validated by person 11111119 in the mock
+    const client = new GraphQLClient(targetURL)
+
+    await expect(
+      client.request(
+        sendConfirmNewEmailAddressEmailMutation,
+        { input: { email: 'skeleton@the-closet.net' } },
+        externalUserHeaders('9111112100')
+      )
+    ).rejects.toMatchObject({
+      response: {
+        errors: [
+          expect.objectContaining({
+            message: 'Email address is already in use by another customer',
+            extensions: expect.objectContaining({ code: 'EMAIL_ALREADY_REGISTERED' })
+          })
+        ]
+      }
+    })
+  })
+
   it('should reject a customer with no email address', async () => {
     // person 3010085 (CRN 3010000085) has no email address in the mock
     const client = new GraphQLClient(targetURL)
@@ -70,7 +135,7 @@ describe('sendConfirmEmailAddressEmail Mutation', () => {
         errors: [
           expect.objectContaining({
             message: 'Customer has no email address',
-            extensions: expect.objectContaining({ code: 'NOT FOUND' })
+            extensions: expect.objectContaining({ code: 'CUSTOMER_MISSING_EMAIL' })
           })
         ]
       }

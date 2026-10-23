@@ -132,6 +132,22 @@ const maskPathPII = (pathStr) => {
   return pathStr
 }
 
+// Request bodies are usually JSON, but some are not (e.g. verify-email posts the email address as
+// text/plain). A non-JSON body is not logged rather than thrown on, as a logging failure would
+// fail the request, and pickKeysForLogging would return a plain value (possibly PII) unfiltered.
+const parseBodyForLogging = (body) => {
+  if (typeof body !== 'string') {
+    return body
+  }
+
+  try {
+    const parsedBody = JSON.parse(body)
+    return typeof parsedBody === 'object' ? parsedBody : undefined
+  } catch {
+    return undefined
+  }
+}
+
 const buildUrl = ({ body, path, url }) => {
   const result = {}
 
@@ -154,8 +170,8 @@ const buildUrl = ({ body, path, url }) => {
     }
   }
 
-  if (body) {
-    const parsedBody = typeof body === 'string' ? JSON.parse(body) : body
+  const parsedBody = parseBodyForLogging(body)
+  if (parsedBody) {
     result.query = JSON.stringify(pickKeysForLogging(parsedBody))
   }
 

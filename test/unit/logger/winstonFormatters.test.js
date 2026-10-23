@@ -258,6 +258,17 @@ describe('winstonFormatters', () => {
       })
     })
 
+    it.each([
+      ['plain text', 'test@test.com'],
+      ['a JSON string', '"test@test.com"']
+    ])('does not log a %s body', (_, body) => {
+      const result = cdpSchemaTranslator().transform({
+        request: { body, path: '/verify-email/1' }
+      })
+
+      expect(result.url).toEqual({ path: '/verify-email/1', full: '/verify-email/1' })
+    })
+
     it('excludes primarySearchPhrase entirely, since it may hold a crn, name or postcode', () => {
       const result = cdpSchemaTranslator().transform({
         request: {

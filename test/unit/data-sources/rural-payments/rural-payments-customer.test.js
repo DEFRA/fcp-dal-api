@@ -108,11 +108,15 @@ describe('Rural Payments Customer', () => {
   test('should post to verify-email and return the response data from sendVerificationEmail', async () => {
     httpPost.mockImplementationOnce(async () => ({ _data: 'Success' }))
 
-    const result = await ruralPaymentsCustomer.sendVerificationEmail('digitalContactPartyId')
+    const result = await ruralPaymentsCustomer.sendVerificationEmail(
+      'digitalContactPartyId',
+      'test@test.test'
+    )
 
     expect(result).toEqual('Success')
     expect(httpPost).toHaveBeenCalledWith('verify-email/digitalContactPartyId', {
-      headers: { 'Content-Type': 'application/json' }
+      body: 'test@test.test',
+      headers: { 'Content-Type': 'text/plain' }
     })
   })
 

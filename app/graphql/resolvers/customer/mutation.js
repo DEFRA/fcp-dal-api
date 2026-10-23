@@ -1,5 +1,6 @@
+import { StatusCodes } from 'http-status-codes'
 import { config } from '../../../config.js'
-import { BadRequest, Forbidden, NotFound, Unauthorized } from '../../../errors/graphql.js'
+import { BadRequest, Forbidden, Unauthorized } from '../../../errors/graphql.js'
 import { logger } from '../../../logger/logger.js'
 import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
@@ -45,7 +46,7 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
 // the one identified by the CRN in the request's Defra ID token.
 async function sendConfirmEmailAddressEmailResolver(
   _,
-  __,
+  { input },
   { dataSources, auditTrail, defraIdContext },
   info
 ) {
@@ -62,34 +63,54 @@ async function sendConfirmEmailAddressEmailResolver(
   const person = await dataSources.ruralPaymentsCustomer.getExternalPerson()
   auditTrail?.recordAccount(info, 'personId', person.id)
 
+  // An email address is required even when a new one is given, as confirmEmail 404s without one
   if (!person.email) {
-    throw new NotFound('Customer has no email address')
+    throw new BadRequest('Customer has no email address', {
+      extensions: { code: 'CUSTOMER_MISSING_EMAIL' }
+    })
   }
 
-  if (booleanise(person.emailValidated)) {
+  // When an email is given, it replaces the customer's current email address once validated
+  const emailToConfirm = input?.email ?? person.email
+
+  const isCurrentEmail = emailToConfirm.toLowerCase() === person.email.toLowerCase()
+  if (isCurrentEmail && booleanise(person.emailValidated)) {
     throw new BadRequest('Customer email address is already verified', {
       extensions: { code: 'EMAIL_ALREADY_VERIFIED' }
     })
   }
 
-  const { id: digitalContactPartyId } = await dataSources.ruralPaymentsCustomer.confirmEmail(
-    person.id,
-    person.email
-  )
+  let digitalContact
+  try {
+    digitalContact = await dataSources.ruralPaymentsCustomer.confirmEmail(person.id, emailToConfirm)
+  } catch (error) {
+    // The customer's own verified email is rejected above, so a 409 means another customer has
+    // already verified this email address
+    if (error?.extensions?.http?.status === StatusCodes.CONFLICT) {
+      throw new BadRequest('Email address is already in use by another customer', {
+        extensions: { code: 'EMAIL_ALREADY_REGISTERED' }
+      })
+    }
+    throw error
+  }
+  const { id: digitalContactPartyId } = digitalContact
 
   await dataSources.ruralPaymentsCustomer.saveEmailValidation({
     customerReference: crn,
     partyDigitalContactId: digitalContactPartyId,
-    email: person.email,
+    email: emailToConfirm,
     linkSentDate: new Date().toISOString()
   })
 
-  await dataSources.ruralPaymentsCustomer.sendVerificationEmail(digitalContactPartyId)
+  await dataSources.ruralPaymentsCustomer.sendVerificationEmail(
+    digitalContactPartyId,
+    emailToConfirm
+  )
 
   if (config.get('ruralPayments.customerEmailsDisabled')) {
     const portalUrl = config.get('ruralPayments.portalUrl')
     logger.info(
-      `#resolver - sendConfirmEmailAddressEmail - Email verification link: ${portalUrl}/validate-email/${encodeURIComponent(person.email)}/${digitalContactPartyId}`
+      `#resolver - sendConfirmEmailAddressEmail - Email verification link: ${portalUrl}/validate-email/${encodeURIComponent(emailToConfirm)}/${digitalContactPartyId}`
     )
   }
 
