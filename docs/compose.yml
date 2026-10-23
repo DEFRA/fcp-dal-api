@@ -1,0 +1,20 @@
+# Local GitHub Pages preview (npm run docs:serve)
+name: fcp-dal-api-docs
+
+services:
+  docs:
+    image: ruby:3.3
+    working_dir: /srv/jekyll
+    command: sh -c "bundle check || bundle install; bundle exec jekyll serve --host 0.0.0.0 --livereload"
+    environment:
+      # No .git inside the container, so github-metadata can't infer the repo
+      PAGES_REPO_NWO: DEFRA/fcp-dal-api
+    ports:
+      - '4000:4000'
+      - '35729:35729'
+    volumes:
+      - .:/srv/jekyll
+      - gems:/usr/local/bundle
+
+volumes:
+  gems:

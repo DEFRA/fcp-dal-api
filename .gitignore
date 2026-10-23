@@ -21,3 +21,7 @@ node_modules
 *.crt
 *.csr
 *.srl
+# Local GitHub Pages preview
+docs/_site
+docs/.jekyll-cache
+docs/Gemfile.lock
