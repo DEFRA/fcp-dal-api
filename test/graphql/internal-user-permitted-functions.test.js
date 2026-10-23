@@ -148,13 +148,13 @@ describe('internalUser.permittedFunctions', () => {
     expect(result.data.internalUser).toBeNull()
     expect(result.errors).toHaveLength(1)
     expect(result.errors[0]).toMatchObject({
-      message: 'Authorization failed, you are not in the correct AD groups',
+      message: 'Authorization failed, requester is not able to access this part of the schema',
       extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
     })
   })
 
   test('authenticated but not in the SFD group - the internalUser query is blocked', async () => {
-    const consolidatedViewGroup = config.get('auth.groups.CONSOLIDATED_VIEW')
+    const consolidatedViewGroup = config.get('auth.entities.CONSOLIDATED_VIEW.entityId')
     enableAuth()
 
     const result = await makeTestQuery(query, null, false, { functions: ['viewLand'] }, [
@@ -164,7 +164,7 @@ describe('internalUser.permittedFunctions', () => {
     expect(result.data.internalUser).toBeNull()
     expect(result.errors).toHaveLength(1)
     expect(result.errors[0]).toMatchObject({
-      message: 'Authorization failed, you are not in the correct AD groups',
+      message: 'Authorization failed, requester is not able to access this part of the schema',
       extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
     })
   })

@@ -2,14 +2,10 @@ import { validateAuditEvent } from '@defra/fcp-audit-publisher'
 import { describe, expect, test, vi } from 'vitest'
 import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
 
-const getRequestingServiceMock = vi.fn()
 const configGetMock = vi.fn()
 const loggerMock = { error: vi.fn(), debug: vi.fn(), warn: vi.fn() }
 const snsPublishMock = vi.fn()
 
-vi.doMock('../../../../app/auth/authenticate.js', () => ({
-  getRequestingService: getRequestingServiceMock
-}))
 vi.doMock('../../../../app/config.js', () => ({
   config: { get: configGetMock }
 }))
@@ -53,7 +49,7 @@ const baseContextValue = {
   requestLogger: { error: vi.fn() },
   request: baseRequest,
   authContext: endUserAuthContext(baseRequest),
-  auth: { appid: 'test-appid', groups: ['group-1'] },
+  auth: { entityId: 'test-appid', serviceName: 'some-service' },
   auditTrail: fakeAuditTrail(),
   defraIdContext: { crn: vi.fn() }
 }
@@ -61,7 +57,6 @@ const baseContextValue = {
 describe('auditPlugin', () => {
   describe('publish', () => {
     test('publishes exactly one event for a root selection with a recorded entity, shaped as an AuditEventPayload', async () => {
-      getRequestingServiceMock.mockReturnValue('Some Service Name')
       const publish = vi.fn()
       const plugin = auditPlugin({ publish })
 
@@ -91,8 +86,8 @@ describe('auditPlugin', () => {
             details: expect.objectContaining({
               requestBody: JSON.stringify(requestPayload),
               rootField: 'business',
-              sourceSystem: 'Some Service Name',
-              sourceSystemAppRegId: 'test-appid',
+              sourceSystem: 'some-service',
+              sourceSystemEntityId: 'test-appid',
               errorDetails: []
             })
           })
@@ -519,42 +514,35 @@ describe('auditPlugin', () => {
     })
   })
 
-  describe('sourceSystem', () => {
-    test('passes an empty array to getRequestingService, not undefined, when auth has no groups', async () => {
-      const publish = vi.fn()
-      const plugin = auditPlugin({ publish })
+  test('audit record contains dummy entity values when auth fails', async () => {
+    const publish = vi.fn()
+    const plugin = auditPlugin({ publish })
 
-      const contextValue = {
-        ...baseContextValue,
-        auth: {},
-        auditTrail: fakeAuditTrail({
-          business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
+    const contextValue = {
+      ...baseContextValue,
+      auth: {
+        entityId: 'no-entityId--no-approved-app-or-groups',
+        serviceName: 'unknown-unauthorised-service'
+      },
+      auditTrail: fakeAuditTrail({
+        business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
+      })
+    }
+    const listener = await plugin.requestDidStart()
+    const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+    await listener.willSendResponse(requestContext)
+
+    expect(publish).toHaveBeenCalledWith(
+      expect.objectContaining({
+        audit: expect.objectContaining({
+          details: expect.objectContaining({
+            sourceSystem: 'unknown-unauthorised-service',
+            sourceSystemEntityId: 'no-entityId--no-approved-app-or-groups'
+          })
         })
-      }
-      const listener = await plugin.requestDidStart()
-      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
-      await listener.willSendResponse(requestContext)
-
-      expect(getRequestingServiceMock).toHaveBeenCalledWith([])
-    })
-
-    test('passes an empty array to getRequestingService, not undefined, when auth itself is missing', async () => {
-      const publish = vi.fn()
-      const plugin = auditPlugin({ publish })
-
-      const { auth: _auth, ...contextValueWithoutAuth } = baseContextValue
-      const contextValue = {
-        ...contextValueWithoutAuth,
-        auditTrail: fakeAuditTrail({
-          business: { entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }] }
-        })
-      }
-      const listener = await plugin.requestDidStart()
-      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
-      await listener.willSendResponse(requestContext)
-
-      expect(getRequestingServiceMock).toHaveBeenCalledWith([])
-    })
+      }),
+      baseContextValue.requestLogger
+    )
   })
 
   describe('serviceAccount', () => {

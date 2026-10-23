@@ -302,7 +302,7 @@ describe('Query.customer', () => {
     const result = await makeTestQuery(
       `#graphql
         query Customer {
-          customer(crn: "crn") {
+          customer(crn: "1234567890") {
             crn
           }
         }
@@ -314,7 +314,7 @@ describe('Query.customer', () => {
     expect(result.data.customer).toBeNull()
     expect(result.errors).toHaveLength(1)
     expect(result.errors[0]).toMatchObject({
-      message: 'Authorization failed, you are not in the correct AD groups',
+      message: 'Authorization failed, requester is not able to access this part of the schema',
       extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
     })
   })

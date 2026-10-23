@@ -71,7 +71,7 @@ type BusinessInfo {
   Telephone numbers of the business.
   """
   phone: Phone
-    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM, LAND_APP_TECH_SPIKES_API])
+    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM, LAND_APP_TECH_SPIKES])
 
   """
   Correspondence telephone numbers of the business.

@@ -348,7 +348,7 @@ describe('customer mutations', () => {
         { email: 'test@defra.gov.uk' },
         false,
         { input },
-        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+        [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
       )
 
       // assert
@@ -357,8 +357,8 @@ describe('customer mutations', () => {
     })
 
     test.each([
-      ['SINGLE_FRONT_DOOR', 'auth.groups.SINGLE_FRONT_DOOR'],
-      ['ADMIN', 'auth.groups.ADMIN']
+      ['SINGLE_FRONT_DOOR', 'auth.entities.SINGLE_FRONT_DOOR.entityId'],
+      ['ADMIN', 'auth.entities.ADMIN.entityId']
     ])('blocks an external user calling as %s', async (_, group) => {
       // arrange
       const internalKits = nockAction('internal')
@@ -515,7 +515,7 @@ describe('customer mutations', () => {
 
       // act
       const result = await makeTestQuery(deactivateMutation, null, false, { input: validInput }, [
-        config.get('auth.groups.SINGLE_FRONT_DOOR')
+        config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')
       ])
 
       // assert
@@ -530,12 +530,12 @@ describe('customer mutations', () => {
 
       // act
       const result = await makeTestQuery(deactivateMutation, null, false, { input: validInput }, [
-        config.get('auth.groups.CONSOLIDATED_VIEW')
+        config.get('auth.entities.CONSOLIDATED_VIEW.entityId')
       ])
 
       // assert
       expect(result.errors[0].message).toBe(
-        'Authorization failed, you are not in the correct AD groups'
+        'Authorization failed, requester is not able to access this part of the schema'
       )
       expect(kits.isDone()).toBe(false)
     })
@@ -551,7 +551,7 @@ describe('customer mutations', () => {
         { 'service-account': 'service@defra.gov.uk' },
         false,
         { input: validInput },
-        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+        [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
       )
 
       // assert
@@ -575,7 +575,7 @@ describe('customer mutations', () => {
         { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
         false,
         { input: validInput },
-        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+        [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
       )
 
       // assert
@@ -785,12 +785,12 @@ describe('customer mutations', () => {
         null,
         false,
         { input: validInput },
-        [config.get('auth.groups.CONSOLIDATED_VIEW')]
+        [config.get('auth.entities.CONSOLIDATED_VIEW.entityId')]
       )
 
       // assert
       expect(result.errors[0].message).toBe(
-        'Authorization failed, you are not in the correct AD groups'
+        'Authorization failed, requester is not able to access this part of the schema'
       )
       expect(kits.isDone()).toBe(false)
     })
@@ -819,7 +819,7 @@ describe('customer mutations', () => {
         { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
         false,
         { input: validInput },
-        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+        [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
       )
 
       // assert
@@ -841,7 +841,7 @@ describe('customer mutations', () => {
         { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1111111111' }) },
         false,
         { input: validInput },
-        [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+        [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
       )
 
       // assert
@@ -1132,7 +1132,7 @@ describe('customer mutations', () => {
         }
       }
     `
-    const sfdGroups = () => [config.get('auth.groups.SINGLE_FRONT_DOOR')]
+    const sfdGroups = () => [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
 
     const makeExternalQuery = (variables = {}) => {
       mockDefraIdJwks()
@@ -1187,7 +1187,6 @@ describe('customer mutations', () => {
         .reply(200, { _data: 'Success' })
 
       const result = await makeExternalQuery()
-
       expect(result).toEqual({
         data: {
           sendConfirmEmailAddressEmail: {

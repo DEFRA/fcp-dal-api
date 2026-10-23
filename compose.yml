@@ -43,7 +43,7 @@ services:
       DISABLE_AUTH: true
       DISABLE_PROXY: true
       GRAPHQL_DASHBOARD_ENABLED: true
-      ADMIN_AD_GROUP_ID: unused
+      ADMIN_ENTITY_ID: unused
       KITS_INTERNAL_GATEWAY_URL: http://upstream-mock:3100/extapi/
       KITS_EXTERNAL_GATEWAY_URL: http://upstream-mock:3100/extapi/
       KITS_GATEWAY_TIMEOUT_MS: 3000
