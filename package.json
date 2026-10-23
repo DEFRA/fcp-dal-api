@@ -15,6 +15,7 @@
     "lint:fix": "eslint . --fix && prettier --log-level warn --write .",
     "lint:test": "npm run lint && npm t",
     "dev": "nodemon --ext js,gql --watch app/ -x 'node -r dotenv/config app/index.js | jq .'",
+    "docs:serve": "docker compose -f docs/compose.yml up",
     "start": "node -r dotenv/config app/index.js | jq .",
     "start:debug": "nodemon --ext js,gql --watch app/ -x 'node --inspect-brk=0.0.0.0 -r dotenv/config app/index.js'",
     "start:proxy": "docker run --rm --net=host --name fcp-dal-api-proxy -v $(pwd)/test/acceptance/squid.conf:/etc/squid/squid.conf ubuntu/squid",
