@@ -273,9 +273,11 @@ For example, you might need to test logging works as expected within the cdp por
 
 It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) by selecting the branch to build from, and running the workflow.
 
-The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, tagging it `0.0.<run_number>` (the GitHub Actions run number), so each dispatch of the workflow produces a unique, incrementing version regardless of branch.
+The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, so dev builds are versioned exactly like hotfixes (see [Publish Hot Fix workflow](#publish-hot-fix-workflow)): a semver prerelease suffixed with the branch name, e.g. dispatching from `feat/new-thing` when the latest release reachable from the branch is `2.45.1` produces `2.45.2-feat-new-thing.0`, then `2.45.2-feat-new-thing.1` after a new commit. Prerelease tags are ignored when calculating the next mainline release version.
 
-> NOTE: this bypasses the usual release process and is intended for short-lived dev testing only, not for tracking real releases.
+The publish step runs after the SonarCloud scan, so a failing scan stops the build from being published. Runs on the same branch (across this and the hotfix workflow) are queued rather than run in parallel, to avoid two runs racing to create the same tag.
+
+> NOTE: this bypasses the usual release process and is intended for short-lived dev testing only, not for tracking real releases. Re-dispatching without a new commit reuses the existing tag, and once a branch has been tagged avoid rebasing, amending or force-pushing it, as this can orphan the tag and fail the next run with `422 Reference already exists`.
 
 ### Publish Hot Fix workflow
 
@@ -293,6 +295,16 @@ Hotfixes are tagged as semver prereleases, with the prerelease suffix derived fr
 Because the suffix is unique per branch, two hotfix branches cut from the same release get distinct tags (e.g. `2.45.2-hotfix-a.0` and `2.45.2-hotfix-b.0`), and a hotfix can no longer collide with a plain release tag such as `2.45.2`.
 
 > NOTE: re-dispatching the workflow without a new commit on the branch reuses the existing tag rather than producing a new one, so push a commit if you need a fresh version.
+
+To ship a hotfix (see the [CDP hotfix builds guide](https://portal.cdp-int.defra.cloud/documentation/how-to/hotfix-builds.md#hotfix-builds)):
+
+1. Create a branch from the release tag you need to patch, e.g. `git checkout -b hotfix/fix-login 2.45.1`
+2. Commit and push the fix to that branch - don't raise a PR from it. Apply the fix to `main` separately.
+3. Dispatch the workflow from the Actions tab, selecting the hotfix branch.
+4. Deploy the published version (e.g. `2.45.2-hotfix-fix-login.0`) from the CDP portal as normal.
+5. Merge the hotfix branch back into `main` afterwards.
+
+> NOTE: the workflow file must exist on both `main` (for it to appear in the Actions tab) and the hotfix branch (it's the branch's copy that runs). Once the first hotfix tag exists, treat the branch as append-only - rebasing, amending or force-pushing can orphan the tag and fail the next run with `422 Reference already exists`. Hotfix builds are for emergencies; consider a feature flag first.
 
 ### Dependabot - TODO!
 
