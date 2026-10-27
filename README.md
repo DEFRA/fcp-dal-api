@@ -273,7 +273,9 @@ For example, you might need to test logging works as expected within the cdp por
 
 It is triggered manually (`workflow_dispatch`) from the [Actions tab](https://github.com/DEFRA/fcp-dal-api/actions/workflows/publish-dev-build.yml) by selecting the branch to build from, and running the workflow.
 
-The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build-hotfix` action, so dev builds are versioned exactly like hotfixes (see [Publish Hot Fix workflow](#publish-hot-fix-workflow)): a semver prerelease suffixed with the branch name, e.g. dispatching from `feat/new-thing` when the latest release reachable from the branch is `2.45.1` produces `2.45.2-feat-new-thing.0`, then `2.45.2-feat-new-thing.1` after a new commit. Prerelease tags are ignored when calculating the next mainline release version.
+The workflow publishes the build via [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action)'s `build` action with `prerelease: true`, as recommended by the [CDP hotfix builds guide](https://portal.cdp-int.defra.cloud/documentation/how-to/hotfix-builds.md#hotfix-builds) for non-emergency builds. The prerelease suffix is `dev-` followed by the branch name (lower-cased, with any run of characters other than `a-z` and `0-9` collapsed to a single `-`), so dispatching from `feat/new-thing` produces `<next-version>-dev-feat-new-thing.0`, then `.1` after a new commit, where `<next-version>` is worked out from the latest release reachable from the branch.
+
+The `dev-` prefix keeps dev builds distinguishable from hotfixes (which are suffixed with the branch name only, e.g. `2.45.2-hotfix-fix-login.0`), even when both are published from the same branch. Prerelease tags are ignored when calculating the next mainline release version.
 
 The publish step runs after the SonarCloud scan, so a failing scan stops the build from being published. Runs on the same branch (across this and the hotfix workflow) are queued rather than run in parallel, to avoid two runs racing to create the same tag.
 

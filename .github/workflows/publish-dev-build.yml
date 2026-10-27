@@ -45,7 +45,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      - name: Prerelease suffix
+        id: prerelease-suffix
+        run: |
+          SLUG=$(echo "$GITHUB_REF_NAME" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')
+          echo "value=dev-${SLUG}" >> "$GITHUB_OUTPUT"
+
       - name: Publish Dev Build
-        uses: DEFRA/cdp-build-action/build-hotfix@54ced5c5344c8b9620561a1628fe8f3d858e9871 # v1.5.0
+        uses: DEFRA/cdp-build-action/build@54ced5c5344c8b9620561a1628fe8f3d858e9871 # v1.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: true
+          prerelease-suffix: ${{ steps.prerelease-suffix.outputs.value }}
