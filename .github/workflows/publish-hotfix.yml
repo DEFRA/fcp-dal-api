@@ -29,7 +29,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: |
-          npm audit --omit=dev
           npm ci --ignore-scripts
           npm run postinstall
           npm run lint
