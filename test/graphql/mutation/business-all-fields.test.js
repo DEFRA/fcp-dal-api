@@ -12,7 +12,7 @@ const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const orgDetailsUpdatePayload = {
   id: 'organisationId',
-  name: 'HADLEY FARMS LTD 2',
+  name: 'EXAMPLE FARMS LTD 2',
   address: {
     address1: 'line1',
     address2: 'line2',
@@ -22,20 +22,20 @@ const orgDetailsUpdatePayload = {
     pafOrganisationName: 'pafOrganisationName',
     flatName: null,
     buildingNumberRange: 'buildingNumberRange',
-    buildingName: 'COLSHAW HALL',
+    buildingName: 'EXAMPLE HALL',
     street: 'street',
-    city: 'BRAINTREE',
+    city: 'EXAMPLETOWN',
     county: null,
     postalCode: '12312312',
     country: 'United Kingdom',
     uprn: '123123123',
-    dependentLocality: 'HIGH HAWSKER',
+    dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: null
   },
   isCorrespondenceAsBusinessAddr: false,
-  email: 'hadleyfarmsltdp@defra.com.test',
-  landline: '01234613020',
-  mobile: '01234042273',
+  email: 'examplefarmsltd@example.com.test',
+  landline: '01632960001',
+  mobile: '07700900001',
   businessType: { id: 0 },
   legalStatus: { id: 101 },
   taxRegistrationNumber: '123456789'
@@ -192,7 +192,7 @@ describe('updateBusinessAllFields', () => {
     mockOrganisationSearch(v1)
 
     v1.get('/organisation/organisationId').reply(200, {
-      _data: { id: 'organisationId', name: 'HADLEY FARMS LTD 2' }
+      _data: { id: 'organisationId', name: 'EXAMPLE FARMS LTD 2' }
     })
 
     const result = await makeTestQuery(query, null, true, { input })
@@ -205,7 +205,7 @@ describe('updateBusinessAllFields', () => {
           additionalBusinessDetailsUpdated: null,
           business: {
             info: {
-              name: 'HADLEY FARMS LTD 2'
+              name: 'EXAMPLE FARMS LTD 2'
             }
           }
         }

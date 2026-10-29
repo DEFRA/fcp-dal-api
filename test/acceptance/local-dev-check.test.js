@@ -7,15 +7,15 @@ const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'
 const parcels = [
   {
     id: '7386091',
-    sheetId: 'SS6627',
-    parcelId: '5662',
+    sheetId: 'TE0001',
+    parcelId: '1001',
     area: 1.027,
     pendingDigitisation: true
   },
   {
     id: '7386092',
-    sheetId: 'SS6828',
-    parcelId: '3818',
+    sheetId: 'TE0002',
+    parcelId: '1002',
     area: 1.027,
     pendingDigitisation: false
   }
@@ -393,8 +393,8 @@ const business = {
     parcels: expect.arrayContaining(parcels),
     parcel: {
       id: '7386091',
-      sheetId: 'SS6627',
-      parcelId: '5662',
+      sheetId: 'TE0001',
+      parcelId: '1001',
       area: 1.027,
       pendingDigitisation: true,
       effectiveToDate: '2024-09-22T13:28:07.626Z',
@@ -705,8 +705,8 @@ const businessVariables = {
   sbi: '111111111',
   crn: '1111111100',
   date: '2025-05-04',
-  sheetId: 'SS6627',
-  parcelId: '5662'
+  sheetId: 'TE0001',
+  parcelId: '1001'
 }
 
 describe('Local mocked dev check', () => {

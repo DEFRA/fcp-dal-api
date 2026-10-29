@@ -7,7 +7,7 @@ import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../../app/transformers/rural-payments/business.js'
 
 const businessDetailsUpdatePayload = {
-  name: 'HADLEY FARMS LTD 2',
+  name: 'EXAMPLE FARMS LTD 2',
   address: {
     pafOrganisationName: 'pafOrganisationName',
     line1: 'line1',
@@ -16,15 +16,15 @@ const businessDetailsUpdatePayload = {
     line4: 'line4',
     line5: 'line5',
     buildingNumberRange: 'buildingNumberRange',
-    buildingName: 'COLSHAW HALL',
+    buildingName: 'EXAMPLE HALL',
     flatName: null,
     street: 'street',
-    city: 'BRAINTREE',
+    city: 'EXAMPLETOWN',
     county: null,
     postalCode: '12312312',
     country: 'United Kingdom',
     uprn: '123123123',
-    dependentLocality: 'HIGH HAWSKER',
+    dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: null
   },
   correspondenceAddress: {
@@ -42,19 +42,19 @@ const businessDetailsUpdatePayload = {
     county: 'county',
     postalCode: '1231231',
     country: 'USA',
-    uprn: '10008042952',
-    dependentLocality: 'HIGH HAWSKER',
+    uprn: '12345678902',
+    dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: 'doubleDependentLocality'
   },
   phone: {
-    mobile: '01234042273',
-    landline: '01234613020'
+    mobile: '07700900001',
+    landline: '01632960001'
   },
   email: {
-    address: 'hadleyfarmsltdp@defra.com.test'
+    address: 'examplefarmsltd@example.com.test'
   },
   correspondenceEmail: {
-    address: 'hadleyfarmsltdp@defra.com.123'
+    address: 'examplefarmsltd@example.com.123'
   },
   correspondencePhone: {
     mobile: '07111222333',

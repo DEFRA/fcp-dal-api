@@ -432,7 +432,7 @@ describe('Customer Mutations - as an external user', () => {
         },
         address: { ...inputs.addressInput.address, typeId: null },
         doNotContact: true,
-        personalIdentifiers: ['8500901592', '9596460156']
+        personalIdentifiers: [expect.any(String), expect.any(String)]
       }
     })
   })
@@ -461,7 +461,7 @@ describe('Customer Mutations - as an external user', () => {
         },
         address: { ...inputs.allFieldsInput.address, typeId: null },
         doNotContact: false,
-        personalIdentifiers: ['8500901592', '9596460156']
+        personalIdentifiers: [expect.any(String), expect.any(String)]
       }
     })
   })

@@ -589,8 +589,8 @@ describe('Business Mutations - deactivate a business', () => {
 })
 
 describe('Business Mutations - lock and unlock a business', () => {
-  // note: sbi 920000002 is reserved for these tests; it starts out unlocked in the mock
-  const lockSbi = '920000002'
+  // note: sbi 920000003 is reserved for these tests; it starts out unlocked in the mock
+  const lockSbi = '920000003'
 
   const lockBusinessMutation = gql`
     mutation UpdateBusinessLock($input: UpdateBusinessLockUnlockInput!) {

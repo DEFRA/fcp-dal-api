@@ -142,7 +142,7 @@ describe('Customer transformer', () => {
     const data = [
       {
         id: '5625145',
-        name: "Cliff Spence Teritorial Army's Abbey Farm, Hop-Worthering on the Naze a.k.a. the Donkey Sanctuary",
+        name: 'Sam Example Farm',
         sbi: 890000004,
         additionalSbiIds: [],
         confirmed: true,

@@ -239,7 +239,7 @@ describe('Customer Search Queries', () => {
     const client = new GraphQLClient(targetURL)
     const response = await client.request(
       customerSearchQuery,
-      { searchString: '9999999999', searchType: 'CRN' },
+      { searchString: '9999999990', searchType: 'CRN' },
       { email: 'some-email' }
     )
 

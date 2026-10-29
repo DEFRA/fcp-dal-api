@@ -838,7 +838,7 @@ describe('customer mutations', () => {
       // act
       const result = await makeTestQuery(
         authenticationQuestionsMutation,
-        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1111111111' }) },
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9111111111' }) },
         false,
         { input: validInput },
         [config.get('auth.groups.SINGLE_FRONT_DOOR')]
@@ -869,7 +869,7 @@ describe('customer mutations', () => {
         county: 'newCounty',
         postalCode: 'NE1 2PC',
         country: 'newCountry',
-        uprn: '100080429522',
+        uprn: '123456789022',
         dependentLocality: 'newDependentLocality',
         doubleDependentLocality: 'newDoubleDependentLocality'
       }
@@ -897,7 +897,7 @@ describe('customer mutations', () => {
               pafOrganisationName: "newPafOrganisationName"
               postalCode: "NE1 2PC"
               street: "newStreet"
-              uprn: "100080429522"
+              uprn: "123456789022"
             }
           }
         ) {
@@ -950,7 +950,7 @@ describe('customer mutations', () => {
                 county: 'newCounty',
                 postalCode: 'NE1 2PC',
                 country: 'newCountry',
-                uprn: '100080429522',
+                uprn: '123456789022',
                 dependentLocality: 'newDependentLocality',
                 doubleDependentLocality: 'newDoubleDependentLocality'
               }

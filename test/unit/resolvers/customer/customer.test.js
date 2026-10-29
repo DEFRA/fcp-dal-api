@@ -42,13 +42,13 @@ const personFixture = {
   locked: false,
   confirmed: false,
   customerReferenceNumber: 'crn-11111111',
-  personalIdentifiers: ['8568845789', '370030956', '7899566034'],
+  personalIdentifiers: ['9568845788', '370030956', '7899566034'],
   deactivated: false
 }
 const personBusinessesFixture = [
   {
     id: '5625145',
-    name: 'Cliff Spence T/As Abbey Farm',
+    name: 'Sam Example T/As Example Farm',
     sbi: 890000004,
     additionalSbiIds: [],
     confirmed: true,
@@ -258,7 +258,7 @@ describe('Customer', () => {
         typeId: null
       },
       status: { locked: false, confirmed: false, deactivated: false },
-      personalIdentifiers: ['8568845789', '370030956', '7899566034']
+      personalIdentifiers: ['9568845788', '370030956', '7899566034']
     })
   })
 
@@ -291,7 +291,7 @@ describe('Customer', () => {
       crn: 'crn-11111111',
       organisationId: '5625145',
       personId: 11111111,
-      name: 'Cliff Spence T/As Abbey Farm',
+      name: 'Sam Example T/As Example Farm',
       sbi: 890000004
     })
   })
@@ -313,7 +313,7 @@ describe('Customer', () => {
     )
     expect(response).toEqual([
       {
-        name: 'Cliff Spence T/As Abbey Farm',
+        name: 'Sam Example T/As Example Farm',
         sbi: 890000004,
         organisationId: '5625145',
         personId: 11111111,

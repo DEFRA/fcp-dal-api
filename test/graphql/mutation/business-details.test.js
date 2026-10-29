@@ -9,7 +9,7 @@ const v1_external = nock(config.get('kits.external.gatewayUrl'))
 
 const orgDetailsUpdatePayload = {
   id: 'organisationId',
-  name: 'HADLEY FARMS LTD 2',
+  name: 'EXAMPLE FARMS LTD 2',
   address: {
     address1: 'line1',
     address2: 'line2',
@@ -19,14 +19,14 @@ const orgDetailsUpdatePayload = {
     pafOrganisationName: 'pafOrganisationName',
     flatName: null,
     buildingNumberRange: 'buildingNumberRange',
-    buildingName: 'COLSHAW HALL',
+    buildingName: 'EXAMPLE HALL',
     street: 'street',
-    city: 'BRAINTREE',
+    city: 'EXAMPLETOWN',
     county: null,
     postalCode: '12312312',
     country: 'United Kingdom',
     uprn: '123123123',
-    dependentLocality: 'HIGH HAWSKER',
+    dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: null
   },
   correspondenceAddress: {
@@ -44,15 +44,15 @@ const orgDetailsUpdatePayload = {
     county: 'county',
     postalCode: '1231231',
     country: 'USA',
-    uprn: '10008042952',
-    dependentLocality: 'HIGH HAWSKER',
+    uprn: '12345678902',
+    dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: 'doubleDependentLocality'
   },
   isCorrespondenceAsBusinessAddr: false,
-  email: 'hadleyfarmsltdp@defra.com.test',
-  landline: '01234613020',
-  mobile: '01234042273',
-  correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
+  email: 'examplefarmsltd@example.com.test',
+  landline: '01632960001',
+  mobile: '07700900001',
+  correspondenceEmail: 'examplefarmsltd@example.com.123',
   correspondenceLandline: '01225111222',
   correspondenceMobile: '07111222333',
   businessType: { id: 0 },
@@ -246,7 +246,7 @@ describe('business', () => {
           pafOrganisationName: 'new pafOrganisationName',
           postalCode: 'NE1 2PC',
           street: 'new street',
-          uprn: '100080429521'
+          uprn: '123456789021'
         }
       },
       correspondenceAddress: {
@@ -267,7 +267,7 @@ describe('business', () => {
           pafOrganisationName: 'new pafOrganisationName',
           postalCode: 'NE1 2PC',
           street: 'new street',
-          uprn: '100080429521'
+          uprn: '123456789021'
         }
       },
       isCorrespondenceAsBusinessAddress: true
@@ -289,7 +289,7 @@ describe('business', () => {
         county: 'new county',
         postalCode: 'NE1 2PC',
         country: 'new country',
-        uprn: '100080429521',
+        uprn: '123456789021',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
         addressTypeId: undefined
@@ -309,7 +309,7 @@ describe('business', () => {
         county: 'new county',
         postalCode: 'NE1 2PC',
         country: 'new country',
-        uprn: '100080429521',
+        uprn: '123456789021',
         dependentLocality: 'new dependentLocality',
         doubleDependentLocality: 'new doubleDependentLocality',
         addressTypeId: undefined

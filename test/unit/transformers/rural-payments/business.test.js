@@ -6,18 +6,18 @@ import {
   transformBankChangeInputToSubmission,
   transformBusinessCustomerPrivilegesToPermissionGroups,
   transformBusinessDetailsToOrgDetailsCreate,
-  transformPermissionGroupsToBusinessCustomerPrivileges,
   transformBusinessDetailsToOrgDetailsUpdate,
   transformCountyParishHoldings,
   transformOrganisationCustomer,
   transformOrganisationCustomers,
-  transformOrganisationSearchResult
+  transformOrganisationSearchResult,
+  transformPermissionGroupsToBusinessCustomerPrivileges
 } from '../../../../app/transformers/rural-payments/business.js'
 
 import { buildPermissionsFromIdsAndLevels } from '../../../test-helpers/permissions.js'
 
 const baseInput = {
-  name: 'HADLEY FARMS LTD 2',
+  name: 'EXAMPLE FARMS LTD 2',
   address: {
     withoutUprn: {
       pafOrganisationName: 'pafOrganisationName',
@@ -27,15 +27,15 @@ const baseInput = {
       line4: 'line4',
       line5: 'line5',
       buildingNumberRange: 'buildingNumberRange',
-      buildingName: 'COLSHAW HALL',
+      buildingName: 'EXAMPLE HALL',
       flatName: null,
       street: 'street',
-      city: 'BRAINTREE',
+      city: 'EXAMPLETOWN',
       county: null,
       postalCode: '12312312',
       country: 'United Kingdom',
       uprn: '123123123',
-      dependentLocality: 'HIGH HAWSKER',
+      dependentLocality: 'EXAMPLE LOCALITY',
       doubleDependentLocality: null
     }
   },
@@ -55,20 +55,20 @@ const baseInput = {
       county: 'county',
       postalCode: '1231231',
       country: 'USA',
-      uprn: '10008042952',
-      dependentLocality: 'HIGH HAWSKER',
+      uprn: '12345678902',
+      dependentLocality: 'EXAMPLE LOCALITY',
       doubleDependentLocality: 'doubleDependentLocality'
     }
   },
   phone: {
-    mobile: '01234042273',
-    landline: '01234613020'
+    mobile: '07700900001',
+    landline: '01632960001'
   },
   email: {
-    address: 'hadleyfarmsltdp@defra.com.test'
+    address: 'examplefarmsltd@example.com.test'
   },
   correspondenceEmail: {
-    address: 'hadleyfarmsltdp@defra.com.123'
+    address: 'examplefarmsltd@example.com.123'
   },
   correspondencePhone: {
     mobile: '07111222333',
@@ -854,7 +854,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
   it('transforms base input correctly', () => {
     const result = transformBusinessDetailsToOrgDetailsUpdate(baseInput)
     expect(result).toEqual({
-      name: 'HADLEY FARMS LTD 2',
+      name: 'EXAMPLE FARMS LTD 2',
       address: {
         address1: 'line1',
         address2: 'line2',
@@ -864,14 +864,14 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         pafOrganisationName: 'pafOrganisationName',
         flatName: null,
         buildingNumberRange: 'buildingNumberRange',
-        buildingName: 'COLSHAW HALL',
+        buildingName: 'EXAMPLE HALL',
         street: 'street',
-        city: 'BRAINTREE',
+        city: 'EXAMPLETOWN',
         county: null,
         postalCode: '12312312',
         country: 'United Kingdom',
         uprn: '123123123',
-        dependentLocality: 'HIGH HAWSKER',
+        dependentLocality: 'EXAMPLE LOCALITY',
         doubleDependentLocality: null,
         addressTypeId: undefined
       },
@@ -881,7 +881,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         address3: 'c line3',
         address4: 'c line4',
         address5: 'c line5',
-        dependentLocality: 'HIGH HAWSKER',
+        dependentLocality: 'EXAMPLE LOCALITY',
         pafOrganisationName: 'c pafOrganisationName',
         doubleDependentLocality: 'doubleDependentLocality',
         buildingName: 'buildingName',
@@ -892,14 +892,14 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         flatName: 'flatName',
         postalCode: '1231231',
         street: 'street',
-        uprn: '10008042952',
+        uprn: '12345678902',
         addressTypeId: undefined
       },
       isCorrespondenceAsBusinessAddr: false,
-      email: 'hadleyfarmsltdp@defra.com.test',
-      landline: '01234613020',
-      mobile: '01234042273',
-      correspondenceEmail: 'hadleyfarmsltdp@defra.com.123',
+      email: 'examplefarmsltd@example.com.test',
+      landline: '01632960001',
+      mobile: '07700900001',
+      correspondenceEmail: 'examplefarmsltd@example.com.123',
       correspondenceLandline: '01225111222',
       correspondenceMobile: '07111222333',
       taxRegistrationNumber: '123456789'
@@ -1316,7 +1316,7 @@ describe('#transformOrganisationSearchResult', () => {
   test('transforms a full organisation search result', () => {
     const result = transformOrganisationSearchResult({
       id: 5565448,
-      name: 'HADLEY FARMS LTD',
+      name: 'EXAMPLE FARMS LTD',
       sbi: 890000004,
       additionalSbiIds: [890000003],
       confirmed: true,
@@ -1333,7 +1333,7 @@ describe('#transformOrganisationSearchResult', () => {
     expect(result).toEqual({
       organisationId: '5565448',
       sbi: '890000004',
-      name: 'HADLEY FARMS LTD',
+      name: 'EXAMPLE FARMS LTD',
       additionalSbis: [890000003],
       address: expect.objectContaining({ line1: 'line 1', postalCode: 'AB12 3CD' }),
       correspondenceAddress: expect.objectContaining({
