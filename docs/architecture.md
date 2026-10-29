@@ -56,7 +56,7 @@ High unit test coverage is maintained and a [threshold set at 95%](../vitest.con
 
 ### Acceptance testing
 
-Configuring and starting the DAL API is covered in the main project [`README.md`](../README.md), but as a developer it is quite common to start the [mock](https://github.com/DEFRA/fcp-dal-upstream-mock) (for the upstream data requirement) and then running (or debugging) the DAL API:
+Configuring and starting the DAL API is covered in the main project [`README.md`](../README.md), but as a developer it is quite common to start the [mock](https://github.com/DEFRA/fcp-dal-upstream-services-mock) (for the upstream data requirement) and then running (or debugging) the DAL API:
 
 ```shell
 npm start
