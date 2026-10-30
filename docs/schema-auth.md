@@ -116,4 +116,4 @@ Setting `DISABLE_AUTH=true` skips `@auth` enforcement entirely
 This is only ever allowed when `cdp.env` is `dev` - `schema.js` throws at startup if auth is
 disabled anywhere else, so it can't be accidentally left on in a real environment.
 
-[< back to Homepage](./homepage)
+[< back to Homepage](./)

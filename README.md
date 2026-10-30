@@ -18,7 +18,7 @@ The graphQL explorer should now be available, head to http://localhost:3000/grap
 > NOTE: The above is a simplified setup that is intended to aid consumer development.
 > For access to the live instances, [schema availability](#the-wip-directive) and [authorisation](#security) would need to be carefully considered.
 
-More consumer focused documentation can be found on the project [Homepage...](https://defra.github.io/fcp-dal-api/homepage)
+More consumer focused documentation can be found on the project [Homepage...](https://defra.github.io/fcp-dal-api/)
 
 ## Requirements
 

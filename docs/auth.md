@@ -32,4 +32,4 @@ Please refer to the [Service Account](https://eaflood.atlassian.net/wiki/spaces/
 
 - The email address of the service account should be added to the `service-account` header.
 
-[< back to Homepage](./homepage)
+[< back to Homepage](./)

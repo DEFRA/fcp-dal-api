@@ -1,4 +1,19 @@
-theme: jekyll-theme-minimal
-title: DAL homepage
+theme: jekyll-theme-cayman
+title: FCP Data Access Layer (DAL)
 description: DEFRA Data Access Layer Github page, documenting all things DAL.
 markdown: GFM
+
+# Local preview tooling (setting exclude replaces Jekyll's defaults, so keep those listed)
+exclude:
+  - compose.yml
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .jekyll-cache
+
+# Don't publish the raw .md sources alongside the rendered .html
+optional_front_matter:
+  remove_originals: true
+
+plugins:
+  - jekyll-redirect-from
