@@ -2,12 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
 import { transformBusinessDetailsToOrgAdditionalDetailsUpdate } from '../../../app/transformers/rural-payments/business.js'
-import {
-  mockBusinessTypeReferenceData,
-  mockLegalStatusReferenceData,
-  mockOrganisationSearch,
-  signDefraIdToken
-} from '../helpers.js'
+import { mockOrganisationSearch, signDefraIdToken } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -72,7 +67,6 @@ describe('business', () => {
     })
 
     mockOrganisationSearch(v1)
-    mockLegalStatusReferenceData(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
@@ -135,7 +129,6 @@ describe('business', () => {
     })
 
     mockOrganisationSearch(v1)
-    mockBusinessTypeReferenceData(v1)
 
     const query = `
       mutation Mutation($input: UpdateBusinessTypeInput!) {
@@ -313,44 +306,6 @@ describe('business', () => {
       }
     })
   })
-
-  test('update business legal status - rejects unknown legal status code', async () => {
-    mockLegalStatusReferenceData(v1)
-
-    const query = `
-      mutation Mutation($input: UpdateBusinessLegalStatusInput!) {
-        updateBusinessLegalStatus(input: $input) {
-          success
-        }
-      }
-    `
-    const result = await makeTestQuery(query, null, true, {
-      input: { sbi: '123456789', legalStatusCode: 102 }
-    })
-
-    expect(result.errors[0].message).toEqual('Invalid legalStatusCode: 102')
-    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
-    expect(result.data.updateBusinessLegalStatus).toBeNull()
-  })
-
-  test('update business type - rejects unknown type code', async () => {
-    mockBusinessTypeReferenceData(v1)
-
-    const query = `
-      mutation Mutation($input: UpdateBusinessTypeInput!) {
-        updateBusinessType(input: $input) {
-          success
-        }
-      }
-    `
-    const result = await makeTestQuery(query, null, true, {
-      input: { sbi: '123456789', typeCode: 123 }
-    })
-
-    expect(result.errors[0].message).toEqual('Invalid typeCode: 123')
-    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
-    expect(result.data.updateBusinessType).toBeNull()
-  })
 })
 
 describe('business - external', () => {
@@ -396,8 +351,6 @@ describe('business - external', () => {
     })
 
     mockOrganisationSearch(v1)
-
-    mockLegalStatusReferenceData(v1_external)
 
     const query = `
       mutation Mutation($input: UpdateBusinessLegalStatusInput!) {

@@ -11,10 +11,7 @@ const mockBusinessCommonModule = {
   businessUnlockResolver: vi.fn(),
   businessReactivateResolver: vi.fn(),
   businessDeactivateResolver: vi.fn(),
-  validateLegalStatusCode: vi.fn(),
-  validatePhoneHasNumber: vi.fn(),
-  validateTypeCode: vi.fn(),
-  validateBusinessReferenceDataCodes: vi.fn()
+  validatePhoneHasNumber: vi.fn()
 }
 const mockCustomerCommonModule = {
   retrievePersonIdByCRN: vi.fn()
@@ -261,10 +258,6 @@ describe('Business Mutation createBusiness', () => {
 
     expect(mockBusinessCommonModule.validatePhoneHasNumber).toHaveBeenCalledWith(
       mockArgs.input.phone
-    )
-    expect(mockBusinessCommonModule.validateBusinessReferenceDataCodes).toHaveBeenCalledWith(
-      businessDetails,
-      dataSources
     )
     expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith('123', dataSources)
     expect(dataSources.ruralPaymentsBusiness.createOrganisationByPersonId).toHaveBeenCalledWith(

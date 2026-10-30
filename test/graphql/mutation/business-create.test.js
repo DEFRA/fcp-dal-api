@@ -4,11 +4,7 @@ import { config } from '../../../app/config.js'
 import { db } from '../../../app/mongo.js'
 import { transformBusinessDetailsToOrgDetailsCreate } from '../../../app/transformers/rural-payments/business.js'
 import { waitFor } from '../../test-helpers/wait-for.js'
-import {
-  mockBusinessTypeReferenceData,
-  mockLegalStatusReferenceData,
-  mockPersonSearch
-} from '../helpers.js'
+import { mockPersonSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const EMAIL_PATTERN = '^(?=.{6,254}$)[^@\\s]+@[^@\\s]+[.][^@\\s]+$'
@@ -20,8 +16,6 @@ const v1 = nock(config.get('kits.internal.gatewayUrl'))
 const setupNock = () => {
   nock.disableNetConnect()
 
-  mockLegalStatusReferenceData(v1)
-  mockBusinessTypeReferenceData(v1)
   mockPersonSearch(v1)
 
   v1.post('/organisation/create/personId').reply(200, {
@@ -419,63 +413,6 @@ describe('business', () => {
     expect(result.errors[0].message).toEqual(
       'phone must include at least one of mobile or landline'
     )
-    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
-    expect(result.data.createBusiness).toBeNull()
-    // Rejected before the business is created upstream
-    expect(nock.pendingMocks()).toContainEqual(
-      expect.stringContaining('/organisation/create/personId')
-    )
-  })
-
-  test('create a business - rejects unknown legal status code', async () => {
-    const result = await makeTestQuery(
-      query,
-      null,
-      true,
-      { input: { ...input, legalStatusCode: 102 } },
-      [],
-      false
-    )
-
-    expect(result.errors[0].message).toEqual('Invalid legalStatusCode: 102')
-    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
-    expect(result.data.createBusiness).toBeNull()
-    // Rejected before the business is created upstream
-    expect(nock.pendingMocks()).toContainEqual(
-      expect.stringContaining('/organisation/create/personId')
-    )
-  })
-
-  test('create a business - rejects unknown type code', async () => {
-    const result = await makeTestQuery(
-      query,
-      null,
-      true,
-      { input: { ...input, typeCode: 123 } },
-      [],
-      false
-    )
-
-    expect(result.errors[0].message).toEqual('Invalid typeCode: 123')
-    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
-    expect(result.data.createBusiness).toBeNull()
-    // Rejected before the business is created upstream
-    expect(nock.pendingMocks()).toContainEqual(
-      expect.stringContaining('/organisation/create/personId')
-    )
-  })
-
-  test('create a business - rejects unknown legal status and type codes', async () => {
-    const result = await makeTestQuery(
-      query,
-      null,
-      true,
-      { input: { ...input, legalStatusCode: 102, typeCode: 123 } },
-      [],
-      false
-    )
-
-    expect(result.errors[0].message).toMatch(/^Invalid (legalStatusCode: 102|typeCode: 123)$/)
     expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
     expect(result.data.createBusiness).toBeNull()
     // Rejected before the business is created upstream

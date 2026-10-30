@@ -1,11 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import nock from 'nock'
 import { config } from '../../../app/config.js'
-import {
-  mockBusinessTypeReferenceData,
-  mockLegalStatusReferenceData,
-  mockOrganisationSearch
-} from '../helpers.js'
+import { mockOrganisationSearch } from '../helpers.js'
 import { makeTestQuery } from '../makeTestQuery.js'
 
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
@@ -118,8 +114,6 @@ describe('updateBusinessAllFields', () => {
     )
 
     mockOrganisationSearch(v1)
-    mockLegalStatusReferenceData(v1)
-    mockBusinessTypeReferenceData(v1)
 
     v1.get('/organisation/organisationId').reply(200, {
       _data: { id: 'organisationId', name: 'new name' }
@@ -220,8 +214,6 @@ describe('updateBusinessAllFields', () => {
       typeCode: 3
     }
 
-    mockBusinessTypeReferenceData(v1)
-
     const expectedPutPayload = {
       ...orgDetailsUpdatePayload,
       name: 'new name',
@@ -258,8 +250,6 @@ describe('updateBusinessAllFields', () => {
       typeCode: 3
     }
 
-    mockBusinessTypeReferenceData(v1)
-
     const expectedPutPayload = {
       ...orgDetailsUpdatePayload,
       name: 'new name',
@@ -289,8 +279,6 @@ describe('updateBusinessAllFields', () => {
       sbi: '123456789',
       typeCode: 3
     }
-
-    mockBusinessTypeReferenceData(v1)
 
     v1.put('/organisation/organisationId/additional-business-details', {
       ...orgDetailsUpdatePayload,
