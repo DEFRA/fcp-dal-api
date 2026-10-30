@@ -136,7 +136,7 @@ describe('SFI Query', () => {
       },
       false,
       {},
-      [config.get('auth.groups.SFI_REFORM')]
+      [config.get('auth.entities.GRANTS_UI.entityId')]
     )
 
     expect(result).toEqual({

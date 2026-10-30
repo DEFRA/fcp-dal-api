@@ -2,7 +2,7 @@ extend type Business {
   """
   Existing bank accounts held for the business.
   """
-  bankAccounts: [BusinessBankAccount!] @auth(requires: [SINGLE_FRONT_DOOR, SFI_REFORM])
+  bankAccounts: [BusinessBankAccount!] @auth(requires: [SINGLE_FRONT_DOOR, GRANTS_UI])
 }
 
 """

@@ -159,13 +159,13 @@ describe('business.permittedFunctions', () => {
     expect(result.data.business).toBeNull()
     expect(result.errors).toHaveLength(1)
     expect(result.errors[0]).toMatchObject({
-      message: 'Authorization failed, you are not in the correct AD groups',
+      message: 'Authorization failed, requester is not able to access this part of the schema',
       extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
     })
   })
 
   test('authorised for business but not in the SFD group - permittedFunctions is blocked', async () => {
-    const consolidatedViewGroup = config.get('auth.groups.CONSOLIDATED_VIEW')
+    const consolidatedViewGroup = config.get('auth.entities.CONSOLIDATED_VIEW.entityId')
     enableAuth()
     mockOrganisationSearch(v1)
 
@@ -176,7 +176,7 @@ describe('business.permittedFunctions', () => {
     expect(result.data.business.permittedFunctions).toBeNull()
     expect(result.errors).toHaveLength(1)
     expect(result.errors[0]).toMatchObject({
-      message: 'Authorization failed, you are not in the correct AD groups',
+      message: 'Authorization failed, requester is not able to access this part of the schema',
       extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
     })
   })

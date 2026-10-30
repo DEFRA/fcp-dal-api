@@ -7,9 +7,9 @@ extend type Query {
       requires: [
         CONSOLIDATED_VIEW
         SINGLE_FRONT_DOOR
-        SFI_REFORM
+        GRANTS_UI
         LAND_GRANTS_API
-        LAND_APP_TECH_SPIKES_API
+        LAND_APP_TECH_SPIKES
       ]
     )
 
@@ -20,5 +20,5 @@ extend type Query {
     searchString: String!
     searchType: BusinessSearchFieldType!
     pagination: Pagination
-  ): BusinessSearchResponse @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+  ): BusinessSearchResponse @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, GRANTS_UI])
 }

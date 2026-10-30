@@ -1,7 +1,7 @@
-import { buildSchema, findBreakingChanges, graphql } from 'graphql'
+import { buildSchema, findBreakingChanges, graphql, GraphQLError } from 'graphql'
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
-import { beforeEach, describe, expect, it, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
@@ -11,22 +11,19 @@ vi.doMock('../../../app/logger/logger.js', () => ({
 }))
 const {
   authDirectiveTransformer,
-  authGroups,
-  checkAuthGroup,
+  checkAuthEntity,
   checkServiceAccountAccess,
   checkUserAccess,
-  getAuth,
-  getRequestingService,
-  isAdminCaller
+  getAuthorisedEntity
 } = await import('../../../app/auth/authenticate.js')
 
 const tokenPayload = {
   aud: 'api://appid',
   iss: 'https://sts.windows.net/appid/',
   aio: 'aio',
-  appid: 'appid',
+  appid: config.get('auth.entities.SINGLE_FRONT_DOOR.entityId'),
   appidacr: '1',
-  groups: ['appid'],
+  groups: [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')],
   idp: 'https://sts.windows.net/appid/',
   oid: 'oid',
   rh: 'rh',
@@ -55,6 +52,12 @@ const tokenDiffSecret = jwt.sign(tokenPayload, wrongPrivateKey, {
   expiresIn: '1h',
   keyid: 'mock-key-id-123'
 })
+const createConsumerToken = (claims) =>
+  jwt.sign({ ...tokenPayload, ...claims }, privateKey, {
+    algorithm: 'RS256',
+    expiresIn: '1h',
+    keyid: 'mock-key-id-123'
+  })
 const requestInfo = { remoteAddress: '0.0.0.0' }
 const mockRequest = (token) => ({
   headers: {
@@ -63,33 +66,47 @@ const mockRequest = (token) => ({
   info: requestInfo,
   traceId: 'trace-id'
 })
-const decodedToken = jwt.decode(token)
 const mockPublicKeyFunc = vi.fn()
 const mockJWKSDataSource = { getPublicKey: mockPublicKeyFunc }
 
 describe('authenticate', () => {
-  describe('getAuth', () => {
+  describe('getAuthorisedEntity', () => {
     describe('when auth is disabled', () => {
-      test('should return an object with default appid when request has no auth', async () => {
-        expect(await getAuth({})).toEqual({ appid: 'auth-disabled-no-appid' })
+      test('should return default auth details', async () => {
+        expect(await getAuthorisedEntity({})).toEqual({
+          entityId: 'auth-disabled-no-entityId',
+          serviceName: 'unknown-unauthorised-service'
+        })
       })
     })
 
     describe('when auth is enabled', () => {
-      it('should return an object with default appid when request has no auth', async () => {
+      beforeEach(() => {
         config.set('auth.disabled', false) // temporarily set auth to enabled for this test
-        const { getAuth } = await import('../../../app/auth/authenticate.js?r=3')
+      })
+      afterEach(() => {
         config.set('auth.disabled', true) // reset to original state after import
+      })
 
-        expect(await getAuth({})).toEqual({ appid: 'no-appid-no-auth-provided' })
+      it('should return default auth details when request has no auth', async () => {
+        const { getAuthorisedEntity } = await import('../../../app/auth/authenticate.js?r=3')
+
+        expect(await getAuthorisedEntity({})).toEqual({
+          entityId: 'no-entityId--no-auth-provided',
+          serviceName: 'unknown-unauthorised-service'
+        })
       })
 
       describe('with a valid token', () => {
-        test('should return decoded token, and log payload details', async () => {
+        test('should return resolved auth details, and log payload details', async () => {
           mockPublicKeyFunc.mockResolvedValue(publicKey)
-          const tokenPayload = await getAuth(mockRequest(token), mockJWKSDataSource)
+          const auth = await getAuthorisedEntity(mockRequest(token), mockJWKSDataSource)
 
-          expect(tokenPayload).toEqual(decodedToken)
+          expect(auth).toEqual({
+            entityId: config.get('auth.entities.SINGLE_FRONT_DOOR.entityId'),
+            authName: 'SINGLE_FRONT_DOOR',
+            serviceName: 'single-front-door'
+          })
           expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
           expect(info).toHaveBeenCalledTimes(1)
           expect(info.mock.calls[0]).toEqual([
@@ -103,8 +120,8 @@ describe('authenticate', () => {
               tenant: {
                 message: expect.stringMatching(
                   new RegExp(
-                    '{"appid":"appid","aud":"api://appid","oid":"oid",' +
-                      '"sub":"sub","tid":"tid","groups":\\["appid"\\],"roles":\\["role-id"\\],"azp":"azp-id",' +
+                    `{"appid":"${config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')}","aud":"api://appid","oid":"oid",` +
+                      `"sub":"sub","tid":"tid","groups":\\["${config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')}"\\],"roles":\\["role-id"\\],"azp":"azp-id",` +
                       '"iat":[0-9]+,"exp":[0-9]+,"ver":"1\\.0"}'
                   )
                 )
@@ -113,92 +130,109 @@ describe('authenticate', () => {
           ])
         })
       })
-      test('returns a no-appid object if token cannot be decoded', async () => {
-        expect(await getAuth(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({
-          appid: 'no-appid-token-verification-failed'
+
+      test('matches the azp claim when the appid is not available (i.e. a v2 token)', async () => {
+        const entityId = config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+
+        expect(
+          await getAuthorisedEntity(
+            mockRequest(createConsumerToken({ azp: entityId })),
+            mockJWKSDataSource
+          )
+        ).toEqual({
+          entityId: config.get('auth.entities.SINGLE_FRONT_DOOR.entityId'),
+          authName: 'SINGLE_FRONT_DOOR',
+          serviceName: 'single-front-door'
+        })
+      })
+
+      test('matches an authorised group when neither appid claim is an authorised entity', async () => {
+        const entityId = config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+
+        expect(
+          await getAuthorisedEntity(
+            mockRequest(
+              createConsumerToken({
+                appid: 'unknown-app',
+                groups: ['unrecognised-group', entityId]
+              })
+            ),
+            mockJWKSDataSource
+          )
+        ).toEqual({
+          entityId,
+          authName: 'SINGLE_FRONT_DOOR',
+          serviceName: 'single-front-door'
+        })
+      })
+
+      test('prefers the ADMIN group as the authorised entity, if available', async () => {
+        const entityId = config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')
+        const admin = config.get('auth.entities.ADMIN.entityId')
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+
+        expect(
+          await getAuthorisedEntity(
+            mockRequest(
+              createConsumerToken({
+                appid: 'unknown-app',
+                groups: ['unrecognised-group', entityId, admin]
+              })
+            ),
+            mockJWKSDataSource
+          )
+        ).toEqual({ entityId: admin, authName: 'ADMIN', serviceName: 'admin' })
+      })
+
+      test('returns unauthorised auth details if token cannot be decoded', async () => {
+        expect(await getAuthorisedEntity(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({
+          entityId: 'no-entityId--token-verification-failed',
+          serviceName: 'unknown-unauthorised-service'
         })
         expect(mockPublicKeyFunc).not.toHaveBeenCalled()
       })
 
-      test('returns a no-appid object if verification fails with incorrect key', async () => {
+      test('returns unauthorised auth details if verification fails with incorrect key', async () => {
         mockPublicKeyFunc.mockResolvedValue(publicKey)
-        expect(await getAuth(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual({
-          appid: 'no-appid-token-verification-failed'
-        })
+        expect(await getAuthorisedEntity(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual(
+          {
+            entityId: 'no-entityId--token-verification-failed',
+            serviceName: 'unknown-unauthorised-service'
+          }
+        )
         expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
       })
 
-      test('returns a no-appid object if verification fails with token expiry', async () => {
+      test('returns unauthorised auth details if verification fails with token expiry', async () => {
         const error = new Error('TokenExpiredError')
         error.name = 'TokenExpiredError'
         mockPublicKeyFunc.mockImplementation(() => {
           throw error
         })
-        expect(await getAuth(mockRequest(token), mockJWKSDataSource)).toEqual({
-          appid: 'no-appid-token-verification-failed'
+        expect(await getAuthorisedEntity(mockRequest(token), mockJWKSDataSource)).toEqual({
+          entityId: 'no-entityId--token-verification-failed',
+          serviceName: 'unknown-unauthorised-service'
         })
         expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
       })
     })
   })
 
-  describe('checkAuthGroup', () => {
-    const adminGroupId = config.get('auth.groups.ADMIN')
-
-    it('checkAuthGroup should not throw an error for admins with correct group', () => {
-      expect(() => checkAuthGroup([adminGroupId], [adminGroupId])).not.toThrow()
+  describe('checkAuthEntity', () => {
+    it('allows a service name in the allow-list', () => {
+      expect(() => checkAuthEntity('SINGLE_FRONT_DOOR', ['SINGLE_FRONT_DOOR'])).not.toThrow()
     })
 
-    it('checkAuthGroup should throw Unauthorized when user is not in AD groups', () => {
-      const testGroup = 'ADMIN'
-      expect(() => checkAuthGroup([], [testGroup])).toThrow(Unauthorized)
+    it('throws Unauthorized when the service name is not allowed', () => {
+      expect(() => checkAuthEntity('unknown-unauthorised-service', ['SINGLE_FRONT_DOOR'])).toThrow(
+        Unauthorized
+      )
     })
 
-    it('checkAuthGroup should throw Unauthorized when user is not in specified AD group', () => {
-      const testGroup = 'NON_EXISTENT_GROUP'
-      expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
-    })
-
-    it('checkAuthGroup should throw Unauthorized when AD group is null in token', () => {
-      const testGroup = null
-      expect(() => checkAuthGroup([testGroup], [adminGroupId])).toThrow(Unauthorized)
-    })
-
-    it('checkAuthGroup should not throw for an ADMIN caller regardless of the allow-list', () => {
-      expect(() => checkAuthGroup([adminGroupId], ['SOME_GROUP'])).not.toThrow()
-    })
-
-    it('checkAuthGroup should not throw for a caller with matching group membership', () => {
-      const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
-      expect(() => checkAuthGroup([sfdGroupId], ['SINGLE_FRONT_DOOR'])).not.toThrow()
-    })
-
-    it('expect authGroups to match .env.test setup', () => {
-      expect(authGroups).toEqual({
-        ADMIN: 'some-ad-group-id',
-        CONSOLIDATED_VIEW: 'consolidated-view-ad-group-id',
-        SINGLE_FRONT_DOOR: 'single-front-door-ad-group-id',
-        SFI_REFORM: 'sfi-reform-ad-group-id',
-        LAND_GRANTS_API: 'land-grants-api-ad-group-id',
-        LAND_APP_TECH_SPIKES_API: 'land-app-tech-spikes-api-ad-group-id'
-      })
-    })
-  })
-
-  describe('isAdminCaller', () => {
-    const adminGroupId = config.get('auth.groups.ADMIN')
-    const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
-
-    it('returns true when ADMIN is among the requester groups', () => {
-      expect(isAdminCaller([sfdGroupId, adminGroupId])).toBe(true)
-    })
-
-    it('returns false when ADMIN is not among the requester groups', () => {
-      expect(isAdminCaller([sfdGroupId])).toBe(false)
-    })
-
-    it('returns false for an empty group list', () => {
-      expect(isAdminCaller([])).toBe(false)
+    it('allows ADMIN regardless of the allow-list', () => {
+      expect(() => checkAuthEntity('ADMIN', ['SOME_GROUP'])).not.toThrow()
     })
   })
 
@@ -254,82 +288,6 @@ describe('authenticate', () => {
 
     it('throws Unauthorized for a service account when the field has a userType restriction', () => {
       expect(() => checkUserAccess(serviceAccountAuthContext, ['INTERNAL'])).toThrow(Unauthorized)
-    })
-  })
-
-  describe('getRequestingService', () => {
-    describe('when auth is disabled', () => {
-      const originalConfig = { ...config }
-      const configMockPath = {
-        'auth.disabled': true
-      }
-
-      beforeEach(() => {
-        vi.spyOn(config, 'get').mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
-      })
-
-      it('should return Auth Disabled', () => {
-        expect(getRequestingService(null)).toBe('auth-disabled')
-      })
-    })
-
-    describe('when auth is enabled', () => {
-      const originalConfig = { ...config }
-      const configMockPath = {
-        'auth.disabled': false
-      }
-
-      beforeEach(() => {
-        vi.spyOn(config, 'get').mockImplementation((path) =>
-          configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
-        )
-      })
-
-      const adminGroupId = config.get('auth.groups.ADMIN')
-      const consolidatedViewGroupId = config.get('auth.groups.CONSOLIDATED_VIEW')
-      const sfiReformGroupId = config.get('auth.groups.SFI_REFORM')
-      const singleFrontDoorGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
-      const landGrantsApiGroupId = config.get('auth.groups.LAND_GRANTS_API')
-      const landAppTechSpikesApiGroupId = config.get('auth.groups.LAND_APP_TECH_SPIKES_API')
-
-      it('should return the service name for a single recognised group', () => {
-        expect(getRequestingService([consolidatedViewGroupId])).toBe('consolidated-view')
-        expect(getRequestingService([sfiReformGroupId])).toBe('grants-platform')
-        expect(getRequestingService([singleFrontDoorGroupId])).toBe('single-front-door')
-        expect(getRequestingService([landGrantsApiGroupId])).toBe('land-grants-api')
-        expect(getRequestingService([landAppTechSpikesApiGroupId])).toBe('land-app-tech-spikes-api')
-      })
-
-      it('should return null when the only group present is ADMIN', () => {
-        expect(getRequestingService([adminGroupId])).toBeNull()
-      })
-
-      it('should return the first group in the array that maps to a service, skipping ADMIN', () => {
-        expect(getRequestingService([adminGroupId, sfiReformGroupId])).toBe('grants-platform')
-      })
-
-      it('should honour input array order over any fixed preference between services', () => {
-        expect(getRequestingService([sfiReformGroupId, consolidatedViewGroupId])).toBe(
-          'grants-platform'
-        )
-        expect(getRequestingService([consolidatedViewGroupId, sfiReformGroupId])).toBe(
-          'consolidated-view'
-        )
-      })
-
-      it('should return null when no groups are recognised', () => {
-        expect(getRequestingService(['unrecognised-group'])).toBeNull()
-      })
-
-      it('should return null when groups is an empty array', () => {
-        expect(getRequestingService([])).toBeNull()
-      })
-
-      it('should throw when groups is undefined', () => {
-        expect(() => getRequestingService(undefined)).toThrow()
-      })
     })
   })
 
@@ -389,8 +347,8 @@ describe('authenticate', () => {
     })
 
     describe('service account gating', () => {
-      const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
-      const adminGroupId = config.get('auth.groups.ADMIN')
+      const sfdEntityId = config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')
+      const adminEntityId = config.get('auth.entities.ADMIN.entityId')
       const rootValue = {
         gatedQueryFieldDefault: 'a',
         gatedQueryFieldExplicitlyClosed: 'b',
@@ -407,27 +365,40 @@ describe('authenticate', () => {
           contextValue
         })
 
-      const serviceAccountContext = (groups) => ({
-        auth: { groups },
+      const serviceAccountContext = (entityId) => ({
+        auth: {
+          entityId,
+          authName: entityId === adminEntityId ? 'ADMIN' : 'SINGLE_FRONT_DOOR',
+          serviceName:
+            entityId === adminEntityId
+              ? 'admin'
+              : entityId === sfdEntityId
+                ? 'single-front-door'
+                : 'unknown-unauthorised-service'
+        },
         authContext: { serviceAccount: 'service-account@example.com' }
       })
 
-      it('denies a caller with no groups claim', async () => {
+      it('denies a caller with an unrecognised entity ID', async () => {
         const result = await run('gatedQueryFieldDefault', {
-          auth: { appid: 'some-appid' },
+          auth: { entityId: 'unknown-app', serviceName: 'unknown-unauthorised-service' },
           authContext: {}
         })
-        expect(result.errors).toHaveLength(1)
-        expect(result.errors[0]).toMatchObject({
-          message: 'Authorization failed, you are not in the correct AD groups',
-          extensions: { code: 'UNAUTHORIZED', http: { status: 401 } }
-        })
+
+        expect(result.errors?.[0]).toBeInstanceOf(GraphQLError)
+        expect(result.errors[0].message).toEqual(
+          'Authorization failed, requester is not able to access this part of the schema'
+        )
         expect(result.data.gatedQueryFieldDefault).toBeNull()
       })
 
-      it('allows a non-service-account caller in the required group', async () => {
+      it('allows a non-service-account caller with the required entity ID', async () => {
         const result = await run('gatedQueryFieldDefault', {
-          auth: { groups: [sfdGroupId] },
+          auth: {
+            entityId: sfdEntityId,
+            authName: 'SINGLE_FRONT_DOOR',
+            serviceName: 'single-front-door'
+          },
           authContext: {}
         })
         expect(result.errors).toBeUndefined()
@@ -435,23 +406,33 @@ describe('authenticate', () => {
       })
 
       it('allows a service account on a Query field ', async () => {
-        const result = await run('gatedQueryFieldDefault', serviceAccountContext([sfdGroupId]))
+        const result = await run('gatedQueryFieldDefault', serviceAccountContext(sfdEntityId))
         expect(result.errors).toBeUndefined()
         expect(result.data.gatedQueryFieldDefault).toBe('a')
       })
 
       it('denies a service account access to Mutations', async () => {
-        const result = await run('gatedMutationFieldDefault', serviceAccountContext([sfdGroupId]), {
+        const result = await run('gatedMutationFieldDefault', serviceAccountContext(sfdEntityId), {
           mutation: true
         })
-        expect(result.errors?.[0]).toBeInstanceOf(Object)
+        expect(result.errors?.[0]).toBeInstanceOf(GraphQLError)
         expect(result.errors[0].message).toMatch(/not available to service accounts/)
       })
 
       it('allows an ADMIN-group service account on a Mutation field', async () => {
         const result = await run(
           'gatedMutationFieldDefault',
-          serviceAccountContext([adminGroupId]),
+          serviceAccountContext(adminEntityId),
+          { mutation: true }
+        )
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedMutationFieldDefault).toBe('c')
+      })
+
+      it('allows an ADMIN app service account on a Mutation field', async () => {
+        const result = await run(
+          'gatedMutationFieldDefault',
+          serviceAccountContext(adminEntityId),
           { mutation: true }
         )
         expect(result.errors).toBeUndefined()
@@ -460,8 +441,8 @@ describe('authenticate', () => {
     })
 
     describe('user access gating', () => {
-      const sfdGroupId = config.get('auth.groups.SINGLE_FRONT_DOOR')
-      const adminGroupId = config.get('auth.groups.ADMIN')
+      const sfdEntityId = config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')
+      const adminEntityId = config.get('auth.entities.ADMIN.entityId')
       const rootValue = { gatedQueryFieldInternalOnly: 'a' }
 
       const run = (contextValue) =>
@@ -474,7 +455,11 @@ describe('authenticate', () => {
 
       it('allows an internal caller', async () => {
         const result = await run({
-          auth: { groups: [sfdGroupId] },
+          auth: {
+            entityId: sfdEntityId,
+            authName: 'SINGLE_FRONT_DOOR',
+            serviceName: 'single-front-door'
+          },
           authContext: { internalAuthHeader: 'user@defra.gov.uk' }
         })
         expect(result.errors).toBeUndefined()
@@ -483,7 +468,11 @@ describe('authenticate', () => {
 
       it('denies an external caller', async () => {
         const result = await run({
-          auth: { groups: [sfdGroupId] },
+          auth: {
+            entityId: sfdEntityId,
+            authName: 'SINGLE_FRONT_DOOR',
+            serviceName: 'single-front-door'
+          },
           authContext: { externalAuthHeader: 'Bearer token' }
         })
         expect(result.errors?.[0].message).toMatch(/not available to this user type/)
@@ -491,27 +480,39 @@ describe('authenticate', () => {
 
       it('denies a service account', async () => {
         const result = await run({
-          auth: { groups: [sfdGroupId] },
+          auth: {
+            entityId: sfdEntityId,
+            authName: 'SINGLE_FRONT_DOOR',
+            serviceName: 'single-front-door'
+          },
           authContext: { serviceAccount: 'service-account@example.com' }
         })
         expect(result.errors?.[0].message).toMatch(/not available to this user type/)
       })
 
-      it('denies an ADMIN-group external caller', async () => {
+      it('denies an ADMIN external caller', async () => {
         const result = await run({
-          auth: { groups: [adminGroupId] },
+          auth: { entityId: adminEntityId, authName: 'ADMIN', serviceName: 'admin' },
           authContext: { externalAuthHeader: 'Bearer token' }
         })
         expect(result.errors?.[0].message).toMatch(/not available to this user type/)
       })
 
-      it('allows an ADMIN-group internal caller', async () => {
+      it('allows an ADMIN internal caller', async () => {
         const result = await run({
-          auth: { groups: [adminGroupId] },
+          auth: { entityId: adminEntityId, authName: 'ADMIN', serviceName: 'admin' },
           authContext: { internalAuthHeader: 'user@defra.gov.uk' }
         })
         expect(result.errors).toBeUndefined()
         expect(result.data.gatedQueryFieldInternalOnly).toBe('a')
+      })
+
+      it('denies an ADMIN service account caller when an internal user is required', async () => {
+        const result = await run({
+          auth: { entityId: adminEntityId, authName: 'ADMIN', serviceName: 'admin' },
+          authContext: { serviceAccount: 'service-account@example.com' }
+        })
+        expect(result.errors?.[0].message).toMatch(/not available to this user type/)
       })
     })
   })

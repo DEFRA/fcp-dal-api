@@ -112,7 +112,7 @@ type BusinessLand {
   The earliest date is 01/01/2015.
   """
   parcels(date: Date): [BusinessLandParcel]
-    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, SFI_REFORM])
+    @auth(requires: [CONSOLIDATED_VIEW, SINGLE_FRONT_DOOR, GRANTS_UI])
 
   """
   A single parcel of the business land based on its SheetId and ParcelId for a

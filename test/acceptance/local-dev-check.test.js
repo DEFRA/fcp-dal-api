@@ -83,8 +83,8 @@ const business = {
   sbi: '111111111',
   info: {
     name: 'Bechtelar - Stamm',
-    reference: '2760178899',
     frn: '2760178899',
+    reference: '2760178899',
     vat: '997364387',
     traderNumber: '535182',
     vendorNumber: null,
@@ -482,6 +482,7 @@ const businessQuery = gql`
       sbi
       info {
         name
+        frn
         reference
         frn
         vat
@@ -636,6 +637,8 @@ const businessQuery = gql`
           deleteDate
           area
           length
+          type
+          campaign
         }
       }
       countyParishHoldings {

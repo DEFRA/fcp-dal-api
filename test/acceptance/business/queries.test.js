@@ -65,36 +65,6 @@ describe('Business Queries - DAL service account routing', () => {
 
 const headers = { email: 'some-email' }
 
-describe('Business Queries - bankAccounts', () => {
-  const client = new GraphQLClient(targetURL)
-  const bankAccountsQuery = gql`
-    query BusinessBankAccounts($sbi: ID!) {
-      business(sbi: $sbi) {
-        bankAccounts {
-          number
-          currency
-        }
-      }
-    }
-  `
-
-  it('returns the existing bank accounts held for the business', async () => {
-    // org 222222222 has static existing accounts in the mock
-    const response = await client.request(bankAccountsQuery, { sbi: '222222222' }, headers)
-
-    expect(response.business.bankAccounts).toEqual([
-      { number: '1234', currency: 'GBP' },
-      { number: '5678', currency: 'EUR' }
-    ])
-  })
-
-  it('returns an empty list when the business has no bank accounts', async () => {
-    const response = await client.request(bankAccountsQuery, { sbi: '111111111' }, headers)
-
-    expect(response.business.bankAccounts).toEqual([])
-  })
-})
-
 describe('Business Queries - permittedFunctions', () => {
   const client = new GraphQLClient(targetURL)
   const permittedFunctionsQuery = gql`

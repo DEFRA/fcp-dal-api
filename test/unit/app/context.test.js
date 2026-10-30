@@ -12,8 +12,7 @@ const validDefraIdToken = jwt.sign(
 // dummy app reg id token
 const appRegToken = jwt.sign({ appid: 'test-appid' }, 'appid-secret')
 
-const getAuthMock = vi.fn()
-const getRequestingServiceMock = vi.fn()
+const getAuthorisedEntityMock = vi.fn()
 const PermissionsMock = vi.fn()
 const RuralPaymentsBusinessMock = vi.fn()
 const RuralPaymentsCustomerMock = vi.fn()
@@ -24,8 +23,7 @@ const loggerChild = vi.fn()
 const loggerMock = { child: loggerChild, info: vi.fn() }
 
 vi.doMock('../../../app/auth/authenticate.js', () => ({
-  getAuth: getAuthMock,
-  getRequestingService: getRequestingServiceMock
+  getAuthorisedEntity: getAuthorisedEntityMock
 }))
 vi.doMock('../../../app/data-sources/static/permissions.js', () => ({
   Permissions: PermissionsMock
@@ -58,7 +56,7 @@ describe('context', () => {
   })
 
   test('should build context with correct properties', async () => {
-    getAuthMock.mockResolvedValue({ user: 'test-user' })
+    getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
     PermissionsMock.mockImplementation(function () {
       return { type: 'Permissions' }
     })
@@ -75,9 +73,10 @@ describe('context', () => {
 
     const result = await context({ request })
 
-    expect(getAuthMock).toHaveBeenCalledWith(request, JWKSMock())
+    expect(getAuthorisedEntityMock).toHaveBeenCalledWith(request, JWKSMock())
     expect(loggerMock.child).toHaveBeenCalledWith({
-      traceId: 'trace-1'
+      traceId: 'trace-1',
+      tenant: { id: undefined }
     })
     expect(result.auth).toEqual({ user: 'test-user' })
     expect(result.request).toBe(request)
@@ -95,8 +94,11 @@ describe('context', () => {
   })
 
   test('binds the requesting service onto the request logger and the request itself, when one is identified', async () => {
-    getAuthMock.mockResolvedValue({ user: 'test-user', groups: ['some-group'] })
-    getRequestingServiceMock.mockReturnValue('Grants')
+    getAuthorisedEntityMock.mockResolvedValue({
+      user: 'test-user',
+      entityId: 'grants-id',
+      serviceName: 'Grants'
+    })
     PermissionsMock.mockImplementation(function () {
       return { type: 'Permissions' }
     })
@@ -111,7 +113,6 @@ describe('context', () => {
 
     await context({ request })
 
-    expect(getRequestingServiceMock).toHaveBeenCalledWith(['some-group'])
     expect(loggerMock.child).toHaveBeenCalledWith({
       traceId: 'trace-1',
       tenant: { id: 'Grants' }
@@ -119,9 +120,8 @@ describe('context', () => {
     expect(request.requestingService).toBe('Grants')
   })
 
-  test('omits tenant from the request logger bindings when no requesting service is identified', async () => {
-    getAuthMock.mockResolvedValue({ user: 'test-user' })
-    getRequestingServiceMock.mockReturnValue(null)
+  test('binds a null tenant when no service name is identified', async () => {
+    getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user', serviceName: null })
     PermissionsMock.mockImplementation(function () {
       return { type: 'Permissions' }
     })
@@ -136,16 +136,16 @@ describe('context', () => {
 
     await context({ request })
 
-    expect(getRequestingServiceMock).toHaveBeenCalledWith([])
     expect(loggerMock.child).toHaveBeenCalledWith({
-      traceId: 'trace-1'
+      traceId: 'trace-1',
+      tenant: { id: null }
     })
     expect(request.requestingService).toBeNull()
   })
 
   describe('serviceAccount', () => {
     test('constructs a service-account RuralPaymentsBusiness instance, injecting the configured DAL email as the "service-account" header, when the standard instance is on the external route', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       loggerChild.mockReturnValue({ log: vi.fn() })
       const configGetSpy = vi.spyOn(config, 'get').mockImplementation((path) => {
         if (path === 'kits.dalServiceAccountEmail') return 'dal-service-account@example.com'
@@ -182,7 +182,7 @@ describe('context', () => {
     })
 
     test('does not construct a service-account data source when the standard instance is not on the external route', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       loggerChild.mockReturnValue({ log: vi.fn() })
       RuralPaymentsBusinessMock.mockImplementationOnce(function () {
         return { isExternalRoute: () => false }
@@ -198,7 +198,7 @@ describe('context', () => {
 
   describe('auditTrail', () => {
     test('exposes a fresh, independent audit trail on every call', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       const request = { headers: { email: 'user@example.com' } }
 
       const first = await context({ request })
@@ -214,7 +214,7 @@ describe('context', () => {
       expect(second.auditTrail.getForRoot('business').accounts).toBeUndefined()
     })
     test('passes the authContext to the audit trail to allow service account to be captured', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       const request = { headers: { 'service-account': 'service@example.com' } }
 
       const ctx = await context({ request })
@@ -225,7 +225,7 @@ describe('context', () => {
 
   describe('hitachiPayments', () => {
     test('Audit requesterId is extracted from request email header', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       const request = {
         headers: {
           email: 'email@example.com'
@@ -237,7 +237,7 @@ describe('context', () => {
     })
 
     test('Audit requesterId is undefined if no email header found', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken }
       }
@@ -246,8 +246,8 @@ describe('context', () => {
       expect(result.dataSources.hitachiPayments.audit.requesterId).toBeUndefined()
     })
 
-    test('Audit correlationId (for Hitachi) is populated from request traceId', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+    test('Audit correlationId is extracted from request traceId', async () => {
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'
@@ -258,7 +258,7 @@ describe('context', () => {
     })
 
     test('Audit correlationId is undefined if no request traceId is found', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken }
       }
@@ -267,8 +267,8 @@ describe('context', () => {
       expect(result.dataSources.hitachiPayments.audit.correlationId).toBeUndefined()
     })
 
-    test('Audit requestedSystem is extracted from appid auth token claim', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user', appid: 'test-appid' })
+    test('Audit requestedSystem is extracted from the resolved entity ID', async () => {
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user', entityId: 'test-appid' })
       const request = {
         headers: {
           authorization: `Bearer ${appRegToken}`,
@@ -282,8 +282,11 @@ describe('context', () => {
       expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBe('test-appid')
     })
 
-    test('Audit requestedSystem defaults to a placeholder when auth is disabled', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user', appid: 'auth-disabled-no-appid' })
+    test('Audit requestedSystem defaults to the auth-disabled entity ID', async () => {
+      getAuthorisedEntityMock.mockResolvedValue({
+        user: 'test-user',
+        entityId: 'auth-disabled-no-entityId'
+      })
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'
@@ -292,12 +295,12 @@ describe('context', () => {
       const result = await context({ request })
 
       expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBe(
-        'auth-disabled-no-appid'
+        'auth-disabled-no-entityId'
       )
     })
 
-    test('Audit requestedSystem is undefined if no requesting group returned', async () => {
-      getAuthMock.mockResolvedValue({ user: 'test-user' })
+    test('Audit requestedSystem is undefined if no entity ID is returned', async () => {
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
       const request = {
         headers: { 'x-forwarded-authorization': validDefraIdToken },
         traceId: '111-222-333'

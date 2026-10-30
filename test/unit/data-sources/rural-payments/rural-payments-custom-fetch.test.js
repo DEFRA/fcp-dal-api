@@ -42,8 +42,9 @@ describe('RuralPayments Custom Fetch', () => {
     // the mocked `undici` the same way RuralPayments.js's own import of it does.
     vi.resetModules()
     vi.doMock('../../../../app/config.js', () => ({ config }))
-    const { resetGatewayDispatchers } =
-      await import('../../../../app/data-sources/rural-payments/gateway-dispatcher.js')
+    const { resetGatewayDispatchers } = await import(
+      '../../../../app/data-sources/rural-payments/gateway-dispatcher.js'
+    )
     resetGatewayDispatchers()
 
     configMockPath = {
