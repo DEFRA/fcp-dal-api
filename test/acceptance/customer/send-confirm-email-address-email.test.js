@@ -125,11 +125,11 @@ describe('sendConfirmEmailAddressEmail Mutation', () => {
   })
 
   it('should reject a customer with no email address', async () => {
-    // person 3010085 (CRN 3010000085) has no email address in the mock
+    // person 3010085 (CRN 9610000085) has no email address in the mock
     const client = new GraphQLClient(targetURL)
 
     await expect(
-      client.request(sendConfirmEmailAddressEmailMutation, {}, externalUserHeaders('3010000085'))
+      client.request(sendConfirmEmailAddressEmailMutation, {}, externalUserHeaders('9610000085'))
     ).rejects.toMatchObject({
       response: {
         errors: [

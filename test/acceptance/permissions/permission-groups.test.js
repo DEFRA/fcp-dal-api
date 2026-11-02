@@ -18,7 +18,7 @@ const permissionGroupsQuery = gql`
 `
 
 // Groups and levels come from app/data-sources/static/permission-groups.json; `active` is the
-// level CRN 1111111100 holds for SBI 111111111 in the mock (see customer/queries.test.js)
+// level CRN 9111111100 holds for SBI 111111111 in the mock (see customer/queries.test.js)
 const permissionLevels = (levels, activeLevel) =>
   levels.map((level) => expect.objectContaining({ level, active: level === activeLevel }))
 
@@ -69,7 +69,7 @@ describe('permissionGroups Query', () => {
   it('should return every permission group with the level active for the customer and business', async () => {
     const response = await client.request(
       permissionGroupsQuery,
-      { crn: '1111111100', sbi: '111111111' },
+      { crn: '9111111100', sbi: '111111111' },
       { email: 'some-email' }
     )
 
@@ -80,7 +80,7 @@ describe('permissionGroups Query', () => {
   it('should return the functions for each permission level', async () => {
     const response = await client.request(
       permissionGroupsQuery,
-      { crn: '1111111100', sbi: '111111111' },
+      { crn: '9111111100', sbi: '111111111' },
       { email: 'some-email' }
     )
 

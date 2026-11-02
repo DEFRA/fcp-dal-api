@@ -91,7 +91,7 @@ const customerQuery = gql`
 
 const customer = {
   personId: '11111111',
-  crn: '1111111100',
+  crn: '9111111100',
   info: {
     name: {
       title: 'Mr.',
@@ -294,7 +294,7 @@ describe('Customer Queries', () => {
       customerQuery,
       {
         sbi: '111111111',
-        crn: '1111111100'
+        crn: '9111111100'
       },
       { email: 'some-email' }
     )
@@ -309,7 +309,7 @@ describe('Customer Queries', () => {
   it('should support full customer schema - external', async () => {
     const tokenValue = jwt.sign(
       {
-        contactId: '1111111100',
+        contactId: '9111111100',
         relationships: ['111111111:111111111']
       },
       'test-secret'
@@ -319,7 +319,7 @@ describe('Customer Queries', () => {
       customerQuery,
       {
         sbi: '111111111',
-        crn: '1111111100'
+        crn: '9111111100'
       },
       { 'x-forwarded-authorization': tokenValue }
     )
@@ -346,7 +346,7 @@ describe('Customer Queries', () => {
           }
         }
       `,
-      { crn: '1111111100', sbi: '111111111', fromDate: '2024-01-01' },
+      { crn: '9111111100', sbi: '111111111', fromDate: '2024-01-01' },
       { email: 'some-email' }
     )
 

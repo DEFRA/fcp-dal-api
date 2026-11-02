@@ -256,7 +256,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   it('returns BankDetailsMatched when the details fully match', async () => {
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '111111111', crn: '1111111100', account: matchAccount } },
+      { input: { sbi: '111111111', crn: '9111111100', account: matchAccount } },
       headers
     )
 
@@ -269,7 +269,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   it('returns BankDetailsPartialMatch when the details partially match', async () => {
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '111111111', crn: '1111111100', account: partialMatchAccount } },
+      { input: { sbi: '111111111', crn: '9111111100', account: partialMatchAccount } },
       headers
     )
 
@@ -282,7 +282,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   it('returns BankDetailsValidationFailed when the details do not match', async () => {
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '111111111', crn: '1111111100', account: noMatchAccount } },
+      { input: { sbi: '111111111', crn: '9111111100', account: noMatchAccount } },
       headers
     )
 
@@ -329,7 +329,7 @@ describe('createBusinessCustomerBankDetails', () => {
   it('submits the bank change when the details fully match', async () => {
     const response = await client.request(
       submitMutation,
-      { input: { sbi: '111111111', crn: '1111111100', account: matchAccount } },
+      { input: { sbi: '111111111', crn: '9111111100', account: matchAccount } },
       headers
     )
 
@@ -342,7 +342,7 @@ describe('createBusinessCustomerBankDetails', () => {
   it('submits the bank change when the details partially match', async () => {
     const response = await client.request(
       submitMutation,
-      { input: { sbi: '111111111', crn: '1111111100', account: partialMatchAccount } },
+      { input: { sbi: '111111111', crn: '9111111100', account: partialMatchAccount } },
       headers
     )
 
@@ -1082,7 +1082,7 @@ const createBusinessMutation = gql`
 `
 
 // NOTE: creating a business links it to the person, so use the CRN reserved for
-// mutation tests; other suites assert the original businesses for CRN 1111111100!
+// mutation tests; other suites assert the original businesses for CRN 9111111100!
 const createBusinessInput = {
   crn: '9000000000',
   name: 'acceptance-created-business',

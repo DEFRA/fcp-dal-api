@@ -185,7 +185,7 @@ describe('Customer Search Queries', () => {
     const client = new GraphQLClient(targetURL)
     const response = await client.request(
       customerSearchQuery,
-      { searchString: '1111111100', searchType: 'CRN' },
+      { searchString: '9111111100', searchType: 'CRN' },
       { email: 'some-email' }
     )
 
@@ -194,7 +194,7 @@ describe('Customer Search Queries', () => {
       results: [
         {
           personId: '11111111',
-          crn: '1111111100',
+          crn: '9111111100',
           fullName: 'Raul Feil',
           personalIdentifiers: ['2363710898', '7209755783'],
           nationalInsuranceNumber: null,

@@ -28,7 +28,7 @@ describe('Business Queries - DAL service account routing', () => {
 
   it('resolves a service-account-routed field for a valid authenticated external request', async () => {
     const tokenValue = jwt.sign(
-      { contactId: '1111111100', relationships: ['111111111:111111111'] },
+      { contactId: '9111111100', relationships: ['111111111:111111111'] },
       'test-secret'
     )
 
@@ -80,7 +80,7 @@ describe('Business Queries - permittedFunctions', () => {
 
   it('returns whether the external user is permitted each requested function for the business', async () => {
     const tokenValue = jwt.sign(
-      { contactId: '1111111100', relationships: ['111111111:111111111'] },
+      { contactId: '9111111100', relationships: ['111111111:111111111'] },
       'test-secret'
     )
 
