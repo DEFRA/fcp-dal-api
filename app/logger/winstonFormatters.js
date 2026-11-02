@@ -116,20 +116,38 @@ const pickKeysForLogging = (obj) => {
   return picked
 }
 
-// URL paths that embed PII directly as a path segment, rather than in the body. Each pattern's
-// second capture group is the segment to mask.
-const PII_PATH_PATTERNS = [/(external-auth\/security-answers\/)([^/?]+)/]
+// Some URLs embed PII directly in the path or query string, rather than in the body (e.g. a crn in
+// external-auth/security-answers/{crn}, or an email in person/{email}/validateEmail). Any path
+// segment, query parameter name/value or fragment that looks like an email address or a number is
+// masked. The origin (scheme + host + port) is left as-is.
+// Character classes are mutually exclusive with their delimiters so no regex can backtrack.
+const EMAIL_REGEX = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/
+const NUMBER_REGEX = /^\d+$/
+const ORIGIN_REGEX = /^[a-z][a-z\d+.-]*:\/\/[^/?#]*/i
+// Captured so the delimiters are kept when splitting
+const URL_DELIMITERS_REGEX = /([/?&=#])/
 
-const maskPathPII = (pathStr) => {
-  for (const pattern of PII_PATH_PATTERNS) {
-    if (pattern.test(pathStr)) {
-      return pathStr.replace(
-        pattern,
-        (_, prefix, segment) => `${prefix}${maskAllButLastFour(segment)}`
-      )
-    }
+const decodeToken = (token) => {
+  try {
+    return decodeURIComponent(token)
+  } catch {
+    return token
   }
-  return pathStr
+}
+
+const isPIIToken = (token) => {
+  const decoded = decodeToken(token)
+  return EMAIL_REGEX.test(decoded) || NUMBER_REGEX.test(decoded)
+}
+
+const maskUrlPII = (urlStr) => {
+  const origin = urlStr.match(ORIGIN_REGEX)?.[0] ?? ''
+  const maskedRest = urlStr
+    .slice(origin.length)
+    .split(URL_DELIMITERS_REGEX)
+    .map((token) => (isPIIToken(token) ? maskAllButLastFour(token) : token))
+    .join('')
+  return `${origin}${maskedRest}`
 }
 
 // Request bodies are usually JSON, but some are not (e.g. verify-email posts the email address as
@@ -153,12 +171,12 @@ const buildUrl = ({ body, path, url }) => {
 
   if (url && path) {
     // Simplest case, both fields supplied, no interpretation needed
-    result.full = maskPathPII(url.toString())
-    result.path = maskPathPII(path.toString())
+    result.full = maskUrlPII(url.toString())
+    result.path = maskUrlPII(path.toString())
   } else {
     const pathToUse = url || path
     if (pathToUse) {
-      const pathStr = maskPathPII(pathToUse.toString())
+      const pathStr = maskUrlPII(pathToUse.toString())
       if (pathStr.startsWith('http')) {
         result.full = pathStr
         result.path = new URL(pathStr).pathname

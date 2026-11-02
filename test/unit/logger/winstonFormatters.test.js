@@ -471,11 +471,76 @@ describe('winstonFormatters', () => {
       })
     })
 
-    it('does not affect paths that are not in the PII path pattern list', () => {
+    it('masks any numeric path segment', () => {
       const result = cdpSchemaTranslator().transform({
-        request: { path: '/organisation/123' }
+        request: { path: 'https://api.example.com/organisation/5565448/person/9102634220/summary' }
       })
-      expect(result.url).toEqual({ full: '/organisation/123', path: '/organisation/123' })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/organisation/***5448/person/******4220/summary',
+        path: '/organisation/***5448/person/******4220/summary'
+      })
+    })
+
+    it('masks an email path segment', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/person/someone@example.com/validateEmail' }
+      })
+      expect(result.url).toEqual({
+        full: '/person/***************.com/validateEmail',
+        path: '/person/***************.com/validateEmail'
+      })
+    })
+
+    it('masks a URL-encoded email path segment', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: 'https://api.example.com/person/someone%40example.com/validateEmail' }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/person/*****************.com/validateEmail',
+        path: '/person/*****************.com/validateEmail'
+      })
+    })
+
+    it('masks numeric and email query string values', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          path: 'https://api.example.com/person/search?crn=9102634220&email=someone%40example.com&page=1'
+        }
+      })
+      expect(result.url).toEqual({
+        full: 'https://api.example.com/person/search?crn=******4220&email=*****************.com&page=1',
+        path: '/person/search'
+      })
+    })
+
+    it('masks query string values on a path-only URL', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/person/search?email=someone@example.com' }
+      })
+      expect(result.url).toEqual({
+        full: '/person/search?email=***************.com',
+        path: '/person/search?email=***************.com'
+      })
+    })
+
+    it('does not mask the host, port or non-PII path segments and query values', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: 'http://localhost:12345/v1/organisation-search?sort=name&page=12345' }
+      })
+      expect(result.url).toEqual({
+        full: 'http://localhost:12345/v1/organisation-search?sort=name&page=*2345',
+        path: '/v1/organisation-search'
+      })
+    })
+
+    it('does not mask segments that only partly contain a number or email', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { path: '/abc12345/someone@example' }
+      })
+      expect(result.url).toEqual({
+        full: '/abc12345/someone@example',
+        path: '/abc12345/someone@example'
+      })
     })
   })
 })
