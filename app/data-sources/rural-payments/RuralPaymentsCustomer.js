@@ -13,6 +13,24 @@ const KITS_CUSTOMER_SEARCH_FIELD = {
 }
 
 export class RuralPaymentsCustomer extends RuralPayments {
+  /**
+   * Creates a new person. Rural payments allocates the person's ID and Customer Reference Number
+   * (CRN), but only returns the CRN, so callers need getPersonIdByCRN to get the ID.
+   *
+   * @param {object} personDetails - The person's details in the rural payments format, as built by
+   * transformCustomerUpdateInputToPersonUpdate. firstName and lastName are required.
+   * @returns {Promise<string>} The CRN of the new person.
+   * @throws {HttpError} When the upstream request fails, e.g. a 422 when required fields are
+   * missing or invalid.
+   */
+  async createPerson(personDetails) {
+    const response = await this.post('person/create', {
+      body: personDetails,
+      headers: postPutHeaders
+    })
+    return response._data
+  }
+
   async validateEmail(email) {
     const response = await this.get(`person/${encodeURIComponent(email)}/validateEmail`)
     return response._data

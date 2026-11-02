@@ -4,7 +4,30 @@ import { BadRequest, Forbidden, Unauthorized } from '../../../errors/graphql.js'
 import { logger } from '../../../logger/logger.js'
 import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
-import { retrievePersonIdByCRN } from './common.js'
+import { retrievePersonIdByCRN, upsertPersonIdByCRN } from './common.js'
+
+async function createCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
+  let personCrn
+  let personId
+  try {
+    const transformedPerson = transformCustomerUpdateInputToPersonUpdate({}, input)
+    personCrn = await dataSources.ruralPaymentsCustomer.createPerson(transformedPerson)
+    personId = await upsertPersonIdByCRN(personCrn, dataSources)
+
+    return {
+      success: true,
+      customer: { personId, crn: personCrn }
+    }
+  } finally {
+    auditTrail?.recordAccount(info, 'personId', personId)
+    auditTrail?.recordAccount(info, 'crn', personCrn)
+    auditTrail?.recordEntity(info, {
+      entity: 'person',
+      action: 'created',
+      entityid: personCrn
+    })
+  }
+}
 
 async function updateCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
   auditTrail?.recordAccount(info, 'crn', input.crn)
@@ -244,6 +267,7 @@ function validateReasonOrNote(reason, note) {
 }
 
 export const Mutation = {
+  createCustomer: createCustomerResolver,
   updateCustomerAddress: updateCustomerResolver,
   updateCustomerDateOfBirth: updateCustomerResolver,
   updateCustomerEmail: updateCustomerResolver,

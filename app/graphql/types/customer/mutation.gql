@@ -1,4 +1,15 @@
 extend type Mutation {
+  """
+  Creates a new customer. Only first and
+  last names are required. Any email address given is marked as not validated.
+
+  The email address is not checked for duplicates, unlike when a customer is
+  updated.
+
+  Only available to internal users.
+  """
+  createCustomer(input: CreateCustomerInput!): UpdateCustomerResponse
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
   updateCustomerAddress(input: UpdateCustomerAddressInput!): UpdateCustomerResponse
     @auth(requires: [SINGLE_FRONT_DOOR])
   updateCustomerDateOfBirth(input: UpdateCustomerDateOfBirthInput!): UpdateCustomerResponse
@@ -324,6 +335,52 @@ input UpdateCustomerAllFieldsInput {
   phone: PhoneInput
   """
   Do not contact status of the customer email address.
+  """
+  doNotContact: Boolean
+}
+
+"""
+Details of the customer to create. First and last names are required.
+"""
+input CreateCustomerInput {
+  """
+  First name of the new customer.
+  """
+  first: String! @validateVariable(pattern: "^.{1,100}$")
+  """
+  Last name of the new customer.
+  """
+  last: String! @validateVariable(pattern: "^.{1,100}$")
+  """
+  Middle names of the new customer.
+  """
+  middle: String @validateVariable(pattern: "^.{1,100}$")
+  """
+  The title of the new customer (e.g., Mr., Mrs., Dr.).
+  """
+  otherTitle: String @validateVariable(pattern: "^.{1,100}$")
+  """
+  The title of the new customer (e.g., Mr., Mrs., Dr.).
+  """
+  title: String @validateVariable(pattern: "^.{1,20}$")
+  """
+  Address of the new customer.
+  """
+  address: AddressInput
+  """
+  Date of birth of the new customer (YYYY-MM-DD).
+  """
+  dateOfBirth: Date
+  """
+  Email address for the new customer.
+  """
+  email: EmailInput
+  """
+  Telephone number of the new customer.
+  """
+  phone: PhoneInput
+  """
+  Do not contact status of the new customer email address.
   """
   doNotContact: Boolean
 }

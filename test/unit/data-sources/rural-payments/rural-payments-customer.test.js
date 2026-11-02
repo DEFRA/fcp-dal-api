@@ -41,6 +41,18 @@ describe('Rural Payments Customer', () => {
     }
   })
 
+  test('should create a person', async () => {
+    httpPost.mockImplementationOnce(async () => ({ _data: 'personCrn' }))
+
+    const result = await ruralPaymentsCustomer.createPerson({ email: 'test@test.test' })
+
+    expect(result).toEqual('personCrn')
+    expect(httpPost).toHaveBeenCalledWith('person/create', {
+      body: { email: 'test@test.test' },
+      headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
   test('should return emailDuplicated from validateEmail', async () => {
     httpGet.mockImplementationOnce(async () => ({ _data: { emailDuplicated: true } }))
 

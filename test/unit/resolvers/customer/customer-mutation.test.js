@@ -61,9 +61,131 @@ describe('Customer Mutations', () => {
         request: {},
         confirmEmail: vi.fn(),
         saveEmailValidation: vi.fn(),
-        sendVerificationEmail: vi.fn()
+        sendVerificationEmail: vi.fn(),
+        createPerson: vi.fn()
       }
     }
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe('createCustomer', () => {
+    const input = { first: 'John', last: 'Doe', address: { line1: '123 Main St' } }
+    const transformedInput = {
+      firstName: input.first,
+      lastName: input.last,
+      address: { address1: input.address.line1 }
+    }
+
+    beforeEach(() => {
+      mockDataSources.mongoCustomer.upsertPersonIdByCRN.mockResolvedValue()
+    })
+
+    test('creates a customer when the required fields are available', async () => {
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockResolvedValue('crn')
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('newPersonId')
+
+      const result = await Mutation.createCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources }
+      )
+
+      expect(mockDataSources.ruralPaymentsCustomer.createPerson).toHaveBeenCalledWith(
+        transformedInput
+      )
+      expect(result).toEqual({ success: true, customer: { personId: 'newPersonId', crn: 'crn' } })
+    })
+
+    test('caches the new CRN to personId mapping in mongo without reading the cache first', async () => {
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockResolvedValue('crn')
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('newPersonId')
+
+      await Mutation.createCustomer(null, { input }, { dataSources: mockDataSources })
+
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).not.toHaveBeenCalled()
+      expect(mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN).toHaveBeenCalledWith('crn')
+      expect(mockDataSources.mongoCustomer.upsertPersonIdByCRN).toHaveBeenCalledWith(
+        'crn',
+        'newPersonId'
+      )
+    })
+
+    test('still returns the customer when caching the personId in mongo fails', async () => {
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockResolvedValue('crn')
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('newPersonId')
+      mockDataSources.mongoCustomer.upsertPersonIdByCRN.mockRejectedValue(new Error('mongo down'))
+
+      const result = await Mutation.createCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources }
+      )
+
+      expect(result).toEqual({ success: true, customer: { personId: 'newPersonId', crn: 'crn' } })
+    })
+
+    test('records the created person on the audit trail', async () => {
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+      const info = { path: { key: 'createCustomer', typename: 'Mutation', prev: undefined } }
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('newPersonId')
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockResolvedValue('newPersonCrn')
+
+      await Mutation.createCustomer(
+        null,
+        { input },
+        { dataSources: mockDataSources, auditTrail },
+        info
+      )
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'newPersonId')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'newPersonCrn')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'created',
+        entityid: 'newPersonCrn'
+      })
+    })
+
+    test('records the created person on the audit trail when the person id lookup fails', async () => {
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+      const info = { path: { key: 'createCustomer', typename: 'Mutation', prev: undefined } }
+      const error = new Error('person search failed')
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockResolvedValue('newPersonCrn')
+      mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockRejectedValue(error)
+
+      await expect(
+        Mutation.createCustomer(null, { input }, { dataSources: mockDataSources, auditTrail }, info)
+      ).rejects.toBe(error)
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', 'newPersonCrn')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', undefined)
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'created',
+        entityid: 'newPersonCrn'
+      })
+    })
+
+    test('records the attempted creation on the audit trail when creating the person fails', async () => {
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+      const info = { path: { key: 'createCustomer', typename: 'Mutation', prev: undefined } }
+      const error = new Error('create failed')
+      mockDataSources.ruralPaymentsCustomer.createPerson.mockRejectedValue(error)
+
+      await expect(
+        Mutation.createCustomer(null, { input }, { dataSources: mockDataSources, auditTrail }, info)
+      ).rejects.toBe(error)
+
+      expect(mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN).not.toHaveBeenCalled()
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'person',
+        action: 'created',
+        entityid: undefined
+      })
+    })
   })
 
   const updateMutations = [

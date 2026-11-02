@@ -1,7 +1,7 @@
 import { MONGO_DB_ERROR_001 } from '../../../logger/codes.js'
 import { maskAllButLastFour } from '../../../logger/utils.js'
 
-async function upsertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCustomer }) {
+export async function upsertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCustomer }) {
   const personId = await ruralPaymentsCustomer.getPersonIdByCRN(crn)
 
   // NOTE: fire-and-forget insertion to avoid slowing down the request, must use .catch for errors

@@ -4,7 +4,8 @@ import { config } from '../../../app/config.js'
 import { mockDefraIdJwks, signDefraIdToken } from '../helpers.js'
 
 const mockCustomerCommonModule = {
-  retrievePersonIdByCRN: vi.fn().mockResolvedValue('personId')
+  retrievePersonIdByCRN: vi.fn().mockResolvedValue('personId'),
+  upsertPersonIdByCRN: vi.fn().mockResolvedValue('personId')
 }
 
 vi.doMock('../../../app/graphql/resolvers/customer/common.js', () => mockCustomerCommonModule)
@@ -13,6 +14,7 @@ const { makeTestQuery } = await import('../makeTestQuery.js')
 
 beforeEach(() => {
   mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
+  mockCustomerCommonModule.upsertPersonIdByCRN.mockResolvedValue('personId')
   nock.disableNetConnect()
 })
 
@@ -1314,6 +1316,226 @@ describe('customer mutations', () => {
           customer: { info: { doNotContact: true } }
         }
       }
+    })
+  })
+
+  describe('createCustomer', () => {
+    const createMutation = `#graphql
+      mutation Create($input: CreateCustomerInput!) {
+        createCustomer(input: $input) {
+          success
+          customer {
+            personId
+            crn
+          }
+        }
+      }
+    `
+    const validInput = {
+      title: 'Mr',
+      first: 'John',
+      middle: 'James',
+      last: 'Doe',
+      dateOfBirth: '2000-01-02',
+      email: { address: 'john.doe@example.com' },
+      phone: { mobile: '07123456789', landline: '01234567890' },
+      doNotContact: false,
+      address: { line1: '1 Main Street', city: 'Leeds', postalCode: 'LS1 1AA' }
+    }
+    const expectedPerson = {
+      title: 'Mr',
+      firstName: 'John',
+      middleName: 'James',
+      lastName: 'Doe',
+      dateOfBirth: 946771200000,
+      email: 'john.doe@example.com',
+      mobile: '07123456789',
+      landline: '01234567890',
+      doNotContact: false,
+      address: { address1: '1 Main Street', city: 'Leeds', postalCode: 'LS1 1AA' }
+    }
+    let configMockPath
+
+    beforeEach(() => {
+      configMockPath = {}
+      const originalConfig = { ...config }
+      vi.spyOn(config, 'get').mockImplementation((path) =>
+        configMockPath[path] === undefined ? originalConfig.get(path) : configMockPath[path]
+      )
+    })
+
+    afterEach(() => {
+      vi.restoreAllMocks()
+    })
+
+    const nockCreate = (person = expectedPerson, status = 200) =>
+      nock(config.get('kits.internal.gatewayUrl'))
+        .post('/person/create', person)
+        .reply(status, { _data: '1234567890' })
+
+    test('creates the customer in KITS and returns its personId and crn', async () => {
+      // arrange
+      const kitsCreate = nockCreate()
+      mockCustomerCommonModule.upsertPersonIdByCRN.mockResolvedValueOnce('newPersonId')
+
+      // act
+      const result = await makeTestQuery(createMutation, null, true, { input: validInput })
+
+      // assert
+      expect(result).toEqual({
+        data: {
+          createCustomer: {
+            success: true,
+            customer: { personId: 'newPersonId', crn: '1234567890' }
+          }
+        }
+      })
+      expect(kitsCreate.isDone()).toBe(true)
+      expect(mockCustomerCommonModule.upsertPersonIdByCRN).toHaveBeenCalledWith(
+        '1234567890',
+        expect.objectContaining({ mongoCustomer: expect.anything() })
+      )
+    })
+
+    test('creates a customer with only the required fields', async () => {
+      // arrange
+      const kitsCreate = nockCreate({ firstName: 'John', lastName: 'Doe', address: {} })
+
+      // act
+      const result = await makeTestQuery(createMutation, null, true, {
+        input: { first: 'John', last: 'Doe' }
+      })
+
+      // assert
+      expect(result.errors).toBeUndefined()
+      expect(kitsCreate.isDone()).toBe(true)
+    })
+
+    test.each(['first', 'last'])('refuses when %s is missing', async (field) => {
+      // arrange
+      const kitsCreate = nockCreate()
+      const { [field]: _, ...input } = validInput
+
+      // act
+      const result = await makeTestQuery(createMutation, null, true, { input })
+
+      // assert
+      expect(result.errors[0].message).toContain(`Field "${field}" of required type "String!"`)
+      expect(kitsCreate.isDone()).toBe(false)
+    })
+
+    test.each([
+      ['first', 0],
+      ['first', 101],
+      ['last', 0],
+      ['last', 101]
+    ])('refuses when %s is %i characters long', async (field, length) => {
+      // arrange
+      const kitsCreate = nockCreate()
+
+      // act
+      const result = await makeTestQuery(createMutation, null, true, {
+        input: { ...validInput, [field]: 'a'.repeat(length) }
+      })
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        `variable 'input.${field}' must match pattern ^.{1,100}$`
+      )
+      expect(result.errors[0].extensions.code).toBe('BAD_USER_INPUT')
+      expect(result.data.createCustomer).toBeNull()
+      expect(kitsCreate.isDone()).toBe(false)
+    })
+
+    test('returns an error and does not look up the person when KITS fails to create it', async () => {
+      // arrange
+      nockCreate(expectedPerson, 500)
+
+      // act
+      const result = await makeTestQuery(createMutation, null, true, { input: validInput })
+
+      // assert
+      expect(result.data.createCustomer).toBeNull()
+      expect(result.errors).toHaveLength(1)
+      expect(mockCustomerCommonModule.upsertPersonIdByCRN).not.toHaveBeenCalled()
+    })
+
+    test('allows callers in the SINGLE_FRONT_DOOR group', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      const kitsCreate = nockCreate()
+
+      // act
+      const result = await makeTestQuery(createMutation, null, false, { input: validInput }, [
+        config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')
+      ])
+
+      // assert
+      expect(result.errors).toBeUndefined()
+      expect(kitsCreate.isDone()).toBe(true)
+    })
+
+    test('blocks callers outside the SINGLE_FRONT_DOOR group', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      const kitsCreate = nockCreate()
+
+      // act
+      const result = await makeTestQuery(createMutation, null, false, { input: validInput }, [
+        config.get('auth.entities.CONSOLIDATED_VIEW.entityId')
+      ])
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, requester is not able to access this part of the schema'
+      )
+      expect(kitsCreate.isDone()).toBe(false)
+    })
+
+    test('blocks service accounts', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      const kitsCreate = nockCreate()
+
+      // act
+      const result = await makeTestQuery(
+        createMutation,
+        { 'service-account': 'service@defra.gov.uk' },
+        false,
+        { input: validInput },
+        [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
+      )
+
+      // assert
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to service accounts'
+      )
+      expect(kitsCreate.isDone()).toBe(false)
+    })
+
+    test('blocks external users', async () => {
+      // arrange
+      configMockPath['auth.disabled'] = false
+      mockDefraIdJwks()
+      const kitsCreate = nock(config.get('kits.external.gatewayUrl'))
+        .post('/person/create')
+        .reply(200, { _data: '1234567890' })
+
+      // act
+      const result = await makeTestQuery(
+        createMutation,
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        false,
+        { input: validInput },
+        [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
+      )
+
+      // assert
+      expect(result.data.createCustomer).toBeNull()
+      expect(result.errors[0].message).toBe(
+        'Authorization failed, this field is not available to this user type'
+      )
+      expect(kitsCreate.isDone()).toBe(false)
     })
   })
 })

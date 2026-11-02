@@ -626,3 +626,138 @@ describe('Customer Mutations - update authentication questions', () => {
     })
   })
 })
+
+describe('Customer Mutations - create a customer', () => {
+  const createCustomerMutation = gql`
+    mutation createCustomer($input: CreateCustomerInput!) {
+      createCustomer(input: $input) {
+        success
+        customer {
+          personId
+          crn
+        }
+      }
+    }
+  `
+  const customerQuery = gql`
+    query Customer($crn: ID!) {
+      customer(crn: $crn) {
+        personId
+        info {
+          name {
+            title
+            otherTitle
+            first
+            middle
+            last
+          }
+          dateOfBirth
+          phone {
+            mobile
+            landline
+          }
+          email {
+            address
+            validated
+          }
+          status {
+            locked
+            confirmed
+            deactivated
+          }
+          address {
+            pafOrganisationName
+            line1
+            line2
+            line3
+            line4
+            line5
+            buildingNumberRange
+            buildingName
+            flatName
+            street
+            city
+            county
+            postalCode
+            country
+            uprn
+            dependentLocality
+            doubleDependentLocality
+            typeId
+          }
+          doNotContact
+          personalIdentifiers
+        }
+      }
+    }
+  `
+  const { crn: _, ...createInput } = generateFullInputForCRN(null).allFieldsInput
+
+  it('should create the customer with all the details provided', async () => {
+    // arrange
+    const client = new GraphQLClient(targetURL)
+
+    // act
+    const result = await client.request(createCustomerMutation, { input: createInput }, headers)
+
+    // assert
+    expect(result.createCustomer.success).toBe(true)
+    const { personId, crn } = result.createCustomer.customer
+    expect(personId).toMatch(/^\d+$/)
+    expect(crn).toMatch(/^\d{10}$/)
+
+    const check = await client.request(customerQuery, { crn }, headers)
+    expect(check.customer).toEqual({
+      personId,
+      info: {
+        name: nameFullInput,
+        dateOfBirth: '2000-03-01',
+        phone: createInput.phone,
+        email: { ...createInput.email, validated: false },
+        status: {
+          locked: false,
+          confirmed: true,
+          deactivated: false
+        },
+        address: { ...createInput.address, typeId: null },
+        doNotContact: false,
+        personalIdentifiers: []
+      }
+    })
+  })
+
+  it('should create the customer with only the required details', async () => {
+    // arrange
+    const client = new GraphQLClient(targetURL)
+    const input = { first: 'acceptance-first-minimal', last: 'acceptance-last-minimal' }
+
+    // act
+    const result = await client.request(createCustomerMutation, { input }, headers)
+
+    // assert
+    expect(result.createCustomer.success).toBe(true)
+    const check = await client.request(
+      customerQuery,
+      { crn: result.createCustomer.customer.crn },
+      headers
+    )
+    expect(check.customer.info.name).toMatchObject(input)
+  })
+
+  it('should create a new customer each time', async () => {
+    // arrange
+    const client = new GraphQLClient(targetURL)
+    const input = { first: 'acceptance-first-repeat', last: 'acceptance-last-repeat' }
+
+    // act
+    const first = await client.request(createCustomerMutation, { input }, headers)
+    const second = await client.request(createCustomerMutation, { input }, headers)
+
+    // assert
+    expect(second.createCustomer.customer.crn).not.toBe(first.createCustomer.customer.crn)
+    expect(second.createCustomer.customer.personId).not.toBe(first.createCustomer.customer.personId)
+  })
+
+  // NOTE: auth is disabled in the acceptance tests, so the @auth userType check that blocks
+  // external users is covered by the graphql tests instead
+})
