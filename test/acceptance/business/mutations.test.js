@@ -294,7 +294,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   })
 
   it('returns BankDetailsLocked when the person is locked for bank changes', async () => {
-    // person 11111119 (CRN 9111111900) is locked for org 111111111 in the mock
+    // person 11111119 (CRN 9111111900) is locked for org 811111111 in the mock
     const response = await client.request(
       validateMutation,
       { input: { sbi: '811111111', crn: '9111111900', account: matchAccount } },
@@ -308,7 +308,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   })
 
   it('returns BankDetailsNotEditable when the bank details cannot currently be changed', async () => {
-    // org 222222222 has bankAccountStatus submitted+updatedRecently in the mock
+    // org 822222222 has bankAccountStatus submitted+updatedRecently in the mock
     const response = await client.request(
       validateMutation,
       { input: { sbi: '822222222', crn: '9222222000', account: matchAccount } },
@@ -373,8 +373,8 @@ const updateCustomerPermissionsAndRelationshipToBusiness = gql`
   }
 `
 
-// CRN 9222222000 belongs to org 222222222 in the mock, so it can be linked to the
-// mutation-reserved SBI without changing the fixture data asserted for SBI 811111111.
+// CRN 9222222000 belongs to org 822222222 in the mock, so it can be linked to the
+// mutation-reserved SBI without changing the fixture data asserted for 811111111.
 const customerPermissionsSbi = '800000001'
 const customerPermissionsCrn = '9222222000'
 
