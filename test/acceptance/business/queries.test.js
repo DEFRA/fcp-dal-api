@@ -28,18 +28,18 @@ describe('Business Queries - DAL service account routing', () => {
 
   it('resolves a service-account-routed field for a valid authenticated external request', async () => {
     const tokenValue = jwt.sign(
-      { contactId: '9111111100', relationships: ['111111111:111111111'] },
+      { contactId: '9111111100', relationships: ['111111111:811111111'] },
       'test-secret'
     )
 
     const response = await client.request(
       businessAgreementsQuery,
-      { sbi: '111111111' },
+      { sbi: '811111111' },
       { 'x-forwarded-authorization': tokenValue }
     )
 
     expect(response).not.toHaveProperty('errors')
-    expect(response.business.sbi).toBe('111111111')
+    expect(response.business.sbi).toBe('811111111')
     expect(response.business.agreements.length).toBeGreaterThan(0)
   })
 
@@ -47,7 +47,7 @@ describe('Business Queries - DAL service account routing', () => {
     await expect(
       client.request(
         businessAgreementsQuery,
-        { sbi: '111111111' },
+        { sbi: '811111111' },
         { 'x-forwarded-authorization': 'not-a-jwt' }
       )
     ).rejects.toMatchObject({
@@ -80,14 +80,14 @@ describe('Business Queries - permittedFunctions', () => {
 
   it('returns whether the external user is permitted each requested function for the business', async () => {
     const tokenValue = jwt.sign(
-      { contactId: '9111111100', relationships: ['111111111:111111111'] },
+      { contactId: '9111111100', relationships: ['111111111:811111111'] },
       'test-secret'
     )
 
     const response = await client.request(
       permittedFunctionsQuery,
       {
-        sbi: '111111111',
+        sbi: '811111111',
         functions: ['viewLand', 'amendBankAccountDetails', 'closeBusiness', 'someBrandNewFunction']
       },
       { 'x-forwarded-authorization': tokenValue }
@@ -132,7 +132,7 @@ describe('Business Queries - payments', () => {
   it('returns the payments made to the business', async () => {
     const response = await client.request(
       paymentsQuery,
-      { sbi: '111111111', userIP: '127.0.0.1' },
+      { sbi: '811111111', userIP: '127.0.0.1' },
       headers
     )
 
@@ -193,7 +193,7 @@ describe('Business Queries - payments', () => {
   it('returns only the payments within the fromDate and toDate range', async () => {
     const response = await client.request(
       paymentsQuery,
-      { sbi: '111111111', userIP: '127.0.0.1', fromDate: '2020-03-01', toDate: '2020-06-30' },
+      { sbi: '811111111', userIP: '127.0.0.1', fromDate: '2020-03-01', toDate: '2020-06-30' },
       headers
     )
 
@@ -209,7 +209,7 @@ describe('Business Queries - payments', () => {
     await expect(
       client.request(
         paymentsQuery,
-        { sbi: '111111111', userIP: '127.0.0.1', fromDate: 'not-a-date' },
+        { sbi: '811111111', userIP: '127.0.0.1', fromDate: 'not-a-date' },
         headers
       )
     ).rejects.toMatchObject({
@@ -226,10 +226,10 @@ describe('Business Queries - payments', () => {
   })
 
   it('returns no payments when the business has none', async () => {
-    // org 100000000 has no payments in the mock
+    // org 100000000 (SBI 800000000) has no payments in the mock
     const response = await client.request(
       paymentsQuery,
-      { sbi: '100000000', userIP: '127.0.0.1' },
+      { sbi: '800000000', userIP: '127.0.0.1' },
       headers
     )
 

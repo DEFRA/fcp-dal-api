@@ -2,10 +2,10 @@ import { gql, GraphQLClient } from 'graphql-request'
 import { describe, expect, it } from 'vitest'
 const targetURL = process.env.TARGET_URL ?? 'http://localhost:3000/graphql'
 
-// NOTE: SBI 900000001 is reserved for mutation tests; other suites assert the
-// original (faker generated) mock data for SBI 111111111, so it must not be
+// NOTE: SBI 800000001 is reserved for mutation tests; other suites assert the
+// original (faker generated) mock data for SBI 811111111, so it must not be
 // mutated here!
-const sbi = '900000001'
+const sbi = '800000001'
 
 const allFieldsMutation = gql`
   mutation Mutation($allFieldsInput: UpdateBusinessAllFieldsInput!) {
@@ -256,7 +256,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   it('returns BankDetailsMatched when the details fully match', async () => {
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '111111111', crn: '9111111100', account: matchAccount } },
+      { input: { sbi: '811111111', crn: '9111111100', account: matchAccount } },
       headers
     )
 
@@ -269,7 +269,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   it('returns BankDetailsPartialMatch when the details partially match', async () => {
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '111111111', crn: '9111111100', account: partialMatchAccount } },
+      { input: { sbi: '811111111', crn: '9111111100', account: partialMatchAccount } },
       headers
     )
 
@@ -282,7 +282,7 @@ describe('validateBusinessCustomerBankDetails', () => {
   it('returns BankDetailsValidationFailed when the details do not match', async () => {
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '111111111', crn: '9111111100', account: noMatchAccount } },
+      { input: { sbi: '811111111', crn: '9111111100', account: noMatchAccount } },
       headers
     )
 
@@ -297,7 +297,7 @@ describe('validateBusinessCustomerBankDetails', () => {
     // person 11111119 (CRN 9111111900) is locked for org 111111111 in the mock
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '111111111', crn: '9111111900', account: matchAccount } },
+      { input: { sbi: '811111111', crn: '9111111900', account: matchAccount } },
       headers
     )
 
@@ -311,7 +311,7 @@ describe('validateBusinessCustomerBankDetails', () => {
     // org 222222222 has bankAccountStatus submitted+updatedRecently in the mock
     const response = await client.request(
       validateMutation,
-      { input: { sbi: '222222222', crn: '9222222000', account: matchAccount } },
+      { input: { sbi: '822222222', crn: '9222222000', account: matchAccount } },
       headers
     )
 
@@ -329,7 +329,7 @@ describe('createBusinessCustomerBankDetails', () => {
   it('submits the bank change when the details fully match', async () => {
     const response = await client.request(
       submitMutation,
-      { input: { sbi: '111111111', crn: '9111111100', account: matchAccount } },
+      { input: { sbi: '811111111', crn: '9111111100', account: matchAccount } },
       headers
     )
 
@@ -342,7 +342,7 @@ describe('createBusinessCustomerBankDetails', () => {
   it('submits the bank change when the details partially match', async () => {
     const response = await client.request(
       submitMutation,
-      { input: { sbi: '111111111', crn: '9111111100', account: partialMatchAccount } },
+      { input: { sbi: '811111111', crn: '9111111100', account: partialMatchAccount } },
       headers
     )
 
@@ -374,8 +374,8 @@ const updateCustomerPermissionsAndRelationshipToBusiness = gql`
 `
 
 // CRN 9222222000 belongs to org 222222222 in the mock, so it can be linked to the
-// mutation-reserved SBI without changing the fixture data asserted for 111111111.
-const customerPermissionsSbi = '900000001'
+// mutation-reserved SBI without changing the fixture data asserted for SBI 811111111.
+const customerPermissionsSbi = '800000001'
 const customerPermissionsCrn = '9222222000'
 
 // NOTE: the create test fails on a second run against the same mock (409 Conflict) as the
@@ -487,8 +487,8 @@ describe('customer permissions on business', () => {
 })
 
 describe('Business Mutations - reactivate a business', () => {
-  // note: sbi 920000001 is reserved for this test; it starts out locked and deactivated in the mock
-  const reactivateSbi = '920000001'
+  // note: sbi 820000001 is reserved for this test; it starts out locked and deactivated in the mock
+  const reactivateSbi = '820000001'
 
   const reactivateBusinessMutation = gql`
     mutation updateBusinessReactivate($input: UpdateBusinessReactivateInput!) {
@@ -531,9 +531,9 @@ describe('Business Mutations - reactivate a business', () => {
 })
 
 describe('Business Mutations - deactivate a business', () => {
-  // note: sbi 920000001 is reserved for this test;
+  // note: sbi 820000001 is reserved for this test;
   // it resumes previously locked and not deactivated org in the mock
-  const deactivateSbi = '920000001'
+  const deactivateSbi = '820000001'
 
   const deactivateBusinessMutation = gql`
     mutation updateBusinessDeactivate($input: UpdateBusinessDeactivateInput!) {
@@ -589,8 +589,8 @@ describe('Business Mutations - deactivate a business', () => {
 })
 
 describe('Business Mutations - lock and unlock a business', () => {
-  // note: sbi 920000003 is reserved for these tests; it starts out unlocked in the mock
-  const lockSbi = '920000003'
+  // note: sbi 820000003 is reserved for these tests; it starts out unlocked in the mock
+  const lockSbi = '820000003'
 
   const lockBusinessMutation = gql`
     mutation UpdateBusinessLock($input: UpdateBusinessLockUnlockInput!) {

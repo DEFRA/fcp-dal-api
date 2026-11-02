@@ -20,7 +20,7 @@ describe('Business - extended queries', () => {
   it('resolves a business query with bank account details - internal', async () => {
     const response = await client.request(
       bankAccountsQuery,
-      { sbi: '222222222' },
+      { sbi: '822222222' },
       { email: 'some-email' }
     )
 
@@ -34,13 +34,13 @@ describe('Business - extended queries', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '22222222',
-        relationships: ['222222222:222222222']
+        relationships: ['222222222:822222222']
       },
       'test-secret'
     )
     const response = await client.request(
       bankAccountsQuery,
-      { sbi: '222222222' },
+      { sbi: '822222222' },
       { 'x-forwarded-authorization': tokenValue }
     )
 
@@ -53,7 +53,7 @@ describe('Business - extended queries', () => {
   it('returns an empty list when the business has no bank accounts', async () => {
     const response = await client.request(
       bankAccountsQuery,
-      { sbi: '111111111' },
+      { sbi: '811111111' },
       { email: 'some-email' }
     )
 

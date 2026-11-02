@@ -113,7 +113,7 @@ describe('Business Search Queries', () => {
     const client = new GraphQLClient(targetURL)
     const response = await client.request(
       businessSearchQuery,
-      { searchString: '111111111', searchType: 'SBI' },
+      { searchString: '811111111', searchType: 'SBI' },
       { email: 'some-email' }
     )
 
@@ -122,7 +122,7 @@ describe('Business Search Queries', () => {
       results: [
         {
           organisationId: '111111111',
-          sbi: '111111111',
+          sbi: '811111111',
           name: 'Bechtelar - Stamm',
           additionalSbis: [],
           isFinancialToBusinessAddress: true,

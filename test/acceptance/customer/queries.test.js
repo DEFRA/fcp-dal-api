@@ -141,13 +141,13 @@ const customer = {
     {
       name: 'Bechtelar - Stamm',
       organisationId: '111111111',
-      sbi: '111111111',
+      sbi: '811111111',
       role: 'Key Contact'
     }
   ],
   business: {
     organisationId: '111111111',
-    sbi: '111111111',
+    sbi: '811111111',
     name: 'Bechtelar - Stamm',
     role: 'Key Contact',
     permissionGroups: [
@@ -293,7 +293,7 @@ describe('Customer Queries', () => {
     const response = await client.request(
       customerQuery,
       {
-        sbi: '111111111',
+        sbi: '811111111',
         crn: '9111111100'
       },
       { email: 'some-email' }
@@ -310,7 +310,7 @@ describe('Customer Queries', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '9111111100',
-        relationships: ['111111111:111111111']
+        relationships: ['111111111:811111111']
       },
       'test-secret'
     )
@@ -318,7 +318,7 @@ describe('Customer Queries', () => {
     const response = await client.request(
       customerQuery,
       {
-        sbi: '111111111',
+        sbi: '811111111',
         crn: '9111111100'
       },
       { 'x-forwarded-authorization': tokenValue }
@@ -346,7 +346,7 @@ describe('Customer Queries', () => {
           }
         }
       `,
-      { crn: '9111111100', sbi: '111111111', fromDate: '2024-01-01' },
+      { crn: '9111111100', sbi: '811111111', fromDate: '2024-01-01' },
       { email: 'some-email' }
     )
 
