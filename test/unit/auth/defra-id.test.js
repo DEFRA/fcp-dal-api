@@ -43,6 +43,28 @@ describe('defraIdContext', () => {
       expect(ctx.crn()).toEqual('11111111')
     })
 
+    test('returns crn as a string when contactId is a number in the token', async () => {
+      const token = signToken({ contactId: 11111111 })
+
+      const ctx = await defraIdContext(
+        { externalAuthHeader: token },
+        { traceId, jwksDataSource: jwksDataSource() }
+      )
+
+      expect(ctx.crn()).toBe('11111111')
+    })
+
+    test('throws BadRequest when contactId is not a string or number', async () => {
+      const token = signToken({ contactId: { crn: '11111111' } })
+
+      const ctx = await defraIdContext(
+        { externalAuthHeader: token },
+        { traceId, jwksDataSource: jwksDataSource() }
+      )
+
+      expect(() => ctx.crn()).toThrow(new BadRequest('Defra ID token does not contain crn'))
+    })
+
     test('throws BadRequest when the verified token does not contain crn', async () => {
       const token = signToken({})
 
@@ -168,6 +190,30 @@ describe('defraIdContext', () => {
         }
       }
     ])
+  })
+
+  test('masks a numeric contactId in the log', async () => {
+    const token = signToken({ contactId: 11111111 })
+
+    await defraIdContext(
+      { externalAuthHeader: token },
+      { traceId, jwksDataSource: jwksDataSource() }
+    )
+
+    const message = JSON.parse(info.mock.calls[0][1].tenant.message)
+    expect(message.contactId).toBe('****1111')
+  })
+
+  test('does not log a contactId when the token has none', async () => {
+    const token = signToken({})
+
+    await defraIdContext(
+      { externalAuthHeader: token },
+      { traceId, jwksDataSource: jwksDataSource() }
+    )
+
+    const message = JSON.parse(info.mock.calls[0][1].tenant.message)
+    expect(message).not.toHaveProperty('contactId')
   })
 
   test('verifies the token once, not on every crn()/orgId() call', async () => {

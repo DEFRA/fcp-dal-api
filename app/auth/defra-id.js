@@ -29,9 +29,19 @@ function decodeUnverifiedDefraIdToken(token) {
   }
 }
 
+// contactId (crn) may be issued as either a string or a number, normalise it to a string. Any other
+// type is not a valid crn
+function contactIdAsString(contactId) {
+  if (typeof contactId === 'string' || typeof contactId === 'number') {
+    return `${contactId}`
+  }
+  return undefined
+}
+
 function extractCrnFromDefraIdToken(payload) {
-  if (payload?.contactId) {
-    return payload.contactId
+  const crn = contactIdAsString(payload?.contactId)
+  if (crn) {
+    return crn
   }
   throw new BadRequest('Defra ID token does not contain crn')
 }
@@ -84,7 +94,7 @@ export const defraIdContext = async (authContext, { traceId, jwksDataSource = de
         sessionId: tokenPayload.sessionId,
         email: tokenPayload.email?.split('@')[1],
         // contactId is crn which is considered PII
-        contactId: maskAllButLastFour(tokenPayload.contactId),
+        contactId: maskAllButLastFour(contactIdAsString(tokenPayload.contactId)),
         relationships: tokenPayload.relationships,
         roles: tokenPayload.roles,
         iat: tokenPayload.iat,
