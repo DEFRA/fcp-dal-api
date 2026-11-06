@@ -473,11 +473,11 @@ describe('winstonFormatters', () => {
 
     it('masks any numeric path segment', () => {
       const result = cdpSchemaTranslator().transform({
-        request: { path: 'https://api.example.com/organisation/5565448/person/9102634220/summary' }
+        request: { path: 'https://api.example.com/organisation/5565448/person/9999999999/summary' }
       })
       expect(result.url).toEqual({
-        full: 'https://api.example.com/organisation/***5448/person/******4220/summary',
-        path: '/organisation/***5448/person/******4220/summary'
+        full: 'https://api.example.com/organisation/***5448/person/******9999/summary',
+        path: '/organisation/***5448/person/******9999/summary'
       })
     })
 

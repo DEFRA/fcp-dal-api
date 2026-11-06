@@ -42,7 +42,7 @@ describe('Customer Query Resolver', () => {
           id: 123,
           fullName: 'John Smith',
           primaryAddress: { address1: 'line 1', postalCode: 'AB12 3CD' },
-          personalIdentifiers: ['916172867'],
+          personalIdentifiers: ['999999999'],
           nationalInsuranceNumber: 'AB123456C',
           customerReference: '1234567890',
           email: 'john.smith@example.com',
@@ -74,7 +74,7 @@ describe('Customer Query Resolver', () => {
       personId: '123',
       crn: '1234567890',
       fullName: 'John Smith',
-      personalIdentifiers: ['916172867'],
+      personalIdentifiers: ['999999999'],
       nationalInsuranceNumber: 'AB123456C',
       email: 'john.smith@example.com',
       status: { locked: false, deactivated: false, confirmed: false }

@@ -769,7 +769,7 @@ describe('Customer transformer', () => {
         id: 5263421,
         fullName: 'John Smith',
         primaryAddress: { address1: 'line 1', postalCode: 'AB12 3CD' },
-        personalIdentifiers: ['916172867'],
+        personalIdentifiers: ['999999999'],
         nationalInsuranceNumber: 'AB123456C',
         customerReference: '9638563942',
         email: 'john.smith@example.com',
@@ -782,7 +782,7 @@ describe('Customer transformer', () => {
         crn: '9638563942',
         fullName: 'John Smith',
         address: expect.objectContaining({ line1: 'line 1', postalCode: 'AB12 3CD' }),
-        personalIdentifiers: ['916172867'],
+        personalIdentifiers: ['999999999'],
         nationalInsuranceNumber: 'AB123456C',
         email: 'john.smith@example.com',
         status: { locked: true, deactivated: false, confirmed: false }
