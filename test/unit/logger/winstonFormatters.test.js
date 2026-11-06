@@ -504,11 +504,11 @@ describe('winstonFormatters', () => {
     it('masks numeric and email query string values', () => {
       const result = cdpSchemaTranslator().transform({
         request: {
-          path: 'https://api.example.com/person/search?crn=9102634220&email=someone%40example.com&page=1'
+          path: 'https://api.example.com/person/search?crn=9999999999&email=someone%40example.com&page=1'
         }
       })
       expect(result.url).toEqual({
-        full: 'https://api.example.com/person/search?crn=******4220&email=*****************.com&page=1',
+        full: 'https://api.example.com/person/search?crn=******9999&email=*****************.com&page=1',
         path: '/person/search'
       })
     })
