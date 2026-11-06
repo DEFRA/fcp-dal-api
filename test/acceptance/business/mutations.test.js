@@ -373,14 +373,24 @@ const updateCustomerPermissionsAndRelationshipToBusiness = gql`
   }
 `
 
+const deleteCustomerPermissionsAndRelationshipFromBusiness = gql`
+  mutation DeleteCustomerPermissionsAndRelationshipFromBusiness(
+    $input: CustomerPermissionsAndRelationshipToBusinessInput!
+  ) {
+    deleteCustomerPermissionsAndRelationshipFromBusiness(input: $input) {
+      success
+      errorString
+    }
+  }
+`
+
 // CRN 9222222000 belongs to org 822222222 in the mock, so it can be linked to the
 // mutation-reserved SBI without changing the fixture data asserted for 811111111.
 const customerPermissionsSbi = '800000001'
 const customerPermissionsCrn = '9222222000'
 
-// NOTE: the create test fails on a second run against the same mock (409 Conflict) as the
-// DAL cannot yet unlink a customer from a business. Once FCPDAL-318 is played, add an
-// afterAll that unlinks the customer so the suite can be re-run.
+// NOTE: these tests run in order: add, update, then delete. The delete test unlinks the
+// customer again, so the create test does not hit a 409 Conflict when the suite is re-run.
 describe('customer permissions on business', () => {
   it('adds a customer to a business with the given role and permissions', async () => {
     const response = await client.request(
@@ -427,6 +437,30 @@ describe('customer permissions on business', () => {
     })
   })
 
+  it('removes a customer role and permissions from a business', async () => {
+    const response = await client.request(
+      deleteCustomerPermissionsAndRelationshipFromBusiness,
+      {
+        input: {
+          sbi: customerPermissionsSbi,
+          crn: customerPermissionsCrn,
+          role: 'Business Partner',
+          permissions: [
+            { id: 'BUSINESS_DETAILS', level: 'VIEW' },
+            { id: 'LAND_DETAILS', level: 'AMEND' }
+          ]
+        }
+      },
+      headers
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.deleteCustomerPermissionsAndRelationshipFromBusiness).toEqual({
+      success: true,
+      errorString: null
+    })
+  })
+
   const invalidInputError = (message) => ({
     response: {
       errors: [
@@ -443,6 +477,10 @@ describe('customer permissions on business', () => {
     [
       'updateCustomerPermissionsAndRelationshipToBusiness',
       updateCustomerPermissionsAndRelationshipToBusiness
+    ],
+    [
+      'deleteCustomerPermissionsAndRelationshipFromBusiness',
+      deleteCustomerPermissionsAndRelationshipFromBusiness
     ]
   ])('%s rejects a request without a role', async (_, mutation) => {
     await expect(
@@ -467,6 +505,10 @@ describe('customer permissions on business', () => {
     [
       'updateCustomerPermissionsAndRelationshipToBusiness',
       updateCustomerPermissionsAndRelationshipToBusiness
+    ],
+    [
+      'deleteCustomerPermissionsAndRelationshipFromBusiness',
+      deleteCustomerPermissionsAndRelationshipFromBusiness
     ]
   ])('%s rejects a null permission entry', async (_, mutation) => {
     await expect(
