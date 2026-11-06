@@ -21,7 +21,7 @@ describe('Business Query Resolver', () => {
   })
 
   it('internal gateway should return orgId when found', async () => {
-    const sbi = '123456789'
+    const sbi = '823456789'
     const mockOrganisation = { id: 1, name: 'Test Farm' }
 
     mockDataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(mockOrganisation.id)
@@ -34,19 +34,19 @@ describe('Business Query Resolver', () => {
 
     expect(mockDataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith(sbi)
     expect(result).toEqual({
-      sbi: '123456789',
+      sbi: '823456789',
       organisationId: 1,
       land: {
-        sbi: '123456789'
+        sbi: '823456789'
       },
       payments: {
-        sbi: '123456789'
+        sbi: '823456789'
       }
     })
   })
 
   it('records the organisationId and sbi as accounts on the audit trail', async () => {
-    const sbi = '123456789'
+    const sbi = '823456789'
     const auditTrail = { recordAccount: vi.fn() }
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
@@ -60,7 +60,7 @@ describe('Business Query Resolver', () => {
   })
 
   it('still records the sbi account when the organisationId lookup itself fails', async () => {
-    const sbi = '123456789'
+    const sbi = '823456789'
     const auditTrail = { recordAccount: vi.fn() }
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
@@ -79,14 +79,14 @@ describe('Business Query Resolver', () => {
   })
 
   it('does not throw when no audit trail is supplied', async () => {
-    const sbi = '123456789'
+    const sbi = '823456789'
     mockDataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(1)
 
     await Query.business(null, { sbi }, { dataSources: mockDataSources })
   })
 
   it('retrieves the organisationId from the Defra ID token when a defraIdContext is present', async () => {
-    const sbi = '123456789'
+    const sbi = '823456789'
     const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
 
     const result = await Query.business(
@@ -108,7 +108,7 @@ describe('Business Query Resolver', () => {
         {
           id: 123,
           name: 'Test Farm',
-          sbi: 123456789,
+          sbi: 823456789,
           additionalSbiIds: [],
           confirmed: true,
           lastUpdatedOn: 1614108764000,
@@ -143,7 +143,7 @@ describe('Business Query Resolver', () => {
     expect(result.results).toHaveLength(1)
     expect(result.results[0]).toMatchObject({
       organisationId: '123',
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'Test Farm',
       additionalSbis: [],
       correspondenceAddress: null,
@@ -174,16 +174,16 @@ describe('Business Query Resolver', () => {
 
       await Query.businessSearch(
         null,
-        { searchString: '123456789', searchType: 'SBI', pagination: { page: 1, perPage: 20 } },
+        { searchString: '823456789', searchType: 'SBI', pagination: { page: 1, perPage: 20 } },
         { dataSources: mockDataSources, auditTrail },
         info
       )
 
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '123456789')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '823456789')
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'business',
         action: 'search',
-        entityid: '123456789'
+        entityid: '823456789'
       })
     })
 

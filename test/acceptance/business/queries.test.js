@@ -28,7 +28,7 @@ describe('Business Queries - DAL service account routing', () => {
 
   it('resolves a service-account-routed field for a valid authenticated external request', async () => {
     const tokenValue = jwt.sign(
-      { contactId: '9111111100', relationships: ['111111111:811111111'] },
+      { contactId: '9111111100', relationships: ['111111111:811111111'] }, // sfd-id-check: allow
       'test-secret'
     )
 
@@ -80,7 +80,7 @@ describe('Business Queries - permittedFunctions', () => {
 
   it('returns whether the external user is permitted each requested function for the business', async () => {
     const tokenValue = jwt.sign(
-      { contactId: '9111111100', relationships: ['111111111:811111111'] },
+      { contactId: '9111111100', relationships: ['111111111:811111111'] }, // sfd-id-check: allow
       'test-secret'
     )
 
@@ -147,7 +147,7 @@ describe('Business Queries - payments', () => {
       lineItems: [
         {
           agreementNumber: 'Z1439793',
-          claimReferenceNumber: '7138384183',
+          claimReferenceNumber: '7138384183', // sfd-id-check: allow
           scheme: '6168',
           marketingYear: '2024',
           description: 'Condico utor abscido varius derelinquo patruus comburo.',
@@ -155,7 +155,7 @@ describe('Business Queries - payments', () => {
         },
         {
           agreementNumber: 'R3552433',
-          claimReferenceNumber: '7510608535',
+          claimReferenceNumber: '7510608535', // sfd-id-check: allow
           scheme: '170',
           marketingYear: '2024',
           description:
@@ -164,7 +164,7 @@ describe('Business Queries - payments', () => {
         },
         {
           agreementNumber: 'Q4190772',
-          claimReferenceNumber: '7949750534',
+          claimReferenceNumber: '7949750534', // sfd-id-check: allow
           scheme: '109315',
           marketingYear: '2024',
           description: 'Vulgo utilis vix sint perspiciatis tredecim.',
@@ -172,7 +172,7 @@ describe('Business Queries - payments', () => {
         },
         {
           agreementNumber: 'K2990517',
-          claimReferenceNumber: '159897353',
+          claimReferenceNumber: '159897353', // sfd-id-check: allow
           scheme: '407',
           marketingYear: '2024',
           description: 'Conscendo ocer somniculosus universe veritatis utroque ait.',
@@ -180,7 +180,7 @@ describe('Business Queries - payments', () => {
         },
         {
           agreementNumber: 'U0938415',
-          claimReferenceNumber: '6784873429',
+          claimReferenceNumber: '6784873429', // sfd-id-check: allow
           scheme: '424949',
           marketingYear: '2024',
           description: 'Demens contra aqua velut sublime.',
@@ -226,7 +226,7 @@ describe('Business Queries - payments', () => {
   })
 
   it('returns no payments when the business has none', async () => {
-    // org 100000000 (SBI 800000000) has no payments in the mock
+    // org 100000000 (SBI 800000000) has no payments in the mock // sfd-id-check: allow
     const response = await client.request(
       paymentsQuery,
       { sbi: '800000000', userIP: '127.0.0.1' },

@@ -15,14 +15,13 @@ describe('UkAccountNumber scalar', () => {
     expect(UkAccountNumber.parseLiteral(stringLiteral(value))).toBe(value)
   })
 
-  it.each(['1234567', '123456789', 'abcdefgh', '1234 5678', '', null, 12345678])(
-    'rejects %s',
-    (value) => {
-      expect(() => UkAccountNumber.parseValue(value)).toThrow(
-        'UkAccountNumber must be exactly 8 digits'
-      )
-    }
-  )
+  const invalid = ['1234567', '123456789', 'abcdefgh', '1234 5678', '', null, 12345678] // sfd-id-check: allow
+
+  it.each(invalid)('rejects %s', (value) => {
+    expect(() => UkAccountNumber.parseValue(value)).toThrow(
+      'UkAccountNumber must be exactly 8 digits'
+    )
+  })
 
   it('rejects non-string literals', () => {
     expect(() => UkAccountNumber.parseLiteral(intLiteral(12345678))).toThrow()

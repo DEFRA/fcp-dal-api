@@ -25,19 +25,19 @@ describe('MongoCustomer', () => {
 
   describe('getPersonIdByCRN', () => {
     it('when no matching record exists', async () => {
-      const result = await mongoCustomer.findPersonIdByCRN('1234567890')
+      const result = await mongoCustomer.findPersonIdByCRN('9234567890')
       expect(result).toBeUndefined()
-      expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '1234567890' })
+      expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '9234567890' })
     })
 
     it('when a matching record already exists', async () => {
       mockCollection.findOne.mockReturnValue({
-        _id: '1234567890',
+        _id: '9234567890',
         personId: 'personId'
       })
-      const result = await mongoCustomer.findPersonIdByCRN('1234567890')
+      const result = await mongoCustomer.findPersonIdByCRN('9234567890')
       expect(result).toEqual('personId')
-      expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '1234567890' })
+      expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '9234567890' })
     })
   })
 
@@ -47,10 +47,10 @@ describe('MongoCustomer', () => {
       vi.useFakeTimers().setSystemTime(dummyDate)
       mockCollection.updateOne.mockResolvedValue({ acknowledged: true, upsertedId: 'personId' })
 
-      const result = await mongoCustomer.upsertPersonIdByCRN('1234567890', 'personId')
+      const result = await mongoCustomer.upsertPersonIdByCRN('9234567890', 'personId')
       expect(result).toEqual({ acknowledged: true, upsertedId: 'personId' })
       expect(mockCollection.updateOne).toHaveBeenCalledWith(
-        { _id: '1234567890' },
+        { _id: '9234567890' },
         {
           $set: { personId: 'personId', updatedAt: dummyDate },
           $setOnInsert: { createdAt: dummyDate }
@@ -66,7 +66,7 @@ describe('MongoCustomer', () => {
 
     it('upsertPersonIdByCRN handles two concurrent requests for the same CRN without failing', async () => {
       vi.useRealTimers()
-      const crn = '0987654321'
+      const crn = '9987654321'
       await realCollection.deleteMany({})
 
       await expect(

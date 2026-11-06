@@ -9,8 +9,8 @@ import { makeTestQuery } from '../makeTestQuery.js'
 const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const input = {
-  sbi: '123456789',
-  crn: '1234567890',
+  sbi: '823456789',
+  crn: '9234567890',
   account: {
     ukBusiness: {
       accountHolderName: 'Acme Farms Ltd',
@@ -51,7 +51,7 @@ const query = `
 
 const waitForPersonIdToBeCachedInMongo = async () => {
   await waitFor(async () => {
-    const cached = await db.collection('customers').findOne({ _id: '1234567890' })
+    const cached = await db.collection('customers').findOne({ _id: '9234567890' })
     expect(cached?.personId).toBe('personId')
   })
 }
@@ -109,9 +109,9 @@ describe('validateBusinessCustomerBankDetails', () => {
     expect(validatedBody).toEqual({
       organisationId: 'organisationId',
       personId: 'personId',
-      sbi: '123456789',
+      sbi: '823456789',
       frn: '10014489653',
-      crn: '1234567890',
+      crn: '9234567890',
       submissionDateTime: expect.stringMatching(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/),
       account: {
         accountType: 'UK_BUSINESS',

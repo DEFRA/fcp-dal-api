@@ -6,7 +6,7 @@ import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
     query BusinessTest {
-      business(sbi: "123456789") {
+      business(sbi: "823456789") {
         organisationId
         sbi
         info {
@@ -126,7 +126,7 @@ describe('SFI Query', () => {
     mockDefraIdJwks()
     const tokenValue = signDefraIdToken({
       contactId: '123',
-      relationships: ['organisationId:123456789']
+      relationships: ['organisationId:823456789']
     })
 
     const result = await makeTestQuery(
@@ -143,7 +143,7 @@ describe('SFI Query', () => {
       data: {
         business: {
           organisationId: 'organisationId',
-          sbi: '123456789',
+          sbi: '823456789',
           info: {
             name: 'name',
             address: {

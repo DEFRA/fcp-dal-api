@@ -23,7 +23,7 @@ const businessDetailsUpdatePayload = {
     county: null,
     postalCode: '12312312',
     country: 'United Kingdom',
-    uprn: '123123123',
+    uprn: '123123123', // sfd-id-check: allow
     dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: null
   },
@@ -80,7 +80,7 @@ describe('Rural Payments Business', () => {
   ]
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
 
-  const defraIdContext = { orgId: (sbi) => (sbi === '123456789' ? '123' : undefined) }
+  const defraIdContext = { orgId: (sbi) => (sbi === '823456789' ? '123' : undefined) }
   const ruralPaymentsBusinessExt = new RuralPaymentsBusiness(
     { logger },
     {
@@ -135,12 +135,12 @@ describe('Rural Payments Business', () => {
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
       httpGet.mockImplementationOnce(async () => mockOrgResponse)
 
-      const result = await ruralPaymentsBusiness.getOrganisationBySBI('123456789')
+      const result = await ruralPaymentsBusiness.getOrganisationBySBI('823456789')
       expect(result).toEqual(mockOrgResponse._data)
       expect(httpPost).toHaveBeenCalledWith('organisation/search', {
         body: JSON.stringify({
           searchFieldType: 'SBI',
-          primarySearchPhrase: '123456789',
+          primarySearchPhrase: '823456789',
           offset: 0,
           limit: 1
         }),
@@ -240,7 +240,7 @@ describe('Rural Payments Business', () => {
     test('should return empty data and undefined page when response is empty', async () => {
       httpPost.mockImplementationOnce(async () => undefined)
 
-      const result = await ruralPaymentsBusiness.organisationSearch('SBI', '123456789')
+      const result = await ruralPaymentsBusiness.organisationSearch('SBI', '823456789')
 
       expect(result).toEqual({ data: [], page: undefined })
     })
@@ -273,12 +273,12 @@ describe('Rural Payments Business', () => {
       const mockSearchResponse = { _data: [{ id: 123 }] }
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
 
-      const result = await ruralPaymentsBusiness.getOrganisationIdBySBI('123456789')
+      const result = await ruralPaymentsBusiness.getOrganisationIdBySBI('823456789')
       expect(result).toEqual(123)
       expect(httpPost).toHaveBeenCalledWith('organisation/search', {
         body: JSON.stringify({
           searchFieldType: 'SBI',
-          primarySearchPhrase: '123456789',
+          primarySearchPhrase: '823456789',
           offset: 0,
           limit: 1
         }),
@@ -292,19 +292,19 @@ describe('Rural Payments Business', () => {
       const mockSearchResponse = { _data: [{ id: 123 }] }
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
 
-      const result = await ruralPaymentsBusinessExt.getOrganisationIdBySBI('123456789')
+      const result = await ruralPaymentsBusinessExt.getOrganisationIdBySBI('823456789')
       expect(result).toEqual('123')
     })
 
     test('should throw NotFound when organisation not found by SBI', async () => {
       httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
-      await expect(ruralPaymentsBusiness.getOrganisationIdBySBI('123456789')).rejects.toEqual(
+      await expect(ruralPaymentsBusiness.getOrganisationIdBySBI('823456789')).rejects.toEqual(
         new NotFound('Rural payments organisation not found')
       )
       expect(logger.warn).toHaveBeenCalledWith(
         '#datasource - Rural payments - organisation not found for organisation SBI',
-        { sbi: '123456789', code: 'RURALPAYMENTS_API_NOT_FOUND_001' }
+        { sbi: '823456789', code: 'RURALPAYMENTS_API_NOT_FOUND_001' }
       )
     })
   })
@@ -838,14 +838,15 @@ describe('Rural Payments Business', () => {
       const data = { viewLand: true, amendBusinessDetails: false }
       httpGet.mockResolvedValueOnce({ data, success: true, errorString: null })
 
-      const result = await ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(123456789, [
-        'viewLand',
-        'amendBusinessDetails'
-      ])
+      const organisationId = 123456789 // sfd-id-check: allow
+      const result = await ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(
+        organisationId,
+        ['viewLand', 'amendBusinessDetails']
+      )
 
       expect(httpGet).toHaveBeenCalledWith(
         expect.stringMatching(
-          /^SitiAgriApi\/authorisation\/organisation\/123456789\/byFunction\?functions=viewLand%7CamendBusinessDetails&module=CUST_SS_PORTAL&timestamp=\d+$/
+          /^SitiAgriApi\/authorisation\/organisation\/123456789\/byFunction\?functions=viewLand%7CamendBusinessDetails&module=CUST_SS_PORTAL&timestamp=\d+$/ // sfd-id-check: allow
         )
       )
       expect(result).toEqual(data)
@@ -854,14 +855,15 @@ describe('Rural Payments Business', () => {
     test('URL-encodes function names containing reserved characters', async () => {
       httpGet.mockResolvedValueOnce({ data: {}, success: true, errorString: null })
 
-      await ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(123456789, [
+      const organisationId = 123456789 // sfd-id-check: allow
+      await ruralPaymentsBusiness.getAuthorisedFunctionsByOrganisationId(organisationId, [
         'viewLand',
         'does#Not&Exist'
       ])
 
       expect(httpGet).toHaveBeenCalledWith(
         expect.stringMatching(
-          /^SitiAgriApi\/authorisation\/organisation\/123456789\/byFunction\?functions=viewLand%7Cdoes%23Not%26Exist&module=CUST_SS_PORTAL&timestamp=\d+$/
+          /^SitiAgriApi\/authorisation\/organisation\/123456789\/byFunction\?functions=viewLand%7Cdoes%23Not%26Exist&module=CUST_SS_PORTAL&timestamp=\d+$/ // sfd-id-check: allow
         )
       )
     })

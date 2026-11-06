@@ -22,7 +22,7 @@ const parcels = [
 ]
 const agreement = [
   {
-    contractId: '111111111',
+    contractId: '111111111', // sfd-id-check: allow
     name: 'ELS AGREEMENT',
     status: 'EXPIRED',
     contractType: 'Higher Level Stewardship',
@@ -79,13 +79,13 @@ const agreement = [
   }
 ]
 const business = {
-  organisationId: '111111111',
+  organisationId: '111111111', // sfd-id-check: allow
   sbi: '811111111',
   info: {
     name: 'Bechtelar - Stamm',
-    frn: '2760178899',
-    reference: '2760178899',
-    vat: '997364387',
+    frn: '2760178899', // sfd-id-check: allow
+    reference: '2760178899', // sfd-id-check: allow
+    vat: '997364387', // sfd-id-check: allow
     traderNumber: '535182',
     vendorNumber: null,
     address: {
@@ -434,8 +434,8 @@ const business = {
   applications: [
     {
       sbi: '811111111',
-      id: '4370008780',
-      subjectId: '620008135',
+      id: '4370008780', // sfd-id-check: allow
+      subjectId: '620008135', // sfd-id-check: allow
       year: 2022,
       name: 'TYRANNUS UMBRA VOLUPTATEM VIRGA CONTRA IURE USQUE SED VIRGO',
       moduleCode: 'TUM_CULTELLUS_AUTUS_2022',
@@ -448,12 +448,12 @@ const business = {
       portalStatusS: null,
       portalStatus: null,
       active: true,
-      transitionId: '6470349421',
+      transitionId: '6470349421', // sfd-id-check: allow
       transitionName: 'DELETE',
-      agreementReferences: ['6633536845'],
+      agreementReferences: ['6633536845'], // sfd-id-check: allow
       transitionHistory: [
         {
-          id: '6470349421',
+          id: '6470349421', // sfd-id-check: allow
           name: 'DELETE',
           timestamp: '2022-12-31T00:54:50.310Z',
           checkStatus: 'PASSED'
@@ -727,7 +727,7 @@ describe('Local mocked dev check', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '11111111',
-        relationships: ['111111111:811111111']
+        relationships: ['111111111:811111111'] // sfd-id-check: allow
       },
       'test-secret'
     )

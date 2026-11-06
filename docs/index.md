@@ -167,7 +167,7 @@ The DAL requires a few things:
 - An "App Reg" in your Group to generate the auth token, with the groups exposed in the token
 - Supply the Group ID to the DAL Team to provide access to the necessary fields
 - A valid internal user email, Defra ID token, or service account email for the user making the request for your service
-  - See [Service account](https://eaflood.atlassian.net/wiki/spaces/FDM/pages/6535938295/Service+account) for instructions on requesting a service account
+  - See [Service account](https://eaflood.atlassian.net/wiki/spaces/FDM/pages/6535938295/Service+account) for instructions on requesting a service account <!-- sfd-id-check: allow -->
   - **If your service users do not have access to the RP Portal you will not be able to use the DAL currently**
 
 **Note:** you must also request the app reg be updated to expose the security groups in the token, this is done by setting the following in the manifest JSON:

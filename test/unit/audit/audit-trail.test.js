@@ -103,18 +103,18 @@ describe('createAuditTrail', () => {
       const auditTrail = createAuditTrail()
       const info = { path: pathTo('business', undefined) }
 
-      auditTrail.recordAccount(info, 'frn', '123456789')
+      auditTrail.recordAccount(info, 'frn', '123456789') // sfd-id-check: allow
 
-      expect(auditTrail.getForRoot('business').accounts).toEqual({ frn: '123456789' })
+      expect(auditTrail.getForRoot('business').accounts).toEqual({ frn: '123456789' }) // sfd-id-check: allow
     })
 
     test('coerces the recorded value to a string', () => {
       const auditTrail = createAuditTrail()
       const info = { path: pathTo('business', undefined) }
 
-      auditTrail.recordAccount(info, 'organisationId', 123456789)
+      auditTrail.recordAccount(info, 'organisationId', 123456789) // sfd-id-check: allow
 
-      expect(auditTrail.getForRoot('business').accounts).toEqual({ organisationId: '123456789' })
+      expect(auditTrail.getForRoot('business').accounts).toEqual({ organisationId: '123456789' }) // sfd-id-check: allow
     })
 
     test('ignores a null or undefined value', () => {
@@ -130,7 +130,7 @@ describe('createAuditTrail', () => {
     test('is a no-op when the root selection cannot be determined', () => {
       const auditTrail = createAuditTrail()
 
-      auditTrail.recordAccount({}, 'frn', '123456789')
+      auditTrail.recordAccount({}, 'frn', '123456789') // sfd-id-check: allow
 
       expect(auditTrail.getForRoot(undefined).accounts).toBeUndefined()
     })
@@ -139,12 +139,12 @@ describe('createAuditTrail', () => {
       const auditTrail = createAuditTrail()
       const info = { path: pathTo('business', undefined) }
 
-      auditTrail.recordAccount(info, 'frn', '6561479446')
-      auditTrail.recordAccount(info, 'sbi', '123456789')
+      auditTrail.recordAccount(info, 'frn', '6561479446') // sfd-id-check: allow
+      auditTrail.recordAccount(info, 'sbi', '823456789')
 
       expect(auditTrail.getForRoot('business').accounts).toEqual({
-        frn: '6561479446',
-        sbi: '123456789'
+        frn: '6561479446', // sfd-id-check: allow
+        sbi: '823456789'
       })
     })
 
@@ -217,11 +217,11 @@ describe('createAuditTrail', () => {
       const auditTrail = createAuditTrail()
       const info = { path: pathTo('business', undefined) }
 
-      auditTrail.recordAccount(info, 'frn', '6561479446')
+      auditTrail.recordAccount(info, 'frn', '6561479446') // sfd-id-check: allow
 
       expect(auditTrail.getForRoot('business')).toEqual({
         entities: undefined,
-        accounts: { frn: '6561479446' }
+        accounts: { frn: '6561479446' } // sfd-id-check: allow
       })
     })
   })
@@ -249,7 +249,7 @@ describe('createAuditTrail', () => {
       const auditTrail = createAuditTrail()
       const info = { path: pathTo('business', undefined) }
 
-      auditTrail.recordAccount(info, 'sbi', '123456789')
+      auditTrail.recordAccount(info, 'sbi', '823456789')
       auditTrail.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: 'frn-1' })
 
       expect(auditTrail.rootKeys()).toEqual(['business'])
@@ -261,7 +261,7 @@ describe('createAuditTrail', () => {
     const second = createAuditTrail()
     const info = { path: pathTo('business', undefined) }
 
-    first.recordAccount(info, 'frn', '6561479446')
+    first.recordAccount(info, 'frn', '6561479446') // sfd-id-check: allow
     first.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: 'frn-1' })
 
     expect(second.getForRoot('business')).toEqual({ entities: undefined, accounts: undefined })

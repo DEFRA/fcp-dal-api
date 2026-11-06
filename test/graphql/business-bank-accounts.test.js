@@ -8,7 +8,7 @@ const v1 = nock(config.get('kits.internal.gatewayUrl'))
 
 const query = `#graphql
   query BusinessBankAccounts {
-    business(sbi: "123456789") {
+    business(sbi: "823456789") {
       sbi
       bankAccounts {
         number
@@ -67,7 +67,7 @@ describe('business bankAccounts', () => {
     expect(result).toEqual({
       data: {
         business: {
-          sbi: '123456789',
+          sbi: '823456789',
           bankAccounts: [
             { number: '1234', currency: 'GBP' },
             { number: '5678', currency: 'EUR' }
@@ -88,7 +88,7 @@ describe('business bankAccounts', () => {
     expect(result).toEqual({
       data: {
         business: {
-          sbi: '123456789',
+          sbi: '823456789',
           bankAccounts: []
         }
       }
@@ -106,7 +106,7 @@ describe('business bankAccounts', () => {
     expect(result).toEqual({
       data: {
         business: {
-          sbi: '123456789',
+          sbi: '823456789',
           bankAccounts: []
         }
       }
@@ -154,7 +154,7 @@ describe('business bankAccounts', () => {
       config.get('auth.entities.CONSOLIDATED_VIEW.entityId')
     ])
 
-    expect(result.data.business.sbi).toBe('123456789')
+    expect(result.data.business.sbi).toBe('823456789')
     expect(result.data.business.bankAccounts).toBeNull()
     expect(result.errors).toHaveLength(1)
     expect(result.errors[0]).toMatchObject({

@@ -87,25 +87,25 @@ describe('defraIdContext', () => {
 
   describe('orgId', () => {
     test('extracts orgId when a relationship matches the given SBI', async () => {
-      const token = signToken({ relationships: ['orgId1:987654321', 'orgId2:123456789'] })
+      const token = signToken({ relationships: ['orgId1:887654321', 'orgId2:823456789'] })
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
         { traceId, jwksDataSource: jwksDataSource() }
       )
 
-      expect(ctx.orgId('123456789')).toBe('orgId2')
+      expect(ctx.orgId('823456789')).toBe('orgId2')
     })
 
     test('throws BadRequest if no relationship matches the given SBI', async () => {
-      const token = signToken({ relationships: ['orgId1:987654321', 'orgId2:123456789'] })
+      const token = signToken({ relationships: ['orgId1:887654321', 'orgId2:823456789'] })
 
       const ctx = await defraIdContext(
         { externalAuthHeader: token },
         { traceId, jwksDataSource: jwksDataSource() }
       )
 
-      expect(() => ctx.orgId('000000000')).toThrow(BadRequest)
+      expect(() => ctx.orgId('800000000')).toThrow(BadRequest)
     })
 
     test('throws BadRequest if relationships is missing', async () => {
@@ -116,7 +116,7 @@ describe('defraIdContext', () => {
         { traceId, jwksDataSource: jwksDataSource() }
       )
 
-      expect(() => ctx.orgId('123456789')).toThrow(BadRequest)
+      expect(() => ctx.orgId('823456789')).toThrow(BadRequest)
     })
 
     test('throws BadRequest if relationships is not an array', async () => {
@@ -127,11 +127,11 @@ describe('defraIdContext', () => {
         { traceId, jwksDataSource: jwksDataSource() }
       )
 
-      expect(() => ctx.orgId('123456789')).toThrow(BadRequest)
+      expect(() => ctx.orgId('823456789')).toThrow(BadRequest)
     })
 
     test('throws an error when the token signature is invalid', async () => {
-      const token = signToken({ relationships: ['orgId2:123456789'] }, wrongPrivateKey)
+      const token = signToken({ relationships: ['orgId2:823456789'] }, wrongPrivateKey)
 
       await expect(
         defraIdContext({ externalAuthHeader: token }, { traceId, jwksDataSource: jwksDataSource() })
@@ -218,7 +218,7 @@ describe('defraIdContext', () => {
 
   test('verifies the token once, not on every crn()/orgId() call', async () => {
     const jwks = jwksDataSource()
-    const token = signToken({ contactId: '11111111', relationships: ['orgId2:123456789'] })
+    const token = signToken({ contactId: '11111111', relationships: ['orgId2:823456789'] })
 
     const ctx = await defraIdContext(
       { externalAuthHeader: token },
@@ -226,7 +226,7 @@ describe('defraIdContext', () => {
     )
     ctx.crn()
     ctx.crn()
-    ctx.orgId('123456789')
+    ctx.orgId('823456789')
 
     expect(jwks.getPublicKey).toHaveBeenCalledTimes(1)
   })
@@ -241,7 +241,7 @@ describe('defraIdContext', () => {
       // Signed with a key the configured jwksDataSource would never accept, to prove the
       // signature isn't being checked at all in this mode.
       const token = signToken(
-        { contactId: '11111111', relationships: ['orgId2:123456789'] },
+        { contactId: '11111111', relationships: ['orgId2:823456789'] },
         wrongPrivateKey
       )
 
@@ -251,7 +251,7 @@ describe('defraIdContext', () => {
       )
 
       expect(ctx.crn()).toEqual('11111111')
-      expect(ctx.orgId('123456789')).toEqual('orgId2')
+      expect(ctx.orgId('823456789')).toEqual('orgId2')
       expect(jwks.getPublicKey).not.toHaveBeenCalled()
     })
 

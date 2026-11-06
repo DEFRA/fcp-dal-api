@@ -10,7 +10,7 @@ type BusinessInfo {
   """
   Firm Reference Number (FRN) of the business.
 
-  A unique 10-digit number that is known to the customer, for example, 1234567890.
+  A unique 10-digit number that is known to the customer, for example, 9234567890.
   However a customer is more likely to be familiar with their Single Business Identified
   (SBI). FRN is commonly used in RPA's payment systems. The format is the same as the
   Customer Reference Number (CRN), which is also a 10-digit number.
@@ -20,7 +20,7 @@ type BusinessInfo {
   """
   Firm Reference Number (FRN) of the business.
 
-  A unique 10-digit number that is known to the customer, for example, 1234567890.
+  A unique 10-digit number that is known to the customer, for example, 9234567890.
   However a customer is more likely to be familiar with their Single Business Identified
   (SBI). FRN is commonly used in RPA's payment systems. The format is the same as the
   Customer Reference Number (CRN), which is also a 10-digit number.
@@ -206,7 +206,7 @@ type BusinessCustomer {
 
   """
   Unique Customer Reference Number (CRN) of the customer. 10-digit number that should
-  be known to to the customer, for example, 1234567890. This is the same format as the
+  be known to to the customer, for example, 9234567890. This is the same format as the
   Firm Reference Number (FRN).
   """
   crn: String

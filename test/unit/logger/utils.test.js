@@ -70,7 +70,7 @@ describe('sampleResponse', () => {
 
 describe('maskAllButLastFour', () => {
   it('masks all but the last four characters of a string', () => {
-    expect(maskAllButLastFour('1234567890')).toBe('******7890')
+    expect(maskAllButLastFour('9234567890')).toBe('******7890')
   })
 
   it('leaves a four character string unmasked', () => {
@@ -86,9 +86,9 @@ describe('maskAllButLastFour', () => {
   })
 
   it('returns non-string values unchanged', () => {
-    expect(maskAllButLastFour(1234567890)).toBe(1234567890)
+    expect(maskAllButLastFour(9234567890)).toBe(9234567890)
     expect(maskAllButLastFour(null)).toBeNull()
     expect(maskAllButLastFour(undefined)).toBeUndefined()
-    expect(maskAllButLastFour({ crn: '1234567890' })).toEqual({ crn: '1234567890' })
+    expect(maskAllButLastFour({ crn: '9234567890' })).toEqual({ crn: '9234567890' })
   })
 })

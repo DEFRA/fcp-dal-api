@@ -24,7 +24,7 @@ const orgDetailsUpdatePayload = {
     county: null,
     postalCode: '12312312',
     country: 'United Kingdom',
-    uprn: '123123123',
+    uprn: '123123123', // sfd-id-check: allow
     dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: null
   },
@@ -34,7 +34,7 @@ const orgDetailsUpdatePayload = {
   mobile: '07700900001',
   businessType: { id: 0 },
   legalStatus: { id: 101 },
-  taxRegistrationNumber: '123456789'
+  taxRegistrationNumber: '123456789' // sfd-id-check: allow
 }
 
 const query = `
@@ -72,11 +72,11 @@ describe('updateBusinessAllFields', () => {
 
   test('updates business details and additional details with one upstream call each', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'new name',
       email: { address: 'newemail@test.com' },
       phone: { landline: '01234 567890', mobile: '07123 456789' },
-      vat: '987654321',
+      vat: '987654321', // sfd-id-check: allow
       legalStatusCode: 102108,
       typeCode: 3,
       dateStartedFarming: '2025-01-01',
@@ -91,7 +91,7 @@ describe('updateBusinessAllFields', () => {
       email: 'newemail@test.com',
       landline: '01234 567890',
       mobile: '07123 456789',
-      taxRegistrationNumber: '987654321'
+      taxRegistrationNumber: '987654321' // sfd-id-check: allow
     }
     const additionalDetailsPutPayloadOverrides = {
       companiesHouseRegistrationNumber: '12345678',
@@ -139,7 +139,7 @@ describe('updateBusinessAllFields', () => {
 
   test('only calls the business details endpoint when no additional details fields are provided', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'new name'
     }
 
@@ -174,7 +174,7 @@ describe('updateBusinessAllFields', () => {
 
   test('allows an empty vat to clear the vat number', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       vat: ''
     }
 
@@ -209,7 +209,7 @@ describe('updateBusinessAllFields', () => {
 
   test('returns a GraphQL error when the additional business details update fails', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'new name',
       typeCode: 3
     }
@@ -245,7 +245,7 @@ describe('updateBusinessAllFields', () => {
 
   test('reports neither update applied when the business details update fails first', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'new name',
       typeCode: 3
     }
@@ -276,7 +276,7 @@ describe('updateBusinessAllFields', () => {
 
   test('only calls the additional business details endpoint when no business details fields are provided', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       typeCode: 3
     }
 

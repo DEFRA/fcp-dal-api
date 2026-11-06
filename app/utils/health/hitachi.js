@@ -22,7 +22,7 @@ export const healthCheck = async () => {
     })
 
     await hitachiPayments.getSupplierPayments({
-      frn: '000000000',
+      frn: '000000000', // sfd-id-check: allow
       userIP: '127.0.0.1',
       resourceId: 'healthcheck'
     })

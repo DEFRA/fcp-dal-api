@@ -38,7 +38,7 @@ describe('Hitachi payments health check', () => {
       }
     })
     expect(getSupplierPaymentsMock).toHaveBeenCalledWith({
-      frn: '000000000',
+      frn: '000000000', // sfd-id-check: allow
       userIP: '127.0.0.1',
       resourceId: 'healthcheck'
     })

@@ -20,7 +20,7 @@ describe('retrievePersonIdByCRN', () => {
   it('returns personId from Mongo when found', async () => {
     dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('mongoPersonId')
 
-    const crn = '1234567890'
+    const crn = '9234567890'
     const result = await retrievePersonIdByCRN(crn, dataSources)
 
     expect(dataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith(crn)
@@ -28,7 +28,7 @@ describe('retrievePersonIdByCRN', () => {
   })
 
   it('falls back to return personId from upstream request when not found in Mongo', async () => {
-    const crn = '1234567890'
+    const crn = '9234567890'
     const personId = 'rpPersonId'
     dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(undefined)
     dataSources.mongoCustomer.upsertPersonIdByCRN.mockResolvedValue(undefined)
@@ -43,7 +43,7 @@ describe('retrievePersonIdByCRN', () => {
   })
 
   it('handles MongoDB fetch error by logging and falling back to upstream request', async () => {
-    const crn = '1234567890'
+    const crn = '9234567890'
     const personId = 'rpPersonId'
     const mongoError = new Error('MongoDB error')
     dataSources.mongoCustomer.findPersonIdByCRN.mockRejectedValue(mongoError)
@@ -64,7 +64,7 @@ describe('retrievePersonIdByCRN', () => {
   })
 
   it('logs and returns personId if there is a problem inserting into Mongo', async () => {
-    const crn = '1234567890'
+    const crn = '9234567890'
     const personId = 'rpPersonId'
     const mongoError = new Error('MongoDB error')
     dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(undefined)

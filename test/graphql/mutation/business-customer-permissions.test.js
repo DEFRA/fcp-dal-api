@@ -47,8 +47,8 @@ const mutations = [
 ]
 
 const baseInput = {
-  sbi: '123456789',
-  crn: '1234567890',
+  sbi: '823456789',
+  crn: '9234567890',
   role: 'Agent',
   permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
 }
@@ -62,7 +62,7 @@ const expectedUpstreamBody = (privilegeNames) => ({
 // dropping the database, otherwise the next test gets a cache hit and skips person search
 const waitForPersonIdToBeCachedInMongo = async () => {
   await waitFor(async () => {
-    const cached = await db.collection('customers').findOne({ _id: '1234567890' })
+    const cached = await db.collection('customers').findOne({ _id: '9234567890' })
     expect(cached?.personId).toBe('personId')
   })
 }

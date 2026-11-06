@@ -28,7 +28,7 @@ describe('business state mutations', () => {
 
   test('lock a business', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       reason: 'test'
     }
 
@@ -36,7 +36,7 @@ describe('business state mutations', () => {
     v1.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        sbi: '123456789',
+        sbi: '823456789',
         locked: true
       }
     })
@@ -65,7 +65,7 @@ describe('business state mutations', () => {
         updateBusinessLock: {
           success: true,
           business: {
-            sbi: '123456789',
+            sbi: '823456789',
             info: {
               status: {
                 locked: true
@@ -79,7 +79,7 @@ describe('business state mutations', () => {
 
   test('unlock a business', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       reason: 'test'
     }
 
@@ -87,7 +87,7 @@ describe('business state mutations', () => {
     v1.get('/organisation/organisationId').reply(200, {
       _data: {
         id: 'organisationId',
-        sbi: '123456789',
+        sbi: '823456789',
         locked: false
       }
     })
@@ -116,7 +116,7 @@ describe('business state mutations', () => {
         updateBusinessUnlock: {
           success: true,
           business: {
-            sbi: '123456789',
+            sbi: '823456789',
             info: {
               status: {
                 locked: false
@@ -132,7 +132,7 @@ describe('business state mutations', () => {
     test('reactivate a business', async () => {
       // arrange
       const input = {
-        sbi: '123456789',
+        sbi: '823456789',
         reason: 'test'
       }
 
@@ -143,7 +143,7 @@ describe('business state mutations', () => {
       v1.get('/organisation/organisationId').reply(200, {
         _data: {
           id: 'organisationId',
-          sbi: '123456789',
+          sbi: '823456789',
           locked: true,
           deactivated: false
         }
@@ -175,7 +175,7 @@ describe('business state mutations', () => {
           updateBusinessReactivate: {
             success: true,
             business: {
-              sbi: '123456789',
+              sbi: '823456789',
               info: {
                 status: {
                   deactivated: false
@@ -209,9 +209,9 @@ describe('business state mutations', () => {
       // act
       const result = await makeTestQuery(
         query,
-        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' }) },
         false,
-        { input: { sbi: '123456789', reason: 'test' } },
+        { input: { sbi: '823456789', reason: 'test' } },
         [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
       )
 
@@ -227,7 +227,7 @@ describe('business state mutations', () => {
   describe('Deactivate a business', () => {
     test('deactivate a business', async () => {
       const input = {
-        sbi: '123456789',
+        sbi: '823456789',
         reason: 'test'
       }
 
@@ -238,7 +238,7 @@ describe('business state mutations', () => {
       v1.get('/organisation/organisationId').reply(200, {
         _data: {
           id: 'organisationId',
-          sbi: '123456789',
+          sbi: '823456789',
           locked: true,
           deactivated: false
         }
@@ -268,7 +268,7 @@ describe('business state mutations', () => {
           updateBusinessDeactivate: {
             success: true,
             business: {
-              sbi: '123456789',
+              sbi: '823456789',
               info: {
                 status: {
                   deactivated: false
@@ -300,9 +300,9 @@ describe('business state mutations', () => {
 
       const result = await makeTestQuery(
         query,
-        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' }) },
         false,
-        { input: { sbi: '123456789', reason: 'test' } },
+        { input: { sbi: '823456789', reason: 'test' } },
         [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
       )
 

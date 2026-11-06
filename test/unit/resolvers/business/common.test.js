@@ -354,7 +354,7 @@ describe('businessAllFieldsUpdateResolver', () => {
     const input = {
       sbi: '123',
       name: 'Test',
-      vat: '123456789',
+      vat: '123456789', // sfd-id-check: allow
       legalStatusCode: 2,
       dateStartedFarming: '2025-01-01'
     }
@@ -363,7 +363,7 @@ describe('businessAllFieldsUpdateResolver', () => {
 
     const expectedPayload = {
       name: 'Test',
-      taxRegistrationNumber: '123456789',
+      taxRegistrationNumber: '123456789', // sfd-id-check: allow
       legalStatus: { id: 2 },
       dateStartedFarming: '2025-01-01T00:00:00.000Z'
     }

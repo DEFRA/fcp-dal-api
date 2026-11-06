@@ -30,7 +30,7 @@ function setupNock(update = {}) {
   kits
     .post('/person/search', {
       searchFieldType: 'CUSTOMER_REFERENCE',
-      primarySearchPhrase: '1234567890',
+      primarySearchPhrase: '9234567890',
       offset: 0,
       limit: 1
     })
@@ -96,7 +96,7 @@ function setupNock(update = {}) {
   kits
     .post('/person/search', {
       searchFieldType: 'CUSTOMER_REFERENCE',
-      primarySearchPhrase: '1234567890',
+      primarySearchPhrase: '9234567890',
       offset: 0,
       limit: 1
     })
@@ -130,7 +130,7 @@ describe('customer mutations', () => {
 
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateLockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+          updateLockCustomer(input: { crn: "9234567890", reason: "my reason" }) {
             success
             customer {
               info {
@@ -162,7 +162,7 @@ describe('customer mutations', () => {
     test('throws an error if no reason or note is provided', async () => {
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateLockCustomer(input: { crn: "1234567890" }) {
+          updateLockCustomer(input: { crn: "9234567890" }) {
             success
             customer {
               info {
@@ -192,7 +192,7 @@ describe('customer mutations', () => {
 
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateLockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+          updateLockCustomer(input: { crn: "9234567890", reason: "my reason" }) {
             success
             customer {
               info {
@@ -225,7 +225,7 @@ describe('customer mutations', () => {
 
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateUnlockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+          updateUnlockCustomer(input: { crn: "9234567890", reason: "my reason" }) {
             success
             customer {
               info {
@@ -257,7 +257,7 @@ describe('customer mutations', () => {
     test('throws an error if no reason or note is provided', async () => {
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateUnlockCustomer(input: { crn: "1234567890" }) {
+          updateUnlockCustomer(input: { crn: "9234567890" }) {
             success
             customer {
               info {
@@ -287,7 +287,7 @@ describe('customer mutations', () => {
 
       const result = await makeTestQuery(`#graphql
         mutation {
-          updateUnlockCustomer(input: { crn: "1234567890", reason: "my reason" }) {
+          updateUnlockCustomer(input: { crn: "9234567890", reason: "my reason" }) {
             success
             customer {
               info {
@@ -315,7 +315,7 @@ describe('customer mutations', () => {
         }
       }
     `
-    const input = { crn: '1234567890', reason: 'my reason' }
+    const input = { crn: '9234567890', reason: 'my reason' }
     let configMockPath
 
     beforeEach(() => {
@@ -337,7 +337,7 @@ describe('customer mutations', () => {
 
     const externalHeaders = () => {
       mockDefraIdJwks()
-      return { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) }
+      return { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' }) }
     }
 
     test('allows an internal user in the SINGLE_FRONT_DOOR group', async () => {
@@ -389,7 +389,7 @@ describe('customer mutations', () => {
         }
       }
     `
-    const validInput = { crn: '1234567890', reason: 'my reason', note: 'my note' }
+    const validInput = { crn: '9234567890', reason: 'my reason', note: 'my note' }
     let configMockPath
 
     beforeEach(() => {
@@ -436,7 +436,7 @@ describe('customer mutations', () => {
 
       // act
       const result = await makeTestQuery(deactivateMutation, null, true, {
-        input: { crn: '1234567890', ...fields }
+        input: { crn: '9234567890', ...fields }
       })
 
       // assert
@@ -453,7 +453,7 @@ describe('customer mutations', () => {
 
       // act
       const result = await makeTestQuery(deactivateMutation, null, true, {
-        input: { crn: '1234567890', ...fields }
+        input: { crn: '9234567890', ...fields }
       })
 
       // assert
@@ -490,7 +490,7 @@ describe('customer mutations', () => {
 
       // act
       const result = await makeTestQuery(deactivateMutation, null, true, {
-        input: { crn: '1234567890', note }
+        input: { crn: '9234567890', note }
       })
 
       // assert
@@ -574,7 +574,7 @@ describe('customer mutations', () => {
       // act
       const result = await makeTestQuery(
         deactivateMutation,
-        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' }) },
         false,
         { input: validInput },
         [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
@@ -606,7 +606,7 @@ describe('customer mutations', () => {
       }
     `
     const validInput = {
-      crn: '1234567890',
+      crn: '9234567890',
       memorableDate: 'my date',
       memorableEvent: 'my event',
       memorableLocation: 'my location'
@@ -627,7 +627,7 @@ describe('customer mutations', () => {
 
     const nockSaveAnswers = (status = 200) =>
       nock(config.get('kits.internal.gatewayUrl'))
-        .post('/external-auth/security-answers/1234567890', {
+        .post('/external-auth/security-answers/9234567890', {
           date: 'my date',
           event: 'my event',
           location: 'my location'
@@ -637,8 +637,8 @@ describe('customer mutations', () => {
     test('saves the answers in KITS and returns the updated customer', async () => {
       // arrange
       const kits = nockSaveAnswers()
-      kits.get('/external-auth/security-answers/1234567890').reply(200, {
-        customerReference: '1234567890',
+      kits.get('/external-auth/security-answers/9234567890').reply(200, {
+        customerReference: '9234567890',
         memorableDate: 'my date',
         memorableEvent: 'my event',
         memorableLocation: 'my location',
@@ -656,7 +656,7 @@ describe('customer mutations', () => {
           updateCustomerAuthenticationQuestions: {
             success: true,
             customer: {
-              crn: '1234567890',
+              crn: '9234567890',
               authenticationQuestions: {
                 memorableDate: 'my date',
                 memorableEvent: 'my event',
@@ -694,7 +694,7 @@ describe('customer mutations', () => {
     ])('clears the answers in KITS when they are %s', async (_, answers) => {
       // arrange
       const kits = nock(config.get('kits.internal.gatewayUrl'))
-        .post('/external-auth/security-answers/1234567890', {})
+        .post('/external-auth/security-answers/9234567890', {})
         .reply(200)
 
       // act
@@ -708,7 +708,7 @@ describe('customer mutations', () => {
         `,
         null,
         true,
-        { input: { crn: '1234567890', ...answers } }
+        { input: { crn: '9234567890', ...answers } }
       )
 
       // assert
@@ -736,7 +736,7 @@ describe('customer mutations', () => {
       // arrange
       const memorableEvent = 'x'.repeat(256)
       const kits = nock(config.get('kits.internal.gatewayUrl'))
-        .post('/external-auth/security-answers/1234567890', {
+        .post('/external-auth/security-answers/9234567890', {
           date: 'my date',
           event: memorableEvent,
           location: 'my location'
@@ -802,7 +802,7 @@ describe('customer mutations', () => {
       configMockPath['auth.disabled'] = false
       mockDefraIdJwks()
       const kits = nock(config.get('kits.external.gatewayUrl'))
-        .post('/external-auth/security-answers/1234567890', {
+        .post('/external-auth/security-answers/9234567890', {
           date: 'my date',
           event: 'my event',
           location: 'my location'
@@ -818,7 +818,7 @@ describe('customer mutations', () => {
             }
           }
         `,
-        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' }) },
         false,
         { input: validInput },
         [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]
@@ -881,7 +881,7 @@ describe('customer mutations', () => {
       mutation {
         updateCustomerAddress(
           input: {
-            crn: "1234567890"
+            crn: "9234567890"
             address: {
               buildingName: "newBuildingName"
               buildingNumberRange: "newBuildingNumberRange"
@@ -970,7 +970,7 @@ describe('customer mutations', () => {
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerDateOfBirth(input: { crn: "1234567890", dateOfBirth: "2025-01-01" }) {
+        updateCustomerDateOfBirth(input: { crn: "9234567890", dateOfBirth: "2025-01-01" }) {
           customer {
             info {
               dateOfBirth
@@ -1006,7 +1006,7 @@ describe('customer mutations', () => {
 
     const result = await makeTestQuery(`#graphql
       mutation {
-        updateCustomerEmail(input: { crn: "1234567890", email: { address: "new.email@example.com" } }) {
+        updateCustomerEmail(input: { crn: "9234567890", email: { address: "new.email@example.com" } }) {
           success
           customer {
             info {
@@ -1048,7 +1048,7 @@ describe('customer mutations', () => {
       mutation {
         updateCustomerName(
           input: {
-            crn: "1234567890"
+            crn: "9234567890"
             first: "newFirst"
             last: "newLast"
             middle: "newMiddle"
@@ -1101,7 +1101,7 @@ describe('customer mutations', () => {
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerPhone(
-          input: { crn: "1234567890", phone: { landline: "(01234) 567890", mobile: "+44 7123 456789" } }
+          input: { crn: "9234567890", phone: { landline: "(01234) 567890", mobile: "+44 7123 456789" } }
         ) {
           success
           customer {
@@ -1140,7 +1140,7 @@ describe('customer mutations', () => {
       mockDefraIdJwks()
       return makeTestQuery(
         sendConfirmEmailAddressEmailMutation,
-        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' }) },
         false,
         variables,
         sfdGroups()
@@ -1175,7 +1175,7 @@ describe('customer mutations', () => {
       kits
         .post('/external-auth/email-validation', (body) => {
           expect(body).toEqual({
-            customerReference: '1234567890',
+            customerReference: '9234567890',
             partyDigitalContactId: 'digitalContactPartyId',
             email: 'currentEmail',
             linkSentDate: expect.any(String)
@@ -1209,7 +1209,7 @@ describe('customer mutations', () => {
       kits
         .post('/external-auth/email-validation', (body) => {
           expect(body).toEqual({
-            customerReference: '1234567890',
+            customerReference: '9234567890',
             partyDigitalContactId: 'digitalContactPartyId',
             email: 'new@example.com',
             linkSentDate: expect.any(String)
@@ -1297,7 +1297,7 @@ describe('customer mutations', () => {
     const result = await makeTestQuery(`#graphql
       mutation {
         updateCustomerDoNotContact(
-          input: { crn: "1234567890", doNotContact: true }
+          input: { crn: "9234567890", doNotContact: true }
         ) {
           success
           customer {
@@ -1371,7 +1371,7 @@ describe('customer mutations', () => {
     const nockCreate = (person = expectedPerson, status = 200) =>
       nock(config.get('kits.internal.gatewayUrl'))
         .post('/person/create', person)
-        .reply(status, { _data: '1234567890' })
+        .reply(status, { _data: '9234567890' })
 
     test('creates the customer in KITS and returns its personId and crn', async () => {
       // arrange
@@ -1386,13 +1386,13 @@ describe('customer mutations', () => {
         data: {
           createCustomer: {
             success: true,
-            customer: { personId: 'newPersonId', crn: '1234567890' }
+            customer: { personId: 'newPersonId', crn: '9234567890' }
           }
         }
       })
       expect(kitsCreate.isDone()).toBe(true)
       expect(mockCustomerCommonModule.upsertPersonIdByCRN).toHaveBeenCalledWith(
-        '1234567890',
+        '9234567890',
         expect.objectContaining({ mongoCustomer: expect.anything() })
       )
     })
@@ -1519,12 +1519,12 @@ describe('customer mutations', () => {
       mockDefraIdJwks()
       const kitsCreate = nock(config.get('kits.external.gatewayUrl'))
         .post('/person/create')
-        .reply(200, { _data: '1234567890' })
+        .reply(200, { _data: '9234567890' })
 
       // act
       const result = await makeTestQuery(
         createMutation,
-        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' }) },
+        { 'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' }) },
         false,
         { input: validInput },
         [config.get('auth.entities.SINGLE_FRONT_DOOR.entityId')]

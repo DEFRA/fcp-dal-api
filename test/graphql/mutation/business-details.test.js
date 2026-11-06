@@ -25,7 +25,7 @@ const orgDetailsUpdatePayload = {
     county: null,
     postalCode: '12312312',
     country: 'United Kingdom',
-    uprn: '123123123',
+    uprn: '123123123', // sfd-id-check: allow
     dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: null
   },
@@ -56,7 +56,7 @@ const orgDetailsUpdatePayload = {
   correspondenceLandline: '01225111222',
   correspondenceMobile: '07111222333',
   businessType: { id: 0 },
-  taxRegistrationNumber: '123456789'
+  taxRegistrationNumber: '123456789' // sfd-id-check: allow
 }
 
 const setupNock = () => {
@@ -80,7 +80,7 @@ describe('business', () => {
 
   test('update business name', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'new name'
     }
 
@@ -137,7 +137,7 @@ describe('business', () => {
       }
     `
     const result = await makeTestQuery(query, null, true, {
-      input: { sbi: '123456789', name: 'a'.repeat(161) }
+      input: { sbi: '823456789', name: 'a'.repeat(161) }
     })
 
     expect(result.errors[0].message).toEqual("variable 'input.name' must match pattern ^.{0,160}$")
@@ -166,7 +166,7 @@ describe('business', () => {
         }
       }
     `
-    const result = await makeTestQuery(query, null, true, { input: { sbi: '123456789', name } })
+    const result = await makeTestQuery(query, null, true, { input: { sbi: '823456789', name } })
 
     expect(result.errors).toBeUndefined()
     expect(result.data.updateBusinessName.success).toBe(true)
@@ -174,7 +174,7 @@ describe('business', () => {
 
   test('update business email', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       email: {
         address: 'newemail@test.com'
       }
@@ -227,7 +227,7 @@ describe('business', () => {
 
   test('update business address - withUprn', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       address: {
         withUprn: {
           buildingName: 'new buildingName',
@@ -403,7 +403,7 @@ describe('business', () => {
 
   test('update business address - withoutUprn', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       address: {
         withoutUprn: {
           buildingName: 'new buildingName',
@@ -573,7 +573,7 @@ describe('business', () => {
 
   test('update business phone', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       phone: {
         landline: '01234 567890',
         mobile: '07123 456789'
@@ -639,11 +639,11 @@ describe('business', () => {
 
   test('update business vat', async () => {
     const input = {
-      sbi: '123456789',
-      vat: '123456789'
+      sbi: '823456789',
+      vat: '123456789' // sfd-id-check: allow
     }
     const putPayloadOverrides = {
-      taxRegistrationNumber: '123456789'
+      taxRegistrationNumber: '123456789' // sfd-id-check: allow
     }
     const { sbi: _, ...queryReturn } = input
 
@@ -686,28 +686,27 @@ describe('business', () => {
     })
   })
 
-  test.each(['GB123456789', '12345678', '1234567890', '12345678A'])(
-    'update business vat - rejects invalid vat %s',
-    async (vat) => {
-      const query = `
+  const invalidVats = ['GB123456789', '12345678', '1234567890', '12345678A'] // sfd-id-check: allow
+
+  test.each(invalidVats)('update business vat - rejects invalid vat %s', async (vat) => {
+    const query = `
         mutation UpdateBusinessVAT($input: UpdateBusinessVATInput!) {
           updateBusinessVAT(input: $input) {
             success
           }
         }
       `
-      const result = await makeTestQuery(query, null, true, { input: { sbi: '123456789', vat } })
+    const result = await makeTestQuery(query, null, true, { input: { sbi: '823456789', vat } })
 
-      expect(result.errors[0].message).toEqual(
-        "variable 'input.vat' must match pattern ^(?:|[0-9]{9})$"
-      )
-      expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
-    }
-  )
+    expect(result.errors[0].message).toEqual(
+      "variable 'input.vat' must match pattern ^(?:|[0-9]{9})$"
+    )
+    expect(result.errors[0].extensions.code).toEqual('BAD_USER_INPUT')
+  })
 
   test('update business vat - allows empty string to clear vat', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       vat: ''
     }
     const putPayloadOverrides = {
@@ -757,7 +756,7 @@ describe('business', () => {
 
 describe('business - external gateway', () => {
   const tokenValue = signDefraIdToken({
-    relationships: ['organisationId:123456789'],
+    relationships: ['organisationId:823456789'],
     contactId: 'crn'
   })
   afterEach(() => {
@@ -775,7 +774,7 @@ describe('business - external gateway', () => {
 
   test('update business name', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'new name'
     }
 

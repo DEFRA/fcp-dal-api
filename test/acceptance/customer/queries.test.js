@@ -135,18 +135,18 @@ const customer = {
       typeId: null
     },
     doNotContact: true,
-    personalIdentifiers: ['2363710898', '7209755783']
+    personalIdentifiers: ['2363710898', '7209755783'] // sfd-id-check: allow
   },
   businesses: [
     {
       name: 'Bechtelar - Stamm',
-      organisationId: '111111111',
+      organisationId: '111111111', // sfd-id-check: allow
       sbi: '811111111',
       role: 'Key Contact'
     }
   ],
   business: {
-    organisationId: '111111111',
+    organisationId: '111111111', // sfd-id-check: allow
     sbi: '811111111',
     name: 'Bechtelar - Stamm',
     role: 'Key Contact',
@@ -270,7 +270,7 @@ const customer = {
 }
 const messages = [
   {
-    id: '4219813749',
+    id: '4219813749', // sfd-id-check: allow
     subject: 'Vulnero talio necessitatibus vero complectus venio convoco calculus veritatis.',
     date: '2023-07-23T20:23:12.681Z',
     body: '<p>Absconditus vulgaris calco acquiro.</p>',
@@ -278,7 +278,7 @@ const messages = [
     deleted: false
   },
   {
-    id: '2023306539',
+    id: '2023306539', // sfd-id-check: allow
     subject: 'Demulceo claro dedico degenero at vitae caelum adnuo cruentus.',
     date: '2024-08-29T06:53:08.606Z',
     body: '<p>Barba ocer alveus depromo tener comis acerbitas cohaero nemo.</p>',
@@ -310,7 +310,7 @@ describe('Customer Queries', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '9111111100',
-        relationships: ['111111111:811111111']
+        relationships: ['111111111:811111111'] // sfd-id-check: allow
       },
       'test-secret'
     )
@@ -351,12 +351,12 @@ describe('Customer Queries', () => {
     )
 
     expect(response.customer.business.messages).toEqual([
-      { id: '2023306539', date: '2024-08-29T06:53:08.606Z' },
-      { id: '5514348645', date: '2024-01-30T00:16:20.757Z' },
+      { id: '2023306539', date: '2024-08-29T06:53:08.606Z' }, // sfd-id-check: allow
+      { id: '5514348645', date: '2024-01-30T00:16:20.757Z' }, // sfd-id-check: allow
       { id: '9983911729', date: '2024-03-02T21:09:31.939Z' },
-      { id: '747808064', date: '2024-06-21T12:43:47.401Z' },
+      { id: '747808064', date: '2024-06-21T12:43:47.401Z' }, // sfd-id-check: allow
       { id: '9194806935', date: '2024-10-21T18:43:25.491Z' },
-      { id: '4175223768', date: '2024-06-18T07:16:11.729Z' }
+      { id: '4175223768', date: '2024-06-18T07:16:11.729Z' } // sfd-id-check: allow
     ])
   })
 })

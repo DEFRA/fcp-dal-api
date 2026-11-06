@@ -20,7 +20,7 @@ describe('Customer Query Resolver', () => {
   })
 
   it('customer should return crn and personId when found', async () => {
-    const crn = '1234567890'
+    const crn = '9234567890'
 
     mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
 
@@ -42,9 +42,9 @@ describe('Customer Query Resolver', () => {
           id: 123,
           fullName: 'John Smith',
           primaryAddress: { address1: 'line 1', postalCode: 'AB12 3CD' },
-          personalIdentifiers: ['999999999'],
+          personalIdentifiers: ['999999999'], // sfd-id-check: allow
           nationalInsuranceNumber: 'AB123456C',
-          customerReference: '1234567890',
+          customerReference: '9234567890',
           email: 'john.smith@example.com',
           locked: false,
           deactivated: false
@@ -72,9 +72,9 @@ describe('Customer Query Resolver', () => {
     expect(result.results).toHaveLength(1)
     expect(result.results[0]).toMatchObject({
       personId: '123',
-      crn: '1234567890',
+      crn: '9234567890',
       fullName: 'John Smith',
-      personalIdentifiers: ['999999999'],
+      personalIdentifiers: ['999999999'], // sfd-id-check: allow
       nationalInsuranceNumber: 'AB123456C',
       email: 'john.smith@example.com',
       status: { locked: false, deactivated: false, confirmed: false }
@@ -120,7 +120,7 @@ describe('Customer Query Resolver', () => {
     const info = { path: { key: 'customer', typename: 'Query', prev: undefined } }
 
     it('customer records the personId and crn as accounts', async () => {
-      const crn = '1234567890'
+      const crn = '9234567890'
       const auditTrail = { recordAccount: vi.fn() }
 
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
@@ -132,7 +132,7 @@ describe('Customer Query Resolver', () => {
     })
 
     it('still records the crn account when the personId lookup itself fails', async () => {
-      const crn = '1234567890'
+      const crn = '9234567890'
       const auditTrail = { recordAccount: vi.fn() }
 
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(null)
@@ -151,7 +151,7 @@ describe('Customer Query Resolver', () => {
     it('does not throw when no audit trail is supplied', async () => {
       mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
 
-      await Query.customer(null, { crn: '1234567890' }, { dataSources: mockDataSources })
+      await Query.customer(null, { crn: '9234567890' }, { dataSources: mockDataSources })
     })
 
     it('customerSearch records the crn as an account and an entity when searching by CRN', async () => {
@@ -163,16 +163,16 @@ describe('Customer Query Resolver', () => {
 
       await Query.customerSearch(
         null,
-        { searchString: '1234567890', searchType: 'CRN', pagination: { page: 1, perPage: 20 } },
+        { searchString: '9234567890', searchType: 'CRN', pagination: { page: 1, perPage: 20 } },
         { dataSources: mockDataSources, auditTrail },
         info
       )
 
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1234567890')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9234567890')
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'person',
         action: 'search',
-        entityid: '1234567890'
+        entityid: '9234567890'
       })
     })
 

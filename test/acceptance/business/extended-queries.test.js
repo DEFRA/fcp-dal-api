@@ -34,7 +34,7 @@ describe('Business - extended queries', () => {
     const tokenValue = jwt.sign(
       {
         contactId: '22222222',
-        relationships: ['222222222:822222222']
+        relationships: ['222222222:822222222'] // sfd-id-check: allow
       },
       'test-secret'
     )

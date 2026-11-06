@@ -197,7 +197,7 @@ describe('Business Mutation createBusiness', () => {
       input: {
         crn: '123',
         name: 'Acme Farms Ltd',
-        vat: '123456789',
+        vat: '123456789', // sfd-id-check: allow
         traderNumber: 'TR12345',
         vendorNumber: 'VN67890',
         address: {
@@ -273,7 +273,7 @@ describe('Business Mutation createBusiness', () => {
         info: {
           name: 'Acme Farms Ltd',
           reference: undefined,
-          vat: '123456789',
+          vat: '123456789', // sfd-id-check: allow
           traderNumber: 'TR12345',
           vendorNumber: 'VN67890',
           address: {
@@ -1057,8 +1057,8 @@ describe('Business Mutation updateBusinessUnlockStatus', () => {
 })
 
 const mutateCustomerPermissionsAndRelationshipToBusinessInput = {
-  sbi: '111111111',
-  crn: '1111111100',
+  sbi: '811111111',
+  crn: '9111111100',
   role: 'Agent',
   permissions: [{ id: 'BUSINESS_DETAILS', level: 'FULL_PERMISSION' }]
 }
@@ -1096,10 +1096,10 @@ describe('Business Mutation addCustomerToBusiness', () => {
     )
 
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
-      '111111111'
+      '811111111'
     )
     expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
-      '1111111100',
+      '9111111100',
       dataSources
     )
     expect(
@@ -1127,14 +1127,14 @@ describe('Business Mutation addCustomerToBusiness', () => {
       info
     )
 
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '811111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9111111100')
     expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'org-1')
     expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'person-1')
     expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
       entity: 'permission',
       action: 'created',
-      entityid: '111111111-1111111100'
+      entityid: '811111111-9111111100'
     })
   })
 
@@ -1159,8 +1159,8 @@ describe('Business Mutation addCustomerToBusiness', () => {
       )
     ).rejects.toThrow('not found')
 
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '811111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9111111100')
     expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
       info,
       'organisationId',
@@ -1169,7 +1169,7 @@ describe('Business Mutation addCustomerToBusiness', () => {
     expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
       entity: 'permission',
       action: 'created',
-      entityid: '111111111-1111111100'
+      entityid: '811111111-9111111100'
     })
   })
 })
@@ -1192,10 +1192,10 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
     )
 
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
-      '111111111'
+      '811111111'
     )
     expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
-      '1111111100',
+      '9111111100',
       dataSources
     )
     expect(
@@ -1233,14 +1233,14 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
       info
     )
 
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '811111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9111111100')
     expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'org-1')
     expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'person-1')
     expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
       entity: 'permission',
       action: 'updated',
-      entityid: '111111111-1111111100'
+      entityid: '811111111-9111111100'
     })
   })
 
@@ -1271,8 +1271,8 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
       )
     ).rejects.toThrow('not found')
 
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '111111111')
-    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '1111111100')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '811111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9111111100')
     expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
       info,
       'organisationId',
@@ -1281,7 +1281,7 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
     expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
       entity: 'permission',
       action: 'updated',
-      entityid: '111111111-1111111100'
+      entityid: '811111111-9111111100'
     })
   })
 })

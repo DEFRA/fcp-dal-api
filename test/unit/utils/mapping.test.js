@@ -34,7 +34,7 @@ const businessDetailsUpdatePayload = {
     county: null,
     postalCode: '12312312',
     country: 'United Kingdom',
-    uprn: '123123123',
+    uprn: '123123123', // sfd-id-check: allow
     dependentLocality: 'EXAMPLE LOCALITY',
     doubleDependentLocality: null
   },
@@ -72,7 +72,7 @@ const businessDetailsUpdatePayload = {
     landline: '01225111222'
   },
   isCorrespondenceAsBusinessAddress: false,
-  vat: '123456789'
+  vat: '123456789' // sfd-id-check: allow
 }
 
 describe('transformMapping', () => {
@@ -87,7 +87,7 @@ describe('transformMapping', () => {
     expect(result.email).toBe('examplefarmsltd@example.com.test')
     expect(result.landline).toBe('01632960001')
     expect(result.mobile).toBe('07700900001')
-    expect(result.taxRegistrationNumber).toBe('123456789')
+    expect(result.taxRegistrationNumber).toBe('123456789') // sfd-id-check: allow
   })
 
   test('should only return keys that are not undefined orgDetailsUpdateMapping', () => {
@@ -115,7 +115,7 @@ describe('transformMapping', () => {
     const nestedPayload = {
       name: 'Test Co.',
       email: { address: 'test@example.com' },
-      phone: { mobile: '123456789' }
+      phone: { mobile: '123456789' } // sfd-id-check: allow
     }
     const result = transformMapping(nestedMapping, nestedPayload)
 
@@ -125,7 +125,7 @@ describe('transformMapping', () => {
         email: 'test@example.com'
       },
       phone: {
-        mobile: '123456789'
+        mobile: '123456789' // sfd-id-check: allow
       }
     })
   })
@@ -137,7 +137,7 @@ describe('transformMapping', () => {
     const nestedPayload = {
       name: 'Test Co.',
       email: { address: 'test@example.com' },
-      phone: { mobile: '123456789' }
+      phone: { mobile: '123456789' } // sfd-id-check: allow
     }
     const result = transformMapping(nestedMapping, nestedPayload)
 

@@ -28,8 +28,8 @@ describe('Business payments resolver', () => {
     test('should lookup FRN from Rural Payments and call Hitachi with real FRN', async () => {
       const mockOrganisation = {
         id: 12345,
-        sbi: '123456789',
-        businessReference: '6561479446',
+        sbi: '823456789',
+        businessReference: '6561479446', // sfd-id-check: allow
         name: 'Test Farm'
       }
 
@@ -37,20 +37,20 @@ describe('Business payments resolver', () => {
       mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
 
       const result = await Business.payments(
-        { sbi: '123456789' },
+        { sbi: '823456789' },
         { userIP: '192.168.1.1' },
         mockContext
       )
 
       expect(mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI).toHaveBeenCalledWith(
-        '123456789'
+        '823456789'
       )
       expect(mockDataSources.hitachiPayments.getSupplierPayments).toHaveBeenCalledWith({
-        frn: '6561479446',
+        frn: '6561479446', // sfd-id-check: allow
         fromDate: undefined,
         toDate: undefined,
         userIP: '192.168.1.1',
-        resourceId: '123456789'
+        resourceId: '823456789'
       })
       expect(result).toBeDefined()
     })
@@ -58,8 +58,8 @@ describe('Business payments resolver', () => {
     test('should convert date filters to Dates and pass them to Hitachi datasource', async () => {
       const mockOrganisation = {
         id: 12345,
-        sbi: '123456789',
-        businessReference: '6561479446',
+        sbi: '823456789',
+        businessReference: '6561479446', // sfd-id-check: allow
         name: 'Test Farm'
       }
 
@@ -68,24 +68,24 @@ describe('Business payments resolver', () => {
 
       // the Date scalar reaches the resolver as a string
       await Business.payments(
-        { sbi: '123456789' },
+        { sbi: '823456789' },
         { fromDate: '2023-01-01', toDate: '2023-12-31', userIP: '192.168.1.1' },
         mockContext
       )
 
       expect(mockDataSources.hitachiPayments.getSupplierPayments).toHaveBeenCalledWith({
-        frn: '6561479446',
+        frn: '6561479446', // sfd-id-check: allow
         fromDate: new Date('2023-01-01'),
         toDate: new Date('2023-12-31'),
         userIP: '192.168.1.1',
-        resourceId: '123456789'
+        resourceId: '823456789'
       })
     })
 
     test('should throw BadRequest for an invalid date filter without calling upstream', async () => {
       await expect(
         Business.payments(
-          { sbi: '123456789' },
+          { sbi: '823456789' },
           { fromDate: 'not-a-date', userIP: '192.168.1.1' },
           mockContext
         )
@@ -98,7 +98,7 @@ describe('Business payments resolver', () => {
     test('should throw NotFound when FRN is not available', async () => {
       const mockOrganisation = {
         id: 12345,
-        sbi: '123456789',
+        sbi: '823456789',
         businessReference: null, // No FRN available
         name: 'Test Farm'
       }
@@ -106,15 +106,15 @@ describe('Business payments resolver', () => {
       mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
 
       await expect(
-        Business.payments({ sbi: '123456789' }, { userIP: '192.168.1.1' }, mockContext)
+        Business.payments({ sbi: '823456789' }, { userIP: '192.168.1.1' }, mockContext)
       ).rejects.toThrow('FRN not found for business')
     })
 
     test('records the resolved FRN as an account and a payment-list entity on the audit trail', async () => {
       const mockOrganisation = {
         id: 12345,
-        sbi: '123456789',
-        businessReference: '6561479446',
+        sbi: '823456789',
+        businessReference: '6561479446', // sfd-id-check: allow
         name: 'Test Farm'
       }
       const auditTrail = {
@@ -127,24 +127,24 @@ describe('Business payments resolver', () => {
       mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
 
       await Business.payments(
-        { sbi: '123456789' },
+        { sbi: '823456789' },
         { userIP: '192.168.1.1' },
         { ...mockContext, auditTrail },
         info
       )
 
-      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', '6561479446')
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'frn', '6561479446') // sfd-id-check: allow
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'payment-list',
         action: 'read',
-        entityid: '6561479446'
+        entityid: '6561479446' // sfd-id-check: allow
       })
     })
 
     test('still records the payment-list entity on the audit trail when the FRN cannot be found', async () => {
       const mockOrganisation = {
         id: 12345,
-        sbi: '123456789',
+        sbi: '823456789',
         businessReference: null,
         name: 'Test Farm'
       }
@@ -158,7 +158,7 @@ describe('Business payments resolver', () => {
 
       await expect(
         Business.payments(
-          { sbi: '123456789' },
+          { sbi: '823456789' },
           { userIP: '192.168.1.1' },
           { ...mockContext, auditTrail },
           info
@@ -185,7 +185,7 @@ describe('Business payments resolver', () => {
 
       await expect(
         Business.payments(
-          { sbi: '123456789' },
+          { sbi: '823456789' },
           { userIP: '192.168.1.1' },
           { ...mockContext, auditTrail },
           info
@@ -202,8 +202,8 @@ describe('Business payments resolver', () => {
     test('should throw NotFound when Hitachi returns Result: false', async () => {
       const mockOrganisation = {
         id: 12345,
-        sbi: '123456789',
-        businessReference: '6561479446',
+        sbi: '823456789',
+        businessReference: '6561479446', // sfd-id-check: allow
         name: 'Test Farm'
       }
 
@@ -216,7 +216,7 @@ describe('Business payments resolver', () => {
       mockDataSources.hitachiPayments.getSupplierPayments.mockRejectedValue(notFoundError)
 
       await expect(
-        Business.payments({ sbi: '123456789' }, { userIP: '192.168.1.1' }, mockContext)
+        Business.payments({ sbi: '823456789' }, { userIP: '192.168.1.1' }, mockContext)
       ).rejects.toThrow(
         'Hitachi payments: *** FRN does not exist, No data retrieved for this request'
       )

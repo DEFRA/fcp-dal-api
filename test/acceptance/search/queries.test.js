@@ -121,7 +121,7 @@ describe('Business Search Queries', () => {
     expect(response.businessSearch).toEqual({
       results: [
         {
-          organisationId: '111111111',
+          organisationId: '111111111', // sfd-id-check: allow
           sbi: '811111111',
           name: 'Bechtelar - Stamm',
           additionalSbis: [],
@@ -170,7 +170,7 @@ describe('Business Search Queries', () => {
     const client = new GraphQLClient(targetURL)
     const response = await client.request(
       businessSearchQuery,
-      { searchString: '999999999', searchType: 'SBI' },
+      { searchString: '899999999', searchType: 'SBI' },
       { email: 'some-email' }
     )
 
@@ -196,7 +196,7 @@ describe('Customer Search Queries', () => {
           personId: '11111111',
           crn: '9111111100',
           fullName: 'Raul Feil',
-          personalIdentifiers: ['2363710898', '7209755783'],
+          personalIdentifiers: ['2363710898', '7209755783'], // sfd-id-check: allow
           nationalInsuranceNumber: null,
           email: 'raul.feil@questionable-millet.uk',
           status: {

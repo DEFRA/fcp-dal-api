@@ -33,7 +33,7 @@ describe('Query.customer', () => {
 
   const query = `#graphql
     query CustomerTest {
-      customer(crn: "1234567890") {
+      customer(crn: "9234567890") {
         crn
         personId
         authenticationQuestions {
@@ -49,7 +49,7 @@ describe('Query.customer', () => {
           name
           role
         }
-        business(sbi: "123456789") {
+        business(sbi: "823456789") {
           organisationId
           sbi
           name
@@ -82,7 +82,7 @@ describe('Query.customer', () => {
       }
     })
 
-    v1.get('/external-auth/security-answers/1234567890').reply(200, {
+    v1.get('/external-auth/security-answers/9234567890').reply(200, {
       memorableDate: 'memorableDate',
       memorableEvent: 'memorableEvent',
       memorableLocation: 'memorableLocation',
@@ -94,7 +94,7 @@ describe('Query.customer', () => {
         {
           id: 'organisationId',
           name: 'name',
-          sbi: '123456789'
+          sbi: '823456789'
         }
       ]
     })
@@ -106,7 +106,7 @@ describe('Query.customer', () => {
           firstName: 'firstName',
           lastName: 'lastName',
           role: 'role',
-          customerReference: '1234567890',
+          customerReference: '9234567890',
           privileges: []
         }
       ]
@@ -138,7 +138,7 @@ describe('Query.customer', () => {
     expect(result).toEqual({
       data: {
         customer: {
-          crn: '1234567890',
+          crn: '9234567890',
           personId: 'personId',
           authenticationQuestions: {
             memorableDate: 'memorableDate',
@@ -148,11 +148,11 @@ describe('Query.customer', () => {
             isFound: true
           },
           businesses: [
-            { organisationId: 'organisationId', sbi: '123456789', name: 'name', role: 'role' }
+            { organisationId: 'organisationId', sbi: '823456789', name: 'name', role: 'role' }
           ],
           business: {
             organisationId: 'organisationId',
-            sbi: '123456789',
+            sbi: '823456789',
             name: 'name',
             role: 'role',
             messages: [
@@ -193,7 +193,7 @@ describe('Query.customer', () => {
       }
     })
 
-    v1.get('/external-auth/security-answers/1234567890').reply(200, {
+    v1.get('/external-auth/security-answers/9234567890').reply(200, {
       memorableDate: 'memorableDate',
       memorableEvent: 'memorableEvent',
       memorableLocation: 'memorableLocation',
@@ -205,7 +205,7 @@ describe('Query.customer', () => {
         {
           id: 'organisationId',
           name: 'name',
-          sbi: '123456789'
+          sbi: '823456789'
         }
       ]
     })
@@ -217,7 +217,7 @@ describe('Query.customer', () => {
           firstName: 'firstName',
           lastName: 'lastName',
           role: 'role',
-          customerReference: '1234567890',
+          customerReference: '9234567890',
           privileges: []
         }
       ]
@@ -245,13 +245,13 @@ describe('Query.customer', () => {
     })
 
     const result = await makeTestQuery(query, {
-      'x-forwarded-authorization': signDefraIdToken({ contactId: '1234567890' })
+      'x-forwarded-authorization': signDefraIdToken({ contactId: '9234567890' })
     })
 
     expect(result).toEqual({
       data: {
         customer: {
-          crn: '1234567890',
+          crn: '9234567890',
           personId: 'personId',
           authenticationQuestions: {
             memorableDate: 'memorableDate',
@@ -261,11 +261,11 @@ describe('Query.customer', () => {
             isFound: true
           },
           businesses: [
-            { organisationId: 'organisationId', sbi: '123456789', name: 'name', role: 'role' }
+            { organisationId: 'organisationId', sbi: '823456789', name: 'name', role: 'role' }
           ],
           business: {
             organisationId: 'organisationId',
-            sbi: '123456789',
+            sbi: '823456789',
             name: 'name',
             role: 'role',
             messages: [
@@ -302,7 +302,7 @@ describe('Query.customer', () => {
     const result = await makeTestQuery(
       `#graphql
         query Customer {
-          customer(crn: "1234567890") {
+          customer(crn: "9234567890") {
             crn
           }
         }

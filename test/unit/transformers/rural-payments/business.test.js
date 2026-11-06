@@ -34,7 +34,7 @@ const baseInput = {
       county: null,
       postalCode: '12312312',
       country: 'United Kingdom',
-      uprn: '123123123',
+      uprn: '123123123', // sfd-id-check: allow
       dependentLocality: 'EXAMPLE LOCALITY',
       doubleDependentLocality: null
     }
@@ -75,7 +75,7 @@ const baseInput = {
     landline: '01225111222'
   },
   isCorrespondenceAsBusinessAddress: false,
-  vat: '123456789'
+  vat: '123456789' // sfd-id-check: allow
 }
 
 describe('Business transformer', () => {
@@ -148,7 +148,7 @@ describe('Business transformer', () => {
         id: 5331098,
         firstName: 'Marcus',
         lastName: 'Twigden',
-        customerReference: '4804081228',
+        customerReference: '9804081228',
         confirmed: true,
         lastUpdatedOn: 1699870896103,
         role: 'Agent',
@@ -171,7 +171,7 @@ describe('Business transformer', () => {
         id: 5778203,
         firstName: 'Oliver',
         lastName: 'Colwill',
-        customerReference: '6148241575',
+        customerReference: '9148241575',
         confirmed: true,
         lastUpdatedOn: 1707841972541,
         role: 'Agent',
@@ -212,9 +212,9 @@ describe('Business transformer', () => {
       { id: 2, firstName: 'B', lastName: 'Two', customerReference: '222', privileges: [] }
     ]
 
-    expect(transformOrganisationCustomers(customers, '123456789')).toEqual([
-      expect.objectContaining({ personId: 1, sbi: '123456789' }),
-      expect.objectContaining({ personId: 2, sbi: '123456789' })
+    expect(transformOrganisationCustomers(customers, '823456789')).toEqual([
+      expect.objectContaining({ personId: 1, sbi: '823456789' }),
+      expect.objectContaining({ personId: 2, sbi: '823456789' })
     ])
   })
 
@@ -228,14 +228,14 @@ describe('Business transformer', () => {
       privileges: []
     }
 
-    expect(transformOrganisationCustomer(customer, '123456789')).toEqual({
+    expect(transformOrganisationCustomer(customer, '823456789')).toEqual({
       personId: 1,
       firstName: 'A',
       lastName: 'One',
       crn: '111',
       role: 'Business Partner',
       privileges: [],
-      sbi: '123456789'
+      sbi: '823456789'
     })
   })
 
@@ -365,7 +365,7 @@ describe('Business transformer', () => {
         id: 5331098,
         firstName: 'Marcus',
         lastName: 'Twigden',
-        customerReference: '4804081228',
+        customerReference: '9804081228',
         confirmed: true,
         lastUpdatedOn: 1699870896103,
         role: 'Agent',
@@ -388,7 +388,7 @@ describe('Business transformer', () => {
         id: 5778203,
         firstName: 'Oliver',
         lastName: 'Colwill',
-        customerReference: '6148241575',
+        customerReference: '9148241575',
         confirmed: true,
         lastUpdatedOn: 1707841972541,
         role: 'Agent',
@@ -870,7 +870,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
         county: null,
         postalCode: '12312312',
         country: 'United Kingdom',
-        uprn: '123123123',
+        uprn: '123123123', // sfd-id-check: allow
         dependentLocality: 'EXAMPLE LOCALITY',
         doubleDependentLocality: null,
         addressTypeId: undefined
@@ -902,7 +902,7 @@ describe('#transformBusinessDetailsToOrgDetailsUpdate', () => {
       correspondenceEmail: 'examplefarmsltd@example.com.123',
       correspondenceLandline: '01225111222',
       correspondenceMobile: '07111222333',
-      taxRegistrationNumber: '123456789'
+      taxRegistrationNumber: '123456789' // sfd-id-check: allow
     })
   })
 
@@ -960,7 +960,7 @@ describe('#transformBusinessDetailsToOrgDetailsCreate', () => {
   const businessCreateInput = {
     name: 'Acme Farms Ltd',
     reference: undefined,
-    vat: '123456789',
+    vat: '123456789', // sfd-id-check: allow
     traderNumber: 'TR12345',
     vendorNumber: 'VN67890',
     address: {
@@ -1112,7 +1112,7 @@ describe('#transformBusinessDetailsToOrgDetailsCreate', () => {
       landConfirmed: true,
       traderNumber: 'TR12345',
       vendorNumber: 'VN67890',
-      taxRegistrationNumber: '123456789'
+      taxRegistrationNumber: '123456789' // sfd-id-check: allow
     })
   })
 })
@@ -1352,7 +1352,7 @@ describe('#transformOrganisationSearchResult', () => {
     const result = transformOrganisationSearchResult({
       id: 1,
       name: 'Farm',
-      sbi: 123456789,
+      sbi: 823456789,
       additionalSbiIds: null,
       address: null,
       correspondenceAddress: null,
@@ -1361,7 +1361,7 @@ describe('#transformOrganisationSearchResult', () => {
 
     expect(result).toMatchObject({
       organisationId: '1',
-      sbi: '123456789',
+      sbi: '823456789',
       additionalSbis: [],
       address: null,
       correspondenceAddress: null,

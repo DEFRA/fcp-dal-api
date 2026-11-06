@@ -42,7 +42,7 @@ const personFixture = {
   locked: false,
   confirmed: false,
   customerReferenceNumber: 'crn-11111111',
-  personalIdentifiers: ['9568845788', '370030956', '7899566034'],
+  personalIdentifiers: ['9568845788', '370030956', '7899566034'], // sfd-id-check: allow
   deactivated: false
 }
 const personBusinessesFixture = [
@@ -146,7 +146,7 @@ const dataSources = {
           id: 5331098,
           firstName: 'Marcus',
           lastName: 'Twigden',
-          customerReference: '4804081228',
+          customerReference: '9804081228',
           confirmed: true,
           lastUpdatedOn: 1699870896103,
           role: 'Agent',
@@ -169,7 +169,7 @@ const dataSources = {
           id: 5778203,
           firstName: 'Oliver',
           lastName: 'Colwill',
-          customerReference: '6148241575',
+          customerReference: '9148241575',
           confirmed: true,
           lastUpdatedOn: 1707841972541,
           role: 'Agent',
@@ -258,7 +258,7 @@ describe('Customer', () => {
         typeId: null
       },
       status: { locked: false, confirmed: false, deactivated: false },
-      personalIdentifiers: ['9568845788', '370030956', '7899566034']
+      personalIdentifiers: ['9568845788', '370030956', '7899566034'] // sfd-id-check: allow
     })
   })
 

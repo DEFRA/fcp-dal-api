@@ -43,7 +43,7 @@ describe('validateVariable Directive', () => {
     it('should validate variable value against its specified pattern', async () => {
       const query = `#graphql
         query {
-            test(id: "123456789", id2: "123")
+            test(id: "823456789", id2: "123")
         }`
 
       const validResult = await graphql({ schema: transformedSchema, source: query })
@@ -64,7 +64,7 @@ describe('validateVariable Directive', () => {
 
       const badId2Query = `#graphql
         query {
-            test(id: "123456789", id2: "invalid_id2")
+            test(id: "823456789", id2: "invalid_id2")
         }`
 
       invalidResult = await graphql({ schema: transformedSchema, source: badId2Query })
@@ -86,7 +86,7 @@ describe('validateVariable Directive', () => {
     it('should validate nested input object field values', async () => {
       const query = `#graphql
         mutation {
-            testMutation(input: { id: "123456789", id2: "123" })
+            testMutation(input: { id: "823456789", id2: "123" })
         }`
 
       const validResult = await graphql({ schema: transformedSchema, source: query })
@@ -107,7 +107,7 @@ describe('validateVariable Directive', () => {
 
       const invalidMutation2 = `#graphql
         mutation {
-            testMutation(input: { id: "123456789", id2: "invalid_id" })
+            testMutation(input: { id: "823456789", id2: "invalid_id" })
         }
         `
 

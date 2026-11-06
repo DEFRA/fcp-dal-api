@@ -44,7 +44,7 @@ describe('business', () => {
 
   test('update business legal status', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       legalStatusCode: 102111
     }
 
@@ -104,7 +104,7 @@ describe('business', () => {
 
   test('update business type', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       typeCode: 3
     }
 
@@ -166,7 +166,7 @@ describe('business', () => {
 
   test('update business registration numbers', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       registrationNumbers: {
         charityCommission: '0123',
         companiesHouse: '0456'
@@ -239,7 +239,7 @@ describe('business', () => {
         true,
         {
           input: {
-            sbi: '123456789',
+            sbi: '823456789',
             registrationNumbers: { [field]: '1'.repeat(maxLength + 1) }
           }
         },
@@ -257,7 +257,7 @@ describe('business', () => {
 
   test('update business date started farming', async () => {
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       // Will get converted to ISO date
       dateStartedFarming: '01-01-2020'
     }
@@ -324,11 +324,11 @@ describe('business - external', () => {
 
   test('update business legal status', async () => {
     const tokenValue = signDefraIdToken({
-      relationships: ['organisationId:123456789'],
+      relationships: ['organisationId:823456789'],
       contactId: 'crn'
     })
     const input = {
-      sbi: '123456789',
+      sbi: '823456789',
       legalStatusCode: 102111
     }
 

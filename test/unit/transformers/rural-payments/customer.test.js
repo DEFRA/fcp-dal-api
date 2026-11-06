@@ -84,7 +84,7 @@ describe('Customer transformer', () => {
         id: 5331098,
         firstName: 'Marcus',
         lastName: 'Twigden',
-        customerReference: '4804081228',
+        customerReference: '9804081228',
         confirmed: true,
         lastUpdatedOn: 1699870896103,
         role: 'Agent',
@@ -107,7 +107,7 @@ describe('Customer transformer', () => {
         id: 5778203,
         firstName: 'Oliver',
         lastName: 'Colwill',
-        customerReference: '6148241575',
+        customerReference: '9148241575',
         confirmed: true,
         lastUpdatedOn: 1707841972541,
         role: 'Agent',
@@ -156,7 +156,7 @@ describe('Customer transformer', () => {
     ]
 
     const personId = '5302028'
-    const crn = '0866159801'
+    const crn = '9866159801'
 
     const transformed = transformPersonSummaryToCustomerAuthorisedBusinesses(
       { personId, crn },
@@ -769,7 +769,7 @@ describe('Customer transformer', () => {
         id: 5263421,
         fullName: 'John Smith',
         primaryAddress: { address1: 'line 1', postalCode: 'AB12 3CD' },
-        personalIdentifiers: ['999999999'],
+        personalIdentifiers: ['999999999'], // sfd-id-check: allow
         nationalInsuranceNumber: 'AB123456C',
         customerReference: '9638563942',
         email: 'john.smith@example.com',
@@ -782,7 +782,7 @@ describe('Customer transformer', () => {
         crn: '9638563942',
         fullName: 'John Smith',
         address: expect.objectContaining({ line1: 'line 1', postalCode: 'AB12 3CD' }),
-        personalIdentifiers: ['999999999'],
+        personalIdentifiers: ['999999999'], // sfd-id-check: allow
         nationalInsuranceNumber: 'AB123456C',
         email: 'john.smith@example.com',
         status: { locked: true, deactivated: false, confirmed: false }

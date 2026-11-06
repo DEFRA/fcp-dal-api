@@ -115,7 +115,7 @@ const allFieldsInput = {
   address: { withUprn: address },
   correspondenceAddress: { withoutUprn: correspondenceAddress },
   isCorrespondenceAsBusinessAddress: false,
-  vat: '123456789',
+  vat: '123456789', // sfd-id-check: allow
   legalStatusCode: 102111,
   typeCode: 101404,
   dateStartedFarming: '2020-01-31',
@@ -144,7 +144,7 @@ describe('Business Mutations - as an internal user', () => {
         sbi,
         info: {
           name: 'acceptance-business-name',
-          vat: '123456789',
+          vat: '123456789', // sfd-id-check: allow
           email: { address: 'acceptance-business@example.com', validated: true },
           correspondenceEmail: {
             address: 'acceptance-business-corr@example.com',
@@ -972,13 +972,13 @@ describe('Business Mutations - individual field updates', () => {
   it('updateBusinessVAT updates the business VAT number', async () => {
     const response = await client.request(
       updateBusinessVATMutation,
-      { input: { sbi, vat: '555555555' } },
+      { input: { sbi, vat: '555555555' } }, // sfd-id-check: allow
       headers
     )
 
     expect(response.updateBusinessVAT).toEqual({
       success: true,
-      business: { sbi, info: { vat: '555555555' } }
+      business: { sbi, info: { vat: '555555555' } } // sfd-id-check: allow
     })
   })
 
@@ -1086,7 +1086,7 @@ const createBusinessMutation = gql`
 const createBusinessInput = {
   crn: '9000000000',
   name: 'acceptance-created-business',
-  vat: '987654321',
+  vat: '987654321', // sfd-id-check: allow
   email: { address: 'acceptance-created-business@example.com' },
   correspondenceEmail: { address: 'acceptance-created-business-corr@example.com' },
   phone: { landline: '01234 567894', mobile: '07700 900004' },
@@ -1117,7 +1117,7 @@ describe('createBusiness', () => {
     expect(response.createBusiness.business.organisationId).toEqual(expect.any(String))
     expect(response.createBusiness.business.info).toEqual({
       name: 'acceptance-created-business',
-      vat: '987654321',
+      vat: '987654321', // sfd-id-check: allow
       email: { address: 'acceptance-created-business@example.com' },
       phone: createBusinessInput.phone,
       address: {

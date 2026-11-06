@@ -5,7 +5,7 @@ import { config } from '../../../app/config.js'
 // A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only
 // decoded (jose's decodeJwt), never signature-verified, so the signing secret doesn't matter.
 const validDefraIdToken = jwt.sign(
-  { contactId: 'contact-1', relationships: ['org-1:123456789'] },
+  { contactId: 'contact-1', relationships: ['org-1:823456789'] },
   'test-secret'
 )
 

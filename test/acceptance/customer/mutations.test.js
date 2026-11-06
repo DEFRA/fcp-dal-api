@@ -266,7 +266,7 @@ describe('Customer Mutations - as an internal user', () => {
         },
         address: { ...inputs.addressInput.address, typeId: null },
         doNotContact: true,
-        personalIdentifiers: ['1819421250', '9527746847', '3904800546']
+        personalIdentifiers: ['1819421250', '9527746847', '3904800546'] // sfd-id-check: allow
       }
     })
   })
@@ -293,7 +293,7 @@ describe('Customer Mutations - as an internal user', () => {
         },
         address: { ...inputs.allFieldsInput.address, typeId: null },
         doNotContact: false,
-        personalIdentifiers: ['1819421250', '9527746847', '3904800546']
+        personalIdentifiers: ['1819421250', '9527746847', '3904800546'] // sfd-id-check: allow
       }
     })
   })

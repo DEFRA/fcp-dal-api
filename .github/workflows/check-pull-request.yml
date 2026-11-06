@@ -50,6 +50,9 @@ jobs:
             exit 1
           fi
 
+      - name: Check for real-looking CRNs and SBIs
+        uses: DEFRA/fcp-sfd-core/.github/actions/check-synthetic-ids@95f58ade56b2d0dd0f15bdcba6a5f37a54bcc939 # main
+
       - name: Lint code
         run: npm run lint
 

@@ -32,7 +32,7 @@ const fakeAuditTrail = (byRoot = {}) => ({
 
 const requestPayload = {
   query: 'query GetBusiness { business { id } }',
-  variables: { sbi: '123456789' },
+  variables: { sbi: '823456789' },
   operationName: 'GetBusiness'
 }
 
@@ -103,7 +103,7 @@ describe('auditPlugin', () => {
       const contextValue = {
         ...baseContextValue,
         auditTrail: fakeAuditTrail({
-          business: { accounts: { sbi: '123456789' } }
+          business: { accounts: { sbi: '823456789' } }
         })
       }
       const listener = await plugin.requestDidStart()
@@ -115,7 +115,7 @@ describe('auditPlugin', () => {
         expect.objectContaining({
           audit: expect.objectContaining({
             entities: [{ entity: 'audit', action: 'created', entityid: 'trace-1' }],
-            accounts: { sbi: '123456789' }
+            accounts: { sbi: '823456789' }
           })
         }),
         baseContextValue.requestLogger
@@ -431,7 +431,7 @@ describe('auditPlugin', () => {
         auditTrail: fakeAuditTrail({
           business: {
             entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }],
-            accounts: { sbi: '123456789', frn: '6561479446' }
+            accounts: { sbi: '823456789', frn: '6561479446' } // sfd-id-check: allow
           }
         })
       }
@@ -441,7 +441,7 @@ describe('auditPlugin', () => {
 
       expect(publish).toHaveBeenCalledWith(
         expect.objectContaining({
-          audit: expect.objectContaining({ accounts: { sbi: '123456789', frn: '6561479446' } })
+          audit: expect.objectContaining({ accounts: { sbi: '823456789', frn: '6561479446' } }) // sfd-id-check: allow
         }),
         baseContextValue.requestLogger
       )
@@ -734,7 +734,7 @@ describe('auditPlugin', () => {
         auditTrail: fakeAuditTrail({
           business: {
             entities: [{ entity: 'payment-list', action: 'read', entityid: 'frn-1' }],
-            accounts: { sbi: '123456789' }
+            accounts: { sbi: '823456789' }
           }
         })
       }

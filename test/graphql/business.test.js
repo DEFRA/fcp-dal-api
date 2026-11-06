@@ -6,7 +6,7 @@ import { makeTestQuery } from './makeTestQuery.js'
 
 const query = `#graphql
 query BusinessTest {
-  business(sbi: "123456789") {
+  business(sbi: "823456789") {
     organisationId
     sbi
     info {
@@ -98,7 +98,7 @@ query BusinessTest {
       crn
       role
     }
-    customer(crn: "1234567890") {
+    customer(crn: "9234567890") {
       personId
       firstName
       lastName
@@ -183,7 +183,7 @@ const setupNock = (upstream, headers) => {
   upstream.get('/organisation/organisationId').reply(200, {
     _data: {
       id: 'organisationId',
-      sbi: '123456789',
+      sbi: '823456789',
       name: 'name',
       email: 'email address',
       address: {
@@ -230,7 +230,7 @@ const setupNock = (upstream, headers) => {
         firstName: 'firstName',
         lastName: 'lastName',
         role: 'role',
-        customerReference: '1234567890',
+        customerReference: '9234567890',
         privileges: ['Full permission - business']
       }
     ]
@@ -289,12 +289,12 @@ const setupAnnotatedFieldsNock = (internalUpstream, email) => {
   internalUpstream.matchHeader('email', email)
 
   internalUpstream
-    .get(`/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/123456789/list`)
+    .get(`/SitiAgriApi/cv/landUseByBusinessParcel/sheet/sheetId/parcel/parcelId/sbi/823456789/list`)
     .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
       data: [
         {
-          sbi: '123456789',
+          sbi: '823456789',
           dt_insert: '2021-03-01T12:09:09:009+0000',
           dt_delete: '9999-12-31T00:00:00:000+0000',
           sheet_name: 'sheetId',
@@ -313,7 +313,7 @@ const setupAnnotatedFieldsNock = (internalUpstream, email) => {
     })
 
   internalUpstream
-    .get('/SitiAgriApi/cv/cphByBusiness/sbi/123456789/list')
+    .get('/SitiAgriApi/cv/cphByBusiness/sbi/823456789/list')
     .query(({ pointInTime }) => /\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(pointInTime))
     .reply(200, {
       data: [
@@ -333,10 +333,10 @@ const setupAnnotatedFieldsNock = (internalUpstream, email) => {
       ]
     })
 
-  internalUpstream.get('/SitiAgriApi/cv/appByBusiness/sbi/123456789/list').reply(200, {
+  internalUpstream.get('/SitiAgriApi/cv/appByBusiness/sbi/823456789/list').reply(200, {
     data: [
       {
-        sbi: '123456789',
+        sbi: '823456789',
         application_id: 'app123',
         subject_id: '123',
         year: 2025,
@@ -366,7 +366,7 @@ const setupAnnotatedFieldsNock = (internalUpstream, email) => {
     ]
   })
 
-  internalUpstream.get('/SitiAgriApi/cv/agreementsByBusiness/sbi/123456789/list').reply(200, {
+  internalUpstream.get('/SitiAgriApi/cv/agreementsByBusiness/sbi/823456789/list').reply(200, {
     data: [
       {
         contract_id: 'contract-1',
@@ -431,7 +431,7 @@ describe('Query.business internal', () => {
     const crn = '123'
     const tokenValue = signDefraIdToken({
       contactId: crn,
-      relationships: ['organisationId:123456789']
+      relationships: ['organisationId:823456789']
     })
 
     const externalKitsGateway = nock(config.get('kits.external.gatewayUrl'))
@@ -453,7 +453,7 @@ describe('Query.business internal', () => {
       data: {
         business: {
           organisationId: 'organisationId',
-          sbi: '123456789',
+          sbi: '823456789',
           info: {
             name: 'name',
             address: {
@@ -530,7 +530,7 @@ describe('Query.business internal', () => {
               personId: 'personId',
               firstName: 'firstName',
               lastName: 'lastName',
-              crn: '1234567890',
+              crn: '9234567890',
               role: 'role'
             }
           ],
@@ -538,7 +538,7 @@ describe('Query.business internal', () => {
             personId: 'personId',
             firstName: 'firstName',
             lastName: 'lastName',
-            crn: '1234567890',
+            crn: '9234567890',
             role: 'role',
             permissionGroups: [
               {
@@ -571,7 +571,7 @@ describe('Query.business internal', () => {
           ],
           applications: [
             {
-              sbi: '123456789',
+              sbi: '823456789',
               id: 'app123',
               subjectId: '123',
               year: 2025,
@@ -647,7 +647,7 @@ describe('Query.business internal', () => {
       data: {
         business: {
           organisationId: 'organisationId',
-          sbi: '123456789',
+          sbi: '823456789',
           info: {
             name: 'name',
             address: {
@@ -724,7 +724,7 @@ describe('Query.business internal', () => {
               personId: 'personId',
               firstName: 'firstName',
               lastName: 'lastName',
-              crn: '1234567890',
+              crn: '9234567890',
               role: 'role'
             }
           ],
@@ -732,7 +732,7 @@ describe('Query.business internal', () => {
             personId: 'personId',
             firstName: 'firstName',
             lastName: 'lastName',
-            crn: '1234567890',
+            crn: '9234567890',
             role: 'role',
             permissionGroups: [
               {
@@ -765,7 +765,7 @@ describe('Query.business internal', () => {
           ],
           applications: [
             {
-              sbi: '123456789',
+              sbi: '823456789',
               id: 'app123',
               subjectId: '123',
               year: 2025,
@@ -894,7 +894,7 @@ describe('Query.business internal', () => {
 
     const parcelsQuery = `#graphql
     query BusinessTest {
-      business(sbi: "123456789") {
+      business(sbi: "823456789") {
         land {
           parcels {
             id
@@ -1022,7 +1022,7 @@ describe('Query.business internal', () => {
     const result = await makeTestQuery(
       `#graphql
           query BusinessAuthTest {
-            business(sbi: "123456789") {
+            business(sbi: "823456789") {
               sbi
             }
           }
@@ -1034,7 +1034,7 @@ describe('Query.business internal', () => {
     )
 
     expect(result.errors).toBeUndefined()
-    expect(result.data.business.sbi).toBe('123456789')
+    expect(result.data.business.sbi).toBe('823456789')
     expect(internalKitsGateway.isDone()).toBe(true)
   })
 })

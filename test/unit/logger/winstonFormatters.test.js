@@ -85,7 +85,7 @@ describe('winstonFormatters', () => {
           reference: 'http://localhost/path',
           type: 'POST',
           created: 1752678579327,
-          duration: 100000000,
+          duration: 100000000, // sfd-id-check: allow
           kind: 'http'
         },
         http: {
@@ -164,7 +164,7 @@ describe('winstonFormatters', () => {
     ).toEqual({
       level: 'info',
       message: 'msg',
-      event: { duration: 100000000 },
+      event: { duration: 100000000 }, // sfd-id-check: allow
       http: { response: { response_time: 100 } }
     })
     expect(cdpSchemaTranslator().transform({ '@timestamp': 100 })).toEqual({
@@ -209,7 +209,7 @@ describe('winstonFormatters', () => {
           body: {
             crn: 'CRN001',
             customerReferenceNumber: 'CRN002',
-            sbi: '123456789',
+            sbi: '823456789',
             primarySearchPhrase: 'john doe',
             searchFieldType: 'name',
             id: 'user-123',
@@ -228,7 +228,7 @@ describe('winstonFormatters', () => {
       expect(JSON.parse(result.url.query)).toEqual({
         crn: '**N001',
         customerReferenceNumber: '**N002',
-        sbi: '123456789',
+        sbi: '823456789',
         searchFieldType: 'name',
         id: 'user-123',
         nested: { crn: '******-crn' },
@@ -243,7 +243,7 @@ describe('winstonFormatters', () => {
       const result = cdpSchemaTranslator().transform({
         request: {
           body: {
-            crn: '1234567890',
+            crn: '9234567890',
             customerReferenceNumber: '9876543210',
             shortCrn: 'ab', // key not masked, but also under 4 chars — included verbatim
             nested: { crn: '5555' } // exactly 4 chars, nothing to mask
@@ -273,7 +273,7 @@ describe('winstonFormatters', () => {
       const result = cdpSchemaTranslator().transform({
         request: {
           body: {
-            sbi: '987654321',
+            sbi: '887654321',
             primarySearchPhrase: 'jane doe',
             allowed: 'no',
             disallowed: 'yes'
@@ -282,7 +282,7 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        sbi: '987654321'
+        sbi: '887654321'
       })
     })
 
@@ -290,7 +290,7 @@ describe('winstonFormatters', () => {
       const result = cdpSchemaTranslator().transform({
         request: {
           body: JSON.stringify({
-            sbi: '987654321',
+            sbi: '887654321',
             primarySearchPhrase: 'jane doe',
             allowed: 'no',
             disallowed: 'yes'
@@ -299,7 +299,7 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        sbi: '987654321'
+        sbi: '887654321'
       })
     })
 
@@ -336,7 +336,7 @@ describe('winstonFormatters', () => {
       it('masks primarySearchPhrase to the last 4 digits when searchFieldType is CUSTOMER_REFERENCE (the wire-level CRN search type)', () => {
         const result = cdpSchemaTranslator().transform({
           request: {
-            body: { searchFieldType: 'CUSTOMER_REFERENCE', primarySearchPhrase: '1234567890' }
+            body: { searchFieldType: 'CUSTOMER_REFERENCE', primarySearchPhrase: '9234567890' }
           }
         })
 
@@ -440,7 +440,7 @@ describe('winstonFormatters', () => {
 
     it('masks the crn segment of an external-auth security-answers path', () => {
       const result = cdpSchemaTranslator().transform({
-        request: { path: '/external-auth/security-answers/1234567890' }
+        request: { path: '/external-auth/security-answers/9234567890' }
       })
       expect(result.url).toEqual({
         full: '/external-auth/security-answers/******7890',
@@ -450,7 +450,7 @@ describe('winstonFormatters', () => {
 
     it('masks the crn segment of a full external-auth security-answers URL', () => {
       const result = cdpSchemaTranslator().transform({
-        request: { path: 'https://api.example.com/external-auth/security-answers/1234567890' }
+        request: { path: 'https://api.example.com/external-auth/security-answers/9234567890' }
       })
       expect(result.url).toEqual({
         full: 'https://api.example.com/external-auth/security-answers/******7890',
@@ -461,8 +461,8 @@ describe('winstonFormatters', () => {
     it('masks the crn segment when both url and path are supplied', () => {
       const result = cdpSchemaTranslator().transform({
         request: {
-          url: 'https://api.example.com/external-auth/security-answers/1234567890',
-          path: '/external-auth/security-answers/1234567890'
+          url: 'https://api.example.com/external-auth/security-answers/9234567890',
+          path: '/external-auth/security-answers/9234567890'
         }
       })
       expect(result.url).toEqual({

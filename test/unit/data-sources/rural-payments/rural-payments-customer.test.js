@@ -100,7 +100,7 @@ describe('Rural Payments Customer', () => {
     httpPost.mockImplementationOnce(async () => ({}))
 
     await ruralPaymentsCustomer.saveEmailValidation({
-      customerReference: '1234567890',
+      customerReference: '9234567890',
       partyDigitalContactId: 'digitalContactPartyId',
       email: 'test@test.test',
       linkSentDate: '2026-09-22T00:00:00.000Z'
@@ -108,7 +108,7 @@ describe('Rural Payments Customer', () => {
 
     expect(httpPost).toHaveBeenCalledWith('external-auth/email-validation', {
       body: {
-        customerReference: '1234567890',
+        customerReference: '9234567890',
         partyDigitalContactId: 'digitalContactPartyId',
         email: 'test@test.test',
         linkSentDate: '2026-09-22T00:00:00.000Z'
@@ -229,7 +229,7 @@ describe('Rural Payments Customer', () => {
   test('should return empty data and undefined page when person search response is empty', async () => {
     httpPost.mockImplementationOnce(async () => undefined)
 
-    const result = await ruralPaymentsCustomer.personSearch('CRN', '1234567890')
+    const result = await ruralPaymentsCustomer.personSearch('CRN', '9234567890')
 
     expect(result).toEqual({ data: [], page: undefined })
   })
@@ -237,10 +237,10 @@ describe('Rural Payments Customer', () => {
   test('should map CRN search type to the CUSTOMER_REFERENCE field expected by KITS', async () => {
     httpPost.mockImplementationOnce(async () => ({ _data: [], _page: undefined }))
 
-    await ruralPaymentsCustomer.personSearch('CRN', '1234567890')
+    await ruralPaymentsCustomer.personSearch('CRN', '9234567890')
 
     expect(httpPost).toHaveBeenCalledWith('person/search', {
-      body: '{"searchFieldType":"CUSTOMER_REFERENCE","primarySearchPhrase":"1234567890","offset":0,"limit":100}',
+      body: '{"searchFieldType":"CUSTOMER_REFERENCE","primarySearchPhrase":"9234567890","offset":0,"limit":100}',
       headers: { 'Content-Type': 'application/json' }
     })
   })
@@ -407,7 +407,7 @@ describe('Rural Payments Customer', () => {
     }
     httpGet.mockImplementationOnce(async () => results)
 
-    const getAuthenticate = await ruralPaymentsCustomer.getAuthenticateAnswersByCRN(123123123)
+    const getAuthenticate = await ruralPaymentsCustomer.getAuthenticateAnswersByCRN(9123123123)
 
     expect(getAuthenticate).toEqual(results)
     expect(httpGet).toHaveBeenCalledTimes(1)
@@ -416,7 +416,7 @@ describe('Rural Payments Customer', () => {
   test('should handle 204 reponse and return null via getAuthenticateAnswersByCRN', async () => {
     httpGet.mockImplementationOnce(async () => ({ status: 204, body: '' }))
 
-    const authenticateAnswers = await ruralPaymentsCustomer.getAuthenticateAnswersByCRN(123123123)
+    const authenticateAnswers = await ruralPaymentsCustomer.getAuthenticateAnswersByCRN(9123123123)
 
     expect(authenticateAnswers).toEqual(null)
     expect(httpGet).toHaveBeenCalledTimes(1)
@@ -426,7 +426,7 @@ describe('Rural Payments Customer', () => {
     httpGet.mockRejectedValue({
       extensions: { response: { status: 404 } }
     })
-    await expect(ruralPaymentsCustomer.getAuthenticateAnswersByCRN(123123123)).rejects.toEqual({
+    await expect(ruralPaymentsCustomer.getAuthenticateAnswersByCRN(9123123123)).rejects.toEqual({
       extensions: { response: { status: 404 } }
     })
     expect(httpGet).toHaveBeenCalledTimes(1)
@@ -538,14 +538,14 @@ describe('Rural Payments Customer', () => {
       httpPost.mockResolvedValueOnce({ status: 200 })
 
       // act
-      await ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('1234567890', {
+      await ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('9234567890', {
         memorableDate: 'my date',
         memorableEvent: 'my event',
         memorableLocation: 'my location'
       })
 
       // assert
-      expect(httpPost).toHaveBeenCalledWith('external-auth/security-answers/1234567890', {
+      expect(httpPost).toHaveBeenCalledWith('external-auth/security-answers/9234567890', {
         body: JSON.stringify({ date: 'my date', event: 'my event', location: 'my location' }),
         headers: { 'Content-Type': 'application/json' }
       })
@@ -556,13 +556,13 @@ describe('Rural Payments Customer', () => {
       httpPost.mockResolvedValueOnce({ status: 200 })
 
       // act
-      await ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('1234567890', {
+      await ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('9234567890', {
         memorableDate: null,
         memorableEvent: 'my event'
       })
 
       // assert
-      expect(httpPost).toHaveBeenCalledWith('external-auth/security-answers/1234567890', {
+      expect(httpPost).toHaveBeenCalledWith('external-auth/security-answers/9234567890', {
         body: JSON.stringify({ event: 'my event' }),
         headers: { 'Content-Type': 'application/json' }
       })
@@ -574,7 +574,7 @@ describe('Rural Payments Customer', () => {
 
       // act / assert
       await expect(
-        ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('1234567890', {
+        ruralPaymentsCustomer.saveAuthenticateAnswersByCRN('9234567890', {
           memorableDate: 'my date',
           memorableEvent: 'my event',
           memorableLocation: 'my location'

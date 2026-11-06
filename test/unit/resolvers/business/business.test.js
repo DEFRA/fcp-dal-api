@@ -93,7 +93,7 @@ const dataSources = {
           id: 5331098,
           firstName: 'Marcus',
           lastName: 'Twigden',
-          customerReference: '4804081228',
+          customerReference: '9804081228',
           confirmed: true,
           lastUpdatedOn: 1699870896103,
           role: 'Agent',
@@ -116,7 +116,7 @@ const dataSources = {
           id: 5778203,
           firstName: 'Oliver',
           lastName: 'Colwill',
-          customerReference: '6148241575',
+          customerReference: '9148241575',
           confirmed: true,
           lastUpdatedOn: 1707841972541,
           role: 'Agent',
@@ -301,7 +301,7 @@ describe('Business', () => {
           id: 5331098,
           firstName: 'Marcus',
           lastName: 'Twigden',
-          customerReference: '4804081228',
+          customerReference: '9804081228',
           confirmed: true,
           lastUpdatedOn: 1699870896103,
           role: 'Agent',
@@ -324,7 +324,7 @@ describe('Business', () => {
           id: 5778203,
           firstName: 'Oliver',
           lastName: 'Colwill',
-          customerReference: '6148241575',
+          customerReference: '9148241575',
           confirmed: true,
           lastUpdatedOn: 1707841972541,
           role: 'Agent',
@@ -554,7 +554,7 @@ describe('Business', () => {
   })
 
   it('should handle errors from dataSource for internal gateway', async () => {
-    const sbi = '123456789'
+    const sbi = '823456789'
     const error = new Error('Database error')
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValue(error)
 
@@ -936,7 +936,7 @@ describe('BusinessCustomer', () => {
         id: 5331098,
         firstName: 'Marcus',
         lastName: 'Twigden',
-        customerReference: '4804081228',
+        customerReference: '9804081228',
         confirmed: true,
         lastUpdatedOn: 1699870896103,
         role: 'Agent',
@@ -959,7 +959,7 @@ describe('BusinessCustomer', () => {
         id: 5778203,
         firstName: 'Oliver',
         lastName: 'Colwill',
-        customerReference: '6148241575',
+        customerReference: '9148241575',
         confirmed: true,
         lastUpdatedOn: 1707841972541,
         role: 'Agent',

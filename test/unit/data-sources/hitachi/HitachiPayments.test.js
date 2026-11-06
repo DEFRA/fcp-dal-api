@@ -116,11 +116,11 @@ describe('HitachiPayments', () => {
       mockPost.mockResolvedValue(mockResponse)
 
       const result = await dataSource.getSupplierPayments({
-        frn: '123456789',
+        frn: '123456789', // sfd-id-check: allow
         fromDate: undefined,
         toDate: undefined,
         userIP: '192.168.1.1',
-        resourceId: '123456789'
+        resourceId: '823456789'
       })
 
       expect(mockPost).toHaveBeenCalledWith(
@@ -129,13 +129,13 @@ describe('HitachiPayments', () => {
           body: {
             request: {
               payment: {
-                SupplierAccount: '123456789'
+                SupplierAccount: '123456789' // sfd-id-check: allow
               },
               audit: {
                 requestedSystem: 'dal-api-system',
                 requesterId: 'test@example.com',
                 userIP: '192.168.1.1',
-                resourceId: '123456789',
+                resourceId: '823456789',
                 correlationId: 'test-correlation-id'
               }
             }
@@ -156,16 +156,16 @@ describe('HitachiPayments', () => {
 
       await expect(
         dataSource.getSupplierPayments({
-          frn: '123456789',
+          frn: '123456789', // sfd-id-check: allow
           fromDate: undefined,
           toDate: undefined,
           userIP: '192.168.1.1',
-          resourceId: '123456789'
+          resourceId: '823456789'
         })
       ).rejects.toThrow('Hitachi payments business not found')
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '#datasource - Hitachi payments - business not found with FRN 123456789',
+        '#datasource - Hitachi payments - business not found with FRN 123456789', // sfd-id-check: allow
         {
           code: HITACHI_API_NOT_FOUND_001
         }
@@ -183,11 +183,11 @@ describe('HitachiPayments', () => {
 
       const fromDate = new Date('2023-01-01')
       const result = await dataSource.getSupplierPayments({
-        frn: '123456789',
+        frn: '123456789', // sfd-id-check: allow
         fromDate,
         toDate: undefined,
         userIP: '192.168.1.1',
-        resourceId: '123456789'
+        resourceId: '823456789'
       })
 
       expect(mockPost).toHaveBeenCalledWith(
@@ -196,14 +196,14 @@ describe('HitachiPayments', () => {
           body: {
             request: {
               payment: {
-                SupplierAccount: '123456789',
+                SupplierAccount: '123456789', // sfd-id-check: allow
                 FromDate: fromDate.toISOString()
               },
               audit: {
                 requestedSystem: 'dal-api-system',
                 requesterId: 'test@example.com',
                 userIP: '192.168.1.1',
-                resourceId: '123456789',
+                resourceId: '823456789',
                 correlationId: 'test-correlation-id'
               }
             }
@@ -224,11 +224,11 @@ describe('HitachiPayments', () => {
 
       const toDate = new Date('2023-12-31')
       const result = await dataSource.getSupplierPayments({
-        frn: '123456789',
+        frn: '123456789', // sfd-id-check: allow
         fromDate: undefined,
         toDate,
         userIP: '192.168.1.1',
-        resourceId: '123456789'
+        resourceId: '823456789'
       })
 
       expect(mockPost).toHaveBeenCalledWith(
@@ -237,14 +237,14 @@ describe('HitachiPayments', () => {
           body: {
             request: {
               payment: {
-                SupplierAccount: '123456789',
+                SupplierAccount: '123456789', // sfd-id-check: allow
                 ToDate: toDate.toISOString()
               },
               audit: {
                 requestedSystem: 'dal-api-system',
                 requesterId: 'test@example.com',
                 userIP: '192.168.1.1',
-                resourceId: '123456789',
+                resourceId: '823456789',
                 correlationId: 'test-correlation-id'
               }
             }
@@ -266,11 +266,11 @@ describe('HitachiPayments', () => {
       const fromDate = new Date('2023-01-01')
       const toDate = new Date('2023-12-31')
       const result = await dataSource.getSupplierPayments({
-        frn: '123456789',
+        frn: '123456789', // sfd-id-check: allow
         fromDate,
         toDate,
         userIP: '192.168.1.1',
-        resourceId: '123456789'
+        resourceId: '823456789'
       })
 
       expect(mockPost).toHaveBeenCalledWith(
@@ -279,7 +279,7 @@ describe('HitachiPayments', () => {
           body: {
             request: {
               payment: {
-                SupplierAccount: '123456789',
+                SupplierAccount: '123456789', // sfd-id-check: allow
                 FromDate: fromDate.toISOString(),
                 ToDate: toDate.toISOString()
               },
@@ -287,7 +287,7 @@ describe('HitachiPayments', () => {
                 requestedSystem: 'dal-api-system',
                 requesterId: 'test@example.com',
                 userIP: '192.168.1.1',
-                resourceId: '123456789',
+                resourceId: '823456789',
                 correlationId: 'test-correlation-id'
               }
             }
@@ -300,11 +300,11 @@ describe('HitachiPayments', () => {
     test('should throw HttpError when userIP is missing', async () => {
       await expect(
         dataSource.getSupplierPayments({
-          frn: '123456789',
+          frn: '123456789', // sfd-id-check: allow
           fromDate: undefined,
           toDate: undefined,
           userIP: undefined,
-          resourceId: '123456789'
+          resourceId: '823456789'
         })
       ).rejects.toMatchObject({
         extensions: {
@@ -318,11 +318,11 @@ describe('HitachiPayments', () => {
       async (userIP) => {
         await expect(
           dataSource.getSupplierPayments({
-            frn: '123456789',
+            frn: '123456789', // sfd-id-check: allow
             fromDate: undefined,
             toDate: undefined,
             userIP,
-            resourceId: '123456789'
+            resourceId: '823456789'
           })
         ).rejects.toMatchObject({
           extensions: {
@@ -339,11 +339,11 @@ describe('HitachiPayments', () => {
 
         await expect(
           dataSource.getSupplierPayments({
-            frn: '123456789',
+            frn: '123456789', // sfd-id-check: allow
             fromDate: undefined,
             toDate: undefined,
             userIP,
-            resourceId: '123456789'
+            resourceId: '823456789'
           })
         ).resolves.not.toThrow()
       }
@@ -362,7 +362,7 @@ describe('HitachiPayments', () => {
 
       await expect(
         dataSourceWithMissingAudit.getSupplierPayments({
-          frn: '123456789',
+          frn: '123456789', // sfd-id-check: allow
           fromDate: undefined,
           toDate: undefined,
           userIP: '192.168.1.1',
@@ -395,7 +395,7 @@ describe('HitachiPayments', () => {
 
       await expect(
         dataSourceWithMissingAudit.getSupplierPayments({
-          frn: '123456789',
+          frn: '123456789', // sfd-id-check: allow
           fromDate: undefined,
           toDate: undefined,
           userIP: '192.168.1.1',
@@ -428,7 +428,7 @@ describe('HitachiPayments', () => {
 
       await expect(
         dataSourceWithMissingAudit.getSupplierPayments({
-          frn: '123456789',
+          frn: '123456789', // sfd-id-check: allow
           fromDate: undefined,
           toDate: undefined,
           userIP: '192.168.1.1',
@@ -451,7 +451,7 @@ describe('HitachiPayments', () => {
     test('should throw HttpError when resource id is missing', async () => {
       await expect(
         dataSource.getSupplierPayments({
-          frn: '123456789',
+          frn: '123456789', // sfd-id-check: allow
           fromDate: undefined,
           toDate: undefined,
           userIP: '192.168.1.1',
@@ -484,7 +484,7 @@ describe('HitachiPayments', () => {
 
       await expect(
         dataSourceWithMissingAudit.getSupplierPayments({
-          frn: '123456789',
+          frn: '123456789', // sfd-id-check: allow
           fromDate: undefined,
           toDate: undefined,
           userIP: '192.168.1.1',

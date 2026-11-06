@@ -24,9 +24,9 @@ const setupNock = () => {
 }
 
 const input = {
-  crn: '1234567890',
+  crn: '9234567890',
   name: 'Acme Farms Ltd',
-  vat: '123456789',
+  vat: '123456789', // sfd-id-check: allow
   traderNumber: 'TR12345',
   vendorNumber: 'VN67890',
   address: {
@@ -165,7 +165,7 @@ mutation CreateBusiness($input: CreateBusinessInput!) {
 // the afterEach)
 const waitForPersonIdToBeCachedInMongo = async () => {
   await waitFor(async () => {
-    const cached = await db.collection('customers').findOne({ _id: '1234567890' })
+    const cached = await db.collection('customers').findOne({ _id: '9234567890' })
     expect(cached?.personId).toBe('personId')
   })
 }
@@ -235,7 +235,7 @@ describe('business', () => {
               },
               name: 'Acme Farms Ltd',
               reference: null,
-              vat: '123456789',
+              vat: '123456789', // sfd-id-check: allow
               traderNumber: 'TR12345',
               vendorNumber: 'VN67890',
               isCorrespondenceAsBusinessAddress: false,
@@ -339,7 +339,7 @@ describe('business', () => {
               },
               name: 'Acme Farms Ltd',
               reference: null,
-              vat: '123456789',
+              vat: '123456789', // sfd-id-check: allow
               traderNumber: 'TR12345',
               vendorNumber: 'VN67890',
               isCorrespondenceAsBusinessAddress: false,
@@ -576,7 +576,7 @@ describe('business', () => {
   test.each(
     ['mobile', 'landline'].flatMap((field) => [
       [field, 'longer than 50 characters', `+44${'1'.repeat(48)}`],
-      [field, 'shorter than 10 characters', '012345678'],
+      [field, 'shorter than 10 characters', '012345678'], // sfd-id-check: allow
       [field, 'of only a space', ' '],
       [field, 'of only spaces', ' '.repeat(10)],
       [field, 'of only brackets', '()()()()()'],
@@ -584,7 +584,7 @@ describe('business', () => {
       [field, 'containing a hyphen', '01234-567890'],
       [field, 'containing an extension', '01234 567890 ext 12'],
       [field, 'containing a full stop', '01234.567890'],
-      [field, 'with + after the start', '44+1234567890'],
+      [field, 'with + after the start', '44+1234567890'], // sfd-id-check: allow
       [field, 'with + at the end', '01234567890+'],
       [field, 'with more than one +', '++441234567890'],
       [field, 'with a space before the +', ' +441234567890']
@@ -611,7 +611,7 @@ describe('business', () => {
 
   test.each([
     ['digits only', { landline: '01234567890' }],
-    ['exactly 10 characters', { landline: '0123456789' }],
+    ['exactly 10 characters', { landline: '0123456789' }], // sfd-id-check: allow
     ['a blank landline alongside a mobile', { mobile: '07123456789', landline: '' }],
     ['spaces', { landline: '01234 567 890' }],
     ['brackets', { landline: '(01234) 567890' }],

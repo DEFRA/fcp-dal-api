@@ -23,19 +23,19 @@ describe('MongoBusiness', () => {
   })
 
   it('getOrgIdBySbi sbi doesnt exist', async () => {
-    const result = await mongoBusiness.getOrgIdBySbi('1234567890')
+    const result = await mongoBusiness.getOrgIdBySbi('823456789')
     expect(result).toBeUndefined()
-    expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '1234567890' })
+    expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '823456789' })
   })
 
   it('getOrgIdBySbi sbi does exist', async () => {
     mockCollection.findOne.mockReturnValue({
-      _id: '1234567890',
+      _id: '823456789',
       orgId: 'orgId'
     })
-    const result = await mongoBusiness.getOrgIdBySbi('1234567890')
+    const result = await mongoBusiness.getOrgIdBySbi('823456789')
     expect(result).toEqual('orgId')
-    expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '1234567890' })
+    expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '823456789' })
   })
 
   it('upsertOrgIdBySbi', async () => {
@@ -43,10 +43,10 @@ describe('MongoBusiness', () => {
     vi.useFakeTimers().setSystemTime(dummyDate)
     mockCollection.updateOne.mockResolvedValue({ acknowledged: true, upsertedId: 'orgId' })
 
-    const result = await mongoBusiness.upsertOrgIdBySbi('1234567890', 'orgId')
+    const result = await mongoBusiness.upsertOrgIdBySbi('823456789', 'orgId')
     expect(result).toEqual({ acknowledged: true, upsertedId: 'orgId' })
     expect(mockCollection.updateOne).toHaveBeenCalledWith(
-      { _id: '1234567890' },
+      { _id: '823456789' },
       {
         $set: { orgId: 'orgId', updatedAt: dummyDate },
         $setOnInsert: { createdAt: dummyDate }
@@ -61,7 +61,7 @@ describe('MongoBusiness', () => {
 
     it('upsertOrgIdBySbi handles two concurrent requests for the same SBI without failing', async () => {
       vi.useRealTimers()
-      const sbi = '1234567890'
+      const sbi = '823456789'
       await realCollection.deleteMany({})
 
       await expect(
