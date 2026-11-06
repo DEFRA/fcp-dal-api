@@ -282,6 +282,26 @@ export const Mutation = {
       personId,
       body
     )
+  },
+
+  deleteCustomerPermissionsAndRelationshipFromBusiness: async (
+    _,
+    { input },
+    { dataSources, auditTrail },
+    info
+  ) => {
+    const { organisationId, body } = await buildCustomerAuthorisationRequest({
+      input,
+      dataSources,
+      auditTrail,
+      info,
+      action: 'deleted'
+    })
+
+    return dataSources.ruralPaymentsBusiness.deleteAuthorisationForPersonOnOrganisation(
+      organisationId,
+      body
+    )
   }
 }
 
