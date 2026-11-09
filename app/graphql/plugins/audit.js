@@ -8,6 +8,47 @@ const APPLICATION = 'Data Access Layer'
 const COMPONENT = 'fcp-dal-api'
 const ENVIRONMENT_NAME = config.get('cdp.env') ? `cdp-${config.get('cdp.env')}` : 'local'
 
+// schema-discovery meta fields. __typename is left out on purpose: it only names a type and is
+// commonly used as a cheap ping, so it keeps the generic audit event
+const INTROSPECTION_FIELDS = new Set(['__schema', '__type'])
+const INTROSPECTION_ROOT_FIELD = 'Introspection metadata'
+const INTROSPECTION_ENTITY = { entity: 'graphql-introspection', action: 'read', entityid: '' }
+
+// response keys (alias, else field name) of the operation's root fields, following fragments.
+// undefined when there is no operation, e.g. the query failed to parse or validate
+function rootFieldsOf({ operation, document }) {
+  if (!operation) {
+    return undefined
+  }
+  const fragments = new Map(
+    (document?.definitions ?? [])
+      .filter((definition) => definition.kind === 'FragmentDefinition')
+      .map((definition) => [definition.name.value, definition])
+  )
+  const fields = []
+  const visitedFragments = new Set()
+  const collect = (selectionSet) => {
+    for (const selection of selectionSet?.selections ?? []) {
+      if (selection.kind === 'Field') {
+        fields.push({
+          name: selection.name.value,
+          key: selection.alias?.value ?? selection.name.value
+        })
+      } else if (selection.kind === 'InlineFragment') {
+        collect(selection.selectionSet)
+      } else if (
+        selection.kind === 'FragmentSpread' &&
+        !visitedFragments.has(selection.name.value)
+      ) {
+        visitedFragments.add(selection.name.value)
+        collect(fragments.get(selection.name.value)?.selectionSet)
+      }
+    }
+  }
+  collect(operation.selectionSet)
+  return fields
+}
+
 // Using the http request headers, work out the identifier for the end user
 function endUser(contextValue) {
   const authContext = contextValue.authContext
@@ -28,7 +69,7 @@ function endUser(contextValue) {
 // identified in the resolver layer are added to the audit event.  If no entities are discovered
 // then a top-level 'Audit' event is generated.  The request payload (GraphQL query and variables)
 // is included in audit.details.requestBody so it's captured even without individual entity detail.
-function buildEvent({ contextValue, rootSelection, errors }) {
+function buildEvent({ contextValue, rootSelection, errors, fallbackEntities }) {
   // For each error, extract the message, path and status code
   const mappedErrors = (errors ?? []).map((error) => ({
     message: error.message,
@@ -38,7 +79,7 @@ function buildEvent({ contextValue, rootSelection, errors }) {
 
   const recorded = contextValue?.auditTrail?.getForRoot(rootSelection)
 
-  let entities = recorded?.entities
+  let entities = recorded?.entities ?? fallbackEntities
   if (!entities) {
     // A root element has been processed, but no auditable entities have been found.  This may be
     // a genuine gap in auditing, make sure the request itself is audited
@@ -108,12 +149,30 @@ export function auditPlugin({ publish = snsPublish } = {}) {
 
           try {
             const rootKeys = contextValue.auditTrail.rootKeys()
+            const rootFields = rootFieldsOf(requestContext)
+            const introspectionKeys = (rootFields ?? [])
+              .filter((field) => INTROSPECTION_FIELDS.has(field.name))
+              .map((field) => field.key)
+            const onlyIntrospection =
+              introspectionKeys.length > 0 && introspectionKeys.length === rootFields.length
 
-            if (rootKeys.length === 0) {
-              // Nothing recorded a root selection at all (e.g. a parse/validation error, or a pure
-              // introspection query) - the rootKeys loop below has nothing to iterate, so publish a
-              // single audit/created event for the request itself instead.
+            if (rootKeys.length === 0 && !onlyIntrospection) {
+              // Nothing recorded a root selection at all (e.g. a parse/validation error) - the
+              // rootKeys loop below has nothing to iterate, so publish a single audit/created event
+              // for the request itself instead.
               const event = buildEvent({ contextValue, errors })
+              await publishOne(event)
+            }
+
+            if (introspectionKeys.length > 0) {
+              // introspection resolvers record nothing, so they get their own event alongside any
+              // recorded roots in the same request
+              const event = buildEvent({
+                contextValue,
+                rootSelection: INTROSPECTION_ROOT_FIELD,
+                errors: errors?.filter((error) => introspectionKeys.includes(error.path?.[0])),
+                fallbackEntities: [INTROSPECTION_ENTITY]
+              })
               await publishOne(event)
             }
 
