@@ -310,12 +310,12 @@ describe('auditPlugin', () => {
       const contextValue = {
         ...baseContextValue,
         auditTrail: fakeAuditTrail({
-          business: { entities: [{ entity: 'business', action: 'read', entityid: '107183280' }] }
+          business: { entities: [{ entity: 'business', action: 'read', entityid: '823456789' }] }
         })
       }
       const listener = await plugin.requestDidStart()
       const requestContext = {
-        ...parsedRequest('{ __schema { queryType { name } } business(sbi: "107183280") { sbi } }'),
+        ...parsedRequest('{ __schema { queryType { name } } business(sbi: "823456789") { sbi } }'),
         contextValue,
         errors: undefined
       }
@@ -328,7 +328,7 @@ describe('auditPlugin', () => {
       expect(publish).toHaveBeenCalledWith(
         expect.objectContaining({
           audit: expect.objectContaining({
-            entities: [{ entity: 'business', action: 'read', entityid: '107183280' }],
+            entities: [{ entity: 'business', action: 'read', entityid: '823456789' }],
             details: expect.objectContaining({ rootField: 'business' })
           })
         }),
@@ -396,13 +396,13 @@ describe('auditPlugin', () => {
       const contextValue = {
         ...baseContextValue,
         auditTrail: fakeAuditTrail({
-          business: { entities: [{ entity: 'business', action: 'read', entityid: '107183280' }] }
+          business: { entities: [{ entity: 'business', action: 'read', entityid: '823456789' }] }
         })
       }
       const listener = await plugin.requestDidStart()
       const error = { message: 'boom', path: ['__schema', 'types'], extensions: { code: 'X' } }
       const requestContext = {
-        ...parsedRequest('{ __schema { types { name } } business(sbi: "107183280") { sbi } }'),
+        ...parsedRequest('{ __schema { types { name } } business(sbi: "823456789") { sbi } }'),
         contextValue,
         errors: [error]
       }
