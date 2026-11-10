@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { config } from '../../config.js'
-import { NotFound } from '../../errors/graphql.js'
+import { Forbidden, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { maskAllButLastFour } from '../../logger/utils.js'
 import { postPutHeaders } from '../../utils/headers.js'
@@ -78,6 +78,11 @@ export class RuralPaymentsCustomer extends RuralPayments {
 
   async getPersonIdByCRN(crn) {
     if (this.isExternalRoute()) {
+      // The external gateway always returns the person behind the Defra ID token, whatever crn is
+      // asked for, so refuse a crn that isn't the token's rather than return the wrong person
+      if (`${crn}` !== this.defraIdContext?.crn()) {
+        throw new Forbidden('CRN does not match the Defra ID token')
+      }
       const response = await this.getExternalPerson()
       return response?.id
     }

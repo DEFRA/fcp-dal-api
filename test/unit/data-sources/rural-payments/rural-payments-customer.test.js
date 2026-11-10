@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
-import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, Forbidden, NotFound } from '../../../../app/errors/graphql.js'
 
 describe('Rural Payments Customer', () => {
   const logger = {
@@ -25,7 +25,8 @@ describe('Rural Payments Customer', () => {
             expiresIn: '1h'
           })
         }
-      }
+      },
+      defraIdContext: { crn: () => '11111111' }
     }
   )
   const httpGet = vi.spyOn(ruralPaymentsCustomer, 'get')
@@ -128,12 +129,34 @@ describe('Rural Payments Customer', () => {
     expect(response).toEqual({ id: 123 })
   })
 
-  test('should call getExternalPerson for external gateway ignoring specified CRN', async () => {
-    httpGetExt.mockImplementation(async () => ({ _data: { id: 123 } }))
-    const response = await ruralPaymentsCustomerExt.getCustomerByCRN('ignored-crn')
+  test('should reject a CRN that does not match the Defra ID token on the external gateway', async () => {
+    await expect(ruralPaymentsCustomerExt.getPersonIdByCRN('22222222')).rejects.toEqual(
+      new Forbidden('CRN does not match the Defra ID token')
+    )
 
-    expect(httpGetExt.mock.calls).toEqual([['person/3337243/summary'], ['person/3337243/summary']])
-    expect(response).toEqual({ id: 123 })
+    expect(httpGetExt).not.toHaveBeenCalled()
+  })
+
+  test('should reject any CRN on the external gateway when there is no Defra ID context', async () => {
+    const withoutDefraIdContext = new RuralPaymentsCustomer(
+      { logger },
+      {
+        request: {
+          headers: {
+            'x-forwarded-authorization': jwt.sign({ contactId: '11111111' }, 'secret', {
+              expiresIn: '1h'
+            })
+          }
+        }
+      }
+    )
+    const httpGetNoCtx = vi.spyOn(withoutDefraIdContext, 'get')
+
+    await expect(withoutDefraIdContext.getPersonIdByCRN('11111111')).rejects.toEqual(
+      new Forbidden('CRN does not match the Defra ID token')
+    )
+
+    expect(httpGetNoCtx).not.toHaveBeenCalled()
   })
 
   test('should handle customer not found', async () => {
