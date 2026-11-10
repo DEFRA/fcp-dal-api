@@ -29,7 +29,7 @@ services:
   # NOTE: Hitachi is a separate (non-KITS) upstream without mTLS, so it gets its own plain HTTP mock
   # instance - the TLS-enabled upstream-mock above no longer accepts plain HTTP requests.
   hitachi-mock:
-    image: defradigital/fcp-dal-upstream-mock
+    image: defradigital/fcp-dal-upstream-services-mock
     environment:
       PORT: 3100
     healthcheck:

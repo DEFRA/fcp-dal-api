@@ -13,7 +13,7 @@ services:
     restart: unless-stopped
 
   upstream-mock:
-    image: defradigital/fcp-dal-upstream-mock
+    image: defradigital/fcp-dal-upstream-services-mock
     ports:
       - '3100:3100'
     environment:
