@@ -16,7 +16,9 @@ export const db = mongoClient.db(config.get('mongo.databaseName'))
 export const CACHE_COLLECTIONS = ['customers', 'businesses']
 const TTL_INDEX_NAME = 'updatedAt_ttl'
 // MongoDB error codes raised when an index of the same name/key exists with different options
-const INDEX_CONFLICT_CODES = new Set([85, 86])
+const INDEX_OPTIONS_CONFLICT = 85
+const INDEX_KEY_SPECS_CONFLICT = 86
+const INDEX_CONFLICT_CODES = new Set([INDEX_OPTIONS_CONFLICT, INDEX_KEY_SPECS_CONFLICT])
 
 /**
  * Ensures a TTL index on `updatedAt` exists for the given collection, expiring documents
