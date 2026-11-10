@@ -378,6 +378,20 @@ export const config = convict({
       default: 'fcp-dal-api',
       env: 'MONGO_DATABASE'
     },
+    cacheTtlSeconds: {
+      customers: {
+        doc: 'TTL in seconds for cached CRN -> personId documents in the customers collection',
+        format: 'nat',
+        default: 86400, // 24 hours
+        env: 'MONGO_CUSTOMER_CACHE_TTL_SECONDS'
+      },
+      businesses: {
+        doc: 'TTL in seconds for cached SBI -> orgId documents in the businesses collection',
+        format: 'nat',
+        default: 86400, // 24 hours
+        env: 'MONGO_BUSINESS_CACHE_TTL_SECONDS'
+      }
+    },
     mongoOptions: {
       retryWrites: {
         doc: 'Enable mongo write retries',
