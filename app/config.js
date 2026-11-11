@@ -359,7 +359,7 @@ export const config = convict({
         'not already in use by another customer (rejecting with EMAIL_ALREADY_REGISTERED if so).',
       format: Boolean,
       default: false,
-      env: 'CUSTOMER_EMAIL_DUPLICATE_CHECK_ENABLED'
+      env: 'FF_CUSTOMER_EMAIL_DUPLICATE_CHECK_ENABLED'
     }
   },
   audit: {
