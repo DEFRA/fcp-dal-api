@@ -57,6 +57,7 @@ services:
       MONGO_DATABASE: 'fcp-dal-api'
       HITACHI_DISABLE_AUTH: true
       SERVICE_VERSION: 0.0.0
+      FF_CUSTOMER_EMAIL_DUPLICATE_CHECK_ENABLED: true
     depends_on:
       upstream-mock:
         condition: service_healthy
