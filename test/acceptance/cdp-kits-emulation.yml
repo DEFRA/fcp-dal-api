@@ -42,7 +42,13 @@ services:
 
   proxy:
     healthcheck:
-      test: curl -s --proxy http://localhost:3128 --cacert /tmp/ca.crt --key /tmp/client.key --cert /tmp/client.crt https://upstream-mock:3100/health > /tmp/start.log 2>&1
+      # NOTE: ubuntu/squid has no curl, so use openssl to make the mTLS request via the proxy
+      test: >-
+        printf 'GET /health HTTP/1.0\r\nHost: upstream-mock\r\n\r\n' |
+        openssl s_client -quiet -verify_return_error
+        -proxy localhost:3128 -connect upstream-mock:3100 -servername upstream-mock
+        -CAfile /tmp/ca.crt -cert /tmp/client.crt -key /tmp/client.key 2>/dev/null |
+        head -1 | grep -q ' 200 '
     volumes:
       - ./test/acceptance/mtls/ca.crt:/tmp/ca.crt:ro
       - ./test/acceptance/mtls/client.crt:/tmp/client.crt:ro
