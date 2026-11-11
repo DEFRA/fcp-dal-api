@@ -272,8 +272,31 @@ describe('Customer Mutations', () => {
     '%s email duplicate check',
     (mutationName) => {
       beforeEach(() => {
+        config.set('featureFlags.emailDuplicateCheckEnabled', true)
         mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('currentId')
         mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(mockPerson)
+      })
+
+      afterEach(() => {
+        config.set('featureFlags.emailDuplicateCheckEnabled', false)
+      })
+
+      test('should not call validateEmail when the duplicate check is disabled', async () => {
+        config.set('featureFlags.emailDuplicateCheckEnabled', false)
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        const result = await Mutation[mutationName](
+          null,
+          { input },
+          { dataSources: mockDataSources }
+        )
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).toHaveBeenCalled()
+        expect(result).toEqual({
+          success: true,
+          customer: { personId: 'currentId' }
+        })
       })
 
       test('should call validateEmail with the new email address', async () => {

@@ -352,6 +352,16 @@ export const config = convict({
       }
     }
   },
+  featureFlags: {
+    emailDuplicateCheckEnabled: {
+      doc:
+        'Whether customer updates that change the email address first check the new address is ' +
+        'not already in use by another customer (rejecting with EMAIL_ALREADY_REGISTERED if so).',
+      format: Boolean,
+      default: false,
+      env: 'FF_CUSTOMER_EMAIL_DUPLICATE_CHECK_ENABLED'
+    }
+  },
   audit: {
     sns: {
       topicArn: {
