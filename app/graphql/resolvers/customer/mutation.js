@@ -20,7 +20,7 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
   const isEmailChanging =
     input.email && input.email.address?.toLowerCase() !== person.email?.toLowerCase()
 
-  if (isEmailChanging) {
+  if (isEmailChanging && config.get('featureFlags.emailDuplicateCheckEnabled')) {
     const { emailDuplicated } = await dataSources.ruralPaymentsCustomer.validateEmail(
       input.email.address
     )
