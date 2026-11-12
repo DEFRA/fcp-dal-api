@@ -98,7 +98,8 @@ export function logGraphQLError(log, error) {
     // name is mapped to error.type by the cdp log formatter
     error: { name: code ?? error.name, message: redactMessage(error), stack }
     // The http status is deliberately not logged as response.statusCode: that becomes
-    // http.response.status_code, which CDP alerts and dashboards count potentially multiple times per request.
+    // http.response.status_code, which CDP alerts and dashboards count potentially
+    // multiple times per request.
   })
 }
 
