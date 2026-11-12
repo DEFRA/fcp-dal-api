@@ -95,7 +95,7 @@ describe('errorLoggingPlugin', () => {
     })
   })
 
-  test('treats validation failures without an http status as client errors', async () => {
+  test('treats validation failures without an http status as client errors, logging only the code', async () => {
     const error = new GraphQLError('Cannot query field "nope" on type "Query".', {
       extensions: { code: 'GRAPHQL_VALIDATION_FAILED' }
     })
@@ -106,11 +106,7 @@ describe('errorLoggingPlugin', () => {
       '#DAL - GraphQL error (GRAPHQL_VALIDATION_FAILED)',
       {
         code: 'DAL_GRAPHQL_ERROR_001',
-        error: {
-          name: 'GRAPHQL_VALIDATION_FAILED',
-          message: 'Cannot query field "nope" on type "Query".',
-          stack: undefined
-        }
+        error: { name: 'GRAPHQL_VALIDATION_FAILED' }
       }
     )
   })
@@ -154,7 +150,7 @@ describe('errorLoggingPlugin', () => {
     const typeDefs = `
       enum Status { ACTIVE }
       input UpdateCustomerEmailInput { crn: String!, address: String!, count: Int, status: Status }
-      type Query { ok: Boolean }
+      type Query { ok: Boolean, business(sbi: ID!): Boolean }
       type Mutation {
         updateCustomerEmail(input: UpdateCustomerEmailInput!): Boolean
         count(n: Int): Boolean
@@ -166,75 +162,110 @@ describe('errorLoggingPlugin', () => {
       await server.start()
       await server.executeOperation({ query, variables }, { contextValue: { requestLogger } })
       await server.stop()
+      expect(requestLogger.warn).toHaveBeenCalledTimes(1)
       const [message, meta] = requestLogger.warn.mock.calls[0]
       const logged = JSON.stringify([message, meta])
       for (const value of PII) {
         expect(logged).not.toContain(value)
       }
-      return meta.error.message
+      return meta.error
     }
 
     const mutation = `mutation UpdateCustomerEmail($input: UpdateCustomerEmailInput!) {
       updateCustomerEmail(input: $input)
     }`
 
-    test('redacts the value of a variable with an unknown field', async () => {
-      const message = await run(mutation, {
-        input: { crn: '9234567890', address: 'jane.secret@example.com', nope: 1 }
+    test.each([
+      ['a syntax error', 'GRAPHQL_PARSE_FAILED', '{ business("9234567890") }', undefined],
+      [
+        'a variable with an unknown field',
+        'BAD_USER_INPUT',
+        mutation,
+        { input: { crn: '9234567890', address: 'jane.secret@example.com', nope: 1 } }
+      ],
+      [
+        'a variable missing a required field',
+        'BAD_USER_INPUT',
+        mutation,
+        { input: { address: 'jane.secret@example.com' } }
+      ],
+      [
+        'a nested invalid scalar variable',
+        'BAD_USER_INPUT',
+        mutation,
+        { input: { crn: '1', address: 'a', count: 'jane.secret@example.com' } }
+      ],
+      [
+        'a nested invalid enum variable',
+        'BAD_USER_INPUT',
+        mutation,
+        { input: { crn: '1', address: 'a', status: 'jane.secret@example.com' } }
+      ],
+      [
+        'an invalid inline literal',
+        'GRAPHQL_VALIDATION_FAILED',
+        'mutation { count(n: "jane.secret@example.com") }',
+        undefined
+      ],
+      [
+        'an inline literal of the wrong type',
+        'GRAPHQL_VALIDATION_FAILED',
+        'mutation { updateCustomerEmail(input: "jane.secret@example.com") }',
+        undefined
+      ]
+    ])('logs only the code for %s', async (_, code, query, variables) => {
+      expect(await run(query, variables)).toEqual({ name: code })
+    })
+
+    test('keeps the message of a BAD_USER_INPUT error thrown by a resolver', async () => {
+      const thrown = new BadRequest('phone must include at least one of mobile or landline', {
+        extensions: { code: 'BAD_USER_INPUT' }
       })
-      expect(message).toBe(
-        'Variable "$input" got invalid value [REDACTED]; Field "nope" is not defined by type "UpdateCustomerEmailInput".'
+
+      await encounter([resolverError(thrown, ['updateBusinessPhone'])], { requestLogger })
+
+      expect(requestLogger.warn.mock.calls[0][1].error.message).toBe(
+        'phone must include at least one of mobile or landline'
       )
     })
 
-    test('redacts the value of a variable missing a required field', async () => {
-      const message = await run(mutation, { input: { address: 'jane.secret@example.com' } })
-      expect(message).toBe(
-        'Variable "$input" got invalid value [REDACTED]; Field "crn" of required type "String!" was not provided.'
-      )
-    })
+    test.each([
+      ['Int', 'count', 'Int cannot represent non-integer value: [REDACTED]'],
+      ['String', 'name', 'String cannot represent value: [REDACTED]'],
+      ['Status', 'status', 'Enum "Status" cannot represent value: [REDACTED]']
+    ])(
+      'redacts an upstream value that the %s type cannot serialize',
+      async (_, field, expected) => {
+        const server = new ApolloServer({
+          typeDefs: `
+            enum Status { ACTIVE }
+            type Customer { count: Int, name: String, status: Status }
+            type Query { customer: Customer }
+          `,
+          resolvers: {
+            Query: {
+              customer: () => ({
+                count: 'jane.secret@example.com',
+                name: { email: 'jane.secret@example.com' },
+                status: 'jane.secret@example.com'
+              })
+            }
+          },
+          plugins: [errorLoggingPlugin()]
+        })
+        await server.start()
+        await server.executeOperation(
+          { query: `{ customer { ${field} } }` },
+          { contextValue: { requestLogger } }
+        )
+        await server.stop()
 
-    test('redacts a nested invalid scalar value but keeps the path', async () => {
-      const message = await run(mutation, {
-        input: { crn: '1', address: 'a', count: 'jane.secret@example.com' }
-      })
-      expect(message).toBe(
-        'Variable "$input" got invalid value [REDACTED] at "input.count"; Int cannot represent non-integer value: [REDACTED]'
-      )
-    })
-
-    test('redacts a nested invalid enum value', async () => {
-      const message = await run(mutation, {
-        input: { crn: '1', address: 'a', status: 'jane.secret@example.com' }
-      })
-      expect(message).toBe(
-        'Variable "$input" got invalid value [REDACTED] at "input.status"; Value [REDACTED] does not exist in "Status" enum.'
-      )
-    })
-
-    test('redacts an invalid inline literal', async () => {
-      const message = await run('mutation { count(n: "jane.secret@example.com") }')
-      expect(message).toBe('Int cannot represent non-integer value: [REDACTED]')
-    })
-
-    test('redacts an inline literal of the wrong type', async () => {
-      const message = await run(
-        'mutation { updateCustomerEmail(input: "jane.secret@example.com") }'
-      )
-      expect(message).toBe('Expected value of type "UpdateCustomerEmailInput!", found [REDACTED].')
-    })
-
-    test('redacts values in third party scalar messages', () => {
-      expect(redactMessage(new GraphQLError('Value is not a valid IBAN: GB00SECRET'))).toBe(
-        'Value is not a valid IBAN: [REDACTED]'
-      )
-    })
-
-    test('drops the reason if it cannot be separated from the value', () => {
-      expect(
-        redactMessage(new GraphQLError('Variable "$input" got invalid value "9234567890"; oops'))
-      ).toBe('Variable "$input" got invalid value [REDACTED]')
-    })
+        const [message, meta] = requestLogger.error.mock.calls[0]
+        expect(message).toBe(`#DAL - GraphQL error at customer.${field}`)
+        expect(meta.error.message).toBe(expected)
+        expect(JSON.stringify([message, meta.error.message])).not.toContain('jane.secret')
+      }
+    )
 
     test('leaves messages without values untouched', () => {
       expect(
