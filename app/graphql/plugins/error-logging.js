@@ -20,51 +20,35 @@ function isClientError(status, code) {
   return CLIENT_ERROR_CODES.has(code)
 }
 
-const REDACTED = '[REDACTED]'
+// Errors raised by graphql-js/Apollo while parsing, validating or coercing the request, before any
+// resolver runs. Their messages echo whatever the client sent (e.g. 'Syntax Error: Expected Name,
+// found String "<sbi>".' or 'Variable "$input" got invalid value { email: "..." }'), which can
+// be PII, so only the code is logged for them
+const REQUEST_ERROR_CODES = new Set([
+  'GRAPHQL_PARSE_FAILED',
+  'GRAPHQL_VALIDATION_FAILED',
+  'OPERATION_RESOLUTION_FAILURE'
+])
 
-// graphql-js (and graphql-scalars) echo the offending input value in their coercion/validation
-// messages, which can contain PII (e.g. an email address or CRN), so strip the value out while
-// keeping the reason, type and path that make the error diagnosable
-const VALUE_PATTERNS = [
-  // 'Expected value of type "String!", found 123.'
-  [/(Expected value of type ".*?", found ).*$/s, `$1${REDACTED}.`],
-  // 'Value "FOO" does not exist in "Status" enum.'
-  [/Value ".*" does not exist in /s, `Value ${REDACTED} does not exist in `],
-  // 'Int cannot represent non-integer value: "abc"', 'Value is not a valid IBAN: GB00...'
-  [/(\bvalue\b[^:"]*): .*$/is, `$1: ${REDACTED}`]
-]
-
-function redactValues(message) {
-  return VALUE_PATTERNS.reduce(
-    (msg, [pattern, replacement]) => msg.replace(pattern, replacement),
-    message
-  )
+function isRequestError(code, path) {
+  // BAD_USER_INPUT is also thrown by our own resolvers with safe messages; those have a path,
+  // whereas graphql-js variable coercion errors are raised before execution and do not
+  return REQUEST_ERROR_CODES.has(code) || (code === 'BAD_USER_INPUT' && !path)
 }
 
-// 'Variable "$input" got invalid value { email: "..." } at "input.email"; <reason>'
-const INVALID_VARIABLE = /^Variable "(\$[^"]+)" got invalid value /
+const REDACTED = '[REDACTED]'
+
+// When a resolver returns a value a leaf type cannot serialize, graphql-js echoes it into the
+// message, e.g. 'Int cannot represent non-integer value: "abc"' or 'Enum "Status" cannot represent
+// value: "FOO"'. The value comes from the upstream response so could be PII; strip it but keep the
+// reason
+const SERIALIZE_ERROR = /(cannot represent [^:]*value): .*$/s
 
 /**
- * Remove user supplied values from an error message so it is safe to log.
+ * Remove the value from a leaf serialization error message so it is safe to log.
  */
 export function redactMessage(error) {
-  const message = error.message ?? ''
-  const variable = INVALID_VARIABLE.exec(message)
-  if (!variable) {
-    return redactValues(message)
-  }
-
-  // graphql-js builds the message as `${prefix}; ${originalError.message}`, so use the original
-  // error to split the reason from the (unsafe) printed value rather than parsing the value
-  const redactedPrefix = `Variable "${variable[1]}" got invalid value ${REDACTED}`
-  const reason = error.originalError?.message
-  if (!reason || !message.endsWith(`; ${reason}`)) {
-    return redactedPrefix
-  }
-  const prefix = message.slice(0, -(reason.length + 2))
-  const path = / at "([\w$.[\]]+)"$/.exec(prefix)?.[1]
-  const location = path ? ` at "${path}"` : ''
-  return `${redactedPrefix}${location}; ${redactValues(reason)}`
+  return (error.message ?? '').replace(SERIALIZE_ERROR, `$1: ${REDACTED}`)
 }
 
 /**
@@ -73,7 +57,8 @@ export function redactMessage(error) {
  *
  * Only the error message, extension code and path are logged - never the raw
  * extensions (HttpError attaches the upstream request/response, which can carry PII) or the
- * request variables. Input values that graphql-js echoes into the message are redacted. A stack
+ * request variables. Parse, validation and variable coercion errors log only their code, as their
+ * messages echo the client's input; values in other messages are redacted. A stack
  * trace is only included for server errors, where it is useful for diagnosis; client errors are
  * expected and their stack is just noise.
  */
@@ -84,6 +69,7 @@ export function logGraphQLError(log, error) {
   const path = error.path?.join('.')
 
   const stack = clientError ? undefined : (error.originalError?.stack ?? error.stack)
+  const errorMessage = isRequestError(code, path) ? undefined : redactMessage(error)
 
   let message = '#DAL - GraphQL error'
   if (path) {
@@ -96,7 +82,7 @@ export function logGraphQLError(log, error) {
   log[clientError ? 'warn' : 'error'](message, {
     code: DAL_GRAPHQL_ERROR_001,
     // name is mapped to error.type by the cdp log formatter
-    error: { name: code ?? error.name, message: redactMessage(error), stack }
+    error: { name: code ?? error.name, message: errorMessage, stack }
     // The http status is deliberately not logged as response.statusCode: that becomes
     // http.response.status_code, which CDP alerts and dashboards count potentially
     // multiple times per request.
