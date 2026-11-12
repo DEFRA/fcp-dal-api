@@ -1,3 +1,4 @@
+import { ApolloServer } from '@apollo/server'
 import { GraphQLError } from 'graphql'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { BadRequest, HttpError, Unauthorized } from '../../../../app/errors/graphql.js'
@@ -8,7 +9,9 @@ vi.doMock('../../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
 
-const { errorLoggingPlugin } = await import('../../../../app/graphql/plugins/error-logging.js')
+const { errorLoggingPlugin, redactMessage } = await import(
+  '../../../../app/graphql/plugins/error-logging.js'
+)
 
 // Mirrors how graphql-js wraps an error thrown in a resolver: the thrown error becomes
 // originalError, its extensions are copied across and the resolver path is attached
@@ -142,6 +145,100 @@ describe('errorLoggingPlugin', () => {
         stack: undefined
       },
       response: { statusCode: 401 }
+    })
+  })
+
+  describe('input values are never logged', () => {
+    const PII = ['9234567890', 'jane.secret@example.com']
+    const typeDefs = `
+      enum Status { ACTIVE }
+      input UpdateCustomerEmailInput { crn: String!, address: String!, count: Int, status: Status }
+      type Query { ok: Boolean }
+      type Mutation {
+        updateCustomerEmail(input: UpdateCustomerEmailInput!): Boolean
+        count(n: Int): Boolean
+      }
+    `
+
+    const run = async (query, variables) => {
+      const server = new ApolloServer({ typeDefs, plugins: [errorLoggingPlugin()] })
+      await server.start()
+      await server.executeOperation({ query, variables }, { contextValue: { requestLogger } })
+      await server.stop()
+      const [message, meta] = requestLogger.warn.mock.calls[0]
+      const logged = JSON.stringify([message, meta])
+      for (const value of PII) {
+        expect(logged).not.toContain(value)
+      }
+      return meta.error.message
+    }
+
+    const mutation = `mutation UpdateCustomerEmail($input: UpdateCustomerEmailInput!) {
+      updateCustomerEmail(input: $input)
+    }`
+
+    test('redacts the value of a variable with an unknown field', async () => {
+      const message = await run(mutation, {
+        input: { crn: '9234567890', address: 'jane.secret@example.com', nope: 1 }
+      })
+      expect(message).toBe(
+        'Variable "$input" got invalid value [REDACTED]; Field "nope" is not defined by type "UpdateCustomerEmailInput".'
+      )
+    })
+
+    test('redacts the value of a variable missing a required field', async () => {
+      const message = await run(mutation, { input: { address: 'jane.secret@example.com' } })
+      expect(message).toBe(
+        'Variable "$input" got invalid value [REDACTED]; Field "crn" of required type "String!" was not provided.'
+      )
+    })
+
+    test('redacts a nested invalid scalar value but keeps the path', async () => {
+      const message = await run(mutation, {
+        input: { crn: '1', address: 'a', count: 'jane.secret@example.com' }
+      })
+      expect(message).toBe(
+        'Variable "$input" got invalid value [REDACTED] at "input.count"; Int cannot represent non-integer value: [REDACTED]'
+      )
+    })
+
+    test('redacts a nested invalid enum value', async () => {
+      const message = await run(mutation, {
+        input: { crn: '1', address: 'a', status: 'jane.secret@example.com' }
+      })
+      expect(message).toBe(
+        'Variable "$input" got invalid value [REDACTED] at "input.status"; Value [REDACTED] does not exist in "Status" enum.'
+      )
+    })
+
+    test('redacts an invalid inline literal', async () => {
+      const message = await run('mutation { count(n: "jane.secret@example.com") }')
+      expect(message).toBe('Int cannot represent non-integer value: [REDACTED]')
+    })
+
+    test('redacts an inline literal of the wrong type', async () => {
+      const message = await run(
+        'mutation { updateCustomerEmail(input: "jane.secret@example.com") }'
+      )
+      expect(message).toBe('Expected value of type "UpdateCustomerEmailInput!", found [REDACTED].')
+    })
+
+    test('redacts values in third party scalar messages', () => {
+      expect(redactMessage(new GraphQLError('Value is not a valid IBAN: GB00SECRET'))).toBe(
+        'Value is not a valid IBAN: [REDACTED]'
+      )
+    })
+
+    test('drops the reason if it cannot be separated from the value', () => {
+      expect(
+        redactMessage(new GraphQLError('Variable "$input" got invalid value "9234567890"; oops'))
+      ).toBe('Variable "$input" got invalid value [REDACTED]')
+    })
+
+    test('leaves messages without values untouched', () => {
+      expect(
+        redactMessage(new BadRequest('Defra ID token is not valid for the provided SBI'))
+      ).toBe('Defra ID token is not valid for the provided SBI')
     })
   })
 })
