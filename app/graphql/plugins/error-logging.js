@@ -77,7 +77,7 @@ export function redactMessage(error) {
  * trace is only included for server errors, where it is useful for diagnosis; client errors are
  * expected and their stack is just noise.
  */
-function logGraphQLError(log, error) {
+export function logGraphQLError(log, error) {
   const code = error.extensions?.code
   const status = error.extensions?.http?.status
   const clientError = isClientError(status, code)
@@ -104,10 +104,9 @@ function logGraphQLError(log, error) {
 export function errorLoggingPlugin() {
   return {
     // Errors thrown while building the context (e.g. a Defra ID token failing verification) never
-    // reach requestDidStart, so they must be logged here. No request logger exists yet.
-    async contextCreationDidFail({ error }) {
-      logGraphQLError(logger, error)
-    },
+    // reach requestDidStart. They are logged by the context function rather than in
+    // contextCreationDidFail, because that hook is not given the request, so it cannot log the
+    // trace id.
     async requestDidStart() {
       return {
         async didEncounterErrors({ contextValue, errors }) {
