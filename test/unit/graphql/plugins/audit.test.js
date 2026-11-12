@@ -303,6 +303,28 @@ describe('auditPlugin', () => {
       expect(publish.mock.calls[0][0].audit.entities).toEqual([INTROSPECTION_ENTITY])
     })
 
+    test('publishes one introspection event when the same fragment is spread twice', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest(
+          'query { ...Root ...Root } fragment Root on Query { __schema { types { name } } }'
+        ),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish.mock.calls[0][0].audit.entities).toEqual([INTROSPECTION_ENTITY])
+    })
+
     test('publishes both the recorded root event and an introspection event when a query mixes the two', async () => {
       // arrange
       const publish = vi.fn()

@@ -36,12 +36,13 @@ function rootFieldsOf({ operation, document }) {
         })
       } else if (selection.kind === 'InlineFragment') {
         collect(selection.selectionSet)
-      } else if (
-        selection.kind === 'FragmentSpread' &&
-        !visitedFragments.has(selection.name.value)
-      ) {
-        visitedFragments.add(selection.name.value)
-        collect(fragments.get(selection.name.value)?.selectionSet)
+      } else {
+        // the only selection kind left is FragmentSpread
+        const name = selection.name.value
+        if (!visitedFragments.has(name)) {
+          visitedFragments.add(name)
+          collect(fragments.get(name)?.selectionSet)
+        }
       }
     }
   }
