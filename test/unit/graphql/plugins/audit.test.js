@@ -1,4 +1,5 @@
 import { validateAuditEvent } from '@defra/fcp-audit-publisher'
+import { parse } from 'graphql'
 import { describe, expect, test, vi } from 'vitest'
 import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
 
@@ -35,6 +36,15 @@ const requestPayload = {
   variables: { sbi: '823456789' },
   operationName: 'GetBusiness'
 }
+
+// mirrors what apollo puts on the request context once the query has parsed and validated
+const parsedRequest = (query) => {
+  const document = parse(query)
+  const operation = document.definitions.find((d) => d.kind === 'OperationDefinition')
+  return { document, operation }
+}
+
+const INTROSPECTION_ENTITY = { entity: 'graphql-introspection', action: 'read', entityid: '' }
 
 const REQUEST_RECEIVED_MS = Date.parse('2026-01-01T00:00:00.000Z')
 
@@ -214,6 +224,280 @@ describe('auditPlugin', () => {
       await listener.willSendResponse(requestContext)
 
       expect(publish).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('introspection', () => {
+    test('publishes a single introspection event for a pure introspection query', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest('query IntrospectionQuery { __schema { queryType { name } } }'),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          audit: expect.objectContaining({
+            status: 'success',
+            entities: [INTROSPECTION_ENTITY],
+            accounts: undefined,
+            details: expect.objectContaining({
+              rootField: 'Introspection metadata',
+              errorDetails: []
+            })
+          })
+        }),
+        baseContextValue.requestLogger
+      )
+    })
+
+    test('treats __type as introspection', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest('{ __type(name: "Business") { name } }'),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish.mock.calls[0][0].audit.entities).toEqual([INTROSPECTION_ENTITY])
+    })
+
+    test('finds introspection selected through fragments at the root', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest(
+          'query { ...Root } fragment Root on Query { ... on Query { s: __schema { types { name } } } }'
+        ),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish.mock.calls[0][0].audit.entities).toEqual([INTROSPECTION_ENTITY])
+    })
+
+    test('publishes one introspection event when the same fragment is spread twice', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest(
+          'query { ...Root ...Root } fragment Root on Query { __schema { types { name } } }'
+        ),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish.mock.calls[0][0].audit.entities).toEqual([INTROSPECTION_ENTITY])
+    })
+
+    test('publishes both the recorded root event and an introspection event when a query mixes the two', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = {
+        ...baseContextValue,
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'business', action: 'read', entityid: '823456789' }] }
+        })
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest('{ __schema { queryType { name } } business(sbi: "823456789") { sbi } }'),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(2)
+      expect(publish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          audit: expect.objectContaining({
+            entities: [{ entity: 'business', action: 'read', entityid: '823456789' }],
+            details: expect.objectContaining({ rootField: 'business' })
+          })
+        }),
+        baseContextValue.requestLogger
+      )
+      expect(publish).toHaveBeenCalledWith(
+        expect.objectContaining({
+          audit: expect.objectContaining({
+            entities: [INTROSPECTION_ENTITY],
+            details: expect.objectContaining({ rootField: 'Introspection metadata' })
+          })
+        }),
+        baseContextValue.requestLogger
+      )
+    })
+
+    test('still publishes the fallback event when introspection sits beside a root that recorded nothing', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest('{ __schema { queryType { name } } countries { code } }'),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      const entities = publish.mock.calls.map(([event]) => event.audit.entities)
+      expect(entities).toHaveLength(2)
+      expect(entities).toContainEqual([INTROSPECTION_ENTITY])
+      expect(entities).toContainEqual([{ entity: 'audit', action: 'created', entityid: 'trace-1' }])
+    })
+
+    test('does not treat a root __typename as introspection', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest('{ __typename }'),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish.mock.calls[0][0].audit.entities).toEqual([
+        { entity: 'audit', action: 'created', entityid: 'trace-1' }
+      ])
+    })
+
+    test('attributes errors under an introspection field to the introspection event', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = {
+        ...baseContextValue,
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'business', action: 'read', entityid: '823456789' }] }
+        })
+      }
+      const listener = await plugin.requestDidStart()
+      const error = { message: 'boom', path: ['__schema', 'types'], extensions: { code: 'X' } }
+      const requestContext = {
+        ...parsedRequest('{ __schema { types { name } } business(sbi: "823456789") { sbi } }'),
+        contextValue,
+        errors: [error]
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      const byRoot = Object.fromEntries(
+        publish.mock.calls.map(([event]) => [event.audit.details.rootField, event.audit])
+      )
+      expect(byRoot['Introspection metadata']).toMatchObject({
+        status: 'failure',
+        details: { errorDetails: [{ message: 'boom', path: ['__schema', 'types'], code: 'X' }] }
+      })
+      expect(byRoot.business).toMatchObject({ status: 'success', details: { errorDetails: [] } })
+    })
+
+    test('reports a request-level error on the introspection event when it is the only event', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const error = {
+        message: 'Variable "$n" of required type "String!" was not provided.',
+        extensions: { code: 'BAD_USER_INPUT' }
+      }
+      const requestContext = {
+        ...parsedRequest('query Q($n: String!) { __type(name: $n) { name } }'),
+        contextValue,
+        errors: [error]
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish.mock.calls[0][0].audit).toMatchObject({
+        status: 'failure',
+        entities: [INTROSPECTION_ENTITY],
+        details: {
+          errorDetails: [{ message: error.message, path: undefined, code: 'BAD_USER_INPUT' }]
+        }
+      })
+    })
+
+    test('reports an introspection error only once when the fallback event is also published', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const error = { message: 'boom', path: ['__schema', 'types'], extensions: { code: 'X' } }
+      const requestContext = {
+        ...parsedRequest('{ __schema { types { name } } countries { code } }'),
+        contextValue,
+        errors: [error]
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      const byEntity = Object.fromEntries(
+        publish.mock.calls.map(([event]) => [event.audit.entities[0].entity, event.audit])
+      )
+      expect(byEntity['graphql-introspection']).toMatchObject({
+        status: 'failure',
+        details: { errorDetails: [{ message: 'boom', path: ['__schema', 'types'], code: 'X' }] }
+      })
+      expect(byEntity.audit).toMatchObject({ status: 'success', details: { errorDetails: [] } })
     })
   })
 
@@ -760,6 +1044,26 @@ describe('auditPlugin', () => {
       }
       await listener.willSendResponse(requestContext)
 
+      const [event] = publish.mock.calls[0]
+      expect(validateAuditEvent(event)).toMatchObject({ valid: true })
+    })
+
+    test('the introspection event also passes real schema validation', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const requestContext = {
+        ...parsedRequest('{ __schema { queryType { name } } }'),
+        contextValue,
+        errors: undefined
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
       const [event] = publish.mock.calls[0]
       expect(validateAuditEvent(event)).toMatchObject({ valid: true })
     })
