@@ -50,8 +50,7 @@ describe('errorLoggingPlugin', () => {
           name: 'BAD REQUEST',
           message: 'Defra ID token is not valid for the provided SBI',
           stack: undefined
-        },
-        response: { statusCode: 400 }
+        }
       }
     )
     expect(requestLogger.error).not.toHaveBeenCalled()
@@ -75,8 +74,7 @@ describe('errorLoggingPlugin', () => {
         name: 'INTERNAL SERVER ERROR',
         message: 'Internal Server Error',
         stack: thrown.stack
-      },
-      response: { statusCode: 500 }
+      }
     })
     expect(JSON.stringify(meta)).not.toContain('pii')
   })
@@ -147,8 +145,7 @@ describe('errorLoggingPlugin', () => {
         name: 'UNAUTHORIZED',
         message: 'Defra ID token failed verification',
         stack: undefined
-      },
-      response: { statusCode: 401 }
+      }
     })
   })
 

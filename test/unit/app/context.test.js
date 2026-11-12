@@ -344,8 +344,7 @@ describe('context', () => {
             name: 'UNAUTHORIZED',
             message: 'Defra ID token could not be decoded',
             stack: undefined
-          },
-          response: { statusCode: 401 }
+          }
         }
       )
     })
@@ -360,8 +359,7 @@ describe('context', () => {
       expect(loggerMock.child).toHaveBeenCalledExactlyOnceWith({ traceId: 'trace-2' })
       expect(requestLogger.warn).toHaveBeenCalledWith('#DAL - GraphQL error (UNAUTHORIZED)', {
         code: 'DAL_GRAPHQL_ERROR_001',
-        error: { name: 'UNAUTHORIZED', message: 'token failed verification', stack: undefined },
-        response: { statusCode: 401 }
+        error: { name: 'UNAUTHORIZED', message: 'token failed verification', stack: undefined }
       })
     })
   })

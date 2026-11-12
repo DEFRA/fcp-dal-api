@@ -71,7 +71,7 @@ export function redactMessage(error) {
  * Logs one line per GraphQL error, so it is possible to see why a request failed (e.g. returned a
  * 400) without needing debug level response logging.
  *
- * Only the error message, extension code, http status and path are logged - never the raw
+ * Only the error message, extension code and path are logged - never the raw
  * extensions (HttpError attaches the upstream request/response, which can carry PII) or the
  * request variables. Input values that graphql-js echoes into the message are redacted. A stack
  * trace is only included for server errors, where it is useful for diagnosis; client errors are
@@ -96,8 +96,9 @@ export function logGraphQLError(log, error) {
   log[clientError ? 'warn' : 'error'](message, {
     code: DAL_GRAPHQL_ERROR_001,
     // name is mapped to error.type by the cdp log formatter
-    error: { name: code ?? error.name, message: redactMessage(error), stack },
-    ...(status && { response: { statusCode: status } })
+    error: { name: code ?? error.name, message: redactMessage(error), stack }
+    // The http status is deliberately not logged as response.statusCode: that becomes
+    // http.response.status_code, which CDP alerts and dashboards count potentially multiple times per request.
   })
 }
 
