@@ -442,6 +442,63 @@ describe('auditPlugin', () => {
       })
       expect(byRoot.business).toMatchObject({ status: 'success', details: { errorDetails: [] } })
     })
+
+    test('reports a request-level error on the introspection event when it is the only event', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const error = {
+        message: 'Variable "$n" of required type "String!" was not provided.',
+        extensions: { code: 'BAD_USER_INPUT' }
+      }
+      const requestContext = {
+        ...parsedRequest('query Q($n: String!) { __type(name: $n) { name } }'),
+        contextValue,
+        errors: [error]
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      expect(publish).toHaveBeenCalledTimes(1)
+      expect(publish.mock.calls[0][0].audit).toMatchObject({
+        status: 'failure',
+        entities: [INTROSPECTION_ENTITY],
+        details: {
+          errorDetails: [{ message: error.message, path: undefined, code: 'BAD_USER_INPUT' }]
+        }
+      })
+    })
+
+    test('reports an introspection error only once when the fallback event is also published', async () => {
+      // arrange
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+      const contextValue = { ...baseContextValue, auditTrail: fakeAuditTrail() }
+      const listener = await plugin.requestDidStart()
+      const error = { message: 'boom', path: ['__schema', 'types'], extensions: { code: 'X' } }
+      const requestContext = {
+        ...parsedRequest('{ __schema { types { name } } countries { code } }'),
+        contextValue,
+        errors: [error]
+      }
+
+      // act
+      await listener.willSendResponse(requestContext)
+
+      // assert
+      const byEntity = Object.fromEntries(
+        publish.mock.calls.map(([event]) => [event.audit.entities[0].entity, event.audit])
+      )
+      expect(byEntity['graphql-introspection']).toMatchObject({
+        status: 'failure',
+        details: { errorDetails: [{ message: 'boom', path: ['__schema', 'types'], code: 'X' }] }
+      })
+      expect(byEntity.audit).toMatchObject({ status: 'success', details: { errorDetails: [] } })
+    })
   })
 
   describe('user', () => {

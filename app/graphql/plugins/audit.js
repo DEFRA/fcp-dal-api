@@ -156,22 +156,30 @@ export function auditPlugin({ publish = snsPublish } = {}) {
               .map((field) => field.key)
             const onlyIntrospection =
               introspectionKeys.length > 0 && introspectionKeys.length === rootFields.length
+            const publishFallback = rootKeys.length === 0 && !onlyIntrospection
+            const isIntrospectionError = (error) => introspectionKeys.includes(error.path?.[0])
 
-            if (rootKeys.length === 0 && !onlyIntrospection) {
+            if (publishFallback) {
               // Nothing recorded a root selection at all (e.g. a parse/validation error) - the
               // rootKeys loop below has nothing to iterate, so publish a single audit/created event
               // for the request itself instead.
-              const event = buildEvent({ contextValue, errors })
+              const event = buildEvent({
+                contextValue,
+                errors: errors?.filter((error) => !isIntrospectionError(error))
+              })
               await publishOne(event)
             }
 
             if (introspectionKeys.length > 0) {
               // introspection resolvers record nothing, so they get their own event alongside any
-              // recorded roots in the same request
+              // recorded roots in the same request. errors with no path (e.g. a missing variable)
+              // belong to the whole request, so they land here when there is no fallback event
               const event = buildEvent({
                 contextValue,
                 rootSelection: INTROSPECTION_ROOT_FIELD,
-                errors: errors?.filter((error) => introspectionKeys.includes(error.path?.[0])),
+                errors: errors?.filter(
+                  (error) => isIntrospectionError(error) || (!publishFallback && !error.path)
+                ),
                 fallbackEntities: [INTROSPECTION_ENTITY]
               })
               await publishOne(event)
