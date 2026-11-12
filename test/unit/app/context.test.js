@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
+import { Unauthorized } from '../../../app/errors/graphql.js'
 
 // A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only
 // decoded (jose's decodeJwt), never signature-verified, so the signing secret doesn't matter.
@@ -308,6 +309,60 @@ describe('context', () => {
 
       const result = await context({ request })
       expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBeUndefined()
+    })
+  })
+
+  describe('when the context cannot be created', () => {
+    const requestLogger = { warn: vi.fn(), error: vi.fn() }
+
+    beforeEach(() => {
+      vi.clearAllMocks()
+      JWKSMock.mockImplementation(function () {
+        return {}
+      })
+      loggerChild.mockReturnValue(requestLogger)
+    })
+
+    test('logs an undecodable Defra ID token with the trace id and calling service, then rethrows', async () => {
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user', serviceName: 'Grants' })
+      const request = {
+        headers: { 'x-forwarded-authorization': 'not-a-jwt' },
+        traceId: 'trace-1'
+      }
+
+      await expect(context({ request })).rejects.toThrow('Defra ID token could not be decoded')
+
+      expect(loggerMock.child).toHaveBeenLastCalledWith({
+        traceId: 'trace-1',
+        tenant: { id: 'Grants' }
+      })
+      expect(requestLogger.warn).toHaveBeenCalledExactlyOnceWith(
+        '#DAL - GraphQL error (UNAUTHORIZED)',
+        {
+          code: 'DAL_GRAPHQL_ERROR_001',
+          error: {
+            name: 'UNAUTHORIZED',
+            message: 'Defra ID token could not be decoded',
+            stack: undefined
+          },
+          response: { statusCode: 401 }
+        }
+      )
+    })
+
+    test('logs the error with just the trace id when authentication fails', async () => {
+      const authError = new Unauthorized('token failed verification')
+      getAuthorisedEntityMock.mockRejectedValue(authError)
+      const request = { headers: {}, traceId: 'trace-2' }
+
+      await expect(context({ request })).rejects.toBe(authError)
+
+      expect(loggerMock.child).toHaveBeenCalledExactlyOnceWith({ traceId: 'trace-2' })
+      expect(requestLogger.warn).toHaveBeenCalledWith('#DAL - GraphQL error (UNAUTHORIZED)', {
+        code: 'DAL_GRAPHQL_ERROR_001',
+        error: { name: 'UNAUTHORIZED', message: 'token failed verification', stack: undefined },
+        response: { statusCode: 401 }
+      })
     })
   })
 })

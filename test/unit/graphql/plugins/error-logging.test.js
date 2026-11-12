@@ -9,7 +9,7 @@ vi.doMock('../../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
 
-const { errorLoggingPlugin, redactMessage } = await import(
+const { errorLoggingPlugin, logGraphQLError, redactMessage } = await import(
   '../../../../app/graphql/plugins/error-logging.js'
 )
 
@@ -132,12 +132,16 @@ describe('errorLoggingPlugin', () => {
     expect(loggerMock.warn).toHaveBeenCalledTimes(1)
   })
 
-  test('logs context creation failures with the base logger', async () => {
-    const error = new Unauthorized('Defra ID token failed verification')
+  test('does not log context creation failures itself, as the context function logs them', () => {
+    expect(errorLoggingPlugin().contextCreationDidFail).toBeUndefined()
+  })
 
-    await errorLoggingPlugin().contextCreationDidFail({ error })
+  test('logGraphQLError logs with the logger it is given', () => {
+    const log = { error: vi.fn(), warn: vi.fn() }
 
-    expect(loggerMock.warn).toHaveBeenCalledWith('#DAL - GraphQL error (UNAUTHORIZED)', {
+    logGraphQLError(log, new Unauthorized('Defra ID token failed verification'))
+
+    expect(log.warn).toHaveBeenCalledWith('#DAL - GraphQL error (UNAUTHORIZED)', {
       code: 'DAL_GRAPHQL_ERROR_001',
       error: {
         name: 'UNAUTHORIZED',

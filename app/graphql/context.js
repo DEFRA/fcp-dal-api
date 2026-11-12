@@ -13,8 +13,21 @@ import { RuralPaymentsReferenceData } from '../data-sources/rural-payments/Rural
 import { Permissions } from '../data-sources/static/permissions.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
+import { logGraphQLError } from './plugins/error-logging.js'
 
 export async function context({ request }) {
+  try {
+    return await buildContext(request)
+  } catch (error) {
+    // Apollo's contextCreationDidFail hook is not given the request, so log here where the trace
+    // id (and the calling service, if authentication got that far) is known
+    const tenant = request.requestingService && { tenant: { id: request.requestingService } }
+    logGraphQLError(logger.child({ traceId: request.traceId, ...tenant }), error)
+    throw error
+  }
+}
+
+async function buildContext(request) {
   const auth = await getAuthorisedEntity(request, new JWKS()) // TODO: make JWKS a singleton
   const requestingService = auth.serviceName
   request.requestingService = requestingService
