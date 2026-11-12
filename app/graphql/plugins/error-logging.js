@@ -1,3 +1,4 @@
+import { StatusCodes } from 'http-status-codes'
 import { DAL_GRAPHQL_ERROR_001 } from '../../logger/codes.js'
 import { logger } from '../../logger/logger.js'
 
@@ -14,7 +15,7 @@ const CLIENT_ERROR_CODES = new Set([
 
 function isClientError(status, code) {
   if (status) {
-    return status < 500
+    return status < StatusCodes.INTERNAL_SERVER_ERROR
   }
   return CLIENT_ERROR_CODES.has(code)
 }
