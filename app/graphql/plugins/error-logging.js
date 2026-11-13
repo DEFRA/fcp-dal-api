@@ -60,7 +60,8 @@ export function redactMessage(error) {
  * request variables. Parse, validation and variable coercion errors log only their code, as their
  * messages echo the client's input; values in other messages are redacted. A stack
  * trace is only included for server errors, where it is useful for diagnosis; client errors are
- * expected and their stack is just noise.
+ * expected and their stack is just noise. It is also left out when the message was redacted, as
+ * the stack repeats the message.
  */
 export function logGraphQLError(log, error) {
   const code = error.extensions?.code
@@ -68,8 +69,12 @@ export function logGraphQLError(log, error) {
   const clientError = isClientError(status, code)
   const path = error.path?.join('.')
 
-  const stack = clientError ? undefined : (error.originalError?.stack ?? error.stack)
   const errorMessage = isRequestError(code, path) ? undefined : redactMessage(error)
+  // A redacted message means the stack's first line ('<name>: <message>') holds the value too. The
+  // stack of these errors only points into graphql-js's serializer, so it is dropped rather than
+  // redacted
+  const redacted = errorMessage !== undefined && errorMessage !== error.message
+  const stack = clientError || redacted ? undefined : (error.originalError?.stack ?? error.stack)
 
   let message = '#DAL - GraphQL error'
   if (path) {

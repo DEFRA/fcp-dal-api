@@ -263,7 +263,8 @@ describe('errorLoggingPlugin', () => {
         const [message, meta] = requestLogger.error.mock.calls[0]
         expect(message).toBe(`#DAL - GraphQL error at customer.${field}`)
         expect(meta.error.message).toBe(expected)
-        expect(JSON.stringify([message, meta.error.message])).not.toContain('jane.secret')
+        expect(meta.error.stack).toBeUndefined()
+        expect(JSON.stringify([message, meta])).not.toContain('jane.secret')
       }
     )
 
