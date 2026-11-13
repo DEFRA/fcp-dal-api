@@ -95,13 +95,12 @@ describe('Rural Payments Business', () => {
   const httpGet = vi.spyOn(ruralPaymentsBusiness, 'get')
   const httpPost = vi.spyOn(ruralPaymentsBusiness, 'post')
   const httpPut = vi.spyOn(ruralPaymentsBusiness, 'put')
-  const httpDelete = vi.spyOn(ruralPaymentsBusiness, 'delete')
 
   beforeEach(() => {
     // mockReset vitest config already restores the real method before each test, so default to
     // rejecting to make a test that forgets to mock the HTTP call fail instead of hitting the
     // network
-    for (const spy of [httpGet, httpPost, httpPut, httpDelete]) {
+    for (const spy of [httpGet, httpPost, httpPut]) {
       spy.mockRejectedValue(new Error('unmocked HTTP call'))
     }
   })
@@ -905,30 +904,6 @@ describe('Rural Payments Business', () => {
 
       expect(httpPut).toHaveBeenCalledWith(
         'SitiAgriApi/authorisation/organisation/orgId/authorisation/person/personId',
-        {
-          body,
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      )
-      expect(response).toEqual(fakeResponse)
-    })
-  })
-
-  describe('deleteAuthorisationForPersonOnOrganisation', () => {
-    test('should call delete endpoint and return response', async () => {
-      const fakeResponse = { success: true }
-      const body = { personId: 'personId', roleId: 'roleId' }
-      httpDelete.mockImplementationOnce(async () => fakeResponse)
-
-      const response = await ruralPaymentsBusiness.deleteAuthorisationForPersonOnOrganisation(
-        'orgId',
-        body
-      )
-
-      expect(httpDelete).toHaveBeenCalledWith(
-        'SitiAgriApi/authorisation/organisation/orgId/authorisation/',
         {
           body,
           headers: {

@@ -319,11 +319,4 @@ export class RuralPaymentsBusiness extends RuralPayments {
       }
     )
   }
-
-  async deleteAuthorisationForPersonOnOrganisation(organisationId, body) {
-    return this.delete(`SitiAgriApi/authorisation/organisation/${organisationId}/authorisation/`, {
-      body,
-      headers: postPutHeaders
-    })
-  }
 }

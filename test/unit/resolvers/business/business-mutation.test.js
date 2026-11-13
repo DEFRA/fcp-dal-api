@@ -1286,20 +1286,20 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
   })
 })
 
-describe('Business Mutation deleteCustomerPermissionsAndRelationshipFromBusiness', () => {
-  it('transforms permissions to privilege names for the upstream request', async () => {
+describe('Business Mutation deleteCustomerFromBusiness', () => {
+  it('sends empty roles and privileges to the update endpoint to unlink the customer', async () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
     const dataSources = {
       ruralPaymentsBusiness: {
         getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
-        deleteAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
+        updateAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
       },
       permissions: new Permissions()
     }
 
-    const response = await Mutation.deleteCustomerPermissionsAndRelationshipFromBusiness(
+    const response = await Mutation.deleteCustomerFromBusiness(
       {},
-      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+      { input: { sbi: '811111111', crn: '9111111100' } },
       { dataSources }
     )
 
@@ -1311,8 +1311,11 @@ describe('Business Mutation deleteCustomerPermissionsAndRelationshipFromBusiness
       dataSources
     )
     expect(
-      dataSources.ruralPaymentsBusiness.deleteAuthorisationForPersonOnOrganisation
-    ).toHaveBeenCalledWith('org-1', expectedMutateCustomerPermissionsAndRelationshipToBusinessBody)
+      dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
+    ).toHaveBeenCalledWith('org-1', 'person-1', {
+      personRoles: [],
+      personPrivileges: []
+    })
     expect(response).toEqual({ success: true })
   })
 
@@ -1321,22 +1324,22 @@ describe('Business Mutation deleteCustomerPermissionsAndRelationshipFromBusiness
     const dataSources = {
       ruralPaymentsBusiness: {
         getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
-        deleteAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
+        updateAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
       },
       permissions: new Permissions()
     }
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: {
-        key: 'deleteCustomerPermissionsAndRelationshipFromBusiness',
+        key: 'deleteCustomerFromBusiness',
         typename: 'Mutation',
         prev: undefined
       }
     }
 
-    await Mutation.deleteCustomerPermissionsAndRelationshipFromBusiness(
+    await Mutation.deleteCustomerFromBusiness(
       {},
-      { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+      { input: { sbi: '811111111', crn: '9111111100' } },
       { dataSources, auditTrail },
       info
     )
@@ -1357,30 +1360,30 @@ describe('Business Mutation deleteCustomerPermissionsAndRelationshipFromBusiness
     const dataSources = {
       ruralPaymentsBusiness: {
         getOrganisationIdBySBI: vi.fn().mockRejectedValue(new Error('not found')),
-        deleteAuthorisationForPersonOnOrganisation: vi.fn()
+        updateAuthorisationForPersonOnOrganisation: vi.fn()
       },
       permissions: new Permissions()
     }
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: {
-        key: 'deleteCustomerPermissionsAndRelationshipFromBusiness',
+        key: 'deleteCustomerFromBusiness',
         typename: 'Mutation',
         prev: undefined
       }
     }
 
     await expect(
-      Mutation.deleteCustomerPermissionsAndRelationshipFromBusiness(
+      Mutation.deleteCustomerFromBusiness(
         {},
-        { input: mutateCustomerPermissionsAndRelationshipToBusinessInput },
+        { input: { sbi: '811111111', crn: '9111111100' } },
         { dataSources, auditTrail },
         info
       )
     ).rejects.toThrow('not found')
 
     expect(
-      dataSources.ruralPaymentsBusiness.deleteAuthorisationForPersonOnOrganisation
+      dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
     ).not.toHaveBeenCalled()
     expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '811111111')
     expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9111111100')
