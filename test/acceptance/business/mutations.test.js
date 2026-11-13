@@ -373,14 +373,22 @@ const updateCustomerPermissionsAndRelationshipToBusiness = gql`
   }
 `
 
+const deleteCustomerFromBusinessMutation = gql`
+  mutation DeleteCustomerFromBusiness($input: DeleteCustomerFromBusinessInput!) {
+    deleteCustomerFromBusiness(input: $input) {
+      success
+      errorString
+    }
+  }
+`
+
 // CRN 9222222000 belongs to org 822222222 in the mock, so it can be linked to the
 // mutation-reserved SBI without changing the fixture data asserted for 811111111.
 const customerPermissionsSbi = '800000001'
 const customerPermissionsCrn = '9222222000'
 
-// NOTE: the create test fails on a second run against the same mock (409 Conflict) as the
-// DAL cannot yet unlink a customer from a business. Once FCPDAL-318 is played, add an
-// afterAll that unlinks the customer so the suite can be re-run.
+// NOTE: these tests run in order: add, update, then delete. The delete test unlinks the
+// customer again, so the create test does not hit a 409 Conflict when the suite is re-run.
 describe('customer permissions on business', () => {
   it('adds a customer to a business with the given role and permissions', async () => {
     const response = await client.request(
@@ -422,6 +430,20 @@ describe('customer permissions on business', () => {
 
     expect(response).not.toHaveProperty('errors')
     expect(response.updateCustomerPermissionsAndRelationshipToBusiness).toEqual({
+      success: true,
+      errorString: null
+    })
+  })
+
+  it('removes a customer from a business', async () => {
+    const response = await client.request(
+      deleteCustomerFromBusinessMutation,
+      { input: { sbi: customerPermissionsSbi, crn: customerPermissionsCrn } },
+      headers
+    )
+
+    expect(response).not.toHaveProperty('errors')
+    expect(response.deleteCustomerFromBusiness).toEqual({
       success: true,
       errorString: null
     })

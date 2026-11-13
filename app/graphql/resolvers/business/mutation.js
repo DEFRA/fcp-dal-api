@@ -38,7 +38,9 @@ const buildCustomerAuthorisationRequest = async ({
   info,
   action
 }) => {
-  const { sbi, crn, role, permissions } = input
+  // role and permissions are optional: omitting both builds a body that unlinks the customer
+  // from the business when sent to the update endpoint
+  const { sbi, crn, role, permissions = [] } = input
   auditTrail?.recordAccount(info, 'sbi', sbi)
   auditTrail?.recordAccount(info, 'crn', crn)
   auditTrail?.recordEntity(info, {
@@ -61,16 +63,19 @@ const buildCustomerAuthorisationRequest = async ({
     organisationId,
     personId,
     body: {
-      personRoles: [{ role, personId }],
-      personPrivileges: [
-        {
-          privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
-            permissions,
-            dataSources.permissions.getPermissionGroups()
-          ),
-          personId
-        }
-      ]
+      personRoles: role ? [{ role, personId }] : [],
+      personPrivileges:
+        permissions.length > 0
+          ? [
+              {
+                privilegeNames: transformPermissionGroupsToBusinessCustomerPrivileges(
+                  permissions,
+                  dataSources.permissions.getPermissionGroups()
+                ),
+                personId
+              }
+            ]
+          : []
     }
   }
 }
@@ -275,6 +280,24 @@ export const Mutation = {
       auditTrail,
       info,
       action: 'updated'
+    })
+
+    return dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(
+      organisationId,
+      personId,
+      body
+    )
+  },
+
+  deleteCustomerFromBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
+    // Rural Payments removes the customer from the business when the update is sent with
+    // no roles and no privileges
+    const { organisationId, personId, body } = await buildCustomerAuthorisationRequest({
+      input: { sbi: input.sbi, crn: input.crn },
+      dataSources,
+      auditTrail,
+      info,
+      action: 'deleted'
     })
 
     return dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation(

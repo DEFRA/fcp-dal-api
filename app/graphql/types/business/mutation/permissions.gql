@@ -18,12 +18,41 @@ extend type Mutation {
 
   If the supplied customer is not already linked to this business, then the customer
   is added to the business (i.e. behaves the same as addCustomerToBusiness for an unlinked customer)
+
+  An empty permissions list removes all of the customer's permissions but keeps them linked to the
+  business with the given role. To remove the customer from the business, use
+  deleteCustomerFromBusiness.
   """
   updateCustomerPermissionsAndRelationshipToBusiness(
     # shared with add; type name cannot match both mutations
     # eslint-disable-next-line @graphql-eslint/input-name
     input: CustomerPermissionsAndRelationshipToBusinessInput!
   ): CustomerPermissionsAndRelationshipToBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Removes the customer from the business, along with their role and all of their permissions on it.
+
+  If the customer is not linked to the business, the request still succeeds, so it is safe to
+  repeat.
+  """
+  deleteCustomerFromBusiness(
+    input: DeleteCustomerFromBusinessInput!
+  ): CustomerPermissionsAndRelationshipToBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+}
+
+input DeleteCustomerFromBusinessInput {
+  """
+  Single Business Identifier (SBI) of the business.
+
+  A unique 9-digit number that identifies the business.
+  """
+  sbi: ID! @validateVariable(pattern: "^[1-9][0-9]{8}$")
+
+  """
+  Customer Reference Number (CRN) of the customer. Unique 10-digit number used
+  to identify the customer.
+  """
+  crn: ID! @validateVariable(pattern: "^[1-9][0-9]{9}$")
 }
 
 input CustomerPermissionsAndRelationshipToBusinessInput {
@@ -48,7 +77,8 @@ input CustomerPermissionsAndRelationshipToBusinessInput {
   """
   The full set of permission groups and levels for the customer on the
   business. This replaces any existing permissions. Include every group
-  that should apply. An empty list removes all permissions.
+  that should apply. An empty list removes all permissions, but does not
+  remove the customer from the business (see deleteCustomerFromBusiness).
   """
   permissions: [CustomerPermissionsInput!]!
 }
