@@ -373,11 +373,9 @@ const updateCustomerPermissionsAndRelationshipToBusiness = gql`
   }
 `
 
-const deleteCustomerPermissionsAndRelationshipFromBusiness = gql`
-  mutation DeleteCustomerPermissionsAndRelationshipFromBusiness(
-    $input: CustomerPermissionsAndRelationshipToBusinessInput!
-  ) {
-    deleteCustomerPermissionsAndRelationshipFromBusiness(input: $input) {
+const deleteCustomerFromBusinessMutation = gql`
+  mutation DeleteCustomerFromBusiness($input: DeleteCustomerFromBusinessInput!) {
+    deleteCustomerFromBusiness(input: $input) {
       success
       errorString
     }
@@ -437,25 +435,15 @@ describe('customer permissions on business', () => {
     })
   })
 
-  it('removes a customer role and permissions from a business', async () => {
+  it('removes a customer from a business', async () => {
     const response = await client.request(
-      deleteCustomerPermissionsAndRelationshipFromBusiness,
-      {
-        input: {
-          sbi: customerPermissionsSbi,
-          crn: customerPermissionsCrn,
-          role: 'Business Partner',
-          permissions: [
-            { id: 'BUSINESS_DETAILS', level: 'VIEW' },
-            { id: 'LAND_DETAILS', level: 'AMEND' }
-          ]
-        }
-      },
+      deleteCustomerFromBusinessMutation,
+      { input: { sbi: customerPermissionsSbi, crn: customerPermissionsCrn } },
       headers
     )
 
     expect(response).not.toHaveProperty('errors')
-    expect(response.deleteCustomerPermissionsAndRelationshipFromBusiness).toEqual({
+    expect(response.deleteCustomerFromBusiness).toEqual({
       success: true,
       errorString: null
     })
@@ -477,10 +465,6 @@ describe('customer permissions on business', () => {
     [
       'updateCustomerPermissionsAndRelationshipToBusiness',
       updateCustomerPermissionsAndRelationshipToBusiness
-    ],
-    [
-      'deleteCustomerPermissionsAndRelationshipFromBusiness',
-      deleteCustomerPermissionsAndRelationshipFromBusiness
     ]
   ])('%s rejects a request without a role', async (_, mutation) => {
     await expect(
@@ -505,10 +489,6 @@ describe('customer permissions on business', () => {
     [
       'updateCustomerPermissionsAndRelationshipToBusiness',
       updateCustomerPermissionsAndRelationshipToBusiness
-    ],
-    [
-      'deleteCustomerPermissionsAndRelationshipFromBusiness',
-      deleteCustomerPermissionsAndRelationshipFromBusiness
     ]
   ])('%s rejects a null permission entry', async (_, mutation) => {
     await expect(

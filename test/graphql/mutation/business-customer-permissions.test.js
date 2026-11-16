@@ -28,11 +28,9 @@ const updateCustomerPermissionsMutation = `
   }
 `
 
-const deleteCustomerPermissionsMutation = `
-  mutation DeleteCustomerPermissionsAndRelationshipFromBusiness(
-    $input: CustomerPermissionsAndRelationshipToBusinessInput!
-  ) {
-    deleteCustomerPermissionsAndRelationshipFromBusiness(input: $input) {
+const deleteCustomerFromBusinessMutation = `
+  mutation DeleteCustomerFromBusiness($input: DeleteCustomerFromBusinessInput!) {
+    deleteCustomerFromBusiness(input: $input) {
       success
       errorString
     }
@@ -54,12 +52,6 @@ const mutations = [
         '/SitiAgriApi/authorisation/organisation/organisationId/authorisation/person/personId',
         body
       )
-  },
-  {
-    name: 'deleteCustomerPermissionsAndRelationshipFromBusiness',
-    query: deleteCustomerPermissionsMutation,
-    mockUpstream: (body) =>
-      v1.delete('/SitiAgriApi/authorisation/organisation/organisationId/authorisation/', body)
   }
 ]
 
@@ -72,7 +64,7 @@ const baseInput = {
 
 const expectedUpstreamBody = (privilegeNames) => ({
   personRoles: [{ role: 'Agent', personId: 'personId' }],
-  personPrivileges: [{ privilegeNames, personId: 'personId' }]
+  personPrivileges: privilegeNames.length ? [{ privilegeNames, personId: 'personId' }] : []
 })
 
 // the CRN -> personId cache write is fire-and-forget, so wait for it to land before
@@ -116,7 +108,7 @@ describe.each(mutations)('$name', ({ name, query, mockUpstream }) => {
     expect(result).toEqual({ data: { [name]: { success: true, errorString: null } } })
   })
 
-  test('accepts an empty permissions list and sends no privilege names', async () => {
+  test('accepts an empty permissions list and sends no privileges', async () => {
     mockLookups()
     mockUpstream(expectedUpstreamBody([])).reply(200, { success: true, errorString: null })
 
@@ -158,5 +150,51 @@ describe.each(mutations)('$name', ({ name, query, mockUpstream }) => {
     expect(result.data).toBeUndefined()
     expect(result.errors).toHaveLength(1)
     expect(result.errors[0].message).toMatch(expectedMessage)
+  })
+})
+
+describe('deleteCustomerFromBusiness', () => {
+  beforeEach(() => {
+    nock.disableNetConnect()
+  })
+
+  afterEach(async () => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+    await db.dropDatabase()
+  })
+
+  test('sends empty roles and privileges to the update endpoint to unlink the customer', async () => {
+    mockOrganisationSearch(v1)
+    mockPersonSearch(v1)
+    v1.put('/SitiAgriApi/authorisation/organisation/organisationId/authorisation/person/personId', {
+      personRoles: [],
+      personPrivileges: []
+    }).reply(200, { success: true, errorString: null })
+
+    const result = await makeTestQuery(
+      deleteCustomerFromBusinessMutation,
+      null,
+      true,
+      { input: { sbi: baseInput.sbi, crn: baseInput.crn } },
+      [],
+      false
+    )
+
+    await waitForPersonIdToBeCachedInMongo()
+
+    expect(nock.isDone()).toBe(true)
+    expect(result).toEqual({
+      data: { deleteCustomerFromBusiness: { success: true, errorString: null } }
+    })
+  })
+
+  test('rejects role and permissions in the input', async () => {
+    const result = await makeTestQuery(deleteCustomerFromBusinessMutation, null, true, {
+      input: baseInput
+    })
+
+    expect(result.data).toBeUndefined()
+    expect(result.errors[0].message).toMatch(/Field "role" is not defined/)
   })
 })
