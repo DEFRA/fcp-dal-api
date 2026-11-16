@@ -574,7 +574,8 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
 
   it('throws and does not submit when validation returns an unexpected status', async () => {
     // arrange
-    const requestLogger = { error: vi.fn() }
+    const logger = { error: vi.fn() }
+    dataSources.ruralPaymentsBusiness.logger = logger
     dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
       status: 'UNEXPECTED_STATUS',
       attemptsRemaining: 0
@@ -582,13 +583,9 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
 
     // act / assert
     await expect(
-      Mutation.createBusinessCustomerBankDetails(
-        {},
-        { input: baseInput },
-        { dataSources, requestLogger }
-      )
+      Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
     ).rejects.toThrow('Internal Server Error')
-    expect(requestLogger.error).toHaveBeenCalledWith(
+    expect(logger.error).toHaveBeenCalledWith(
       'Unexpected bank change validation status',
       expect.objectContaining({ status: 'UNEXPECTED_STATUS' })
     )
@@ -867,9 +864,10 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     })
   })
 
-  it('throws when validation returns an unexpected status, logging it on the request logger', async () => {
+  it('throws when validation returns an unexpected status, logging it on the data source logger', async () => {
     // arrange
-    const requestLogger = { error: vi.fn() }
+    const logger = { error: vi.fn() }
+    dataSources.ruralPaymentsBusiness.logger = logger
     dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
       status: 'UNEXPECTED_STATUS',
       attemptsRemaining: 0
@@ -877,13 +875,9 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
 
     // act / assert
     await expect(
-      Mutation.validateBusinessCustomerBankDetails(
-        {},
-        { input: baseInput },
-        { dataSources, requestLogger }
-      )
+      Mutation.validateBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
     ).rejects.toThrow('Internal Server Error')
-    expect(requestLogger.error).toHaveBeenCalledWith('Unexpected bank change validation status', {
+    expect(logger.error).toHaveBeenCalledWith('Unexpected bank change validation status', {
       status: 'UNEXPECTED_STATUS',
       code: 'RURALPAYMENTS_API_ERROR_001'
     })

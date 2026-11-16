@@ -74,7 +74,7 @@ const buildCustomerAuthorisationRequest = async ({
   }
 }
 
-const validateBankChangeRequest = async (input, dataSources, organisation, requestLogger) => {
+const validateBankChangeRequest = async (input, dataSources, organisation) => {
   const { crn } = input
   const { ruralPaymentsBusiness } = dataSources
 
@@ -132,7 +132,8 @@ const validateBankChangeRequest = async (input, dataSources, organisation, reque
   }
 
   if (validation.status !== 'MATCH' && validation.status !== 'PARTIAL_MATCH') {
-    requestLogger.error('Unexpected bank change validation status', {
+    // the data source logger is the request logger, so this line carries the trace id
+    ruralPaymentsBusiness.logger.error('Unexpected bank change validation status', {
       status: validation.status,
       code: RURALPAYMENTS_API_ERROR_001
     })
@@ -168,12 +169,7 @@ export const Mutation = {
     }
     return { success: true, business }
   },
-  createBusinessCustomerBankDetails: async (
-    _,
-    { input },
-    { dataSources, auditTrail, requestLogger },
-    info
-  ) => {
+  createBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
     try {
@@ -192,8 +188,7 @@ export const Mutation = {
     const { failure, submission } = await validateBankChangeRequest(
       input,
       dataSources,
-      organisation,
-      requestLogger
+      organisation
     )
     if (failure) {
       return failure
@@ -202,12 +197,7 @@ export const Mutation = {
     await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
     return { __typename: 'BankDetailsSubmitted', success: true }
   },
-  validateBusinessCustomerBankDetails: async (
-    _,
-    { input },
-    { dataSources, auditTrail, requestLogger },
-    info
-  ) => {
+  validateBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
     try {
@@ -226,8 +216,7 @@ export const Mutation = {
     const { failure, validation } = await validateBankChangeRequest(
       input,
       dataSources,
-      organisation,
-      requestLogger
+      organisation
     )
     if (failure) {
       return failure
