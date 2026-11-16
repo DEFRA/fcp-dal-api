@@ -41,8 +41,12 @@ const REDACTED = '[REDACTED]'
 // When a resolver returns a value a leaf type cannot serialize, graphql-js echoes it into the
 // message, e.g. 'Int cannot represent non-integer value: "abc"' or 'Enum "Status" cannot represent
 // value: "FOO"'. The value comes from the upstream response so could be PII; strip it but keep the
-// reason
-const SERIALIZE_ERROR = /(cannot represent [^:]*value): .*$/s
+// reason.
+// The pattern is anchored to the start of the message, where graphql-js always puts the type
+// name, so the engine makes a single linear attempt. Unanchored, it retried from every
+// 'cannot represent ' in the message, which is quadratic when a client puts that text into a
+// message that echoes their input (e.g. validateDateInput's).
+const SERIALIZE_ERROR = /^((?:\w+|Enum "\w+") cannot represent [^:]*value): .*$/s
 
 /**
  * Remove the value from a leaf serialization error message so it is safe to log.

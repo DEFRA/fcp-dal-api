@@ -273,5 +273,18 @@ describe('errorLoggingPlugin', () => {
         redactMessage(new BadRequest('Defra ID token is not valid for the provided SBI'))
       ).toBe('Defra ID token is not valid for the provided SBI')
     })
+
+    test('only redacts serialization errors, not client input that contains the same words', () => {
+      const message = 'Invalid date format: "cannot represent value: x" is not a valid date.'
+      expect(redactMessage(new BadRequest(message))).toBe(message)
+    })
+
+    test('redacts in linear time when the message repeats "cannot represent"', () => {
+      const repeated = 'cannot represent '.repeat(50_000)
+      const start = performance.now()
+      redactMessage(new BadRequest(`Invalid date format: "${repeated}" is not a valid date.`))
+      redactMessage(new BadRequest(`String cannot represent ${repeated}`))
+      expect(performance.now() - start).toBeLessThan(500)
+    })
   })
 })
