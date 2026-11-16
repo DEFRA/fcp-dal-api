@@ -1,7 +1,6 @@
 import StatusCodes from 'http-status-codes'
 import { HttpError, NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_ERROR_001 } from '../../../logger/codes.js'
-import { logger } from '../../../logger/logger.js'
 import {
   transformBankChangeInputToSubmission,
   transformBusinessDetailsToOrgDetailsCreate,
@@ -75,7 +74,7 @@ const buildCustomerAuthorisationRequest = async ({
   }
 }
 
-const validateBankChangeRequest = async (input, dataSources, organisation) => {
+const validateBankChangeRequest = async (input, dataSources, organisation, requestLogger) => {
   const { crn } = input
   const { ruralPaymentsBusiness } = dataSources
 
@@ -133,7 +132,7 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
   }
 
   if (validation.status !== 'MATCH' && validation.status !== 'PARTIAL_MATCH') {
-    logger.error('Unexpected bank change validation status', {
+    requestLogger.error('Unexpected bank change validation status', {
       status: validation.status,
       code: RURALPAYMENTS_API_ERROR_001
     })
@@ -169,7 +168,12 @@ export const Mutation = {
     }
     return { success: true, business }
   },
-  createBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
+  createBusinessCustomerBankDetails: async (
+    _,
+    { input },
+    { dataSources, auditTrail, requestLogger },
+    info
+  ) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
     try {
@@ -188,7 +192,8 @@ export const Mutation = {
     const { failure, submission } = await validateBankChangeRequest(
       input,
       dataSources,
-      organisation
+      organisation,
+      requestLogger
     )
     if (failure) {
       return failure
@@ -197,7 +202,12 @@ export const Mutation = {
     await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
     return { __typename: 'BankDetailsSubmitted', success: true }
   },
-  validateBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
+  validateBusinessCustomerBankDetails: async (
+    _,
+    { input },
+    { dataSources, auditTrail, requestLogger },
+    info
+  ) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
     try {
@@ -216,7 +226,8 @@ export const Mutation = {
     const { failure, validation } = await validateBankChangeRequest(
       input,
       dataSources,
-      organisation
+      organisation,
+      requestLogger
     )
     if (failure) {
       return failure

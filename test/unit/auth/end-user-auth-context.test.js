@@ -16,14 +16,19 @@ describe('endUserAuthContext', () => {
   })
 
   test('returns auth headers extracted from the request, logging the conflicting email/external-auth headers', () => {
+    // arrange
     const request = {
+      traceId: 'trace-123',
       headers: {
         email: 'user@example.com',
         'x-forwarded-authorization': 'token123'
       }
     }
 
+    // act
     const result = endUserAuthContext(request)
+
+    // assert
 
     expect(result).toEqual({
       upstreamEmailHeader: 'user@example.com',
@@ -33,7 +38,7 @@ describe('endUserAuthContext', () => {
     })
     expect(loggerErrorSpy).toHaveBeenCalledWith(
       '#DAL - Request authentication - conflicting auth headers',
-      expect.objectContaining({ code: DAL_REQUEST_AUTHENTICATION_001 })
+      expect.objectContaining({ code: DAL_REQUEST_AUTHENTICATION_001, traceId: 'trace-123' })
     )
   })
 
