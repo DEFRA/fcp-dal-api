@@ -28,7 +28,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
 
     if (!organisationResponse?._data?.id) {
       this.logger.warn(
-        '#datasource - Rural payments - organisation not found for organisation ID',
+        `#datasource - Rural payments - organisation not found for organisation ID: ${organisationId}`,
         { organisationId, code: RURALPAYMENTS_API_NOT_FOUND_001 }
       )
       throw new NotFound('Rural payments organisation not found')

@@ -24,6 +24,7 @@ export const endUserAuthContext = (request) => {
   if (externalAuthHeader && emailHeader) {
     logger.error('#DAL - Request authentication - conflicting auth headers', {
       code: DAL_REQUEST_AUTHENTICATION_001,
+      traceId: request.traceId,
       message: 'Both email and x-forwarded-authorization headers were supplied on the same request'
     })
   }

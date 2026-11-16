@@ -1,7 +1,6 @@
 import StatusCodes from 'http-status-codes'
 import { HttpError, NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_ERROR_001 } from '../../../logger/codes.js'
-import { logger } from '../../../logger/logger.js'
 import {
   transformBankChangeInputToSubmission,
   transformBusinessDetailsToOrgDetailsCreate,
@@ -133,7 +132,8 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
   }
 
   if (validation.status !== 'MATCH' && validation.status !== 'PARTIAL_MATCH') {
-    logger.error('Unexpected bank change validation status', {
+    // the data source logger is the request logger, so this line carries the trace id
+    ruralPaymentsBusiness.logger.error('Unexpected bank change validation status', {
       status: validation.status,
       code: RURALPAYMENTS_API_ERROR_001
     })

@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => {
   const mockApolloPluginLandingPage = vi.fn()
   const mockAuditPlugin = vi.fn()
   const mockErrorLoggingPlugin = vi.fn()
+  const mockErrorCodesPlugin = vi.fn()
 
   return {
     mockApolloServer,
@@ -14,6 +15,7 @@ const mocks = vi.hoisted(() => {
     mockApolloPluginLandingPage,
     mockAuditPlugin,
     mockErrorLoggingPlugin,
+    mockErrorCodesPlugin,
     mockApolloModule: { ApolloServer: mockApolloServer },
     mockApolloPluginDisabledModule: {
       ApolloServerPluginLandingPageDisabled: mockApolloPluginDisabled
@@ -33,6 +35,9 @@ vi.mock('../../../app/graphql/plugins/audit.js', () => ({
 }))
 vi.mock('../../../app/graphql/plugins/error-logging.js', () => ({
   errorLoggingPlugin: mocks.mockErrorLoggingPlugin
+}))
+vi.mock('../../../app/graphql/plugins/error-codes.js', () => ({
+  errorCodesPlugin: mocks.mockErrorCodesPlugin
 }))
 
 describe('GraphQL Dashboard test with mocks', () => {
@@ -60,7 +65,8 @@ describe('GraphQL Dashboard test with mocks', () => {
       plugins: [
         mocks.mockApolloPluginDisabled(),
         mocks.mockAuditPlugin(),
-        mocks.mockErrorLoggingPlugin()
+        mocks.mockErrorLoggingPlugin(),
+        mocks.mockErrorCodesPlugin()
       ],
       introspection: false,
       formatError: expect.any(Function)
@@ -90,7 +96,8 @@ describe('GraphQL Dashboard test with mocks', () => {
       plugins: [
         mocks.mockApolloPluginLandingPage(),
         mocks.mockAuditPlugin(),
-        mocks.mockErrorLoggingPlugin()
+        mocks.mockErrorLoggingPlugin(),
+        mocks.mockErrorCodesPlugin()
       ],
       introspection: true,
       formatError: expect.any(Function)
