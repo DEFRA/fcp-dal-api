@@ -1,4 +1,5 @@
 import convict from 'convict'
+import { parseDummyCrnToSbiMapping } from './auth/dummy-crn-to-sbi-mapping.js'
 
 export const cdpEnvironments = ['dev', 'test', 'ext-test', 'perf-test', 'prod']
 const entityConfig = {
@@ -186,6 +187,19 @@ export const config = convict({
       default: null,
       nullable: process.env.DISABLE_AUTH === 'true',
       env: 'DEFRA_ID_TIMEOUT_MS'
+    },
+    dummyCrnToSbiMapping: {
+      doc:
+        'DEV/TEST ONLY. Maps dummy Defra ID CRNs to the SBIs they may access, as a comma separated ' +
+        'list of "crn:sbi|sbi" entries. Mapped requests are routed internally as the DAL service ' +
+        'account, may only access the listed businesses and cannot use customer functions.',
+      format: (value) => {
+        parseDummyCrnToSbiMapping(value)
+      },
+      default: null,
+      nullable: true,
+      sensitive: true,
+      env: 'DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING'
     }
   },
   auth: {
@@ -426,6 +440,24 @@ export const config = convict({
 })
 
 config.validate({ allowed: 'strict' })
+
+export const dummyCrnToSbiMappingEnvironments = ['dev', 'test']
+
+// The dummy CRN to SBI mapping lets an unverified Defra ID token access real businesses, so it must
+// never be configured outside dev/test (an unset ENVIRONMENT means local runs and unit tests)
+if (
+  config.get('defraId.dummyCrnToSbiMapping') &&
+  config.get('cdp.env') &&
+  !dummyCrnToSbiMappingEnvironments.includes(config.get('cdp.env'))
+) {
+  throw new Error(
+    `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING must not be set in the ${config.get('cdp.env')} environment`
+  )
+}
+
+export const dummyCrnToSbiMapping = parseDummyCrnToSbiMapping(
+  config.get('defraId.dummyCrnToSbiMapping')
+)
 
 // add authorised entities where configuration exists
 export const authorisedEntities = Object.values(config.get('auth.entities')).reduce(

@@ -30,6 +30,7 @@ describe('config', () => {
     delete process.env.OIDC_JWKS_URI
     delete process.env.DEFRA_ID_WELL_KNOWN_URL
     delete process.env.DEFRA_ID_TIMEOUT_MS
+    delete process.env.DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING
   })
 
   it('should have default values when optional env vars are unset', async () => {
@@ -348,6 +349,54 @@ describe('config', () => {
       )
     })
   })
+})
+
+describe('dummy Defra ID CRN to SBI mapping', () => {
+  afterAll(() => {
+    process.env = existingEnvVars
+  })
+
+  beforeEach(() => {
+    process.env.DISABLE_AUTH = 'true'
+    process.env.KITS_DISABLE_MTLS = 'true'
+    process.env.HITACHI_DISABLE_AUTH = 'true'
+    process.env.HTTPS_PROXY = 'some-proxy'
+    delete process.env.ENVIRONMENT
+    delete process.env.DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING
+  })
+
+  it('is empty when unset', async () => {
+    const { dummyCrnToSbiMapping } = await loadFreshConfig()
+    expect(dummyCrnToSbiMapping).toEqual(new Map())
+  })
+
+  it('rejects a malformed value at startup', async () => {
+    process.env.DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING = 'not-a-mapping'
+    await expect(loadFreshConfig()).rejects.toThrow(/defraId.dummyCrnToSbiMapping/)
+  })
+
+  it.each([undefined, 'dev', 'test'])('is allowed when ENVIRONMENT is %s', async (environment) => {
+    if (environment) {
+      process.env.ENVIRONMENT = environment
+    }
+    process.env.DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING = '9100000001:810000000'
+
+    const { dummyCrnToSbiMapping } = await loadFreshConfig()
+
+    expect(dummyCrnToSbiMapping).toEqual(new Map([['9100000001', new Set(['810000000'])]]))
+  })
+
+  it.each(['ext-test', 'perf-test', 'prod'])(
+    'prevents startup when ENVIRONMENT is %s',
+    async (environment) => {
+      process.env.ENVIRONMENT = environment
+      process.env.DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING = '9100000001:810000000'
+
+      await expect(loadFreshConfig()).rejects.toThrow(
+        `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING must not be set in the ${environment} environment`
+      )
+    }
+  )
 })
 
 describe('decodeBase64Config', () => {
