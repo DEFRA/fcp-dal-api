@@ -77,11 +77,11 @@ describe('errorCodesPlugin', () => {
 
   test('never records the error message, which can repeat a value the caller sent', async () => {
     // arrange / act
-    const request = await run('query ($sbi: Int!) { echo(sbi: $sbi) }', { sbi: '107183280' })
+    const request = await run('query ($sbi: Int!) { echo(sbi: $sbi) }', { sbi: '812345678' })
 
     // assert
     expect(request.graphqlErrorCodes).toEqual(['BAD_USER_INPUT'])
-    expect(JSON.stringify(request)).not.toContain('107183280')
+    expect(JSON.stringify(request)).not.toContain('812345678')
   })
 
   test('does not throw when the request has no context (context creation failed)', async () => {

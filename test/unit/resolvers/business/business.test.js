@@ -394,13 +394,13 @@ describe('Business', () => {
     // act
     await Business.customer(
       mockBusiness,
-      { crn: '1234567890' },
+      { crn: '9123456789' },
       { dataSources, requestLogger }
     ).catch(() => {})
 
     // assert
     expect(requestLogger.warn).toHaveBeenCalledWith(
-      'Could not find customer in business (organisation ID: mockId, CRN: ******7890)',
+      'Could not find customer in business (organisation ID: mockId, CRN: ******6789)',
       expect.objectContaining({ code: 'RURALPAYMENTS_API_NOT_FOUND_001' })
     )
   })
@@ -412,14 +412,14 @@ describe('Business', () => {
     // act
     await Business.customer(
       mockBusiness,
-      { crn: '1234567890' },
+      { crn: '9123456789' },
       { dataSources, requestLogger }
     ).catch(() => {})
 
     // assert
     const logged = JSON.stringify(requestLogger.warn.mock.calls)
     expect(logged).not.toContain('mockSbi')
-    expect(logged).not.toContain('1234567890')
+    expect(logged).not.toContain('9123456789')
   })
 
   it('countyParishHoldings', async () => {
