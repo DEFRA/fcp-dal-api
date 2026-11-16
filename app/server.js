@@ -82,6 +82,13 @@ const buildAccessLogTenant = (request) => {
   return Object.keys(tenant).length ? { tenant } : {}
 }
 
+// A graphql request can fail and still answer with a 200, so the status code alone does not show
+// that it went wrong. The error codes are left on the request by the errorCodesPlugin.
+const buildAccessLogReason = (request) =>
+  request.graphqlErrorCodes?.length
+    ? { reason: `graphql errors: ${request.graphqlErrorCodes.join(', ')}` }
+    : {}
+
 server.events.on('response', function (request) {
   // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
   // response is never fully written (e.g. the client disconnects mid-response).
@@ -115,6 +122,7 @@ server.events.on('response', function (request) {
       response: {
         statusCode: request.response.statusCode
       },
+      ...buildAccessLogReason(request),
       ...buildAccessLogTenant(request)
     })
   }

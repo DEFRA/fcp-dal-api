@@ -156,6 +156,32 @@ describe('Server config and startup', () => {
       )
     })
 
+    test('response event logs the graphql error codes as the reason, when the request had errors', async () => {
+      // arrange
+      server.ext('onRequest', (request, h) => {
+        request.graphqlErrorCodes = ['NOT FOUND', 'FORBIDDEN']
+        return h.continue
+      })
+
+      // act
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      // assert
+      expect(mockLogger.logger.info).toHaveBeenCalledWith(
+        'FCP - Access log',
+        expect.objectContaining({ reason: 'graphql errors: NOT FOUND, FORBIDDEN' })
+      )
+    })
+
+    test('response event omits the reason when the request had no graphql errors', async () => {
+      // arrange / act
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      // assert
+      const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload).not.toHaveProperty('reason')
+    })
+
     test('response event omits tenant when the request has no requesting service', async () => {
       await server.inject({ method: 'GET', url: '/non-health' })
 
