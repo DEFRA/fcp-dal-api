@@ -24,6 +24,15 @@ extend type Mutation {
     # eslint-disable-next-line @graphql-eslint/input-name
     input: CustomerPermissionsAndRelationshipToBusinessInput!
   ): CustomerPermissionsAndRelationshipToBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Deletes a person roles or privileges specified in the body inside a business.
+  """
+  deleteCustomerPermissionsAndRelationshipFromBusiness(
+    # shared with add and update; type name cannot match more than one mutation
+    # eslint-disable-next-line @graphql-eslint/input-name
+    input: CustomerPermissionsAndRelationshipToBusinessInput!
+  ): CustomerPermissionsAndRelationshipToBusinessResponse @auth(requires: [SINGLE_FRONT_DOOR])
 }
 
 input CustomerPermissionsAndRelationshipToBusinessInput {

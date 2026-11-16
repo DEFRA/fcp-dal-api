@@ -28,6 +28,17 @@ const updateCustomerPermissionsMutation = `
   }
 `
 
+const deleteCustomerPermissionsMutation = `
+  mutation DeleteCustomerPermissionsAndRelationshipFromBusiness(
+    $input: CustomerPermissionsAndRelationshipToBusinessInput!
+  ) {
+    deleteCustomerPermissionsAndRelationshipFromBusiness(input: $input) {
+      success
+      errorString
+    }
+  }
+`
+
 const mutations = [
   {
     name: 'addCustomerToBusiness',
@@ -43,6 +54,12 @@ const mutations = [
         '/SitiAgriApi/authorisation/organisation/organisationId/authorisation/person/personId',
         body
       )
+  },
+  {
+    name: 'deleteCustomerPermissionsAndRelationshipFromBusiness',
+    query: deleteCustomerPermissionsMutation,
+    mockUpstream: (body) =>
+      v1.delete('/SitiAgriApi/authorisation/organisation/organisationId/authorisation/', body)
   }
 ]
 
