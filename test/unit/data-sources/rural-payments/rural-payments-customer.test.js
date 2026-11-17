@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { RuralPaymentsCustomer } from '../../../../app/data-sources/rural-payments/RuralPaymentsCustomer.js'
-import { BadRequest, Forbidden, NotFound } from '../../../../app/errors/graphql.js'
+import { BadRequest, Forbidden, HttpError, NotFound } from '../../../../app/errors/graphql.js'
 
 describe('Rural Payments Customer', () => {
   const logger = {
@@ -51,6 +51,43 @@ describe('Rural Payments Customer', () => {
     expect(httpPost).toHaveBeenCalledWith('person/create', {
       body: { email: 'test@test.test' },
       headers: { 'Content-Type': 'application/json' }
+    })
+  })
+
+  describe('checkPersonDuplicates', () => {
+    const request = {
+      id: null,
+      firstName: 'Jon',
+      lastName: 'Doe',
+      dateOfBirth: 0,
+      landline: null,
+      mobile: '07123456789'
+    }
+
+    test('should post the request and return the matching person', async () => {
+      const duplicate = { id: 123, customerReferenceNumber: '9123456789' }
+      httpPost.mockImplementationOnce(async () => ({ _data: duplicate }))
+
+      const result = await ruralPaymentsCustomer.checkPersonDuplicates(request)
+
+      expect(result).toEqual(duplicate)
+      expect(httpPost).toHaveBeenCalledWith('person/check/duplicates', {
+        body: request,
+        headers: { 'Content-Type': 'application/json' }
+      })
+    })
+
+    test('should return null when upstream returns no data', async () => {
+      httpPost.mockImplementationOnce(async () => ({ _data: null }))
+
+      expect(await ruralPaymentsCustomer.checkPersonDuplicates(request)).toBeNull()
+    })
+
+    test('should rethrow an upstream error', async () => {
+      const error = new HttpError(500)
+      httpPost.mockRejectedValueOnce(error)
+
+      await expect(ruralPaymentsCustomer.checkPersonDuplicates(request)).rejects.toBe(error)
     })
   })
 

@@ -21,4 +21,66 @@ extend type Query {
   in use by another customer will not be reported as registered.
   """
   isCustomerEmailRegistered(email: String!): Boolean! @auth(requires: [SINGLE_FRONT_DOOR])
+
+  """
+  Check whether a customer matching the supplied details already exists, e.g. before creating a
+  new customer. Upstream matches on first name, last name, date of birth, mobile and landline,
+  ignoring deactivated customers. Returns the matching customer, or null if there is no match.
+  """
+  customerDuplicate(input: CustomerDuplicateInput!): CustomerDuplicate
+    @auth(requires: [SINGLE_FRONT_DOOR], userType: [INTERNAL])
+}
+
+input CustomerDuplicateInput {
+  """
+  Customer Reference Number (CRN) of a customer to leave out of the check, e.g. the customer being
+  updated, so that they are not reported as a duplicate of themselves.
+  """
+  crn: ID @validateVariable(pattern: "^[1-9][0-9]{9}$")
+  """
+  First name of the customer.
+  """
+  first: String! @validateVariable(pattern: "^.{1,100}$")
+  """
+  Last name of the customer.
+  """
+  last: String! @validateVariable(pattern: "^.{1,100}$")
+  """
+  Date of birth of the customer (YYYY-MM-DD).
+  """
+  dateOfBirth: Date
+  """
+  Telephone number of the customer.
+  """
+  phone: PhoneInput
+}
+
+"""
+An existing customer that matches the details supplied to `customerDuplicate`.
+"""
+type CustomerDuplicate {
+  """
+  Customer Reference Number (CRN) of the matching customer.
+  """
+  crn: ID!
+  """
+  Rural payments ID of the matching customer.
+  """
+  personId: ID!
+  """
+  First name of the matching customer.
+  """
+  first: String
+  """
+  Last name of the matching customer.
+  """
+  last: String
+  """
+  Date of birth of the matching customer (YYYY-MM-DD).
+  """
+  dateOfBirth: Date
+  """
+  Telephone number of the matching customer.
+  """
+  phone: Phone
 }

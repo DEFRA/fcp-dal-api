@@ -4,7 +4,9 @@ import {
   ruralPaymentsPortalCustomerTransformer,
   transformBusinessCustomerToCustomerPermissionGroups,
   transformBusinessCustomerToCustomerRole,
+  transformCustomerDuplicateInputToPersonDuplicateRequest,
   transformCustomerUpdateInputToPersonUpdate,
+  transformPersonDuplicateToCustomerDuplicate,
   transformPersonSearchResult,
   transformPersonSummaryToCustomerAuthorisedBusinesses
 } from '../../../../app/transformers/rural-payments/customer.js'
@@ -836,6 +838,99 @@ describe('Customer transformer', () => {
         email: undefined,
         status: { locked: false, deactivated: false, confirmed: false }
       })
+    })
+  })
+
+  describe('#transformCustomerDuplicateInputToPersonDuplicateRequest', () => {
+    it('maps the input and person ID to the upstream request', () => {
+      expect(
+        transformCustomerDuplicateInputToPersonDuplicateRequest(
+          {
+            crn: '9123456789',
+            first: 'Jon',
+            last: 'Doe',
+            dateOfBirth: '1980-06-10',
+            phone: { mobile: '07123456789', landline: '01234567890' }
+          },
+          123
+        )
+      ).toEqual({
+        id: 123,
+        firstName: 'Jon',
+        lastName: 'Doe',
+        dateOfBirth: Date.UTC(1980, 5, 10),
+        landline: '01234567890',
+        mobile: '07123456789'
+      })
+    })
+
+    it('sends null for a missing person ID, date of birth and phone numbers', () => {
+      expect(
+        transformCustomerDuplicateInputToPersonDuplicateRequest({ first: 'Jon', last: 'Doe' })
+      ).toEqual({
+        id: null,
+        firstName: 'Jon',
+        lastName: 'Doe',
+        dateOfBirth: null,
+        landline: null,
+        mobile: null
+      })
+    })
+
+    it('treats blank phone numbers as missing', () => {
+      expect(
+        transformCustomerDuplicateInputToPersonDuplicateRequest({
+          first: 'Jon',
+          last: 'Doe',
+          phone: { mobile: '', landline: '  ' }
+        })
+      ).toMatchObject({ landline: null, mobile: null })
+    })
+
+    it('throws a BadRequest for an invalid date of birth', () => {
+      expect(() =>
+        transformCustomerDuplicateInputToPersonDuplicateRequest({
+          first: 'Jon',
+          last: 'Doe',
+          dateOfBirth: 'not-a-date'
+        })
+      ).toThrow('Invalid date format')
+    })
+  })
+
+  describe('#transformPersonDuplicateToCustomerDuplicate', () => {
+    const oneHour = 60 * 60 * 1000
+
+    it('maps the upstream duplicate to a CustomerDuplicate', () => {
+      expect(
+        transformPersonDuplicateToCustomerDuplicate({
+          id: 123,
+          customerReferenceNumber: '9123456789',
+          firstName: 'Jon',
+          lastName: 'Doe',
+          // upstream dates of birth can be off midnight UTC, e.g. midnight BST
+          dateOfBirth: Date.UTC(1980, 5, 10) - oneHour,
+          landline: null,
+          mobile: '07123456789'
+        })
+      ).toEqual({
+        crn: '9123456789',
+        personId: '123',
+        first: 'Jon',
+        last: 'Doe',
+        dateOfBirth: '1980-06-10',
+        phone: { mobile: '07123456789', landline: null }
+      })
+    })
+
+    it('returns a null date of birth when upstream has none', () => {
+      expect(
+        transformPersonDuplicateToCustomerDuplicate({
+          id: 123,
+          customerReferenceNumber: '9123456789',
+          dateOfBirth: null
+        }).dateOfBirth
+      ).toBeNull()
     })
   })
 })
