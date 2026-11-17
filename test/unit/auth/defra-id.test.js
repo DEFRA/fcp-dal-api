@@ -348,6 +348,28 @@ describe('defraIdContext', () => {
       )
     })
 
+    // an unsigned (alg: none) JWT, i.e. `header.payload.` with an empty signature
+    const unsignedToken = (payload) => {
+      const encode = (part) => Buffer.from(JSON.stringify(part)).toString('base64url')
+      return `${encode({ alg: 'none', typ: 'JWT' })}.${encode(payload)}.`
+    }
+
+    test('maps an unsigned token with a dummy CRN', async () => {
+      const jwks = jwksDataSource()
+
+      const ctx = await mappedContext(unsignedToken({ contactId: '9100000001' }), jwks)
+
+      expect(ctx.isMapped).toBe(true)
+      expect(ctx.dummyCrn).toBe('9100000001')
+      expect(jwks.getPublicKey).not.toHaveBeenCalled()
+    })
+
+    test('rejects an unsigned token whose CRN is not mapped', async () => {
+      await expect(mappedContext(unsignedToken({ contactId: '11111111' }))).rejects.toThrow(
+        new Unauthorized('Defra ID token failed verification')
+      )
+    })
+
     test('maps a numeric contactId', async () => {
       const ctx = await mappedContext(signToken({ contactId: 9100000001 }))
 

@@ -56,7 +56,7 @@ async function buildContext(request) {
   ]
 
   // A mapped Defra ID token has no real customer behind it and will be refused by
-  // the upstream service on the external route.  Instead, every Rural Payments request  will be
+  // the upstream service on the external route.  Instead, every Rural Payments request will be
   // routed to the internal gateway using the DAL service account.  The mapped context restricts
   // which businesses can be accessed
   const datasourceOptions = defraIdCtx?.isMapped
