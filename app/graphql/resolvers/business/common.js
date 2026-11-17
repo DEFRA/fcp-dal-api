@@ -175,7 +175,11 @@ async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
 }
 
 export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
-  if (defraIdContext) {
+  if (defraIdContext?.isMapped) {
+    // A mapped Defra ID token contains no org id.  Check that the SBI is one of the mapped SBIs,
+    // then drop down to the mongo step for the org id lookup.
+    defraIdContext.assertSbiAllowed(sbi)
+  } else if (defraIdContext) {
     // A defraIdContext is only built for externally authenticated requests, in which case the org
     // id can be retrieved directly from the token
     return defraIdContext.orgId(sbi)

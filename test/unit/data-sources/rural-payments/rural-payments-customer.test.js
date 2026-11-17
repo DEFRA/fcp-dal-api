@@ -644,4 +644,42 @@ describe('Rural Payments Customer', () => {
       })
     })
   })
+
+  describe('mapped Defra ID token', () => {
+    const ruralPaymentsCustomerMapped = new RuralPaymentsCustomer(
+      { logger },
+      {
+        request: {
+          headers: {
+            'x-forwarded-authorization': 'the-defra-id-token',
+            'service-account': 'dal-service-account@example.com'
+          }
+        },
+        defraIdContext: { isMapped: true }
+      }
+    )
+    const forbidden = new Forbidden(
+      'Customer functions are not available for a mapped Defra ID token'
+    )
+
+    test('refuses every customer request before it is sent', async () => {
+      const httpFetch = vi
+        .spyOn(ruralPaymentsCustomerMapped.httpCache, 'httpFetch')
+        .mockRejectedValue(new Error('unexpected HTTP call'))
+
+      await expect(ruralPaymentsCustomerMapped.getCustomerByCRN('9234567890')).rejects.toEqual(
+        forbidden
+      )
+      await expect(ruralPaymentsCustomerMapped.getPersonByPersonId('5007136')).rejects.toEqual(
+        forbidden
+      )
+      expect(httpFetch).not.toHaveBeenCalled()
+    })
+
+    test('does not refuse requests for an unmapped context', async () => {
+      await expect(
+        ruralPaymentsCustomer.addAuthentication({ headers: {} })
+      ).resolves.toBeUndefined()
+    })
+  })
 })

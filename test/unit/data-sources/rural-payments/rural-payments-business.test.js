@@ -296,6 +296,49 @@ describe('Rural Payments Business', () => {
       expect(result).toEqual('123')
     })
 
+    describe('mapped Defra ID token', () => {
+      const assertSbiAllowed = vi.fn((sbi) => {
+        if (sbi !== '810000000') {
+          throw new BadRequest('Defra ID token is not valid for the provided SBI')
+        }
+      })
+      const ruralPaymentsBusinessMapped = new RuralPaymentsBusiness(
+        { logger },
+        {
+          request: {
+            headers: {
+              'x-forwarded-authorization': 'the-defra-id-token',
+              'service-account': 'dal-service-account@example.com'
+            }
+          },
+          defraIdContext: { isMapped: true, assertSbiAllowed }
+        }
+      )
+      const mappedPost = vi.spyOn(ruralPaymentsBusinessMapped, 'post')
+
+      test('routes internally as the DAL service account', () => {
+        expect(ruralPaymentsBusinessMapped.isExternalRoute()).toBe(false)
+        expect(ruralPaymentsBusinessMapped.gatewayType).toBe('rural-payments-dal-service-account')
+      })
+
+      test('searches for a mapped SBI', async () => {
+        mappedPost.mockResolvedValueOnce({ _data: [{ id: 123 }] })
+
+        const result = await ruralPaymentsBusinessMapped.getOrganisationIdBySBI('810000000')
+
+        expect(result).toEqual(123)
+        expect(assertSbiAllowed).toHaveBeenCalledWith('810000000')
+        expect(mappedPost).toHaveBeenCalledWith('organisation/search', expect.anything())
+      })
+
+      test('refuses an SBI that is not mapped, without searching', async () => {
+        await expect(ruralPaymentsBusinessMapped.getOrganisationBySBI('823456789')).rejects.toEqual(
+          new BadRequest('Defra ID token is not valid for the provided SBI')
+        )
+        expect(mappedPost).not.toHaveBeenCalled()
+      })
+    })
+
     test('should throw NotFound when organisation not found by SBI', async () => {
       httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 

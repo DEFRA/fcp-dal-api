@@ -86,6 +86,10 @@ export class RuralPaymentsBusiness extends RuralPayments {
     if (this.isExternalRoute()) {
       return this.defraIdContext.orgId(sbi)
     }
+    if (this.defraIdContext?.isMapped) {
+      // a mapped Defra ID token may only access its mapped SBIs
+      this.defraIdContext.assertSbiAllowed(sbi)
+    }
     return (await this.organisationSearchBySbi(sbi)).id
   }
 

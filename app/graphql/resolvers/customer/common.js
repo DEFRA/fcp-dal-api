@@ -1,3 +1,5 @@
+import { MAPPED_CUSTOMER_FUNCTIONS_MESSAGE } from '../../../auth/dummy-defra-id.js'
+import { Forbidden } from '../../../errors/graphql.js'
 import { MONGO_DB_ERROR_001 } from '../../../logger/codes.js'
 import { maskAllButLastFour } from '../../../logger/utils.js'
 
@@ -22,6 +24,10 @@ export async function upsertPersonIdByCRN(crn, { mongoCustomer, ruralPaymentsCus
 }
 
 export const retrievePersonIdByCRN = async (crn, { mongoCustomer, ruralPaymentsCustomer }) => {
+  // Checked before the mongo cache, which would otherwise skip the datasource's own check
+  if (ruralPaymentsCustomer.defraIdContext?.isMapped) {
+    throw new Forbidden(MAPPED_CUSTOMER_FUNCTIONS_MESSAGE)
+  }
   try {
     return (
       (await mongoCustomer.findPersonIdByCRN(crn)) ?? // check the mongo cache first

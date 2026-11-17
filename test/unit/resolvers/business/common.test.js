@@ -58,6 +58,45 @@ describe('retrieveOrgIdBySbi', () => {
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
   })
+
+  describe('with a mapped Defra ID token', () => {
+    const defraIdContext = {
+      isMapped: true,
+      assertSbiAllowed: vi.fn((sbi) => {
+        if (sbi !== '810000000') {
+          throw new BadRequest('Defra ID token is not valid for the provided SBI')
+        }
+      })
+    }
+
+    it('returns the cached orgId from mongo for a mapped SBI', async () => {
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('cachedOrgId')
+
+      const result = await retrieveOrgIdBySbi('810000000', { dataSources, defraIdContext })
+
+      expect(result).toBe('cachedOrgId')
+      expect(defraIdContext.assertSbiAllowed).toHaveBeenCalledWith('810000000')
+    })
+
+    it('falls back to upstream on a cache miss for a mapped SBI', async () => {
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(undefined)
+      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('upstreamOrgId')
+
+      const result = await retrieveOrgIdBySbi('810000000', { dataSources, defraIdContext })
+
+      expect(result).toBe('upstreamOrgId')
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
+        '810000000'
+      )
+    })
+
+    it('refuses an SBI that is not mapped, before checking mongo', async () => {
+      await expect(
+        retrieveOrgIdBySbi('823456789', { dataSources, defraIdContext })
+      ).rejects.toThrow(new BadRequest('Defra ID token is not valid for the provided SBI'))
+      expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    })
+  })
 })
 
 describe('validatePhoneHasNumber', () => {

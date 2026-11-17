@@ -1,4 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
+import { MAPPED_CUSTOMER_FUNCTIONS_MESSAGE } from '../../auth/dummy-defra-id.js'
 import { config } from '../../config.js'
 import { Forbidden, NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
@@ -13,6 +14,16 @@ const KITS_CUSTOMER_SEARCH_FIELD = {
 }
 
 export class RuralPaymentsCustomer extends RuralPayments {
+  async addAuthentication(request) {
+    // A mapped Defra ID token has no real customer behind it, and is routed
+    // via the DAL service account, so refuse every customer request rather than let it act on
+    // arbitrary customers
+    if (this.defraIdContext?.isMapped) {
+      throw new Forbidden(MAPPED_CUSTOMER_FUNCTIONS_MESSAGE)
+    }
+    return super.addAuthentication(request)
+  }
+
   /**
    * Creates a new person. Rural payments allocates the person's ID and Customer Reference Number
    * (CRN), but only returns the CRN, so callers need getPersonIdByCRN to get the ID.

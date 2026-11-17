@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { Forbidden } from '../../../../app/errors/graphql.js'
 import { retrievePersonIdByCRN } from '../../../../app/graphql/resolvers/customer/common.js'
 
 describe('retrievePersonIdByCRN', () => {
@@ -15,6 +16,16 @@ describe('retrievePersonIdByCRN', () => {
         upsertPersonIdByCRN: vi.fn()
       }
     }
+  })
+
+  it('refuses a mapped Defra ID token, even when Mongo has the personId', async () => {
+    dataSources.ruralPaymentsCustomer.defraIdContext = { isMapped: true }
+    dataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue('mongoPersonId')
+
+    await expect(retrievePersonIdByCRN('9234567890', dataSources)).rejects.toEqual(
+      new Forbidden('Customer functions are not available for a mapped Defra ID token')
+    )
+    expect(dataSources.mongoCustomer.findPersonIdByCRN).not.toHaveBeenCalled()
   })
 
   it('returns personId from Mongo when found', async () => {
