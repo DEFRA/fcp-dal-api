@@ -245,6 +245,30 @@ Consumers must first get an access token, which must be supplied in the `Authori
 > - [perf-test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/perf-test/apis/fcp-dal-api.yml)
 > - [prod](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/prod/apis/fcp-dal-api.yml)
 
+### Dummy Defra ID CRN to SBI mapping (dev/test only)
+
+Testers can usually only get Defra ID tokens for dummy CRNs, and those tokens may not verify. The dummy CRN to SBI mapping lets a token for a dummy CRN call business functions for real SBIs in `dev` and `test`.
+
+The mapping is set in the `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING` secret, as a comma separated list of `crn:sbi|sbi...` entries:
+
+```bash
+DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING=9100000001:810000000|810000001,9100000002:810000002
+```
+
+Each dummy CRN may appear only once, and needs at least one SBI. A malformed value stops the service starting.
+
+When a request's `x-forwarded-authorization` Defra ID token has a dummy CRN (its `contactId`) in the mapping, the request is **mapped**:
+
+- **No verification:** the token's signature and expiry are not checked, so testers can use long-lived dummy tokens. Any other token is verified as normal.
+- **Internal routing:** the request goes to the internal gateway as the DAL service account, so the dummy token is never sent upstream. `@auth` `userType` checks still treat the caller as `EXTERNAL`.
+- **Mapped SBIs only:** business queries and mutations are limited to the SBIs mapped to that dummy CRN. Any other SBI gets a `BAD REQUEST` error.
+- **No customer functions:** there is no real customer behind a dummy CRN, so all customer queries and mutations get a `FORBIDDEN` error. This includes business mutations that take a CRN, such as changing a customer's permissions on a business.
+- **Logging and audit:** each mapped request logs a `warn` with code `DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001`, with the CRN and SBIs masked. Audit events record the user as `IDM/<dummy CRN>`.
+
+> **Note:** the mapping can only be set when `ENVIRONMENT` is `dev` or `test`, or unset for local development. The service refuses to start if it is set in any other environment. In production the mapping is empty and none of this code runs.
+
+To try it locally, set `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING` in your `.env` file and send a JWT whose `contactId` is a dummy CRN in the `x-forwarded-authorization` header. The token only needs to decode; it can be signed with any key.
+
 ## Development helpers
 
 ### Proxy
