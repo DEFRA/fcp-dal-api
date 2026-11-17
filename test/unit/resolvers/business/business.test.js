@@ -378,9 +378,48 @@ describe('Business', () => {
   })
 
   it('handle customer not found', async () => {
+    // arrange
+    const requestLogger = { warn: vi.fn() }
+
+    // act / assert
     await expect(() =>
-      Business.customer(mockBusiness, { crn: 'not-found' }, { dataSources })
+      Business.customer(mockBusiness, { crn: 'not-found' }, { dataSources, requestLogger })
     ).rejects.toEqual(new NotFound('Customer not found'))
+  })
+
+  it('logs which business and customer could not be matched, on the request logger', async () => {
+    // arrange
+    const requestLogger = { warn: vi.fn() }
+
+    // act
+    await Business.customer(
+      mockBusiness,
+      { crn: '9123456789' },
+      { dataSources, requestLogger }
+    ).catch(() => {})
+
+    // assert
+    expect(requestLogger.warn).toHaveBeenCalledWith(
+      'Could not find customer in business (organisation ID: mockId, CRN: ******6789)',
+      expect.objectContaining({ code: 'RURALPAYMENTS_API_NOT_FOUND_001' })
+    )
+  })
+
+  it('does not log the sbi or the full crn when the customer is not found', async () => {
+    // arrange
+    const requestLogger = { warn: vi.fn() }
+
+    // act
+    await Business.customer(
+      mockBusiness,
+      { crn: '9123456789' },
+      { dataSources, requestLogger }
+    ).catch(() => {})
+
+    // assert
+    const logged = JSON.stringify(requestLogger.warn.mock.calls)
+    expect(logged).not.toContain('mockSbi')
+    expect(logged).not.toContain('9123456789')
   })
 
   it('countyParishHoldings', async () => {

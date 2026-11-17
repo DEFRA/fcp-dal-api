@@ -5,6 +5,8 @@ import { config } from '../config.js'
 import { formatError } from './formatError.js'
 import { createSchema } from './schema.js'
 import { auditPlugin } from './plugins/audit.js'
+import { errorCodesPlugin } from './plugins/error-codes.js'
+import { errorLoggingPlugin } from './plugins/error-logging.js'
 
 export const schema = await createSchema()
 
@@ -18,7 +20,7 @@ export const enableApolloLandingPage = () => {
 
 export const apolloServer = new ApolloServer({
   schema,
-  plugins: [enableApolloLandingPage(), auditPlugin()],
+  plugins: [enableApolloLandingPage(), auditPlugin(), errorLoggingPlugin(), errorCodesPlugin()],
   introspection: config.get('graphqlDashboardEnabled'),
   formatError
 })

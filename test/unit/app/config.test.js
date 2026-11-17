@@ -109,6 +109,8 @@ describe('config', () => {
     process.env.MONGO_RETRY_WRITES = 'false'
     process.env.MONGO_READ_PREFERENCE = 'secondary'
     process.env.MONGO_TIMEOUT_MS = '4000'
+    process.env.MONGO_CUSTOMER_CACHE_TTL_SECONDS = '3600'
+    process.env.MONGO_BUSINESS_CACHE_TTL_SECONDS = '7200'
 
     const { config } = await loadFreshConfig()
 
@@ -159,6 +161,8 @@ describe('config', () => {
     expect(config.get('mongo.mongoOptions.retryWrites')).toBe(false)
     expect(config.get('mongo.mongoOptions.readPreference')).toBe('secondary')
     expect(config.get('mongo.mongoOptions.timeoutMS')).toBe(4000)
+    expect(config.get('mongo.cacheTtlSeconds.customers')).toBe(3600)
+    expect(config.get('mongo.cacheTtlSeconds.businesses')).toBe(7200)
   })
 
   it('should throw an error with any invalid combinations of env vars', async () => {

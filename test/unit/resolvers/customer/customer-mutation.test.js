@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../../app/config.js'
 import { HttpError, Unauthorized } from '../../../../app/errors/graphql.js'
 import { Mutation } from '../../../../app/graphql/resolvers/customer/mutation.js'
-import { logger } from '../../../../app/logger/logger.js'
 
 describe('Customer Mutations', () => {
   let mockDataSources
@@ -272,8 +271,31 @@ describe('Customer Mutations', () => {
     '%s email duplicate check',
     (mutationName) => {
       beforeEach(() => {
+        config.set('featureFlags.emailDuplicateCheckEnabled', true)
         mockDataSources.ruralPaymentsCustomer.getPersonIdByCRN.mockResolvedValue('currentId')
         mockDataSources.ruralPaymentsCustomer.getPersonByPersonId.mockResolvedValue(mockPerson)
+      })
+
+      afterEach(() => {
+        config.set('featureFlags.emailDuplicateCheckEnabled', false)
+      })
+
+      test('should not call validateEmail when the duplicate check is disabled', async () => {
+        config.set('featureFlags.emailDuplicateCheckEnabled', false)
+        const input = { crn: 'crn', email: { address: 'new@example.com' } }
+
+        const result = await Mutation[mutationName](
+          null,
+          { input },
+          { dataSources: mockDataSources }
+        )
+
+        expect(mockDataSources.ruralPaymentsCustomer.validateEmail).not.toHaveBeenCalled()
+        expect(mockDataSources.ruralPaymentsCustomer.updatePersonDetails).toHaveBeenCalled()
+        expect(result).toEqual({
+          success: true,
+          customer: { personId: 'currentId' }
+        })
       })
 
       test('should call validateEmail with the new email address', async () => {
@@ -778,20 +800,23 @@ describe('Customer Mutations', () => {
         vi.restoreAllMocks()
       })
 
-      test('logs the email verification link when customer emails are disabled', async () => {
+      test('logs the email verification link on the request logger when customer emails are disabled', async () => {
+        // arrange
         mockConfig({
           'ruralPayments.customerEmailsDisabled': true,
           'ruralPayments.portalUrl': 'https://rural-payments.example.com'
         })
-        const infoSpy = vi.spyOn(logger, 'info').mockImplementation(() => {})
+        const requestLogger = { info: vi.fn() }
 
+        // act
         await Mutation.sendConfirmEmailAddressEmail(
           null,
           {},
-          { dataSources: mockDataSources, defraIdContext }
+          { dataSources: mockDataSources, defraIdContext, requestLogger }
         )
 
-        expect(infoSpy).toHaveBeenCalledWith(
+        // assert
+        expect(requestLogger.info).toHaveBeenCalledWith(
           expect.stringContaining(
             'https://rural-payments.example.com/validate-email/test%2Buser%40example.com/digitalContactPartyId'
           )
@@ -799,19 +824,22 @@ describe('Customer Mutations', () => {
       })
 
       test('does not log the email verification link when customer emails are enabled', async () => {
+        // arrange
         mockConfig({
           'ruralPayments.customerEmailsDisabled': false,
           'ruralPayments.portalUrl': 'https://rural-payments.example.com'
         })
-        const infoSpy = vi.spyOn(logger, 'info').mockImplementation(() => {})
+        const requestLogger = { info: vi.fn() }
 
+        // act
         await Mutation.sendConfirmEmailAddressEmail(
           null,
           {},
-          { dataSources: mockDataSources, defraIdContext }
+          { dataSources: mockDataSources, defraIdContext, requestLogger }
         )
 
-        expect(infoSpy).not.toHaveBeenCalledWith(expect.stringContaining('validate-email'))
+        // assert
+        expect(requestLogger.info).not.toHaveBeenCalled()
       })
     })
 

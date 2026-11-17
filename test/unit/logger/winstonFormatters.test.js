@@ -358,6 +358,26 @@ describe('winstonFormatters', () => {
       expect(result.event.reference).toBe('/organisation/123/details')
     })
 
+    it('sets event.reason from reason', () => {
+      // arrange / act
+      const result = cdpSchemaTranslator().transform({
+        level: 'info',
+        message: 'test',
+        reason: 'graphql errors: NOT FOUND'
+      })
+
+      // assert
+      expect(result.event.reason).toBe('graphql errors: NOT FOUND')
+    })
+
+    it('omits event.reason when no reason is provided', () => {
+      // arrange / act
+      const result = cdpSchemaTranslator().transform({ response: { status: 200 } })
+
+      // assert
+      expect(result.event).not.toHaveProperty('reason')
+    })
+
     describe('outcome', () => {
       it('omits event.outcome when no response is provided', () => {
         const result = cdpSchemaTranslator().transform({ level: 'info', message: 'test' })

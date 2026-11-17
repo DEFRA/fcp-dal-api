@@ -1,6 +1,6 @@
 import { NotFound } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../../logger/codes.js'
-import { logger } from '../../../logger/logger.js'
+import { maskAllButLastFour } from '../../../logger/utils.js'
 import { transformBusinessPayments } from '../../../transformers/hitachi/payments.js'
 import {
   transformAgreements,
@@ -50,7 +50,12 @@ export const Business = {
     return transformOrganisationCustomers(customers, sbi)
   },
 
-  async customer({ organisationId, sbi }, { crn }, { dataSources, auditTrail }, info) {
+  async customer(
+    { organisationId, sbi },
+    { crn },
+    { dataSources, auditTrail, requestLogger },
+    info
+  ) {
     auditTrail?.recordEntity(info, { entity: 'person-list', action: 'read', entityid: sbi })
     auditTrail?.recordAccount(info, 'crn', crn)
     const customers =
@@ -61,12 +66,12 @@ export const Business = {
     const customer = customers.find(({ customerReference }) => customerReference === crn)
 
     if (!customer) {
-      logger.warn('Could not find customer in business', {
-        crn,
-        organisationId,
-        sbi,
-        code: RURALPAYMENTS_API_NOT_FOUND_001
-      })
+      // the sbi and the full crn are sensitive, so the business is named by its organisation id
+      // and the customer by the last four digits of the crn
+      requestLogger.warn(
+        `Could not find customer in business (organisation ID: ${organisationId}, CRN: ${maskAllButLastFour(crn)})`,
+        { organisationId, code: RURALPAYMENTS_API_NOT_FOUND_001 }
+      )
       throw new NotFound('Customer not found')
     }
     auditTrail?.recordAccount(info, 'personId', customer.id)

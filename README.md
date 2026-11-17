@@ -13,7 +13,7 @@ docker compose -f dal-api-compose.yml up
 
 The graphQL explorer should now be available, head to http://localhost:3000/graphql in your browser, and have a play!
 
-> NOTE: the IDs of the available customers and businesses can be found in the [mock code](https://github.com/DEFRA/fcp-dal-upstream-mock/blob/main/src/factories/id-lookups.js), along with their corresponding CRN or SBI (respectively), as well as the relationships between entities.
+> NOTE: the IDs of the available customers and businesses can be found in the [mock code](https://github.com/DEFRA/fcp-dal-upstream-services-mock/blob/main/src/factories/id-lookups.js), along with their corresponding CRN or SBI (respectively), as well as the relationships between entities.
 
 > NOTE: The above is a simplified setup that is intended to aid consumer development.
 > For access to the live instances, [schema availability](#the-wip-directive) and [authorisation](#security) would need to be carefully considered.
@@ -119,10 +119,10 @@ There is a local mock for the KITS API (the source of all the DAL's data).
 It can be started by running:
 
 ```bash
-docker run -p 3100:3100 defradigital/fcp-dal-upstream-mock
+docker run -p 3100:3100 defradigital/fcp-dal-upstream-services-mock
 ```
 
-The code for the Mock can be found [here](https://github.com/DEFRA/fcp-dal-upstream-mock).
+The code for the Mock can be found [here](https://github.com/DEFRA/fcp-dal-upstream-services-mock).
 The `fixtures` folder is probably the most interesting, as this contains all the mock's raw data.
 
 ### Testing

@@ -113,10 +113,16 @@ if ${GENERATE_CA} ; then
     run_command openssl req -new \
         -key ./mtls/ca.key -passin pass:ca-password \
         -out ./mtls/ca.csr -subj '/CN=fcp-dal-acceptance-test-ca'
+    # OpenSSL 3.2+ (e.g. Ubuntu 26.04 runners) emits a v3 cert here, which is only accepted as a CA
+    # if it explicitly carries basicConstraints CA:TRUE (older versions emitted an implicit-CA v1 cert)
+    printf 'basicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\nsubjectKeyIdentifier=hash\n' \
+        > ./mtls/ca.ext
     run_command openssl x509 -req \
         -signkey ${CA_KEY} -passin pass:ca-password \
         -in ./mtls/ca.csr -out ${CA_CERT} \
+        -extfile ./mtls/ca.ext \
         -days ${TEST_ASSET_TTL}
+    rm ./mtls/ca.ext
 else
     echo "Skipping CA generation, using existing key/cert pair"
 fi

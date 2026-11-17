@@ -1,7 +1,6 @@
 import { StatusCodes } from 'http-status-codes'
 import { config } from '../../../config.js'
 import { BadRequest, Forbidden, Unauthorized } from '../../../errors/graphql.js'
-import { logger } from '../../../logger/logger.js'
 import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
 import { retrievePersonIdByCRN, upsertPersonIdByCRN } from './common.js'
@@ -43,7 +42,7 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
   const isEmailChanging =
     input.email && input.email.address?.toLowerCase() !== person.email?.toLowerCase()
 
-  if (isEmailChanging) {
+  if (isEmailChanging && config.get('featureFlags.emailDuplicateCheckEnabled')) {
     const { emailDuplicated } = await dataSources.ruralPaymentsCustomer.validateEmail(
       input.email.address
     )
@@ -70,7 +69,7 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
 async function sendConfirmEmailAddressEmailResolver(
   _,
   { input },
-  { dataSources, auditTrail, defraIdContext },
+  { dataSources, auditTrail, defraIdContext, requestLogger },
   info
 ) {
   if (!defraIdContext) {
@@ -132,7 +131,7 @@ async function sendConfirmEmailAddressEmailResolver(
 
   if (config.get('ruralPayments.customerEmailsDisabled')) {
     const portalUrl = config.get('ruralPayments.portalUrl')
-    logger.info(
+    requestLogger.info(
       `#resolver - sendConfirmEmailAddressEmail - Email verification link: ${portalUrl}/validate-email/${encodeURIComponent(emailToConfirm)}/${digitalContactPartyId}`
     )
   }

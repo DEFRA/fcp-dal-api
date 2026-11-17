@@ -122,7 +122,7 @@ describe('Rural Payments Business', () => {
         new NotFound('Rural payments organisation not found')
       )
       expect(logger.warn).toHaveBeenCalledWith(
-        '#datasource - Rural payments - organisation not found for organisation ID',
+        '#datasource - Rural payments - organisation not found for organisation ID: 123',
         { organisationId: 123, code: 'RURALPAYMENTS_API_NOT_FOUND_001' }
       )
     })

@@ -573,15 +573,22 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
   })
 
   it('throws and does not submit when validation returns an unexpected status', async () => {
+    // arrange
+    const logger = { error: vi.fn() }
+    dataSources.ruralPaymentsBusiness.logger = logger
     dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
       status: 'UNEXPECTED_STATUS',
       attemptsRemaining: 0
     })
 
+    // act / assert
     await expect(
       Mutation.createBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
     ).rejects.toThrow('Internal Server Error')
-
+    expect(logger.error).toHaveBeenCalledWith(
+      'Unexpected bank change validation status',
+      expect.objectContaining({ status: 'UNEXPECTED_STATUS' })
+    )
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
 
@@ -857,15 +864,23 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     })
   })
 
-  it('throws when validation returns an unexpected status', async () => {
+  it('throws when validation returns an unexpected status, logging it on the data source logger', async () => {
+    // arrange
+    const logger = { error: vi.fn() }
+    dataSources.ruralPaymentsBusiness.logger = logger
     dataSources.ruralPaymentsBusiness.validateBankChange.mockResolvedValue({
       status: 'UNEXPECTED_STATUS',
       attemptsRemaining: 0
     })
 
+    // act / assert
     await expect(
       Mutation.validateBusinessCustomerBankDetails({}, { input: baseInput }, { dataSources })
     ).rejects.toThrow('Internal Server Error')
+    expect(logger.error).toHaveBeenCalledWith('Unexpected bank change validation status', {
+      status: 'UNEXPECTED_STATUS',
+      code: 'RURALPAYMENTS_API_ERROR_001'
+    })
   })
 
   it('returns BankDetailsValidationFailed when the details do not match', async () => {
@@ -1281,6 +1296,120 @@ describe('Business Mutation updateCustomerPermissionsAndRelationshipToBusiness',
     expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
       entity: 'permission',
       action: 'updated',
+      entityid: '811111111-9111111100'
+    })
+  })
+})
+
+describe('Business Mutation deleteCustomerFromBusiness', () => {
+  it('sends empty roles and privileges to the update endpoint to unlink the customer', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        updateAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
+      },
+      permissions: new Permissions()
+    }
+
+    const response = await Mutation.deleteCustomerFromBusiness(
+      {},
+      { input: { sbi: '811111111', crn: '9111111100' } },
+      { dataSources }
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith(
+      '811111111'
+    )
+    expect(mockCustomerCommonModule.retrievePersonIdByCRN).toHaveBeenCalledWith(
+      '9111111100',
+      dataSources
+    )
+    expect(
+      dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
+    ).toHaveBeenCalledWith('org-1', 'person-1', {
+      personRoles: [],
+      personPrivileges: []
+    })
+    expect(response).toEqual({ success: true })
+  })
+
+  it('records audit entity and accounts', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockResolvedValue('org-1'),
+        updateAuthorisationForPersonOnOrganisation: vi.fn().mockResolvedValue({ success: true })
+      },
+      permissions: new Permissions()
+    }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+    const info = {
+      path: {
+        key: 'deleteCustomerFromBusiness',
+        typename: 'Mutation',
+        prev: undefined
+      }
+    }
+
+    await Mutation.deleteCustomerFromBusiness(
+      {},
+      { input: { sbi: '811111111', crn: '9111111100' } },
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '811111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9111111100')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'organisationId', 'org-1')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'personId', 'person-1')
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission',
+      action: 'deleted',
+      entityid: '811111111-9111111100'
+    })
+  })
+
+  it('records audit entity even when organisation lookup fails', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('person-1')
+    const dataSources = {
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn().mockRejectedValue(new Error('not found')),
+        updateAuthorisationForPersonOnOrganisation: vi.fn()
+      },
+      permissions: new Permissions()
+    }
+    const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+    const info = {
+      path: {
+        key: 'deleteCustomerFromBusiness',
+        typename: 'Mutation',
+        prev: undefined
+      }
+    }
+
+    await expect(
+      Mutation.deleteCustomerFromBusiness(
+        {},
+        { input: { sbi: '811111111', crn: '9111111100' } },
+        { dataSources, auditTrail },
+        info
+      )
+    ).rejects.toThrow('not found')
+
+    expect(
+      dataSources.ruralPaymentsBusiness.updateAuthorisationForPersonOnOrganisation
+    ).not.toHaveBeenCalled()
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '811111111')
+    expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'crn', '9111111100')
+    expect(auditTrail.recordAccount).not.toHaveBeenCalledWith(
+      info,
+      'organisationId',
+      expect.anything()
+    )
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'permission',
+      action: 'deleted',
       entityid: '811111111-9111111100'
     })
   })

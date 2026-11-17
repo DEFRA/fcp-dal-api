@@ -352,6 +352,16 @@ export const config = convict({
       }
     }
   },
+  featureFlags: {
+    emailDuplicateCheckEnabled: {
+      doc:
+        'Whether customer updates that change the email address first check the new address is ' +
+        'not already in use by another customer (rejecting with EMAIL_ALREADY_REGISTERED if so).',
+      format: Boolean,
+      default: false,
+      env: 'FF_CUSTOMER_EMAIL_DUPLICATE_CHECK_ENABLED'
+    }
+  },
   audit: {
     sns: {
       topicArn: {
@@ -377,6 +387,20 @@ export const config = convict({
       format: String,
       default: 'fcp-dal-api',
       env: 'MONGO_DATABASE'
+    },
+    cacheTtlSeconds: {
+      customers: {
+        doc: 'TTL in seconds for cached CRN -> personId documents in the customers collection',
+        format: 'nat',
+        default: 86400, // 24 hours
+        env: 'MONGO_CUSTOMER_CACHE_TTL_SECONDS'
+      },
+      businesses: {
+        doc: 'TTL in seconds for cached SBI -> orgId documents in the businesses collection',
+        format: 'nat',
+        default: 86400, // 24 hours
+        env: 'MONGO_BUSINESS_CACHE_TTL_SECONDS'
+      }
     },
     mongoOptions: {
       retryWrites: {

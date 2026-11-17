@@ -18,7 +18,7 @@ The DAL is a single GraphQL endpoint: every request is a `POST` to `/graphql`. T
 
 While you build your service you don't need real data or credentials. Use the CDP dev environment: <a href="https://fcp-dal-api.dev.cdp-int.defra.cloud/graphql" target="_blank" rel="noopener">`https://fcp-dal-api.dev.cdp-int.defra.cloud/graphql`</a>. Auth is disabled, but your service must be on the CDP network.
 
-Dev is backed by the [upstream mock](https://github.com/DEFRA/fcp-dal-upstream-mock), so the data is fake. The test businesses and customers, with their SBIs and CRNs, are listed in [`id-lookups.js`](https://github.com/DEFRA/fcp-dal-upstream-mock/blob/main/src/factories/id-lookups.js).
+Dev is backed by the [upstream mock](https://github.com/DEFRA/fcp-dal-upstream-services-mock), so the data is fake. The test businesses and customers, with their SBIs and CRNs, are listed in [`id-lookups.js`](https://github.com/DEFRA/fcp-dal-upstream-services-mock/blob/main/src/factories/id-lookups.js).
 
 ### 3. Make a request
 

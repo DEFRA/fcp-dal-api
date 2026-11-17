@@ -5,6 +5,8 @@ const mocks = vi.hoisted(() => {
   const mockApolloPluginDisabled = vi.fn()
   const mockApolloPluginLandingPage = vi.fn()
   const mockAuditPlugin = vi.fn()
+  const mockErrorLoggingPlugin = vi.fn()
+  const mockErrorCodesPlugin = vi.fn()
 
   return {
     mockApolloServer,
@@ -12,6 +14,8 @@ const mocks = vi.hoisted(() => {
     mockApolloPluginDisabled,
     mockApolloPluginLandingPage,
     mockAuditPlugin,
+    mockErrorLoggingPlugin,
+    mockErrorCodesPlugin,
     mockApolloModule: { ApolloServer: mockApolloServer },
     mockApolloPluginDisabledModule: {
       ApolloServerPluginLandingPageDisabled: mockApolloPluginDisabled
@@ -28,6 +32,12 @@ vi.mock('@apollo/server/plugin/disabled', () => mocks.mockApolloPluginDisabledMo
 vi.mock('@apollo/server/plugin/landingPage/default', () => mocks.mockApolloPluginLandingPageModule)
 vi.mock('../../../app/graphql/plugins/audit.js', () => ({
   auditPlugin: mocks.mockAuditPlugin
+}))
+vi.mock('../../../app/graphql/plugins/error-logging.js', () => ({
+  errorLoggingPlugin: mocks.mockErrorLoggingPlugin
+}))
+vi.mock('../../../app/graphql/plugins/error-codes.js', () => ({
+  errorCodesPlugin: mocks.mockErrorCodesPlugin
 }))
 
 describe('GraphQL Dashboard test with mocks', () => {
@@ -52,7 +62,12 @@ describe('GraphQL Dashboard test with mocks', () => {
     expect(mocks.mockAuditPlugin).toHaveBeenCalledWith()
     expect(mocks.mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mocks.mockApolloPluginDisabled(), mocks.mockAuditPlugin()],
+      plugins: [
+        mocks.mockApolloPluginDisabled(),
+        mocks.mockAuditPlugin(),
+        mocks.mockErrorLoggingPlugin(),
+        mocks.mockErrorCodesPlugin()
+      ],
       introspection: false,
       formatError: expect.any(Function)
     })
@@ -78,7 +93,12 @@ describe('GraphQL Dashboard test with mocks', () => {
 
     expect(mocks.mockApolloServer).toHaveBeenCalledWith({
       schema: 'mockCreateSchemaRV',
-      plugins: [mocks.mockApolloPluginLandingPage(), mocks.mockAuditPlugin()],
+      plugins: [
+        mocks.mockApolloPluginLandingPage(),
+        mocks.mockAuditPlugin(),
+        mocks.mockErrorLoggingPlugin(),
+        mocks.mockErrorCodesPlugin()
+      ],
       introspection: true,
       formatError: expect.any(Function)
     })
