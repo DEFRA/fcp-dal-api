@@ -10,6 +10,9 @@ import { maskAllButLastFour } from '../logger/utils.js'
 export const MAPPED_CUSTOMER_FUNCTIONS_MESSAGE =
   'Customer functions are not available for a mapped Defra ID token'
 
+export const MAPPED_BUSINESS_SEARCH_MESSAGE =
+  'Business search is not available for a mapped Defra ID token'
+
 /**
  * Builds a Defra ID context for a token whose CRN is in the dummy CRN to SBI mapping. The token's
  * signature and expiry are deliberately not checked, so testers can use long-lived dummy tokens.

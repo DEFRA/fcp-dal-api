@@ -1,3 +1,5 @@
+import { MAPPED_BUSINESS_SEARCH_MESSAGE } from '../../../auth/dummy-defra-id.js'
+import { Forbidden } from '../../../errors/graphql.js'
 import { transformPageInfo } from '../../../transformers/common.js'
 import { transformOrganisationSearchResult } from '../../../transformers/rural-payments/business.js'
 import { retrieveOrgIdBySbi } from './common.js'
@@ -20,7 +22,7 @@ export const Query = {
   async businessSearch(
     __,
     { searchString, searchType, pagination },
-    { dataSources, auditTrail },
+    { dataSources, auditTrail, defraIdContext },
     info
   ) {
     if (searchType === 'SBI') {
@@ -31,6 +33,12 @@ export const Query = {
       action: 'search',
       ...(searchType === 'SBI' ? { entityid: searchString } : {})
     })
+
+    // A mapped Defra ID token is routed internally as the DAL service account, so a search would
+    // return any business rather than only the mapped SBIs
+    if (defraIdContext?.isMapped) {
+      throw new Forbidden(MAPPED_BUSINESS_SEARCH_MESSAGE)
+    }
 
     const { data, page } = await dataSources.ruralPaymentsBusiness.organisationSearch(
       searchType,

@@ -159,6 +159,49 @@ describe('Business Query Resolver', () => {
     })
   })
 
+  describe('businessSearch with a mapped Defra ID token', () => {
+    const info = { path: { key: 'businessSearch', typename: 'Query', prev: undefined } }
+    const defraIdContext = { isMapped: true, dummyCrn: '9100000001' }
+
+    it.each(['SBI', 'BUSINESS_NAME'])(
+      'refuses a %s search without calling upstream',
+      async (searchType) => {
+        await expect(
+          Query.businessSearch(
+            null,
+            { searchString: '823456789', searchType, pagination: { page: 1, perPage: 20 } },
+            { dataSources: mockDataSources, defraIdContext },
+            info
+          )
+        ).rejects.toMatchObject({
+          message: 'Business search is not available for a mapped Defra ID token',
+          extensions: { code: 'FORBIDDEN' }
+        })
+        expect(mockDataSources.ruralPaymentsBusiness.organisationSearch).not.toHaveBeenCalled()
+      }
+    )
+
+    it('still records the attempted search in the audit trail', async () => {
+      const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+
+      await expect(
+        Query.businessSearch(
+          null,
+          { searchString: '823456789', searchType: 'SBI', pagination: { page: 1, perPage: 20 } },
+          { dataSources: mockDataSources, auditTrail, defraIdContext },
+          info
+        )
+      ).rejects.toThrow()
+
+      expect(auditTrail.recordAccount).toHaveBeenCalledWith(info, 'sbi', '823456789')
+      expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+        entity: 'business',
+        action: 'search',
+        entityid: '823456789'
+      })
+    })
+  })
+
   describe('businessSearch audit trail', () => {
     const info = { path: { key: 'businessSearch', typename: 'Query', prev: undefined } }
 
