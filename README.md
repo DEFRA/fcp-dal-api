@@ -261,8 +261,9 @@ When a request's `x-forwarded-authorization` Defra ID token has a dummy CRN (its
 
 - **No verification:** the token's signature and expiry are not checked, so testers can use long-lived dummy tokens. Any other token is verified as normal.
 - **Internal routing:** the request goes to the internal gateway as the DAL service account, so the dummy token is never sent upstream. `@auth` `userType` checks still treat the caller as `EXTERNAL`.
-- **Mapped SBIs only:** business queries and mutations are limited to the SBIs mapped to that dummy CRN. Any other SBI gets a `BAD REQUEST` error. `businessSearch` gets a `FORBIDDEN` error, as the internal gateway would return any business.
-- **No customer functions:** there is no real customer behind a dummy CRN, so all customer queries and mutations get a `FORBIDDEN` error. This includes business mutations that take a CRN, such as changing a customer's permissions on a business.
+- **Read only:** every mutation gets a `FORBIDDEN` error, as it would change real data under the DAL service account.
+- **Mapped SBIs only:** business queries are limited to the SBIs mapped to that dummy CRN. Any other SBI gets a `BAD REQUEST` error. `businessSearch` gets a `FORBIDDEN` error, as the internal gateway would return any business.
+- **No customer functions:** there is no real customer behind a dummy CRN, so all customer queries get a `FORBIDDEN` error.
 - **Logging and audit:** each mapped request logs a `warn` with code `DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001`, with the CRN and SBIs masked. Audit events record the user as `IDM/<dummy CRN>`.
 
 > **Note:** the mapping can only be set when `ENVIRONMENT` is `dev` or `test`, or unset for local development. The service refuses to start if it is set in any other environment. In production the mapping is empty and none of this code runs.

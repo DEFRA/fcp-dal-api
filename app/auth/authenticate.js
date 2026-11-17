@@ -3,10 +3,11 @@ import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
 import { decodeProtectedHeader, jwtVerify } from 'jose'
 import { authorisedEntities, config } from '../config.js'
-import { Unauthorized } from '../errors/graphql.js'
+import { Forbidden, Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
+import { MAPPED_MUTATIONS_MESSAGE } from './dummy-defra-id.js'
 
 const unauthedAppid = config.get('auth.disabled')
   ? 'auth-disabled-no-entityId'
@@ -159,6 +160,21 @@ export function checkServiceAccountAccess(serviceAccount, serviceAccountPermitte
 }
 
 /**
+ * DEV/TEST ONLY. A mapped Defra ID token (see dummy-defra-id.js) is read only: its requests run
+ * upstream as the DAL service account, so a mutation would change real data under that account.
+ * Unlike `checkServiceAccountAccess`, ADMIN membership does not bypass this check.
+ *
+ * @param {{ isMapped?: boolean } | undefined} defraIdContext
+ * @param {boolean} isMutationField
+ * @throws {Forbidden} if a mapped Defra ID token calls a mutation
+ */
+export function checkMappedDefraIdAccess(defraIdContext, isMutationField) {
+  if (defraIdContext?.isMapped && isMutationField) {
+    throw new Forbidden(MAPPED_MUTATIONS_MESSAGE)
+  }
+}
+
+/**
  * Derives the end user's access type from the request-level end-user auth context (see
  * `app/auth/end-user-auth-context.js`): an `email` header identifies an internal (Rural Payments
  * portal) user, an `x-forwarded-authorization` header identifies an external (Defra ID) user.
@@ -217,6 +233,7 @@ export function authDirectiveTransformer(schema) {
         getDirective(schema, fieldConfig, directiveName)?.[0] ?? typeDirectiveArgumentMaps[typeName]
 
       const { resolve = defaultFieldResolver } = fieldConfig
+      const isMutationField = typeName === schema.getMutationType()?.name
 
       if (authDirective) {
         fieldConfig.resolve = function (source, args, context, info) {
@@ -227,6 +244,7 @@ export function authDirectiveTransformer(schema) {
             context.auth.authName === 'ADMIN'
           )
           checkUserAccess(context.authContext, authDirective.userType)
+          checkMappedDefraIdAccess(context.defraIdContext, isMutationField)
           return resolve(source, args, context, info)
         }
       }

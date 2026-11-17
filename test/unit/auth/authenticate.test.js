@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
-import { Unauthorized } from '../../../app/errors/graphql.js'
+import { Forbidden, Unauthorized } from '../../../app/errors/graphql.js'
 
 const info = vi.fn()
 vi.doMock('../../../app/logger/logger.js', () => ({
@@ -12,6 +12,7 @@ vi.doMock('../../../app/logger/logger.js', () => ({
 const {
   authDirectiveTransformer,
   checkAuthEntity,
+  checkMappedDefraIdAccess,
   checkServiceAccountAccess,
   checkUserAccess,
   getAuthorisedEntity
@@ -254,6 +255,24 @@ describe('authenticate', () => {
     })
   })
 
+  describe('checkMappedDefraIdAccess', () => {
+    it('does not throw without a Defra ID context', () => {
+      expect(() => checkMappedDefraIdAccess(undefined, true)).not.toThrow()
+    })
+
+    it('does not throw for an unmapped Defra ID token on a Mutation field', () => {
+      expect(() => checkMappedDefraIdAccess({ crn: vi.fn() }, true)).not.toThrow()
+    })
+
+    it('does not throw for a mapped Defra ID token on a Query field', () => {
+      expect(() => checkMappedDefraIdAccess({ isMapped: true }, false)).not.toThrow()
+    })
+
+    it('throws Forbidden for a mapped Defra ID token on a Mutation field', () => {
+      expect(() => checkMappedDefraIdAccess({ isMapped: true }, true)).toThrow(Forbidden)
+    })
+  })
+
   describe('checkUserAccess', () => {
     const internalAuthContext = { internalAuthHeader: 'user@defra.gov.uk' }
     const externalAuthContext = { externalAuthHeader: 'Bearer token' }
@@ -435,6 +454,49 @@ describe('authenticate', () => {
           serviceAccountContext(adminEntityId),
           { mutation: true }
         )
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedMutationFieldDefault).toBe('c')
+      })
+    })
+
+    describe('mapped Defra ID gating', () => {
+      const adminEntityId = config.get('auth.entities.ADMIN.entityId')
+      const rootValue = { gatedQueryFieldDefault: 'a', gatedMutationFieldDefault: 'c' }
+
+      const run = (source, authName = 'SINGLE_FRONT_DOOR', defraIdContext = { isMapped: true }) =>
+        graphql({
+          schema: authDirectiveTransformer(schema),
+          source,
+          rootValue,
+          contextValue: {
+            auth: { entityId: adminEntityId, authName },
+            authContext: { externalAuthHeader: 'dummy-token' },
+            defraIdContext
+          }
+        })
+
+      it('allows a mapped Defra ID token on a Query field', async () => {
+        const result = await run('{ gatedQueryFieldDefault }')
+        expect(result.errors).toBeUndefined()
+        expect(result.data.gatedQueryFieldDefault).toBe('a')
+      })
+
+      it.each(['SINGLE_FRONT_DOOR', 'ADMIN'])(
+        'denies a mapped Defra ID token a Mutation field for a %s caller',
+        async (authName) => {
+          const result = await run('mutation { gatedMutationFieldDefault }', authName)
+          expect(result.errors?.[0].message).toEqual(
+            'Mutations are not available for a mapped Defra ID token'
+          )
+          expect(result.errors[0].extensions.code).toEqual('FORBIDDEN')
+          expect(result.data.gatedMutationFieldDefault).toBeNull()
+        }
+      )
+
+      it('allows an unmapped Defra ID token on a Mutation field', async () => {
+        const result = await run('mutation { gatedMutationFieldDefault }', 'SINGLE_FRONT_DOOR', {
+          crn: vi.fn()
+        })
         expect(result.errors).toBeUndefined()
         expect(result.data.gatedMutationFieldDefault).toBe('c')
       })
