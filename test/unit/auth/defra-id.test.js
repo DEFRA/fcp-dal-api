@@ -184,7 +184,7 @@ describe('defraIdContext', () => {
               '{"aud":"defra-id-aud","sub":"sub","serviceId":"service-id",' +
                 '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
                 '"sessionId":"session-id","email":"defra.gov.uk","contactId":"\\*\\*\\*\\*1111",' +
-                '"relationships":\\["orgId:sbi:company name:"\\],"roles":\\["role-id"\\],' +
+                '"relationships":\\["orgId:sbi"\\],"roles":\\["role-id"\\],' +
                 '"iat":[0-9]+,"exp":[0-9]+}'
             )
           )
@@ -204,6 +204,47 @@ describe('defraIdContext', () => {
     const message = JSON.parse(info.mock.calls[0][1].tenant.message)
     expect(message.contactId).toBe('****1111')
   })
+
+  test('logs only the org id and masked SBI of each relationship, never the business name', async () => {
+    const token = signToken({
+      relationships: [
+        'orgId1:823456789:company name:1:2',
+        'orgId2:887654321',
+        'company name only',
+        { name: 'company name' }
+      ]
+    })
+
+    await defraIdContext(
+      { externalAuthHeader: token },
+      { traceId, jwksDataSource: jwksDataSource() }
+    )
+
+    const logged = info.mock.calls[0][1].tenant.message
+    expect(JSON.parse(logged).relationships).toEqual([
+      'orgId1:*****6789',
+      'orgId2:*****4321',
+      '[redacted]',
+      '[redacted]'
+    ])
+    expect(logged).not.toContain('company name')
+  })
+
+  test.each([undefined, 'orgId:823456789:company name', { name: 'company name' }])(
+    'leaves relationships of %j out of the log',
+    async (relationships) => {
+      const token = signToken({ relationships })
+
+      await defraIdContext(
+        { externalAuthHeader: token },
+        { traceId, jwksDataSource: jwksDataSource() }
+      )
+
+      const logged = info.mock.calls[0][1].tenant.message
+      expect(JSON.parse(logged)).not.toHaveProperty('relationships')
+      expect(logged).not.toContain('company name')
+    }
+  )
 
   test('does not log a contactId when the token has none', async () => {
     const token = signToken({})

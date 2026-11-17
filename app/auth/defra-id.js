@@ -62,6 +62,19 @@ function extractOrgIdFromDefraIdToken(sbi, payload) {
   throw new BadRequest('Defra ID token is not valid for the provided SBI')
 }
 
+function redactRelationshipsForLog(relationships) {
+  if (!Array.isArray(relationships)) {
+    return undefined
+  }
+  return relationships.map((relationship) => {
+    if (typeof relationship !== 'string' || !relationship.includes(':')) {
+      return '[redacted]'
+    }
+    const [orgId, sbi] = relationship.split(':')
+    return `${orgId}:${maskAllButLastFour(sbi)}`
+  })
+}
+
 /**
  * Verifies the Defra ID token. Verification is only attempted when authContext.externalAuthHeader
  * is set - a request authenticated another way (internal email/service-account headers) carries no
@@ -108,7 +121,7 @@ export const defraIdContext = async (authContext, { traceId, jwksDataSource = de
         email: tokenPayload.email?.split('@')[1],
         // contactId is crn which is considered PII
         contactId: maskAllButLastFour(contactIdAsString(tokenPayload.contactId)),
-        relationships: tokenPayload.relationships,
+        relationships: redactRelationshipsForLog(tokenPayload.relationships),
         roles: tokenPayload.roles,
         iat: tokenPayload.iat,
         exp: tokenPayload.exp
