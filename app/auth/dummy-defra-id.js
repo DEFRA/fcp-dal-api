@@ -46,7 +46,10 @@ export function mappedDefraIdContext(token, { traceId }) {
     code: DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001,
     traceId,
     tenant: {
-      message: JSON.stringify({ contactId: maskAllButLastFour(dummyCrn), sbis: [...sbis] })
+      message: JSON.stringify({
+        contactId: maskAllButLastFour(dummyCrn),
+        sbis: [...sbis].map(maskAllButLastFour)
+      })
     }
   })
 

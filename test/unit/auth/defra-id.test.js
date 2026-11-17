@@ -1,12 +1,13 @@
 import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-import { config } from '../../../app/config.js'
-import { BadRequest, Unauthorized } from '../../../app/errors/graphql.js'
+import { config, dummyCrnToSbiMapping } from '../../../app/config.js'
+import { BadRequest, Forbidden, Unauthorized } from '../../../app/errors/graphql.js'
 
 const info = vi.fn()
+const warn = vi.fn()
 vi.doMock('../../../app/logger/logger.js', () => ({
-  logger: { info, debug: vi.fn(), warn: vi.fn(), error: vi.fn() }
+  logger: { info, debug: vi.fn(), warn, error: vi.fn() }
 }))
 const { defraIdContext } = await import('../../../app/auth/defra-id.js')
 
@@ -270,6 +271,122 @@ describe('defraIdContext', () => {
           { traceId, jwksDataSource: jwksDataSource() }
         )
       ).rejects.toThrow(Unauthorized)
+    })
+  })
+
+  describe('dummy CRN to SBI mapping', () => {
+    const mappedContext = (token, jwks = jwksDataSource()) =>
+      defraIdContext({ externalAuthHeader: token }, { traceId, jwksDataSource: jwks })
+
+    beforeEach(() => {
+      warn.mockClear()
+      dummyCrnToSbiMapping.set('9100000001', new Set(['810000000', '810000001']))
+      dummyCrnToSbiMapping.set('9100000002', new Set(['810000002']))
+    })
+
+    afterEach(() => {
+      dummyCrnToSbiMapping.clear()
+    })
+
+    test('maps a token with a dummy CRN, without verifying it', async () => {
+      const jwks = jwksDataSource()
+
+      const ctx = await mappedContext(signToken({ contactId: '9100000001' }), jwks)
+
+      expect(ctx.isMapped).toBe(true)
+      expect(ctx.dummyCrn).toBe('9100000001')
+      expect(jwks.getPublicKey).not.toHaveBeenCalled()
+      expect(warn).toHaveBeenCalledWith(
+        '#DAL Request authentication - dummy Defra ID CRN mapped to SBIs',
+        expect.objectContaining({
+          code: 'DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001',
+          tenant: {
+            message: JSON.stringify({ contactId: '******0001', sbis: ['*****0000', '*****0001'] })
+          }
+        })
+      )
+    })
+
+    test('maps a numeric contactId', async () => {
+      const ctx = await mappedContext(signToken({ contactId: 9100000001 }))
+
+      expect(ctx.isMapped).toBe(true)
+    })
+
+    test('maps a token with an invalid signature that has expired', async () => {
+      const expired = jwt.sign(
+        { contactId: '9100000002', exp: Math.floor(Date.now() / 1000) - 3600 },
+        wrongPrivateKey,
+        { algorithm: 'RS256' }
+      )
+
+      const ctx = await mappedContext(expired)
+
+      expect(ctx.isMapped).toBe(true)
+      expect(ctx.dummyCrn).toBe('9100000002')
+    })
+
+    test('maps a token with a dummy CRN when auth is disabled', async () => {
+      configGetSpy.mockReturnValue(true)
+
+      const ctx = await mappedContext(signToken({ contactId: '9100000001' }, wrongPrivateKey))
+
+      expect(ctx.isMapped).toBe(true)
+    })
+
+    test('gives each dummy CRN its own SBIs', async () => {
+      const first = await mappedContext(signToken({ contactId: '9100000001' }))
+      const second = await mappedContext(signToken({ contactId: '9100000002' }))
+
+      expect(() => first.assertSbiAllowed('810000001')).not.toThrow()
+      expect(() => first.assertSbiAllowed(810000000)).not.toThrow()
+      expect(() => first.assertSbiAllowed('810000002')).toThrow(
+        new BadRequest('Defra ID token is not valid for the provided SBI')
+      )
+      expect(() => second.assertSbiAllowed('810000002')).not.toThrow()
+      expect(() => second.assertSbiAllowed('810000000')).toThrow(BadRequest)
+    })
+
+    test('refuses customer functions', async () => {
+      const ctx = await mappedContext(signToken({ contactId: '9100000001' }))
+
+      expect(() => ctx.crn()).toThrow(
+        new Forbidden('Customer functions are not available for a mapped Defra ID token')
+      )
+    })
+
+    test('verifies a token whose CRN is not mapped as normal', async () => {
+      const ctx = await mappedContext(signToken({ contactId: '11111111' }))
+
+      expect(ctx.isMapped).toBeUndefined()
+      expect(ctx.crn()).toBe('11111111')
+      expect(warn).not.toHaveBeenCalled()
+    })
+
+    test('rejects an unverified token whose CRN is not mapped', async () => {
+      await expect(
+        mappedContext(signToken({ contactId: '11111111' }, wrongPrivateKey))
+      ).rejects.toThrow(new Unauthorized('Defra ID token failed verification'))
+    })
+
+    test('rejects an unverified token with no CRN', async () => {
+      await expect(mappedContext(signToken({}, wrongPrivateKey))).rejects.toThrow(
+        new Unauthorized('Defra ID token failed verification')
+      )
+    })
+
+    test('rejects a token that cannot be decoded', async () => {
+      await expect(mappedContext('not-a-jwt')).rejects.toThrow(
+        new Unauthorized('Defra ID token failed verification')
+      )
+    })
+
+    test('rejects an unverified token with a dummy CRN when no mapping is configured', async () => {
+      dummyCrnToSbiMapping.clear()
+
+      await expect(
+        mappedContext(signToken({ contactId: '9100000001' }, wrongPrivateKey))
+      ).rejects.toThrow(new Unauthorized('Defra ID token failed verification'))
     })
   })
 })

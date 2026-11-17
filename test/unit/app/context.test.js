@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
-import { config } from '../../../app/config.js'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { config, dummyCrnToSbiMapping } from '../../../app/config.js'
 import { Unauthorized } from '../../../app/errors/graphql.js'
 
 // A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only
@@ -21,7 +21,7 @@ const MongoCustomerMock = vi.fn()
 const MongoBusinessMock = vi.fn()
 const JWKSMock = vi.fn()
 const loggerChild = vi.fn()
-const loggerMock = { child: loggerChild, info: vi.fn() }
+const loggerMock = { child: loggerChild, info: vi.fn(), warn: vi.fn() }
 
 vi.doMock('../../../app/auth/authenticate.js', () => ({
   getAuthorisedEntity: getAuthorisedEntityMock
@@ -194,6 +194,49 @@ describe('context', () => {
 
       expect(RuralPaymentsBusinessMock).toHaveBeenCalledTimes(1)
       expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toBeNull()
+    })
+  })
+
+  describe('mapped Defra ID token', () => {
+    const mappedToken = jwt.sign({ contactId: '9100000001' }, 'test-secret')
+
+    afterEach(() => {
+      dummyCrnToSbiMapping.clear()
+    })
+
+    test('routes every Rural Payments data source internally as the DAL service account', async () => {
+      dummyCrnToSbiMapping.set('9100000001', new Set(['810000000']))
+      getAuthorisedEntityMock.mockResolvedValue({ user: 'test-user' })
+      loggerChild.mockReturnValue({ log: vi.fn(), warn: vi.fn() })
+      const configGetSpy = vi.spyOn(config, 'get').mockImplementation((path) => {
+        if (path === 'kits.dalServiceAccountEmail') return 'dal-service-account@example.com'
+        if (path === 'auth.disabled') return true
+        return undefined
+      })
+      const request = { headers: { 'x-forwarded-authorization': mappedToken } }
+
+      const result = await context({ request })
+
+      expect(result.defraIdContext.isMapped).toBe(true)
+      const expectedOptions = [
+        { logger: expect.anything() },
+        {
+          request: {
+            ...request,
+            headers: { ...request.headers, 'service-account': 'dal-service-account@example.com' }
+          },
+          defraIdContext: result.defraIdContext
+        }
+      ]
+      expect(RuralPaymentsBusinessMock).toHaveBeenCalledTimes(1)
+      expect(RuralPaymentsBusinessMock).toHaveBeenCalledWith(...expectedOptions)
+      expect(RuralPaymentsCustomerMock).toHaveBeenCalledWith(...expectedOptions)
+      expect(result.dataSources.ruralPaymentsReferenceData.gatewayType).toBe(
+        'rural-payments-dal-service-account'
+      )
+      expect(result.dataSources.serviceAccount.ruralPaymentsBusiness).toBeNull()
+
+      configGetSpy.mockRestore()
     })
   })
 

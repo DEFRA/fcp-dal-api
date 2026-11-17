@@ -41,14 +41,6 @@ async function buildContext(request) {
   const defraIdCtx = await defraIdContext(authContext, { traceId: request.traceId })
   const auditTrail = createAuditTrail(authContext)
 
-  const datasourceOptions = [
-    { logger: requestLogger },
-    {
-      request,
-      defraIdContext: defraIdCtx
-    }
-  ]
-
   const internalServiceAccountDatasourceOptions = [
     { logger: requestLogger },
     {
@@ -62,6 +54,20 @@ async function buildContext(request) {
       defraIdContext: defraIdCtx
     }
   ]
+
+  // A mapped Defra ID token has no real customer behind it and will be refused by
+  // the upstream service on the external route.  Instead, every Rural Payments request  will be
+  // routed to the internal gateway using the DAL service account.  The mapped context restricts
+  // which businesses can be accessed
+  const datasourceOptions = defraIdCtx?.isMapped
+    ? internalServiceAccountDatasourceOptions
+    : [
+        { logger: requestLogger },
+        {
+          request,
+          defraIdContext: defraIdCtx
+        }
+      ]
 
   const standardAuthRuralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
 

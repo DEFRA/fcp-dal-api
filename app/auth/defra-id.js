@@ -1,10 +1,11 @@
 import { decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
-import { config } from '../config.js'
+import { config, dummyCrnToSbiMapping } from '../config.js'
 import { DefraIdJWKS } from '../data-sources/DefraIdJWKS.js'
 import { BadRequest, Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_DEFRA_ID_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { maskAllButLastFour } from '../logger/utils.js'
+import { mappedDefraIdContext } from './dummy-defra-id.js'
 
 const defraIdJWKS = new DefraIdJWKS()
 
@@ -65,7 +66,9 @@ function extractOrgIdFromDefraIdToken(sbi, payload) {
  * Verifies the Defra ID token. Verification is only attempted when authContext.externalAuthHeader
  * is set - a request authenticated another way (internal email/service-account headers) carries no
  * Defra ID token at all, so this resolves to undefined. When the header is present, a failed
- * verification/decode throws an Unauthorized error
+ * verification/decode throws an Unauthorized error. In dev/test only, a token whose CRN is in the
+ * dummy CRN to SBI mapping returns a mapped context instead, without verification
+ * (see dummy-defra-id.js)
  *
  * @param {{ externalAuthHeader?: string }} authContext
  * @param {{ traceId: string, jwksDataSource?: DefraIdJWKS }} options
@@ -74,6 +77,16 @@ function extractOrgIdFromDefraIdToken(sbi, payload) {
 export const defraIdContext = async (authContext, { traceId, jwksDataSource = defraIdJWKS }) => {
   if (!authContext.externalAuthHeader) {
     return undefined
+  }
+
+  // DEV/TEST ONLY: the mapping is always empty elsewhere (enforced in config)
+  if (dummyCrnToSbiMapping.size) {
+    const mappedContext = mappedDefraIdContext(authContext.externalAuthHeader, { traceId })
+    if (mappedContext) {
+      // The CRN has been found in the mapping, so use it, otherwise drop down to the standard
+      // defra id verification.
+      return mappedContext
+    }
   }
 
   const tokenPayload = config.get('auth.disabled')
