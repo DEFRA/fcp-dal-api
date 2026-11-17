@@ -590,6 +590,34 @@ describe('auditPlugin', () => {
       )
     })
 
+    test('uses the dummy CRN for a mapped Defra ID token', async () => {
+      const publish = vi.fn()
+      const plugin = auditPlugin({ publish })
+
+      const request = {
+        ...baseContextValue.request,
+        headers: { 'x-forwarded-authorization': 'the-defra-id-token' }
+      }
+      const contextValue = {
+        ...baseContextValue,
+        request,
+        authContext: endUserAuthContext(request),
+        auditTrail: fakeAuditTrail({
+          business: { entities: [{ entity: 'business', action: 'read', entityid: '810000000' }] }
+        }),
+        defraIdContext: { isMapped: true, dummyCrn: '9100000001', crn: vi.fn() }
+      }
+      const listener = await plugin.requestDidStart()
+      const requestContext = { operationName: 'GetBusiness', contextValue, errors: undefined }
+      await listener.willSendResponse(requestContext)
+
+      expect(contextValue.defraIdContext.crn).not.toHaveBeenCalled()
+      expect(publish).toHaveBeenCalledWith(
+        expect.objectContaining({ user: 'IDM/9100000001' }),
+        baseContextValue.requestLogger
+      )
+    })
+
     test('falls back to "unknown" (and still publishes) when the Defra ID token cannot be verified', async () => {
       const publish = vi.fn()
       const plugin = auditPlugin({ publish })

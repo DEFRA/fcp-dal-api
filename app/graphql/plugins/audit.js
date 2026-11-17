@@ -57,6 +57,8 @@ function endUser(contextValue) {
     return authContext.internalAuthHeader
   } else if (authContext.serviceAccount) {
     return authContext.serviceAccount
+  } else if (contextValue.defraIdContext?.isMapped) {
+    return `IDM/${contextValue.defraIdContext.dummyCrn}`
   } else {
     try {
       return `IDM/${contextValue.defraIdContext.crn()}`
