@@ -6,6 +6,27 @@ import {
 } from '../../../transformers/rural-payments/business.js'
 
 /**
+ * @import {
+ *   GraphQLResolveInfo,
+ *   MutationUpdateBusinessAddressArgs,
+ *   MutationUpdateBusinessAllFieldsArgs,
+ *   MutationUpdateBusinessDateStartedFarmingArgs,
+ *   MutationUpdateBusinessDeactivateArgs,
+ *   MutationUpdateBusinessEmailArgs,
+ *   MutationUpdateBusinessLegalStatusArgs,
+ *   MutationUpdateBusinessLockArgs,
+ *   MutationUpdateBusinessNameArgs,
+ *   MutationUpdateBusinessPhoneArgs,
+ *   MutationUpdateBusinessReactivateArgs,
+ *   MutationUpdateBusinessRegistrationNumbersArgs,
+ *   MutationUpdateBusinessTypeArgs,
+ *   MutationUpdateBusinessUnlockArgs,
+ *   MutationUpdateBusinessVATArgs,
+ *   ResolverContext
+ * } from '../types.js'
+ */
+
+/**
  * GraphQL cannot express "at least one of" on an input type, so check that a phone has a number
  * @param {{ mobile?: string | null, landline?: string | null }} phone the phone from the input
  * @returns {void}
@@ -19,6 +40,21 @@ export const validatePhoneHasNumber = (phone) => {
   }
 }
 
+/**
+ * Resolves the `updateBusinessName`, `updateBusinessPhone`, `updateBusinessEmail`,
+ * `updateBusinessAddress` and `updateBusinessVAT` mutations
+ *
+ * @param {unknown} __
+ * @param {
+ *   | MutationUpdateBusinessNameArgs
+ *   | MutationUpdateBusinessPhoneArgs
+ *   | MutationUpdateBusinessEmailArgs
+ *   | MutationUpdateBusinessAddressArgs
+ *   | MutationUpdateBusinessVATArgs
+ * } args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 export const businessDetailsUpdateResolver = async (
   __,
   { input },
@@ -49,6 +85,20 @@ export const businessDetailsUpdateResolver = async (
   }
 }
 
+/**
+ * Resolves the `updateBusinessLegalStatus`, `updateBusinessType`,
+ * `updateBusinessDateStartedFarming` and `updateBusinessRegistrationNumbers` mutations
+ *
+ * @param {unknown} __
+ * @param {
+ *   | MutationUpdateBusinessLegalStatusArgs
+ *   | MutationUpdateBusinessTypeArgs
+ *   | MutationUpdateBusinessDateStartedFarmingArgs
+ *   | MutationUpdateBusinessRegistrationNumbersArgs
+ * } args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 export const businessAdditionalDetailsUpdateResolver = async (
   __,
   { input },
@@ -103,6 +153,14 @@ const withUpdateStatuses = (error, statuses) => {
   return new GraphQLError(error.message, { originalError: error, extensions: statuses })
 }
 
+/**
+ * Resolves the `updateBusinessAllFields` mutation
+ *
+ * @param {unknown} __
+ * @param {MutationUpdateBusinessAllFieldsArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 export const businessAllFieldsUpdateResolver = async (
   __,
   { input },
@@ -174,6 +232,12 @@ async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   return orgId
 }
 
+/**
+ * Look up the Rural Payments organisation id for a business
+ * @param {string} sbi Single Business Identifier: a unique 9-digit number
+ * @param {Pick<ResolverContext, 'dataSources' | 'defraIdContext'>} context
+ * @returns the organisation id
+ */
 export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
   if (defraIdContext) {
     // A defraIdContext is only built for externally authenticated requests, in which case the org
@@ -191,6 +255,10 @@ export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
 // Some fields must always be resolved against the internal gateway even when the request itself
 // arrived with external authorisation. Resolvers for those fields should call this instead of using
 // dataSources.ruralPaymentsBusiness directly.
+/**
+ * @param {Pick<ResolverContext, 'dataSources'> & { useServiceAccountForExternal?: boolean }} ctx
+ *   the resolver context, plus whether to use the service account for external requests
+ */
 export function getRuralPaymentsBusinessDataSource({
   dataSources,
   useServiceAccountForExternal = false
@@ -209,6 +277,14 @@ const validateLockUnlockInput = (input) => {
   }
 }
 
+/**
+ * Resolves the `updateBusinessLock` mutation
+ *
+ * @param {unknown} __
+ * @param {MutationUpdateBusinessLockArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 export const businessLockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...lockBodyAttributes } = input
   auditTrail?.recordAccount(info, 'sbi', sbi)
@@ -234,6 +310,14 @@ export const businessLockResolver = async (__, { input }, { dataSources, auditTr
   }
 }
 
+/**
+ * Resolves the `updateBusinessUnlock` mutation
+ *
+ * @param {unknown} __
+ * @param {MutationUpdateBusinessUnlockArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 export const businessUnlockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
   const { sbi, ...unlockBodyAttributes } = input
   auditTrail?.recordAccount(info, 'sbi', sbi)
@@ -259,6 +343,14 @@ export const businessUnlockResolver = async (__, { input }, { dataSources, audit
   }
 }
 
+/**
+ * Resolves the `updateBusinessReactivate` mutation
+ *
+ * @param {unknown} __
+ * @param {MutationUpdateBusinessReactivateArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 export const businessReactivateResolver = async (
   __,
   { input },
@@ -292,6 +384,14 @@ export const businessReactivateResolver = async (
   }
 }
 
+/**
+ * Resolves the `updateBusinessDeactivate` mutation
+ *
+ * @param {unknown} __
+ * @param {MutationUpdateBusinessDeactivateArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 export const businessDeactivateResolver = async (
   __,
   { input },

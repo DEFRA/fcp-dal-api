@@ -5,6 +5,34 @@ import { booleanise } from '../../../transformers/common.js'
 import { transformCustomerUpdateInputToPersonUpdate } from '../../../transformers/rural-payments/customer.js'
 import { retrievePersonIdByCRN, upsertPersonIdByCRN } from './common.js'
 
+/**
+ * @import {
+ *   GraphQLResolveInfo,
+ *   MutationCreateCustomerArgs,
+ *   MutationSendConfirmEmailAddressEmailArgs,
+ *   MutationUpdateCustomerAddressArgs,
+ *   MutationUpdateCustomerAllFieldsArgs,
+ *   MutationUpdateCustomerAuthenticationQuestionsArgs,
+ *   MutationUpdateCustomerDateOfBirthArgs,
+ *   MutationUpdateCustomerDoNotContactArgs,
+ *   MutationUpdateCustomerEmailArgs,
+ *   MutationUpdateCustomerNameArgs,
+ *   MutationUpdateCustomerPhoneArgs,
+ *   MutationUpdateDeactivateCustomerArgs,
+ *   MutationUpdateLockCustomerArgs,
+ *   MutationUpdateUnlockCustomerArgs,
+ *   ResolverContext
+ * } from '../types.js'
+ */
+
+/**
+ * Resolves the `createCustomer` mutation
+ *
+ * @param {unknown} _
+ * @param {MutationCreateCustomerArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 async function createCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
   let personCrn
   let personId
@@ -28,6 +56,24 @@ async function createCustomerResolver(_, { input }, { dataSources, auditTrail },
   }
 }
 
+/**
+ * Resolves the `updateCustomerAddress`, `updateCustomerDateOfBirth`, `updateCustomerEmail`,
+ * `updateCustomerName`, `updateCustomerPhone`, `updateCustomerDoNotContact` and
+ * `updateCustomerAllFields` mutations
+ *
+ * @param {unknown} _
+ * @param {
+ *   | MutationUpdateCustomerAddressArgs
+ *   | MutationUpdateCustomerDateOfBirthArgs
+ *   | MutationUpdateCustomerEmailArgs
+ *   | MutationUpdateCustomerNameArgs
+ *   | MutationUpdateCustomerPhoneArgs
+ *   | MutationUpdateCustomerDoNotContactArgs
+ *   | MutationUpdateCustomerAllFieldsArgs
+ * } args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 async function updateCustomerResolver(_, { input }, { dataSources, auditTrail }, info) {
   auditTrail?.recordAccount(info, 'crn', input.crn)
   auditTrail?.recordEntity(info, {
@@ -66,6 +112,14 @@ async function updateCustomerResolver(_, { input }, { dataSources, auditTrail },
 
 // Only available to external users (see the @auth userType restriction), so the customer is always
 // the one identified by the CRN in the request's Defra ID token.
+/**
+ * Resolves the `sendConfirmEmailAddressEmail` mutation
+ *
+ * @param {unknown} _
+ * @param {MutationSendConfirmEmailAddressEmailArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 async function sendConfirmEmailAddressEmailResolver(
   _,
   { input },
@@ -141,6 +195,14 @@ async function sendConfirmEmailAddressEmailResolver(
   }
 }
 
+/**
+ * Resolves the `updateLockCustomer` mutation
+ *
+ * @param {unknown} _
+ * @param {MutationUpdateLockCustomerArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 async function updateLockCustomerResolver(
   _,
   { input: { crn, reason, note } },
@@ -169,6 +231,14 @@ async function updateLockCustomerResolver(
   }
 }
 
+/**
+ * Resolves the `updateUnlockCustomer` mutation
+ *
+ * @param {unknown} _
+ * @param {MutationUpdateUnlockCustomerArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 async function updateUnlockCustomerResolver(
   _,
   { input: { crn, reason, note } },
@@ -197,6 +267,14 @@ async function updateUnlockCustomerResolver(
   }
 }
 
+/**
+ * Resolves the `updateDeactivateCustomer` mutation
+ *
+ * @param {unknown} _
+ * @param {MutationUpdateDeactivateCustomerArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 async function updateDeactivateCustomerResolver(
   _,
   { input: { crn, reason, note } },
@@ -219,6 +297,14 @@ async function updateDeactivateCustomerResolver(
   }
 }
 
+/**
+ * Resolves the `updateCustomerAuthenticationQuestions` mutation
+ *
+ * @param {unknown} _
+ * @param {MutationUpdateCustomerAuthenticationQuestionsArgs} args
+ * @param {ResolverContext} context
+ * @param {GraphQLResolveInfo} info
+ */
 async function updateCustomerAuthenticationQuestionsResolver(
   _,
   { input: { crn, memorableDate, memorableEvent, memorableLocation } },

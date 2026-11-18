@@ -11,7 +11,48 @@ import {
 import { validateDateInput } from '../../../utils/date.js'
 import { getRuralPaymentsBusinessDataSource } from './common.js'
 
+/**
+ * @import {
+ *   BusinessLandParcelArgs,
+ *   BusinessLandParcelCoversArgs,
+ *   BusinessLandParcelLandUsesArgs,
+ *   BusinessLandParcelsArgs,
+ *   BusinessLandSummaryArgs,
+ *   GraphQLResolveInfo,
+ *   ResolverContext
+ * } from '../types.js'
+ */
+
+/**
+ * The land returned by `Business.land`
+ * @typedef {object} BusinessLandParent
+ * @property {string} organisationId the Rural Payments id of the business
+ * @property {string} [sbi] Single Business Identifier: a unique 9-digit number
+ */
+
+/**
+ * A parcel returned by `BusinessLand.parcels`/`BusinessLand.parcel`
+ * @typedef {object} BusinessLandParcelParent
+ * @property {string} organisationId the Rural Payments id of the business
+ * @property {string} sheetId
+ * @property {string} parcelId
+ * @property {string | Date} date the date the parcel was requested for
+ */
+
+/**
+ * The land summary returned by `BusinessLand.summary`
+ * @typedef {object} BusinessLandSummaryParent
+ * @property {string} organisationId the Rural Payments id of the business
+ * @property {string | Date} [date] the date the summary was requested for
+ */
+
 export const BusinessLand = {
+  /**
+   * @param {BusinessLandParent} parent
+   * @param {BusinessLandSummaryArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   summary({ organisationId, sbi }, { date }, { auditTrail }, info) {
     auditTrail?.recordEntity(info, {
       entity: 'land-summary',
@@ -22,6 +63,12 @@ export const BusinessLand = {
     return { organisationId, date }
   },
 
+  /**
+   * @param {BusinessLandParent} parent
+   * @param {BusinessLandParcelArgs} args
+   * @param {Partial<ResolverContext> & Pick<ResolverContext, 'dataSources'>} context
+   * @param {GraphQLResolveInfo} [info]
+   */
   async parcel(
     { organisationId, sbi },
     { date = new Date(), parcelId, sheetId },
@@ -49,6 +96,12 @@ export const BusinessLand = {
     }
   },
 
+  /**
+   * @param {BusinessLandParent} parent
+   * @param {BusinessLandParcelsArgs} args
+   * @param {Partial<ResolverContext> & Pick<ResolverContext, 'dataSources'>} context
+   * @param {GraphQLResolveInfo} [info]
+   */
   async parcels({ organisationId, sbi }, { date = new Date() }, { dataSources, auditTrail }, info) {
     auditTrail?.recordEntity(info, {
       entity: 'parcel-list',
@@ -65,6 +118,12 @@ export const BusinessLand = {
     )
   },
 
+  /**
+   * @param {BusinessLandParent} parent
+   * @param {BusinessLandParcelCoversArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async parcelCovers(
     { organisationId },
     { date = new Date(), sheetId, parcelId },
@@ -94,6 +153,12 @@ export const BusinessLand = {
     )
   },
 
+  /**
+   * @param {BusinessLandParent} parent
+   * @param {BusinessLandParcelLandUsesArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, context, info) {
     const { auditTrail } = context
     auditTrail?.recordEntity(info, {
@@ -126,12 +191,22 @@ const getParcelEffectiveDates = async (
 }
 
 export const BusinessLandParcel = {
+  /**
+   * @param {BusinessLandParcelParent} parcel
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   */
   async effectiveToDate(parcel, __, { dataSources }) {
     const { effectiveTo } = await getParcelEffectiveDates(dataSources, parcel)
 
     return effectiveTo
   },
 
+  /**
+   * @param {BusinessLandParcelParent} parcel
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   */
   async effectiveFromDate(parcel, __, { dataSources }) {
     const { effectiveFrom } = await getParcelEffectiveDates(dataSources, parcel)
 
@@ -140,6 +215,11 @@ export const BusinessLandParcel = {
 }
 
 export const BusinessLandSummary = {
+  /**
+   * @param {BusinessLandSummaryParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   */
   async totalParcels({ organisationId, date = new Date() }, __, { dataSources }) {
     return transformTotalParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
@@ -149,6 +229,11 @@ export const BusinessLandSummary = {
     )
   },
 
+  /**
+   * @param {BusinessLandSummaryParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   */
   async totalArea({ organisationId, date = new Date() }, __, { dataSources }) {
     return transformTotalArea(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
@@ -158,6 +243,11 @@ export const BusinessLandSummary = {
     )
   },
 
+  /**
+   * @param {BusinessLandSummaryParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   */
   async arableLandArea({ organisationId, date = new Date() }, __, { dataSources }) {
     return transformLandCoversToArea(
       'Arable Land',
@@ -168,6 +258,11 @@ export const BusinessLandSummary = {
     )
   },
 
+  /**
+   * @param {BusinessLandSummaryParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   */
   async permanentGrasslandArea({ organisationId, date = new Date() }, __, { dataSources }) {
     return transformLandCoversToArea(
       'Permanent Grassland',
@@ -178,6 +273,11 @@ export const BusinessLandSummary = {
     )
   },
 
+  /**
+   * @param {BusinessLandSummaryParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   */
   async permanentCropsArea({ organisationId, date = new Date() }, __, { dataSources }) {
     return transformLandCoversToArea(
       'Permanent Crops',

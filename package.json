@@ -20,6 +20,7 @@
     "start:debug": "nodemon --ext js,gql --watch app/ -x 'node --inspect-brk=0.0.0.0 -r dotenv/config app/index.js'",
     "start:proxy": "docker run --rm --net=host --name fcp-dal-api-proxy -v $(pwd)/test/acceptance/squid.conf:/etc/squid/squid.conf ubuntu/squid",
     "schema:print": "node -r dotenv/config scripts/print-schema.js",
+    "schema:types": "node scripts/generate-resolver-types.js",
     "schema:type:similarity": "npm run schema:print && graphql-inspector similar ./schema.graphql",
     "test:acceptance:coverage": "export DOTENV_CONFIG_PATH=./.env.test && npm run schema:print && graphql-inspector coverage 'test/acceptance/**/*.js' ./schema.graphql -w schema-coverage.json && node scripts/check-schema-coverage.js schema-coverage.json",
     "test:acceptance": "vitest run --config vitest.acceptance.config.js",
@@ -33,7 +34,8 @@
     "test:unit:watch": "DOTENV_CONFIG_PATH=./.env.test vitest test/unit",
     "test:graphql": "DOTENV_CONFIG_PATH=./.env.test vitest run test/graphql",
     "test": "DOTENV_CONFIG_PATH=./.env.test vitest run test/unit test/graphql --coverage",
-    "check:synthetic-ids": "sfd-id-check --staged"
+    "check:synthetic-ids": "sfd-id-check --staged",
+    "type-check": "npx -y -p typescript tsc --noEmit -p jsconfig.json"
   },
   "author": "Defra",
   "contributors": [],
