@@ -14,7 +14,31 @@ import {
 import { validateDateInput } from '../../../utils/date.js'
 import { getRuralPaymentsBusinessDataSource } from './common.js'
 
+/**
+ * @import {
+ *   BusinessCustomerArgs,
+ *   BusinessPaymentsArgs,
+ *   BusinessPermittedFunctionsArgs,
+ *   GraphQLResolveInfo,
+ *   ResolverContext
+ * } from '../types.js'
+ */
+
+/**
+ * The business returned by `Query.business` and the business mutations
+ * @typedef {object} BusinessParent
+ * @property {string} sbi Single Business Identifier: a unique 9-digit number
+ * @property {string} organisationId the Rural Payments id of the business
+ * @property {object} [info] the business info, when the parent resolver has already fetched it
+ */
+
 export const Business = {
+  /**
+   * @param {BusinessParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async info({ organisationId, sbi, info: businessInfo }, __, { dataSources, auditTrail }, info) {
     if (businessInfo) {
       return businessInfo
@@ -25,10 +49,19 @@ export const Business = {
     return transformOrganisationToBusiness(response).info
   },
 
+  /**
+   * @param {BusinessParent} parent
+   */
   land({ organisationId, sbi }) {
     return { organisationId, sbi }
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async countyParishHoldings({ sbi }, __, context, info) {
     const { auditTrail } = context
     auditTrail?.recordEntity(info, { entity: 'cph-list', action: 'read', entityid: sbi })
@@ -40,6 +73,12 @@ export const Business = {
     return transformCountyParishHoldings(countyParishHoldings)
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {unknown} _
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async customers({ organisationId, sbi }, _, { dataSources, auditTrail }, info) {
     auditTrail?.recordEntity(info, { entity: 'person-list', action: 'read', entityid: sbi })
     const customers =
@@ -50,6 +89,12 @@ export const Business = {
     return transformOrganisationCustomers(customers, sbi)
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {BusinessCustomerArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async customer(
     { organisationId, sbi },
     { crn },
@@ -78,6 +123,12 @@ export const Business = {
     return transformOrganisationCustomer(customer, sbi)
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {unknown} _
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async agreements({ sbi }, _, context, info) {
     const { auditTrail } = context
     auditTrail?.recordEntity(info, { entity: 'agreement-list', action: 'read', entityid: sbi })
@@ -89,6 +140,12 @@ export const Business = {
     return transformAgreements(agreements)
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {unknown} _
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async applications({ sbi }, _, context, info) {
     const { auditTrail } = context
     auditTrail?.recordEntity(info, { entity: 'application-list', action: 'read', entityid: sbi })
@@ -100,6 +157,12 @@ export const Business = {
     return transformApplications(applications)
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {BusinessPermittedFunctionsArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async permittedFunctions(
     { organisationId, sbi },
     { functions },
@@ -120,6 +183,12 @@ export const Business = {
     return functions.map((name) => ({ name, permitted: authorisedFunctions?.[name] ?? false }))
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async bankAccounts({ organisationId }, __, { dataSources, auditTrail }, info) {
     let frn
     try {
@@ -140,6 +209,12 @@ export const Business = {
     return response?.accounts ?? []
   },
 
+  /**
+   * @param {BusinessParent} parent
+   * @param {BusinessPaymentsArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources, auditTrail }, info) {
     // the Date scalar is passed through as a string, so convert it before use
     fromDate = fromDate && validateDateInput(fromDate)
@@ -173,6 +248,12 @@ export const Business = {
 }
 
 export const BusinessCustomer = {
+  /**
+   * @param {{ privileges: string[], sbi: string, crn: string }} parent
+   * @param {unknown} __
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async permissionGroups({ privileges, sbi, crn }, __, { dataSources, auditTrail }, info) {
     auditTrail?.recordEntity(info, {
       entity: 'permission-list',

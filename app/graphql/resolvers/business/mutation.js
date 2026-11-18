@@ -20,6 +20,19 @@ import {
 } from './common.js'
 import { Query } from './query.js'
 
+/**
+ * @import {
+ *   GraphQLResolveInfo,
+ *   MutationAddCustomerToBusinessArgs,
+ *   MutationCreateBusinessArgs,
+ *   MutationCreateBusinessCustomerBankDetailsArgs,
+ *   MutationDeleteCustomerFromBusinessArgs,
+ *   MutationUpdateCustomerPermissionsAndRelationshipToBusinessArgs,
+ *   MutationValidateBusinessCustomerBankDetailsArgs,
+ *   ResolverContext
+ * } from '../types.js'
+ */
+
 const getOrganisation = async (dataSources, sbi) => {
   const { ruralPaymentsBusiness } = dataSources
   const organisation = await ruralPaymentsBusiness.getOrganisationBySBI(sbi)
@@ -149,6 +162,12 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
 }
 
 export const Mutation = {
+  /**
+   * @param {unknown} _
+   * @param {MutationCreateBusinessArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   createBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
     const { crn, ...businessDetails } = input
     let business
@@ -174,6 +193,12 @@ export const Mutation = {
     }
     return { success: true, business }
   },
+  /**
+   * @param {unknown} _
+   * @param {MutationCreateBusinessCustomerBankDetailsArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   createBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
@@ -202,6 +227,12 @@ export const Mutation = {
     await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
     return { __typename: 'BankDetailsSubmitted', success: true }
   },
+  /**
+   * @param {unknown} _
+   * @param {MutationValidateBusinessCustomerBankDetailsArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   validateBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
@@ -253,6 +284,12 @@ export const Mutation = {
   updateBusinessReactivate: businessReactivateResolver,
   updateBusinessDeactivate: businessDeactivateResolver,
 
+  /**
+   * @param {unknown} _
+   * @param {MutationAddCustomerToBusinessArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   addCustomerToBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
     const { organisationId, body } = await buildCustomerAuthorisationRequest({
       input,
@@ -268,6 +305,12 @@ export const Mutation = {
     )
   },
 
+  /**
+   * @param {unknown} _
+   * @param {MutationUpdateCustomerPermissionsAndRelationshipToBusinessArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   updateCustomerPermissionsAndRelationshipToBusiness: async (
     _,
     { input },
@@ -289,6 +332,12 @@ export const Mutation = {
     )
   },
 
+  /**
+   * @param {unknown} _
+   * @param {MutationDeleteCustomerFromBusinessArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   deleteCustomerFromBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
     // Rural Payments removes the customer from the business when the update is sent with
     // no roles and no privileges
@@ -309,6 +358,11 @@ export const Mutation = {
 }
 
 export const UpdateBusinessResponse = {
+  /**
+   * @param {{ business: { sbi: string } }} parent
+   * @param {unknown} _
+   * @param {ResolverContext} context
+   */
   business({ business: { sbi } }, _, context) {
     return Query.business({}, { sbi }, context)
   }

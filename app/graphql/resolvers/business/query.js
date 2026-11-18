@@ -2,7 +2,22 @@ import { transformPageInfo } from '../../../transformers/common.js'
 import { transformOrganisationSearchResult } from '../../../transformers/rural-payments/business.js'
 import { retrieveOrgIdBySbi } from './common.js'
 
+/**
+ * @import {
+ *   GraphQLResolveInfo,
+ *   QueryBusinessArgs,
+ *   QueryBusinessSearchArgs,
+ *   ResolverContext
+ * } from '../types.js'
+ */
+
 export const Query = {
+  /**
+   * @param {unknown} __
+   * @param {QueryBusinessArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} [info] omitted when called by `UpdateBusinessResponse.business`
+   */
   async business(__, { sbi }, { dataSources, auditTrail, defraIdContext }, info) {
     auditTrail?.recordAccount(info, 'sbi', sbi)
     const organisationId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
@@ -17,6 +32,12 @@ export const Query = {
     }
   },
 
+  /**
+   * @param {unknown} __
+   * @param {QueryBusinessSearchArgs} args
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async businessSearch(
     __,
     { searchString, searchType, pagination },

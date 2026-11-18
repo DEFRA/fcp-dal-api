@@ -1,3 +1,7 @@
+/**
+ * @import { GraphQLResolveInfo, ResolverContext } from '../types.js'
+ */
+
 export const Query = {
   referenceData() {
     return {}
@@ -5,6 +9,12 @@ export const Query = {
 }
 
 export const ReferenceData = {
+  /**
+   * @param {unknown} __
+   * @param {unknown} ___
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async countriesCurrencies(__, ___, { dataSources, auditTrail }, info) {
     auditTrail?.recordEntity(info, {
       entity: 'reference-data',
@@ -15,6 +25,12 @@ export const ReferenceData = {
     return Object.entries(countriesCurrency).map(([code, currency]) => ({ code, currency }))
   },
 
+  /**
+   * @param {unknown} __
+   * @param {unknown} ___
+   * @param {ResolverContext} context
+   * @param {GraphQLResolveInfo} info
+   */
   async legalStatuses(__, ___, { dataSources, auditTrail }, info) {
     auditTrail?.recordEntity(info, {
       entity: 'reference-data',
