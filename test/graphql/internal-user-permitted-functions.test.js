@@ -18,7 +18,7 @@ const query = `#graphql
 
 // Note the pipe separating function names must be URL-encoded (%7C)
 const authorisationPath =
-  /^\/SitiAgriApi\/authorisation\/byFunction\?functions=[^|&]+(%7C[^|&]+)*&module=CUST_SS_PORTAL&timestamp=\d+$/
+  /^\/SitiAgriApi\/authorisation\/byFunction\?functions=[^%|&]+(%7C[^%|&]+)*&module=CUST_SS_PORTAL&timestamp=\d+$/
 
 // The `functions` query parameter is present but empty when no (non-empty) function names are
 // requested
