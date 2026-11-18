@@ -1,5 +1,9 @@
 import { transformPageInfo } from '../../../transformers/common.js'
-import { transformPersonSearchResult } from '../../../transformers/rural-payments/customer.js'
+import {
+  transformCustomerDuplicateInputToPersonDuplicateRequest,
+  transformPersonDuplicateToCustomerDuplicate,
+  transformPersonSearchResult
+} from '../../../transformers/rural-payments/customer.js'
 import { retrievePersonIdByCRN } from './common.js'
 
 export const Query = {
@@ -44,5 +48,26 @@ export const Query = {
     })
     const { emailDuplicated } = await dataSources.ruralPaymentsCustomer.validateEmail(email)
     return emailDuplicated
+  },
+
+  async customerDuplicate(__, { input }, { dataSources, auditTrail }, info) {
+    let duplicate = null
+    try {
+      const personId = input.crn ? await retrievePersonIdByCRN(input.crn, dataSources) : null
+      duplicate = await dataSources.ruralPaymentsCustomer.checkPersonDuplicates(
+        transformCustomerDuplicateInputToPersonDuplicateRequest(input, personId)
+      )
+    } finally {
+      const duplicateCrn = duplicate?.customerReferenceNumber
+      auditTrail?.recordEntity(info, {
+        entity: 'person',
+        action: 'read-duplicate',
+        ...(duplicateCrn ? { entityid: duplicateCrn } : {})
+      })
+      if (duplicateCrn) {
+        auditTrail?.recordAccount(info, 'crn', duplicateCrn)
+      }
+    }
+    return duplicate ? transformPersonDuplicateToCustomerDuplicate(duplicate) : null
   }
 }

@@ -10,7 +10,8 @@ describe('Customer Query Resolver', () => {
       ruralPaymentsCustomer: {
         getPersonIdByCRN: vi.fn(),
         personSearch: vi.fn(),
-        validateEmail: vi.fn()
+        validateEmail: vi.fn(),
+        checkPersonDuplicates: vi.fn()
       },
       mongoCustomer: {
         findPersonIdByCRN: vi.fn(),
@@ -114,6 +115,139 @@ describe('Customer Query Resolver', () => {
     )
 
     expect(result).toBe(false)
+  })
+
+  describe('customerDuplicate', () => {
+    const duplicate = {
+      id: 456,
+      customerReferenceNumber: '9876543210',
+      firstName: 'Jon',
+      lastName: 'Doe',
+      dateOfBirth: Date.UTC(1980, 5, 10),
+      landline: null,
+      mobile: '07123456789'
+    }
+
+    it('returns the matching customer', async () => {
+      mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates.mockResolvedValue(duplicate)
+
+      const result = await Query.customerDuplicate(
+        null,
+        { input: { first: 'Jon', last: 'Doe', phone: { mobile: '07123456789' } } },
+        { dataSources: mockDataSources }
+      )
+
+      expect(mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates).toHaveBeenCalledWith({
+        id: null,
+        firstName: 'Jon',
+        lastName: 'Doe',
+        dateOfBirth: null,
+        landline: null,
+        mobile: '07123456789'
+      })
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).not.toHaveBeenCalled()
+      expect(result).toEqual({
+        crn: '9876543210',
+        personId: '456',
+        first: 'Jon',
+        last: 'Doe',
+        dateOfBirth: '1980-06-10',
+        phone: { mobile: '07123456789', landline: null }
+      })
+    })
+
+    it('excludes the customer with the given CRN from the check', async () => {
+      mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
+      mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates.mockResolvedValue(null)
+
+      await Query.customerDuplicate(
+        null,
+        { input: { crn: '9123456789', first: 'Jon', last: 'Doe' } },
+        { dataSources: mockDataSources }
+      )
+
+      expect(mockDataSources.mongoCustomer.findPersonIdByCRN).toHaveBeenCalledWith('9123456789')
+      expect(mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 123 })
+      )
+    })
+
+    it('returns null when there is no match', async () => {
+      mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates.mockResolvedValue(null)
+
+      const result = await Query.customerDuplicate(
+        null,
+        { input: { first: 'Jon', last: 'Doe' } },
+        { dataSources: mockDataSources }
+      )
+
+      expect(result).toBeNull()
+    })
+
+    describe('audit trail', () => {
+      const info = { path: { key: 'customerDuplicate', typename: 'Query', prev: undefined } }
+      let auditTrail
+
+      beforeEach(() => {
+        auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+      })
+
+      it('records the matching CRN as the entity and as an account', async () => {
+        mockDataSources.mongoCustomer.findPersonIdByCRN.mockResolvedValue(123)
+        mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates.mockResolvedValue(duplicate)
+
+        await Query.customerDuplicate(
+          null,
+          { input: { crn: '9123456789', first: 'Jon', last: 'Doe' } },
+          { dataSources: mockDataSources, auditTrail },
+          info
+        )
+
+        expect(auditTrail.recordEntity).toHaveBeenCalledExactlyOnceWith(info, {
+          entity: 'person',
+          action: 'read-duplicate',
+          entityid: '9876543210'
+        })
+        expect(auditTrail.recordAccount).toHaveBeenCalledExactlyOnceWith(info, 'crn', '9876543210')
+      })
+
+      it('records the entity without an entityid or account when there is no match', async () => {
+        mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates.mockResolvedValue(null)
+
+        await Query.customerDuplicate(
+          null,
+          { input: { first: 'Jon', last: 'Doe' } },
+          { dataSources: mockDataSources, auditTrail },
+          info
+        )
+
+        expect(auditTrail.recordEntity).toHaveBeenCalledExactlyOnceWith(info, {
+          entity: 'person',
+          action: 'read-duplicate'
+        })
+        expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+      })
+
+      it('still records the entity when the check fails', async () => {
+        const error = new Error('upstream failure')
+        mockDataSources.ruralPaymentsCustomer.checkPersonDuplicates.mockRejectedValue(error)
+
+        await expect(
+          Query.customerDuplicate(
+            null,
+            { input: { first: 'Jon', last: 'Doe' } },
+            { dataSources: mockDataSources, auditTrail },
+            info
+          )
+        ).rejects.toBe(error)
+
+        expect(auditTrail.recordEntity).toHaveBeenCalledExactlyOnceWith(info, {
+          entity: 'person',
+          action: 'read-duplicate'
+        })
+        expect(auditTrail.recordAccount).not.toHaveBeenCalled()
+      })
+    })
   })
 
   describe('audit trail', () => {

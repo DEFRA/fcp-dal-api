@@ -1,4 +1,8 @@
-import { validateUpstreamTimestamp, validateUpstreamTimestampToISO } from '../../utils/date.js'
+import {
+  validateDateInput,
+  validateUpstreamTimestamp,
+  validateUpstreamTimestampToISO
+} from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
 import { booleanise, kitsAddressToDalAddress, transformEntityStatus } from '../common.js'
 
@@ -91,6 +95,40 @@ export const transformPersonSearchResult = (data) => ({
   nationalInsuranceNumber: data?.nationalInsuranceNumber,
   email: data?.email,
   status: transformEntityStatus(data)
+})
+
+// Upstream treats a missing date of birth or phone number as "has none", so send null rather than
+// omitting the field, and treat a blank phone number the same as a missing one
+const blankToNull = (value) => (value?.trim() ? value : null)
+
+/**
+ * Builds the rural payments person duplicate check request from a CustomerDuplicateInput.
+ *
+ * @param {object} input - The CustomerDuplicateInput.
+ * @param {string | number | null} [personId] - Rural payments ID of a person to leave out of the
+ * check.
+ * @returns {object} The PersonDuplicateRequest body.
+ * @throws {BadRequest} When the date of birth is not a valid date.
+ */
+export const transformCustomerDuplicateInputToPersonDuplicateRequest = (input, personId) => ({
+  id: personId ?? null,
+  firstName: input.first,
+  lastName: input.last,
+  dateOfBirth: input.dateOfBirth ? dob2utc(validateDateInput(input.dateOfBirth).getTime()) : null,
+  landline: blankToNull(input.phone?.landline),
+  mobile: blankToNull(input.phone?.mobile)
+})
+
+export const transformPersonDuplicateToCustomerDuplicate = (data) => ({
+  crn: data.customerReferenceNumber,
+  personId: data.id?.toString(),
+  first: data.firstName,
+  last: data.lastName,
+  dateOfBirth: validateUpstreamTimestampToISO(dob2utc(data.dateOfBirth))?.substring(0, 10) ?? null,
+  phone: {
+    mobile: data.mobile,
+    landline: data.landline
+  }
 })
 
 export function transformNotificationsToMessages(notifications = []) {
