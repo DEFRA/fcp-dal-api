@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql'
-import { BadRequest } from '../../../errors/graphql.js'
+import { BadRequest, NotFound } from '../../../errors/graphql.js'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
@@ -185,6 +185,32 @@ export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
   return (
     (await mongoBusiness.getOrgIdBySbi(sbi)) ??
     upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
+  )
+}
+
+async function fetchAndCacheFrnBySbi(sbi, { dataSources, defraIdContext }) {
+  // Reuses the orgId lookup (token, then Mongo cache, then upstream search), so only the
+  // organisation fetch is guaranteed to hit Rural Payments
+  const orgId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
+  const { businessReference: frn } =
+    await dataSources.ruralPaymentsBusiness.getOrganisationById(orgId)
+
+  if (!frn) {
+    throw new NotFound('FRN not found for business')
+  }
+
+  await dataSources.mongoBusiness.upsertFrnBySbi(sbi, frn)
+  return frn
+}
+
+export async function retrieveFrnBySbi(sbi, { dataSources, defraIdContext }) {
+  if (defraIdContext) {
+    defraIdContext.orgId(sbi) // throws unless the SBI is in the caller's token
+  }
+
+  return (
+    (await dataSources.mongoBusiness.getFrnBySbi(sbi)) ??
+    fetchAndCacheFrnBySbi(sbi, { dataSources, defraIdContext })
   )
 }
 

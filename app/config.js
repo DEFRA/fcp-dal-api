@@ -396,7 +396,7 @@ export const config = convict({
         env: 'MONGO_CUSTOMER_CACHE_TTL_SECONDS'
       },
       businesses: {
-        doc: 'TTL in seconds for cached SBI -> orgId documents in the businesses collection',
+        doc: 'TTL in seconds for cached SBI -> orgId and SBI -> frn documents in the businesses collection',
         format: 'nat',
         default: 86400, // 24 hours
         env: 'MONGO_BUSINESS_CACHE_TTL_SECONDS'

@@ -9,6 +9,7 @@ import {
   businessReactivateResolver,
   businessUnlockResolver,
   getRuralPaymentsBusinessDataSource,
+  retrieveFrnBySbi,
   retrieveOrgIdBySbi,
   validatePhoneHasNumber
 } from '../../../../app/graphql/resolvers/business/common.js'
@@ -57,6 +58,144 @@ describe('retrieveOrgIdBySbi', () => {
     expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
     expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+  })
+})
+
+describe('retrieveFrnBySbi', () => {
+  let dataSources
+
+  beforeEach(() => {
+    dataSources = {
+      mongoBusiness: {
+        getFrnBySbi: vi.fn(),
+        upsertFrnBySbi: vi.fn(),
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      },
+      ruralPaymentsBusiness: {
+        getOrganisationIdBySBI: vi.fn(),
+        getOrganisationById: vi.fn()
+      }
+    }
+  })
+
+  describe('without a defraIdContext (internal request)', () => {
+    it('returns the cached frn without calling upstream', async () => {
+      dataSources.mongoBusiness.getFrnBySbi.mockResolvedValue('cachedFrn')
+
+      const result = await retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
+
+      expect(result).toBe('cachedFrn')
+      expect(dataSources.mongoBusiness.getFrnBySbi).toHaveBeenCalledWith('123')
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
+      expect(dataSources.mongoBusiness.upsertFrnBySbi).not.toHaveBeenCalled()
+    })
+
+    it('uses the cached orgId to fetch the organisation and caches the frn on a cache miss', async () => {
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('cachedOrgId')
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+        id: 'cachedOrgId',
+        businessReference: 'upstreamFrn'
+      })
+
+      const result = await retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
+
+      expect(result).toBe('upstreamFrn')
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+        'cachedOrgId'
+      )
+      expect(dataSources.mongoBusiness.upsertFrnBySbi).toHaveBeenCalledWith('123', 'upstreamFrn')
+    })
+
+    it('looks up and caches the orgId upstream when neither the frn nor the orgId is cached', async () => {
+      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('upstreamOrgId')
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+        id: 'upstreamOrgId',
+        businessReference: 'upstreamFrn'
+      })
+
+      const result = await retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
+
+      expect(result).toBe('upstreamFrn')
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+      expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith(
+        '123',
+        'upstreamOrgId'
+      )
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+        'upstreamOrgId'
+      )
+      expect(dataSources.mongoBusiness.upsertFrnBySbi).toHaveBeenCalledWith('123', 'upstreamFrn')
+    })
+
+    it('throws NotFound and caches nothing when the organisation has no frn', async () => {
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('cachedOrgId')
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ id: 'cachedOrgId' })
+
+      await expect(
+        retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
+      ).rejects.toThrow(new NotFound('FRN not found for business'))
+      expect(dataSources.mongoBusiness.upsertFrnBySbi).not.toHaveBeenCalled()
+    })
+
+    it('propagates upstream errors without caching', async () => {
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('cachedOrgId')
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValue(
+        new Error('upstream failure')
+      )
+
+      await expect(
+        retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
+      ).rejects.toThrow('upstream failure')
+      expect(dataSources.mongoBusiness.upsertFrnBySbi).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('with a defraIdContext (external request)', () => {
+    it('checks the sbi against the token before returning a cached frn', async () => {
+      const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
+      dataSources.mongoBusiness.getFrnBySbi.mockResolvedValue('cachedFrn')
+
+      const result = await retrieveFrnBySbi('123', { dataSources, defraIdContext })
+
+      expect(result).toBe('cachedFrn')
+      expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
+    })
+
+    it('throws without reading the cache when the sbi is not in the token', async () => {
+      const defraIdContext = {
+        orgId: vi.fn(() => {
+          throw new BadRequest('Defra ID token is not valid for the provided SBI')
+        })
+      }
+      dataSources.mongoBusiness.getFrnBySbi.mockResolvedValue('someoneElsesFrn')
+
+      await expect(retrieveFrnBySbi('123', { dataSources, defraIdContext })).rejects.toThrow(
+        BadRequest
+      )
+      expect(dataSources.mongoBusiness.getFrnBySbi).not.toHaveBeenCalled()
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
+    })
+
+    it('uses the orgId from the token, not mongo or search, on a cache miss', async () => {
+      const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
+      dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+        id: 'orgIdFromToken',
+        businessReference: 'upstreamFrn'
+      })
+
+      const result = await retrieveFrnBySbi('123', { dataSources, defraIdContext })
+
+      expect(result).toBe('upstreamFrn')
+      expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+      expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+        'orgIdFromToken'
+      )
+      expect(dataSources.mongoBusiness.upsertFrnBySbi).toHaveBeenCalledWith('123', 'upstreamFrn')
+    })
   })
 })
 

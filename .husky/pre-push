@@ -14,3 +14,8 @@ if ! ./node_modules/.bin/semver -r ">${REMOTE_VERSION}" "${LOCAL_VERSION}" > /de
   exit 1
 fi
 
+
+if ! ./node_modules/.bin/sfd-id-check --base origin/main --head HEAD ; then
+  echo "ERROR: Branch contains possible real CRNs/SBIs (see above). Use synthetic identifiers before pushing."
+  exit 1
+fi

@@ -17,4 +17,21 @@ export class MongoBusiness extends MongoDataSource {
       { upsert: true }
     )
   }
+
+  async upsertFrnBySbi(sbi, frn) {
+    const now = new Date()
+    return this.collection.updateOne(
+      { _id: sbi },
+      {
+        $set: { frn, updatedAt: now },
+        $setOnInsert: { createdAt: now }
+      },
+      { upsert: true }
+    )
+  }
+
+  async getFrnBySbi(sbi) {
+    const org = await this.collection.findOne({ _id: sbi })
+    return org?.frn
+  }
 }
