@@ -55,6 +55,43 @@ describe('MongoBusiness', () => {
     )
   })
 
+  it('getFrnBySbi sbi doesnt exist', async () => {
+    mockCollection.findOne.mockReturnValue(null)
+    const result = await mongoBusiness.getFrnBySbi('823456789')
+    expect(result).toBeUndefined()
+    expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '823456789' })
+  })
+
+  it('getFrnBySbi sbi exists without a cached frn', async () => {
+    mockCollection.findOne.mockReturnValue({ _id: '823456789', orgId: 'orgId' })
+    const result = await mongoBusiness.getFrnBySbi('823456789')
+    expect(result).toBeUndefined()
+  })
+
+  it('getFrnBySbi sbi does exist', async () => {
+    mockCollection.findOne.mockReturnValue({ _id: '823456789', orgId: 'orgId', frn: '9102658375' })
+    const result = await mongoBusiness.getFrnBySbi('823456789')
+    expect(result).toEqual('9102658375')
+    expect(mockCollection.findOne).toHaveBeenCalledWith({ _id: '823456789' })
+  })
+
+  it('upsertFrnBySbi', async () => {
+    const dummyDate = new Date('2025-01-01')
+    vi.useFakeTimers().setSystemTime(dummyDate)
+    mockCollection.updateOne.mockResolvedValue({ acknowledged: true })
+
+    const result = await mongoBusiness.upsertFrnBySbi('823456789', '9102658375')
+    expect(result).toEqual({ acknowledged: true })
+    expect(mockCollection.updateOne).toHaveBeenCalledWith(
+      { _id: '823456789' },
+      {
+        $set: { frn: '9102658375', updatedAt: dummyDate },
+        $setOnInsert: { createdAt: dummyDate }
+      },
+      { upsert: true }
+    )
+  })
+
   describe('test concurrent writes', () => {
     const realCollection = db.collection('business-concurrency')
     const realMongoBusiness = new MongoBusiness({ modelOrCollection: realCollection })
@@ -72,6 +109,20 @@ describe('MongoBusiness', () => {
       ).resolves.toHaveLength(2)
 
       expect(await realMongoBusiness.getOrgIdBySbi(sbi)).toEqual('orgId')
+      expect(await realCollection.countDocuments({ _id: sbi })).toEqual(1)
+    })
+
+    it('upsertFrnBySbi adds the frn to an existing orgId document without overwriting it', async () => {
+      vi.useRealTimers()
+      const sbi = '823456789'
+      await realCollection.deleteMany({})
+
+      await realMongoBusiness.upsertOrgIdBySbi(sbi, 'orgId')
+      const { createdAt } = await realCollection.findOne({ _id: sbi })
+      await realMongoBusiness.upsertFrnBySbi(sbi, '9102658375')
+
+      const doc = await realCollection.findOne({ _id: sbi })
+      expect(doc).toMatchObject({ _id: sbi, orgId: 'orgId', frn: '9102658375', createdAt })
       expect(await realCollection.countDocuments({ _id: sbi })).toEqual(1)
     })
   })
