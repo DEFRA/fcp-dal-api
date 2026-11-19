@@ -1,7 +1,8 @@
 import { ApolloServer } from '@apollo/server'
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
-import { config } from '../config.js'
+import { mappedDefraIdApolloPlugin } from '../auth/mapped-defra-id.js'
+import { config, dummyCrnToSbiMapping } from '../config.js'
 import { formatError } from './formatError.js'
 import { createSchema } from './schema.js'
 import { auditPlugin } from './plugins/audit.js'
@@ -20,7 +21,14 @@ export const enableApolloLandingPage = () => {
 
 export const apolloServer = new ApolloServer({
   schema,
-  plugins: [enableApolloLandingPage(), auditPlugin(), errorLoggingPlugin(), errorCodesPlugin()],
+  plugins: [
+    enableApolloLandingPage(),
+    auditPlugin(),
+    errorLoggingPlugin(),
+    errorCodesPlugin(),
+    // Only enabled in dev/test. Used to map dummy Defra ID CRNs onto actual businesses.
+    ...(dummyCrnToSbiMapping.size ? [mappedDefraIdApolloPlugin()] : [])
+  ],
   introspection: config.get('graphqlDashboardEnabled'),
   formatError
 })

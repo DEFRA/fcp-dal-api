@@ -1,0 +1,119 @@
+// In the dev and test environments it is possible to call the DAL with an unverified Defra
+// ID-shaped token. Only tokens whose CRN is in the DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING secret are
+// accepted this way; any other token is verified as normal.
+//
+// A request is mapped when `request.app.mappedDefraId` ({ dummyCrn, sbis }) is set on it.
+// mappedDefraIdApolloPlugin restricts what a mapped request can do, and fails closed: queries
+// only, allowed root fields only, and only the mapped SBIs. The plugin is only registered when a
+// mapping is configured, and config refuses to start with a mapping outside dev/test, so none of
+// this can run in production.
+import { getArgumentValues, getVariableValues, Kind, OperationTypeNode } from 'graphql'
+import { BadRequest, Forbidden } from '../errors/graphql.js'
+
+// Root fields a mapped request may select. Anything not listed, including fields added to the
+// schema later, is refused
+export const MAPPED_ALLOWED_ROOT_FIELDS = new Set(['business', '__typename'])
+
+export const MAPPED_QUERIES_ONLY_MESSAGE = 'Only queries are available for a mapped Defra ID token'
+export const MAPPED_SBI_MESSAGE = 'Defra ID token is not valid for the provided SBI'
+
+// The operation's root field nodes, following fragments. Directives such as @skip are ignored, so
+// every field that could run is checked.
+//
+// A parsed query is a tree (AST) of nodes. The curly-brace block under an operation is its
+// "selection set", and each entry in it is a "selection" of one of three kinds:
+// - FIELD, e.g. `business(sbi: "810000000") { ... }`
+// - INLINE_FRAGMENT, e.g. `... { business(...) { ... } }`, a block of fields nested inline
+// - FRAGMENT_SPREAD, e.g. `...MyFragment`, a reference to fields defined elsewhere in the document
+// Only the root level matters here, so the fields' own selection sets are not walked.
+function rootFieldNodes(selectionSet, fragments) {
+  return selectionSet.selections.flatMap((selection) => {
+    if (selection.kind === Kind.FIELD) {
+      return [selection]
+    }
+    if (selection.kind === Kind.INLINE_FRAGMENT) {
+      // The inline fragment's fields sit at the same (root) level, so collect them too
+      return rootFieldNodes(selection.selectionSet, fragments)
+    }
+    // FRAGMENT_SPREAD: look the named fragment up and collect its fields. The operation has already
+    // been validated, so the fragment exists and the fragments don't form a cycle
+    return rootFieldNodes(fragments[selection.name.value].selectionSet, fragments)
+  })
+}
+
+/**
+ * Checks that an operation is allowed for a mapped Defra ID token.
+ *
+ * @throws {Forbidden} for a mutation (or subscription) or a root field that is not allowed
+ * @throws {BadRequest} for a `business` whose SBI is not mapped to the dummy CRN
+ */
+export function assertMappedOperationAllowed({ schema, document, operation, variables, sbis }) {
+  // `operation` is the operation being run (the document may hold several; Apollo has already
+  // picked one by operationName). Its type is query, mutation or subscription
+  if (operation.operation !== OperationTypeNode.QUERY) {
+    throw new Forbidden(MAPPED_QUERIES_ONLY_MESSAGE)
+  }
+
+  // Besides operations, the parsed document holds any named fragments (`fragment MyFragment on
+  // Query { ... }`). Index them by name so `...MyFragment` spreads can be followed
+  const fragments = Object.fromEntries(
+    document.definitions
+      .filter((definition) => definition.kind === Kind.FRAGMENT_DEFINITION)
+      .map((definition) => [definition.name.value, definition])
+  )
+
+  // The variables arrive as raw JSON from the request. Coerce them to their declared types (as
+  // GraphQL execution would), so e.g. an ID given as the number 810000000 becomes "810000000"
+  const { coerced, errors } = getVariableValues(
+    schema,
+    operation.variableDefinitions ?? [],
+    variables ?? {}
+  )
+  if (errors) {
+    throw errors[0]
+  }
+
+  // The schema's definitions of the root Query fields, used to read each field's arguments
+  const queryFields = schema.getQueryType().getFields()
+  for (const fieldNode of rootFieldNodes(operation.selectionSet, fragments)) {
+    // The field's schema name. An alias (`a: business(...)`) only changes the response key, so
+    // it is ignored here
+    const name = fieldNode.name.value
+    if (!MAPPED_ALLOWED_ROOT_FIELDS.has(name)) {
+      throw new Forbidden(`${name} is not available for a mapped Defra ID token`)
+    }
+    if (name === 'business') {
+      // Resolve the field's arguments the same way GraphQL execution does: a literal
+      // (`sbi: "810000000"`) or a variable (`sbi: $sbi`) both give the final string value
+      const { sbi } = getArgumentValues(queryFields.business, fieldNode, coerced)
+      if (!sbis.has(sbi)) {
+        throw new BadRequest(MAPPED_SBI_MESSAGE)
+      }
+    }
+  }
+}
+
+export function mappedDefraIdApolloPlugin() {
+  return {
+    async requestDidStart() {
+      return {
+        // Apollo calls this once the query has been parsed and validated and the operation to run
+        // is known, but before any resolver runs. Throwing here fails the whole request
+        async didResolveOperation({ schema, document, operation, request, contextValue }) {
+          // contextValue.request is the hapi request (see app/graphql/context.js)
+          const mappedDefraId = contextValue?.request?.app?.mappedDefraId
+          if (!mappedDefraId) {
+            return
+          }
+          assertMappedOperationAllowed({
+            schema,
+            document,
+            operation,
+            variables: request.variables,
+            sbis: mappedDefraId.sbis
+          })
+        }
+      }
+    }
+  }
+}
