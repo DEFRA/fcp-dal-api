@@ -245,6 +245,36 @@ Consumers must first get an access token, which must be supplied in the `Authori
 > - [perf-test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/perf-test/apis/fcp-dal-api.yml)
 > - [prod](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/prod/apis/fcp-dal-api.yml)
 
+### Dummy Defra ID CRN to SBI mapping (dev/test only)
+
+Testers can usually only get Defra ID tokens for dummy CRNs, and those tokens may not verify. The dummy CRN to SBI mapping lets a token for a dummy CRN query real businesses in `dev` and `test`.
+
+The mapping is set in the `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING` secret, as a comma separated list of `crn:sbi|sbi...` entries:
+
+```bash
+DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING=9100000001:810000000|810000001,9100000002:810000002
+```
+
+Each dummy CRN may appear only once, and needs at least one SBI. A malformed value stops the service starting.
+
+The feature is two plugins in [`app/auth/mapped-defra-id.js`](app/auth/mapped-defra-id.js), which are only registered when a mapping is set. The rest of the DAL's authentication code is unchanged.
+
+1. **A hapi `onRequest` extension maps the request.** A request is mapped when its `x-forwarded-authorization` Defra ID token has a dummy CRN (its `contactId`) in the mapping, and it has no `email` or `service-account` header. The token header is removed and replaced with the DAL service account (`service-account: <KITS_DAL_SERVICE_ACCOUNT_EMAIL>`). From then on, the DAL handles it like any other service-account request:
+   - **No verification:** the token's signature and expiry are not checked, so testers can use long-lived dummy tokens. Any other token is verified as normal.
+   - **Internal routing:** the request goes to the internal gateway as the DAL service account, so the dummy token is never sent upstream.
+2. **An Apollo plugin restricts what a mapped request can do.** It checks the operation before any resolver runs, and fails closed:
+   - **Queries only:** any mutation gets a `FORBIDDEN` error, as it would change real data under the DAL service account.
+   - **`business` only:** the only root fields allowed are `business` and `__typename`. Anything else gets a `FORBIDDEN` error, including `customer`, `businessSearch`, introspection and any root field added to the schema later. Everything under `business`, including its `customers`, can be queried.
+   - **Mapped SBIs only:** the `business` SBI must be one of those mapped to the dummy CRN. Any other SBI gets a `BAD REQUEST` error. This is checked however the SBI is given, including through aliases, fragments and variables.
+
+The calling service still needs its own access token and `@auth` group, as for any other request.
+
+**Logging and audit:** each mapped request logs a `warn` with code `DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001`, with the CRN and SBIs masked. Everything after that, including audit events, records the request as coming from the DAL service account. Use the trace ID to link an audit event back to the dummy CRN.
+
+> **Note:** the mapping can only be set when `ENVIRONMENT` is `dev` or `test`, or unset for local development. The service refuses to start if it is set in any other environment. In production the mapping is empty, the plugins aren't registered, and none of this code runs.
+
+To try it locally, set `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING` in your `.env` file and send a JWT whose `contactId` is a dummy CRN in the `x-forwarded-authorization` header. The token only needs to decode; it can be unsigned or signed with any key.
+
 ## Development helpers
 
 ### Proxy
