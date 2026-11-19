@@ -57,6 +57,9 @@ describe('App initialization', () => {
       }
     ])
 
+    // No dummy CRN to SBI mapping is configured, so the mapped Defra ID plugin is not registered
+    expect(server.register).toHaveBeenCalledTimes(1)
+
     // Verify that health checks were run
     expect(mockRunHealthChecks).toHaveBeenCalled()
 

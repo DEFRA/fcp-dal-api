@@ -2,13 +2,22 @@
 // ID-shaped token. Only tokens whose CRN is in the DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING secret are
 // accepted this way; any other token is verified as normal.
 //
-// A request is mapped when `request.app.mappedDefraId` ({ dummyCrn, sbis }) is set on it.
-// mappedDefraIdApolloPlugin restricts what a mapped request can do, and fails closed: queries
-// only, allowed root fields only, and only the mapped SBIs. The plugin is only registered when a
-// mapping is configured, and config refuses to start with a mapping outside dev/test, so none of
-// this can run in production.
+// - mappedDefraIdHapiPlugin turns a request carrying a mapped token into a DAL service-account
+//   request before anything else sees it, and marks it as mapped by setting
+//   `request.app.mappedDefraId` ({ dummyCrn, sbis }). The token is never verified or sent
+//   upstream, and the rest of the DAL treats the request like any other service-account request.
+// - mappedDefraIdApolloPlugin then restricts what a mapped request can do: queries only, allowed
+//   root fields only, and only the mapped SBIs.
+//
+// Both plugins are only registered when a mapping is configured, and config refuses to start with
+// a mapping outside dev/test, so none of this can run in production.
 import { getArgumentValues, getVariableValues, Kind, OperationTypeNode } from 'graphql'
+import { decodeJwt } from 'jose'
+import { config, dummyCrnToSbiMapping } from '../config.js'
 import { BadRequest, Forbidden } from '../errors/graphql.js'
+import { DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001 } from '../logger/codes.js'
+import { logger } from '../logger/logger.js'
+import { maskAllButLastFour } from '../logger/utils.js'
 
 // Root fields a mapped request may select. Anything not listed, including fields added to the
 // schema later, is refused
@@ -16,6 +25,61 @@ export const MAPPED_ALLOWED_ROOT_FIELDS = new Set(['business', '__typename'])
 
 export const MAPPED_QUERIES_ONLY_MESSAGE = 'Only queries are available for a mapped Defra ID token'
 export const MAPPED_SBI_MESSAGE = 'Defra ID token is not valid for the provided SBI'
+
+/**
+ * If the request carries a Defra ID token whose CRN is in the dummy CRN to SBI mapping, rewrites it
+ * as a DAL service-account request and records the mapping on `request.app.mappedDefraId`.
+ * Any other request is left untouched.
+ */
+export function mapDefraIdRequest(request) {
+  const { headers } = request
+  const token = headers['x-forwarded-authorization']
+  if (!token || headers.email || headers['service-account']) {
+    // Not a Defra ID only request, so there is nothing to map; normal authentication handles it
+    return
+  }
+
+  let payload
+  try {
+    payload = decodeJwt(token)
+  } catch {
+    // not a JWT, so it can't be mapped; let normal verification report the error
+    return
+  }
+
+  const dummyCrn = `${payload.contactId}`
+  const sbis = dummyCrnToSbiMapping.get(dummyCrn)
+  if (!sbis) {
+    // There is no matching CRN in the mapping; let normal verification handle the token
+    return
+  }
+
+  delete headers['x-forwarded-authorization']
+  headers['service-account'] = config.get('kits.dalServiceAccountEmail')
+  request.app.mappedDefraId = { dummyCrn, sbis }
+
+  logger.warn('#DAL Request authentication - dummy Defra ID CRN mapped to SBIs', {
+    type: 'http',
+    code: DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001,
+    traceId: request.traceId,
+    tenant: {
+      message: JSON.stringify({
+        contactId: maskAllButLastFour(dummyCrn),
+        sbis: [...sbis].map(maskAllButLastFour)
+      })
+    }
+  })
+}
+
+export const mappedDefraIdHapiPlugin = {
+  name: 'mapped-defra-id',
+  register(server) {
+    server.ext('onRequest', (request, h) => {
+      mapDefraIdRequest(request)
+      return h.continue
+    })
+  }
+}
 
 // The operation's root field nodes, following fragments. Directives such as @skip are ignored, so
 // every field that could run is checked.
