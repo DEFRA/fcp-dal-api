@@ -16,14 +16,16 @@ const query = `#graphql
   }
 `
 
-// Note the pipe separating function names must be URL-encoded (%7C)
-const authorisationPath =
-  /^\/SitiAgriApi\/authorisation\/byFunction\?functions=[^|&]+(%7C[^|&]+)*&module=CUST_SS_PORTAL&timestamp=\d+$/
+const authorisationPath = '/SitiAgriApi/authorisation/byFunction'
 
-// The `functions` query parameter is present but empty when no (non-empty) function names are
-// requested
-const emptyFunctionsAuthorisationPath =
-  /^\/SitiAgriApi\/authorisation\/byFunction\?functions=&module=CUST_SS_PORTAL&timestamp=\d+$/
+// Asserts the exact pipe-separated `functions` value sent upstream (nock decodes %7C to `|`).
+// The `functions` query parameter is present but empty when no function names are requested.
+const mockAuthorisation = (functions) =>
+  v1.get(authorisationPath).query({
+    functions: functions.join('|'),
+    module: 'CUST_SS_PORTAL',
+    timestamp: /^\d+$/
+  })
 
 describe('internalUser.permittedFunctions', () => {
   beforeEach(() => {
@@ -38,7 +40,7 @@ describe('internalUser.permittedFunctions', () => {
 
   test('returns whether the internal user is permitted each requested function', async () => {
     // the upstream identifies the internal user by the forwarded `email` header
-    v1.get(authorisationPath)
+    mockAuthorisation(['viewLand', 'caseManagement'])
       .matchHeader('email', 'test@defra.gov.uk')
       .reply(200, {
         data: {
@@ -62,7 +64,7 @@ describe('internalUser.permittedFunctions', () => {
   })
 
   test('echoes back a custom function name, defaulting to not permitted when absent', async () => {
-    v1.get(authorisationPath).reply(200, {
+    mockAuthorisation(['viewLand', 'someBrandNewFunction']).reply(200, {
       data: {
         viewLand: true
       },
@@ -84,7 +86,7 @@ describe('internalUser.permittedFunctions', () => {
 
   test('returns an empty list when an empty functions list is requested', async () => {
     // the upstream treats an empty functions parameter as a single empty-string function name
-    v1.get(emptyFunctionsAuthorisationPath).reply(200, {
+    mockAuthorisation([]).reply(200, {
       data: { '': false },
       success: true,
       errorString: null
@@ -98,7 +100,7 @@ describe('internalUser.permittedFunctions', () => {
   })
 
   test('echoes an empty-string function name back as not permitted', async () => {
-    v1.get(emptyFunctionsAuthorisationPath).reply(200, {
+    mockAuthorisation(['']).reply(200, {
       data: { '': false },
       success: true,
       errorString: null
