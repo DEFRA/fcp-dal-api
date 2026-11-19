@@ -32,12 +32,27 @@ describe('parseDummyCrnToSbiMapping', () => {
     ['too many parts', '9100000001:9100000003:810000000'],
     ['an empty entry', '9100000001:810000000,']
   ])('rejects %s', (_, value) => {
-    expect(() => parseDummyCrnToSbiMapping(value)).toThrow(/dummy Defra ID CRN to SBI mapping/)
+    expect(() => parseDummyCrnToSbiMapping(value)).toThrow(/DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING/)
   })
 
-  it('rejects a duplicate CRN', () => {
-    expect(() => parseDummyCrnToSbiMapping('9100000001:810000000,9100000001:810000001')).toThrow(
-      'Duplicate CRN in dummy Defra ID CRN to SBI mapping: "9100000001"'
-    )
+  it.each([
+    [
+      'entry',
+      'abc:810000000,9100000001:810000000',
+      'Invalid DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING entry 1, expected "crn:sbi|sbi"'
+    ],
+    [
+      'SBI',
+      '9100000001:810000000,9100000002:810abc',
+      'Invalid SBI in DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING entry 2'
+    ],
+    [
+      'duplicate CRN',
+      '9100000001:810000000,9100000001:810000001',
+      'Duplicate CRN in DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING entry 2'
+    ]
+  ])('identifies an invalid %s by position, without its values', (_, value, message) => {
+    expect(() => parseDummyCrnToSbiMapping(value)).toThrow(message)
+    expect(() => parseDummyCrnToSbiMapping(value)).not.toThrow(/9100000001|81000000/)
   })
 })

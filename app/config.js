@@ -190,12 +190,10 @@ export const config = convict({
     },
     dummyCrnToSbiMapping: {
       doc:
-        'DEV/TEST ONLY. Maps dummy Defra ID CRNs to the SBIs they may access, as a comma separated ' +
+        'Maps dummy Defra ID CRNs to the SBIs they may access, as a comma separated ' +
         'list of "crn:sbi|sbi" entries. Mapped requests are routed internally as the DAL service ' +
-        'account and can only query the listed businesses.',
-      format: (value) => {
-        parseDummyCrnToSbiMapping(value)
-      },
+        'account and can only query the listed businesses.  This can only be used in dev and test',
+      format: String,
       default: null,
       nullable: true,
       sensitive: true,

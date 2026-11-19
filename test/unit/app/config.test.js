@@ -372,7 +372,9 @@ describe('dummy Defra ID CRN to SBI mapping', () => {
 
   it('rejects a malformed value at startup', async () => {
     process.env.DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING = 'not-a-mapping'
-    await expect(loadFreshConfig()).rejects.toThrow(/defraId.dummyCrnToSbiMapping/)
+    await expect(loadFreshConfig()).rejects.toThrow(
+      'Invalid DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING entry 1'
+    )
   })
 
   it.each([undefined, 'dev', 'test'])('is allowed when ENVIRONMENT is %s', async (environment) => {
