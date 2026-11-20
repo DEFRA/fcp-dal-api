@@ -88,22 +88,33 @@ describe('Date scalar', () => {
     `Invalid date format: "${value}" is not a valid date. Date should be supplied in ISO 8601 format, e.g. 2020-01-01`
 
   // Lenient on purpose: anything `new Date()` parses is accepted, to avoid breaking clients
-  it.each(['2020-01-01', '2020-01-01T00:00:00.000Z', '2020-01-01T01:00:00+01:00', '01-01-2020'])(
-    'accepts %s and returns it unchanged',
-    (value) => {
-      expect(DateScalar.parseValue(value)).toBe(value)
-      expect(DateScalar.parseLiteral(stringLiteral(value))).toBe(value)
-    }
-  )
-
-  it('accepts epoch milliseconds', () => {
-    expect(DateScalar.parseValue(1577836800000)).toBe(1577836800000)
-    expect(DateScalar.parseLiteral(intLiteral(1577836800000))).toBe(1577836800000)
+  it.each([
+    ['2020-01-01', '2020-01-01T00:00:00.000Z'],
+    ['2020-01-01T00:00:00.000Z', '2020-01-01T00:00:00.000Z'],
+    ['2020-01-01T01:00:00+01:00', '2020-01-01T00:00:00.000Z']
+  ])('parses %s into a Date', (value, expected) => {
+    expect(DateScalar.parseValue(value)).toEqual(new Date(expected))
+    expect(DateScalar.parseLiteral(stringLiteral(value))).toEqual(new Date(expected))
   })
 
-  it('accepts a Date object passed in-process', () => {
+  // Non-ISO formats are read in local time, so compare with what `new Date()` gives
+  it('parses a non-ISO date the same way as new Date()', () => {
+    expect(DateScalar.parseValue('01-01-2020')).toEqual(new Date('01-01-2020'))
+    expect(DateScalar.parseLiteral(stringLiteral('01-01-2020'))).toEqual(new Date('01-01-2020'))
+  })
+
+  it('parses epoch milliseconds into a Date', () => {
+    expect(DateScalar.parseValue(1577836800000)).toEqual(new Date('2020-01-01T00:00:00.000Z'))
+    expect(DateScalar.parseLiteral(intLiteral(1577836800000))).toEqual(
+      new Date('2020-01-01T00:00:00.000Z')
+    )
+  })
+
+  it('returns a copy of a Date object passed in-process', () => {
     const date = new Date('2021-05-27T12:46:17.305Z')
-    expect(DateScalar.parseValue(date)).toBe(date)
+    const parsed = DateScalar.parseValue(date)
+    expect(parsed).toEqual(date)
+    expect(parsed).not.toBe(date)
   })
 
   it('rejects an invalid Date object', () => {

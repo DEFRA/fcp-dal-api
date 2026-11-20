@@ -44,13 +44,13 @@ export const SwiftCode = makeStringScalar({
 const DATE_TYPE_MESSAGE = 'Date must be a string, ideally in ISO 8601 format, e.g. 2020-01-01'
 
 /**
- * Checks a client-supplied Date input and returns it unchanged.
+ * Checks a client-supplied Date input and parses it into a `Date`.
  *
  * `Date` objects are accepted because in-process callers (e.g. tests using `graphql()` directly)
  * can pass them as variables; HTTP clients can only send strings or numbers.
  *
  * @param {string|number|Date} value - The raw input value.
- * @returns {string|number|Date} The same value, once it is known to parse to a valid date.
+ * @returns {Date} The parsed date (a new object, even when given a `Date`).
  * @throws {GraphQLError} If the value is not a string, number or `Date`.
  * @throws {BadRequest} If the value cannot be parsed into a valid date.
  */
@@ -58,26 +58,27 @@ const parseDateInput = (value) => {
   if (typeof value !== 'string' && typeof value !== 'number' && !(value instanceof Date)) {
     throw new GraphQLError(DATE_TYPE_MESSAGE)
   }
-  validateDateInput(value)
-  return value
+  return validateDateInput(value)
 }
 
 /**
- * Date scalar: checks that inputs are valid dates.
+ * Date scalar: checks that inputs are valid dates and gives resolvers a `Date` object.
  *
  * This is deliberately lenient. It accepts anything JavaScript's `Date` constructor can parse
  * (e.g. `2020-01-01`, `2020-01-01T00:00:00.000Z`, but also `01-01-2020` or `Jan 1 2020`),
  * because that is what clients could send before this scalar existed, and rejecting other
- * formats would be a breaking change. The input is returned unchanged, so resolvers and
- * transformers still get the same value as before.
+ * formats would be a breaking change. Note that `new Date()` reads date-only ISO strings as
+ * UTC midnight but other formats (and date-times without an offset) as local time.
+ *
+ * Resolvers always receive a `Date` (or `undefined` when the argument is omitted), so the
+ * downstream code only ever has to deal with `Date` objects.
  *
  * Outputs go through unchanged, as resolvers already return a mix of ISO date strings, ISO
  * timestamps and `Date` objects (which serialize to ISO timestamps).
  *
  * Future improvement: once clients are confirmed to send ISO 8601 only, make this strict: accept
- * only `YYYY-MM-DD` or a full ISO 8601 date-time, reject impossible dates such as `2025-02-30`
- * (which `new Date()` rolls over to 2 March), and return a parsed value so resolvers no
- * longer need their own `validateDateInput` calls.
+ * only `YYYY-MM-DD` or a full ISO 8601 date-time, and reject impossible dates such as
+ * `2025-02-30` (which `new Date()` rolls over to 2 March).
  */
 const DateScalar = new GraphQLScalarType({
   name: 'Date',
