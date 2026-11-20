@@ -85,7 +85,7 @@ describe('HitachiPayments', () => {
       // Mock config to return false for disableAuth
       const { config } = await import('../../../../app/config.js')
       config.get.mockImplementation((key) => {
-        if (key === 'hitachi.disableAuth') return true
+        if (key === 'hitachi.disableAuth') return false
         return 'mock-value'
       })
 
