@@ -58,6 +58,18 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses(properties,
 }
 
 const day = 24 * 60 * 60 * 1000
+
+/**
+ * Normalises a date-of-birth timestamp to midnight UTC of the nearest day.
+ *
+ * Upstream dates of birth may be stored as local midnight (e.g. 23:00 UTC the
+ * previous day during BST), so rounding to the nearest whole UTC day avoids
+ * the date shifting by one when converted to an ISO date string.
+ *
+ * @param {number|null|undefined} dateOfBirth - Date of birth as epoch milliseconds.
+ * @returns {number|null|undefined} Epoch milliseconds at 00:00:00.000 UTC of the nearest day,
+ *   or the original falsy value if `dateOfBirth` is falsy.
+ */
 const dob2utc = (dateOfBirth) => dateOfBirth && Math.round(dateOfBirth / day) * day
 
 export const ruralPaymentsPortalCustomerTransformer = (data) => {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Kind } from 'graphql'
 import {
+  Date as DateScalar,
   SwiftCode,
   UkAccountNumber,
   UkSortCode
@@ -79,5 +80,62 @@ describe('SwiftCode scalar', () => {
 
   it('serializes the value through unchanged', () => {
     expect(SwiftCode.serialize('BARCGB22XXX')).toBe('BARCGB22XXX')
+  })
+})
+
+describe('Date scalar', () => {
+  const invalidDateMessage = (value) =>
+    `Invalid date format: "${value}" is not a valid date. Date should be supplied in ISO 8601 format, e.g. 2020-01-01`
+
+  // Lenient on purpose: anything `new Date()` parses is accepted, to avoid breaking clients
+  it.each(['2020-01-01', '2020-01-01T00:00:00.000Z', '2020-01-01T01:00:00+01:00', '01-01-2020'])(
+    'accepts %s and returns it unchanged',
+    (value) => {
+      expect(DateScalar.parseValue(value)).toBe(value)
+      expect(DateScalar.parseLiteral(stringLiteral(value))).toBe(value)
+    }
+  )
+
+  it('accepts epoch milliseconds', () => {
+    expect(DateScalar.parseValue(1577836800000)).toBe(1577836800000)
+    expect(DateScalar.parseLiteral(intLiteral(1577836800000))).toBe(1577836800000)
+  })
+
+  it('accepts a Date object passed in-process', () => {
+    const date = new Date('2021-05-27T12:46:17.305Z')
+    expect(DateScalar.parseValue(date)).toBe(date)
+  })
+
+  it('rejects an invalid Date object', () => {
+    expect(() => DateScalar.parseValue(new Date('not-a-date'))).toThrow('is not a valid date')
+  })
+
+  it.each(['not-a-date', '', '2020-13-01'])('rejects %s', (value) => {
+    expect(() => DateScalar.parseValue(value)).toThrow(invalidDateMessage(value))
+    expect(() => DateScalar.parseLiteral(stringLiteral(value))).toThrow(invalidDateMessage(value))
+  })
+
+  it('rejects an invalid date with a BAD REQUEST code', () => {
+    expect(() => DateScalar.parseValue('not-a-date')).toThrow(
+      expect.objectContaining({ extensions: expect.objectContaining({ code: 'BAD REQUEST' }) })
+    )
+  })
+
+  it.each([true, null, {}, []])('rejects a non-string value %s', (value) => {
+    expect(() => DateScalar.parseValue(value)).toThrow(
+      'Date must be a string, ideally in ISO 8601 format, e.g. 2020-01-01'
+    )
+  })
+
+  it('rejects other literal kinds', () => {
+    expect(() => DateScalar.parseLiteral({ kind: Kind.BOOLEAN, value: true })).toThrow(
+      'Date must be a string, ideally in ISO 8601 format, e.g. 2020-01-01'
+    )
+  })
+
+  it('serializes the value through unchanged', () => {
+    const date = new Date('2020-01-01T00:00:00.000Z')
+    expect(DateScalar.serialize('2020-01-01')).toBe('2020-01-01')
+    expect(DateScalar.serialize(date)).toBe(date)
   })
 })
