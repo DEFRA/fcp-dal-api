@@ -285,7 +285,7 @@ export const config = convict({
     gatewayTimeoutMs: {
       doc: 'KITS gateway timeout in milliseconds',
       format: 'int',
-      default: null,
+      default: 29_000,
       env: 'KITS_GATEWAY_TIMEOUT_MS'
     },
     requestPageSize: {
@@ -336,7 +336,7 @@ export const config = convict({
     timeoutMs: {
       doc: 'Hitachi timeout in milliseconds',
       format: 'int',
-      default: 3000,
+      default: 29_000,
       env: 'HITACHI_TIMEOUT_MS'
     },
     entra: {
