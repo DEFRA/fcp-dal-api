@@ -8,6 +8,7 @@ import {
   businessLockResolver,
   businessReactivateResolver,
   businessUnlockResolver,
+  getOrganisation,
   getRuralPaymentsBusinessDataSource,
   retrieveFrnBySbi,
   retrieveOrgIdBySbi,
@@ -24,7 +25,7 @@ describe('retrieveOrgIdBySbi', () => {
         upsertOrgIdBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn()
+        organisationSearchBySbi: vi.fn()
       }
     }
   })
@@ -35,17 +36,19 @@ describe('retrieveOrgIdBySbi', () => {
     const result = await retrieveOrgIdBySbi('123', { dataSources, defraIdContext: undefined })
 
     expect(result).toBe('cachedOrgId')
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
   })
 
   it('falls back to upstream and caches the result in mongo on a cache miss, when no defraIdContext is present', async () => {
     dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue(undefined)
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('upstreamOrgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({
+      id: 'upstreamOrgId'
+    })
 
     const result = await retrieveOrgIdBySbi('123', { dataSources, defraIdContext: undefined })
 
     expect(result).toBe('upstreamOrgId')
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'upstreamOrgId')
   })
 
@@ -57,7 +60,119 @@ describe('retrieveOrgIdBySbi', () => {
     expect(result).toBe('orgIdFromToken')
     expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
+  })
+
+  it('propagates the token error without falling back to mongo or upstream when the SBI is not in the Defra ID token', async () => {
+    const tokenError = new BadRequest('Defra ID token is not valid for the provided SBI')
+    const defraIdContext = {
+      orgId: vi.fn(() => {
+        throw tokenError
+      })
+    }
+
+    await expect(retrieveOrgIdBySbi('123', { dataSources, defraIdContext })).rejects.toThrow(
+      tokenError
+    )
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
+    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).not.toHaveBeenCalled()
+  })
+
+  it('does not cache anything when the upstream search fails', async () => {
+    const notFoundError = new NotFound('Rural payments organisation not found')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(notFoundError)
+
+    await expect(retrieveOrgIdBySbi('123', { dataSources })).rejects.toThrow(notFoundError)
+    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).not.toHaveBeenCalled()
+  })
+})
+
+describe('getOrganisation', () => {
+  let dataSources
+  const organisation = { id: 'orgId', businessReference: 'frn' }
+
+  beforeEach(() => {
+    dataSources = {
+      mongoBusiness: {
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      },
+      ruralPaymentsBusiness: {
+        organisationSearchBySbi: vi.fn(),
+        getOrganisationById: vi.fn().mockResolvedValue(organisation)
+      }
+    }
+  })
+
+  it('fetches the organisation using the cached orgId without searching upstream', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
+
+    const result = await getOrganisation(dataSources, '123')
+
+    expect(result).toBe(organisation)
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
+  })
+
+  it('searches upstream and caches the orgId on a cache miss', async () => {
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
+
+    const result = await getOrganisation(dataSources, '123')
+
+    expect(result).toBe(organisation)
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
+  })
+
+  it('uses the orgId from the Defra ID token without touching mongo, when a defraIdContext is present', async () => {
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
+
+    await getOrganisation(dataSources, '123', defraIdContext)
+
+    expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
+      'orgIdFromToken'
+    )
+  })
+
+  it('does not fetch the organisation when the SBI is not in the Defra ID token', async () => {
+    const defraIdContext = {
+      orgId: vi.fn(() => {
+        throw new BadRequest('Defra ID token is not valid for the provided SBI')
+      })
+    }
+
+    await expect(getOrganisation(dataSources, '123', defraIdContext)).rejects.toThrow(
+      'Defra ID token is not valid for the provided SBI'
+    )
+    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
+  })
+
+  it('throws NotFound when the organisation has no FRN', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
+      id: 'orgId',
+      businessReference: null
+    })
+
+    await expect(getOrganisation(dataSources, '123')).rejects.toThrow(
+      new NotFound('FRN not found for business')
+    )
+  })
+
+  it('propagates errors from the organisation fetch', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValue(
+      new NotFound('Rural payments organisation not found')
+    )
+
+    await expect(getOrganisation(dataSources, '123')).rejects.toThrow(
+      'Rural payments organisation not found'
+    )
   })
 })
 
@@ -73,7 +188,7 @@ describe('retrieveFrnBySbi', () => {
         upsertOrgIdBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn(),
+        organisationSearchBySbi: vi.fn(),
         getOrganisationById: vi.fn()
       }
     }
@@ -101,7 +216,7 @@ describe('retrieveFrnBySbi', () => {
       const result = await retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
 
       expect(result).toBe('upstreamFrn')
-      expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+      expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
       expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
         'cachedOrgId'
       )
@@ -109,7 +224,9 @@ describe('retrieveFrnBySbi', () => {
     })
 
     it('looks up and caches the orgId upstream when neither the frn nor the orgId is cached', async () => {
-      dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('upstreamOrgId')
+      dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({
+        id: 'upstreamOrgId'
+      })
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
         id: 'upstreamOrgId',
         businessReference: 'upstreamFrn'
@@ -118,7 +235,7 @@ describe('retrieveFrnBySbi', () => {
       const result = await retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
 
       expect(result).toBe('upstreamFrn')
-      expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+      expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
       expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith(
         '123',
         'upstreamOrgId'
@@ -190,7 +307,7 @@ describe('retrieveFrnBySbi', () => {
 
       expect(result).toBe('upstreamFrn')
       expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
-      expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+      expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
       expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
         'orgIdFromToken'
       )
@@ -235,7 +352,7 @@ describe('businessDetailsUpdateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn(),
+        organisationSearchBySbi: vi.fn(),
         getOrganisationById: vi.fn(),
         updateOrganisationDetails: vi.fn()
       },
@@ -250,7 +367,7 @@ describe('businessDetailsUpdateResolver', () => {
   })
 
   it('businessDetailsUpdateResolver returns true when updateOrganisationDetails returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       // Include this to ensure it gets overwritten by provided details
       name: 'org name'
@@ -264,7 +381,7 @@ describe('businessDetailsUpdateResolver', () => {
 
     const result = await businessDetailsUpdateResolver(null, { input }, { dataSources, logger })
 
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
     expect(dataSources.ruralPaymentsBusiness.updateOrganisationDetails).toHaveBeenCalledWith(
       'orgId',
@@ -278,7 +395,7 @@ describe('businessDetailsUpdateResolver', () => {
 
   it('businessDetailsUpdateResolver, returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
     const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(notFoundError)
     const input = { sbi: '999', details: { name: 'Missing' } }
 
     await expect(
@@ -287,7 +404,7 @@ describe('businessDetailsUpdateResolver', () => {
   })
 
   it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
     dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
 
@@ -307,7 +424,7 @@ describe('businessDetailsUpdateResolver', () => {
   })
 
   it('does not throw when no audit trail is supplied', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({ name: 'org name' })
     dataSources.ruralPaymentsBusiness.updateOrganisationDetails.mockResolvedValue({})
 
@@ -333,7 +450,7 @@ describe('businessDetailsUpdateResolver', () => {
     expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
       'orgIdFromToken'
     )
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
   })
 })
@@ -345,7 +462,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn(),
+        organisationSearchBySbi: vi.fn(),
         getOrganisationById: vi.fn(),
         updateOrganisationAdditionalDetails: vi.fn()
       },
@@ -360,7 +477,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
   })
 
   it('businessAdditionalDetailsUpdateResolver returns true when updateOrganisationDetails returns a response', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       // Include this to ensure it gets overwritten by provided details
       dateStartedFarming: '01-01-2024'
@@ -378,7 +495,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
       { dataSources, logger }
     )
 
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
     expect(
       dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails
@@ -392,7 +509,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
 
   it('businessAdditionalDetailsUpdateResolver, returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
     const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(notFoundError)
     const input = { sbi: '999', details: { name: 'Missing' } }
 
     await expect(
@@ -401,7 +518,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
   })
 
   it('records the organisationId/sbi accounts and an updated business entity on the audit trail', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       dateStartedFarming: '01-01-2024'
     })
@@ -430,7 +547,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
   })
 
   it('does not throw when no audit trail is supplied', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
       dateStartedFarming: '01-01-2024'
     })
@@ -458,7 +575,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
       'orgIdFromToken'
     )
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
   })
 })
@@ -469,7 +586,7 @@ describe('businessAllFieldsUpdateResolver', () => {
   beforeEach(() => {
     dataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn().mockResolvedValue('orgId'),
+        organisationSearchBySbi: vi.fn().mockResolvedValue({ id: 'orgId' }),
         getOrganisationById: vi.fn().mockResolvedValue({
           name: 'org name',
           legalStatus: { id: 1 }
@@ -576,7 +693,7 @@ describe('businessAllFieldsUpdateResolver', () => {
 
   it('propagates a NotFound error when the organisation cannot be found', async () => {
     const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(notFoundError)
 
     const input = { sbi: '999', name: 'Missing' }
 
@@ -683,7 +800,7 @@ describe('businessAllFieldsUpdateResolver', () => {
     expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
       'orgIdFromToken'
     )
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
   })
 })
@@ -694,8 +811,12 @@ describe('businessLockResolver', () => {
 
   beforeEach(() => {
     dataSources = {
+      mongoBusiness: {
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      },
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn(),
+        organisationSearchBySbi: vi.fn(),
         lockOrganisation: vi.fn()
       }
     }
@@ -705,7 +826,7 @@ describe('businessLockResolver', () => {
   })
 
   it('returns correct response when lockOrganisation is successfully executed', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
 
     const input = { sbi: '123', reason: 'test' }
@@ -713,14 +834,14 @@ describe('businessLockResolver', () => {
     const result = await businessLockResolver(null, { input }, { dataSources, logger })
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.lockOrganisation).toHaveBeenCalledWith('orgId', {
       reason: 'test'
     })
   })
 
   it('returns correct response when lockOrganisation is successfully executed with note and reason', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
 
     const input = { sbi: '123', reason: 'test', note: 'test' }
@@ -728,7 +849,7 @@ describe('businessLockResolver', () => {
     const result = await businessLockResolver(null, { input }, { dataSources, logger })
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.lockOrganisation).toHaveBeenCalledWith('orgId', {
       reason: 'test',
       note: 'test'
@@ -737,7 +858,7 @@ describe('businessLockResolver', () => {
 
   it('returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
     const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(notFoundError)
 
     const input = { sbi: '123', reason: 'test' }
 
@@ -747,6 +868,7 @@ describe('businessLockResolver', () => {
   })
 
   it('returns error when neither reason or note are provided', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
     const input = { sbi: '123' }
 
     await expect(businessLockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
@@ -755,7 +877,7 @@ describe('businessLockResolver', () => {
   })
 
   it('records the sbi/organisationId accounts and a locked business entity on the audit trail', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
 
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
@@ -774,7 +896,7 @@ describe('businessLockResolver', () => {
   })
 
   it('records the audit trail even when input validation subsequently fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
 
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'lockBusiness', typename: 'Mutation', prev: undefined } }
@@ -793,7 +915,7 @@ describe('businessLockResolver', () => {
   })
 
   it('still records the sbi account and a locked business entity when the organisation lookup itself fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(
       new Error('upstream failure')
     )
 
@@ -819,7 +941,7 @@ describe('businessLockResolver', () => {
   })
 
   it('does not throw when no audit trail is supplied', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.lockOrganisation.mockResolvedValue('true')
 
     await businessLockResolver(null, { input: { sbi: '123', reason: 'test' } }, { dataSources })
@@ -888,8 +1010,12 @@ describe('businessUnlockResolver', () => {
 
   beforeEach(() => {
     dataSources = {
+      mongoBusiness: {
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      },
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn(),
+        organisationSearchBySbi: vi.fn(),
         unlockOrganisation: vi.fn()
       }
     }
@@ -899,7 +1025,7 @@ describe('businessUnlockResolver', () => {
   })
 
   it('returns correct response when unlockOrganisation is successfully executed', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
 
     const input = { sbi: '123', reason: 'test' }
@@ -907,14 +1033,14 @@ describe('businessUnlockResolver', () => {
     const result = await businessUnlockResolver(null, { input }, { dataSources, logger })
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.unlockOrganisation).toHaveBeenCalledWith('orgId', {
       reason: 'test'
     })
   })
 
   it('returns correct response when unlockOrganisation is successfully executed with note and reason', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
 
     const input = { sbi: '123', reason: 'test', note: 'test' }
@@ -922,7 +1048,7 @@ describe('businessUnlockResolver', () => {
     const result = await businessUnlockResolver(null, { input }, { dataSources, logger })
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.unlockOrganisation).toHaveBeenCalledWith('orgId', {
       reason: 'test',
       note: 'test'
@@ -931,7 +1057,7 @@ describe('businessUnlockResolver', () => {
 
   it('returns false and logs a warning when updateBusinessBySBI throws a NotFound error', async () => {
     const notFoundError = new NotFound('Rural payments organisation not found')
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(notFoundError)
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(notFoundError)
 
     const input = { sbi: '123', reason: 'test' }
 
@@ -941,6 +1067,7 @@ describe('businessUnlockResolver', () => {
   })
 
   it('returns error when neither reason or note are provided', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
     const input = { sbi: '123' }
 
     await expect(businessUnlockResolver(null, { input }, { dataSources, logger })).rejects.toThrow(
@@ -949,7 +1076,7 @@ describe('businessUnlockResolver', () => {
   })
 
   it('records the sbi/organisationId accounts and an unlocked business entity on the audit trail', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
 
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
@@ -968,7 +1095,7 @@ describe('businessUnlockResolver', () => {
   })
 
   it('records the audit trail even when input validation subsequently fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
 
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = { path: { key: 'unlockBusiness', typename: 'Mutation', prev: undefined } }
@@ -987,7 +1114,7 @@ describe('businessUnlockResolver', () => {
   })
 
   it('still records the sbi account and an unlocked business entity when the organisation lookup itself fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(
       new Error('upstream failure')
     )
 
@@ -1013,7 +1140,7 @@ describe('businessUnlockResolver', () => {
   })
 
   it('does not throw when no audit trail is supplied', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.unlockOrganisation.mockResolvedValue('true')
 
     await businessUnlockResolver(null, { input: { sbi: '123', reason: 'test' } }, { dataSources })
@@ -1027,8 +1154,12 @@ describe('businessReactivateResolver', () => {
 
   beforeEach(() => {
     dataSources = {
+      mongoBusiness: {
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      },
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn(),
+        organisationSearchBySbi: vi.fn(),
         reactivateOrganisation: vi.fn()
       }
     }
@@ -1037,7 +1168,7 @@ describe('businessReactivateResolver', () => {
 
   it('reactivates the organisation with the reason and note', async () => {
     // arrange
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     const input = { sbi: '123', reason: 'test reason', note: 'test note' }
 
     // act
@@ -1045,7 +1176,7 @@ describe('businessReactivateResolver', () => {
 
     // assert
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.reactivateOrganisation).toHaveBeenCalledWith('orgId', {
       reason: 'test reason',
       note: 'test note'
@@ -1054,7 +1185,7 @@ describe('businessReactivateResolver', () => {
 
   it('throws when neither reason nor note is provided', async () => {
     // arrange
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     const input = { sbi: '123' }
 
     // act / assert
@@ -1066,7 +1197,7 @@ describe('businessReactivateResolver', () => {
 
   it('records the sbi/organisationId accounts and a reactivated business entity on the audit trail', async () => {
     // arrange
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     const input = { sbi: '123', reason: 'test' }
 
     // act
@@ -1084,7 +1215,7 @@ describe('businessReactivateResolver', () => {
 
   it('records the audit trail when the reactivate request fails', async () => {
     // arrange
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.reactivateOrganisation.mockRejectedValue(
       new Error('Business is not deactivated')
     )
@@ -1104,7 +1235,7 @@ describe('businessReactivateResolver', () => {
 
   it('records the sbi account when the organisation lookup fails', async () => {
     // arrange
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(
       new Error('upstream failure')
     )
     const input = { sbi: '123', reason: 'test' }
@@ -1129,8 +1260,12 @@ describe('businessDeactivateResolver', () => {
 
   beforeEach(() => {
     dataSources = {
+      mongoBusiness: {
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      },
       ruralPaymentsBusiness: {
-        getOrganisationIdBySBI: vi.fn(),
+        organisationSearchBySbi: vi.fn(),
         deactivateOrganisation: vi.fn()
       }
     }
@@ -1138,13 +1273,13 @@ describe('businessDeactivateResolver', () => {
   })
 
   it('deactivates the organisation with the reason and note', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     const input = { sbi: '123', reason: 'test reason', note: 'test note' }
 
     const result = await businessDeactivateResolver(null, { input }, { dataSources }, info)
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
     expect(dataSources.ruralPaymentsBusiness.deactivateOrganisation).toHaveBeenCalledWith('orgId', {
       reason: 'test reason',
       note: 'test note'
@@ -1152,7 +1287,7 @@ describe('businessDeactivateResolver', () => {
   })
 
   it('throws when neither reason nor note is provided', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     const input = { sbi: '123' }
 
     await expect(
@@ -1162,7 +1297,7 @@ describe('businessDeactivateResolver', () => {
   })
 
   it('audits sbi and organisationId when request is successful', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     const input = { sbi: '123', reason: 'test' }
 
     await businessDeactivateResolver(null, { input }, { dataSources, auditTrail }, info)
@@ -1177,7 +1312,7 @@ describe('businessDeactivateResolver', () => {
   })
 
   it('audits the organisationId when the request fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockResolvedValue('orgId')
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
     dataSources.ruralPaymentsBusiness.deactivateOrganisation.mockRejectedValue(
       new Error('Business is not deactivated')
     )
@@ -1195,7 +1330,7 @@ describe('businessDeactivateResolver', () => {
   })
 
   it('audits sbi when the organisation lookup fails', async () => {
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI.mockRejectedValue(
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(
       new Error('upstream failure')
     )
     const input = { sbi: '123', reason: 'test' }
@@ -1210,5 +1345,94 @@ describe('businessDeactivateResolver', () => {
       expect.anything()
     )
     expect(dataSources.ruralPaymentsBusiness.deactivateOrganisation).not.toHaveBeenCalled()
+  })
+})
+
+describe.each([
+  { name: 'businessLockResolver', resolver: businessLockResolver, upstream: 'lockOrganisation' },
+  {
+    name: 'businessUnlockResolver',
+    resolver: businessUnlockResolver,
+    upstream: 'unlockOrganisation'
+  },
+  {
+    name: 'businessReactivateResolver',
+    resolver: businessReactivateResolver,
+    upstream: 'reactivateOrganisation'
+  },
+  {
+    name: 'businessDeactivateResolver',
+    resolver: businessDeactivateResolver,
+    upstream: 'deactivateOrganisation'
+  }
+])('$name organisation id lookup', ({ resolver, upstream }) => {
+  let dataSources
+  const input = { sbi: '123', reason: 'test' }
+
+  beforeEach(() => {
+    dataSources = {
+      mongoBusiness: {
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      },
+      ruralPaymentsBusiness: {
+        organisationSearchBySbi: vi.fn(),
+        [upstream]: vi.fn().mockResolvedValue(true)
+      }
+    }
+  })
+
+  it('uses the cached orgId without searching upstream', async () => {
+    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('cachedOrgId')
+
+    await resolver(null, { input }, { dataSources })
+
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness[upstream]).toHaveBeenCalledWith('cachedOrgId', {
+      reason: 'test'
+    })
+  })
+
+  it('searches upstream and caches the orgId on a cache miss', async () => {
+    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({
+      id: 'upstreamOrgId'
+    })
+
+    await resolver(null, { input }, { dataSources })
+
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'upstreamOrgId')
+    expect(dataSources.ruralPaymentsBusiness[upstream]).toHaveBeenCalledWith('upstreamOrgId', {
+      reason: 'test'
+    })
+  })
+
+  it('uses the orgId from the Defra ID token without touching mongo, when a defraIdContext is present', async () => {
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
+
+    await resolver(null, { input }, { dataSources, defraIdContext })
+
+    expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness[upstream]).toHaveBeenCalledWith('orgIdFromToken', {
+      reason: 'test'
+    })
+  })
+
+  it("does not call upstream when the SBI is not in the caller's Defra ID token", async () => {
+    const defraIdContext = {
+      orgId: vi.fn(() => {
+        throw new BadRequest('Defra ID token is not valid for the provided SBI')
+      })
+    }
+
+    await expect(resolver(null, { input }, { dataSources, defraIdContext })).rejects.toThrow(
+      'Defra ID token is not valid for the provided SBI'
+    )
+    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
+    expect(dataSources.ruralPaymentsBusiness[upstream]).not.toHaveBeenCalled()
   })
 })

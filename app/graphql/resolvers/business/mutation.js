@@ -1,5 +1,5 @@
 import StatusCodes from 'http-status-codes'
-import { HttpError, NotFound } from '../../../errors/graphql.js'
+import { HttpError } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_ERROR_001 } from '../../../logger/codes.js'
 import {
   transformBankChangeInputToSubmission,
@@ -16,26 +16,19 @@ import {
   businessLockResolver,
   businessReactivateResolver,
   businessUnlockResolver,
+  getOrganisation,
+  retrieveOrgIdBySbi,
   validatePhoneHasNumber
 } from './common.js'
 import { Query } from './query.js'
-
-const getOrganisation = async (dataSources, sbi) => {
-  const { ruralPaymentsBusiness } = dataSources
-  const organisation = await ruralPaymentsBusiness.getOrganisationBySBI(sbi)
-
-  if (!organisation.businessReference) {
-    throw new NotFound('FRN not found for business')
-  }
-  return organisation
-}
 
 const buildCustomerAuthorisationRequest = async ({
   input,
   dataSources,
   auditTrail,
   info,
-  action
+  action,
+  defraIdContext
 }) => {
   // role and permissions are optional: omitting both builds a body that unlinks the customer
   // from the business when sent to the update endpoint
@@ -48,7 +41,7 @@ const buildCustomerAuthorisationRequest = async ({
     entityid: `${sbi}-${crn}`
   })
   const [organisationId, personId] = await Promise.all([
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi).then((id) => {
+    retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }).then((id) => {
       auditTrail?.recordAccount(info, 'organisationId', id)
       return id
     }),
@@ -174,11 +167,16 @@ export const Mutation = {
     }
     return { success: true, business }
   },
-  createBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
+  createBusinessCustomerBankDetails: async (
+    _,
+    { input },
+    { dataSources, auditTrail, defraIdContext },
+    info
+  ) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
     try {
-      organisation = await getOrganisation(dataSources, input.sbi)
+      organisation = await getOrganisation(dataSources, input.sbi, defraIdContext)
     } finally {
       if (organisation) {
         auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
@@ -202,11 +200,16 @@ export const Mutation = {
     await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
     return { __typename: 'BankDetailsSubmitted', success: true }
   },
-  validateBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
+  validateBusinessCustomerBankDetails: async (
+    _,
+    { input },
+    { dataSources, auditTrail, defraIdContext },
+    info
+  ) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
     let organisation
     try {
-      organisation = await getOrganisation(dataSources, input.sbi)
+      organisation = await getOrganisation(dataSources, input.sbi, defraIdContext)
     } finally {
       if (organisation) {
         auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
@@ -253,11 +256,17 @@ export const Mutation = {
   updateBusinessReactivate: businessReactivateResolver,
   updateBusinessDeactivate: businessDeactivateResolver,
 
-  addCustomerToBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
+  addCustomerToBusiness: async (
+    _,
+    { input },
+    { dataSources, auditTrail, defraIdContext },
+    info
+  ) => {
     const { organisationId, body } = await buildCustomerAuthorisationRequest({
       input,
       dataSources,
       auditTrail,
+      defraIdContext,
       info,
       action: 'created'
     })
@@ -271,13 +280,14 @@ export const Mutation = {
   updateCustomerPermissionsAndRelationshipToBusiness: async (
     _,
     { input },
-    { dataSources, auditTrail },
+    { dataSources, auditTrail, defraIdContext },
     info
   ) => {
     const { organisationId, personId, body } = await buildCustomerAuthorisationRequest({
       input,
       dataSources,
       auditTrail,
+      defraIdContext,
       info,
       action: 'updated'
     })
@@ -289,13 +299,19 @@ export const Mutation = {
     )
   },
 
-  deleteCustomerFromBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
+  deleteCustomerFromBusiness: async (
+    _,
+    { input },
+    { dataSources, auditTrail, defraIdContext },
+    info
+  ) => {
     // Rural Payments removes the customer from the business when the update is sent with
     // no roles and no privileges
     const { organisationId, personId, body } = await buildCustomerAuthorisationRequest({
       input: { sbi: input.sbi, crn: input.crn },
       dataSources,
       auditTrail,
+      defraIdContext,
       info,
       action: 'deleted'
     })

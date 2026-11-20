@@ -23,6 +23,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response._data
   }
 
+  // api endpoint: GET /organisation/{organisationId}
   async getOrganisationById(organisationId) {
     const organisationResponse = await this.get(`organisation/${organisationId}`)
 
@@ -37,6 +38,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
+  // api endpoint: POST /organisation/search
   async organisationSearchBySbi(sbi) {
     const body = JSON.stringify({
       searchFieldType: 'SBI',
@@ -61,6 +63,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data[0]
   }
 
+  // api endpoint: POST /organisation/search
   async organisationSearch(searchFieldType, primarySearchPhrase, pagination) {
     const { offset, limit } = getSearchOffsetAndLimit(pagination)
 
@@ -80,18 +83,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
       data: response?._data ?? [],
       page: response?._page
     }
-  }
-
-  async getOrganisationIdBySBI(sbi) {
-    if (this.isExternalRoute()) {
-      return this.defraIdContext.orgId(sbi)
-    }
-    return (await this.organisationSearchBySbi(sbi)).id
-  }
-
-  async getOrganisationBySBI(sbi) {
-    const orgId = await this.getOrganisationIdBySBI(sbi)
-    return this.getOrganisationById(orgId)
   }
 
   async getOrganisationCustomersByOrganisationId(organisationId) {

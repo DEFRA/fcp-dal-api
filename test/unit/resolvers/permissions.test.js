@@ -1,4 +1,4 @@
-import { describe, expect, it, test, vi } from 'vitest'
+import { beforeEach, describe, expect, it, test, vi } from 'vitest'
 import {
   InternalUser,
   Permission,
@@ -202,9 +202,15 @@ const dataSources = {
     getOrganisationCustomersByOrganisationId(_organisationId) {
       return organisationPeopleData._data
     },
-    getOrganisationBySBI(_sbi) {
+    organisationSearchBySbi(_sbi) {
       return organisationBySbiData._data[0]
     }
+  },
+  mongoBusiness: {
+    getOrgIdBySbi(_sbi) {
+      return undefined
+    },
+    upsertOrgIdBySbi() {}
   },
   ruralPaymentsCustomer: {
     getCustomerByCRN() {
@@ -260,6 +266,85 @@ test('Permission.active', async () => {
     }
   )
   expect(response).toEqual(true)
+})
+
+describe('Permission.active organisation id lookup', () => {
+  const permissionGroup = { id: 'MOCK_PERMISSION_GROUP_ID', level: 'MOCK_PRIVILEGE_LEVEL' }
+  const args = { crn: '9102634220', sbi: '890000001' }
+  let lookupDataSources
+
+  beforeEach(() => {
+    lookupDataSources = {
+      ...dataSources,
+      ruralPaymentsBusiness: {
+        organisationSearchBySbi: vi.fn().mockResolvedValue({ id: 'upstreamOrgId' }),
+        getOrganisationById: vi.fn(),
+        getOrganisationCustomersByOrganisationId: vi.fn().mockResolvedValue([])
+      },
+      mongoBusiness: {
+        getOrgIdBySbi: vi.fn(),
+        upsertOrgIdBySbi: vi.fn()
+      }
+    }
+  })
+
+  it('uses the cached orgId without searching or fetching the organisation upstream', async () => {
+    lookupDataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('cachedOrgId')
+
+    await Permission.active(permissionGroup, args, { dataSources: lookupDataSources })
+
+    expect(lookupDataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('890000001')
+    expect(lookupDataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
+    expect(lookupDataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
+    expect(
+      lookupDataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId
+    ).toHaveBeenCalledWith('cachedOrgId')
+  })
+
+  it('searches upstream and caches the orgId on a cache miss', async () => {
+    await Permission.active(permissionGroup, args, { dataSources: lookupDataSources })
+
+    expect(lookupDataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith(
+      '890000001'
+    )
+    expect(lookupDataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith(
+      '890000001',
+      'upstreamOrgId'
+    )
+    expect(
+      lookupDataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId
+    ).toHaveBeenCalledWith('upstreamOrgId')
+  })
+
+  it('uses the orgId from the Defra ID token without touching mongo, when a defraIdContext is present', async () => {
+    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
+
+    await Permission.active(permissionGroup, args, {
+      dataSources: lookupDataSources,
+      defraIdContext
+    })
+
+    expect(defraIdContext.orgId).toHaveBeenCalledWith('890000001')
+    expect(lookupDataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
+    expect(
+      lookupDataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId
+    ).toHaveBeenCalledWith('orgIdFromToken')
+  })
+
+  it("does not fetch the organisation customers when the SBI is not in the caller's Defra ID token", async () => {
+    const defraIdContext = {
+      orgId: vi.fn(() => {
+        throw new Error('Defra ID token is not valid for the provided SBI')
+      })
+    }
+
+    await expect(
+      Permission.active(permissionGroup, args, { dataSources: lookupDataSources, defraIdContext })
+    ).rejects.toThrow('Defra ID token is not valid for the provided SBI')
+    expect(
+      lookupDataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId
+    ).not.toHaveBeenCalled()
+  })
 })
 
 test('Query.internalUser', () => {
