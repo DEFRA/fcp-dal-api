@@ -24,7 +24,8 @@ vi.mock('../../../../app/config.js', () => ({
         'hitachi.entra.clientId': '12345678-1234-1234-1234-123456789012',
         'hitachi.entra.clientSecret': 'client-secret',
         'hitachi.entra.tenantId': '12345678-1234-1234-1234-123456789012',
-        'hitachi.baseUrl': 'https://api.hitachi.com'
+        'hitachi.baseUrl': 'https://api.hitachi.com',
+        'hitachi.timeoutMs': 7_500
       }
       return values[key]
     })
@@ -69,7 +70,7 @@ describe('HitachiPayments', () => {
     test('should set placeholder token when auth is disabled', async () => {
       // Mock config to return true for disableAuth
       const { config } = await import('../../../../app/config.js')
-      config.get = vi.fn((key) => {
+      config.get.mockImplementation((key) => {
         if (key === 'hitachi.disableAuth') return true
         return 'mock-value'
       })
@@ -83,7 +84,7 @@ describe('HitachiPayments', () => {
     test('should handle token acquisition errors', async () => {
       // Mock config to return false for disableAuth
       const { config } = await import('../../../../app/config.js')
-      config.get = vi.fn((key) => {
+      config.get.mockImplementation((key) => {
         if (key === 'hitachi.disableAuth') return false
         return 'mock-value'
       })
@@ -139,12 +140,29 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
     })
+    test('should use the configured request timeout', async () => {
+      const timeoutSpy = vi.spyOn(AbortSignal, 'timeout')
+      mockPost.mockResolvedValue({ Result: true })
 
+      try {
+        await dataSource.getSupplierPayments({
+          frn: '123456789', // sfd-id-check: allow
+          userIP: '192.168.1.1',
+          resourceId: '823456789'
+        })
+
+        expect(timeoutSpy).toHaveBeenCalledWith(7_500)
+        expect(mockPost.mock.calls[0][1].signal).toBeInstanceOf(AbortSignal)
+      } finally {
+        timeoutSpy.mockRestore()
+      }
+    })
     test('should throw NotFound when response has Result: false', async () => {
       const mockResponse = {
         Result: false,
@@ -207,7 +225,8 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
@@ -248,7 +267,8 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
@@ -291,7 +311,8 @@ describe('HitachiPayments', () => {
                 correlationId: 'test-correlation-id'
               }
             }
-          }
+          },
+          signal: expect.any(AbortSignal)
         }
       )
       expect(result).toBe(mockResponse)
