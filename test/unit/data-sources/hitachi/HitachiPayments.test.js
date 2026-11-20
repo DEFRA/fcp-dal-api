@@ -70,7 +70,7 @@ describe('HitachiPayments', () => {
     test('should set placeholder token when auth is disabled', async () => {
       // Mock config to return true for disableAuth
       const { config } = await import('../../../../app/config.js')
-      config.get = vi.fn((key) => {
+      config.get.mockImplementation((key) => {
         if (key === 'hitachi.disableAuth') return true
         return 'mock-value'
       })
@@ -84,8 +84,8 @@ describe('HitachiPayments', () => {
     test('should handle token acquisition errors', async () => {
       // Mock config to return false for disableAuth
       const { config } = await import('../../../../app/config.js')
-      config.get = vi.fn((key) => {
-        if (key === 'hitachi.disableAuth') return false
+      config.get.mockImplementation((key) => {
+        if (key === 'hitachi.disableAuth') return true
         return 'mock-value'
       })
 
