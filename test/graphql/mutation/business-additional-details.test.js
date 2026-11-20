@@ -262,7 +262,11 @@ describe('business', () => {
       dateStartedFarming: '01-01-2020'
     }
 
-    const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate(input)
+    // the Date scalar parses the input into a Date before the transformer sees it
+    const transformedInput = transformBusinessDetailsToOrgAdditionalDetailsUpdate({
+      ...input,
+      dateStartedFarming: new Date(input.dateStartedFarming)
+    })
 
     const expectedPutPayload = {
       ...orgAdditionalDetailsUpdatePayload,

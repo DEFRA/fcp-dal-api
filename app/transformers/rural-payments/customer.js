@@ -1,8 +1,4 @@
-import {
-  validateDateInput,
-  validateUpstreamTimestamp,
-  validateUpstreamTimestampToISO
-} from '../../utils/date.js'
+import { validateUpstreamTimestamp, validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
 import { booleanise, kitsAddressToDalAddress, transformEntityStatus } from '../common.js'
 
@@ -58,6 +54,18 @@ export function transformPersonSummaryToCustomerAuthorisedBusinesses(properties,
 }
 
 const day = 24 * 60 * 60 * 1000
+
+/**
+ * Normalises a date-of-birth timestamp to midnight UTC of the nearest day.
+ *
+ * Upstream dates of birth may be stored as local midnight (e.g. 23:00 UTC the
+ * previous day during BST), so rounding to the nearest whole UTC day avoids
+ * the date shifting by one when converted to an ISO date string.
+ *
+ * @param {number|null|undefined} dateOfBirth - Date of birth as epoch milliseconds.
+ * @returns {number|null|undefined} Epoch milliseconds at 00:00:00.000 UTC of the nearest day,
+ *   or the original falsy value if `dateOfBirth` is falsy.
+ */
 const dob2utc = (dateOfBirth) => dateOfBirth && Math.round(dateOfBirth / day) * day
 
 export const ruralPaymentsPortalCustomerTransformer = (data) => {
@@ -104,17 +112,17 @@ const blankToNull = (value) => (value?.trim() ? value : null)
 /**
  * Builds the rural payments person duplicate check request from a CustomerDuplicateInput.
  *
- * @param {object} input - The CustomerDuplicateInput.
+ * @param {object} input - The CustomerDuplicateInput; `dateOfBirth` is a `Date`, already
+ * validated by the Date scalar.
  * @param {string | number | null} [personId] - Rural payments ID of a person to leave out of the
  * check.
  * @returns {object} The PersonDuplicateRequest body.
- * @throws {BadRequest} When the date of birth is not a valid date.
  */
 export const transformCustomerDuplicateInputToPersonDuplicateRequest = (input, personId) => ({
   id: personId ?? null,
   firstName: input.first,
   lastName: input.last,
-  dateOfBirth: input.dateOfBirth ? dob2utc(validateDateInput(input.dateOfBirth).getTime()) : null,
+  dateOfBirth: input.dateOfBirth ? dob2utc(input.dateOfBirth.getTime()) : null,
   landline: blankToNull(input.phone?.landline),
   mobile: blankToNull(input.phone?.mobile)
 })
@@ -163,7 +171,7 @@ const customerUpdateInputMapping = {
   firstName: (input) => input.first,
   middleName: (input) => input.middle,
   lastName: (input) => input.last,
-  dateOfBirth: (input) => input.dateOfBirth && dob2utc(Date.parse(input.dateOfBirth)),
+  dateOfBirth: (input) => input.dateOfBirth && dob2utc(input.dateOfBirth.getTime()),
   landline: (input) => input.phone?.landline,
   mobile: (input) => input.phone?.mobile,
   email: (input) => input.email?.address,

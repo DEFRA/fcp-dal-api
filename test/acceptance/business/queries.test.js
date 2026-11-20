@@ -216,8 +216,11 @@ describe('Business Queries - payments', () => {
       response: {
         errors: [
           expect.objectContaining({
-            message:
-              'Invalid date format: "not-a-date" is not a valid date. Date should be supplied in ISO 8601 format, e.g. 2020-01-01',
+            // The Date scalar rejects it during variable coercion, so graphql-js prefixes the
+            // message with 'Variable "$fromDate" got invalid value ...;'
+            message: expect.stringContaining(
+              'Invalid date format: "not-a-date" is not a valid date. Date should be supplied in ISO 8601 format, e.g. 2020-01-01'
+            ),
             extensions: expect.objectContaining({ code: 'BAD REQUEST' })
           })
         ]

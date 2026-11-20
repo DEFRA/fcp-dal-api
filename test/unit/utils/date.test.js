@@ -3,7 +3,7 @@ import { BadRequest } from '../../../app/errors/graphql.js'
 import {
   formatDateAsUtcDateTime,
   validateDateInput,
-  validatePastDateInput,
+  validatePastDate,
   validateUpstreamDate,
   validateUpstreamTimestamp,
   validateUpstreamTimestampToISO
@@ -27,18 +27,16 @@ describe('validateDateInput function', () => {
   })
 })
 
-describe('validatePastDateInput function', () => {
-  it('should return a Date object for a valid ISO 8601 date string in the past', () => {
-    const dateString = '2020-01-01'
-    const result = validatePastDateInput(dateString)
-    expect(result).toBeInstanceOf(Date)
-    expect(result.toISOString()).toBe('2020-01-01T00:00:00.000Z')
+describe('validatePastDate function', () => {
+  it('should return the same Date for a date in the past', () => {
+    const date = new Date('2020-01-01')
+    expect(validatePastDate(date)).toBe(date)
   })
 
-  it('should throw a BadRequest error for a valid FUTURE date string', () => {
-    const invalidDateString = new Date('9999-12-31T23:59:59.999Z').toISOString()
-    expect(() => validatePastDateInput(invalidDateString)).toThrow(BadRequest)
-    expect(() => validatePastDateInput(invalidDateString)).toThrow(
+  it('should throw a BadRequest error for a future date', () => {
+    const futureDate = new Date('9999-12-31T23:59:59.999Z')
+    expect(() => validatePastDate(futureDate)).toThrow(BadRequest)
+    expect(() => validatePastDate(futureDate)).toThrow(
       'Invalid date: "9999-12-31T23:59:59.999Z" must be in the past.'
     )
   })

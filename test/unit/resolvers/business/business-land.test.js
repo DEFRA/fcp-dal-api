@@ -176,6 +176,65 @@ describe('BusinessLand', () => {
     ])
   })
 
+  describe('null date means 1 January 1970, as before the Date scalar', () => {
+    // A client can send `date: null` explicitly. Before the Date scalar the datasources did
+    // `new Date(null)`, i.e. epoch zero, so the resolvers keep that rather than crash on null.
+    const nullDate = { date: null, sheetId: 'mockSheetId', parcelId: 'mockParcelId' }
+
+    const expectEpoch = (date) => {
+      expect(date).toEqual(new Date(0))
+    }
+
+    it('summary stores epoch zero for its child resolvers', () => {
+      expectEpoch(BusinessLand.summary(mockBusiness, { date: null }, {}).date)
+    })
+
+    it('parcels passes epoch zero to the datasource', async () => {
+      const spy = vi.spyOn(dataSources.ruralPaymentsBusiness, 'getParcelsByOrganisationIdAndDate')
+
+      await BusinessLand.parcels(mockBusiness, { date: null }, { dataSources })
+
+      expectEpoch(spy.mock.calls[0][1])
+    })
+
+    it('parcel passes epoch zero to the datasource and returns it', async () => {
+      const spy = vi.spyOn(dataSources.ruralPaymentsBusiness, 'getParcelsByOrganisationIdAndDate')
+
+      const result = await BusinessLand.parcel(mockBusiness, nullDate, { dataSources })
+
+      expectEpoch(spy.mock.calls[0][1])
+      expectEpoch(result.date)
+    })
+
+    it('parcelCovers passes epoch zero to the datasource', async () => {
+      const spy = vi.spyOn(dataSources.ruralPaymentsBusiness, 'getCoversByOrgSheetParcelIdDate')
+
+      await BusinessLand.parcelCovers(mockBusiness, nullDate, { dataSources })
+
+      expectEpoch(spy.mock.calls[0][3])
+    })
+
+    it('parcelLandUses passes epoch zero to the datasource', async () => {
+      const spy = vi.spyOn(dataSources.ruralPaymentsBusiness, 'getLandUseByBusinessParcel')
+
+      await BusinessLand.parcelLandUses({ sbi: 'mockSbi' }, nullDate, { dataSources })
+
+      expectEpoch(spy.mock.calls[0][3])
+    })
+  })
+
+  it('an omitted date means now', async () => {
+    const spy = vi.spyOn(dataSources.ruralPaymentsBusiness, 'getParcelsByOrganisationIdAndDate')
+    const before = Date.now()
+
+    await BusinessLand.parcels(mockBusiness, {}, { dataSources })
+
+    const date = spy.mock.calls[0][1]
+    expect(date).toBeInstanceOf(Date)
+    expect(date.getTime()).toBeGreaterThanOrEqual(before)
+    expect(date.getTime()).toBeLessThanOrEqual(Date.now())
+  })
+
   describe('audit trail', () => {
     const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
