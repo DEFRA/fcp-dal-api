@@ -121,7 +121,8 @@ describe('Date scalar', () => {
     expect(() => DateScalar.parseValue(new Date('not-a-date'))).toThrow('is not a valid date')
   })
 
-  it.each(['not-a-date', '', '2020-13-01'])('rejects %s', (value) => {
+  // "" is not treated as "not supplied": a null result would get past a Date! argument
+  it.each(['not-a-date', '', ' ', '2020-13-01'])('rejects %s', (value) => {
     expect(() => DateScalar.parseValue(value)).toThrow(invalidDateMessage(value))
     expect(() => DateScalar.parseLiteral(stringLiteral(value))).toThrow(invalidDateMessage(value))
   })

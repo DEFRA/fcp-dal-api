@@ -10,6 +10,23 @@ import {
 } from '../../../transformers/rural-payments/lms.js'
 import { getRuralPaymentsBusinessDataSource } from './common.js'
 
+/**
+ * Turns the land queries' optional `date` argument into the `Date` to send upstream.
+ *
+ * An omitted date means now. An explicit `null` means 1 January 1970 (epoch zero): that is what
+ * the land queries did before the Date scalar existed, because the datasources built the date with
+ * `new Date(null)`. It is kept so this change does not alter what clients get back.
+ *
+ * @param {Date|null|undefined} date - The parsed `date` argument from the Date scalar.
+ * @returns {Date} The date to query.
+ */
+const resolveLandDate = (date) => {
+  if (date === undefined) {
+    return new Date()
+  }
+  return date ?? new Date(0)
+}
+
 export const BusinessLand = {
   summary({ organisationId, sbi }, { date }, { auditTrail }, info) {
     auditTrail?.recordEntity(info, {
@@ -18,15 +35,16 @@ export const BusinessLand = {
       entityid: sbi
     })
 
-    return { organisationId, date }
+    return { organisationId, date: resolveLandDate(date) }
   },
 
   async parcel(
     { organisationId, sbi },
-    { date = new Date(), parcelId, sheetId },
+    { date, parcelId, sheetId },
     { dataSources, auditTrail },
     info
   ) {
+    date = resolveLandDate(date)
     auditTrail?.recordEntity(info, {
       entity: 'parcel',
       action: 'read',
@@ -47,7 +65,8 @@ export const BusinessLand = {
     }
   },
 
-  async parcels({ organisationId, sbi }, { date = new Date() }, { dataSources, auditTrail }, info) {
+  async parcels({ organisationId, sbi }, { date }, { dataSources, auditTrail }, info) {
+    date = resolveLandDate(date)
     auditTrail?.recordEntity(info, {
       entity: 'parcel-list',
       action: 'read',
@@ -64,10 +83,11 @@ export const BusinessLand = {
 
   async parcelCovers(
     { organisationId },
-    { date = new Date(), sheetId, parcelId },
+    { date, sheetId, parcelId },
     { dataSources, auditTrail },
     info
   ) {
+    date = resolveLandDate(date)
     auditTrail?.recordEntity(info, {
       entity: 'land-cover-list',
       action: 'read',
@@ -90,7 +110,8 @@ export const BusinessLand = {
     )
   },
 
-  async parcelLandUses({ sbi }, { sheetId, parcelId, date = new Date() }, context, info) {
+  async parcelLandUses({ sbi }, { sheetId, parcelId, date }, context, info) {
+    date = resolveLandDate(date)
     const { auditTrail } = context
     auditTrail?.recordEntity(info, {
       entity: 'land-use-list',

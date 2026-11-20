@@ -49,6 +49,10 @@ const DATE_TYPE_MESSAGE = 'Date must be a string, ideally in ISO 8601 format, e.
  * `Date` objects are accepted because in-process callers (e.g. tests using `graphql()` directly)
  * can pass them as variables; HTTP clients can only send strings or numbers.
  *
+ * An empty string is rejected as an invalid date, not treated as "not supplied": the scalar
+ * cannot tell required (`Date!`) arguments from optional ones, and a `null` result would get
+ * past graphql-js's non-null check. Clients should omit the argument or send `null` instead.
+ *
  * @param {string|number|Date} value - The raw input value.
  * @returns {Date} The parsed date (a new object, even when given a `Date`).
  * @throws {GraphQLError} If the value is not a string, number or `Date`.
@@ -70,8 +74,8 @@ const parseDateInput = (value) => {
  * formats would be a breaking change. Note that `new Date()` reads date-only ISO strings as
  * UTC midnight but other formats (and date-times without an offset) as local time.
  *
- * Resolvers always receive a `Date` (or `undefined` when the argument is omitted), so the
- * downstream code only ever has to deal with `Date` objects.
+ * Resolvers always receive a `Date` (or `null`/`undefined` when the argument is null or
+ * omitted), so the downstream code only ever has to deal with `Date` objects.
  *
  * Outputs go through unchanged, as resolvers already return a mix of ISO date strings, ISO
  * timestamps and `Date` objects (which serialize to ISO timestamps).
