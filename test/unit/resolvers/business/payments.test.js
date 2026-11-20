@@ -64,7 +64,7 @@ describe('Business payments resolver', () => {
       expect(result).toBeDefined()
     })
 
-    test('should convert date filters to Dates and pass them to Hitachi datasource', async () => {
+    test('should pass date filters to Hitachi datasource', async () => {
       const mockOrganisation = {
         id: 12345,
         sbi: '823456789',
@@ -75,10 +75,14 @@ describe('Business payments resolver', () => {
       mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
       mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
 
-      // the Date scalar reaches the resolver as a string
+      // the Date scalar parses the arguments, so they reach the resolver as Dates
       await Business.payments(
         { sbi: '823456789' },
-        { fromDate: '2023-01-01', toDate: '2023-12-31', userIP: '192.168.1.1' },
+        {
+          fromDate: new Date('2023-01-01'),
+          toDate: new Date('2023-12-31'),
+          userIP: '192.168.1.1'
+        },
         mockContext
       )
 
@@ -89,19 +93,6 @@ describe('Business payments resolver', () => {
         userIP: '192.168.1.1',
         resourceId: '823456789'
       })
-    })
-
-    test('should throw BadRequest for an invalid date filter without calling upstream', async () => {
-      await expect(
-        Business.payments(
-          { sbi: '823456789' },
-          { fromDate: 'not-a-date', userIP: '192.168.1.1' },
-          mockContext
-        )
-      ).rejects.toThrow('Invalid date format: "not-a-date" is not a valid date.')
-
-      expect(mockDataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
-      expect(mockDataSources.hitachiPayments.getSupplierPayments).not.toHaveBeenCalled()
     })
 
     test('should throw NotFound when FRN is not available', async () => {

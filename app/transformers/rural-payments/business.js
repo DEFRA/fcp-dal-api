@@ -247,7 +247,7 @@ const orgAdditionalDetailsMapping = {
         }
       : undefined,
   dateStartedFarming: (data) =>
-    data.dateStartedFarming ? new Date(data.dateStartedFarming).toISOString() : undefined,
+    data.dateStartedFarming ? data.dateStartedFarming.toISOString() : undefined,
   legalStatus: (data) =>
     data.legalStatusCode
       ? {

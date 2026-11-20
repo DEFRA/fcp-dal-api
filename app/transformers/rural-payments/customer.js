@@ -1,8 +1,4 @@
-import {
-  validateDateInput,
-  validateUpstreamTimestamp,
-  validateUpstreamTimestampToISO
-} from '../../utils/date.js'
+import { validateUpstreamTimestamp, validateUpstreamTimestampToISO } from '../../utils/date.js'
 import { transformMapping } from '../../utils/mapping.js'
 import { booleanise, kitsAddressToDalAddress, transformEntityStatus } from '../common.js'
 
@@ -116,17 +112,17 @@ const blankToNull = (value) => (value?.trim() ? value : null)
 /**
  * Builds the rural payments person duplicate check request from a CustomerDuplicateInput.
  *
- * @param {object} input - The CustomerDuplicateInput.
+ * @param {object} input - The CustomerDuplicateInput; `dateOfBirth` is a `Date`, already
+ * validated by the Date scalar.
  * @param {string | number | null} [personId] - Rural payments ID of a person to leave out of the
  * check.
  * @returns {object} The PersonDuplicateRequest body.
- * @throws {BadRequest} When the date of birth is not a valid date.
  */
 export const transformCustomerDuplicateInputToPersonDuplicateRequest = (input, personId) => ({
   id: personId ?? null,
   firstName: input.first,
   lastName: input.last,
-  dateOfBirth: input.dateOfBirth ? dob2utc(validateDateInput(input.dateOfBirth).getTime()) : null,
+  dateOfBirth: input.dateOfBirth ? dob2utc(input.dateOfBirth.getTime()) : null,
   landline: blankToNull(input.phone?.landline),
   mobile: blankToNull(input.phone?.mobile)
 })
@@ -175,7 +171,7 @@ const customerUpdateInputMapping = {
   firstName: (input) => input.first,
   middleName: (input) => input.middle,
   lastName: (input) => input.last,
-  dateOfBirth: (input) => input.dateOfBirth && dob2utc(new Date(input.dateOfBirth).getTime()),
+  dateOfBirth: (input) => input.dateOfBirth && dob2utc(input.dateOfBirth.getTime()),
   landline: (input) => input.phone?.landline,
   mobile: (input) => input.phone?.mobile,
   email: (input) => input.email?.address,

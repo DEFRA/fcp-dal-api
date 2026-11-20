@@ -7,7 +7,7 @@ import {
   transformPersonSummaryToCustomerAuthorisedBusinesses,
   transformPersonSummaryToCustomerAuthorisedFilteredBusiness
 } from '../../../transformers/rural-payments/customer.js'
-import { validatePastDateInput } from '../../../utils/date.js'
+import { validatePastDate } from '../../../utils/date.js'
 
 const BUSINESS_LIST_ENTITY = 'business-list'
 
@@ -81,7 +81,7 @@ export const CustomerBusiness = {
       entityid: `${crn}-${sbi}`
     })
     if (fromDate) {
-      fromDate = validatePastDateInput(fromDate)
+      validatePastDate(fromDate)
     }
 
     const notifications =

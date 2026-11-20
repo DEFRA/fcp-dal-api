@@ -11,7 +11,6 @@ import {
   transformOrganisationCustomers,
   transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
-import { validateDateInput } from '../../../utils/date.js'
 import { getRuralPaymentsBusinessDataSource, retrieveFrnBySbi } from './common.js'
 
 export const Business = {
@@ -141,10 +140,6 @@ export const Business = {
     { dataSources, auditTrail, defraIdContext },
     info
   ) {
-    // the Date scalar is passed through as a string, so convert it before use
-    fromDate = fromDate && validateDateInput(fromDate)
-    toDate = toDate && validateDateInput(toDate)
-
     let frn
     try {
       frn = await retrieveFrnBySbi(sbi, { dataSources, defraIdContext })

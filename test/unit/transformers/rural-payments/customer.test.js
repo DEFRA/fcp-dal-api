@@ -572,7 +572,7 @@ describe('Customer transformer', () => {
         first: newPerson.firstName,
         middle: newPerson.middleName,
         last: newPerson.lastName,
-        dateOfBirth: '2023-01-02',
+        dateOfBirth: new Date('2023-01-02'),
         doNotContact: newPerson.doNotContact,
         phone: {
           landline: newPerson.landline,
@@ -662,7 +662,7 @@ describe('Customer transformer', () => {
         first: 'firstName',
         middle: 'middleName',
         last: 'lastName',
-        dateOfBirth: '2023-01-02',
+        dateOfBirth: new Date('2023-01-02'),
         phone: {
           landline: 'newLandline',
           mobile: 'newMobile'
@@ -730,7 +730,7 @@ describe('Customer transformer', () => {
 
     it('handles date', () => {
       const input = {
-        dateOfBirth: '2025-01-01'
+        dateOfBirth: new Date('2025-01-01')
       }
 
       const result = transformCustomerUpdateInputToPersonUpdate(currentPerson, input)
@@ -849,7 +849,7 @@ describe('Customer transformer', () => {
             crn: '9123456789',
             first: 'Jon',
             last: 'Doe',
-            dateOfBirth: '1980-06-10',
+            dateOfBirth: new Date('1980-06-10'),
             phone: { mobile: '07123456789', landline: '01234567890' }
           },
           123
@@ -885,16 +885,6 @@ describe('Customer transformer', () => {
           phone: { mobile: '', landline: '  ' }
         })
       ).toMatchObject({ landline: null, mobile: null })
-    })
-
-    it('throws a BadRequest for an invalid date of birth', () => {
-      expect(() =>
-        transformCustomerDuplicateInputToPersonDuplicateRequest({
-          first: 'Jon',
-          last: 'Doe',
-          dateOfBirth: 'not-a-date'
-        })
-      ).toThrow('Invalid date format')
     })
   })
 

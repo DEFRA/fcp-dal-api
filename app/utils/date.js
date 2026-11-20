@@ -20,19 +20,19 @@ export function validateDateInput(dateString) {
 }
 
 /**
- * Parses a client-supplied date string and checks that it is valid and before now.
+ * Checks that a date is before now.
  *
- * @param {string} dateString - Date string, ideally in ISO 8601 format (e.g. `2020-01-01`).
- * @returns {Date} The parsed date.
- * @throws {BadRequest} If `dateString` is not a valid date, or is not before the current time.
+ * Takes an already-parsed `Date` (e.g. from the Date scalar), so it does not re-parse it.
+ *
+ * @param {Date} date - The date to check.
+ * @returns {Date} The same date.
+ * @throws {BadRequest} If `date` is not before the current time.
  */
-export function validatePastDateInput(dateString) {
-  const dateObject = validateDateInput(dateString)
-  const now = new Date()
-  if (dateObject >= now) {
-    throw new BadRequest(`Invalid date: "${dateString}" must be in the past.`)
+export function validatePastDate(date) {
+  if (date >= new Date()) {
+    throw new BadRequest(`Invalid date: "${date.toISOString()}" must be in the past.`)
   }
-  return dateObject
+  return date
 }
 
 /**
@@ -42,7 +42,8 @@ export function validatePastDateInput(dateString) {
  * Some upstream timestamps put a colon instead of a dot before the milliseconds
  * (e.g. `2020-01-01T12:34:56:789`). These are fixed to `12:34:56.789` before parsing.
  *
- * @param {string|number|Date|null|undefined} date - Upstream timestamp (string, epoch milliseconds or `Date`).
+ * @param {string|number|Date|null|undefined} date - Upstream timestamp (string, epoch
+ *   milliseconds or `Date`).
  * @returns {Date|null} The parsed date, or `null` if `date` is falsy or invalid.
  */
 export const validateUpstreamTimestamp = (date) => {
@@ -59,8 +60,10 @@ export const validateUpstreamTimestamp = (date) => {
 /**
  * Converts an upstream timestamp to a full ISO 8601 timestamp string in UTC.
  *
- * @param {string|number|Date|null|undefined} timestamp - Upstream timestamp; see {@link validateUpstreamTimestamp}.
- * @returns {string|null} ISO timestamp (e.g. `2020-01-01T12:34:56.789Z`), or `null` if missing or invalid.
+ * @param {string|number|Date|null|undefined} timestamp - Upstream timestamp; see
+ *   {@link validateUpstreamTimestamp}.
+ * @returns {string|null} ISO timestamp (e.g. `2020-01-01T12:34:56.789Z`), or `null` if missing
+ *   or invalid.
  */
 export const validateUpstreamTimestampToISO = (timestamp) =>
   validateUpstreamTimestamp(timestamp)?.toISOString() ?? null // ensure null, not undefined
@@ -68,7 +71,8 @@ export const validateUpstreamTimestampToISO = (timestamp) =>
 /**
  * Converts an upstream timestamp to an ISO 8601 date string (UTC date part only).
  *
- * @param {string|number|Date|null|undefined} date - Upstream timestamp; see {@link validateUpstreamTimestamp}.
+ * @param {string|number|Date|null|undefined} date - Upstream timestamp; see
+ *   {@link validateUpstreamTimestamp}.
  * @returns {string|null} ISO date (e.g. `2020-01-01`), or `null` if missing or invalid.
  */
 export const validateUpstreamDate = (date) =>

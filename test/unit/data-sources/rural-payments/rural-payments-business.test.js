@@ -327,7 +327,7 @@ describe('Rural Payments Business', () => {
 
       const result = await ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
         123,
-        '2024-03-19'
+        new Date('2024-03-19')
       )
       expect(result).toEqual(mockResponse)
       expect(httpGet).toHaveBeenCalledWith('lms/organisation/123/parcels/historic/19-Mar-24')
@@ -341,7 +341,7 @@ describe('Rural Payments Business', () => {
 
       const result = await ruralPaymentsBusiness.getParcelEffectiveDatesByOrganisationIdAndDate(
         123,
-        '2024-03-19'
+        new Date('2024-03-19')
       )
       expect(result).toEqual(mockResponse)
       expect(httpGet).toHaveBeenCalledWith('lms/organisation/123/parcel-details/historic/19-Mar-24')
@@ -357,7 +357,7 @@ describe('Rural Payments Business', () => {
         123,
         'sheet1',
         'parcel1',
-        '2024-03-19'
+        new Date('2024-03-19')
       )
       expect(result).toEqual(mockResponse)
       expect(httpGet).toHaveBeenCalledWith(
@@ -373,7 +373,7 @@ describe('Rural Payments Business', () => {
 
       const result = await ruralPaymentsBusiness.getCoversSummaryByOrganisationIdAndDate(
         123,
-        '2024-03-19'
+        new Date('2024-03-19')
       )
       expect(result).toEqual(mockResponse)
       expect(httpGet).toHaveBeenCalledWith('lms/organisation/123/covers-summary/historic/19-Mar-24')

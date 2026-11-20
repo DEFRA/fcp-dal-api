@@ -605,7 +605,7 @@ describe('CustomerBusiness', () => {
     test('get messages fromDate', async () => {
       const response = await CustomerBusiness.messages(
         { organisationId: 'mockOrganisationId', personId: 'mockPersonId' },
-        { fromDate: '2024-12-31' },
+        { fromDate: new Date('2024-12-31') },
         { dataSources }
       )
 
@@ -638,7 +638,7 @@ describe('CustomerBusiness', () => {
     })
 
     test('get messages fromDate; should fail if date is in the future', async () => {
-      const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000 * 2).toISOString().slice(0, 10)
+      const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000 * 2)
 
       await expect(
         CustomerBusiness.messages(
@@ -646,7 +646,7 @@ describe('CustomerBusiness', () => {
           { fromDate: futureDate },
           { dataSources }
         )
-      ).rejects.toThrow(`Invalid date: "${futureDate}" must be in the past.`)
+      ).rejects.toThrow(`Invalid date: "${futureDate.toISOString()}" must be in the past.`)
     })
 
     test('records a message-list entity without duplicating account fields recorded by Customer.business', async () => {

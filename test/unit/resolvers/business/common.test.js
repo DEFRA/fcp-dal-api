@@ -370,7 +370,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
       email: 'businessemail@defra.com'
     })
 
-    const input = { sbi: '123', dateStartedFarming: '01-01-2025' }
+    const input = { sbi: '123', dateStartedFarming: new Date('2025-01-01') }
 
     const result = await businessAdditionalDetailsUpdateResolver(
       null,
@@ -411,7 +411,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     const info = {
       path: { key: 'updateBusinessLegalStatus', typename: 'Mutation', prev: undefined }
     }
-    const input = { sbi: '123', dateStartedFarming: '01-01-2025' }
+    const input = { sbi: '123', dateStartedFarming: new Date('2025-01-01') }
 
     await businessAdditionalDetailsUpdateResolver(
       null,
@@ -438,7 +438,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
 
     await businessAdditionalDetailsUpdateResolver(
       null,
-      { input: { sbi: '123', dateStartedFarming: '01-01-2025' } },
+      { input: { sbi: '123', dateStartedFarming: new Date('2025-01-01') } },
       { dataSources }
     )
   })
@@ -450,7 +450,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     dataSources.ruralPaymentsBusiness.updateOrganisationAdditionalDetails.mockResolvedValue({})
 
     const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
-    const input = { sbi: '123', dateStartedFarming: '01-01-2025' }
+    const input = { sbi: '123', dateStartedFarming: new Date('2025-01-01') }
 
     await businessAdditionalDetailsUpdateResolver(null, { input }, { dataSources, defraIdContext })
 
@@ -495,7 +495,7 @@ describe('businessAllFieldsUpdateResolver', () => {
       name: 'Test',
       vat: '123456789', // sfd-id-check: allow
       legalStatusCode: 2,
-      dateStartedFarming: '2025-01-01'
+      dateStartedFarming: new Date('2025-01-01')
     }
 
     const result = await businessAllFieldsUpdateResolver(null, { input }, { dataSources })
