@@ -16,7 +16,7 @@ import {
   businessLockResolver,
   businessReactivateResolver,
   businessUnlockResolver,
-  getOrganisation,
+  retrieveFrnBySbi,
   retrieveOrgIdBySbi,
   validatePhoneHasNumber
 } from './common.js'
@@ -72,12 +72,11 @@ const buildCustomerAuthorisationRequest = async ({
   }
 }
 
-const validateBankChangeRequest = async (input, dataSources, organisation) => {
+const validateBankChangeRequest = async (input, dataSources, { organisationId, frn }) => {
   const { crn } = input
   const { ruralPaymentsBusiness } = dataSources
 
   const personId = await retrievePersonIdByCRN(crn, dataSources)
-  const organisationId = `${organisation.id}`
   const lockedStatus = await ruralPaymentsBusiness.getBankChangeLockedStatus(
     organisationId,
     `${personId}`
@@ -107,7 +106,7 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
   const submission = transformBankChangeInputToSubmission(input, {
     organisationId,
     personId: `${personId}`,
-    frn: organisation.businessReference
+    frn
   })
 
   const validation = await ruralPaymentsBusiness.validateBankChange(submission)
@@ -142,9 +141,10 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
 }
 
 /**
- * Builds a bank details mutation resolver. The resolver fetches the organisation for the SBI,
- * records the audit trail (even when the fetch fails), and validates the bank change request.
- * A validation failure is returned as is; otherwise handleRequest builds the response.
+ * Builds a bank details mutation resolver. The resolver looks up the org id and FRN for the SBI
+ * (both cached, so a warm cache makes no Rural Payments call), records the audit trail (even when
+ * a lookup fails), and validates the bank change request. A validation failure is returned as is;
+ * otherwise handleRequest builds the response.
  * @param {string} auditAction the action recorded against the bank-account audit entity
  * @param {Function} handleRequest called with ({ submission, validation }, dataSources) when the
  *   request passes validation, and returns the mutation result
@@ -154,21 +154,30 @@ const bankDetailsResolver =
   (auditAction, handleRequest) =>
   async (_, { input }, { dataSources, auditTrail, defraIdContext }, info) => {
     auditTrail?.recordAccount(info, 'sbi', input.sbi)
-    let organisation
+    let organisationId
+    let frn
     try {
-      organisation = await getOrganisation(dataSources, input.sbi, defraIdContext)
+      // Sequential on purpose: on a cold cache, the FRN lookup resolves the org id again, so
+      // running it after the org id has been cached avoids a duplicate upstream search
+      organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
+      frn = await retrieveFrnBySbi(input.sbi, { dataSources, defraIdContext })
     } finally {
-      if (organisation) {
-        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
-        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
+      if (organisationId) {
+        auditTrail?.recordAccount(info, 'organisationId', `${organisationId}`)
+      }
+      if (frn) {
+        auditTrail?.recordAccount(info, 'frn', frn)
       }
       auditTrail?.recordEntity(info, {
         entity: 'bank-account',
         action: auditAction,
-        entityid: organisation?.businessReference
+        entityid: frn
       })
     }
-    const result = await validateBankChangeRequest(input, dataSources, organisation)
+    const result = await validateBankChangeRequest(input, dataSources, {
+      organisationId: `${organisationId}`,
+      frn
+    })
     return result.failure ?? handleRequest(result, dataSources)
   }
 

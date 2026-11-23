@@ -8,7 +8,6 @@ import {
   businessLockResolver,
   businessReactivateResolver,
   businessUnlockResolver,
-  getOrganisation,
   getRuralPaymentsBusinessDataSource,
   retrieveFrnBySbi,
   retrieveOrgIdBySbi,
@@ -85,94 +84,6 @@ describe('retrieveOrgIdBySbi', () => {
 
     await expect(retrieveOrgIdBySbi('123', { dataSources })).rejects.toThrow(notFoundError)
     expect(dataSources.mongoBusiness.upsertOrgIdBySbi).not.toHaveBeenCalled()
-  })
-})
-
-describe('getOrganisation', () => {
-  let dataSources
-  const organisation = { id: 'orgId', businessReference: 'frn' }
-
-  beforeEach(() => {
-    dataSources = {
-      mongoBusiness: {
-        getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
-      },
-      ruralPaymentsBusiness: {
-        organisationSearchBySbi: vi.fn(),
-        getOrganisationById: vi.fn().mockResolvedValue(organisation)
-      }
-    }
-  })
-
-  it('fetches the organisation using the cached orgId without searching upstream', async () => {
-    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
-
-    const result = await getOrganisation(dataSources, '123')
-
-    expect(result).toBe(organisation)
-    expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
-  })
-
-  it('searches upstream and caches the orgId on a cache miss', async () => {
-    dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockResolvedValue({ id: 'orgId' })
-
-    const result = await getOrganisation(dataSources, '123')
-
-    expect(result).toBe(organisation)
-    expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith('orgId')
-  })
-
-  it('uses the orgId from the Defra ID token without touching mongo, when a defraIdContext is present', async () => {
-    const defraIdContext = { orgId: vi.fn().mockReturnValue('orgIdFromToken') }
-
-    await getOrganisation(dataSources, '123', defraIdContext)
-
-    expect(defraIdContext.orgId).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
-      'orgIdFromToken'
-    )
-  })
-
-  it('does not fetch the organisation when the SBI is not in the Defra ID token', async () => {
-    const defraIdContext = {
-      orgId: vi.fn(() => {
-        throw new BadRequest('Defra ID token is not valid for the provided SBI')
-      })
-    }
-
-    await expect(getOrganisation(dataSources, '123', defraIdContext)).rejects.toThrow(
-      'Defra ID token is not valid for the provided SBI'
-    )
-    expect(dataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
-  })
-
-  it('throws NotFound when the organisation has no FRN', async () => {
-    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
-    dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue({
-      id: 'orgId',
-      businessReference: null
-    })
-
-    await expect(getOrganisation(dataSources, '123')).rejects.toThrow(
-      new NotFound('FRN not found for business')
-    )
-  })
-
-  it('propagates errors from the organisation fetch', async () => {
-    dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValue('orgId')
-    dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValue(
-      new NotFound('Rural payments organisation not found')
-    )
-
-    await expect(getOrganisation(dataSources, '123')).rejects.toThrow(
-      'Rural payments organisation not found'
-    )
   })
 })
 

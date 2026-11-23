@@ -23,7 +23,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return response._data
   }
 
-  // api endpoint: GET /organisation/{organisationId}
   async getOrganisationById(organisationId) {
     const organisationResponse = await this.get(`organisation/${organisationId}`)
 
@@ -41,7 +40,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
   /**
    * Finds the Rural Payments organisation for an SBI. A thin wrapper around organisationSearch
    * that asks for a single result and treats an empty result as not found.
-   * api endpoint: POST /organisation/search
    * @param {string} sbi the business's SBI
    * @returns {Promise<object>} the first matching organisation search result (includes its id)
    * @throws {NotFound} if no organisation matches the SBI
@@ -60,7 +58,6 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return data[0]
   }
 
-  // api endpoint: POST /organisation/search
   async organisationSearch(searchFieldType, primarySearchPhrase, pagination) {
     const { offset, limit } = getSearchOffsetAndLimit(pagination)
 

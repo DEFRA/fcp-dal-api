@@ -188,28 +188,6 @@ export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
   )
 }
 
-/**
- * Fetches the full Rural Payments organisation for an SBI. The org id is resolved via
- * retrieveOrgIdBySbi (Defra ID token, then Mongo cache, then upstream search), so only the
- * organisation fetch is guaranteed to hit Rural Payments.
- * @param {object} dataSources the request's data sources (needs mongoBusiness and
- *   ruralPaymentsBusiness)
- * @param {string} sbi the business's SBI
- * @param {object} [defraIdContext] the Defra ID context, present only for externally
- *   authenticated requests; when given, the SBI must be in the caller's token
- * @returns {Promise<object>} the organisation, including its id and businessReference (FRN)
- * @throws {NotFound} if the organisation has no businessReference (FRN), or is not found upstream
- */
-export async function getOrganisation(dataSources, sbi, defraIdContext) {
-  const orgId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
-  const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationById(orgId)
-
-  if (!organisation.businessReference) {
-    throw new NotFound('FRN not found for business')
-  }
-  return organisation
-}
-
 async function fetchAndCacheFrnBySbi(sbi, { dataSources, defraIdContext }) {
   // Reuses the orgId lookup (token, then Mongo cache, then upstream search), so only the
   // organisation fetch is guaranteed to hit Rural Payments

@@ -11,7 +11,7 @@ const mockBusinessCommonModule = {
   businessUnlockResolver: vi.fn(),
   businessReactivateResolver: vi.fn(),
   businessDeactivateResolver: vi.fn(),
-  getOrganisation: vi.fn(),
+  retrieveFrnBySbi: vi.fn(),
   validatePhoneHasNumber: vi.fn()
 }
 const mockCustomerCommonModule = {
@@ -439,10 +439,8 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
   }
 
   beforeEach(() => {
-    mockBusinessCommonModule.getOrganisation.mockResolvedValue({
-      id: 5583781,
-      businessReference: '10014489653'
-    })
+    mockBusinessCommonModule.retrieveOrgIdBySbi.mockResolvedValue(5583781)
+    mockBusinessCommonModule.retrieveFrnBySbi.mockResolvedValue('10014489653')
     dataSources = {
       ruralPaymentsBusiness: {
         getBankChangeLockedStatus: vi.fn().mockResolvedValue({ locked: false }),
@@ -464,7 +462,7 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
   })
 
-  it('passes the defraIdContext to getOrganisation so external callers are checked against their token', async () => {
+  it('passes the defraIdContext to the org id and FRN lookups so external callers are checked against their token', async () => {
     const defraIdContext = { orgId: vi.fn() }
 
     await Mutation.createBusinessCustomerBankDetails(
@@ -473,16 +471,19 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
       { dataSources, defraIdContext }
     )
 
-    expect(mockBusinessCommonModule.getOrganisation).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('810405990', {
       dataSources,
-      '810405990',
       defraIdContext
-    )
+    })
+    expect(mockBusinessCommonModule.retrieveFrnBySbi).toHaveBeenCalledWith('810405990', {
+      dataSources,
+      defraIdContext
+    })
   })
 
   it("does not continue when the SBI is not in the caller's Defra ID token", async () => {
     const defraIdContext = { orgId: vi.fn() }
-    mockBusinessCommonModule.getOrganisation.mockRejectedValue(
+    mockBusinessCommonModule.retrieveOrgIdBySbi.mockRejectedValue(
       new Error('Defra ID token is not valid for the provided SBI')
     )
 
@@ -560,11 +561,14 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
       { dataSources }
     )
 
-    expect(mockBusinessCommonModule.getOrganisation).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('810405990', {
       dataSources,
-      '810405990',
-      undefined
-    )
+      defraIdContext: undefined
+    })
+    expect(mockBusinessCommonModule.retrieveFrnBySbi).toHaveBeenCalledWith('810405990', {
+      dataSources,
+      defraIdContext: undefined
+    })
     expect(dataSources.ruralPaymentsBusiness.validateBankChange).toHaveBeenCalledWith(
       expect.objectContaining({
         organisationId: '5583781',
@@ -631,7 +635,7 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
   })
 
   it('propagates NotFound when the organisation has no FRN', async () => {
-    mockBusinessCommonModule.getOrganisation.mockRejectedValue(
+    mockBusinessCommonModule.retrieveFrnBySbi.mockRejectedValue(
       new Error('FRN not found for business')
     )
 
@@ -642,8 +646,8 @@ describe('Business Mutation createBusinessCustomerBankDetails', () => {
     expect(dataSources.ruralPaymentsBusiness.submitBankChange).not.toHaveBeenCalled()
   })
 
-  it('still records the sbi account and an attempted bank-account entity when getOrganisation fails', async () => {
-    mockBusinessCommonModule.getOrganisation.mockRejectedValue(new Error('upstream failure'))
+  it('still records the sbi account and an attempted bank-account entity when a lookup fails', async () => {
+    mockBusinessCommonModule.retrieveOrgIdBySbi.mockRejectedValue(new Error('upstream failure'))
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: { key: 'createBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
@@ -794,10 +798,8 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
   }
 
   beforeEach(() => {
-    mockBusinessCommonModule.getOrganisation.mockResolvedValue({
-      id: 5583781,
-      businessReference: '10014489653'
-    })
+    mockBusinessCommonModule.retrieveOrgIdBySbi.mockResolvedValue(5583781)
+    mockBusinessCommonModule.retrieveFrnBySbi.mockResolvedValue('10014489653')
     dataSources = {
       ruralPaymentsBusiness: {
         getBankChangeLockedStatus: vi.fn().mockResolvedValue({ locked: false }),
@@ -819,7 +821,7 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue(5020949)
   })
 
-  it('passes the defraIdContext to getOrganisation so external callers are checked against their token', async () => {
+  it('passes the defraIdContext to the org id and FRN lookups so external callers are checked against their token', async () => {
     const defraIdContext = { orgId: vi.fn() }
 
     await Mutation.validateBusinessCustomerBankDetails(
@@ -828,16 +830,19 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
       { dataSources, defraIdContext }
     )
 
-    expect(mockBusinessCommonModule.getOrganisation).toHaveBeenCalledWith(
+    expect(mockBusinessCommonModule.retrieveOrgIdBySbi).toHaveBeenCalledWith('810405990', {
       dataSources,
-      '810405990',
       defraIdContext
-    )
+    })
+    expect(mockBusinessCommonModule.retrieveFrnBySbi).toHaveBeenCalledWith('810405990', {
+      dataSources,
+      defraIdContext
+    })
   })
 
   it("does not continue when the SBI is not in the caller's Defra ID token", async () => {
     const defraIdContext = { orgId: vi.fn() }
-    mockBusinessCommonModule.getOrganisation.mockRejectedValue(
+    mockBusinessCommonModule.retrieveOrgIdBySbi.mockRejectedValue(
       new Error('Defra ID token is not valid for the provided SBI')
     )
 
@@ -1034,7 +1039,7 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
   })
 
   it('propagates NotFound when the organisation has no FRN', async () => {
-    mockBusinessCommonModule.getOrganisation.mockRejectedValue(
+    mockBusinessCommonModule.retrieveFrnBySbi.mockRejectedValue(
       new Error('FRN not found for business')
     )
 
@@ -1043,8 +1048,8 @@ describe('Business Mutation validateBusinessCustomerBankDetails', () => {
     ).rejects.toThrow('FRN not found for business')
   })
 
-  it('still records the sbi account and an attempted bank-account entity when getOrganisation fails', async () => {
-    mockBusinessCommonModule.getOrganisation.mockRejectedValue(new Error('upstream failure'))
+  it('still records the sbi account and an attempted bank-account entity when a lookup fails', async () => {
+    mockBusinessCommonModule.retrieveOrgIdBySbi.mockRejectedValue(new Error('upstream failure'))
     const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
     const info = {
       path: { key: 'validateBusinessCustomerBankDetails', typename: 'Mutation', prev: undefined }
