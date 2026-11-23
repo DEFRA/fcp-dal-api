@@ -141,6 +141,37 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
   return { submission, validation }
 }
 
+/**
+ * Builds a bank details mutation resolver. The resolver fetches the organisation for the SBI,
+ * records the audit trail (even when the fetch fails), and validates the bank change request.
+ * A validation failure is returned as is; otherwise handleRequest builds the response.
+ * @param {string} auditAction the action recorded against the bank-account audit entity
+ * @param {Function} handleRequest called with ({ submission, validation }, dataSources) when the
+ *   request passes validation, and returns the mutation result
+ * @returns {Function} the GraphQL resolver
+ */
+const bankDetailsResolver =
+  (auditAction, handleRequest) =>
+  async (_, { input }, { dataSources, auditTrail, defraIdContext }, info) => {
+    auditTrail?.recordAccount(info, 'sbi', input.sbi)
+    let organisation
+    try {
+      organisation = await getOrganisation(dataSources, input.sbi, defraIdContext)
+    } finally {
+      if (organisation) {
+        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
+        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'bank-account',
+        action: auditAction,
+        entityid: organisation?.businessReference
+      })
+    }
+    const result = await validateBankChangeRequest(input, dataSources, organisation)
+    return result.failure ?? handleRequest(result, dataSources)
+  }
+
 export const Mutation = {
   createBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
     const { crn, ...businessDetails } = input
@@ -167,69 +198,14 @@ export const Mutation = {
     }
     return { success: true, business }
   },
-  createBusinessCustomerBankDetails: async (
-    _,
-    { input },
-    { dataSources, auditTrail, defraIdContext },
-    info
-  ) => {
-    auditTrail?.recordAccount(info, 'sbi', input.sbi)
-    let organisation
-    try {
-      organisation = await getOrganisation(dataSources, input.sbi, defraIdContext)
-    } finally {
-      if (organisation) {
-        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
-        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
-      }
-      auditTrail?.recordEntity(info, {
-        entity: 'bank-account',
-        action: 'updated',
-        entityid: organisation?.businessReference
-      })
+  createBusinessCustomerBankDetails: bankDetailsResolver(
+    'updated',
+    async ({ submission }, dataSources) => {
+      await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
+      return { __typename: 'BankDetailsSubmitted', success: true }
     }
-    const { failure, submission } = await validateBankChangeRequest(
-      input,
-      dataSources,
-      organisation
-    )
-    if (failure) {
-      return failure
-    }
-
-    await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
-    return { __typename: 'BankDetailsSubmitted', success: true }
-  },
-  validateBusinessCustomerBankDetails: async (
-    _,
-    { input },
-    { dataSources, auditTrail, defraIdContext },
-    info
-  ) => {
-    auditTrail?.recordAccount(info, 'sbi', input.sbi)
-    let organisation
-    try {
-      organisation = await getOrganisation(dataSources, input.sbi, defraIdContext)
-    } finally {
-      if (organisation) {
-        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
-        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
-      }
-      auditTrail?.recordEntity(info, {
-        entity: 'bank-account',
-        action: 'validate',
-        entityid: organisation?.businessReference
-      })
-    }
-    const { failure, validation } = await validateBankChangeRequest(
-      input,
-      dataSources,
-      organisation
-    )
-    if (failure) {
-      return failure
-    }
-
+  ),
+  validateBusinessCustomerBankDetails: bankDetailsResolver('validate', ({ validation }) => {
     if (validation.status === 'PARTIAL_MATCH') {
       return {
         __typename: 'BankDetailsPartialMatch',
@@ -240,7 +216,7 @@ export const Mutation = {
       __typename: 'BankDetailsMatched',
       message: validation.message || 'Bank details match'
     }
-  },
+  }),
   updateBusinessName: businessDetailsUpdateResolver,
   updateBusinessPhone: businessDetailsUpdateResolver,
   updateBusinessEmail: businessDetailsUpdateResolver,
