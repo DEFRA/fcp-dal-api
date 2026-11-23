@@ -58,12 +58,14 @@ export const BusinessLand = {
     })
     validateDateInput(date)
 
-    return transformLandParcels(
+    const parcels = transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
         organisationId,
         date
       )
     )
+    // Parcel field resolvers (e.g. geometry) need the organisation
+    return parcels.map((parcel) => ({ ...parcel, organisationId }))
   },
 
   async geometries({ organisationId, sbi }, _, { dataSources, auditTrail }, info) {
@@ -139,6 +141,13 @@ const getParcelEffectiveDates = async (
 }
 
 export const BusinessLandParcel = {
+  async geometry({ id, organisationId }, __, { dataSources }) {
+    const geometries =
+      await dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(organisationId)
+
+    return geometries.get(`${id}`) ?? null
+  },
+
   async effectiveToDate(parcel, __, { dataSources }) {
     const { effectiveTo } = await getParcelEffectiveDates(dataSources, parcel)
 

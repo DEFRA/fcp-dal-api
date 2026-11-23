@@ -132,6 +132,28 @@ export class RuralPaymentsBusiness extends RuralPayments {
     })
   }
 
+  // Parcel geometries keyed by parcel id, fetched at most once per organisation.  Data sources are
+  // created per GraphQL request, so this is effectively a per-request cache: resolving the geometry
+  // of every parcel for an organisation makes one upstream call and constant-time lookups.
+  getParcelGeometryMapByOrganisationId(organisationId) {
+    this.parcelGeometryMaps ??= new Map()
+    if (!this.parcelGeometryMaps.has(organisationId)) {
+      this.parcelGeometryMaps.set(
+        organisationId,
+        this.getParcelGeometriesByOrganisationId(organisationId).then(
+          (featureCollection) =>
+            new Map(
+              (featureCollection?.features ?? []).map(({ id, geometry }) => [
+                `${id}`,
+                geometry ?? null
+              ])
+            )
+        )
+      )
+    }
+    return this.parcelGeometryMaps.get(organisationId)
+  }
+
   async getCountyParishHoldingsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`, {
       params: {

@@ -109,7 +109,7 @@ describe('schema', () => {
 
     expect(findDangerousChanges(rawSchema, schema)).toHaveLength(0)
     let changes = findBreakingChanges(rawSchema, schema)
-    expect(changes).toHaveLength(17) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
+    expect(changes).toHaveLength(18) // WARNING: CAREFULLY CHECK ANY FAILURES!!! 🔥
     expect(changes).toEqual(
       // loose array check, so ordering isn't important, length MUST match, see above
       expect.arrayContaining([
@@ -125,6 +125,10 @@ describe('schema', () => {
         {
           type: 'FIELD_REMOVED',
           description: 'BusinessLand.geometries was removed.'
+        },
+        {
+          type: 'FIELD_REMOVED',
+          description: 'BusinessLandParcel.geometry was removed.'
         },
         { type: 'TYPE_REMOVED', description: 'BusinessLandParcelGeometry was removed.' },
         { type: 'TYPE_REMOVED', description: 'GeoJSONGeometry was removed.' },

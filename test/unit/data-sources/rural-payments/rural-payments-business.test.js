@@ -393,6 +393,41 @@ describe('Rural Payments Business', () => {
     })
   })
 
+  describe('getParcelGeometryMapByOrganisationId', () => {
+    test('maps geometries by parcel id and only fetches once per organisation', async () => {
+      const polygon = { type: 'Polygon', coordinates: [] }
+      httpGet.mockImplementation(async (path) =>
+        path === 'lms/organisation/123/geometries'
+          ? { features: [{ id: 1, geometry: polygon }, { id: 2 }] }
+          : { features: [] }
+      )
+
+      const [first, second, other] = await Promise.all([
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(123),
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(123),
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(456)
+      ])
+
+      expect(first).toEqual(
+        new Map([
+          ['1', polygon],
+          ['2', null]
+        ])
+      )
+      expect(second).toBe(first)
+      expect(other).toEqual(new Map())
+      expect(httpGet).toHaveBeenCalledTimes(2)
+    })
+
+    test('handles a missing feature collection', async () => {
+      httpGet.mockImplementationOnce(async () => undefined)
+
+      expect(await ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(789)).toEqual(
+        new Map()
+      )
+    })
+  })
+
   describe('getCountyParishHoldingsBySBI', () => {
     beforeAll(() => {
       vi.useFakeTimers()

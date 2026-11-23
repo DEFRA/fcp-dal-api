@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   BusinessLand,
+  BusinessLandParcel,
   BusinessLandSummary
 } from '../../../../app/graphql/resolvers/business/business-land.js'
 
@@ -105,6 +106,7 @@ describe('BusinessLand', () => {
   it('parcels', async () => {
     expect(await BusinessLand.parcels(mockBusiness, mockArguments, { dataSources })).toEqual([
       {
+        organisationId: 'mockId',
         id: 'mockId',
         sheetId: 'mockSheetId',
         area: 0.1,
@@ -354,6 +356,44 @@ describe('BusinessLand', () => {
           dataSources
         })
       ).toEqual(0.3)
+    })
+  })
+})
+
+describe('BusinessLandParcel', () => {
+  describe('geometry', () => {
+    const polygon = { type: 'Polygon', coordinates: [[[0, 0]]] }
+    let dataSources
+
+    beforeEach(() => {
+      dataSources = {
+        ruralPaymentsBusiness: {
+          getParcelGeometryMapByOrganisationId: vi.fn(async () => new Map([['123', polygon]]))
+        }
+      }
+    })
+
+    it('returns the geometry matching the parcel id', async () => {
+      expect(
+        await BusinessLandParcel.geometry(
+          { id: '123', organisationId: 'orgId' },
+          {},
+          { dataSources }
+        )
+      ).toEqual(polygon)
+      expect(
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId
+      ).toHaveBeenCalledWith('orgId')
+    })
+
+    it('returns null when there is no geometry for the parcel', async () => {
+      expect(
+        await BusinessLandParcel.geometry(
+          { id: '999', organisationId: 'orgId' },
+          {},
+          { dataSources }
+        )
+      ).toBeNull()
     })
   })
 })
