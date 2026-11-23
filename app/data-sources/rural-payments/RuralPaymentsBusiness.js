@@ -14,6 +14,8 @@ export const formatDateDDMMMYY = (date) => {
   return `${day}-${month}-${year}`
 }
 
+export const parcelGeometryKey = (sheetId, parcelId) => `${sheetId}:${parcelId}`
+
 export class RuralPaymentsBusiness extends RuralPayments {
   async createOrganisationByPersonId(personId, orgDetails) {
     const response = await this.post(`organisation/create/${personId}`, {
@@ -125,33 +127,39 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`lms/organisation/${organisationId}/covers-summary/historic/${formattedDate}`)
   }
 
-  getParcelGeometriesByOrganisationId(organisationId) {
+  getParcelGeometriesByOrganisationIdAndDate(organisationId, date) {
     // A bbox of 0,0,0,0 tells upstream to return all geometries for the organisation
     return this.get(`lms/organisation/${organisationId}/geometries`, {
-      params: { bbox: '0,0,0,0' }
+      params: { bbox: '0,0,0,0', historicDate: formatDateDDMMMYY(new Date(date)) }
     })
   }
 
-  // Parcel geometries keyed by parcel id, fetched at most once per organisation.  Data sources are
-  // created per GraphQL request, so this is effectively a per-request cache: resolving the geometry
-  // of every parcel for an organisation makes one upstream call and constant-time lookups.
-  getParcelGeometryMapByOrganisationId(organisationId) {
+  // Parcel geometries keyed by `sheetId:parcelId`, fetched at most once per organisation and date.
+  // Data sources are created per GraphQL request, so this is effectively a per-request cache:
+  // resolving the geometry of every parcel for an organisation makes one upstream call and
+  // constant-time lookups.  Parcels and geometries come from separate upstream calls, so they're
+  // joined on sheetId + parcelId (the parcel's stable reference) rather than the internal id.
+  //
+  // This is called once per parcel, so the cache key uses the raw date rather than
+  // formatDateDDMMMYY, whose toLocaleString calls cost ~80µs each (~1.8s for 23k parcels).
+  getParcelGeometryMapByOrganisationIdAndDate(organisationId, date) {
     this.parcelGeometryMaps ??= new Map()
-    if (!this.parcelGeometryMaps.has(organisationId)) {
+    const key = `${organisationId}:${date instanceof Date ? date.toISOString() : date}`
+    if (!this.parcelGeometryMaps.has(key)) {
       this.parcelGeometryMaps.set(
-        organisationId,
-        this.getParcelGeometriesByOrganisationId(organisationId).then(
+        key,
+        this.getParcelGeometriesByOrganisationIdAndDate(organisationId, date).then(
           (featureCollection) =>
             new Map(
-              (featureCollection?.features ?? []).map(({ id, geometry }) => [
-                `${id}`,
+              (featureCollection?.features ?? []).map(({ properties, geometry }) => [
+                parcelGeometryKey(properties?.sheetId, properties?.parcelId),
                 geometry ?? null
               ])
             )
         )
       )
     }
-    return this.parcelGeometryMaps.get(organisationId)
+    return this.parcelGeometryMaps.get(key)
   }
 
   async getCountyParishHoldingsBySBI(sbi) {

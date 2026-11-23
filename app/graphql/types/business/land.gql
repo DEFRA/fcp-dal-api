@@ -30,8 +30,7 @@ type BusinessLandParcel {
   pendingDigitisation: Boolean
 
   """
-  Current boundary of the land parcel as a GeoJSON geometry.
-  This is always the latest boundary, regardless of the date the parcel was requested for.
+  Boundary of the land parcel as a GeoJSON geometry, on the date the parcel was requested for.
   """
   geometry: GeoJSONGeometry @wip
 
@@ -142,9 +141,10 @@ type BusinessLand {
   parcelLandUses(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses]
 
   """
-  Geometries (GeoJSON) of all the current land parcels for a business.
+  Geometries (GeoJSON) of all the land parcels for a business on a particular date.
+  Defaults to today's date if not provided.
   """
-  geometries: [BusinessLandParcelGeometry] @wip
+  geometries(date: Date): [BusinessLandParcelGeometry] @wip
 
   """
   Summary of the land for a particular date for a business.

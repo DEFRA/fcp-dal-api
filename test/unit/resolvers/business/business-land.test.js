@@ -74,7 +74,7 @@ describe('BusinessLand', () => {
         getLandUseByBusinessParcel() {
           return getLandUseByBusinessParcelResult
         },
-        getParcelGeometriesByOrganisationId: vi.fn(async () => ({
+        getParcelGeometriesByOrganisationIdAndDate: vi.fn(async () => ({
           features: [
             {
               id: 1,
@@ -107,6 +107,7 @@ describe('BusinessLand', () => {
     expect(await BusinessLand.parcels(mockBusiness, mockArguments, { dataSources })).toEqual([
       {
         organisationId: 'mockId',
+        date: mockArguments.date,
         id: 'mockId',
         sheetId: 'mockSheetId',
         area: 0.1,
@@ -147,7 +148,7 @@ describe('BusinessLand', () => {
   })
 
   it('geometries', async () => {
-    expect(await BusinessLand.geometries(mockBusiness, {}, { dataSources })).toEqual([
+    expect(await BusinessLand.geometries(mockBusiness, mockArguments, { dataSources })).toEqual([
       {
         id: '1',
         sheetId: 'mockSheetId',
@@ -158,8 +159,16 @@ describe('BusinessLand', () => {
       }
     ])
     expect(
-      dataSources.ruralPaymentsBusiness.getParcelGeometriesByOrganisationId
-    ).toHaveBeenCalledWith('mockId')
+      dataSources.ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate
+    ).toHaveBeenCalledWith('mockId', mockArguments.date)
+  })
+
+  it('geometries defaults to the current date', async () => {
+    await BusinessLand.geometries(mockBusiness, {}, { dataSources })
+
+    expect(
+      dataSources.ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate
+    ).toHaveBeenCalledWith('mockId', expect.any(Date))
   })
 
   it('geometries records a parcel-geometries entity keyed by sbi', async () => {
@@ -363,33 +372,36 @@ describe('BusinessLand', () => {
 describe('BusinessLandParcel', () => {
   describe('geometry', () => {
     const polygon = { type: 'Polygon', coordinates: [[[0, 0]]] }
+    const date = '2024-03-19'
     let dataSources
 
     beforeEach(() => {
       dataSources = {
         ruralPaymentsBusiness: {
-          getParcelGeometryMapByOrganisationId: vi.fn(async () => new Map([['123', polygon]]))
+          getParcelGeometryMapByOrganisationIdAndDate: vi.fn(
+            async () => new Map([['SX1234:5678', polygon]])
+          )
         }
       }
     })
 
-    it('returns the geometry matching the parcel id', async () => {
+    it('returns the geometry matching the parcel sheet and parcel id for the date', async () => {
       expect(
         await BusinessLandParcel.geometry(
-          { id: '123', organisationId: 'orgId' },
+          { id: '123', organisationId: 'orgId', date, sheetId: 'SX1234', parcelId: '5678' },
           {},
           { dataSources }
         )
       ).toEqual(polygon)
       expect(
-        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId
-      ).toHaveBeenCalledWith('orgId')
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      ).toHaveBeenCalledWith('orgId', date)
     })
 
     it('returns null when there is no geometry for the parcel', async () => {
       expect(
         await BusinessLandParcel.geometry(
-          { id: '999', organisationId: 'orgId' },
+          { id: '123', organisationId: 'orgId', date, sheetId: 'SX1234', parcelId: '9999' },
           {},
           { dataSources }
         )

@@ -11,6 +11,7 @@ import {
 } from '../../../transformers/rural-payments/lms.js'
 import { validateDateInput } from '../../../utils/date.js'
 import { getRuralPaymentsBusinessDataSource } from './common.js'
+import { parcelGeometryKey } from '../../../data-sources/rural-payments/RuralPaymentsBusiness.js'
 
 export const BusinessLand = {
   summary({ organisationId, sbi }, { date }, { auditTrail }, info) {
@@ -64,19 +65,28 @@ export const BusinessLand = {
         date
       )
     )
-    // Parcel field resolvers (e.g. geometry) need the organisation
-    return parcels.map((parcel) => ({ ...parcel, organisationId }))
+    // Parcel field resolvers (e.g. geometry) need the organisation and date
+    return parcels.map((parcel) => ({ ...parcel, organisationId, date }))
   },
 
-  async geometries({ organisationId, sbi }, _, { dataSources, auditTrail }, info) {
+  async geometries(
+    { organisationId, sbi },
+    { date = new Date() },
+    { dataSources, auditTrail },
+    info
+  ) {
     auditTrail?.recordEntity(info, {
       entity: 'parcel-geometries',
       action: 'read',
       entityid: sbi
     })
+    validateDateInput(date)
 
     return transformLandParcelGeometries(
-      await dataSources.ruralPaymentsBusiness.getParcelGeometriesByOrganisationId(organisationId)
+      await dataSources.ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(
+        organisationId,
+        date
+      )
     )
   },
 
@@ -141,11 +151,14 @@ const getParcelEffectiveDates = async (
 }
 
 export const BusinessLandParcel = {
-  async geometry({ id, organisationId }, __, { dataSources }) {
+  async geometry({ organisationId, date, sheetId, parcelId }, __, { dataSources }) {
     const geometries =
-      await dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(organisationId)
+      await dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(
+        organisationId,
+        date
+      )
 
-    return geometries.get(`${id}`) ?? null
+    return geometries.get(parcelGeometryKey(sheetId, parcelId)) ?? null
   },
 
   async effectiveToDate(parcel, __, { dataSources }) {

@@ -380,51 +380,61 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('getParcelGeometriesByOrganisationId', () => {
-    test('should request all geometries for the organisation', async () => {
+  describe('getParcelGeometriesByOrganisationIdAndDate', () => {
+    test('should request all geometries for the organisation on the date', async () => {
       const mockResponse = { features: [{ id: 1 }] }
       httpGet.mockImplementationOnce(async () => mockResponse)
 
-      const result = await ruralPaymentsBusiness.getParcelGeometriesByOrganisationId(123)
+      const result = await ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(
+        123,
+        '2024-03-19'
+      )
       expect(result).toEqual(mockResponse)
       expect(httpGet).toHaveBeenCalledWith('lms/organisation/123/geometries', {
-        params: { bbox: '0,0,0,0' }
+        params: { bbox: '0,0,0,0', historicDate: '19-Mar-24' }
       })
     })
   })
 
-  describe('getParcelGeometryMapByOrganisationId', () => {
-    test('maps geometries by parcel id and only fetches once per organisation', async () => {
+  describe('getParcelGeometryMapByOrganisationIdAndDate', () => {
+    test('maps geometries by sheet and parcel id and only fetches once per organisation and date', async () => {
       const polygon = { type: 'Polygon', coordinates: [] }
-      httpGet.mockImplementation(async (path) =>
-        path === 'lms/organisation/123/geometries'
-          ? { features: [{ id: 1, geometry: polygon }, { id: 2 }] }
+      httpGet.mockImplementation(async (path, { params }) =>
+        path === 'lms/organisation/123/geometries' && params.historicDate === '19-Mar-24'
+          ? {
+              features: [
+                { id: 1, geometry: polygon, properties: { sheetId: 'SX1234', parcelId: '0001' } },
+                { id: 2, properties: { sheetId: 'SX1234', parcelId: '0002' } }
+              ]
+            }
           : { features: [] }
       )
 
-      const [first, second, other] = await Promise.all([
-        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(123),
-        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(123),
-        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(456)
+      const [first, second, otherOrg, otherDate] = await Promise.all([
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(123, '2024-03-19'),
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(123, '2024-03-19'),
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(456, '2024-03-19'),
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(123, '2023-01-01')
       ])
 
       expect(first).toEqual(
         new Map([
-          ['1', polygon],
-          ['2', null]
+          ['SX1234:0001', polygon],
+          ['SX1234:0002', null]
         ])
       )
       expect(second).toBe(first)
-      expect(other).toEqual(new Map())
-      expect(httpGet).toHaveBeenCalledTimes(2)
+      expect(otherOrg).toEqual(new Map())
+      expect(otherDate).toEqual(new Map())
+      expect(httpGet).toHaveBeenCalledTimes(3)
     })
 
     test('handles a missing feature collection', async () => {
       httpGet.mockImplementationOnce(async () => undefined)
 
-      expect(await ruralPaymentsBusiness.getParcelGeometryMapByOrganisationId(789)).toEqual(
-        new Map()
-      )
+      expect(
+        await ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(789, '2024-03-19')
+      ).toEqual(new Map())
     })
   })
 
