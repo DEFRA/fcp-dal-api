@@ -9,10 +9,7 @@ const v1 = nock(config.get('kits.internal.gatewayUrl'))
 const setupNock = () => {
   nock.disableNetConnect()
 
-  // converting sbi to organisationId before lock/unlock
-  mockOrganisationSearch(v1)
-
-  // organisation details after lock/unlock
+  // converting sbi to organisationId
   mockOrganisationSearch(v1)
 }
 

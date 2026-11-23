@@ -38,21 +38,18 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return organisationResponse._data
   }
 
-  // api endpoint: POST /organisation/search
+  /**
+   * Finds the Rural Payments organisation for an SBI. A thin wrapper around organisationSearch
+   * that asks for a single result and treats an empty result as not found.
+   * api endpoint: POST /organisation/search
+   * @param {string} sbi the business's SBI
+   * @returns {Promise<object>} the first matching organisation search result (includes its id)
+   * @throws {NotFound} if no organisation matches the SBI
+   */
   async organisationSearchBySbi(sbi) {
-    const body = JSON.stringify({
-      searchFieldType: 'SBI',
-      primarySearchPhrase: sbi,
-      offset: 0,
-      limit: 1
-    })
+    const { data } = await this.organisationSearch('SBI', sbi, { perPage: 1 })
 
-    const organisationResponse = await this.post('organisation/search', {
-      body,
-      headers: postPutHeaders
-    })
-
-    if (!organisationResponse?._data?.length) {
+    if (!data.length) {
       this.logger.warn(
         '#datasource - Rural payments - organisation not found for organisation SBI',
         { sbi, code: RURALPAYMENTS_API_NOT_FOUND_001 }
@@ -60,7 +57,7 @@ export class RuralPaymentsBusiness extends RuralPayments {
       throw new NotFound('Rural payments organisation not found')
     }
 
-    return organisationResponse._data[0]
+    return data[0]
   }
 
   // api endpoint: POST /organisation/search
