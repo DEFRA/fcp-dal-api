@@ -1,4 +1,5 @@
 import net from 'node:net'
+import { gunzipSync } from 'node:zlib'
 import { setTimeout } from 'node:timers/promises'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../../../app/config.js'
@@ -37,6 +38,7 @@ describe('Server config and startup', () => {
     configMockPath = {
       port: '3987',
       requestTimeoutMs: timeout,
+      responseCompressionLevel: 3,
       serviceVersion: '1.2.3'
     }
     const originalConfig = { ...config }
@@ -56,6 +58,25 @@ describe('Server config and startup', () => {
   })
 
   describe('Server Initialization', () => {
+    test('should set the response compression level from config', async () => {
+      expect(server.settings.routes.compression).toEqual({
+        gzip: { level: 3 },
+        deflate: { level: 3 }
+      })
+
+      server.route({
+        method: 'GET',
+        path: '/compression-test',
+        handler: () => 'x'.repeat(10_000)
+      })
+      const response = await server.inject({
+        url: '/compression-test',
+        headers: { 'accept-encoding': 'gzip' }
+      })
+      expect(response.headers['content-encoding']).toBe('gzip')
+      expect(gunzipSync(response.rawPayload).toString()).toBe('x'.repeat(10_000))
+    })
+
     test('should set timeout from env var', () => {
       expect(server.listener.timeout).toBe(timeout)
     })

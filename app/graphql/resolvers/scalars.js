@@ -40,4 +40,4 @@ export const SwiftCode = makeStringScalar({
   message: 'SwiftCode must be 8 or 11 uppercase alphanumeric characters'
 })
 
-export { IBANResolver as IBAN } from 'graphql-scalars'
+export { IBANResolver as IBAN, JSONResolver as JSON } from 'graphql-scalars'

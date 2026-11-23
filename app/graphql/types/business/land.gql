@@ -136,6 +136,11 @@ type BusinessLand {
   parcelLandUses(date: Date, sheetId: ID!, parcelId: ID!): [BusinessLandParcelUses]
 
   """
+  Geometries (GeoJSON) of all the current land parcels for a business.
+  """
+  geometries: [BusinessLandParcelGeometry] @wip
+
+  """
   Summary of the land for a particular date for a business.
   The earliest date is 01/01/2015.
   """
@@ -190,4 +195,54 @@ type BusinessLandParcelUses {
   Campaign of the land use.
   """
   campaign: Int
+}
+
+"""
+A GeoJSON geometry object, for example a Polygon or MultiPolygon.
+"""
+type GeoJSONGeometry {
+  """
+  GeoJSON geometry type, for example 'Polygon' or 'MultiPolygon'.
+  """
+  type: String!
+
+  """
+  GeoJSON coordinates array. Its nesting depends on the geometry type.
+  """
+  coordinates: JSON
+}
+
+"""
+The geometry of a land parcel for a business.
+"""
+type BusinessLandParcelGeometry {
+  """
+  Unique internal identifier of the land parcel.
+  """
+  id: ID!
+
+  """
+  Sheet ID of the land parcel, for example 'AB1234'
+  """
+  sheetId: String
+
+  """
+  Parcel ID of the land parcel, for example '1234'.
+  """
+  parcelId: String
+
+  """
+  Area (in hectares) of the land parcel.
+  """
+  area: Float
+
+  """
+  Indicates if a parcel has a pending Customer Notified Change (CNC).
+  """
+  pendingDigitisation: Boolean
+
+  """
+  Boundary of the land parcel as a GeoJSON geometry.
+  """
+  geometry: GeoJSONGeometry
 }

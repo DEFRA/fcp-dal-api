@@ -130,6 +130,15 @@ export const config = convict({
     default: 3000,
     env: 'PORT'
   },
+  responseCompressionLevel: {
+    doc:
+      'zlib compression level (0-9) for gzip/deflate encoded responses. Level 1 is several ' +
+      'times faster than the zlib default (6) for a slightly larger output, which matters for ' +
+      'large responses such as land geometries',
+    format: 'int',
+    default: 1,
+    env: 'RESPONSE_COMPRESSION_LEVEL'
+  },
   logLevel: {
     doc: 'The log level to use',
     format: ['error', 'warn', 'info', 'debug'],

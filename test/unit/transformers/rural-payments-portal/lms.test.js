@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import {
   transformLandCovers,
   transformLandCoversToArea,
+  transformLandParcelGeometries,
   transformLandParcels,
   transformLandParcelsEffectiveDates,
   transformLandUses
@@ -119,6 +120,68 @@ describe('LMS transformer', () => {
       expectedOutput[0].area = null
       expectedOutput[0].length = 1000
       expect(transformLandUses(input)).toEqual(expectedOutput)
+    })
+  })
+
+  describe('transformLandParcelGeometries', () => {
+    const geometry = {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [0, 0]
+        ]
+      ]
+    }
+
+    test('maps upstream features', () => {
+      expect(
+        transformLandParcelGeometries({
+          features: [
+            {
+              id: 123,
+              type: 'Feature',
+              geometry,
+              properties: {
+                sheetId: 'SX1234',
+                parcelId: '5678',
+                area: '12345',
+                pendingDigitisation: 'true'
+              }
+            },
+            {
+              id: 456,
+              type: 'Feature',
+              geometry: null,
+              properties: { sheetId: 'SX1234', parcelId: '9999', pendingDigitisation: 'false' }
+            }
+          ]
+        })
+      ).toEqual([
+        {
+          id: '123',
+          sheetId: 'SX1234',
+          parcelId: '5678',
+          area: 1.2345,
+          pendingDigitisation: true,
+          geometry
+        },
+        {
+          id: '456',
+          sheetId: 'SX1234',
+          parcelId: '9999',
+          area: null,
+          pendingDigitisation: false,
+          geometry: null
+        }
+      ])
+    })
+
+    test('handles missing features', () => {
+      expect(transformLandParcelGeometries({})).toEqual([])
+      expect(transformLandParcelGeometries(undefined)).toEqual([])
     })
   })
 })

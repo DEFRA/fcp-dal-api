@@ -8,8 +8,17 @@ import { logger } from './logger/logger.js'
 import { sendMetric } from './logger/sendMetric.js'
 import { healthRoute } from './routes/health.js'
 
+const responseCompressionLevel = config.get('responseCompressionLevel')
+
 export const server = hapi.server({
-  port: config.get('port')
+  port: config.get('port'),
+  routes: {
+    // Encoder options for compressed responses (applied when the client sends Accept-Encoding)
+    compression: {
+      gzip: { level: responseCompressionLevel },
+      deflate: { level: responseCompressionLevel }
+    }
+  }
 })
 
 server.ext('onPreStart', () => {

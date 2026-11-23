@@ -380,6 +380,19 @@ describe('Rural Payments Business', () => {
     })
   })
 
+  describe('getParcelGeometriesByOrganisationId', () => {
+    test('should request all geometries for the organisation', async () => {
+      const mockResponse = { features: [{ id: 1 }] }
+      httpGet.mockImplementationOnce(async () => mockResponse)
+
+      const result = await ruralPaymentsBusiness.getParcelGeometriesByOrganisationId(123)
+      expect(result).toEqual(mockResponse)
+      expect(httpGet).toHaveBeenCalledWith('lms/organisation/123/geometries', {
+        params: { bbox: '0,0,0,0' }
+      })
+    })
+  })
+
   describe('getCountyParishHoldingsBySBI', () => {
     beforeAll(() => {
       vi.useFakeTimers()

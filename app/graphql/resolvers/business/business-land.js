@@ -2,6 +2,7 @@ import { NotFound } from '../../../errors/graphql.js'
 import {
   transformLandCovers,
   transformLandCoversToArea,
+  transformLandParcelGeometries,
   transformLandParcels,
   transformLandParcelsEffectiveDates,
   transformLandUses,
@@ -62,6 +63,18 @@ export const BusinessLand = {
         organisationId,
         date
       )
+    )
+  },
+
+  async geometries({ organisationId, sbi }, _, { dataSources, auditTrail }, info) {
+    auditTrail?.recordEntity(info, {
+      entity: 'parcel-geometries',
+      action: 'read',
+      entityid: sbi
+    })
+
+    return transformLandParcelGeometries(
+      await dataSources.ruralPaymentsBusiness.getParcelGeometriesByOrganisationId(organisationId)
     )
   },
 

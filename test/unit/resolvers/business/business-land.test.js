@@ -72,7 +72,22 @@ describe('BusinessLand', () => {
         },
         getLandUseByBusinessParcel() {
           return getLandUseByBusinessParcelResult
-        }
+        },
+        getParcelGeometriesByOrganisationId: vi.fn(async () => ({
+          features: [
+            {
+              id: 1,
+              type: 'Feature',
+              geometry: { type: 'Polygon', coordinates: [] },
+              properties: {
+                sheetId: 'mockSheetId',
+                parcelId: 'mockParcelId',
+                area: '1000',
+                pendingDigitisation: 'false'
+              }
+            }
+          ]
+        }))
       },
       serviceAccount: {
         ruralPaymentsBusiness: null
@@ -127,6 +142,40 @@ describe('BusinessLand', () => {
     ).toEqual([
       { id: '11033654', area: 0.1, name: 'Mock Name', code: 'someCode', isBpsEligible: true }
     ])
+  })
+
+  it('geometries', async () => {
+    expect(await BusinessLand.geometries(mockBusiness, {}, { dataSources })).toEqual([
+      {
+        id: '1',
+        sheetId: 'mockSheetId',
+        parcelId: 'mockParcelId',
+        area: 0.1,
+        pendingDigitisation: false,
+        geometry: { type: 'Polygon', coordinates: [] }
+      }
+    ])
+    expect(
+      dataSources.ruralPaymentsBusiness.getParcelGeometriesByOrganisationId
+    ).toHaveBeenCalledWith('mockId')
+  })
+
+  it('geometries records a parcel-geometries entity keyed by sbi', async () => {
+    const auditTrail = { recordEntity: vi.fn() }
+    const info = { path: { key: 'geometries' } }
+
+    await BusinessLand.geometries(
+      { ...mockBusiness, sbi: 'mockSbi' },
+      {},
+      { dataSources, auditTrail },
+      info
+    )
+
+    expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
+      entity: 'parcel-geometries',
+      action: 'read',
+      entityid: 'mockSbi'
+    })
   })
 
   it('parcelLandUses - no length', async () => {

@@ -125,6 +125,13 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`lms/organisation/${organisationId}/covers-summary/historic/${formattedDate}`)
   }
 
+  getParcelGeometriesByOrganisationId(organisationId) {
+    // A bbox of 0,0,0,0 tells upstream to return all geometries for the organisation
+    return this.get(`lms/organisation/${organisationId}/geometries`, {
+      params: { bbox: '0,0,0,0' }
+    })
+  }
+
   async getCountyParishHoldingsBySBI(sbi) {
     const response = await this.get(`SitiAgriApi/cv/cphByBusiness/sbi/${sbi}/list`, {
       params: {

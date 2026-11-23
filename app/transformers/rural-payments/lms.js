@@ -70,3 +70,18 @@ export function transformLandUses(landUses) {
     length: landUse.length
   }))
 }
+
+export function transformLandParcelGeometries(featureCollection) {
+  const features = featureCollection?.features || []
+  return features.map(({ id, geometry, properties = {} }) => ({
+    id: `${id}`,
+    sheetId: properties.sheetId,
+    parcelId: properties.parcelId,
+    area: properties.area == null ? null : convertSquareMetersToHectares(Number(properties.area)),
+    pendingDigitisation:
+      properties.pendingDigitisation == null
+        ? null
+        : `${properties.pendingDigitisation}` === 'true',
+    geometry: geometry ?? null
+  }))
+}

@@ -1,7 +1,7 @@
 import { mergeResolvers } from '@graphql-tools/merge'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { filterSchema, pruneSchema } from '@graphql-tools/utils'
-import { IBANTypeDefinition } from 'graphql-scalars'
+import { IBANTypeDefinition, JSONDefinition } from 'graphql-scalars'
 import { readdir, readFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -35,7 +35,7 @@ async function getFiles(path) {
  */
 export async function createRawSchema(...typeDefs) {
   return makeExecutableSchema({
-    typeDefs: [...(await getFiles('types')), IBANTypeDefinition, ...typeDefs],
+    typeDefs: [...(await getFiles('types')), IBANTypeDefinition, JSONDefinition, ...typeDefs],
     resolvers: mergeResolvers([
       Business,
       BusinessLand,
