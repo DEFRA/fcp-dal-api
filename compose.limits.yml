@@ -1,0 +1,27 @@
+# Runs the DAL with CDP-like resource limits (0.5 vCPU, 1GB memory) against the local
+# upstream mock on :3001, exposed on host port 3010 so it can run alongside `npm start`.
+#
+#   docker compose -f compose.yml -f compose.limits.yml up --build mongodb fcp-dal-api
+services:
+  fcp-dal-api:
+    build:
+      context: .
+      target: production # the development stage runs nodemon, which adds its own overhead
+    ports: !override
+      - '3010:3000'
+    cpus: 0.5
+    mem_limit: 1g
+    memswap_limit: 1g # no swap: exceeding 1GB OOM-kills the container, as on CDP
+    environment:
+      # NODE_ENV stays 'development' (from compose.yml): 'production' only enables publishing
+      # metrics to a CloudWatch agent, which doesn't exist locally and fails the startup check
+      DAL_REQUEST_TIMEOUT_MS: 60000
+      KITS_GATEWAY_TIMEOUT_MS: 60000
+      KITS_INTERNAL_GATEWAY_URL: http://host.docker.internal:3001/extapi/
+      KITS_EXTERNAL_GATEWAY_URL: http://host.docker.internal:3001/extapi/
+      HITACHI_BASE_URL: http://host.docker.internal:3001/api/
+    depends_on: !override
+      mongodb:
+        condition: service_healthy
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'

@@ -128,24 +128,54 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`lms/organisation/${organisationId}/covers-summary/historic/${formattedDate}`)
   }
 
-  getParcelGeometriesByOrganisationIdAndDate(organisationId, date) {
-    // A bbox of 0,0,0,0 tells upstream to return all geometries for the organisation
-    return this.get(`lms/organisation/${organisationId}/geometries`, {
-      params: { bbox: '0,0,0,0', historicDate: formatDateDDMMMYY(new Date(date)) }
-    })
+  // Organisation geometries responses are very large (~50MB of GeoJSON for 23k parcels).  With
+  // RESTDataSource's request deduplication, every response - even to the first caller - is passed
+  // through lodash cloneDeep, briefly doubling the memory and CPU spent on it.  Geometries are not
+  // deduplicated by RESTDataSource; instead the response promise is cached below, per
+  // organisation and date, for the lifetime of the (per GraphQL request) data source.
+  requestDeduplicationPolicyFor(url, request) {
+    if (/\/lms\/organisation\/[^/]+\/geometries(\?|$)/.test(String(url))) {
+      return { policy: 'do-not-deduplicate' }
+    }
+    return super.requestDeduplicationPolicyFor(url, request)
   }
 
-  // Parcel geometries keyed by `sheetId:parcelId`, fetched at most once per organisation and date.
-  // Data sources are created per GraphQL request, so this is effectively a per-request cache:
-  // resolving the geometry of every parcel for an organisation makes one upstream call and
-  // constant-time lookups.  Parcels and geometries come from separate upstream calls, so they're
-  // joined on sheetId + parcelId (the parcel's stable reference) rather than the internal id.
-  //
-  // This is called once per parcel, so the cache key uses the raw date rather than
-  // formatDateDDMMMYY, whose toLocaleString calls cost ~80µs each (~1.8s for 23k parcels).
+  // Cache key for an organisation and the day upstream is asked for, so that different values for
+  // the same day (e.g. separate `new Date()` defaults) share one request.  The parcel geometry
+  // lookup is called once per parcel, and formatDateDDMMMYY's toLocaleString calls cost ~80µs each
+  // (~1.8s for 23k parcels), so the formatted day is memoised per date value - every parcel in a
+  // request carries the same date value.
+  #geometriesCacheKey(organisationId, date) {
+    this.formattedGeometryDates ??= new Map()
+    if (!this.formattedGeometryDates.has(date)) {
+      this.formattedGeometryDates.set(date, formatDateDDMMMYY(new Date(date)))
+    }
+    return `${organisationId}:${this.formattedGeometryDates.get(date)}`
+  }
+
+  getParcelGeometriesByOrganisationIdAndDate(organisationId, date) {
+    this.parcelGeometries ??= new Map()
+    const key = this.#geometriesCacheKey(organisationId, date)
+    if (!this.parcelGeometries.has(key)) {
+      // A bbox of 0,0,0,0 tells upstream to return all geometries for the organisation
+      this.parcelGeometries.set(
+        key,
+        this.get(`lms/organisation/${organisationId}/geometries`, {
+          params: { bbox: '0,0,0,0', historicDate: formatDateDDMMMYY(new Date(date)) }
+        })
+      )
+    }
+    return this.parcelGeometries.get(key)
+  }
+
+  // Parcel geometries keyed by `sheetId:parcelId`, built at most once per organisation and date
+  // from the cached geometries response, so resolving the geometry of every parcel makes one
+  // upstream call and constant-time lookups.  Parcels and geometries come from separate upstream
+  // calls, so they're joined on sheetId + parcelId (the parcel's stable reference) rather than
+  // the internal id.
   getParcelGeometryMapByOrganisationIdAndDate(organisationId, date) {
     this.parcelGeometryMaps ??= new Map()
-    const key = `${organisationId}:${date instanceof Date ? date.toISOString() : date}`
+    const key = this.#geometriesCacheKey(organisationId, date)
     if (!this.parcelGeometryMaps.has(key)) {
       this.parcelGeometryMaps.set(
         key,

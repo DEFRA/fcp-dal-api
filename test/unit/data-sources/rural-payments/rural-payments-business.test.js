@@ -103,6 +103,10 @@ describe('Rural Payments Business', () => {
     for (const spy of [httpGet, httpPost, httpPut]) {
       spy.mockRejectedValue(new Error('unmocked HTTP call'))
     }
+    // the instance is shared across tests, so clear its per-request geometry caches
+    ruralPaymentsBusiness.parcelGeometries = undefined
+    ruralPaymentsBusiness.parcelGeometryMaps = undefined
+    ruralPaymentsBusiness.formattedGeometryDates = undefined
   })
 
   describe('getOrganisationById', () => {
@@ -409,6 +413,84 @@ describe('Rural Payments Business', () => {
       expect(httpGet).toHaveBeenCalledWith('lms/organisation/123/geometries', {
         params: { bbox: '0,0,0,0', historicDate: '19-Mar-24' }
       })
+    })
+
+    test('should only request geometries once per organisation and date', async () => {
+      const mockResponse = { features: [{ id: 1 }] }
+      httpGet.mockImplementation(async () => mockResponse)
+
+      const [first, second, otherDate] = await Promise.all([
+        ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(123, '2024-03-19'),
+        ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(123, '2024-03-19'),
+        ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(123, '2023-01-01')
+      ])
+
+      expect(second).toBe(first)
+      expect(otherDate).toBe(mockResponse)
+      expect(httpGet).toHaveBeenCalledTimes(2)
+    })
+
+    test('shares one request between different date values for the same day', async () => {
+      httpGet.mockImplementation(async () => ({ features: [] }))
+
+      await Promise.all([
+        ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(
+          123,
+          new Date('2024-03-19T10:00:00Z')
+        ),
+        ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(
+          123,
+          new Date('2024-03-19T10:00:00.005Z')
+        ),
+        ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(123, '2024-03-19')
+      ])
+
+      expect(httpGet).toHaveBeenCalledTimes(1)
+    })
+
+    test('shares the geometries response with the parcel geometry map', async () => {
+      httpGet.mockImplementation(async () => ({ features: [] }))
+
+      await Promise.all([
+        ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(123, '2024-03-19'),
+        ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(123, '2024-03-19')
+      ])
+
+      expect(httpGet).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('requestDeduplicationPolicyFor', () => {
+    const baseUrl = 'https://example.com/extapi/'
+
+    test('does not deduplicate (or clone) organisation geometries responses', () => {
+      const url = new URL(
+        'lms/organisation/123/geometries?bbox=0%2C0%2C0%2C0&historicDate=19-Mar-24',
+        baseUrl
+      )
+
+      expect(
+        ruralPaymentsBusiness.requestDeduplicationPolicyFor(url, { id: '1', method: 'GET' })
+      ).toEqual({ policy: 'do-not-deduplicate' })
+    })
+
+    test('deduplicates other requests as before', () => {
+      const url = new URL('lms/organisation/123/parcels/historic/19-Mar-24', baseUrl)
+
+      expect(
+        ruralPaymentsBusiness.requestDeduplicationPolicyFor(url, { id: '1', method: 'GET' })
+      ).toEqual({
+        policy: 'deduplicate-during-request-lifetime',
+        deduplicationKey: expect.stringContaining('1 GET')
+      })
+    })
+
+    test('does not treat other geometries paths as organisation geometries', () => {
+      const url = new URL('lms/organisation/123/parcel/geometries-summary', baseUrl)
+
+      expect(
+        ruralPaymentsBusiness.requestDeduplicationPolicyFor(url, { id: '1', method: 'GET' }).policy
+      ).toBe('deduplicate-during-request-lifetime')
     })
   })
 
