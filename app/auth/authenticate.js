@@ -38,16 +38,17 @@ const identifyService = (appid, groups) => {
  *
  * @param {*} request the incoming HTTP request
  * @param {*} jwkDatasource the JWKS keystore for verifying the JWT
- * @returns {Promise<{entityId: string, authName: string, serviceName: string}>}
- *  the matching `entityId` from the token, `authName` for the `@auth` directive, and `serviceName`
- *  for the audit/metrics identifier
- * @throws {Unauthorized} if the token is invalid or expired
+ * @returns {Promise<{authenticated: boolean, entityId: string, authName?: string,
+ *  serviceName: string}>}
+ *  whether a token was supplied and verified (`authenticated`), the matching `entityId` from the
+ *  token, `authName` for the `@auth` directive (only set for an authorised entity), and
+ *  `serviceName` for the audit/metrics identifier
  */
 export async function getAuthorisedEntity(request, jwkDatasource) {
   try {
     const token = request?.headers?.authorization?.split(' ')[1]
     if (!token) {
-      return { entityId: unauthedAppid, serviceName: unknownService }
+      return { authenticated: false, entityId: unauthedAppid, serviceName: unknownService }
     }
 
     const decodedToken = decodeProtectedHeader(token)
@@ -82,7 +83,10 @@ export async function getAuthorisedEntity(request, jwkDatasource) {
       }
     })
 
-    return identifyService(verified.appid ?? verified.azp, verified.groups)
+    return {
+      authenticated: true,
+      ...identifyService(verified.appid ?? verified.azp, verified.groups)
+    }
   } catch (error) {
     if (
       error.name === 'TokenExpiredError' ||
@@ -103,7 +107,11 @@ export async function getAuthorisedEntity(request, jwkDatasource) {
         request: { remoteAddress: request?.info?.remoteAddress }
       })
     }
-    return { entityId: 'no-entityId--token-verification-failed', serviceName: unknownService }
+    return {
+      authenticated: false,
+      entityId: 'no-entityId--token-verification-failed',
+      serviceName: unknownService
+    }
   }
 }
 

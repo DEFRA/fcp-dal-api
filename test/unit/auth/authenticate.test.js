@@ -74,6 +74,7 @@ describe('authenticate', () => {
     describe('when auth is disabled', () => {
       test('should return default auth details', async () => {
         expect(await getAuthorisedEntity({})).toEqual({
+          authenticated: false,
           entityId: 'auth-disabled-no-entityId',
           serviceName: 'unknown-unauthorised-service'
         })
@@ -92,6 +93,7 @@ describe('authenticate', () => {
         const { getAuthorisedEntity } = await import('../../../app/auth/authenticate.js?r=3')
 
         expect(await getAuthorisedEntity({})).toEqual({
+          authenticated: false,
           entityId: 'no-entityId--no-auth-provided',
           serviceName: 'unknown-unauthorised-service'
         })
@@ -103,6 +105,7 @@ describe('authenticate', () => {
           const auth = await getAuthorisedEntity(mockRequest(token), mockJWKSDataSource)
 
           expect(auth).toEqual({
+            authenticated: true,
             entityId: config.get('auth.entities.SINGLE_FRONT_DOOR.entityId'),
             authName: 'SINGLE_FRONT_DOOR',
             serviceName: 'single-front-door'
@@ -141,6 +144,7 @@ describe('authenticate', () => {
             mockJWKSDataSource
           )
         ).toEqual({
+          authenticated: true,
           entityId: config.get('auth.entities.SINGLE_FRONT_DOOR.entityId'),
           authName: 'SINGLE_FRONT_DOOR',
           serviceName: 'single-front-door'
@@ -162,6 +166,7 @@ describe('authenticate', () => {
             mockJWKSDataSource
           )
         ).toEqual({
+          authenticated: true,
           entityId,
           authName: 'SINGLE_FRONT_DOOR',
           serviceName: 'single-front-door'
@@ -183,11 +188,34 @@ describe('authenticate', () => {
             ),
             mockJWKSDataSource
           )
-        ).toEqual({ entityId: admin, authName: 'ADMIN', serviceName: 'admin' })
+        ).toEqual({
+          authenticated: true,
+          entityId: admin,
+          authName: 'ADMIN',
+          serviceName: 'admin'
+        })
+      })
+
+      test('returns authenticated but unrecognised auth details when no appid, azp or group is authorised', async () => {
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+
+        expect(
+          await getAuthorisedEntity(
+            mockRequest(
+              createConsumerToken({ appid: 'unknown-app', azp: 'unknown-azp', groups: ['x'] })
+            ),
+            mockJWKSDataSource
+          )
+        ).toEqual({
+          authenticated: true,
+          entityId: 'no-entityId--no-approved-app-or-groups',
+          serviceName: 'unknown-unauthorised-service'
+        })
       })
 
       test('returns unauthorised auth details if token cannot be decoded', async () => {
         expect(await getAuthorisedEntity(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({
+          authenticated: false,
           entityId: 'no-entityId--token-verification-failed',
           serviceName: 'unknown-unauthorised-service'
         })
@@ -198,6 +226,7 @@ describe('authenticate', () => {
         mockPublicKeyFunc.mockResolvedValue(publicKey)
         expect(await getAuthorisedEntity(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual(
           {
+            authenticated: false,
             entityId: 'no-entityId--token-verification-failed',
             serviceName: 'unknown-unauthorised-service'
           }
@@ -212,6 +241,7 @@ describe('authenticate', () => {
           throw error
         })
         expect(await getAuthorisedEntity(mockRequest(token), mockJWKSDataSource)).toEqual({
+          authenticated: false,
           entityId: 'no-entityId--token-verification-failed',
           serviceName: 'unknown-unauthorised-service'
         })
