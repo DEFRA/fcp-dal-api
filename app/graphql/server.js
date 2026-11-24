@@ -30,5 +30,9 @@ export const apolloServer = new ApolloServer({
     ...(dummyCrnToSbiMapping.size ? [mappedDefraIdApolloPlugin()] : [])
   ],
   introspection: config.get('graphqlDashboardEnabled'),
-  formatError
+  formatError,
+  // Apollo's default appends '\n' to the JSON, creating a concatenated string that V8 must flatten
+  // into a second full-size copy before it can be written - significant for large (e.g. ~50MB
+  // land geometries) responses.
+  stringifyResult: (value) => JSON.stringify(value)
 })

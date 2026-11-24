@@ -79,7 +79,8 @@ describe('GraphQL Dashboard test with mocks', () => {
         mocks.mockErrorCodesPlugin()
       ],
       introspection: false,
-      formatError: expect.any(Function)
+      formatError: expect.any(Function),
+      stringifyResult: expect.any(Function)
     })
   })
 
@@ -110,7 +111,8 @@ describe('GraphQL Dashboard test with mocks', () => {
         mocks.mockErrorCodesPlugin()
       ],
       introspection: true,
-      formatError: expect.any(Function)
+      formatError: expect.any(Function),
+      stringifyResult: expect.any(Function)
     })
   })
 
@@ -135,5 +137,12 @@ describe('GraphQL Dashboard test with mocks', () => {
     await import('../../../app/graphql/server.js')
 
     expect(mocks.mockMappedDefraIdApolloPlugin).not.toHaveBeenCalled()
+  })
+
+  it('stringifies results without appending a newline', async () => {
+    await import('../../../app/graphql/server.js')
+    const { stringifyResult } = mocks.mockApolloServer.mock.calls.at(-1)[0]
+
+    expect(stringifyResult({ data: { a: 1 } })).toBe('{"data":{"a":1}}')
   })
 })
