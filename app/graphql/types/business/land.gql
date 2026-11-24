@@ -104,6 +104,11 @@ type BusinessLandCover {
   Indicates whether the land cover is Basic Payment Scheme (BPS) eligible.
   """
   isBpsEligible: Boolean
+
+  """
+  Boundary of the land cover as a GeoJSON geometry, on the date the land covers were requested for.
+  """
+  geometry: GeoJSONGeometry @wip
 }
 
 """

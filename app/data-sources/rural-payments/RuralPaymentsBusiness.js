@@ -113,12 +113,13 @@ export class RuralPaymentsBusiness extends RuralPayments {
     return this.get(`lms/organisation/${organisationId}/parcel-details/historic/${formattedDate}`)
   }
 
-  getCoversByOrgSheetParcelIdDate(organisationId, sheetId, parcelId, date) {
+  getCoversByOrgSheetParcelIdDate(organisationId, sheetId, parcelId, date, includeGeometries) {
     const formattedDate = formatDateDDMMMYY(new Date(date))
+    const path = `lms/organisation/${organisationId}/parcel/sheet-id/${sheetId}/parcel-id/${parcelId}/historic/${formattedDate}/land-covers`
 
-    return this.get(
-      `lms/organisation/${organisationId}/parcel/sheet-id/${sheetId}/parcel-id/${parcelId}/historic/${formattedDate}/land-covers`
-    )
+    return includeGeometries
+      ? this.get(path, { params: { includeGeometries: 'true' } })
+      : this.get(path)
   }
 
   getCoversSummaryByOrganisationIdAndDate(organisationId, date) {

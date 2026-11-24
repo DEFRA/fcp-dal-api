@@ -364,6 +364,22 @@ describe('Rural Payments Business', () => {
         'lms/organisation/123/parcel/sheet-id/sheet1/parcel-id/parcel1/historic/19-Mar-24/land-covers'
       )
     })
+
+    test('should request cover geometries when includeGeometries is true', async () => {
+      httpGet.mockImplementationOnce(async () => ({ features: [] }))
+
+      await ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate(
+        123,
+        'sheet1',
+        'parcel1',
+        '2024-03-19',
+        true
+      )
+      expect(httpGet).toHaveBeenCalledWith(
+        'lms/organisation/123/parcel/sheet-id/sheet1/parcel-id/parcel1/historic/19-Mar-24/land-covers',
+        { params: { includeGeometries: 'true' } }
+      )
+    })
   })
 
   describe('getCoversSummaryByOrganisationIdAndDate', () => {

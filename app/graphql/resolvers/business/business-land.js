@@ -10,6 +10,7 @@ import {
   transformTotalParcels
 } from '../../../transformers/rural-payments/lms.js'
 import { validateDateInput } from '../../../utils/date.js'
+import { isFieldRequested } from '../../../utils/graphql.js'
 import { getRuralPaymentsBusinessDataSource } from './common.js'
 import { parcelGeometryKey } from '../../../data-sources/rural-payments/RuralPaymentsBusiness.js'
 
@@ -37,7 +38,8 @@ export const BusinessLand = {
     })
     validateDateInput(date)
 
-    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources })
+    // Pass info through so that parcels can tell whether geometry has been requested
+    const parcels = await BusinessLand.parcels({ organisationId }, { date }, { dataSources }, info)
     const parcel = parcels?.find((p) => p.sheetId === sheetId && p.parcelId === parcelId)
     if (!parcel) {
       throw new NotFound(`No parcel found for sheetId: ${sheetId} and parcelId: ${parcelId}`)
@@ -58,6 +60,17 @@ export const BusinessLand = {
       entityid: sbi
     })
     validateDateInput(date)
+
+    // If geometry is requested, start fetching the organisation's geometries now, in parallel with
+    // the parcels, rather than waiting for the geometry field resolvers to request them.  The data
+    // source caches the promise, so the field resolvers pick up this same request.  Errors are
+    // surfaced by the field resolvers; the catch only stops an unhandled rejection if the parcels
+    // request fails first and the field resolvers never run.
+    if (isFieldRequested(info, 'geometry')) {
+      dataSources.ruralPaymentsBusiness
+        .getParcelGeometryMapByOrganisationIdAndDate(organisationId, date)
+        .catch(() => {})
+    }
 
     const parcels = transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
@@ -109,12 +122,17 @@ export const BusinessLand = {
       { dataSources }
     )
 
+    // Land cover geometries make the upstream response much larger, so only request them when the
+    // geometry field has been selected
+    const includeGeometries = isFieldRequested(info, 'geometry')
+
     return transformLandCovers(
       await dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate(
         organisationId,
         parcel.sheetId,
         parcelId,
-        date
+        date,
+        includeGeometries
       )
     )
   },

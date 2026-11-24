@@ -27,9 +27,30 @@ describe('LMS transformer', () => {
       ]
     }
     const output = [
-      { area: 0.1, id: 'mockId', name: 'Mock Name', code: 'mockId', isBpsEligible: true }
+      {
+        area: 0.1,
+        id: 'mockId',
+        name: 'Mock Name',
+        code: 'mockId',
+        isBpsEligible: true,
+        geometry: null
+      }
     ]
     expect(transformLandCovers(input)).toEqual(output)
+  })
+
+  test('transformLandCovers - includes geometry when present', () => {
+    const geometry = { type: 'Polygon', coordinates: [[[0, 0]]] }
+    const input = {
+      features: [
+        {
+          id: 'mockId',
+          geometry,
+          properties: { area: '1000', code: '110', name: 'Arable Land', isBpsEligible: 'false' }
+        }
+      ]
+    }
+    expect(transformLandCovers(input)[0].geometry).toEqual(geometry)
   })
 
   test('transformLandCoversToArea', () => {

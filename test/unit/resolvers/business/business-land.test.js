@@ -5,6 +5,16 @@ import {
   BusinessLandSummary
 } from '../../../../app/graphql/resolvers/business/business-land.js'
 
+const infoSelecting = (...fieldNames) => ({
+  fieldNodes: [
+    {
+      selectionSet: {
+        selections: fieldNames.map((value) => ({ kind: 'Field', name: { value } }))
+      }
+    }
+  ]
+})
+
 describe('BusinessLand', () => {
   const mockBusiness = { organisationId: 'mockId' }
   const mockArguments = { date: '2022-01-01' }
@@ -65,9 +75,8 @@ describe('BusinessLand', () => {
         getParcelsByOrganisationIdAndDate() {
           return getParcelsByOrganisationIdAndDateResult
         },
-        getCoversByOrgSheetParcelIdDate() {
-          return getCoversByOrgSheetParcelIdDateResult
-        },
+        getCoversByOrgSheetParcelIdDate: vi.fn(async () => getCoversByOrgSheetParcelIdDateResult),
+        getParcelGeometryMapByOrganisationIdAndDate: vi.fn(async () => new Map()),
         getCoversSummaryByOrganisationIdAndDate() {
           return getCoversSummaryByOrganisationIdAndDateResult
         },
@@ -143,8 +152,98 @@ describe('BusinessLand', () => {
         { dataSources }
       )
     ).toEqual([
-      { id: '11033654', area: 0.1, name: 'Mock Name', code: 'someCode', isBpsEligible: true }
+      {
+        id: '11033654',
+        area: 0.1,
+        name: 'Mock Name',
+        code: 'someCode',
+        isBpsEligible: true,
+        geometry: null
+      }
     ])
+    expect(dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate).toHaveBeenCalledWith(
+      'mockId',
+      'mockSheetId',
+      'mockParcelId',
+      mockArguments.date,
+      false
+    )
+  })
+
+  it('parcelCovers requests cover geometries when geometry is selected', async () => {
+    await BusinessLand.parcelCovers(
+      mockBusiness,
+      { ...mockArguments, sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+      { dataSources },
+      infoSelecting('id', 'geometry')
+    )
+
+    expect(dataSources.ruralPaymentsBusiness.getCoversByOrgSheetParcelIdDate).toHaveBeenCalledWith(
+      'mockId',
+      'mockSheetId',
+      'mockParcelId',
+      mockArguments.date,
+      true
+    )
+    // Cover geometry must not trigger a fetch of the organisation's parcel geometries
+    expect(
+      dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+    ).not.toHaveBeenCalled()
+  })
+
+  describe('parcel geometry prefetch', () => {
+    it('parcels starts fetching geometries when geometry is selected', async () => {
+      await BusinessLand.parcels(
+        mockBusiness,
+        mockArguments,
+        { dataSources },
+        infoSelecting('id', 'geometry')
+      )
+
+      expect(
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      ).toHaveBeenCalledWith('mockId', mockArguments.date)
+    })
+
+    it('parcels does not fetch geometries when geometry is not selected', async () => {
+      await BusinessLand.parcels(mockBusiness, mockArguments, { dataSources }, infoSelecting('id'))
+
+      expect(
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      ).not.toHaveBeenCalled()
+    })
+
+    it('parcel starts fetching geometries when geometry is selected', async () => {
+      await BusinessLand.parcel(
+        mockBusiness,
+        { ...mockArguments, sheetId: 'mockSheetId', parcelId: 'mockParcelId' },
+        { dataSources },
+        infoSelecting('geometry')
+      )
+
+      expect(
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      ).toHaveBeenCalledWith('mockId', mockArguments.date)
+    })
+
+    it('a failed prefetch does not cause an unhandled rejection when parcels fails', async () => {
+      const { ruralPaymentsBusiness } = dataSources
+      ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate.mockRejectedValue(
+        new Error('geometries failed')
+      )
+      dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate = vi.fn(async () => {
+        throw new Error('parcels failed')
+      })
+
+      await expect(
+        BusinessLand.parcels(
+          mockBusiness,
+          mockArguments,
+          { dataSources },
+          infoSelecting('geometry')
+        )
+      ).rejects.toThrow('parcels failed')
+    })
   })
 
   it('geometries', async () => {

@@ -6,14 +6,15 @@ export function transformLandCovers(landCover) {
   const items = landCover?.features || []
   return items
     .filter((item) => item?.properties?.area !== '0')
-    .map(({ id, properties }) => {
+    .map(({ id, properties, geometry }) => {
       const { code, area, name, isBpsEligible } = properties
       return {
         id,
         code,
         area: convertSquareMetersToHectares(area),
         name: name,
-        isBpsEligible: isBpsEligible === 'true'
+        isBpsEligible: isBpsEligible === 'true',
+        geometry: geometry ?? null
       }
     })
 }
