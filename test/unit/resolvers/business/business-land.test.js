@@ -192,6 +192,59 @@ describe('BusinessLand', () => {
   })
 
   describe('parcel geometry prefetch', () => {
+    const polygon = { type: 'Polygon', coordinates: [[[0, 0]]] }
+
+    it('parcels attaches each parcel geometry when geometry is selected', async () => {
+      const getGeometryMap =
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      getGeometryMap.mockResolvedValue(new Map([['mockSheetId:mockParcelId', polygon]]))
+      getParcelsByOrganisationIdAndDateResult.push({
+        id: 'other',
+        sheetId: 'mockSheetId',
+        parcelId: 'noGeometry',
+        area: 1000
+      })
+
+      const parcels = await BusinessLand.parcels(
+        mockBusiness,
+        mockArguments,
+        { dataSources },
+        infoSelecting('id', 'geometry')
+      )
+
+      expect(parcels.map(({ id, geometry }) => ({ id, geometry }))).toEqual([
+        { id: 'mockId', geometry: polygon },
+        { id: 'other', geometry: null }
+      ])
+    })
+
+    it('parcels does not attach geometry when geometry is not selected', async () => {
+      const [parcel] = await BusinessLand.parcels(
+        mockBusiness,
+        mockArguments,
+        { dataSources },
+        infoSelecting('id')
+      )
+
+      expect(parcel).not.toHaveProperty('geometry')
+    })
+
+    it('parcels still returns the parcels, without geometry, if geometries fail', async () => {
+      const getGeometryMap =
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      getGeometryMap.mockRejectedValue(new Error('geometries failed'))
+
+      const [parcel] = await BusinessLand.parcels(
+        mockBusiness,
+        mockArguments,
+        { dataSources },
+        infoSelecting('geometry')
+      )
+
+      expect(parcel).toMatchObject({ id: 'mockId', sheetId: 'mockSheetId' })
+      expect(parcel).not.toHaveProperty('geometry')
+    })
+
     it('parcels starts fetching geometries when geometry is selected', async () => {
       await BusinessLand.parcels(
         mockBusiness,
@@ -495,6 +548,46 @@ describe('BusinessLandParcel', () => {
       expect(
         dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
       ).toHaveBeenCalledWith('orgId', date)
+    })
+
+    it('returns an attached geometry without looking it up', () => {
+      expect(
+        BusinessLandParcel.geometry(
+          { organisationId: 'orgId', date, sheetId: 'SX1234', parcelId: '5678', geometry: polygon },
+          {},
+          { dataSources }
+        )
+      ).toBe(polygon)
+      expect(
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      ).not.toHaveBeenCalled()
+    })
+
+    it('returns an attached null geometry without looking it up', () => {
+      expect(
+        BusinessLandParcel.geometry(
+          { organisationId: 'orgId', date, sheetId: 'SX1234', parcelId: '9999', geometry: null },
+          {},
+          { dataSources }
+        )
+      ).toBeNull()
+      expect(
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      ).not.toHaveBeenCalled()
+    })
+
+    it('surfaces a failed geometries request', async () => {
+      const getGeometryMap =
+        dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate
+      getGeometryMap.mockRejectedValue(new Error('geometries failed'))
+
+      await expect(
+        BusinessLandParcel.geometry(
+          { organisationId: 'orgId', date, sheetId: 'SX1234', parcelId: '5678' },
+          {},
+          { dataSources }
+        )
+      ).rejects.toThrow('geometries failed')
     })
 
     it('returns null when there is no geometry for the parcel', async () => {

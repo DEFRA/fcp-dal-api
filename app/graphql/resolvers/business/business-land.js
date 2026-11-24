@@ -61,16 +61,15 @@ export const BusinessLand = {
     })
     validateDateInput(date)
 
-    // If geometry is requested, start fetching the organisation's geometries now, in parallel with
-    // the parcels, rather than waiting for the geometry field resolvers to request them.  The data
-    // source caches the promise, so the field resolvers pick up this same request.  Errors are
-    // surfaced by the field resolvers; the catch only stops an unhandled rejection if the parcels
-    // request fails first and the field resolvers never run.
-    if (isFieldRequested(info, 'geometry')) {
-      dataSources.ruralPaymentsBusiness
-        .getParcelGeometryMapByOrganisationIdAndDate(organisationId, date)
-        .catch(() => {})
-    }
+    // If geometry is requested, fetch the organisation's geometries in parallel with the parcels.
+    // The catch stops an unhandled rejection if the parcels request fails first.
+    const geometriesPromise = isFieldRequested(info, 'geometry')
+      ? dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(
+          organisationId,
+          date
+        )
+      : undefined
+    geometriesPromise?.catch(() => {})
 
     const parcels = transformLandParcels(
       await dataSources.ruralPaymentsBusiness.getParcelsByOrganisationIdAndDate(
@@ -78,8 +77,23 @@ export const BusinessLand = {
         date
       )
     )
+
+    // Attach each parcel's geometry here, so that the geometry field resolver can return it
+    // synchronously: for large organisations, 23k async field resolvers awaiting the geometries
+    // added significant memory (promises, closures, contexts) and CPU.  If the geometries request
+    // fails, the parcels are still returned, and the geometry field resolver surfaces the error
+    // for each parcel's geometry, as it would without this.
+    const geometries = await geometriesPromise?.catch(() => undefined)
+
     // Parcel field resolvers (e.g. geometry) need the organisation and date
-    return parcels.map((parcel) => ({ ...parcel, organisationId, date }))
+    return parcels.map((parcel) => ({
+      ...parcel,
+      organisationId,
+      date,
+      ...(geometries && {
+        geometry: geometries.get(parcelGeometryKey(parcel.sheetId, parcel.parcelId)) ?? null
+      })
+    }))
   },
 
   async geometries(
@@ -169,14 +183,17 @@ const getParcelEffectiveDates = async (
 }
 
 export const BusinessLandParcel = {
-  async geometry({ organisationId, date, sheetId, parcelId }, __, { dataSources }) {
-    const geometries =
-      await dataSources.ruralPaymentsBusiness.getParcelGeometryMapByOrganisationIdAndDate(
-        organisationId,
-        date
-      )
+  // Not async: when the parcels resolver has attached the geometry (the usual case) it is returned
+  // synchronously, avoiding a promise per parcel
+  geometry(parcel, __, { dataSources }) {
+    if (parcel.geometry !== undefined) {
+      return parcel.geometry
+    }
 
-    return geometries.get(parcelGeometryKey(sheetId, parcelId)) ?? null
+    const { organisationId, date, sheetId, parcelId } = parcel
+    return dataSources.ruralPaymentsBusiness
+      .getParcelGeometryMapByOrganisationIdAndDate(organisationId, date)
+      .then((geometries) => geometries.get(parcelGeometryKey(sheetId, parcelId)) ?? null)
   },
 
   async effectiveToDate(parcel, __, { dataSources }) {
