@@ -21,7 +21,7 @@ describe('retrieveOrgIdBySbi', () => {
     dataSources = {
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
         organisationSearchBySbi: vi.fn()
@@ -48,7 +48,9 @@ describe('retrieveOrgIdBySbi', () => {
 
     expect(result).toBe('upstreamOrgId')
     expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'upstreamOrgId')
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+      orgId: 'upstreamOrgId'
+    })
   })
 
   it('reads the orgId from the Defra ID token, without touching mongo or upstream, when a defraIdContext is present', async () => {
@@ -75,7 +77,7 @@ describe('retrieveOrgIdBySbi', () => {
     )
     expect(dataSources.mongoBusiness.getOrgIdBySbi).not.toHaveBeenCalled()
     expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).not.toHaveBeenCalled()
-    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).not.toHaveBeenCalled()
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
   })
 
   it('does not cache anything when the upstream search fails', async () => {
@@ -83,7 +85,7 @@ describe('retrieveOrgIdBySbi', () => {
     dataSources.ruralPaymentsBusiness.organisationSearchBySbi.mockRejectedValue(notFoundError)
 
     await expect(retrieveOrgIdBySbi('123', { dataSources })).rejects.toThrow(notFoundError)
-    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).not.toHaveBeenCalled()
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
   })
 })
 
@@ -94,9 +96,8 @@ describe('retrieveFrnBySbi', () => {
     dataSources = {
       mongoBusiness: {
         getFrnBySbi: vi.fn(),
-        upsertFrnBySbi: vi.fn(),
-        getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn(),
+        getOrgIdBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
         organisationSearchBySbi: vi.fn(),
@@ -114,7 +115,7 @@ describe('retrieveFrnBySbi', () => {
       expect(result).toBe('cachedFrn')
       expect(dataSources.mongoBusiness.getFrnBySbi).toHaveBeenCalledWith('123')
       expect(dataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
-      expect(dataSources.mongoBusiness.upsertFrnBySbi).not.toHaveBeenCalled()
+      expect(dataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
     })
 
     it('uses the cached orgId to fetch the organisation and caches the frn on a cache miss', async () => {
@@ -131,7 +132,9 @@ describe('retrieveFrnBySbi', () => {
       expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
         'cachedOrgId'
       )
-      expect(dataSources.mongoBusiness.upsertFrnBySbi).toHaveBeenCalledWith('123', 'upstreamFrn')
+      expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+        frn: 'upstreamFrn'
+      })
     })
 
     it('looks up and caches the orgId upstream when neither the frn nor the orgId is cached', async () => {
@@ -147,14 +150,15 @@ describe('retrieveFrnBySbi', () => {
 
       expect(result).toBe('upstreamFrn')
       expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
-      expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith(
-        '123',
-        'upstreamOrgId'
-      )
+      expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+        orgId: 'upstreamOrgId'
+      })
       expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
         'upstreamOrgId'
       )
-      expect(dataSources.mongoBusiness.upsertFrnBySbi).toHaveBeenCalledWith('123', 'upstreamFrn')
+      expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+        frn: 'upstreamFrn'
+      })
     })
 
     it('throws NotFound and caches nothing when the organisation has no frn', async () => {
@@ -164,7 +168,7 @@ describe('retrieveFrnBySbi', () => {
       await expect(
         retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
       ).rejects.toThrow(new NotFound('FRN not found for business'))
-      expect(dataSources.mongoBusiness.upsertFrnBySbi).not.toHaveBeenCalled()
+      expect(dataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
     })
 
     it('propagates upstream errors without caching', async () => {
@@ -176,7 +180,7 @@ describe('retrieveFrnBySbi', () => {
       await expect(
         retrieveFrnBySbi('123', { dataSources, defraIdContext: undefined })
       ).rejects.toThrow('upstream failure')
-      expect(dataSources.mongoBusiness.upsertFrnBySbi).not.toHaveBeenCalled()
+      expect(dataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
     })
   })
 
@@ -222,7 +226,9 @@ describe('retrieveFrnBySbi', () => {
       expect(dataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(
         'orgIdFromToken'
       )
-      expect(dataSources.mongoBusiness.upsertFrnBySbi).toHaveBeenCalledWith('123', 'upstreamFrn')
+      expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+        frn: 'upstreamFrn'
+      })
     })
   })
 })
@@ -269,7 +275,7 @@ describe('businessDetailsUpdateResolver', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       }
     }
     logger = {
@@ -299,7 +305,9 @@ describe('businessDetailsUpdateResolver', () => {
       { name: 'Test' }
     )
     expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+      orgId: 'orgId'
+    })
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
   })
@@ -379,7 +387,7 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       }
     }
     logger = {
@@ -413,7 +421,9 @@ describe('businessAdditionalDetailsUpdateResolver', () => {
     ).toHaveBeenCalledWith('orgId', { dateStartedFarming: '2025-01-01T00:00:00.000Z' })
 
     expect(dataSources.mongoBusiness.getOrgIdBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'orgId')
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+      orgId: 'orgId'
+    })
 
     expect(result).toEqual({ success: true, business: { sbi: '123' } })
   })
@@ -512,7 +522,7 @@ describe('businessAllFieldsUpdateResolver', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       }
     }
   })
@@ -724,7 +734,7 @@ describe('businessLockResolver', () => {
     dataSources = {
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
         organisationSearchBySbi: vi.fn(),
@@ -923,7 +933,7 @@ describe('businessUnlockResolver', () => {
     dataSources = {
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
         organisationSearchBySbi: vi.fn(),
@@ -1067,7 +1077,7 @@ describe('businessReactivateResolver', () => {
     dataSources = {
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
         organisationSearchBySbi: vi.fn(),
@@ -1173,7 +1183,7 @@ describe('businessDeactivateResolver', () => {
     dataSources = {
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
         organisationSearchBySbi: vi.fn(),
@@ -1284,7 +1294,7 @@ describe.each([
     dataSources = {
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       },
       ruralPaymentsBusiness: {
         organisationSearchBySbi: vi.fn(),
@@ -1313,7 +1323,9 @@ describe.each([
     await resolver(null, { input }, { dataSources })
 
     expect(dataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith('123')
-    expect(dataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith('123', 'upstreamOrgId')
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('123', {
+      orgId: 'upstreamOrgId'
+    })
     expect(dataSources.ruralPaymentsBusiness[upstream]).toHaveBeenCalledWith('upstreamOrgId', {
       reason: 'test'
     })

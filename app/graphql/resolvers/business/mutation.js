@@ -194,6 +194,13 @@ export const Mutation = {
         orgDetails
       )
       business = transformOrganisationToBusiness(response)
+
+      if (business.sbi) {
+        await dataSources.mongoBusiness.upsertMappingBySbi(business.sbi, {
+          frn: response.businessReference,
+          orgId: response.id
+        })
+      }
     } finally {
       if (business) {
         auditTrail?.recordAccount(info, 'sbi', business.sbi)

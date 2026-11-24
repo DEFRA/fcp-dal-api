@@ -146,7 +146,7 @@ describe('Business Mutation UpdateBusinessResponse', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       }
     }
   })
@@ -187,6 +187,9 @@ describe('Business Mutation createBusiness', () => {
       },
       ruralPaymentsCustomer: {
         getPersonIdByCRN: vi.fn()
+      },
+      mongoBusiness: {
+        upsertMappingBySbi: vi.fn()
       }
     }
   })
@@ -418,6 +421,45 @@ describe('Business Mutation createBusiness', () => {
       action: 'created',
       entityid: undefined
     })
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
+  })
+
+  it('caches the new organisation orgId and frn against its sbi', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
+    dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockResolvedValue({
+      sbi: 'sbi',
+      id: 'orgId',
+      businessReference: 'frn'
+    })
+
+    await Mutation.createBusiness(
+      {},
+      { input: { crn: '123', name: 'Acme Farms Ltd' } },
+      { dataSources },
+      {}
+    )
+
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('sbi', {
+      orgId: 'orgId',
+      frn: 'frn'
+    })
+  })
+
+  it('caches nothing when the created organisation has no sbi', async () => {
+    mockCustomerCommonModule.retrievePersonIdByCRN.mockResolvedValue('personId')
+    dataSources.ruralPaymentsBusiness.createOrganisationByPersonId.mockResolvedValue({
+      id: 'orgId'
+    })
+
+    const result = await Mutation.createBusiness(
+      {},
+      { input: { crn: '123', name: 'Acme Farms Ltd' } },
+      { dataSources },
+      {}
+    )
+
+    expect(result.success).toBe(true)
+    expect(dataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
   })
 })
 

@@ -170,7 +170,7 @@ export const businessAllFieldsUpdateResolver = async (
 
 async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
   const orgId = (await ruralPaymentsBusiness.organisationSearchBySbi(sbi)).id
-  await mongoBusiness.upsertOrgIdBySbi(sbi, orgId)
+  await mongoBusiness.upsertMappingBySbi(sbi, { orgId })
   return orgId
 }
 
@@ -199,7 +199,7 @@ async function fetchAndCacheFrnBySbi(sbi, { dataSources, defraIdContext }) {
     throw new NotFound('FRN not found for business')
   }
 
-  await dataSources.mongoBusiness.upsertFrnBySbi(sbi, frn)
+  await dataSources.mongoBusiness.upsertMappingBySbi(sbi, { frn })
   return frn
 }
 

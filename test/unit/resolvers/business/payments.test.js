@@ -12,10 +12,9 @@ describe('Business payments resolver', () => {
       },
       mongoBusiness: {
         getFrnBySbi: vi.fn(),
-        upsertFrnBySbi: vi.fn(),
+        upsertMappingBySbi: vi.fn(),
         // orgId already cached, so a cache miss on the frn only needs the organisation fetch
-        getOrgIdBySbi: vi.fn().mockResolvedValue(12345),
-        upsertOrgIdBySbi: vi.fn()
+        getOrgIdBySbi: vi.fn().mockResolvedValue(12345)
       },
       hitachiPayments: {
         getSupplierPayments: vi.fn()
@@ -50,10 +49,9 @@ describe('Business payments resolver', () => {
       )
 
       expect(mockDataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(12345)
-      expect(mockDataSources.mongoBusiness.upsertFrnBySbi).toHaveBeenCalledWith(
-        '823456789',
-        '6561479446' // sfd-id-check: allow
-      )
+      expect(mockDataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('823456789', {
+        frn: '6561479446' // sfd-id-check: allow
+      })
       expect(mockDataSources.hitachiPayments.getSupplierPayments).toHaveBeenCalledWith({
         frn: '6561479446', // sfd-id-check: allow
         fromDate: undefined,
@@ -238,7 +236,7 @@ describe('Business payments resolver', () => {
       await Business.payments({ sbi: '823456789' }, { userIP: '192.168.1.1' }, mockContext)
 
       expect(mockDataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
-      expect(mockDataSources.mongoBusiness.upsertFrnBySbi).not.toHaveBeenCalled()
+      expect(mockDataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
       expect(mockDataSources.hitachiPayments.getSupplierPayments).toHaveBeenCalledWith(
         expect.objectContaining({ frn: '6561479446' }) // sfd-id-check: allow
       )

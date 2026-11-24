@@ -217,9 +217,8 @@ const dataSources = {
   },
   mongoBusiness: {
     getOrgIdBySbi: vi.fn(),
-    upsertOrgIdBySbi: vi.fn(),
-    getFrnBySbi: vi.fn(),
-    upsertFrnBySbi: vi.fn()
+    upsertMappingBySbi: vi.fn(),
+    getFrnBySbi: vi.fn()
   },
   serviceAccount: {
     ruralPaymentsBusiness: null

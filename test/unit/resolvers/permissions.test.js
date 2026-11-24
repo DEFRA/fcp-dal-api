@@ -210,7 +210,7 @@ const dataSources = {
     getOrgIdBySbi(_sbi) {
       return undefined
     },
-    upsertOrgIdBySbi() {}
+    upsertMappingBySbi() {}
   },
   ruralPaymentsCustomer: {
     getCustomerByCRN() {
@@ -283,7 +283,7 @@ describe('Permission.active organisation id lookup', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       }
     }
   })
@@ -307,10 +307,9 @@ describe('Permission.active organisation id lookup', () => {
     expect(lookupDataSources.ruralPaymentsBusiness.organisationSearchBySbi).toHaveBeenCalledWith(
       '890000001'
     )
-    expect(lookupDataSources.mongoBusiness.upsertOrgIdBySbi).toHaveBeenCalledWith(
-      '890000001',
-      'upstreamOrgId'
-    )
+    expect(lookupDataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('890000001', {
+      orgId: 'upstreamOrgId'
+    })
     expect(
       lookupDataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId
     ).toHaveBeenCalledWith('upstreamOrgId')
