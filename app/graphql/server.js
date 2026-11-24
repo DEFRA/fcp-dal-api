@@ -5,6 +5,7 @@ import { mappedDefraIdApolloPlugin } from '../auth/mapped-defra-id.js'
 import { config, dummyCrnToSbiMapping } from '../config.js'
 import { formatError } from './formatError.js'
 import { createSchema } from './schema.js'
+import { stringifyWithRawJSON } from '../utils/raw-json.js'
 import { auditPlugin } from './plugins/audit.js'
 import { errorCodesPlugin } from './plugins/error-codes.js'
 import { errorLoggingPlugin } from './plugins/error-logging.js'
@@ -31,8 +32,9 @@ export const apolloServer = new ApolloServer({
   ],
   introspection: config.get('graphqlDashboardEnabled'),
   formatError,
-  // Apollo's default appends '\n' to the JSON, creating a concatenated string that V8 must flatten
-  // into a second full-size copy before it can be written - significant for large (e.g. ~50MB
-  // land geometries) responses.
-  stringifyResult: (value) => JSON.stringify(value)
+  // Writes RawJSON values (e.g. land geometry coordinates) into the response verbatim.  Unlike
+  // Apollo's default, it doesn't append '\n' to the JSON, which creates a concatenated string that
+  // V8 must flatten into a second full-size copy before it can be written - significant for large
+  // (e.g. ~50MB land geometries) responses.
+  stringifyResult: stringifyWithRawJSON
 })

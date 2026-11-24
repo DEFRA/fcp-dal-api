@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { NotFound } from '../../errors/graphql.js'
 import { RURALPAYMENTS_API_NOT_FOUND_001 } from '../../logger/codes.js'
 import { formatDateAsUtcDateTime } from '../../utils/date.js'
+import { parseFeatureCollectionWithRawCoordinates } from '../../utils/feature-collection.js'
 import { postPutHeaders } from '../../utils/headers.js'
 import { getSearchOffsetAndLimit } from '../../utils/pagination.js'
 import { RuralPayments, SELF_SERVICE_PORTAL_MODULE } from './RuralPayments.js'
@@ -15,6 +16,9 @@ export const formatDateDDMMMYY = (date) => {
 }
 
 export const parcelGeometryKey = (sheetId, parcelId) => `${sheetId}:${parcelId}`
+
+const ORGANISATION_GEOMETRIES_PATH = /\/lms\/organisation\/[^/]+\/geometries(\?|$)/
+const isOrganisationGeometriesUrl = (url) => ORGANISATION_GEOMETRIES_PATH.test(String(url))
 
 export class RuralPaymentsBusiness extends RuralPayments {
   async createOrganisationByPersonId(personId, orgDetails) {
@@ -134,10 +138,19 @@ export class RuralPaymentsBusiness extends RuralPayments {
   // deduplicated by RESTDataSource; instead the response promise is cached below, per
   // organisation and date, for the lifetime of the (per GraphQL request) data source.
   requestDeduplicationPolicyFor(url, request) {
-    if (/\/lms\/organisation\/[^/]+\/geometries(\?|$)/.test(String(url))) {
+    if (isOrganisationGeometriesUrl(url)) {
       return { policy: 'do-not-deduplicate' }
     }
     return super.requestDeduplicationPolicyFor(url, request)
+  }
+
+  // Successful organisation geometries responses are read as text, so that the coordinates can be
+  // kept as raw JSON text rather than parsed (see getParcelGeometriesByOrganisationIdAndDate)
+  parseBody(response) {
+    if (response.ok && isOrganisationGeometriesUrl(response.url)) {
+      return response.text()
+    }
+    return super.parseBody(response)
   }
 
   // Cache key for an organisation and the day upstream is asked for, so that different values for
@@ -157,12 +170,17 @@ export class RuralPaymentsBusiness extends RuralPayments {
     this.parcelGeometries ??= new Map()
     const key = this.#geometriesCacheKey(organisationId, date)
     if (!this.parcelGeometries.has(key)) {
-      // A bbox of 0,0,0,0 tells upstream to return all geometries for the organisation
+      // A bbox of 0,0,0,0 tells upstream to return all geometries for the organisation.
+      // Coordinates are almost all of the response (~50MB for 23k parcels), and are kept as raw
+      // JSON text, which the GraphQL response writes out verbatim.  As parsed arrays they would
+      // take ~2.7x the memory, and need parsing and serialising again.
       this.parcelGeometries.set(
         key,
         this.get(`lms/organisation/${organisationId}/geometries`, {
           params: { bbox: '0,0,0,0', historicDate: formatDateDDMMMYY(new Date(date)) }
-        })
+        }).then((body) =>
+          typeof body === 'string' ? parseFeatureCollectionWithRawCoordinates(body) : body
+        )
       )
     }
     return this.parcelGeometries.get(key)

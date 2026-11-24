@@ -3,6 +3,7 @@ import {
   formatDateDDMMMYY,
   RuralPaymentsBusiness
 } from '../../../../app/data-sources/rural-payments/RuralPaymentsBusiness.js'
+import { RawJSON } from '../../../../app/utils/raw-json.js'
 import { BadRequest, NotFound } from '../../../../app/errors/graphql.js'
 import { transformBusinessDetailsToOrgDetailsUpdate } from '../../../../app/transformers/rural-payments/business.js'
 
@@ -448,6 +449,24 @@ describe('Rural Payments Business', () => {
       expect(httpGet).toHaveBeenCalledTimes(1)
     })
 
+    test('parses a text response, keeping coordinates as raw JSON', async () => {
+      const text =
+        '{"type":"FeatureCollection","features":[{"id":1,"properties":{"sheetId":"SX1234"},' +
+        '"geometry":{"type":"Polygon","coordinates":[[[1.5,2],[3,4]]]}}]}'
+      httpGet.mockImplementationOnce(async () => text)
+
+      const result = await ruralPaymentsBusiness.getParcelGeometriesByOrganisationIdAndDate(
+        123,
+        '2024-03-19'
+      )
+
+      const { geometry } = result.features[0]
+      expect(geometry.type).toBe('Polygon')
+      expect(geometry.coordinates).toBeInstanceOf(RawJSON)
+      expect(geometry.coordinates.text).toBe('[[[1.5,2],[3,4]]]')
+      expect(JSON.parse(JSON.stringify(result))).toEqual(JSON.parse(text))
+    })
+
     test('shares the geometries response with the parcel geometry map', async () => {
       httpGet.mockImplementation(async () => ({ features: [] }))
 
@@ -457,6 +476,39 @@ describe('Rural Payments Business', () => {
       ])
 
       expect(httpGet).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('parseBody', () => {
+    const geometriesUrl =
+      'https://example.com/extapi/lms/organisation/123/geometries?bbox=0%2C0%2C0%2C0'
+    const jsonResponse = (url, init = {}) => {
+      const response = new Response('{"features":[]}', {
+        headers: { 'Content-Type': 'application/json' },
+        ...init
+      })
+      Object.defineProperty(response, 'url', { value: url })
+      return response
+    }
+
+    test('reads successful organisation geometries responses as text', async () => {
+      expect(await ruralPaymentsBusiness.parseBody(jsonResponse(geometriesUrl))).toBe(
+        '{"features":[]}'
+      )
+    })
+
+    test('parses unsuccessful organisation geometries responses as usual', async () => {
+      expect(
+        await ruralPaymentsBusiness.parseBody(jsonResponse(geometriesUrl, { status: 500 }))
+      ).toEqual({ features: [] })
+    })
+
+    test('parses other responses as usual', async () => {
+      expect(
+        await ruralPaymentsBusiness.parseBody(
+          jsonResponse('https://example.com/extapi/lms/organisation/123/parcels/historic/19-Mar-24')
+        )
+      ).toEqual({ features: [] })
     })
   })
 
