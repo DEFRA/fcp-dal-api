@@ -237,7 +237,17 @@ The platform provides features for handling authentication to APIs.
 However, access to the DAL is handled differently.
 Consumers must first get an access token, which must be supplied in the `Authorization` header as part of every request.
 
-> NOTE: all endpoints (expect posts to `/graphql`) are protected by default. Modifications can be made by submitting a PR with changes to the relevant spec files:
+Every request to `/graphql` is checked before the query is parsed. A request that fails the check gets no data and no schema access (including introspection):
+
+| Request                                                                        | Response             |
+| ------------------------------------------------------------------------------ | -------------------- |
+| No `Authorization` header, or a malformed, wrongly signed or expired token     | `401` `UNAUTHORIZED` |
+| A valid token whose app registration (or groups) is not an authorised consumer | `403` `FORBIDDEN`    |
+| A valid token for an authorised consumer                                       | handled as normal    |
+
+The `@auth` directive still controls which authorised consumers can reach each field. The check is skipped when `DISABLE_AUTH=true` (only allowed in the `dev` environment).
+
+> NOTE: all endpoints (except posts to `/graphql`) are protected by default. Modifications can be made by submitting a PR with changes to the relevant spec files:
 >
 > - [dev](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/dev/apis/fcp-dal-api.yml)
 > - [test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/test/apis/fcp-dal-api.yml)
