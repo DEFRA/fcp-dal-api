@@ -168,10 +168,14 @@ describe('GraphQL endpoint authorisation', () => {
         expect(JSON.parse(response.payload).errors).toEqual([forbiddenError])
       })
 
-      test('responds 400 to an invalid payload with no Authorization header', async () => {
-        const response = await post(invalidPayload)
+      test.each([
+        ['no Authorization header', undefined],
+        ['a token without DAL access', noDalAccessToken]
+      ])('responds 400 to an invalid payload with %s', async (_name, token) => {
+        const response = await post(invalidPayload, token)
 
         expect(response.statusCode).toBe(400)
+        expect(JSON.parse(response.payload).data).toBeUndefined()
         expect(JSON.parse(response.payload).errors).toEqual([
           expect.objectContaining({
             extensions: expect.objectContaining({ code: 'GRAPHQL_PARSE_FAILED' })
