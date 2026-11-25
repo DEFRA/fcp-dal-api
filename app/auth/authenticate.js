@@ -3,7 +3,7 @@ import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
 import { decodeProtectedHeader, jwtVerify } from 'jose'
 import { authorisedEntities, config } from '../config.js'
-import { Unauthorized } from '../errors/graphql.js'
+import { Forbidden, Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
@@ -112,6 +112,28 @@ export async function getAuthorisedEntity(request, jwkDatasource) {
       entityId: 'no-entityId--token-verification-failed',
       serviceName: unknownService
     }
+  }
+}
+
+/**
+ * Blocks the request unless it contains a verified token for an authorised DAL consumer. Applied
+ * when the request context is built, before the query is parsed, so no part of the schema (fields
+ * without `@auth`, introspection, validation errors) is available to unauthorised callers.
+ * Skipped when auth is disabled.
+ *
+ * @param {{authenticated: boolean, authName?: string}} auth the result of `getAuthorisedEntity`
+ * @throws {Unauthorized} if no token was supplied, or it could not be verified
+ * @throws {Forbidden} if the token is valid but does not identify an authorised entity
+ */
+export function requireAuthorisedEntity(auth) {
+  if (config.get('auth.disabled')) {
+    return
+  }
+  if (!auth?.authenticated) {
+    throw new Unauthorized('Authorization failed, a valid authorization token is required')
+  }
+  if (!auth.authName) {
+    throw new Forbidden('Authorization failed, requester is not an authorised DAL consumer')
   }
 }
 
