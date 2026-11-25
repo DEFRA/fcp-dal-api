@@ -42,7 +42,9 @@ export async function buildContext(request, { enforceAuth = true } = {}) {
   let deferredAuthError
   if (enforceAuth) {
     try {
-      // Block unauthorised callers before any Defra ID, upstream or Mongo work is done
+      // Where the dashboard is disabled, block unauthorised callers before any Defra ID, upstream
+      // or Mongo work is done. Where it is enabled, the error is deferred (below), so the rest of
+      // the context, including Defra ID verification, is still built
       requireAuthorisedEntity(auth)
     } catch (error) {
       if (!config.get('graphqlDashboardEnabled')) {

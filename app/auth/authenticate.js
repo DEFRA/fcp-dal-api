@@ -117,8 +117,11 @@ export async function getAuthorisedEntity(request, jwkDatasource) {
 
 /**
  * Blocks the request unless it contains a verified token for an authorised DAL consumer. Applied
- * when the request context is built, before the query is parsed, so no part of the schema (fields
- * without `@auth`, introspection, validation errors) is available to unauthorised callers.
+ * when the request context is built, before the query is parsed. Where the GraphQL dashboard is
+ * disabled, no part of the schema (fields without `@auth`, introspection, validation errors) is
+ * available to unauthorised callers. Where it is enabled, app/graphql/context.js defers the error
+ * so that unauthorised callers can still introspect the schema (see
+ * app/graphql/plugins/anonymous-introspection.js); anything else is still rejected.
  * Skipped when auth is disabled.
  *
  * @param {{authenticated: boolean, authName?: string}} auth the result of `getAuthorisedEntity`
