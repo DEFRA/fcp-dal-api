@@ -108,7 +108,7 @@ describe('winstonFormatters', () => {
         url: {
           full: 'http://localhost/path',
           path: 'http://localhost/path',
-          query: '{"searchFieldType":"SBI","primarySearchPhrase":"890000001"}'
+          query: '{"searchFieldType":"SBI","primarySearchPhrase":"*****0001"}'
         }
       })
     })
@@ -142,7 +142,7 @@ describe('winstonFormatters', () => {
       url: {
         full: 'http://localhost/path',
         path: 'http://localhost/path',
-        query: '{"searchFieldType":"SBI","primarySearchPhrase":"890000001"}'
+        query: '{"searchFieldType":"SBI","primarySearchPhrase":"*****0001"}'
       }
     })
   })
@@ -228,11 +228,11 @@ describe('winstonFormatters', () => {
       expect(JSON.parse(result.url.query)).toEqual({
         crn: '**N001',
         customerReferenceNumber: '**N002',
-        sbi: '823456789',
+        sbi: '*****6789',
         searchFieldType: 'name',
-        id: 'user-123',
+        id: '****-123',
         nested: { crn: '******-crn' },
-        array: [{ id: 'allowed' }],
+        array: [{ id: '***owed' }],
         other: {
           crn: null
         }
@@ -255,6 +255,18 @@ describe('winstonFormatters', () => {
         crn: '******7890',
         customerReferenceNumber: '******3210',
         nested: { crn: '5555' }
+      })
+    })
+
+    it('masks numeric values of masked keys (e.g. a personId or orgId sent as a number)', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: { body: { id: 5565448, sbi: 823456789, crn: 9234567890 } }
+      })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        id: '***5448',
+        sbi: '*****6789',
+        crn: '******7890'
       })
     })
 
@@ -282,7 +294,7 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        sbi: '887654321'
+        sbi: '*****4321'
       })
     })
 
@@ -299,12 +311,12 @@ describe('winstonFormatters', () => {
       })
 
       expect(JSON.parse(result.url.query)).toEqual({
-        sbi: '887654321'
+        sbi: '*****4321'
       })
     })
 
     describe('primarySearchPhrase, based on sibling searchFieldType', () => {
-      it.each(['SBI', 'VENDOR_NUMBER', 'TRADER_NUMBER', 'PERSONAL_IDENTIFIER'])(
+      it.each(['VENDOR_NUMBER', 'TRADER_NUMBER', 'PERSONAL_IDENTIFIER'])(
         'logs primarySearchPhrase when searchFieldType is %s',
         (searchFieldType) => {
           const result = cdpSchemaTranslator().transform({
@@ -333,18 +345,69 @@ describe('winstonFormatters', () => {
         }
       )
 
-      it('masks primarySearchPhrase to the last 4 digits when searchFieldType is CUSTOMER_REFERENCE (the wire-level CRN search type)', () => {
-        const result = cdpSchemaTranslator().transform({
-          request: {
-            body: { searchFieldType: 'CUSTOMER_REFERENCE', primarySearchPhrase: '9234567890' }
-          }
-        })
+      it.each([
+        // CUSTOMER_REFERENCE is the wire-level CRN search type
+        ['CUSTOMER_REFERENCE', '9234567890', '******7890'],
+        ['SBI', '823456789', '*****6789']
+      ])(
+        'masks primarySearchPhrase to the last 4 digits when searchFieldType is %s',
+        (searchFieldType, primarySearchPhrase, masked) => {
+          const result = cdpSchemaTranslator().transform({
+            request: {
+              body: { searchFieldType, primarySearchPhrase }
+            }
+          })
 
-        expect(JSON.parse(result.url.query)).toEqual({
-          searchFieldType: 'CUSTOMER_REFERENCE',
-          primarySearchPhrase: '******7890'
-        })
+          expect(JSON.parse(result.url.query)).toEqual({
+            searchFieldType,
+            primarySearchPhrase: masked
+          })
+        }
+      )
+    })
+
+    it('masks an sbi nested in objects and arrays', () => {
+      const result = cdpSchemaTranslator().transform({
+        request: {
+          body: {
+            business: { sbi: '823456789' },
+            businesses: [{ sbi: '887654321' }, { sbi: '811111111', name: 'remove' }]
+          }
+        }
       })
+
+      expect(JSON.parse(result.url.query)).toEqual({
+        business: { sbi: '*****6789' },
+        businesses: [{ sbi: '*****4321' }, { sbi: '*****1111' }]
+      })
+    })
+  })
+
+  describe('masking SBI/CRN-like numbers in free text', () => {
+    it('masks them in the log message', () => {
+      const result = cdpSchemaTranslator().transform({
+        message: 'organisation not found for SBI 823456789 and CRN 9234567890'
+      })
+
+      expect(result.message).toBe('organisation not found for SBI *****6789 and CRN ******7890')
+    })
+
+    it('masks them in the error message and stack trace', () => {
+      const error = new Error('E11000 duplicate key error dup key: { _id: "823456789" }')
+
+      const result = cdpSchemaTranslator().transform({ message: 'failed', error })
+
+      expect(result.error.message).toBe('E11000 duplicate key error dup key: { _id: "*****6789" }')
+      expect(result.error.stack_trace).toContain('{ _id: "*****6789" }')
+      expect(result.error.stack_trace).not.toContain('823456789')
+    })
+
+    it('does not mask tenant.message, which holds 10 digit epoch times', () => {
+      const message = JSON.stringify({ iat: 9795609233, exp: 9795612833 })
+
+      const result = cdpSchemaTranslator().transform({ message: 'decoded', tenant: { message } })
+
+      expect(result.tenant.message).toBe(message)
     })
   })
 

@@ -157,11 +157,11 @@ describe('defraIdContext', () => {
       sub: 'sub',
       serviceId: 'service-id',
       correlationId: 'correlation-id',
-      currentRelationshipId: 'relationship-id',
+      currentRelationshipId: '5565448',
       sessionId: 'session-id',
       email: 'pii@defra.gov.uk',
       contactId: '11111111',
-      relationships: ['orgId:sbi:company name:'],
+      relationships: ['5565448:823456789:company name:1:Employee:1'],
       roles: ['role-id']
     })
 
@@ -181,15 +181,77 @@ describe('defraIdContext', () => {
           message: expect.stringMatching(
             new RegExp(
               '{"aud":"defra-id-aud","sub":"sub","serviceId":"service-id",' +
-                '"correlationId":"correlation-id","currentRelationshipId":"relationship-id",' +
+                '"correlationId":"correlation-id","currentRelationshipId":"\\*\\*\\*5448",' +
                 '"sessionId":"session-id","email":"defra.gov.uk","contactId":"\\*\\*\\*\\*1111",' +
-                '"relationships":\\["orgId:sbi:company name:"\\],"roles":\\["role-id"\\],' +
+                '"relationships":\\["\\*\\*\\*5448:\\*\\*\\*\\*\\*6789"\\],"roles":\\["role-id"\\],' +
                 '"iat":[0-9]+,"exp":[0-9]+}'
             )
           )
         }
       }
     ])
+  })
+
+  describe('relationships in the log', () => {
+    const loggedRelationships = async (relationships) => {
+      const token = signToken({ contactId: '11111111', relationships })
+
+      await defraIdContext(
+        { externalAuthHeader: token },
+        { traceId, jwksDataSource: jwksDataSource() }
+      )
+
+      return JSON.parse(info.mock.calls[0][1].tenant.message).relationships
+    }
+
+    test('masks the orgId and SBI of every relationship', async () => {
+      expect(
+        await loggedRelationships([
+          '5565448:823456789:Farm Ltd:1:Employee:1',
+          '5565449:887654321:J Smith:1:Owner:1'
+        ])
+      ).toEqual(['***5448:*****6789', '***5449:*****4321'])
+    })
+
+    test('masks a relationship that only has an orgId and SBI', async () => {
+      expect(await loggedRelationships(['orgId2:823456789'])).toEqual(['**gId2:*****6789'])
+    })
+
+    test('logs an empty relationships array as empty', async () => {
+      expect(await loggedRelationships([])).toEqual([])
+    })
+
+    test.each([
+      ['a string', 'not-an-array'],
+      ['an object', { sbi: '823456789' }],
+      ['missing', undefined]
+    ])('does not log relationships when the claim is %s', async (_, relationships) => {
+      expect(await loggedRelationships(relationships)).toBeUndefined()
+    })
+  })
+
+  test('masks a numeric currentRelationshipId in the log', async () => {
+    const token = signToken({ currentRelationshipId: 5565448 })
+
+    await defraIdContext(
+      { externalAuthHeader: token },
+      { traceId, jwksDataSource: jwksDataSource() }
+    )
+
+    const message = JSON.parse(info.mock.calls[0][1].tenant.message)
+    expect(message.currentRelationshipId).toBe('***5448')
+  })
+
+  test('does not log a currentRelationshipId when the token has none', async () => {
+    const token = signToken({})
+
+    await defraIdContext(
+      { externalAuthHeader: token },
+      { traceId, jwksDataSource: jwksDataSource() }
+    )
+
+    const message = JSON.parse(info.mock.calls[0][1].tenant.message)
+    expect(message).not.toHaveProperty('currentRelationshipId')
   })
 
   test('masks a numeric contactId in the log', async () => {

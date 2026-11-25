@@ -90,7 +90,8 @@ async function buildContext(request) {
         modelOrCollection: db.collection('customers')
       }),
       mongoBusiness: new MongoBusiness({
-        modelOrCollection: db.collection('businesses')
+        modelOrCollection: db.collection('businesses'),
+        logger: requestLogger
       }),
       serviceAccount: {
         // Service account only currently supported for ruralPaymentsBusiness.

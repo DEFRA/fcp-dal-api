@@ -15,7 +15,7 @@ describe('Business Query Resolver', () => {
       },
       mongoBusiness: {
         getOrgIdBySbi: vi.fn(),
-        upsertOrgIdBySbi: vi.fn()
+        upsertMappingBySbi: vi.fn()
       }
     }
   })

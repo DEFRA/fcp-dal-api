@@ -1,5 +1,5 @@
 import StatusCodes from 'http-status-codes'
-import { HttpError, NotFound } from '../../../errors/graphql.js'
+import { HttpError } from '../../../errors/graphql.js'
 import { RURALPAYMENTS_API_ERROR_001 } from '../../../logger/codes.js'
 import {
   transformBankChangeInputToSubmission,
@@ -16,26 +16,19 @@ import {
   businessLockResolver,
   businessReactivateResolver,
   businessUnlockResolver,
+  retrieveFrnBySbi,
+  retrieveOrgIdBySbi,
   validatePhoneHasNumber
 } from './common.js'
 import { Query } from './query.js'
-
-const getOrganisation = async (dataSources, sbi) => {
-  const { ruralPaymentsBusiness } = dataSources
-  const organisation = await ruralPaymentsBusiness.getOrganisationBySBI(sbi)
-
-  if (!organisation.businessReference) {
-    throw new NotFound('FRN not found for business')
-  }
-  return organisation
-}
 
 const buildCustomerAuthorisationRequest = async ({
   input,
   dataSources,
   auditTrail,
   info,
-  action
+  action,
+  defraIdContext
 }) => {
   // role and permissions are optional: omitting both builds a body that unlinks the customer
   // from the business when sent to the update endpoint
@@ -48,7 +41,7 @@ const buildCustomerAuthorisationRequest = async ({
     entityid: `${sbi}-${crn}`
   })
   const [organisationId, personId] = await Promise.all([
-    dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi).then((id) => {
+    retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }).then((id) => {
       auditTrail?.recordAccount(info, 'organisationId', id)
       return id
     }),
@@ -79,12 +72,11 @@ const buildCustomerAuthorisationRequest = async ({
   }
 }
 
-const validateBankChangeRequest = async (input, dataSources, organisation) => {
+const validateBankChangeRequest = async (input, dataSources, { organisationId, frn }) => {
   const { crn } = input
   const { ruralPaymentsBusiness } = dataSources
 
   const personId = await retrievePersonIdByCRN(crn, dataSources)
-  const organisationId = `${organisation.id}`
   const lockedStatus = await ruralPaymentsBusiness.getBankChangeLockedStatus(
     organisationId,
     `${personId}`
@@ -114,7 +106,7 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
   const submission = transformBankChangeInputToSubmission(input, {
     organisationId,
     personId: `${personId}`,
-    frn: organisation.businessReference
+    frn
   })
 
   const validation = await ruralPaymentsBusiness.validateBankChange(submission)
@@ -148,6 +140,47 @@ const validateBankChangeRequest = async (input, dataSources, organisation) => {
   return { submission, validation }
 }
 
+/**
+ * Builds a bank details mutation resolver. The resolver looks up the org id and FRN for the SBI
+ * (both cached, so a warm cache makes no Rural Payments call), records the audit trail (even when
+ * a lookup fails), and validates the bank change request. A validation failure is returned as is;
+ * otherwise handleRequest builds the response.
+ * @param {string} auditAction the action recorded against the bank-account audit entity
+ * @param {Function} handleRequest called with ({ submission, validation }, dataSources) when the
+ *   request passes validation, and returns the mutation result
+ * @returns {Function} the GraphQL resolver
+ */
+const bankDetailsResolver =
+  (auditAction, handleRequest) =>
+  async (_, { input }, { dataSources, auditTrail, defraIdContext }, info) => {
+    auditTrail?.recordAccount(info, 'sbi', input.sbi)
+    let organisationId
+    let frn
+    try {
+      // Sequential on purpose: on a cold cache, the FRN lookup resolves the org id again, so
+      // running it after the org id has been cached avoids a duplicate upstream search
+      organisationId = await retrieveOrgIdBySbi(input.sbi, { dataSources, defraIdContext })
+      frn = await retrieveFrnBySbi(input.sbi, { dataSources, defraIdContext })
+    } finally {
+      if (organisationId) {
+        auditTrail?.recordAccount(info, 'organisationId', `${organisationId}`)
+      }
+      if (frn) {
+        auditTrail?.recordAccount(info, 'frn', frn)
+      }
+      auditTrail?.recordEntity(info, {
+        entity: 'bank-account',
+        action: auditAction,
+        entityid: frn
+      })
+    }
+    const result = await validateBankChangeRequest(input, dataSources, {
+      organisationId: `${organisationId}`,
+      frn
+    })
+    return result.failure ?? handleRequest(result, dataSources)
+  }
+
 export const Mutation = {
   createBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
     const { crn, ...businessDetails } = input
@@ -161,6 +194,13 @@ export const Mutation = {
         orgDetails
       )
       business = transformOrganisationToBusiness(response)
+
+      if (business.sbi) {
+        await dataSources.mongoBusiness.upsertMappingBySbi(business.sbi, {
+          frn: response.businessReference,
+          orgId: response.id
+        })
+      }
     } finally {
       if (business) {
         auditTrail?.recordAccount(info, 'sbi', business.sbi)
@@ -174,59 +214,14 @@ export const Mutation = {
     }
     return { success: true, business }
   },
-  createBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
-    auditTrail?.recordAccount(info, 'sbi', input.sbi)
-    let organisation
-    try {
-      organisation = await getOrganisation(dataSources, input.sbi)
-    } finally {
-      if (organisation) {
-        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
-        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
-      }
-      auditTrail?.recordEntity(info, {
-        entity: 'bank-account',
-        action: 'updated',
-        entityid: organisation?.businessReference
-      })
+  createBusinessCustomerBankDetails: bankDetailsResolver(
+    'updated',
+    async ({ submission }, dataSources) => {
+      await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
+      return { __typename: 'BankDetailsSubmitted', success: true }
     }
-    const { failure, submission } = await validateBankChangeRequest(
-      input,
-      dataSources,
-      organisation
-    )
-    if (failure) {
-      return failure
-    }
-
-    await dataSources.ruralPaymentsBusiness.submitBankChange(submission)
-    return { __typename: 'BankDetailsSubmitted', success: true }
-  },
-  validateBusinessCustomerBankDetails: async (_, { input }, { dataSources, auditTrail }, info) => {
-    auditTrail?.recordAccount(info, 'sbi', input.sbi)
-    let organisation
-    try {
-      organisation = await getOrganisation(dataSources, input.sbi)
-    } finally {
-      if (organisation) {
-        auditTrail?.recordAccount(info, 'organisationId', `${organisation.id}`)
-        auditTrail?.recordAccount(info, 'frn', organisation.businessReference)
-      }
-      auditTrail?.recordEntity(info, {
-        entity: 'bank-account',
-        action: 'validate',
-        entityid: organisation?.businessReference
-      })
-    }
-    const { failure, validation } = await validateBankChangeRequest(
-      input,
-      dataSources,
-      organisation
-    )
-    if (failure) {
-      return failure
-    }
-
+  ),
+  validateBusinessCustomerBankDetails: bankDetailsResolver('validate', ({ validation }) => {
     if (validation.status === 'PARTIAL_MATCH') {
       return {
         __typename: 'BankDetailsPartialMatch',
@@ -237,7 +232,7 @@ export const Mutation = {
       __typename: 'BankDetailsMatched',
       message: validation.message || 'Bank details match'
     }
-  },
+  }),
   updateBusinessName: businessDetailsUpdateResolver,
   updateBusinessPhone: businessDetailsUpdateResolver,
   updateBusinessEmail: businessDetailsUpdateResolver,
@@ -253,11 +248,17 @@ export const Mutation = {
   updateBusinessReactivate: businessReactivateResolver,
   updateBusinessDeactivate: businessDeactivateResolver,
 
-  addCustomerToBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
+  addCustomerToBusiness: async (
+    _,
+    { input },
+    { dataSources, auditTrail, defraIdContext },
+    info
+  ) => {
     const { organisationId, body } = await buildCustomerAuthorisationRequest({
       input,
       dataSources,
       auditTrail,
+      defraIdContext,
       info,
       action: 'created'
     })
@@ -271,13 +272,14 @@ export const Mutation = {
   updateCustomerPermissionsAndRelationshipToBusiness: async (
     _,
     { input },
-    { dataSources, auditTrail },
+    { dataSources, auditTrail, defraIdContext },
     info
   ) => {
     const { organisationId, personId, body } = await buildCustomerAuthorisationRequest({
       input,
       dataSources,
       auditTrail,
+      defraIdContext,
       info,
       action: 'updated'
     })
@@ -289,13 +291,19 @@ export const Mutation = {
     )
   },
 
-  deleteCustomerFromBusiness: async (_, { input }, { dataSources, auditTrail }, info) => {
+  deleteCustomerFromBusiness: async (
+    _,
+    { input },
+    { dataSources, auditTrail, defraIdContext },
+    info
+  ) => {
     // Rural Payments removes the customer from the business when the update is sent with
     // no roles and no privileges
     const { organisationId, personId, body } = await buildCustomerAuthorisationRequest({
       input: { sbi: input.sbi, crn: input.crn },
       dataSources,
       auditTrail,
+      defraIdContext,
       info,
       action: 'deleted'
     })

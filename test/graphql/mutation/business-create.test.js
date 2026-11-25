@@ -69,7 +69,12 @@ const input = {
   dateStartedFarming: new Date('2021-05-27T12:46:17.305Z')
 }
 
-const orgDetails = { id: 'orgId', sbi: 'sbi', ...transformBusinessDetailsToOrgDetailsCreate(input) }
+const orgDetails = {
+  id: 'orgId',
+  sbi: 'sbi',
+  businessReference: 'frn',
+  ...transformBusinessDetailsToOrgDetailsCreate(input)
+}
 
 const query = `
 mutation CreateBusiness($input: CreateBusinessInput!) {
@@ -187,6 +192,12 @@ describe('business', () => {
 
     await waitForPersonIdToBeCachedInMongo()
 
+    // the sbi -> orgId / frn mapping is written (awaited) before the mutation returns
+    expect(await db.collection('businesses').findOne({ _id: 'sbi' })).toMatchObject({
+      orgId: 'orgId',
+      frn: 'frn'
+    })
+
     expect(result).toEqual({
       data: {
         createBusiness: {
@@ -234,7 +245,7 @@ describe('business', () => {
                 typeId: null
               },
               name: 'Acme Farms Ltd',
-              reference: null,
+              reference: 'frn',
               vat: '123456789', // sfd-id-check: allow
               traderNumber: 'TR12345',
               vendorNumber: 'VN67890',
@@ -338,7 +349,7 @@ describe('business', () => {
                 typeId: null
               },
               name: 'Acme Farms Ltd',
-              reference: null,
+              reference: 'frn',
               vat: '123456789', // sfd-id-check: allow
               traderNumber: 'TR12345',
               vendorNumber: 'VN67890',

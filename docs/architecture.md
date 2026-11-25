@@ -25,7 +25,7 @@ C4Context
 
   Boundary(cdp, "Core Development Platform (CDP)", "AWS VPC") {
     System(dal, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API")
-    System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+    System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
       <br />
       and relations between person IDs / CRNs")
     System_Ext(squid, "Squid Proxy", "Routes all outbound requests")
@@ -81,7 +81,7 @@ C4Context
   }
 
   Boundary(db, "Mongo (docker)", "") {
-    System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+    System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
       <br />
       and relations between person IDs / CRNs")
   }
@@ -114,7 +114,7 @@ C4Context
   Boundary(fcp-dal, "DAL (docker compose)", "") {
     System(dal-mock, "FCP-DAL-MOCK", "RPA data and APIs, e.g. Abaco, SitiAgri, etc.")
     System(dal-api, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API")
-    System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+    System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
       <br />
       and relations between person IDs / CRNs")
   }
@@ -136,7 +136,7 @@ C4Context
   Boundary(fcp-dal, "DAL (docker compose)", "") {
     System_Ext(dal-mock, "FCP-DAL-MOCK", "RPA data and APIs, e.g. Abaco, SitiAgri, etc.")
     System(dal-api, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API")
-    System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+    System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
       <br />
       and relations between person IDs / CRNs")
   }
@@ -166,7 +166,7 @@ C4Context
 
   Boundary(fcp-dal, "DAL (docker compose)", "docker compose -f compose.yml -f test/acceptance/compose.yml") {
     Boundary(network, "Common network context", "cdp-tenant") {
-      System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+      System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
         <br />
         and relations between person IDs / CRNs")
       System(dal-api, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API")
@@ -213,7 +213,7 @@ C4Context
     Boundary(cdp, "CDP network", "cdp-tenant") {
       System(squid, "Squid Proxy", "Proxies all DAL API requests to the mock upstream")
       System(dal-api, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API")
-      System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+      System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
         <br />
         and relations between person IDs / CRNs")
     }
@@ -242,7 +242,7 @@ C4Context
     Boundary(cdp, "CDP network", "cdp-tenant") {
       System(squid, "Squid Proxy", "Proxies all DAL API requests to the mock upstream")
       System(dal-api, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API")
-      System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+      System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
         <br />
         and relations between person IDs / CRNs")
     }
@@ -278,7 +278,7 @@ C4Context
       System(dal-api, "FCP-DAL-API", "Data Access Layer (DAL) provides GraphQL API
         <br />
         * connecting with client TLS cert")
-      System_Ext(mongo, "Mongo DB", "Caches relations between organisation IDs / SBIs,
+      System_Ext(mongo, "Mongo DB", "Caches relations between SBIs and organisation IDs / FRNs,
         <br />
         and relations between person IDs / CRNs")
     }
