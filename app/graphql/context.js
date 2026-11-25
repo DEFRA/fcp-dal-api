@@ -28,6 +28,32 @@ export async function context({ request }) {
 }
 
 /**
+ * Applies the authorised-consumer gate (`requireAuthorisedEntity`).
+ *
+ * @param {{authenticated: boolean, authName?: string}} auth the result of `getAuthorisedEntity`
+ * @returns {Error|undefined} the 401/403 error to defer to the anonymous-introspection plugin, if
+ *  the caller is unauthorised and the dashboard is enabled
+ * @throws {Unauthorized|Forbidden} if the caller is unauthorised and the dashboard is disabled
+ */
+function applyAuthGate(auth) {
+  try {
+    // Where the dashboard is disabled, block unauthorised callers before any Defra ID, upstream
+    // or Mongo work is done. Where it is enabled, the error is deferred (below), so the rest of
+    // the context, including Defra ID verification, is still built
+    requireAuthorisedEntity(auth)
+  } catch (error) {
+    if (!config.get('graphqlDashboardEnabled')) {
+      throw error
+    }
+    // Where the dashboard is enabled (non-prod), unauthorised callers may still introspect the
+    // schema. The query hasn't been parsed yet, so the decision is left to the
+    // anonymous-introspection plugin, which rethrows this error for anything else
+    return error
+  }
+  return undefined
+}
+
+/**
  * Builds the per-request GraphQL context.
  *
  * @param {*} request the incoming HTTP request
@@ -39,23 +65,7 @@ export async function buildContext(request, { enforceAuth = true } = {}) {
   const requestingService = auth.serviceName
   request.requestingService = requestingService
 
-  let deferredAuthError
-  if (enforceAuth) {
-    try {
-      // Where the dashboard is disabled, block unauthorised callers before any Defra ID, upstream
-      // or Mongo work is done. Where it is enabled, the error is deferred (below), so the rest of
-      // the context, including Defra ID verification, is still built
-      requireAuthorisedEntity(auth)
-    } catch (error) {
-      if (!config.get('graphqlDashboardEnabled')) {
-        throw error
-      }
-      // Where the dashboard is enabled (non-prod), unauthorised callers may still introspect the
-      // schema. The query hasn't been parsed yet, so the decision is left to the
-      // anonymous-introspection plugin, which rethrows this error for anything else
-      deferredAuthError = error
-    }
-  }
+  const deferredAuthError = enforceAuth ? applyAuthGate(auth) : undefined
 
   const requestLogger = logger.child({
     traceId: request.traceId,
