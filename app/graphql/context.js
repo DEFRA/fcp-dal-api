@@ -1,5 +1,5 @@
 import { createAuditTrail } from '../audit/audit-trail.js'
-import { getAuthorisedEntity } from '../auth/authenticate.js'
+import { getAuthorisedEntity, requireAuthorisedEntity } from '../auth/authenticate.js'
 import { defraIdContext } from '../auth/defra-id.js'
 import { endUserAuthContext } from '../auth/end-user-auth-context.js'
 import { config } from '../config.js'
@@ -27,10 +27,24 @@ export async function context({ request }) {
   }
 }
 
-async function buildContext(request) {
+/**
+ * Builds the per-request GraphQL context.
+ *
+ * @param {*} request the incoming HTTP request
+ * @param {{enforceAuth?: boolean}} options `enforceAuth: false` skips the authorised-consumer gate;
+ *  only for test harnesses that substitute their own `auth` (see test/graphql/makeTestQuery.js)
+ */
+export async function buildContext(request, { enforceAuth = true } = {}) {
   const auth = await getAuthorisedEntity(request, new JWKS()) // TODO: make JWKS a singleton
   const requestingService = auth.serviceName
   request.requestingService = requestingService
+
+  if (enforceAuth) {
+    // Block unauthorised callers before any Defra ID, upstream or Mongo work is done
+    // This also blocks introspection queries, without valid auth, so the dashboard in
+    // test, perf-test and ext-test now require authentication
+    requireAuthorisedEntity(auth)
+  }
 
   const requestLogger = logger.child({
     traceId: request.traceId,

@@ -1,6 +1,6 @@
 import { graphql } from 'graphql'
 import { authorisedEntities } from '../../app/config.js'
-import { context } from '../../app/graphql/context.js'
+import { buildContext } from '../../app/graphql/context.js'
 import { createSchema } from '../../app/graphql/schema.js'
 
 const defaultHeaders = { email: 'test@defra.gov.uk' }
@@ -12,7 +12,8 @@ export const makeTestQuery = async (
   authorizedEntityIds = [],
   dropDbOnCompletion = true
 ) => {
-  const ctx = await context({ request: { headers: headers ?? defaultHeaders } })
+  // the auth gate is skipped as `auth` is substituted below to simulate the calling service
+  const ctx = await buildContext({ headers: headers ?? defaultHeaders }, { enforceAuth: false })
   const entity = isAuthenticated
     ? Object.values(authorisedEntities).find(({ authName }) => authName === 'ADMIN')
     : Object.values(authorisedEntities).find(({ entityId }) =>

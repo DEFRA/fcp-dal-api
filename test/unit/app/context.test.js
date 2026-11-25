@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
-import { Unauthorized } from '../../../app/errors/graphql.js'
+import { Forbidden, Unauthorized } from '../../../app/errors/graphql.js'
 
 // A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only
 // decoded (jose's decodeJwt), never signature-verified, so the signing secret doesn't matter.
@@ -14,6 +14,7 @@ const validDefraIdToken = jwt.sign(
 const appRegToken = jwt.sign({ appid: 'test-appid' }, 'appid-secret')
 
 const getAuthorisedEntityMock = vi.fn()
+const requireAuthorisedEntityMock = vi.fn()
 const PermissionsMock = vi.fn()
 const RuralPaymentsBusinessMock = vi.fn()
 const RuralPaymentsCustomerMock = vi.fn()
@@ -24,7 +25,8 @@ const loggerChild = vi.fn()
 const loggerMock = { child: loggerChild, info: vi.fn() }
 
 vi.doMock('../../../app/auth/authenticate.js', () => ({
-  getAuthorisedEntity: getAuthorisedEntityMock
+  getAuthorisedEntity: getAuthorisedEntityMock,
+  requireAuthorisedEntity: requireAuthorisedEntityMock
 }))
 vi.doMock('../../../app/data-sources/static/permissions.js', () => ({
   Permissions: PermissionsMock
@@ -47,7 +49,7 @@ vi.doMock('../../../app/data-sources/JWKS.js', () => ({
 vi.doMock('../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
-const { context } = await import('../../../app/graphql/context.js')
+const { buildContext, context } = await import('../../../app/graphql/context.js')
 
 describe('context', () => {
   beforeEach(() => {
@@ -309,6 +311,65 @@ describe('context', () => {
 
       const result = await context({ request })
       expect(result.dataSources.hitachiPayments.audit.requestedSystem).toBeUndefined()
+    })
+  })
+
+  describe('authorised consumer gate', () => {
+    const requestLogger = { warn: vi.fn(), error: vi.fn() }
+    const auth = { authenticated: false, serviceName: 'unknown-unauthorised-service' }
+
+    beforeEach(() => {
+      vi.clearAllMocks()
+      JWKSMock.mockImplementation(function () {
+        return {}
+      })
+      loggerChild.mockReturnValue(requestLogger)
+      getAuthorisedEntityMock.mockResolvedValue(auth)
+    })
+
+    test('checks the resolved auth details before building the rest of the context', async () => {
+      const request = { headers: {}, traceId: 'trace-1' }
+
+      await context({ request })
+
+      expect(requireAuthorisedEntityMock).toHaveBeenCalledExactlyOnceWith(auth)
+    })
+
+    test.each([
+      ['Unauthorized', new Unauthorized('a valid authorization token is required')],
+      ['Forbidden', new Forbidden('requester is not an authorised DAL consumer')]
+    ])(
+      'rejects with %s, without building data sources, and logs with the calling service',
+      async (_name, error) => {
+        requireAuthorisedEntityMock.mockImplementationOnce(() => {
+          throw error
+        })
+        const request = { headers: {}, traceId: 'trace-2' }
+
+        await expect(context({ request })).rejects.toBe(error)
+
+        expect(request.requestingService).toBe('unknown-unauthorised-service')
+        expect(PermissionsMock).not.toHaveBeenCalled()
+        expect(RuralPaymentsBusinessMock).not.toHaveBeenCalled()
+        expect(RuralPaymentsCustomerMock).not.toHaveBeenCalled()
+        expect(loggerMock.child).toHaveBeenCalledExactlyOnceWith({
+          traceId: 'trace-2',
+          tenant: { id: 'unknown-unauthorised-service' }
+        })
+        expect(requestLogger.warn).toHaveBeenCalledOnce()
+      }
+    )
+
+    test('buildContext skips the gate when enforceAuth is false', async () => {
+      requireAuthorisedEntityMock.mockImplementationOnce(() => {
+        throw new Unauthorized('should not be called')
+      })
+
+      const result = await buildContext({ headers: {} }, { enforceAuth: false })
+
+      expect(requireAuthorisedEntityMock).not.toHaveBeenCalled()
+      expect(result.auth).toBe(auth)
+      requireAuthorisedEntityMock.mockReset()
     })
   })
 
