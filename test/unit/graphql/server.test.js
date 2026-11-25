@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => {
   const mockSchemaModule = { createSchema: vi.fn() }
   const mockApolloPluginDisabled = vi.fn()
   const mockApolloPluginLandingPage = vi.fn()
+  const mockAnonymousIntrospectionPlugin = vi.fn()
   const mockAuditPlugin = vi.fn()
   const mockErrorLoggingPlugin = vi.fn()
   const mockErrorCodesPlugin = vi.fn()
@@ -15,6 +16,7 @@ const mocks = vi.hoisted(() => {
     mockSchemaModule,
     mockApolloPluginDisabled,
     mockApolloPluginLandingPage,
+    mockAnonymousIntrospectionPlugin,
     mockAuditPlugin,
     mockErrorLoggingPlugin,
     mockErrorCodesPlugin,
@@ -32,6 +34,9 @@ vi.mock('@apollo/server', () => mocks.mockApolloModule)
 vi.mock('../../../app/graphql/schema.js', () => mocks.mockSchemaModule)
 vi.mock('@apollo/server/plugin/disabled', () => mocks.mockApolloPluginDisabledModule)
 vi.mock('@apollo/server/plugin/landingPage/default', () => mocks.mockApolloPluginLandingPageModule)
+vi.mock('../../../app/graphql/plugins/anonymous-introspection.js', () => ({
+  anonymousIntrospectionPlugin: mocks.mockAnonymousIntrospectionPlugin
+}))
 vi.mock('../../../app/graphql/plugins/audit.js', () => ({
   auditPlugin: mocks.mockAuditPlugin
 }))
@@ -74,6 +79,7 @@ describe('GraphQL Dashboard test with mocks', () => {
       schema: 'mockCreateSchemaRV',
       plugins: [
         mocks.mockApolloPluginDisabled(),
+        mocks.mockAnonymousIntrospectionPlugin(),
         mocks.mockAuditPlugin(),
         mocks.mockErrorLoggingPlugin(),
         mocks.mockErrorCodesPlugin()
@@ -105,6 +111,7 @@ describe('GraphQL Dashboard test with mocks', () => {
       schema: 'mockCreateSchemaRV',
       plugins: [
         mocks.mockApolloPluginLandingPage(),
+        mocks.mockAnonymousIntrospectionPlugin(),
         mocks.mockAuditPlugin(),
         mocks.mockErrorLoggingPlugin(),
         mocks.mockErrorCodesPlugin()

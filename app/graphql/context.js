@@ -39,11 +39,20 @@ export async function buildContext(request, { enforceAuth = true } = {}) {
   const requestingService = auth.serviceName
   request.requestingService = requestingService
 
+  let deferredAuthError
   if (enforceAuth) {
-    // Block unauthorised callers before any Defra ID, upstream or Mongo work is done
-    // This also blocks introspection queries, without valid auth, so the dashboard in
-    // test, perf-test and ext-test now require authentication
-    requireAuthorisedEntity(auth)
+    try {
+      // Block unauthorised callers before any Defra ID, upstream or Mongo work is done
+      requireAuthorisedEntity(auth)
+    } catch (error) {
+      if (!config.get('graphqlDashboardEnabled')) {
+        throw error
+      }
+      // Where the dashboard is enabled (non-prod), unauthorised callers may still introspect the
+      // schema. The query hasn't been parsed yet, so the decision is left to the
+      // anonymous-introspection plugin, which rethrows this error for anything else
+      deferredAuthError = error
+    }
   }
 
   const requestLogger = logger.child({
@@ -81,6 +90,7 @@ export async function buildContext(request, { enforceAuth = true } = {}) {
 
   return {
     auth,
+    deferredAuthError,
     authContext,
     request,
     requestLogger,

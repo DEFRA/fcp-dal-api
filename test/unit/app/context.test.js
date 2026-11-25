@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
 import { Forbidden, Unauthorized } from '../../../app/errors/graphql.js'
 
@@ -330,35 +330,77 @@ describe('context', () => {
     test('checks the resolved auth details before building the rest of the context', async () => {
       const request = { headers: {}, traceId: 'trace-1' }
 
-      await context({ request })
+      const result = await context({ request })
 
       expect(requireAuthorisedEntityMock).toHaveBeenCalledExactlyOnceWith(auth)
+      expect(result.deferredAuthError).toBeUndefined()
     })
 
-    test.each([
+    const gateErrors = [
       ['Unauthorized', new Unauthorized('a valid authorization token is required')],
       ['Forbidden', new Forbidden('requester is not an authorised DAL consumer')]
-    ])(
-      'rejects with %s, without building data sources, and logs with the calling service',
-      async (_name, error) => {
-        requireAuthorisedEntityMock.mockImplementationOnce(() => {
-          throw error
-        })
-        const request = { headers: {}, traceId: 'trace-2' }
+    ]
 
-        await expect(context({ request })).rejects.toBe(error)
+    describe('when the dashboard is disabled', () => {
+      let originalDashboardEnabledValue
+      beforeEach(() => {
+        originalDashboardEnabledValue = config.get('graphqlDashboardEnabled')
+        config.set('graphqlDashboardEnabled', false)
+      })
+      afterEach(() => {
+        config.set('graphqlDashboardEnabled', originalDashboardEnabledValue)
+      })
 
-        expect(request.requestingService).toBe('unknown-unauthorised-service')
-        expect(PermissionsMock).not.toHaveBeenCalled()
-        expect(RuralPaymentsBusinessMock).not.toHaveBeenCalled()
-        expect(RuralPaymentsCustomerMock).not.toHaveBeenCalled()
-        expect(loggerMock.child).toHaveBeenCalledExactlyOnceWith({
-          traceId: 'trace-2',
-          tenant: { id: 'unknown-unauthorised-service' }
-        })
-        expect(requestLogger.warn).toHaveBeenCalledOnce()
-      }
-    )
+      test.each(gateErrors)(
+        'rejects with %s, without building data sources, and logs with the calling service',
+        async (_name, error) => {
+          requireAuthorisedEntityMock.mockImplementationOnce(() => {
+            throw error
+          })
+          const request = { headers: {}, traceId: 'trace-2' }
+
+          await expect(context({ request })).rejects.toBe(error)
+
+          expect(request.requestingService).toBe('unknown-unauthorised-service')
+          expect(PermissionsMock).not.toHaveBeenCalled()
+          expect(RuralPaymentsBusinessMock).not.toHaveBeenCalled()
+          expect(RuralPaymentsCustomerMock).not.toHaveBeenCalled()
+          expect(loggerMock.child).toHaveBeenCalledExactlyOnceWith({
+            traceId: 'trace-2',
+            tenant: { id: 'unknown-unauthorised-service' }
+          })
+          expect(requestLogger.warn).toHaveBeenCalledOnce()
+        }
+      )
+    })
+
+    describe('when the dashboard is enabled', () => {
+      let originalDashboardEnabledValue
+      beforeEach(() => {
+        originalDashboardEnabledValue = config.get('graphqlDashboardEnabled')
+        config.set('graphqlDashboardEnabled', true)
+      })
+      afterEach(() => {
+        config.set('graphqlDashboardEnabled', originalDashboardEnabledValue)
+      })
+
+      test.each(gateErrors)(
+        'defers the %s error (to the anonymous-introspection plugin) and builds the context',
+        async (_name, error) => {
+          requireAuthorisedEntityMock.mockImplementationOnce(() => {
+            throw error
+          })
+          const request = { headers: {}, traceId: 'trace-3' }
+
+          const result = await context({ request })
+
+          expect(result.deferredAuthError).toBe(error)
+          expect(result.auth).toBe(auth)
+          expect(result.dataSources).toBeDefined()
+          expect(requestLogger.warn).not.toHaveBeenCalled()
+        }
+      )
+    })
 
     test('buildContext skips the gate when enforceAuth is false', async () => {
       requireAuthorisedEntityMock.mockImplementationOnce(() => {
