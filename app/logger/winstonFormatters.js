@@ -1,5 +1,5 @@
 import { format } from 'winston'
-import { maskAllButLastFour } from './utils.js'
+import { maskAllButLastFour, maskReferenceNumbers } from './utils.js'
 
 const buildRequestDetails = ({ id, method, headers }) => ({
   ...(id && { id }),
@@ -28,12 +28,15 @@ const buildHttpDetails = (request, response, requestTimeMs) => {
   return { http }
 }
 
+// Error messages and stack traces can come from anywhere (e.g. a MongoDB duplicate key error
+// quotes the document _id, which is an SBI in the businesses collection), so SBI/CRN-like numbers
+// in them are masked
 const buildError = ({ name, message, stack }, code) =>
   (name || message || stack) && {
     error: {
       ...(name && { type: name }),
-      ...(message && { message }),
-      ...(stack && { stack_trace: stack }),
+      ...(message && { message: maskReferenceNumbers(message) }),
+      ...(stack && { stack_trace: maskReferenceNumbers(stack) }),
       ...(code && { code })
     }
   }
@@ -59,9 +62,9 @@ const buildEvent = (details) => {
   }
 }
 
-// crn/customerReferenceNumber is used as a login username, so we don't want to log the full number
-// for security reasons.
-const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber'])
+// Request body keys that are logged, but only as their last four characters: a crn/
+// customerReferenceNumber is used as a login username, and SBIs and ids (e.g. an orgId) are PII.
+const MASKED_KEYS = new Set(['crn', 'customerReferenceNumber', 'sbi', 'id'])
 
 const pick = (obj, key, searchPhraseSafe, searchPhraseMasked, picked) => {
   const value = pickKeysForLogging(obj[key])
@@ -83,13 +86,12 @@ const ALLOWED_KEYS = new Set(['crn', 'customerReferenceNumber', 'id', 'sbi', 'se
 // sibling searchFieldType is one of the values below, which aren't personally identifying on
 // their own.
 const SEARCH_PHRASE_SAFE_FIELD_TYPES = new Set([
-  'SBI',
   'VENDOR_NUMBER',
   'TRADER_NUMBER',
   'PERSONAL_IDENTIFIER'
 ])
 
-const SEARCH_PHRASE_MASKED_FIELD_TYPES = new Set(['CUSTOMER_REFERENCE'])
+const SEARCH_PHRASE_MASKED_FIELD_TYPES = new Set(['CUSTOMER_REFERENCE', 'SBI'])
 
 const pickKeysForLogging = (obj) => {
   if (obj == null) {
@@ -205,7 +207,9 @@ export const cdpSchemaTranslator = format((info) => {
 
   return {
     level: info.level,
-    message: info.message,
+    // Safety net for an SBI/CRN put into a message unmasked. tenant.message is not masked here: it
+    // is JSON built from chosen fields (masked where it is built), and holds 10 digit epoch times
+    message: maskReferenceNumbers(info.message),
     ...(traceId && { 'span.id': traceId, 'trace.id': traceId }),
     ...buildError(error || {}, code),
     ...httpDetails,
