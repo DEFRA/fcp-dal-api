@@ -82,12 +82,18 @@ const buildAccessLogTenant = (request) => {
   return Object.keys(tenant).length ? { tenant } : {}
 }
 
-// A graphql request can fail and still answer with a 200, so the status code alone does not show
-// that it went wrong. The error codes are left on the request by the errorCodesPlugin.
-const buildAccessLogReason = (request) =>
-  request.graphqlErrorCodes?.length
-    ? { reason: `graphql errors: ${request.graphqlErrorCodes.join(', ')}` }
-    : {}
+// Logs which graphql operation was run (its type and name) and, when the request had errors, their
+// codes: a graphql request can fail and still answer with a 200, so the status code alone does not
+// show that it went wrong. These values are left on the request by the accessLogPlugin. The
+// operation is missing when the query failed to parse or validate.
+const buildAccessLogGraphql = (request) => {
+  const graphql = {
+    ...(request.graphqlOperation?.type && { operationType: request.graphqlOperation.type }),
+    ...(request.graphqlOperation?.name && { operationName: request.graphqlOperation.name }),
+    ...(request.graphqlErrorCodes?.length && { errorCodes: request.graphqlErrorCodes })
+  }
+  return Object.keys(graphql).length ? { graphql } : {}
+}
 
 server.events.on('response', function (request) {
   // @hapi/hapi leaves request.info.responded at its initial value of 0 when the
@@ -122,7 +128,7 @@ server.events.on('response', function (request) {
       response: {
         statusCode: request.response.statusCode
       },
-      ...buildAccessLogReason(request),
+      ...buildAccessLogGraphql(request),
       ...buildAccessLogTenant(request)
     })
   }

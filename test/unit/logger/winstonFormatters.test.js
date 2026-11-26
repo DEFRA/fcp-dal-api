@@ -421,24 +421,83 @@ describe('winstonFormatters', () => {
       expect(result.event.reference).toBe('/organisation/123/details')
     })
 
-    it('sets event.reason from reason', () => {
+    it('never sets event.reason', () => {
       // arrange / act
       const result = cdpSchemaTranslator().transform({
         level: 'info',
         message: 'test',
-        reason: 'graphql errors: NOT FOUND'
+        response: { status: 200 },
+        reason: 'something'
       })
 
       // assert
-      expect(result.event.reason).toBe('graphql errors: NOT FOUND')
+      expect(result.event).not.toHaveProperty('reason')
     })
+  })
 
-    it('omits event.reason when no reason is provided', () => {
+  describe('buildGraphqlDetails', () => {
+    it('logs the operation type, name and error codes under graphql', () => {
       // arrange / act
-      const result = cdpSchemaTranslator().transform({ response: { status: 200 } })
+      const result = cdpSchemaTranslator().transform({
+        level: 'info',
+        message: 'test',
+        graphql: {
+          operationType: 'mutation',
+          operationName: 'CreateBusiness',
+          errorCodes: ['NOT FOUND', 'FORBIDDEN']
+        }
+      })
 
       // assert
-      expect(result.event).not.toHaveProperty('reason')
+      expect(result.graphql).toEqual({
+        operationType: 'mutation',
+        operationName: 'CreateBusiness',
+        errorCodes: ['NOT FOUND', 'FORBIDDEN']
+      })
+    })
+
+    it('logs only the fields that are set', () => {
+      // arrange / act
+      const result = cdpSchemaTranslator().transform({
+        level: 'info',
+        message: 'test',
+        graphql: { operationType: 'query', operationName: undefined, errorCodes: [] }
+      })
+
+      // assert
+      expect(result.graphql).toEqual({ operationType: 'query' })
+    })
+
+    it('omits graphql when none of its fields are set', () => {
+      // arrange / act
+      const result = cdpSchemaTranslator().transform({
+        level: 'info',
+        message: 'test',
+        graphql: {}
+      })
+
+      // assert
+      expect(result).not.toHaveProperty('graphql')
+    })
+
+    it('omits graphql when it is not provided', () => {
+      // arrange / act
+      const result = cdpSchemaTranslator().transform({ level: 'info', message: 'test' })
+
+      // assert
+      expect(result).not.toHaveProperty('graphql')
+    })
+
+    it('does not log unknown fields given under graphql', () => {
+      // arrange / act
+      const result = cdpSchemaTranslator().transform({
+        level: 'info',
+        message: 'test',
+        graphql: { operationType: 'query', variables: { sbi: '812345678' } }
+      })
+
+      // assert
+      expect(result.graphql).toEqual({ operationType: 'query' })
     })
 
     describe('outcome', () => {
