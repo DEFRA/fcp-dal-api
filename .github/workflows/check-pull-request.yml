@@ -40,16 +40,6 @@ jobs:
           npm ci --ignore-scripts
           npm run postinstall
 
-      - name: Verify semantic version bump
-        run: |
-          TARGET_BRANCH_VERSION=$(git show origin/${{ github.base_ref }}:package.json | jq -r '.version')
-          PR_BRANCH_VERSION=$(jq -r '.version' package.json)
-
-          if ! ./node_modules/.bin/semver -r ">${TARGET_BRANCH_VERSION}" "${PR_BRANCH_VERSION}" > /dev/null  ; then
-            echo "ERROR: Branch package.json version (${PR_BRANCH_VERSION}) must be semantically greater than target branch (${TARGET_BRANCH_VERSION})"
-            exit 1
-          fi
-
       - name: Check for real-looking CRNs and SBIs
         uses: DEFRA/fcp-sfd-core/.github/actions/check-synthetic-ids@95f58ade56b2d0dd0f15bdcba6a5f37a54bcc939 # main
 

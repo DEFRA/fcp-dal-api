@@ -295,6 +295,29 @@ Modifications can be made by submitting a PR with changes to the relevant spec f
 The project is setup with SonarCloud to ensure certain important code quality standards are met.
 More information can be found [here](https://sonarcloud.io/project/overview?id=DEFRA_fcp-dal-api).
 
+### Versioning
+
+We make use of the default versioning provided by [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action), which
+uses [`github-tag-action`](https://github.com/anothrNick/github-tag-action) under the hood to determine the next version
+based on existing git tags and commit messages. As such, there is no need to increment the version in `package.json` or
+`package-lock.json`, both of which should remain at `0.0.0`.
+
+By default, a minor version bump will be performed, however we can control this by including one of the following tokens
+in the commit message:
+
+- `#major` - Breaking changes.
+- `#minor` - Backwards compatible additions to functionality.
+- `#patch` - Backwards compatible fixes.
+
+For example, a commit message of `Fix customer validation #patch` would result in a patch version bump.
+
+It's worth noting that `github-tag-action` looks at all commit messages since the last release tag, not just the latest
+commit. Where multiple tokens are present, the largest version bump takes precedence. When squash merging a PR, we need
+to ensure that the intended token is present in the resulting commit message.
+
+Whilst `github-tag-action` also supports `#none`, this prevents the version from being incremented but does not prevent
+CDP from attempting to publish a build using the existing version.
+
 ### Publish Dev Build workflow
 
 The [`publish-dev-build`](./.github/workflows/publish-dev-build.yml) GitHub Actions workflow allows a build from any branch to be published to the `dev` environment ahead of merging to `main`, which is useful for testing changes before they are merged.
