@@ -174,13 +174,13 @@ describe('Server config and startup', () => {
           graphql: {
             operationType: 'mutation',
             operationName: 'CreateBusiness',
-            errorCodes: ['NOT FOUND', 'FORBIDDEN']
+            reason: ['NOT FOUND', 'FORBIDDEN']
           }
         })
       )
     })
 
-    test('response event logs the graphql operation without errorCodes, when the request had no errors', async () => {
+    test('response event logs the graphql operation without a reason, when the request had no errors', async () => {
       // arrange
       server.ext('onRequest', (request, h) => {
         request.graphqlOperation = { type: 'query', name: 'GetBusiness' }
@@ -225,7 +225,7 @@ describe('Server config and startup', () => {
 
       // assert
       const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
-      expect(loggedPayload.graphql).toEqual({ errorCodes: ['GRAPHQL_PARSE_FAILED'] })
+      expect(loggedPayload.graphql).toEqual({ reason: ['GRAPHQL_PARSE_FAILED'] })
     })
 
     test('response event omits graphql when the request was not a graphql operation', async () => {
