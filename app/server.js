@@ -90,7 +90,7 @@ const buildAccessLogGraphql = (request) => {
   const graphql = {
     ...(request.graphqlOperation?.type && { operationType: request.graphqlOperation.type }),
     ...(request.graphqlOperation?.name && { operationName: request.graphqlOperation.name }),
-    ...(request.graphqlErrorCodes?.length && { errorCodes: request.graphqlErrorCodes })
+    ...(request.graphqlErrorCodes?.length && { reason: request.graphqlErrorCodes })
   }
   return Object.keys(graphql).length ? { graphql } : {}
 }

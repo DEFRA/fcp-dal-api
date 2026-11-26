@@ -46,7 +46,7 @@ const buildEvent = (details) => {
     return {}
   }
 
-  const { kind, category, type, created, duration, outcome, reference, action } = details
+  const { kind, category, type, created, duration, outcome, reason, reference, action } = details
   return {
     event: {
       ...(kind && { kind }),
@@ -55,19 +55,14 @@ const buildEvent = (details) => {
       ...(created && { created }), // Time the event was created in the system.
       ...(duration && { duration: duration * 1000000 }), // Total time of the event in nanoseconds.
       ...(outcome && { outcome: `status code: ${outcome}` }), // Outcome of the event.
-      ...(reference && { reference }), // A reference ID or URL tied to the event.
-      ...(action && { action: `gateway=${action}` })
+      // GraphQL error codes
+      ...(reason && { reason }),
+      // GraphQL type (query, mutation...) or gateway type (rural-payments, kits, etc.)
+      ...(action && { action }),
+      // GraphQL operation name
+      ...(reference && { reference })
     }
   }
-}
-
-const buildGraphqlDetails = ({ operationType, operationName, errorCodes } = {}) => {
-  const graphql = {
-    ...(operationType && { operationType }),
-    ...(operationName && { operationName }),
-    ...(errorCodes?.length && { errorCodes })
-  }
-  return Object.keys(graphql).length ? { graphql } : {}
 }
 
 // Request body keys that are logged, but only as their last four characters: a crn/
@@ -228,12 +223,10 @@ export const cdpSchemaTranslator = format((info) => {
       created: info['@timestamp'],
       duration: requestTimeMs,
       outcome: httpDetails.http?.response?.status_code,
-      // The URL path is mapped onto the event reference field, which is used in Grafana dashboard
-      // queries
-      reference: parsedUrl?.url?.path,
-      action: info?.gatewayType
+      reason: graphql?.reason,
+      reference: graphql?.operationName ?? parsedUrl?.url?.path,
+      action: graphql?.operationType ?? (info?.gatewayType && `gateway=${info.gatewayType}`)
     }),
-    ...buildGraphqlDetails(graphql),
     ...(tenant && { tenant }),
     ...parsedUrl
   }
