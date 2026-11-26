@@ -8,7 +8,13 @@ describe('Business payments resolver', () => {
   beforeEach(() => {
     mockDataSources = {
       ruralPaymentsBusiness: {
-        getOrganisationBySBI: vi.fn()
+        getOrganisationById: vi.fn()
+      },
+      mongoBusiness: {
+        getFrnBySbi: vi.fn(),
+        upsertMappingBySbi: vi.fn(),
+        // orgId already cached, so a cache miss on the frn only needs the organisation fetch
+        getOrgIdBySbi: vi.fn().mockResolvedValue(12345)
       },
       hitachiPayments: {
         getSupplierPayments: vi.fn()
@@ -33,7 +39,7 @@ describe('Business payments resolver', () => {
         name: 'Test Farm'
       }
 
-      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+      mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
       mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
 
       const result = await Business.payments(
@@ -42,9 +48,10 @@ describe('Business payments resolver', () => {
         mockContext
       )
 
-      expect(mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI).toHaveBeenCalledWith(
-        '823456789'
-      )
+      expect(mockDataSources.ruralPaymentsBusiness.getOrganisationById).toHaveBeenCalledWith(12345)
+      expect(mockDataSources.mongoBusiness.upsertMappingBySbi).toHaveBeenCalledWith('823456789', {
+        frn: '6561479446' // sfd-id-check: allow
+      })
       expect(mockDataSources.hitachiPayments.getSupplierPayments).toHaveBeenCalledWith({
         frn: '6561479446', // sfd-id-check: allow
         fromDate: undefined,
@@ -63,7 +70,7 @@ describe('Business payments resolver', () => {
         name: 'Test Farm'
       }
 
-      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+      mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
       mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
 
       // the Date scalar reaches the resolver as a string
@@ -91,7 +98,7 @@ describe('Business payments resolver', () => {
         )
       ).rejects.toThrow('Invalid date format: "not-a-date" is not a valid date.')
 
-      expect(mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI).not.toHaveBeenCalled()
+      expect(mockDataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
       expect(mockDataSources.hitachiPayments.getSupplierPayments).not.toHaveBeenCalled()
     })
 
@@ -103,7 +110,7 @@ describe('Business payments resolver', () => {
         name: 'Test Farm'
       }
 
-      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+      mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
 
       await expect(
         Business.payments({ sbi: '823456789' }, { userIP: '192.168.1.1' }, mockContext)
@@ -123,7 +130,7 @@ describe('Business payments resolver', () => {
       }
       const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
-      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+      mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
       mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
 
       await Business.payments(
@@ -154,7 +161,7 @@ describe('Business payments resolver', () => {
       }
       const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
-      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+      mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
 
       await expect(
         Business.payments(
@@ -168,7 +175,7 @@ describe('Business payments resolver', () => {
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'payment-list',
         action: 'read',
-        entityid: null
+        entityid: undefined
       })
     })
 
@@ -179,7 +186,7 @@ describe('Business payments resolver', () => {
       }
       const info = { path: { key: 'business', typename: 'Query', prev: undefined } }
 
-      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockRejectedValue(
+      mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValue(
         new Error('upstream failure')
       )
 
@@ -212,7 +219,7 @@ describe('Business payments resolver', () => {
         'Hitachi payments: *** FRN does not exist, No data retrieved for this request'
       )
 
-      mockDataSources.ruralPaymentsBusiness.getOrganisationBySBI.mockResolvedValue(mockOrganisation)
+      mockDataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValue(mockOrganisation)
       mockDataSources.hitachiPayments.getSupplierPayments.mockRejectedValue(notFoundError)
 
       await expect(
@@ -220,6 +227,40 @@ describe('Business payments resolver', () => {
       ).rejects.toThrow(
         'Hitachi payments: *** FRN does not exist, No data retrieved for this request'
       )
+    })
+
+    test('uses a cached FRN without calling Rural Payments', async () => {
+      mockDataSources.mongoBusiness.getFrnBySbi.mockResolvedValue('6561479446') // sfd-id-check: allow
+      mockDataSources.hitachiPayments.getSupplierPayments.mockResolvedValue({})
+
+      await Business.payments({ sbi: '823456789' }, { userIP: '192.168.1.1' }, mockContext)
+
+      expect(mockDataSources.ruralPaymentsBusiness.getOrganisationById).not.toHaveBeenCalled()
+      expect(mockDataSources.mongoBusiness.upsertMappingBySbi).not.toHaveBeenCalled()
+      expect(mockDataSources.hitachiPayments.getSupplierPayments).toHaveBeenCalledWith(
+        expect.objectContaining({ frn: '6561479446' }) // sfd-id-check: allow
+      )
+    })
+
+    test('refuses an external user whose token does not include the SBI, even if the FRN is cached', async () => {
+      const { BadRequest } = await import('../../../../app/errors/graphql.js')
+      const defraIdContext = {
+        orgId: vi.fn(() => {
+          throw new BadRequest('Defra ID token is not valid for the provided SBI')
+        })
+      }
+      mockDataSources.mongoBusiness.getFrnBySbi.mockResolvedValue('6561479446') // sfd-id-check: allow
+
+      await expect(
+        Business.payments(
+          { sbi: '823456789' },
+          { userIP: '192.168.1.1' },
+          { ...mockContext, defraIdContext }
+        )
+      ).rejects.toThrow(BadRequest)
+
+      expect(mockDataSources.mongoBusiness.getFrnBySbi).not.toHaveBeenCalled()
+      expect(mockDataSources.hitachiPayments.getSupplierPayments).not.toHaveBeenCalled()
     })
   })
 })

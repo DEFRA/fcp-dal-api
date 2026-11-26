@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql'
-import { BadRequest } from '../../../errors/graphql.js'
+import { BadRequest, NotFound } from '../../../errors/graphql.js'
 import {
   transformBusinessDetailsToOrgAdditionalDetailsUpdate,
   transformBusinessDetailsToOrgDetailsUpdate
@@ -169,8 +169,8 @@ export const businessAllFieldsUpdateResolver = async (
 }
 
 async function upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness }) {
-  const orgId = await ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
-  await mongoBusiness.upsertOrgIdBySbi(sbi, orgId)
+  const orgId = (await ruralPaymentsBusiness.organisationSearchBySbi(sbi)).id
+  await mongoBusiness.upsertMappingBySbi(sbi, { orgId })
   return orgId
 }
 
@@ -185,6 +185,32 @@ export async function retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext }) {
   return (
     (await mongoBusiness.getOrgIdBySbi(sbi)) ??
     upsertOrgIdBySbi(sbi, { mongoBusiness, ruralPaymentsBusiness })
+  )
+}
+
+async function fetchAndCacheFrnBySbi(sbi, { dataSources, defraIdContext }) {
+  // Reuses the orgId lookup (token, then Mongo cache, then upstream search), so only the
+  // organisation fetch is guaranteed to hit Rural Payments
+  const orgId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
+  const { businessReference: frn } =
+    await dataSources.ruralPaymentsBusiness.getOrganisationById(orgId)
+
+  if (!frn) {
+    throw new NotFound('FRN not found for business')
+  }
+
+  await dataSources.mongoBusiness.upsertMappingBySbi(sbi, { frn })
+  return frn
+}
+
+export async function retrieveFrnBySbi(sbi, { dataSources, defraIdContext }) {
+  if (defraIdContext) {
+    defraIdContext.orgId(sbi) // throws unless the SBI is in the caller's token
+  }
+
+  return (
+    (await dataSources.mongoBusiness.getFrnBySbi(sbi)) ??
+    fetchAndCacheFrnBySbi(sbi, { dataSources, defraIdContext })
   )
 }
 
@@ -209,7 +235,12 @@ const validateLockUnlockInput = (input) => {
   }
 }
 
-export const businessLockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
+export const businessLockResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail, defraIdContext },
+  info
+) => {
   const { sbi, ...lockBodyAttributes } = input
   auditTrail?.recordAccount(info, 'sbi', sbi)
   auditTrail?.recordEntity(info, {
@@ -218,7 +249,7 @@ export const businessLockResolver = async (__, { input }, { dataSources, auditTr
     entityid: sbi
   })
 
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  const organisationId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
@@ -234,7 +265,12 @@ export const businessLockResolver = async (__, { input }, { dataSources, auditTr
   }
 }
 
-export const businessUnlockResolver = async (__, { input }, { dataSources, auditTrail }, info) => {
+export const businessUnlockResolver = async (
+  __,
+  { input },
+  { dataSources, auditTrail, defraIdContext },
+  info
+) => {
   const { sbi, ...unlockBodyAttributes } = input
   auditTrail?.recordAccount(info, 'sbi', sbi)
   auditTrail?.recordEntity(info, {
@@ -243,7 +279,7 @@ export const businessUnlockResolver = async (__, { input }, { dataSources, audit
     entityid: sbi
   })
 
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  const organisationId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
@@ -262,7 +298,7 @@ export const businessUnlockResolver = async (__, { input }, { dataSources, audit
 export const businessReactivateResolver = async (
   __,
   { input },
-  { dataSources, auditTrail },
+  { dataSources, auditTrail, defraIdContext },
   info
 ) => {
   const { sbi, ...reactivateBodyAttributes } = input
@@ -273,7 +309,7 @@ export const businessReactivateResolver = async (
     entityid: sbi
   })
 
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  const organisationId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
 
@@ -295,7 +331,7 @@ export const businessReactivateResolver = async (
 export const businessDeactivateResolver = async (
   __,
   { input },
-  { dataSources, auditTrail },
+  { dataSources, auditTrail, defraIdContext },
   info
 ) => {
   const { sbi, ...reactivateBodyAttributes } = input
@@ -306,7 +342,7 @@ export const businessDeactivateResolver = async (
     entityid: sbi
   })
 
-  const organisationId = await dataSources.ruralPaymentsBusiness.getOrganisationIdBySBI(sbi)
+  const organisationId = await retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
 
   auditTrail?.recordAccount(info, 'organisationId', organisationId)
 

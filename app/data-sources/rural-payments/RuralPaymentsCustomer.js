@@ -94,6 +94,23 @@ export class RuralPaymentsCustomer extends RuralPayments {
     return response._data
   }
 
+  /**
+   * Checks whether a person matching the supplied details already exists.
+   *
+   * @param {object} personDuplicateRequest - The details to match, as built by
+   * transformCustomerDuplicateInputToPersonDuplicateRequest.
+   * @returns {Promise<object | null>} The matching person (`id`, `customerReferenceNumber`,
+   * `firstName`, `lastName`, `dateOfBirth`, `landline`, `mobile`), or null if there is no match.
+   * @throws {HttpError} When the upstream request fails.
+   */
+  async checkPersonDuplicates(personDuplicateRequest) {
+    const response = await this.post('person/check/duplicates', {
+      body: personDuplicateRequest,
+      headers: postPutHeaders
+    })
+    return response?._data ?? null
+  }
+
   async getPersonIdByCRN(crn) {
     if (this.isExternalRoute()) {
       // The external gateway always returns the person behind the Defra ID token, whatever crn is

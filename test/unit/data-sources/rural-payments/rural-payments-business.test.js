@@ -80,18 +80,6 @@ describe('Rural Payments Business', () => {
   ]
   const ruralPaymentsBusiness = new RuralPaymentsBusiness(...datasourceOptions)
 
-  const defraIdContext = { orgId: (sbi) => (sbi === '823456789' ? '123' : undefined) }
-  const ruralPaymentsBusinessExt = new RuralPaymentsBusiness(
-    { logger },
-    {
-      request: {
-        headers: {
-          'x-forwarded-authorization': 'the-defra-id-token'
-        }
-      },
-      defraIdContext
-    }
-  )
   const httpGet = vi.spyOn(ruralPaymentsBusiness, 'get')
   const httpPost = vi.spyOn(ruralPaymentsBusiness, 'post')
   const httpPut = vi.spyOn(ruralPaymentsBusiness, 'put')
@@ -125,29 +113,6 @@ describe('Rural Payments Business', () => {
         '#datasource - Rural payments - organisation not found for organisation ID: 123',
         { organisationId: 123, code: 'RURALPAYMENTS_API_NOT_FOUND_001' }
       )
-    })
-  })
-
-  describe('getOrganisationBySBI', () => {
-    test('should return organisation data when found by SBI', async () => {
-      const mockSearchResponse = { _data: [{ id: 123 }] }
-      const mockOrgResponse = { _data: { id: 123, name: 'Test Org' } }
-      httpPost.mockImplementationOnce(async () => mockSearchResponse)
-      httpGet.mockImplementationOnce(async () => mockOrgResponse)
-
-      const result = await ruralPaymentsBusiness.getOrganisationBySBI('823456789')
-      expect(result).toEqual(mockOrgResponse._data)
-      expect(httpPost).toHaveBeenCalledWith('organisation/search', {
-        body: JSON.stringify({
-          searchFieldType: 'SBI',
-          primarySearchPhrase: '823456789',
-          offset: 0,
-          limit: 1
-        }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
     })
   })
 
@@ -268,13 +233,13 @@ describe('Rural Payments Business', () => {
     })
   })
 
-  describe('getOrganisationIdBySBI', () => {
-    test('should return organisation ID when found by SBI - internal', async () => {
+  describe('organisationSearchBySbi', () => {
+    test('should return the first matching organisation when found by SBI', async () => {
       const mockSearchResponse = { _data: [{ id: 123 }] }
       httpPost.mockImplementationOnce(async () => mockSearchResponse)
 
-      const result = await ruralPaymentsBusiness.getOrganisationIdBySBI('823456789')
-      expect(result).toEqual(123)
+      const result = await ruralPaymentsBusiness.organisationSearchBySbi('823456789')
+      expect(result).toEqual({ id: 123 })
       expect(httpPost).toHaveBeenCalledWith('organisation/search', {
         body: JSON.stringify({
           searchFieldType: 'SBI',
@@ -288,18 +253,10 @@ describe('Rural Payments Business', () => {
       })
     })
 
-    test('should return organisation ID when found by SBI - external', async () => {
-      const mockSearchResponse = { _data: [{ id: 123 }] }
-      httpPost.mockImplementationOnce(async () => mockSearchResponse)
-
-      const result = await ruralPaymentsBusinessExt.getOrganisationIdBySBI('823456789')
-      expect(result).toEqual('123')
-    })
-
     test('should throw NotFound when organisation not found by SBI', async () => {
       httpPost.mockImplementationOnce(async () => ({ _data: [] }))
 
-      await expect(ruralPaymentsBusiness.getOrganisationIdBySBI('823456789')).rejects.toEqual(
+      await expect(ruralPaymentsBusiness.organisationSearchBySbi('823456789')).rejects.toEqual(
         new NotFound('Rural payments organisation not found')
       )
       expect(logger.warn).toHaveBeenCalledWith(

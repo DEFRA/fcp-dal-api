@@ -1,3 +1,4 @@
+import { retrieveOrgIdBySbi } from '../business/common.js'
 import { transformOrganisationAuthorisationToCustomerBusinessPermissionLevel } from '../../../transformers/rural-payments/permissions.js'
 
 export const Query = {
@@ -21,15 +22,15 @@ export const InternalUser = {
 }
 
 export const Permission = {
-  async active(permissionGroup, { crn, sbi }, { dataSources }) {
-    const [person, organisation] = await Promise.all([
+  async active(permissionGroup, { crn, sbi }, { dataSources, defraIdContext }) {
+    const [person, organisationId] = await Promise.all([
       dataSources.ruralPaymentsCustomer.getCustomerByCRN(crn),
-      dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
+      retrieveOrgIdBySbi(sbi, { dataSources, defraIdContext })
     ])
 
     const orgCustomers =
       await dataSources.ruralPaymentsBusiness.getOrganisationCustomersByOrganisationId(
-        organisation.id
+        organisationId
       )
 
     return (

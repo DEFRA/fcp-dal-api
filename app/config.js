@@ -1,4 +1,5 @@
 import convict from 'convict'
+import { parseDummyCrnToSbiMapping } from './auth/dummy-crn-to-sbi-mapping.js'
 
 export const cdpEnvironments = ['dev', 'test', 'ext-test', 'perf-test', 'prod']
 const entityConfig = {
@@ -186,6 +187,17 @@ export const config = convict({
       default: null,
       nullable: process.env.DISABLE_AUTH === 'true',
       env: 'DEFRA_ID_TIMEOUT_MS'
+    },
+    dummyCrnToSbiMapping: {
+      doc:
+        'Maps dummy Defra ID CRNs to the SBIs they may access, as a comma separated ' +
+        'list of "crn:sbi|sbi" entries. Mapped requests are routed internally as the DAL service ' +
+        'account and can only query the listed businesses.  This can only be used in dev and test',
+      format: String,
+      default: null,
+      nullable: true,
+      sensitive: true,
+      env: 'DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING'
     }
   },
   auth: {
@@ -273,7 +285,7 @@ export const config = convict({
     gatewayTimeoutMs: {
       doc: 'KITS gateway timeout in milliseconds',
       format: 'int',
-      default: null,
+      default: 29_000,
       env: 'KITS_GATEWAY_TIMEOUT_MS'
     },
     requestPageSize: {
@@ -324,7 +336,7 @@ export const config = convict({
     timeoutMs: {
       doc: 'Hitachi timeout in milliseconds',
       format: 'int',
-      default: 3000,
+      default: 29_000,
       env: 'HITACHI_TIMEOUT_MS'
     },
     entra: {
@@ -396,7 +408,7 @@ export const config = convict({
         env: 'MONGO_CUSTOMER_CACHE_TTL_SECONDS'
       },
       businesses: {
-        doc: 'TTL in seconds for cached SBI -> orgId documents in the businesses collection',
+        doc: 'TTL in seconds for cached SBI -> orgId and SBI -> frn documents in the businesses collection',
         format: 'nat',
         default: 86400, // 24 hours
         env: 'MONGO_BUSINESS_CACHE_TTL_SECONDS'
@@ -426,6 +438,24 @@ export const config = convict({
 })
 
 config.validate({ allowed: 'strict' })
+
+export const dummyCrnToSbiMappingEnvironments = ['dev', 'test']
+
+// The dummy CRN to SBI mapping lets an unverified Defra ID token access real businesses, so it must
+// never be configured outside dev/test (an unset ENVIRONMENT means local runs and unit tests)
+if (
+  config.get('defraId.dummyCrnToSbiMapping') &&
+  config.get('cdp.env') &&
+  !dummyCrnToSbiMappingEnvironments.includes(config.get('cdp.env'))
+) {
+  throw new Error(
+    `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING must not be set in the ${config.get('cdp.env')} environment`
+  )
+}
+
+export const dummyCrnToSbiMapping = parseDummyCrnToSbiMapping(
+  config.get('defraId.dummyCrnToSbiMapping')
+)
 
 // add authorised entities where configuration exists
 export const authorisedEntities = Object.values(config.get('auth.entities')).reduce(

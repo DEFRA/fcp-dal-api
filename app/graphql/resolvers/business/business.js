@@ -12,7 +12,7 @@ import {
   transformOrganisationToBusiness
 } from '../../../transformers/rural-payments/business.js'
 import { validateDateInput } from '../../../utils/date.js'
-import { getRuralPaymentsBusinessDataSource } from './common.js'
+import { getRuralPaymentsBusinessDataSource, retrieveFrnBySbi } from './common.js'
 
 export const Business = {
   async info({ organisationId, sbi, info: businessInfo }, __, { dataSources, auditTrail }, info) {
@@ -120,12 +120,10 @@ export const Business = {
     return functions.map((name) => ({ name, permitted: authorisedFunctions?.[name] ?? false }))
   },
 
-  async bankAccounts({ organisationId }, __, { dataSources, auditTrail }, info) {
+  async bankAccounts({ sbi }, __, { dataSources, auditTrail, defraIdContext }, info) {
     let frn
     try {
-      const organisation =
-        await dataSources.ruralPaymentsBusiness.getOrganisationById(organisationId)
-      frn = organisation.businessReference
+      frn = await retrieveFrnBySbi(sbi, { dataSources, defraIdContext })
     } finally {
       if (frn) {
         auditTrail?.recordAccount(info, 'frn', frn)
@@ -133,31 +131,28 @@ export const Business = {
       auditTrail?.recordEntity(info, { entity: 'bank-account', action: 'read', entityid: frn })
     }
 
-    if (!frn) {
-      throw new NotFound('FRN not found for business')
-    }
     const response = await dataSources.ruralPaymentsBusiness.getExistingBankAccounts(frn)
     return response?.accounts ?? []
   },
 
-  async payments({ sbi }, { fromDate, toDate, userIP }, { dataSources, auditTrail }, info) {
+  async payments(
+    { sbi },
+    { fromDate, toDate, userIP },
+    { dataSources, auditTrail, defraIdContext },
+    info
+  ) {
     // the Date scalar is passed through as a string, so convert it before use
     fromDate = fromDate && validateDateInput(fromDate)
     toDate = toDate && validateDateInput(toDate)
 
     let frn
     try {
-      const organisation = await dataSources.ruralPaymentsBusiness.getOrganisationBySBI(sbi)
-      frn = organisation.businessReference
+      frn = await retrieveFrnBySbi(sbi, { dataSources, defraIdContext })
     } finally {
       if (frn) {
         auditTrail?.recordAccount(info, 'frn', frn)
       }
       auditTrail?.recordEntity(info, { entity: 'payment-list', action: 'read', entityid: frn })
-    }
-
-    if (!frn) {
-      throw new NotFound('FRN not found for business')
     }
 
     const payments = await dataSources.hitachiPayments.getSupplierPayments({

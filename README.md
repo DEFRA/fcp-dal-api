@@ -245,6 +245,36 @@ Consumers must first get an access token, which must be supplied in the `Authori
 > - [perf-test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/perf-test/apis/fcp-dal-api.yml)
 > - [prod](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/prod/apis/fcp-dal-api.yml)
 
+### Dummy Defra ID CRN to SBI mapping (dev/test only)
+
+Testers can usually only get Defra ID tokens for dummy CRNs, and those tokens may not verify. The dummy CRN to SBI mapping lets a token for a dummy CRN query real businesses in `dev` and `test`.
+
+The mapping is set in the `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING` secret, as a comma separated list of `crn:sbi|sbi...` entries:
+
+```bash
+DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING=9100000001:810000000|810000001,9100000002:810000002
+```
+
+Each dummy CRN may appear only once, and needs at least one SBI. A malformed value stops the service starting.
+
+The feature is two plugins in [`app/auth/mapped-defra-id.js`](app/auth/mapped-defra-id.js), which are only registered when a mapping is set. The rest of the DAL's authentication code is unchanged.
+
+1. **A hapi `onRequest` extension maps the request.** A request is mapped when its `x-forwarded-authorization` Defra ID token has a dummy CRN (its `contactId`) in the mapping, and it has no `email` or `service-account` header. The token header is removed and replaced with the DAL service account (`service-account: <KITS_DAL_SERVICE_ACCOUNT_EMAIL>`). From then on, the DAL handles it like any other service-account request:
+   - **No verification:** the token's signature and expiry are not checked, so testers can use long-lived dummy tokens. Any other token is verified as normal.
+   - **Internal routing:** the request goes to the internal gateway as the DAL service account, so the dummy token is never sent upstream.
+2. **An Apollo plugin restricts what a mapped request can do.** It checks the operation before any resolver runs, and fails closed:
+   - **Queries only:** any mutation gets a `FORBIDDEN` error, as it would change real data under the DAL service account.
+   - **`business` only:** the only root fields allowed are `business` and `__typename`. Anything else gets a `FORBIDDEN` error, including `customer`, `businessSearch`, introspection and any root field added to the schema later. Everything under `business`, including its `customers`, can be queried.
+   - **Mapped SBIs only:** the `business` SBI must be one of those mapped to the dummy CRN. Any other SBI gets a `BAD REQUEST` error. This is checked however the SBI is given, including through aliases, fragments and variables.
+
+The calling service still needs its own access token and `@auth` group, as for any other request.
+
+**Logging and audit:** each mapped request logs a `warn` with code `DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001`, with the CRN and SBIs masked. Everything after that, including audit events, records the request as coming from the DAL service account. Use the trace ID to link an audit event back to the dummy CRN.
+
+> **Note:** the mapping can only be set when `ENVIRONMENT` is `dev` or `test`, or unset for local development. The service refuses to start if it is set in any other environment. In production the mapping is empty, the plugins aren't registered, and none of this code runs.
+
+To try it locally, set `DUMMY_DEFRA_ID_CRN_TO_SBI_MAPPING` in your `.env` file and send a JWT whose `contactId` is a dummy CRN in the `x-forwarded-authorization` header. The token only needs to decode; it can be unsigned or signed with any key.
+
 ## Development helpers
 
 ### Proxy
@@ -264,6 +294,29 @@ Modifications can be made by submitting a PR with changes to the relevant spec f
 
 The project is setup with SonarCloud to ensure certain important code quality standards are met.
 More information can be found [here](https://sonarcloud.io/project/overview?id=DEFRA_fcp-dal-api).
+
+### Versioning
+
+We make use of the default versioning provided by [`cdp-build-action`](https://github.com/DEFRA/cdp-build-action), which
+uses [`github-tag-action`](https://github.com/anothrNick/github-tag-action) under the hood to determine the next version
+based on existing git tags and commit messages. As such, there is no need to increment the version in `package.json` or
+`package-lock.json`, both of which should remain at `0.0.0`.
+
+By default, a minor version bump will be performed, however we can control this by including one of the following tokens
+in the commit message:
+
+- `#major` - Breaking changes.
+- `#minor` - Backwards compatible additions to functionality.
+- `#patch` - Backwards compatible fixes.
+
+For example, a commit message of `Fix customer validation #patch` would result in a patch version bump.
+
+It's worth noting that `github-tag-action` looks at all commit messages since the last release tag, not just the latest
+commit. Where multiple tokens are present, the largest version bump takes precedence. When squash merging a PR, we need
+to ensure that the intended token is present in the resulting commit message.
+
+Whilst `github-tag-action` also supports `#none`, this prevents the version from being incremented but does not prevent
+CDP from attempting to publish a build using the existing version.
 
 ### Publish Dev Build workflow
 

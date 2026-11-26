@@ -3,6 +3,8 @@ import tls from 'node:tls'
 
 import { secureContext } from '@defra/hapi-secure-context'
 
+import { mappedDefraIdHapiPlugin } from './auth/mapped-defra-id.js'
+import { dummyCrnToSbiMapping } from './config.js'
 import { context } from './graphql/context.js'
 import { apolloServer } from './graphql/server.js'
 import { DAL_UNHANDLED_ERROR_001 } from './logger/codes.js'
@@ -24,6 +26,10 @@ const init = async () => {
       }
     }
   ])
+  // Only enabled in dev/test. Used to map dummy Defra ID CRNs onto actual businesses.
+  if (dummyCrnToSbiMapping.size) {
+    await server.register(mappedDefraIdHapiPlugin)
+  }
 
   mongoClient.secureContext = tls.createSecureContext()
 

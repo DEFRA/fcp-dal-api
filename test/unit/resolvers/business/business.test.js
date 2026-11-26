@@ -217,7 +217,8 @@ const dataSources = {
   },
   mongoBusiness: {
     getOrgIdBySbi: vi.fn(),
-    upsertOrgIdBySbi: vi.fn()
+    upsertMappingBySbi: vi.fn(),
+    getFrnBySbi: vi.fn()
   },
   serviceAccount: {
     ruralPaymentsBusiness: null
@@ -804,6 +805,7 @@ describe('Business', () => {
 
     it('bankAccounts records the FRN as an account and a bank-account entity', async () => {
       const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValueOnce('mockId')
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
         businessReference: 'mockFrn'
       })
@@ -823,6 +825,7 @@ describe('Business', () => {
 
     it('bankAccounts still records the attempted bank-account entity when the FRN cannot be found', async () => {
       const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValueOnce('mockId')
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockResolvedValueOnce({
         businessReference: null
       })
@@ -834,12 +837,13 @@ describe('Business', () => {
       expect(auditTrail.recordEntity).toHaveBeenCalledWith(info, {
         entity: 'bank-account',
         action: 'read',
-        entityid: null
+        entityid: undefined
       })
     })
 
     it('bankAccounts still records an attempted bank-account entity when the organisation lookup itself fails', async () => {
       const auditTrail = { recordAccount: vi.fn(), recordEntity: vi.fn() }
+      dataSources.mongoBusiness.getOrgIdBySbi.mockResolvedValueOnce('mockId')
       dataSources.ruralPaymentsBusiness.getOrganisationById.mockRejectedValueOnce(
         new Error('upstream failure')
       )

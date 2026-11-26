@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: false
+  queue: max
+
 permissions:
   id-token: write
   contents: write
@@ -45,26 +50,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Discover version number
-        id: version
-        run: |
-          VERSION=$(jq -r '.version' package.json)
-          if git ls-remote --tags origin "refs/tags/${VERSION}" | grep -q "${VERSION}"; then
-            echo "Tag ${VERSION} already exists"
-            exit 1
-          fi
-          echo "value=${VERSION}" >> $GITHUB_OUTPUT
-
       - name: Build and Publish
         uses: DEFRA/cdp-build-action/build@54ced5c5344c8b9620561a1628fe8f3d858e9871 # v1.5.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          version: ${{ steps.version.outputs.value }}
-
-      - name: Tag repository
-        run: |
-          git tag ${{ steps.version.outputs.value }}
-          git push --tags
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1

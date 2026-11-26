@@ -44,7 +44,7 @@ const ensureTtlIndex = async (collectionName) => {
 }
 
 /**
- * Ensures TTL indexes exist for each cache collection, so cached CRN -> personId and
- * SBI -> orgId mappings expire.
+ * Ensures TTL indexes exist for each cache collection, so cached CRN -> personId,
+ * SBI -> orgId and SBI -> frn mappings expire.
  */
 export const ensureTtlIndexes = () => Promise.all(CACHE_COLLECTIONS.map(ensureTtlIndex))
