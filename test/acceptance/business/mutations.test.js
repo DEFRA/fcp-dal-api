@@ -145,7 +145,8 @@ describe('Business Mutations - as an internal user', () => {
         info: {
           name: 'acceptance-business-name',
           vat: '123456789', // sfd-id-check: allow
-          email: { address: 'acceptance-business@example.com', validated: true },
+          // upstream resets validated whenever the email changes
+          email: { address: 'acceptance-business@example.com', validated: false },
           correspondenceEmail: {
             address: 'acceptance-business-corr@example.com',
             validated: true
