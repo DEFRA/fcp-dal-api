@@ -23,6 +23,7 @@ const MongoBusinessMock = vi.fn()
 const JWKSMock = vi.fn()
 const loggerChild = vi.fn()
 const loggerMock = { child: loggerChild, info: vi.fn() }
+const publishContextFailureAuditMock = vi.fn()
 
 vi.doMock('../../../app/auth/authenticate.js', () => ({
   getAuthorisedEntity: getAuthorisedEntityMock,
@@ -48,6 +49,9 @@ vi.doMock('../../../app/data-sources/JWKS.js', () => ({
 }))
 vi.doMock('../../../app/logger/logger.js', () => ({
   logger: loggerMock
+}))
+vi.doMock('../../../app/graphql/plugins/audit.js', () => ({
+  publishContextFailureAudit: publishContextFailureAuditMock
 }))
 const { buildContext, context } = await import('../../../app/graphql/context.js')
 
@@ -370,6 +374,13 @@ describe('context', () => {
             tenant: { id: 'unknown-unauthorised-service' }
           })
           expect(requestLogger.warn).toHaveBeenCalledOnce()
+          expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+            request,
+            auth,
+            authContext: undefined,
+            error,
+            requestLogger
+          })
         }
       )
     })
@@ -398,6 +409,8 @@ describe('context', () => {
           expect(result.auth).toBe(auth)
           expect(result.dataSources).toBeDefined()
           expect(requestLogger.warn).not.toHaveBeenCalled()
+          // not a context failure: the audit plugin audits this request
+          expect(publishContextFailureAuditMock).not.toHaveBeenCalled()
         }
       )
     })
@@ -450,6 +463,52 @@ describe('context', () => {
           }
         }
       )
+      expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+        request,
+        auth: { user: 'test-user', serviceName: 'Grants' },
+        authContext: expect.objectContaining({ externalAuthHeader: 'not-a-jwt' }),
+        error: expect.objectContaining({ message: 'Defra ID token could not be decoded' }),
+        requestLogger
+      })
+    })
+
+    test('audits an invalid end-user header failure with the auth details but no end-user context', async () => {
+      const auth = { serviceName: 'Grants' }
+      getAuthorisedEntityMock.mockResolvedValue(auth)
+      const request = {
+        headers: { email: 'a@example.com', 'service-account': 'b@example.com' },
+        traceId: 'trace-4'
+      }
+
+      await expect(context({ request })).rejects.toThrow(
+        'Cannot supply both email and service-account headers'
+      )
+
+      expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+        request,
+        auth,
+        authContext: undefined,
+        error: expect.objectContaining({
+          extensions: expect.objectContaining({ code: 'UNAUTHORIZED' })
+        }),
+        requestLogger
+      })
+    })
+
+    test('waits for the audit to be published before rethrowing', async () => {
+      const authError = new Unauthorized('token failed verification')
+      getAuthorisedEntityMock.mockRejectedValue(authError)
+      let published = false
+      publishContextFailureAuditMock.mockImplementationOnce(async () => {
+        await new Promise((resolve) => setImmediate(resolve))
+        published = true
+      })
+
+      await expect(context({ request: { headers: {}, traceId: 'trace-5' } })).rejects.toBe(
+        authError
+      )
+
+      expect(published).toBe(true)
     })
 
     test('logs the error with just the trace id when authentication fails', async () => {
@@ -463,6 +522,13 @@ describe('context', () => {
       expect(requestLogger.warn).toHaveBeenCalledWith('#DAL - GraphQL error (UNAUTHORIZED)', {
         code: 'DAL_GRAPHQL_ERROR_001',
         error: { name: 'UNAUTHORIZED', message: 'token failed verification', stack: undefined }
+      })
+      expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+        request,
+        auth: undefined,
+        authContext: undefined,
+        error: authError,
+        requestLogger
       })
     })
   })

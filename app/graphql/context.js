@@ -13,16 +13,28 @@ import { RuralPaymentsReferenceData } from '../data-sources/rural-payments/Rural
 import { Permissions } from '../data-sources/static/permissions.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
+import { publishContextFailureAudit } from './plugins/audit.js'
 import { logGraphQLError } from './plugins/error-logging.js'
 
 export async function context({ request }) {
+  // Filled in by buildContext as it goes, so a failure can be audited with whatever was known
+  const progress = {}
   try {
-    return await buildContext(request)
+    return await buildContext(request, { progress })
   } catch (error) {
-    // Apollo's contextCreationDidFail hook is not given the request, so log here where the trace
-    // id (and the calling service, if authentication got that far) is known
+    // Apollo's contextCreationDidFail hook is not given the request, so log and audit here where
+    // the trace id (and the calling service, if authentication got that far) is known
     const tenant = request.requestingService && { tenant: { id: request.requestingService } }
-    logGraphQLError(logger.child({ traceId: request.traceId, ...tenant }), error)
+    const requestLogger = logger.child({ traceId: request.traceId, ...tenant })
+    logGraphQLError(requestLogger, error)
+    // Apollo won't run the audit plugin for this request, so audit the failure here
+    await publishContextFailureAudit({
+      request,
+      auth: progress.auth,
+      authContext: progress.authContext,
+      error,
+      requestLogger
+    })
     throw error
   }
 }
@@ -57,11 +69,15 @@ function applyAuthGate(auth) {
  * Builds the per-request GraphQL context.
  *
  * @param {*} request the incoming HTTP request
- * @param {{enforceAuth?: boolean}} options `enforceAuth: false` skips the authorised-consumer gate;
- *  only for test harnesses that substitute their own `auth` (see test/graphql/makeTestQuery.js)
+ * @param {object} [options]
+ * @param {boolean} [options.enforceAuth=true] `false` skips the authorised-consumer gate; only for
+ *  test harnesses that substitute their own `auth` (see test/graphql/makeTestQuery.js)
+ * @param {object} [options.progress] given `auth` and `authContext` as soon as each is known, so
+ *  the caller can audit a request whose context fails part way through
  */
-export async function buildContext(request, { enforceAuth = true } = {}) {
+export async function buildContext(request, { enforceAuth = true, progress = {} } = {}) {
   const auth = await getAuthorisedEntity(request, new JWKS()) // TODO: make JWKS a singleton
+  progress.auth = auth
   const requestingService = auth.serviceName
   request.requestingService = requestingService
 
@@ -73,6 +89,7 @@ export async function buildContext(request, { enforceAuth = true } = {}) {
   })
 
   const authContext = endUserAuthContext(request)
+  progress.authContext = authContext
   const defraIdCtx = await defraIdContext(authContext, { traceId: request.traceId })
   const auditTrail = createAuditTrail(authContext)
 

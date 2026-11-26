@@ -17,6 +17,10 @@ vi.doMock('../../../../../app/data-sources/JWKS.js', () => ({
   }
 }))
 
+// audit events are captured rather than published
+const snsPublishMock = vi.fn()
+vi.doMock('../../../../../app/audit/sns-publisher.js', () => ({ snsPublish: snsPublishMock }))
+
 const { context } = await import('../../../../../app/graphql/context.js')
 const { apolloServer } = await import('../../../../../app/graphql/server.js')
 
@@ -53,6 +57,17 @@ const forbiddenError = expect.objectContaining({
   extensions: expect.objectContaining({ code: 'FORBIDDEN' })
 })
 
+// the single audit event published for the request, with its status and error codes
+const publishedAudit = () => {
+  expect(snsPublishMock).toHaveBeenCalledOnce()
+  const [event] = snsPublishMock.mock.calls[0]
+  return {
+    status: event.audit.status,
+    errorCodes: event.audit.details.errorDetails.map(({ code }) => code),
+    ip: event.ip
+  }
+}
+
 describe('GraphQL endpoint authorisation', () => {
   let server
 
@@ -66,18 +81,23 @@ describe('GraphQL endpoint authorisation', () => {
     await server.initialize()
   })
 
+  beforeEach(() => {
+    snsPublishMock.mockClear()
+  })
+
   afterAll(async () => {
     await server.stop()
     await apolloServer.stop()
   })
 
-  const post = (payload, authorization) =>
+  const post = (payload, authorization, headers = {}) =>
     server.inject({
       method: 'POST',
       url: '/graphql',
       headers: {
         'content-type': 'application/json',
-        ...(authorization && { authorization: `Bearer ${authorization}` })
+        ...(authorization && { authorization: `Bearer ${authorization}` }),
+        ...headers
       },
       payload
     })
@@ -111,6 +131,24 @@ describe('GraphQL endpoint authorisation', () => {
         expect(response.statusCode).toBe(401)
         expect(JSON.parse(response.payload).data).toBeUndefined()
         expect(JSON.parse(response.payload).errors).toEqual([unauthorizedError])
+        expect(publishedAudit()).toEqual({
+          status: 'failure',
+          errorCodes: ['UNAUTHORIZED'],
+          ip: '127.0.0.1'
+        })
+      })
+
+      test('audits the client IP from x-forwarded-for on a rejected request', async () => {
+        const response = await post(validPayload, undefined, {
+          'x-forwarded-for': '203.0.113.5, 10.0.0.1'
+        })
+
+        expect(response.statusCode).toBe(401)
+        expect(publishedAudit()).toEqual({
+          status: 'failure',
+          errorCodes: ['UNAUTHORIZED'],
+          ip: '203.0.113.5'
+        })
       })
 
       test.each([
@@ -125,6 +163,11 @@ describe('GraphQL endpoint authorisation', () => {
           expect(response.statusCode).toBe(403)
           expect(JSON.parse(response.payload).data).toBeUndefined()
           expect(JSON.parse(response.payload).errors).toEqual([forbiddenError])
+          expect(publishedAudit()).toEqual({
+            status: 'failure',
+            errorCodes: ['FORBIDDEN'],
+            ip: '127.0.0.1'
+          })
         }
       )
     })
@@ -189,6 +232,7 @@ describe('GraphQL endpoint authorisation', () => {
 
       expect(response.statusCode).toBe(200)
       expect(JSON.parse(response.payload)).toEqual({ data: { __typename: 'Query' } })
+      expect(publishedAudit()).toEqual({ status: 'success', errorCodes: [], ip: '127.0.0.1' })
     })
 
     test('responds 400 with a graphql error to an authorised request with an invalid payload', async () => {
