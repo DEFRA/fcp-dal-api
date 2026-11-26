@@ -46,7 +46,7 @@ const buildEvent = (details) => {
     return {}
   }
 
-  const { kind, category, type, created, duration, outcome, reason, reference, action } = details
+  const { kind, category, type, created, duration, outcome, reference, action } = details
   return {
     event: {
       ...(kind && { kind }),
@@ -55,11 +55,19 @@ const buildEvent = (details) => {
       ...(created && { created }), // Time the event was created in the system.
       ...(duration && { duration: duration * 1000000 }), // Total time of the event in nanoseconds.
       ...(outcome && { outcome: `status code: ${outcome}` }), // Outcome of the event.
-      ...(reason && { reason }), // Why the event ended the way it did.
       ...(reference && { reference }), // A reference ID or URL tied to the event.
       ...(action && { action: `gateway=${action}` })
     }
   }
+}
+
+const buildGraphqlDetails = ({ operationType, operationName, errorCodes } = {}) => {
+  const graphql = {
+    ...(operationType && { operationType }),
+    ...(operationName && { operationName }),
+    ...(errorCodes?.length && { errorCodes })
+  }
+  return Object.keys(graphql).length ? { graphql } : {}
 }
 
 // Request body keys that are logged, but only as their last four characters: a crn/
@@ -200,7 +208,7 @@ const buildUrl = ({ body, path, url }) => {
 }
 
 export const cdpSchemaTranslator = format((info) => {
-  const { error, code, request, response, requestTimeMs, tenant, traceId } = info
+  const { error, code, request, response, requestTimeMs, tenant, traceId, graphql } = info
 
   const parsedUrl = buildUrl(request || {})
   const httpDetails = buildHttpDetails(request, response, requestTimeMs)
@@ -220,12 +228,12 @@ export const cdpSchemaTranslator = format((info) => {
       created: info['@timestamp'],
       duration: requestTimeMs,
       outcome: httpDetails.http?.response?.status_code,
-      reason: info.reason,
       // The URL path is mapped onto the event reference field, which is used in Grafana dashboard
       // queries
       reference: parsedUrl?.url?.path,
       action: info?.gatewayType
     }),
+    ...buildGraphqlDetails(graphql),
     ...(tenant && { tenant }),
     ...parsedUrl
   }

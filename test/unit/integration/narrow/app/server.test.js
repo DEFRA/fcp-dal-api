@@ -156,9 +156,10 @@ describe('Server config and startup', () => {
       )
     })
 
-    test('response event logs the graphql error codes as the reason, when the request had errors', async () => {
+    test('response event logs the graphql operation and error codes, when the request had errors', async () => {
       // arrange
       server.ext('onRequest', (request, h) => {
+        request.graphqlOperation = { type: 'mutation', name: 'CreateBusiness' }
         request.graphqlErrorCodes = ['NOT FOUND', 'FORBIDDEN']
         return h.continue
       })
@@ -169,16 +170,71 @@ describe('Server config and startup', () => {
       // assert
       expect(mockLogger.logger.info).toHaveBeenCalledWith(
         'FCP - Access log',
-        expect.objectContaining({ reason: 'graphql errors: NOT FOUND, FORBIDDEN' })
+        expect.objectContaining({
+          graphql: {
+            operationType: 'mutation',
+            operationName: 'CreateBusiness',
+            errorCodes: ['NOT FOUND', 'FORBIDDEN']
+          }
+        })
       )
     })
 
-    test('response event omits the reason when the request had no graphql errors', async () => {
+    test('response event logs the graphql operation without errorCodes, when the request had no errors', async () => {
+      // arrange
+      server.ext('onRequest', (request, h) => {
+        request.graphqlOperation = { type: 'query', name: 'GetBusiness' }
+        return h.continue
+      })
+
+      // act
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      // assert
+      const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload.graphql).toEqual({
+        operationType: 'query',
+        operationName: 'GetBusiness'
+      })
+    })
+
+    test('response event logs the graphql operation type without a name, for an anonymous operation', async () => {
+      // arrange
+      server.ext('onRequest', (request, h) => {
+        request.graphqlOperation = { type: 'query' }
+        return h.continue
+      })
+
+      // act
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      // assert
+      const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload.graphql).toEqual({ operationType: 'query' })
+    })
+
+    test('response event logs the graphql error codes without an operation, when the query failed to parse', async () => {
+      // arrange
+      server.ext('onRequest', (request, h) => {
+        request.graphqlErrorCodes = ['GRAPHQL_PARSE_FAILED']
+        return h.continue
+      })
+
+      // act
+      await server.inject({ method: 'GET', url: '/non-health' })
+
+      // assert
+      const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload.graphql).toEqual({ errorCodes: ['GRAPHQL_PARSE_FAILED'] })
+    })
+
+    test('response event omits graphql when the request was not a graphql operation', async () => {
       // arrange / act
       await server.inject({ method: 'GET', url: '/non-health' })
 
       // assert
       const [, loggedPayload] = mockLogger.logger.info.mock.calls[0]
+      expect(loggedPayload).not.toHaveProperty('graphql')
       expect(loggedPayload).not.toHaveProperty('reason')
     })
 

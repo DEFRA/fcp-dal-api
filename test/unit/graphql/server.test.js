@@ -7,7 +7,7 @@ const mocks = vi.hoisted(() => {
   const mockAnonymousIntrospectionPlugin = vi.fn()
   const mockAuditPlugin = vi.fn()
   const mockErrorLoggingPlugin = vi.fn()
-  const mockErrorCodesPlugin = vi.fn()
+  const mockAccessLogPlugin = vi.fn()
   const mockMappedDefraIdApolloPlugin = vi.fn(() => 'mockMappedDefraIdApolloPlugin')
 
   return {
@@ -19,7 +19,7 @@ const mocks = vi.hoisted(() => {
     mockAnonymousIntrospectionPlugin,
     mockAuditPlugin,
     mockErrorLoggingPlugin,
-    mockErrorCodesPlugin,
+    mockAccessLogPlugin,
     mockApolloModule: { ApolloServer: mockApolloServer },
     mockApolloPluginDisabledModule: {
       ApolloServerPluginLandingPageDisabled: mockApolloPluginDisabled
@@ -43,8 +43,8 @@ vi.mock('../../../app/graphql/plugins/audit.js', () => ({
 vi.mock('../../../app/graphql/plugins/error-logging.js', () => ({
   errorLoggingPlugin: mocks.mockErrorLoggingPlugin
 }))
-vi.mock('../../../app/graphql/plugins/error-codes.js', () => ({
-  errorCodesPlugin: mocks.mockErrorCodesPlugin
+vi.mock('../../../app/graphql/plugins/access-log.js', () => ({
+  accessLogPlugin: mocks.mockAccessLogPlugin
 }))
 vi.mock('../../../app/auth/mapped-defra-id.js', () => ({
   mappedDefraIdApolloPlugin: mocks.mockMappedDefraIdApolloPlugin
@@ -82,7 +82,7 @@ describe('GraphQL Dashboard test with mocks', () => {
         mocks.mockAnonymousIntrospectionPlugin(),
         mocks.mockAuditPlugin(),
         mocks.mockErrorLoggingPlugin(),
-        mocks.mockErrorCodesPlugin()
+        mocks.mockAccessLogPlugin()
       ],
       introspection: false,
       formatError: expect.any(Function)
@@ -114,7 +114,7 @@ describe('GraphQL Dashboard test with mocks', () => {
         mocks.mockAnonymousIntrospectionPlugin(),
         mocks.mockAuditPlugin(),
         mocks.mockErrorLoggingPlugin(),
-        mocks.mockErrorCodesPlugin()
+        mocks.mockAccessLogPlugin()
       ],
       introspection: true,
       formatError: expect.any(Function)

@@ -7,7 +7,7 @@ import { formatError } from './formatError.js'
 import { createSchema } from './schema.js'
 import { anonymousIntrospectionPlugin } from './plugins/anonymous-introspection.js'
 import { auditPlugin } from './plugins/audit.js'
-import { errorCodesPlugin } from './plugins/error-codes.js'
+import { accessLogPlugin } from './plugins/access-log.js'
 import { errorLoggingPlugin } from './plugins/error-logging.js'
 
 export const schema = await createSchema()
@@ -27,7 +27,7 @@ export const apolloServer = new ApolloServer({
     anonymousIntrospectionPlugin(),
     auditPlugin(),
     errorLoggingPlugin(),
-    errorCodesPlugin(),
+    accessLogPlugin(),
     // Only enabled in dev/test. Used to map dummy Defra ID CRNs onto actual businesses.
     ...(dummyCrnToSbiMapping.size ? [mappedDefraIdApolloPlugin()] : [])
   ],
