@@ -237,7 +237,24 @@ The platform provides features for handling authentication to APIs.
 However, access to the DAL is handled differently.
 Consumers must first get an access token, which must be supplied in the `Authorization` header as part of every request.
 
-> NOTE: all endpoints (expect posts to `/graphql`) are protected by default. Modifications can be made by submitting a PR with changes to the relevant spec files:
+Every request to `/graphql` is checked before the query is parsed. A request that fails the check gets no data and, except as described below, no
+schema access (including introspection):
+
+| Request                                                                        | Response             |
+| ------------------------------------------------------------------------------ | -------------------- |
+| No `Authorization` header, or a malformed, wrongly signed or expired token     | `401` `UNAUTHORIZED` |
+| A valid token whose app registration (or groups) is not an authorised consumer | `403` `FORBIDDEN`    |
+| A valid token for an authorised consumer                                       | handled as normal    |
+
+The `@auth` directive still controls which authorised consumers can reach each field. The check is skipped when `DISABLE_AUTH=true` (only allowed in the `dev` environment).
+
+Where the GraphQL dashboard is enabled (`GRAPHQL_DASHBOARD_ENABLED=true`, non-prod only), unauthorised callers can still introspect the schema, so Apollo Sandbox and
+schema tooling work without a token. Only queries whose root fields are all `__schema`, `__type` or `__typename` are allowed; any other query gets the `401`/`403` above.
+In those environments, an unauthorised request whose query is malformed or doesn't match the schema gets Apollo's normal `400` error instead of `401`, because the query
+is checked before the token decision is applied. It still gets no data. Where the dashboard is disabled,
+introspection needs an authorised token like any other query.
+
+> NOTE: all endpoints (except posts to `/graphql`) are protected by default. Modifications can be made by submitting a PR with changes to the relevant spec files:
 >
 > - [dev](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/dev/apis/fcp-dal-api.yml)
 > - [test](https://github.com/DEFRA/cdp-tf-svc-infra/blob/main/environments/test/apis/fcp-dal-api.yml)

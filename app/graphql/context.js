@@ -1,5 +1,5 @@
 import { createAuditTrail } from '../audit/audit-trail.js'
-import { getAuthorisedEntity } from '../auth/authenticate.js'
+import { getAuthorisedEntity, requireAuthorisedEntity } from '../auth/authenticate.js'
 import { defraIdContext } from '../auth/defra-id.js'
 import { endUserAuthContext } from '../auth/end-user-auth-context.js'
 import { config } from '../config.js'
@@ -13,24 +13,75 @@ import { RuralPaymentsReferenceData } from '../data-sources/rural-payments/Rural
 import { Permissions } from '../data-sources/static/permissions.js'
 import { logger } from '../logger/logger.js'
 import { db } from '../mongo.js'
+import { publishContextFailureAudit } from './plugins/audit.js'
 import { logGraphQLError } from './plugins/error-logging.js'
 
 export async function context({ request }) {
+  // Filled in by buildContext as it goes, so a failure can be audited with whatever was known
+  const progress = {}
   try {
-    return await buildContext(request)
+    return await buildContext(request, { progress })
   } catch (error) {
-    // Apollo's contextCreationDidFail hook is not given the request, so log here where the trace
-    // id (and the calling service, if authentication got that far) is known
+    // Apollo's contextCreationDidFail hook is not given the request, so log and audit here where
+    // the trace id (and the calling service, if authentication got that far) is known
     const tenant = request.requestingService && { tenant: { id: request.requestingService } }
-    logGraphQLError(logger.child({ traceId: request.traceId, ...tenant }), error)
+    const requestLogger = logger.child({ traceId: request.traceId, ...tenant })
+    logGraphQLError(requestLogger, error)
+    // Apollo won't run the audit plugin for this request, so audit the failure here
+    await publishContextFailureAudit({
+      request,
+      auth: progress.auth,
+      authContext: progress.authContext,
+      error,
+      requestLogger
+    })
     throw error
   }
 }
 
-async function buildContext(request) {
+/**
+ * Applies the authorised-consumer gate (`requireAuthorisedEntity`).
+ *
+ * @param {{authenticated: boolean, authName?: string}} auth the result of `getAuthorisedEntity`
+ * @returns {Error|undefined} the 401/403 error to defer to the anonymous-introspection plugin, if
+ *  the caller is unauthorised and the dashboard is enabled
+ * @throws {Unauthorized|Forbidden} if the caller is unauthorised and the dashboard is disabled
+ */
+function applyAuthGate(auth) {
+  try {
+    // Where the dashboard is disabled, block unauthorised callers before any Defra ID, upstream
+    // or Mongo work is done. Where it is enabled, the error is deferred (below), so the rest of
+    // the context, including Defra ID verification, is still built
+    requireAuthorisedEntity(auth)
+  } catch (error) {
+    if (!config.get('graphqlDashboardEnabled')) {
+      throw error
+    }
+    // Where the dashboard is enabled (non-prod), unauthorised callers may still introspect the
+    // schema. The query hasn't been parsed yet, so the decision is left to the
+    // anonymous-introspection plugin, which rethrows this error for anything else
+    return error
+  }
+  return undefined
+}
+
+/**
+ * Builds the per-request GraphQL context.
+ *
+ * @param {*} request the incoming HTTP request
+ * @param {object} [options]
+ * @param {boolean} [options.enforceAuth=true] `false` skips the authorised-consumer gate; only for
+ *  test harnesses that substitute their own `auth` (see test/graphql/makeTestQuery.js)
+ * @param {object} [options.progress] given `auth` and `authContext` as soon as each is known, so
+ *  the caller can audit a request whose context fails part way through
+ */
+export async function buildContext(request, { enforceAuth = true, progress = {} } = {}) {
   const auth = await getAuthorisedEntity(request, new JWKS()) // TODO: make JWKS a singleton
+  progress.auth = auth
   const requestingService = auth.serviceName
   request.requestingService = requestingService
+
+  const deferredAuthError = enforceAuth ? applyAuthGate(auth) : undefined
 
   const requestLogger = logger.child({
     traceId: request.traceId,
@@ -38,6 +89,7 @@ async function buildContext(request) {
   })
 
   const authContext = endUserAuthContext(request)
+  progress.authContext = authContext
   const defraIdCtx = await defraIdContext(authContext, { traceId: request.traceId })
   const auditTrail = createAuditTrail(authContext)
 
@@ -67,6 +119,7 @@ async function buildContext(request) {
 
   return {
     auth,
+    deferredAuthError,
     authContext,
     request,
     requestLogger,

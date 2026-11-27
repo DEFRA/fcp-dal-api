@@ -3,7 +3,7 @@ import { Unit } from 'aws-embedded-metrics'
 import { defaultFieldResolver } from 'graphql'
 import { decodeProtectedHeader, jwtVerify } from 'jose'
 import { authorisedEntities, config } from '../config.js'
-import { Unauthorized } from '../errors/graphql.js'
+import { Forbidden, Unauthorized } from '../errors/graphql.js'
 import { DAL_REQUEST_AUTHENTICATION_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { sendMetric } from '../logger/sendMetric.js'
@@ -38,16 +38,17 @@ const identifyService = (appid, groups) => {
  *
  * @param {*} request the incoming HTTP request
  * @param {*} jwkDatasource the JWKS keystore for verifying the JWT
- * @returns {Promise<{entityId: string, authName: string, serviceName: string}>}
- *  the matching `entityId` from the token, `authName` for the `@auth` directive, and `serviceName`
- *  for the audit/metrics identifier
- * @throws {Unauthorized} if the token is invalid or expired
+ * @returns {Promise<{authenticated: boolean, entityId: string, authName?: string,
+ *  serviceName: string}>}
+ *  whether a token was supplied and verified (`authenticated`), the matching `entityId` from the
+ *  token, `authName` for the `@auth` directive (only set for an authorised entity), and
+ *  `serviceName` for the audit/metrics identifier
  */
 export async function getAuthorisedEntity(request, jwkDatasource) {
   try {
     const token = request?.headers?.authorization?.split(' ')[1]
     if (!token) {
-      return { entityId: unauthedAppid, serviceName: unknownService }
+      return { authenticated: false, entityId: unauthedAppid, serviceName: unknownService }
     }
 
     const decodedToken = decodeProtectedHeader(token)
@@ -82,7 +83,10 @@ export async function getAuthorisedEntity(request, jwkDatasource) {
       }
     })
 
-    return identifyService(verified.appid ?? verified.azp, verified.groups)
+    return {
+      authenticated: true,
+      ...identifyService(verified.appid ?? verified.azp, verified.groups)
+    }
   } catch (error) {
     if (
       error.name === 'TokenExpiredError' ||
@@ -103,7 +107,36 @@ export async function getAuthorisedEntity(request, jwkDatasource) {
         request: { remoteAddress: request?.info?.remoteAddress }
       })
     }
-    return { entityId: 'no-entityId--token-verification-failed', serviceName: unknownService }
+    return {
+      authenticated: false,
+      entityId: 'no-entityId--token-verification-failed',
+      serviceName: unknownService
+    }
+  }
+}
+
+/**
+ * Blocks the request unless it contains a verified token for an authorised DAL consumer. Applied
+ * when the request context is built, before the query is parsed. Where the GraphQL dashboard is
+ * disabled, no part of the schema (fields without `@auth`, introspection, validation errors) is
+ * available to unauthorised callers. Where it is enabled, app/graphql/context.js defers the error
+ * so that unauthorised callers can still introspect the schema (see
+ * app/graphql/plugins/anonymous-introspection.js); anything else is still rejected.
+ * Skipped when auth is disabled.
+ *
+ * @param {{authenticated: boolean, authName?: string}} auth the result of `getAuthorisedEntity`
+ * @throws {Unauthorized} if no token was supplied, or it could not be verified
+ * @throws {Forbidden} if the token is valid but does not identify an authorised entity
+ */
+export function requireAuthorisedEntity(auth) {
+  if (config.get('auth.disabled')) {
+    return
+  }
+  if (!auth?.authenticated) {
+    throw new Unauthorized('Authorization failed, a valid authorization token is required')
+  }
+  if (!auth.authName) {
+    throw new Forbidden('Authorization failed, requester is not an authorised DAL consumer')
   }
 }
 

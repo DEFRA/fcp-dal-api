@@ -14,6 +14,10 @@ const INTROSPECTION_FIELDS = new Set(['__schema', '__type'])
 const INTROSPECTION_ROOT_FIELD = 'Introspection metadata'
 const INTROSPECTION_ENTITY = { entity: 'graphql-introspection', action: 'read', entityid: '' }
 
+// requests rejected while the GraphQL context was built (see publishContextFailureAudit)
+const REJECTED_ROOT_FIELD = 'Request rejected'
+const REJECTED_ENTITY = { entity: 'audit', action: 'created', entityid: REJECTED_ROOT_FIELD }
+
 // response keys (alias, else field name) of the operation's root fields, following fragments.
 // undefined when there is no operation, e.g. the query failed to parse or validate
 function rootFieldsOf({ operation, document }) {
@@ -116,6 +120,63 @@ function buildEvent({ contextValue, rootSelection, errors, fallbackEntities }) {
   }
 }
 
+// Publishes one event, logging (rather than throwing) a failure, so a publish error never affects
+// the response
+async function publishSafely(publish, event, requestLogger) {
+  try {
+    await publish(event, requestLogger)
+  } catch (error) {
+    requestLogger.error('#DAL - audit event publish failed', {
+      error,
+      code: DAL_AUDIT_EVENT_001
+    })
+  }
+}
+
+/**
+ * Publishes one failure audit event for a request whose GraphQL context could not be built, e.g.
+ * the authorised-consumer gate rejected it (401/403) or its end-user headers or Defra ID token were
+ * invalid.
+ *
+ * The event's `rootField` and entity id are both `Request rejected`, on the generic
+ * `audit`/`created` entity; `status` is `failure` and `errorDetails` says why. Never throws, so a
+ * build or publish failure can't replace the original error.
+ *
+ * @param {object} options
+ * @param {*} options.request the incoming HTTP request
+ * @param {*} [options.auth] the result of `getAuthorisedEntity`, if authentication got that far
+ * @param {*} [options.authContext] the end-user auth context, if it was built
+ * @param {Error} options.error the error the context failed with
+ * @param {*} options.requestLogger the per-request logger
+ * @param {Function} [options.publish] the publisher, for tests
+ */
+export async function publishContextFailureAudit({
+  request,
+  auth,
+  authContext,
+  error,
+  requestLogger,
+  publish = snsPublish
+}) {
+  let event
+  try {
+    event = buildEvent({
+      contextValue: { request, auth, authContext: authContext ?? {}, requestLogger },
+      rootSelection: REJECTED_ROOT_FIELD,
+      errors: [error],
+      fallbackEntities: [REJECTED_ENTITY]
+    })
+  } catch (buildError) {
+    requestLogger.error('#DAL - audit event build failed', {
+      error: buildError,
+      code: DAL_AUDIT_EVENT_001
+    })
+    return
+  }
+
+  await publishSafely(publish, event, requestLogger)
+}
+
 /**
  * Emits one audit event per root selection touched by the query, from whatever
  * contextValue.auditTrail (see app/audit/audit-trail.js) recorded against it - resolvers record
@@ -137,17 +198,6 @@ export function auditPlugin({ publish = snsPublish } = {}) {
 
           const requestLogger = contextValue.requestLogger
 
-          const publishOne = async (event) => {
-            try {
-              await publish(event, requestLogger)
-            } catch (error) {
-              requestLogger.error('#DAL - audit event publish failed', {
-                error,
-                code: DAL_AUDIT_EVENT_001
-              })
-            }
-          }
-
           try {
             const rootKeys = contextValue.auditTrail.rootKeys()
             const rootFields = rootFieldsOf(requestContext)
@@ -167,7 +217,7 @@ export function auditPlugin({ publish = snsPublish } = {}) {
                 contextValue,
                 errors: errors?.filter((error) => !isIntrospectionError(error))
               })
-              await publishOne(event)
+              await publishSafely(publish, event, requestLogger)
             }
 
             if (introspectionKeys.length > 0) {
@@ -182,7 +232,7 @@ export function auditPlugin({ publish = snsPublish } = {}) {
                 ),
                 fallbackEntities: [INTROSPECTION_ENTITY]
               })
-              await publishOne(event)
+              await publishSafely(publish, event, requestLogger)
             }
 
             await Promise.all(
@@ -193,7 +243,7 @@ export function auditPlugin({ publish = snsPublish } = {}) {
                   rootSelection: rootKey,
                   errors: errorsForRoot
                 })
-                return publishOne(event)
+                return publishSafely(publish, event, requestLogger)
               })
             )
           } catch (error) {

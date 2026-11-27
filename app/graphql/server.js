@@ -5,6 +5,7 @@ import { mappedDefraIdApolloPlugin } from '../auth/mapped-defra-id.js'
 import { config, dummyCrnToSbiMapping } from '../config.js'
 import { formatError } from './formatError.js'
 import { createSchema } from './schema.js'
+import { anonymousIntrospectionPlugin } from './plugins/anonymous-introspection.js'
 import { auditPlugin } from './plugins/audit.js'
 import { errorCodesPlugin } from './plugins/error-codes.js'
 import { errorLoggingPlugin } from './plugins/error-logging.js'
@@ -23,6 +24,7 @@ export const apolloServer = new ApolloServer({
   schema,
   plugins: [
     enableApolloLandingPage(),
+    anonymousIntrospectionPlugin(),
     auditPlugin(),
     errorLoggingPlugin(),
     errorCodesPlugin(),

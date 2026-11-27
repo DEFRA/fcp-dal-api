@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import { generateKeyPairSync } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
-import { Unauthorized } from '../../../app/errors/graphql.js'
+import { Forbidden, Unauthorized } from '../../../app/errors/graphql.js'
 
 const info = vi.fn()
 vi.doMock('../../../app/logger/logger.js', () => ({
@@ -14,7 +14,8 @@ const {
   checkAuthEntity,
   checkServiceAccountAccess,
   checkUserAccess,
-  getAuthorisedEntity
+  getAuthorisedEntity,
+  requireAuthorisedEntity
 } = await import('../../../app/auth/authenticate.js')
 
 const tokenPayload = {
@@ -74,6 +75,7 @@ describe('authenticate', () => {
     describe('when auth is disabled', () => {
       test('should return default auth details', async () => {
         expect(await getAuthorisedEntity({})).toEqual({
+          authenticated: false,
           entityId: 'auth-disabled-no-entityId',
           serviceName: 'unknown-unauthorised-service'
         })
@@ -81,17 +83,20 @@ describe('authenticate', () => {
     })
 
     describe('when auth is enabled', () => {
+      let originalAuthDisabledValue
       beforeEach(() => {
+        originalAuthDisabledValue = config.get('auth.disabled')
         config.set('auth.disabled', false) // temporarily set auth to enabled for this test
       })
       afterEach(() => {
-        config.set('auth.disabled', true) // reset to original state after import
+        config.set('auth.disabled', originalAuthDisabledValue) // restore the original setting
       })
 
       it('should return default auth details when request has no auth', async () => {
         const { getAuthorisedEntity } = await import('../../../app/auth/authenticate.js?r=3')
 
         expect(await getAuthorisedEntity({})).toEqual({
+          authenticated: false,
           entityId: 'no-entityId--no-auth-provided',
           serviceName: 'unknown-unauthorised-service'
         })
@@ -103,6 +108,7 @@ describe('authenticate', () => {
           const auth = await getAuthorisedEntity(mockRequest(token), mockJWKSDataSource)
 
           expect(auth).toEqual({
+            authenticated: true,
             entityId: config.get('auth.entities.SINGLE_FRONT_DOOR.entityId'),
             authName: 'SINGLE_FRONT_DOOR',
             serviceName: 'single-front-door'
@@ -141,6 +147,7 @@ describe('authenticate', () => {
             mockJWKSDataSource
           )
         ).toEqual({
+          authenticated: true,
           entityId: config.get('auth.entities.SINGLE_FRONT_DOOR.entityId'),
           authName: 'SINGLE_FRONT_DOOR',
           serviceName: 'single-front-door'
@@ -162,6 +169,7 @@ describe('authenticate', () => {
             mockJWKSDataSource
           )
         ).toEqual({
+          authenticated: true,
           entityId,
           authName: 'SINGLE_FRONT_DOOR',
           serviceName: 'single-front-door'
@@ -183,11 +191,34 @@ describe('authenticate', () => {
             ),
             mockJWKSDataSource
           )
-        ).toEqual({ entityId: admin, authName: 'ADMIN', serviceName: 'admin' })
+        ).toEqual({
+          authenticated: true,
+          entityId: admin,
+          authName: 'ADMIN',
+          serviceName: 'admin'
+        })
+      })
+
+      test('returns authenticated but unrecognised auth details when no appid, azp or group is authorised', async () => {
+        mockPublicKeyFunc.mockResolvedValue(publicKey)
+
+        expect(
+          await getAuthorisedEntity(
+            mockRequest(
+              createConsumerToken({ appid: 'unknown-app', azp: 'unknown-azp', groups: ['x'] })
+            ),
+            mockJWKSDataSource
+          )
+        ).toEqual({
+          authenticated: true,
+          entityId: 'no-entityId--no-approved-app-or-groups',
+          serviceName: 'unknown-unauthorised-service'
+        })
       })
 
       test('returns unauthorised auth details if token cannot be decoded', async () => {
         expect(await getAuthorisedEntity(mockRequest('WRONG'), mockJWKSDataSource)).toEqual({
+          authenticated: false,
           entityId: 'no-entityId--token-verification-failed',
           serviceName: 'unknown-unauthorised-service'
         })
@@ -198,6 +229,7 @@ describe('authenticate', () => {
         mockPublicKeyFunc.mockResolvedValue(publicKey)
         expect(await getAuthorisedEntity(mockRequest(tokenDiffSecret), mockJWKSDataSource)).toEqual(
           {
+            authenticated: false,
             entityId: 'no-entityId--token-verification-failed',
             serviceName: 'unknown-unauthorised-service'
           }
@@ -212,10 +244,78 @@ describe('authenticate', () => {
           throw error
         })
         expect(await getAuthorisedEntity(mockRequest(token), mockJWKSDataSource)).toEqual({
+          authenticated: false,
           entityId: 'no-entityId--token-verification-failed',
           serviceName: 'unknown-unauthorised-service'
         })
         expect(mockPublicKeyFunc).toHaveBeenCalledWith('mock-key-id-123')
+      })
+    })
+  })
+
+  describe('requireAuthorisedEntity', () => {
+    const authorised = {
+      authenticated: true,
+      entityId: 'entity-id',
+      authName: 'SINGLE_FRONT_DOOR',
+      serviceName: 'single-front-door'
+    }
+    const unrecognised = {
+      authenticated: true,
+      entityId: 'no-entityId--no-approved-app-or-groups',
+      serviceName: 'unknown-unauthorised-service'
+    }
+    const unauthenticated = {
+      authenticated: false,
+      entityId: 'no-entityId--no-auth-provided',
+      serviceName: 'unknown-unauthorised-service'
+    }
+
+    describe('when auth is enabled', () => {
+      let originalAuthDisabledValue
+      beforeEach(() => {
+        originalAuthDisabledValue = config.get('auth.disabled')
+        config.set('auth.disabled', false)
+      })
+      afterEach(() => {
+        config.set('auth.disabled', originalAuthDisabledValue)
+      })
+
+      it('allows a verified token for an authorised entity', () => {
+        expect(() => requireAuthorisedEntity(authorised)).not.toThrow()
+      })
+
+      it('throws Unauthorized (401) when no valid token was supplied', () => {
+        expect(() => requireAuthorisedEntity(unauthenticated)).toThrow(Unauthorized)
+        expect(() => requireAuthorisedEntity(unauthenticated)).toThrow(
+          expect.objectContaining({
+            extensions: expect.objectContaining({
+              code: 'UNAUTHORIZED',
+              http: { status: 401 }
+            })
+          })
+        )
+      })
+
+      it('throws Unauthorized when no auth details are available', () => {
+        expect(() => requireAuthorisedEntity(undefined)).toThrow(Unauthorized)
+      })
+
+      it('throws Forbidden (403) when the token is valid but not for an authorised entity', () => {
+        expect(() => requireAuthorisedEntity(unrecognised)).toThrow(Forbidden)
+        expect(() => requireAuthorisedEntity(unrecognised)).toThrow(
+          expect.objectContaining({
+            extensions: expect.objectContaining({ code: 'FORBIDDEN', http: { status: 403 } })
+          })
+        )
+      })
+    })
+
+    describe('when auth is disabled', () => {
+      it('allows any request through', () => {
+        expect(config.get('auth.disabled')).toBe(true)
+        expect(() => requireAuthorisedEntity(unauthenticated)).not.toThrow()
+        expect(() => requireAuthorisedEntity(unrecognised)).not.toThrow()
       })
     })
   })

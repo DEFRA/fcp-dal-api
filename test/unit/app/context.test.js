@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { config } from '../../../app/config.js'
-import { Unauthorized } from '../../../app/errors/graphql.js'
+import { Forbidden, Unauthorized } from '../../../app/errors/graphql.js'
 
 // A structurally valid JWT is enough here: with auth.disabled the Defra ID token is only
 // decoded (jose's decodeJwt), never signature-verified, so the signing secret doesn't matter.
@@ -14,6 +14,7 @@ const validDefraIdToken = jwt.sign(
 const appRegToken = jwt.sign({ appid: 'test-appid' }, 'appid-secret')
 
 const getAuthorisedEntityMock = vi.fn()
+const requireAuthorisedEntityMock = vi.fn()
 const PermissionsMock = vi.fn()
 const RuralPaymentsBusinessMock = vi.fn()
 const RuralPaymentsCustomerMock = vi.fn()
@@ -22,9 +23,11 @@ const MongoBusinessMock = vi.fn()
 const JWKSMock = vi.fn()
 const loggerChild = vi.fn()
 const loggerMock = { child: loggerChild, info: vi.fn() }
+const publishContextFailureAuditMock = vi.fn()
 
 vi.doMock('../../../app/auth/authenticate.js', () => ({
-  getAuthorisedEntity: getAuthorisedEntityMock
+  getAuthorisedEntity: getAuthorisedEntityMock,
+  requireAuthorisedEntity: requireAuthorisedEntityMock
 }))
 vi.doMock('../../../app/data-sources/static/permissions.js', () => ({
   Permissions: PermissionsMock
@@ -47,7 +50,10 @@ vi.doMock('../../../app/data-sources/JWKS.js', () => ({
 vi.doMock('../../../app/logger/logger.js', () => ({
   logger: loggerMock
 }))
-const { context } = await import('../../../app/graphql/context.js')
+vi.doMock('../../../app/graphql/plugins/audit.js', () => ({
+  publishContextFailureAudit: publishContextFailureAuditMock
+}))
+const { buildContext, context } = await import('../../../app/graphql/context.js')
 
 describe('context', () => {
   beforeEach(() => {
@@ -312,6 +318,116 @@ describe('context', () => {
     })
   })
 
+  describe('authorised consumer gate', () => {
+    const requestLogger = { warn: vi.fn(), error: vi.fn() }
+    const auth = { authenticated: false, serviceName: 'unknown-unauthorised-service' }
+
+    beforeEach(() => {
+      vi.clearAllMocks()
+      JWKSMock.mockImplementation(function () {
+        return {}
+      })
+      loggerChild.mockReturnValue(requestLogger)
+      getAuthorisedEntityMock.mockResolvedValue(auth)
+    })
+
+    test('checks the resolved auth details before building the rest of the context', async () => {
+      const request = { headers: {}, traceId: 'trace-1' }
+
+      const result = await context({ request })
+
+      expect(requireAuthorisedEntityMock).toHaveBeenCalledExactlyOnceWith(auth)
+      expect(result.deferredAuthError).toBeUndefined()
+    })
+
+    const gateErrors = [
+      ['Unauthorized', new Unauthorized('a valid authorization token is required')],
+      ['Forbidden', new Forbidden('requester is not an authorised DAL consumer')]
+    ]
+
+    describe('when the dashboard is disabled', () => {
+      let originalDashboardEnabledValue
+      beforeEach(() => {
+        originalDashboardEnabledValue = config.get('graphqlDashboardEnabled')
+        config.set('graphqlDashboardEnabled', false)
+      })
+      afterEach(() => {
+        config.set('graphqlDashboardEnabled', originalDashboardEnabledValue)
+      })
+
+      test.each(gateErrors)(
+        'rejects with %s, without building data sources, and logs with the calling service',
+        async (_name, error) => {
+          requireAuthorisedEntityMock.mockImplementationOnce(() => {
+            throw error
+          })
+          const request = { headers: {}, traceId: 'trace-2' }
+
+          await expect(context({ request })).rejects.toBe(error)
+
+          expect(request.requestingService).toBe('unknown-unauthorised-service')
+          expect(PermissionsMock).not.toHaveBeenCalled()
+          expect(RuralPaymentsBusinessMock).not.toHaveBeenCalled()
+          expect(RuralPaymentsCustomerMock).not.toHaveBeenCalled()
+          expect(loggerMock.child).toHaveBeenCalledExactlyOnceWith({
+            traceId: 'trace-2',
+            tenant: { id: 'unknown-unauthorised-service' }
+          })
+          expect(requestLogger.warn).toHaveBeenCalledOnce()
+          expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+            request,
+            auth,
+            authContext: undefined,
+            error,
+            requestLogger
+          })
+        }
+      )
+    })
+
+    describe('when the dashboard is enabled', () => {
+      let originalDashboardEnabledValue
+      beforeEach(() => {
+        originalDashboardEnabledValue = config.get('graphqlDashboardEnabled')
+        config.set('graphqlDashboardEnabled', true)
+      })
+      afterEach(() => {
+        config.set('graphqlDashboardEnabled', originalDashboardEnabledValue)
+      })
+
+      test.each(gateErrors)(
+        'defers the %s error (to the anonymous-introspection plugin) and builds the context',
+        async (_name, error) => {
+          requireAuthorisedEntityMock.mockImplementationOnce(() => {
+            throw error
+          })
+          const request = { headers: {}, traceId: 'trace-3' }
+
+          const result = await context({ request })
+
+          expect(result.deferredAuthError).toBe(error)
+          expect(result.auth).toBe(auth)
+          expect(result.dataSources).toBeDefined()
+          expect(requestLogger.warn).not.toHaveBeenCalled()
+          // not a context failure: the audit plugin audits this request
+          expect(publishContextFailureAuditMock).not.toHaveBeenCalled()
+        }
+      )
+    })
+
+    test('buildContext skips the gate when enforceAuth is false', async () => {
+      requireAuthorisedEntityMock.mockImplementationOnce(() => {
+        throw new Unauthorized('should not be called')
+      })
+
+      const result = await buildContext({ headers: {} }, { enforceAuth: false })
+
+      expect(requireAuthorisedEntityMock).not.toHaveBeenCalled()
+      expect(result.auth).toBe(auth)
+      requireAuthorisedEntityMock.mockReset()
+    })
+  })
+
   describe('when the context cannot be created', () => {
     const requestLogger = { warn: vi.fn(), error: vi.fn() }
 
@@ -347,6 +463,52 @@ describe('context', () => {
           }
         }
       )
+      expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+        request,
+        auth: { user: 'test-user', serviceName: 'Grants' },
+        authContext: expect.objectContaining({ externalAuthHeader: 'not-a-jwt' }),
+        error: expect.objectContaining({ message: 'Defra ID token could not be decoded' }),
+        requestLogger
+      })
+    })
+
+    test('audits an invalid end-user header failure with the auth details but no end-user context', async () => {
+      const auth = { serviceName: 'Grants' }
+      getAuthorisedEntityMock.mockResolvedValue(auth)
+      const request = {
+        headers: { email: 'a@example.com', 'service-account': 'b@example.com' },
+        traceId: 'trace-4'
+      }
+
+      await expect(context({ request })).rejects.toThrow(
+        'Cannot supply both email and service-account headers'
+      )
+
+      expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+        request,
+        auth,
+        authContext: undefined,
+        error: expect.objectContaining({
+          extensions: expect.objectContaining({ code: 'UNAUTHORIZED' })
+        }),
+        requestLogger
+      })
+    })
+
+    test('waits for the audit to be published before rethrowing', async () => {
+      const authError = new Unauthorized('token failed verification')
+      getAuthorisedEntityMock.mockRejectedValue(authError)
+      let published = false
+      publishContextFailureAuditMock.mockImplementationOnce(async () => {
+        await new Promise((resolve) => setImmediate(resolve))
+        published = true
+      })
+
+      await expect(context({ request: { headers: {}, traceId: 'trace-5' } })).rejects.toBe(
+        authError
+      )
+
+      expect(published).toBe(true)
     })
 
     test('logs the error with just the trace id when authentication fails', async () => {
@@ -360,6 +522,13 @@ describe('context', () => {
       expect(requestLogger.warn).toHaveBeenCalledWith('#DAL - GraphQL error (UNAUTHORIZED)', {
         code: 'DAL_GRAPHQL_ERROR_001',
         error: { name: 'UNAUTHORIZED', message: 'token failed verification', stack: undefined }
+      })
+      expect(publishContextFailureAuditMock).toHaveBeenCalledExactlyOnceWith({
+        request,
+        auth: undefined,
+        authContext: undefined,
+        error: authError,
+        requestLogger
       })
     })
   })

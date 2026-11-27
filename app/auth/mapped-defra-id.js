@@ -11,10 +11,11 @@
 //
 // Both plugins are only registered when a mapping is configured, and config refuses to start with
 // a mapping outside dev/test, so none of this can run in production.
-import { getArgumentValues, getVariableValues, Kind, OperationTypeNode } from 'graphql'
+import { getArgumentValues, getVariableValues, OperationTypeNode } from 'graphql'
 import { decodeJwt } from 'jose'
 import { config, dummyCrnToSbiMapping } from '../config.js'
 import { BadRequest, Forbidden } from '../errors/graphql.js'
+import { fragmentsByName, rootFieldNodes } from '../graphql/operation-fields.js'
 import { DAL_REQUEST_AUTHENTICATION_DEFRA_ID_MAPPED_001 } from '../logger/codes.js'
 import { logger } from '../logger/logger.js'
 import { maskAllButLastFour } from '../logger/utils.js'
@@ -81,30 +82,6 @@ export const mappedDefraIdHapiPlugin = {
   }
 }
 
-// The operation's root field nodes, following fragments. Directives such as @skip are ignored, so
-// every field that could run is checked.
-//
-// A parsed query is a tree (AST) of nodes. The curly-brace block under an operation is its
-// "selection set", and each entry in it is a "selection" of one of three kinds:
-// - FIELD, e.g. `business(sbi: "810000000") { ... }`
-// - INLINE_FRAGMENT, e.g. `... { business(...) { ... } }`, a block of fields nested inline
-// - FRAGMENT_SPREAD, e.g. `...MyFragment`, a reference to fields defined elsewhere in the document
-// Only the root level matters here, so the fields' own selection sets are not walked.
-function rootFieldNodes(selectionSet, fragments) {
-  return selectionSet.selections.flatMap((selection) => {
-    if (selection.kind === Kind.FIELD) {
-      return [selection]
-    }
-    if (selection.kind === Kind.INLINE_FRAGMENT) {
-      // The inline fragment's fields sit at the same (root) level, so collect them too
-      return rootFieldNodes(selection.selectionSet, fragments)
-    }
-    // FRAGMENT_SPREAD: look the named fragment up and collect its fields. The operation has already
-    // been validated, so the fragment exists and the fragments don't form a cycle
-    return rootFieldNodes(fragments[selection.name.value].selectionSet, fragments)
-  })
-}
-
 /**
  * Checks that an operation is allowed for a mapped Defra ID token.
  *
@@ -118,13 +95,8 @@ export function assertMappedOperationAllowed({ schema, document, operation, vari
     throw new Forbidden(MAPPED_QUERIES_ONLY_MESSAGE)
   }
 
-  // Besides operations, the parsed document holds any named fragments (`fragment MyFragment on
-  // Query { ... }`). Index them by name so `...MyFragment` spreads can be followed
-  const fragments = Object.fromEntries(
-    document.definitions
-      .filter((definition) => definition.kind === Kind.FRAGMENT_DEFINITION)
-      .map((definition) => [definition.name.value, definition])
-  )
+  // Besides operations, the parsed document holds any named fragments, needed to follow spreads
+  const fragments = fragmentsByName(document)
 
   // The variables arrive as raw JSON from the request. Coerce them to their declared types (as
   // GraphQL execution would), so e.g. an ID given as the number 810000000 becomes "810000000"

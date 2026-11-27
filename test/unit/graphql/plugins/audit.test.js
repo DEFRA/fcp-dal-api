@@ -2,6 +2,7 @@ import { validateAuditEvent } from '@defra/fcp-audit-publisher'
 import { parse } from 'graphql'
 import { describe, expect, test, vi } from 'vitest'
 import { endUserAuthContext } from '../../../../app/auth/end-user-auth-context.js'
+import { Forbidden } from '../../../../app/errors/graphql.js'
 
 const configGetMock = vi.fn()
 const loggerMock = { error: vi.fn(), debug: vi.fn(), warn: vi.fn() }
@@ -23,7 +24,9 @@ vi.doMock('../../../../app/audit/sns-publisher.js', () => ({
 const configMockPath = { 'cdp.env': 'dev' }
 configGetMock.mockImplementation((path) => configMockPath[path])
 
-const { auditPlugin } = await import('../../../../app/graphql/plugins/audit.js')
+const { auditPlugin, publishContextFailureAudit } = await import(
+  '../../../../app/graphql/plugins/audit.js'
+)
 
 const fakeAuditTrail = (byRoot = {}) => ({
   rootKeys: vi.fn(() => Object.keys(byRoot)),
@@ -1066,6 +1069,112 @@ describe('auditPlugin', () => {
       // assert
       const [event] = publish.mock.calls[0]
       expect(validateAuditEvent(event)).toMatchObject({ valid: true })
+    })
+  })
+})
+
+describe('publishContextFailureAudit', () => {
+  const contextError = new Forbidden(
+    'Authorization failed, requester is not an authorised DAL consumer'
+  )
+
+  test('publishes one failure event for the request, shaped as an AuditEventPayload', async () => {
+    const publish = vi.fn()
+    const requestLogger = { error: vi.fn() }
+
+    await publishContextFailureAudit({
+      request: baseRequest,
+      auth: { entityId: 'no-entityId--no-approved-app-or-groups', serviceName: 'unknown' },
+      authContext: endUserAuthContext(baseRequest),
+      error: contextError,
+      requestLogger,
+      publish
+    })
+
+    expect(publish).toHaveBeenCalledExactlyOnceWith(expect.any(Object), requestLogger)
+    const [event] = publish.mock.calls[0]
+    expect(validateAuditEvent(event)).toMatchObject({ valid: true })
+    expect(event).toMatchObject({
+      user: 'internal@example.com',
+      ip: '203.0.113.5',
+      correlationid: 'trace-1',
+      datetime: '2026-01-01T00:00:00.000Z',
+      audit: {
+        status: 'failure',
+        entities: [{ entity: 'audit', action: 'created', entityid: 'Request rejected' }],
+        details: {
+          requestBody: JSON.stringify(requestPayload),
+          rootField: 'Request rejected',
+          sourceSystem: 'unknown',
+          sourceSystemEntityId: 'no-entityId--no-approved-app-or-groups',
+          errorDetails: [
+            {
+              message: 'Authorization failed, requester is not an authorised DAL consumer',
+              path: undefined,
+              code: 'FORBIDDEN'
+            }
+          ]
+        }
+      }
+    })
+    expect(requestLogger.error).not.toHaveBeenCalled()
+  })
+
+  test('records an unknown end user and source system when the context failed before they were known', async () => {
+    const publish = vi.fn()
+
+    await publishContextFailureAudit({
+      request: baseRequest,
+      error: contextError,
+      requestLogger: { error: vi.fn() },
+      publish
+    })
+
+    const [event] = publish.mock.calls[0]
+    expect(validateAuditEvent(event)).toMatchObject({ valid: true })
+    expect(event.user).toBe('unknown')
+    expect(event.audit.details.sourceSystem).toBeUndefined()
+    expect(event.audit.details.sourceSystemEntityId).toBeUndefined()
+  })
+
+  test('logs a publish failure instead of throwing', async () => {
+    const publishError = new Error('sns down')
+    const publish = vi.fn().mockRejectedValue(publishError)
+    const requestLogger = { error: vi.fn() }
+
+    await expect(
+      publishContextFailureAudit({
+        request: baseRequest,
+        error: contextError,
+        requestLogger,
+        publish
+      })
+    ).resolves.toBeUndefined()
+
+    expect(requestLogger.error).toHaveBeenCalledExactlyOnceWith(
+      '#DAL - audit event publish failed',
+      { error: publishError, code: 'DAL_AUDIT_EVENT_001' }
+    )
+  })
+
+  test('logs a build failure instead of throwing, and publishes nothing', async () => {
+    const publish = vi.fn()
+    const requestLogger = { error: vi.fn() }
+
+    await expect(
+      publishContextFailureAudit({
+        // no request.info, so the event's ip and datetime can't be built
+        request: { headers: {}, traceId: 'trace-1' },
+        error: contextError,
+        requestLogger,
+        publish
+      })
+    ).resolves.toBeUndefined()
+
+    expect(publish).not.toHaveBeenCalled()
+    expect(requestLogger.error).toHaveBeenCalledExactlyOnceWith('#DAL - audit event build failed', {
+      error: expect.any(Error),
+      code: 'DAL_AUDIT_EVENT_001'
     })
   })
 })
